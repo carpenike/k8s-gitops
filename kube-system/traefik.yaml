@@ -18,7 +18,7 @@ spec:
     imageTag: 1.7.8
     serviceType: LoadBalancer
     externalTrafficPolicy: Local
-    loadBalancerIP: 10.20.50.151
+    loadBalancerIP: 10.20.50.150
     replicas: 1
     memoryLimit: 100Mi
     cpuLimit: 1
