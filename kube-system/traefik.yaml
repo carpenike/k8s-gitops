@@ -39,5 +39,3 @@ spec:
     deployment:
       hostPort:
         dashboardEnabled: true
-  valueFileSecrets:
-  - name: "traefik-values"
