@@ -33,7 +33,7 @@ kseal() {
 
 # NS=kube-system kseal values-to-encrypt/consul-values.txt > ../secrets/consul-values.yaml
 # NS=kube-system kseal values-to-encrypt/traefik-values.txt > ../secrets/traefik-values.yaml
-# NS=kube-system kseal values-to-encrypt/kubernetes-dashboard-values.txt > ../secrets/kubernetes-dashboard-values.yaml
+NS=kube-system kseal values-to-encrypt/kubernetes-dashboard-values.txt > ../secrets/kubernetes-dashboard-values.yaml
 # NS=kube-system kseal values-to-encrypt/kured-values.txt > ../secrets/kured-values.yaml
 # NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwardauth-values.yaml
 
