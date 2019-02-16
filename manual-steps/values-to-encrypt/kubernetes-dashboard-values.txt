@@ -1,2 +1,2 @@
 ingress:
-  hosts: [d.k.$DOMAIN]
+  hosts: [kubernetes.$DOMAIN]
