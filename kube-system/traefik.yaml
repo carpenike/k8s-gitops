@@ -15,7 +15,7 @@ spec:
     version: 1.59.2
   values:
     image: traefik
-    imageTag: 1.7.9
+    imageTag: 1.7.8
     serviceType: LoadBalancer
     externalTrafficPolicy: Local
     loadBalancerIP: 10.20.50.150
