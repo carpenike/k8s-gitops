@@ -34,6 +34,11 @@ spec:
       insecureSkipVerify: true
     dashboard:
       enabled: true
+      domain: traefik.holthome.net
+      ingress:
+        enabled: true
+        tls:
+          - secretName: 2019-holthome-wildcard
       statistics:
         recentErrors: 25
     deployment:
