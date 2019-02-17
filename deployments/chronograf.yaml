@@ -13,18 +13,18 @@ spec:
     name: chronograf
     version: 1.0.1
   values:
-    #image:
-    #  tag: "1.7-alpine"
-    #  repo: docker.io/chronograf
+    image:
+      tag: "1.7-alpine"
+      repo: docker.io/chronograf
     persistence:
-      enabled: false
-      storageClass: fast-disks
-    ingress:
       enabled: true
+      storageClass: fast-disks
+    #ingress:
+      #enabled: true
       #annotations:
       #kubernetes.io/ingress.class: "traefik"
       #ingress.kubernetes.io/auth-type: "forward"
       #ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
       #ingress.kubernetes.io/auth-trust-headers: "true"
-  #valueFileSecrets:
-    #- name: "chronograf-values"
+  valueFileSecrets:
+    - name: "chronograf-values"
