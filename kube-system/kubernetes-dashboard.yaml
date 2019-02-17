@@ -28,3 +28,5 @@ spec:
       clusterAdminRole: true
   valueFileSecrets:
     - name: "kubernetes-dashboard-values"
+
+# Create User Account per https://github.com/kubernetes/dashboard/wiki/Creating-sample-user
