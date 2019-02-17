@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: media-storage-pv
+  name: media-storage-tv-pv
 spec:
   capacity:
     storage: 5000Gi
@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: media-storage
   local:
-    path: /mnt/tank/media
+    path: /mnt/tank/media/tv
   nodeAffinity:
     required:
       nodeSelectorTerms:
