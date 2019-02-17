@@ -19,6 +19,7 @@ spec:
     persistence:
       enabled: true
       storageClass: fast-disks
+      size: 8Gi
     ingress:
       enabled: true
       annotations:
@@ -27,4 +28,4 @@ spec:
         #ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
         #ingress.kubernetes.io/auth-trust-headers: "true"
   valueFileSecrets:
-  - name: "chronograf-values"
+    - name: "chronograf-values"
