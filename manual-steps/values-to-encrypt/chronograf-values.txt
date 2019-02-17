@@ -1,3 +1,2 @@
 ingress:
-  enabled: true
   hostname: "chronograf.$DOMAIN"
