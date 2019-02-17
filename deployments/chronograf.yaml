@@ -17,7 +17,7 @@ spec:
     #  tag: "1.7-alpine"
     #  repo: docker.io/chronograf
     persistence:
-      enabled: true
+      enabled: false
       storageClass: fast-disks
     ingress:
       enabled: true
