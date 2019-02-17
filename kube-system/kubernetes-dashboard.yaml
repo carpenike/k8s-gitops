@@ -19,7 +19,6 @@ spec:
     replicaCount: 1
     extraArgs:
       - --token-ttl=0
-
     ingress:
       enabled: true
       annotations:
