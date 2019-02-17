@@ -4,7 +4,7 @@ metadata:
   name: kubernetes-dashboard
   namespace: kube-system
   annotations:
-    flux.weave.works/automated: "true"
+    flux.weave.works/automated: "false"
     flux.weave.works/tag.chart-image: glob:v1.*
 spec:
   releaseName: kubernetes-dashboard
