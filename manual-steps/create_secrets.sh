@@ -37,7 +37,7 @@ NS=kube-system kseal values-to-encrypt/kubernetes-dashboard-values.txt > ../secr
 # NS=kube-system kseal values-to-encrypt/kured-values.txt > ../secrets/kured-values.yaml
 # NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwardauth-values.yaml
 
-# NS=logs kseal values-to-encrypt/kibana-values.txt > ../secrets/kibana-values.yaml
+NS=logs kseal values-to-encrypt/kibana-values.txt > ../secrets/kibana-values.yaml
 
 
 kseal values-to-encrypt/influxdb-values.txt > ../secrets/influxdb-values.yaml
