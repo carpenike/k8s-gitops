@@ -18,7 +18,7 @@ do
   kapply $i
 done
 
-kapply yamls/rook-dashboard-ingress.txt
+#kapply yamls/rook-dashboard-ingress.txt
 
 # loki trial on grafana.net
-kapply yamls/loki.txt
+#kapply yamls/loki.txt
