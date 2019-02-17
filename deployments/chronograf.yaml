@@ -19,7 +19,7 @@ spec:
     persistence:
       enabled: true
       storageClass: nfs-client
-      size: 8Gi
+      #size: 8Gi
     ingress:
       enabled: true
       annotations:
