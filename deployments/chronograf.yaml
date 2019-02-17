@@ -13,9 +13,9 @@ spec:
     name: chronograf
     version: 1.0.1
   values:
-    image:
-      tag: "1.7-alpine"
-      repo: docker.io/chronograf
+    #image:
+    #  tag: "1.7-alpine"
+    #  repo: docker.io/chronograf
     persistence:
       enabled: true
       storageClass: fast-disks
