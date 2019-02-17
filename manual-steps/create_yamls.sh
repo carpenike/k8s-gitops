@@ -13,7 +13,15 @@ kapply() {
 ###################
 # traefik-external
 ###################
-for i in yamls/traefik-external/*.txt
+# for i in yamls/traefik-external/*.txt
+# do
+#   kapply $i
+# done
+
+###################
+# storage-classes
+###################
+for i in yamls/storage-classes/*.txt
 do
   kapply $i
 done
