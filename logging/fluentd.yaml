@@ -1,0 +1,19 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: fluentd
+  namespace: logs
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: glob:v2.*
+spec:
+  releaseName: fluentd
+  chart:
+    repository: https://kiwigrid.github.io/
+    name: fluentd-elasticsearch
+    version: 2.1.2
+  values:
+    image:
+      repository: gcr.io/google-containers/fluentd-elasticsearch
+      tag: v2.4.0
