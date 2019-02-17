@@ -1,4 +1,4 @@
 accessKey: "$MINIO_ACCESS_KEY"
 secretKey: "$MINIO_SECRET_KEY"
 ingress:
-  hosts: [minio-prod.$DOMAIN]
+  hosts: [minio.$DOMAIN]
