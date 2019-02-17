@@ -17,8 +17,6 @@ spec:
       repository: k8s.gcr.io/kubernetes-dashboard-amd64
       tag: v1.10.1
     replicaCount: 1
-    extraArgs:
-      - --token-ttl=0
     ingress:
       enabled: true
       annotations:
@@ -27,4 +25,4 @@ spec:
       create: true
       clusterAdminRole: true
   valueFileSecrets:
-  - name: "kubernetes-dashboard-values"
+    - name: "kubernetes-dashboard-values"
