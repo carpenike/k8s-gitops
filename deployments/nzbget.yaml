@@ -5,6 +5,7 @@ metadata:
   name: nzbget
   namespace: default
   annotations:
+    release: "nzbget"
     flux.weave.works/automated: "true"
     flux.weave.works/tag.chart-image: "regexp:^([0-9][0-9][0-9]+)$"
 spec:
