@@ -15,7 +15,7 @@ spec:
     ref: master
   values:
     image:
-      repository: registry.holthome.net/k8s-services/nzbget
+      repository: registry.holthome.net/k8s-services/docker-nzbget
       tag: latest
     service:
       type: ClusterIP
