@@ -27,7 +27,7 @@ spec:
     persistence:
       downloads:
         enabled: true
-        existingClaim: nfs-media-pvc-10gtank-docker-pvc
+        existingClaim: tank-docker-pvc
         subPath: nzbget/downloads
       config:
         enabled: true
