@@ -1,2 +1,5 @@
 ingress:
   hosts: [nzbget.$DOMAIN]
+puid: 50000
+pgid: 50000
+timezone: "America/New_York"
