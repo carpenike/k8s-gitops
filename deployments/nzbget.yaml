@@ -15,11 +15,10 @@ spec:
     ref: master
   values:
     image:
-      repository: linuxserver/nzbget
-      tag: 156
+      repository: registry.holthome.net/k8s-services/nzbget
+      tag: latest
     service:
-      type: LoadBalancer
-      loadBalancerIP: 10.2.0.153
+      type: ClusterIP
     ingress:
       enabled: true
       annotations:
@@ -28,11 +27,11 @@ spec:
     persistence:
       downloads:
         enabled: true
-        existingClaim: nfs-media-pvc-10g
-        subPath: Downloads
+        existingClaim: nfs-media-pvc-10gtank-docker-pvc
+        subPath: nzbget/downloads
       config:
         enabled: true
-        storageClass: "rbd"
+        storageClass: "fast-disks"
         size: 30Gi
   valueFileSecrets:
     - name: "nzbget-values"
