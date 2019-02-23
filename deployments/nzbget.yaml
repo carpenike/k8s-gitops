@@ -35,3 +35,5 @@ spec:
         size: 30Gi
   valueFileSecrets:
     - name: "nzbget-values"
+  imagePullSecrets:
+    - name: registrypullsecret
