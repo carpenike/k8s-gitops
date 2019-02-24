@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: azure-backups-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  azureFile:
+    secretName: azure-secret
+    shareName: azure-backups
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 500Gi
