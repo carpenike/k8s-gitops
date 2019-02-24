@@ -1,0 +1,40 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: sonarr
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: "glob:amd64-2.*.*.*"
+spec:
+  releaseName: sonarr
+  chart:
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/sonarr
+    ref: master
+  values:
+    image:
+      repository: linuxserver/sonarr
+      tag: "amd64-2.0.0.5303-ls19"
+      pullPolicy: Always
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    timezone: "America/New_York"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "fast-disks"
+      downloads:
+        enabled: true
+        existingClaim: tank-docker-pvc
+        subPath: nzbget/downloads
+        accessMode: ReadWriteMany
+      tv:
+        enabled: true
+        existingClaim: tank-media-tv-pv
+        accessMode: ReadWriteMany
+  valueFileSecrets:
+    - name: "sonarr-values"
