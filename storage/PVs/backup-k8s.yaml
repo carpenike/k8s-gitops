@@ -23,7 +23,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: backup-k8s-pv
+  name: backup-k8s-pvc
 spec:
   accessModes:
     - ReadWriteMany
