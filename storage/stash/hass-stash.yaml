@@ -16,7 +16,7 @@ spec:
       persistentVolumeClaim:
         claimName: backup-k8s-pvc
     storageSecretName: restic-secret
-  schedule: "0 0 11 * * *"
+  schedule: "@every 5m"
   volumeMounts:
     - mountPath: /config
       name: config
