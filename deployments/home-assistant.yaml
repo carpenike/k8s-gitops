@@ -10,10 +10,13 @@ metadata:
 spec:
   releaseName: hass
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: home-assistant
-    version: 0.5.1
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/home-assistant
+    ref: master
   values:
+    zwave:
+      enabled: true
+      device: "ttyACM0"
     image:
       repository: homeassistant/home-assistant
       tag: 0.88.0
