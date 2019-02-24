@@ -30,7 +30,7 @@ spec:
       storageClass: "fast-disks"
     rabbitmqCert:
       enabled: true
-      existingSecret: "2019-holthome-wildcard"
+      existingSecret: "mqtt-cert"
     ingress:
       enabled: true
       annotations:
