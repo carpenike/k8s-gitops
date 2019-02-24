@@ -15,7 +15,7 @@ spec:
       container: backups
       prefix: stash
     storageSecretName: azure-secret
-  schedule: "@every 5m"
+  schedule: "0 0 10 * * *"
   volumeMounts:
     - mountPath: /var/lib/mysql
       name: data

@@ -1,13 +1,12 @@
 apiVersion: stash.appscode.com/v1alpha1
 kind: Restic
 metadata:
-  name: stash-home-assistant
+  name: stash-sonarr
   namespace: default
 spec:
-  paused: false
   selector:
     matchLabels:
-      app: home-assistant
+      app.kubernetes.io/instance: sonarr
   fileGroups:
     - path: /config
       retentionPolicyName: "keep-last-5"
@@ -16,7 +15,7 @@ spec:
       container: backups
       prefix: stash
     storageSecretName: azure-secret
-  schedule: "0 0 11 * * *"
+  schedule: "0 0 14 * * *"
   volumeMounts:
     - mountPath: /config
       name: config
