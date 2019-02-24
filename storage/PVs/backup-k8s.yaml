@@ -9,6 +9,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: slow-disks
+  claimRef:
+    namespace: default
+    name: backup-k8s-pvc
   local:
     path: /mnt/backup/k8s
   nodeAffinity:
