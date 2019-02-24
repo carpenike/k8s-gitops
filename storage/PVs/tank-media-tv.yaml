@@ -11,7 +11,6 @@ spec:
   claimRef:
     namespace: default
     name: tank-media-tv-pvc
-
   storageClassName: slow-disks
   local:
     path: /mnt/tank/media/tv
