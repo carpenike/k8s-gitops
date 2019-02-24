@@ -9,6 +9,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: slow-disks
+  claimRef:
+    namespace: default
+    name: tank-docker-pvc
   local:
     path: /mnt/tank/docker
   nodeAffinity:
