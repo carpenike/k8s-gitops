@@ -4,6 +4,7 @@ metadata:
   name: stash-radarr
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app.kubernetes.io/instance: radarr

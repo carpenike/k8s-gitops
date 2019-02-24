@@ -4,6 +4,7 @@ metadata:
   name: stash-home-assistant-mysql
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app: hass-mysql

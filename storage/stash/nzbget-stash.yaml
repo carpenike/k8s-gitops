@@ -4,6 +4,7 @@ metadata:
   name: stash-nzbget
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app.kubernetes.io/instance: nzbget
