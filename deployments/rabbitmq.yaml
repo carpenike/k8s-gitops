@@ -26,6 +26,9 @@ spec:
     persistentVolume:
       enabled: true
       storageClass: "fast-disks"
+    rabbitmqCert:
+      enabled: true
+      existingSecret: "2019-holthome-wildcard"
     ingress:
       enabled: true
       annotations:
