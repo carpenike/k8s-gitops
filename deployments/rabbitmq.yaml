@@ -22,9 +22,7 @@ spec:
     rabbitmqWebMQTTPlugin:
       enabled: true
     service:
-      clusterIP: ""
-      loadBalancerIP: "10.20.50.152"
-      type: LoadBalancer
+      type: ClusterIP
     persistentVolume:
       enabled: true
       storageClass: "fast-disks"
