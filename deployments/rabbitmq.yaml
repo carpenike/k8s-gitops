@@ -23,7 +23,7 @@ spec:
       enabled: true
     service:
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.152
+      loadBalancerIP: "10.20.50.152"
     persistentVolume:
       enabled: true
       storageClass: "fast-disks"
