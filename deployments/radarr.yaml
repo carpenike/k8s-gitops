@@ -38,4 +38,4 @@ spec:
         subPath: movies
         accessMode: ReadWriteMany
   valueFileSecrets:
-    - name: "radarr-values"
+    - name: "radarr-value"
