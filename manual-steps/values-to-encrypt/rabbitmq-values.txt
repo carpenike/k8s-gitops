@@ -8,3 +8,5 @@ rabbitmqMQTTPlugin:
     mqtt.default_user     = admin
     mqtt.default_pass     = $RABBITMQ_PASSWORD
     mqtt.allow_anonymous  = true
+    mqtt.listeners.ssl.default = 8883
+    mqtt.listeners.tcp.default = 1883
