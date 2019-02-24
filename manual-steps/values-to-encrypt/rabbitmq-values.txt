@@ -14,4 +14,3 @@ rabbitmqMQTTPlugin:
     ssl_options.certfile = /etc/cert/tls/tls.crt
     ssl_options.keyfile = /etc/cert/tls/tls.key
     ssl_options.verify = verify_peer
-    ssl_options.verify_if_no_peer_cert = false
