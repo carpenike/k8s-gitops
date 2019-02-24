@@ -34,7 +34,7 @@ spec:
         accessMode: ReadWriteMany
       tv:
         enabled: true
-        existingClaim: tank-media-tv-pv
+        existingClaim: tank-media-tv-pvc
         accessMode: ReadWriteMany
   valueFileSecrets:
     - name: "sonarr-values"
