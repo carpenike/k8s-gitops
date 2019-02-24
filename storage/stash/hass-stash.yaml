@@ -4,6 +4,7 @@ metadata:
   name: stash-home-assistant
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app: home-assistant
