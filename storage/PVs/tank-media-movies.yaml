@@ -9,6 +9,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: slow-disks
+  claimRef:
+    namespace: default
+    name: tank-media-movies-pvc
   local:
     path: /mnt/tank/media/movies
   nodeAffinity:
