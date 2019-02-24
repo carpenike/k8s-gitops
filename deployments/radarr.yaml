@@ -34,8 +34,7 @@ spec:
         accessMode: ReadWriteMany
       movies:
         enabled: true
-        existingClaim: tank-media-pvc
-        #subPath: movies
+        existingClaim: tank-media-movies-pvc
         accessMode: ReadWriteMany
   valueFileSecrets:
     - name: "radarr-values"
