@@ -5,7 +5,7 @@ metadata:
   name: "azure-backups-pv"
 spec:
   capacity:
-    storage: "5Gi"
+    storage: "500Gi"
   accessModes:
     - "ReadWriteMany"
   storageClassName: azurefile

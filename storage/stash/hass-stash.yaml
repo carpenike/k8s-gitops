@@ -13,8 +13,12 @@ spec:
   backend:
     local:
       mountPath: /mnt/backup/
-      persistentVolumeClaim:
-        claimName: azure-backups-pvc
+      azureFile:
+        secretName: azure-secret
+        shareName: k8s-backups
+        readOnly: false
+      #persistentVolumeClaim:
+      #  claimName: azure-backups-pvc
     storageSecretName: restic-secret
   schedule: "@every 5m"
   volumeMounts:
