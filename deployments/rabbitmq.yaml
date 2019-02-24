@@ -23,6 +23,7 @@ spec:
       enabled: true
     service:
       type: LoadBalancer
+      clusterIP: ""
       loadBalancerIP: "10.20.50.152"
     persistentVolume:
       enabled: true
