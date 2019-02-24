@@ -1,0 +1,41 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: radarr
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: "glob:amd64-0.*.*.*"
+spec:
+  releaseName: radarr
+  chart:
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/radarr
+    ref: master
+  values:
+    image:
+      repository: linuxserver/radarr
+      tag: "amd64-0.2.0.1298-ls4"
+      pullPolicy: Always
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    timezone: "America/New_York"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "fast-disks"
+      downloads:
+        enabled: true
+        existingClaim: tank-docker-pvc
+        subPath: nzbget/downloads
+        accessMode: ReadWriteMany
+      movies:
+        enabled: true
+        existingClaim: tank-media-pvc
+        subPath: movies
+        accessMode: ReadWriteMany
+  valueFileSecrets:
+    - name: "radarr-values"

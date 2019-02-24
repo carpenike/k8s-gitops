@@ -53,8 +53,8 @@ kseal values-to-encrypt/minio-values.txt > ../secrets/minio-values.yaml
 # kseal values-to-encrypt/rtorrent-flood-values.txt > ../secrets/rtorrent-flood-values.yaml
 kseal values-to-encrypt/nzbget-values.txt > ../secrets/nzbget-values.yaml
 # kseal values-to-encrypt/plex-values.txt > ../secrets/plex-values.yaml
-# kseal values-to-encrypt/radarr-values.txt > ../secrets/radarr-values.yaml
-# kseal values-to-encrypt/sonarr-values.txt > ../secrets/sonarr-values.yaml
+kseal values-to-encrypt/radarr-values.txt > ../secrets/radarr-values.yaml
+kseal values-to-encrypt/sonarr-values.txt > ../secrets/sonarr-values.yaml
 # kseal values-to-encrypt/hass-values.txt > ../secrets/hass-values.yaml
 # kseal values-to-encrypt/hass-mysql-values.txt > ../secrets/hass-mysql-values.yaml
 # kseal values-to-encrypt/unifi-values.txt > ../secrets/unifi-values.yaml

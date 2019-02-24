@@ -1,0 +1,6 @@
+ingress:
+  hosts: [sonarr.$DOMAIN]
+puid: 50000
+pgid: 50000
+timezone: "America/New_York"
+imagePullSecrets: registrypullsecret
