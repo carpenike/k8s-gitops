@@ -11,15 +11,15 @@ spec:
     - path: /config
       retentionPolicyName: "keep-last-5"
   backend:
-    local:
-      mountPath: /mnt/backup/
-      azureFile:
-        secretName: azure-secret
-        shareName: k8s-backups
-        readOnly: false
-      #persistentVolumeClaim:
-      #  claimName: azure-backups-pvc
-    storageSecretName: restic-secret
+    azure:
+      container: backups
+      prefix: hass
+    storageSecretName: azure-secret
+    #local:
+    #  mountPath: /mnt/backup/
+    #persistentVolumeClaim:
+    #  claimName: azure-backups-pvc
+    #storageSecretName: restic-secret
   schedule: "@every 5m"
   volumeMounts:
     - mountPath: /config

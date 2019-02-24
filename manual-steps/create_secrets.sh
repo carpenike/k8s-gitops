@@ -27,7 +27,7 @@ kubectl create secret generic restic-secret --from-literal=RESTIC_PASSWORD="$RES
 # kubectl create secret generic registry-storage --from-file=config=values-to-encrypt/registry-storage.txt --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/registry-storage.yaml
 # kubectl create secret generic gitlab-rails-storage --from-file=connection=values-to-encrypt/rails.txt --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/rails.yaml
 # kubectl create secret generic s3cmd-config --from-file=config=values-to-encrypt/s3cmd.config --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/s3cmd-config.yaml
-kubectl create secret generic azure-secret --from-literal=azurestorageaccountname="$AZURE_ACCOUNT_NAME" --from-literal=azurestorageaccountkey="$AZURE_STORAGE_KEY" --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret.yaml
+kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$AZURE_ACCOUNT_NAME" --from-literal=AZURE_ACCOUNT_KEY="$AZURE_STORAGE_KEY" --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret.yaml
 
 ###################
 # helm chart values
