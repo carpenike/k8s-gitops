@@ -1,11 +1,11 @@
 ingress:
   hosts: 
-  - hass.$DOMAIN
+  - ha.$DOMAIN
 #extraEnv:
 #  CAMERA_AUTH: $CAMERA_AUTH
 configurator:
   ingress:
     hosts: 
-    - ha.$DOMAIN
+    - ha-config.$DOMAIN
   hassApiPassword: $HASS_API_PASSWORD
   hassApiUrl: https://ha.$DOMAIN/api/
