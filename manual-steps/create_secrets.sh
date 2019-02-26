@@ -39,7 +39,7 @@ kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$A
 # NS=kube-system kseal values-to-encrypt/traefik-values.txt > ../secrets/traefik-values.yaml
 NS=kube-system kseal values-to-encrypt/kubernetes-dashboard-values.txt > ../secrets/kubernetes-dashboard-values.yaml
 # NS=kube-system kseal values-to-encrypt/kured-values.txt > ../secrets/kured-values.yaml
-# NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwardauth-values.yaml
+NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwardauth-values.yaml
 
 NS=logs kseal values-to-encrypt/kibana-values.txt > ../secrets/kibana-values.yaml
 
