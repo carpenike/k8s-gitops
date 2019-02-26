@@ -1,0 +1,21 @@
+apiVersion: stash.appscode.com/v1alpha1
+kind: Recovery
+metadata:
+  name: stash-radarr
+  namespace: default
+spec:
+  repository:
+    name: deployment.radarr
+    namespace: default
+  snapshot: deployment.radarr-96ca706c
+  backend:
+    azure:
+      container: backups
+      prefix: stash
+    storageSecretName: azure-secret
+  paths:
+    - /config
+  recoveredVolumes:
+    - mountPath: /config
+      persistentVolumeClaim:
+        claimName: radarr-config
