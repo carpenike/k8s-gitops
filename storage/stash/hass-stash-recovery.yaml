@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   repository:
-    name: deployment.stash-home-assistant
+    name: deployment.hass-home-assistant
     namespace: default
   backend:
     azure:
