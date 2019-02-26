@@ -4,9 +4,9 @@ metadata:
   name: stash-home-assistant
   namespace: default
 spec:
-  workload:
-    kind: Deployment
-    name: stash-home-assistant
+  repository:
+    name: deployment.stash-home-assistant
+    namespace: default
   backend:
     azure:
       container: backups
