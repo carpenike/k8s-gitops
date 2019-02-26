@@ -4,6 +4,7 @@ metadata:
   name: stash-prometheus-server
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app: prometheus

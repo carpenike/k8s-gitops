@@ -4,6 +4,7 @@ metadata:
   name: stash-grafana
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app: grafana

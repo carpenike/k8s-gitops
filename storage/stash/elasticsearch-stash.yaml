@@ -4,6 +4,7 @@ metadata:
   name: stash-elasticsearch
   namespace: logs
 spec:
+  paused: false
   selector:
     matchLabels:
       app: elasticsearch

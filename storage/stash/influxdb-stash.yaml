@@ -4,6 +4,7 @@ metadata:
   name: stash-influxdb
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app: influxdb
