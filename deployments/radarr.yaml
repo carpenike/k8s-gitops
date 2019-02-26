@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: linuxserver/radarr
-      tag: "amd64-0.2.0.1298-ls4"
+      tag: "amd64-0.2.0.1318-ls4"
       pullPolicy: Always
     ingress:
       enabled: true
@@ -37,4 +37,4 @@ spec:
         existingClaim: tank-media-movies-pvc
         accessMode: ReadWriteMany
   valueFileSecrets:
-    - name: "radarr-values"
+  - name: "radarr-values"
