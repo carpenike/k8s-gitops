@@ -52,7 +52,7 @@ spec:
           #ingress.kubernetes.io/auth-trust-headers: "true"
       persistentVolume:
         enabled: true
-        storageClass: "rbd"
+        storageClass: "slow-disks"
         size: 30Gi
     pushgateway:
       image:
