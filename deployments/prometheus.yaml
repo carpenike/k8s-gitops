@@ -30,7 +30,7 @@ spec:
           #ingress.kubernetes.io/auth-trust-headers: "true"
       persistentVolume:
         enabled: true
-        storageClass: "fast-disks"
+        storageClass: "slow-disks"
     configmapReload:
       image:
         repository: jimmidyson/configmap-reload
