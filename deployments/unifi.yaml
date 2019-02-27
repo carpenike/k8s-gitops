@@ -29,13 +29,19 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "traefik"
     controllerService:
+      annotations:
+        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
       loadBalancerIP: 10.20.50.153
     stunService:
+      annotations:
+        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.154
+      loadBalancerIP: 10.20.50.153
     discoveryService:
+      annotations:
+        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.155
+      loadBalancerIP: 10.20.50.153
   valueFileSecrets:
     - name: "unifi-values"
