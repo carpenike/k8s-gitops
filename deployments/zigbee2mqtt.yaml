@@ -18,7 +18,7 @@ spec:
       repository: koenkk/zigbee2mqtt
       tag: 1.1.0
       pullPolicy: Always
-    device: "ttyACM1"
+    device: ttyACM1
     persistence:
       enabled: true
-      storageClass: "slow-disks"
+      storageClass: slow-disks
