@@ -32,6 +32,7 @@ metadata:
   name: stash-prometheus-alertmanager
   namespace: default
 spec:
+  paused: false
   selector:
     matchLabels:
       app: prometheus
