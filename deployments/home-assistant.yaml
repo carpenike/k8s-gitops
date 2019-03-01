@@ -25,6 +25,7 @@ spec:
       accessMode: ReadWriteOnce
       size: 10Gi
       storageClass: "fast-disks"
+    hostNetwork: true
     ingress:
       enabled: true
       annotations:
@@ -62,7 +63,6 @@ spec:
     imageTag: "5.7.25"
     mysqlUser: "homeassistant"
     mysqlDatabase: "homeassistant"
-    hostNetwork: true
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
