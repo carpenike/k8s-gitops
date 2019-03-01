@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: koenkk/zigbee2mqtt
-      tag: 1.1.1
+      tag: 1.1.0
       pullPolicy: Always
     device: ttyACM1
     persistence:
