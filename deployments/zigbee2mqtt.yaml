@@ -8,7 +8,7 @@ metadata:
     flux.weave.works/automated: "true"
     flux.weave.works/tag.chart-image: "semver:~1"
 spec:
-  releaseName: radarr
+  releaseName: zigbee2mqtt
   chart:
     git: git@gitlab.holthome.net:k8s-services/k8s-helm
     path: charts/zigbee2mqtt
