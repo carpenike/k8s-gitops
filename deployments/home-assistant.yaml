@@ -25,7 +25,7 @@ spec:
       accessMode: ReadWriteOnce
       size: 10Gi
       storageClass: "fast-disks"
-    hostNetwork: true
+    hostNetwork: false
     ingress:
       enabled: true
       annotations:
