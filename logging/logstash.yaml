@@ -39,28 +39,28 @@ spec:
           targetPort: beats
           protocol: TCP
     ports:
-    - name: syslog-udp
-      containerPort: 1514
-      protocol: UDP
-    - name: syslog-tcp
-      containerPort: 1514
-      protocol: TCP
-    - name: beats
-      containerPort: 5044
-      protocol: TCP
+      - name: syslog-udp
+        containerPort: 1514
+        protocol: UDP
+      - name: syslog-tcp
+        containerPort: 1514
+        protocol: TCP
+      - name: beats
+        containerPort: 5044
+        protocol: TCP
     env:
       ELASTICSEARCH_URL: "http://elasticsearch-client.logs:9200"
     inputs:
       main: |-
         input {
-           udp {
+          udp {
              port => 1514
              type => syslog
-           }
-           tcp {
+          }
+          tcp {
              port => 1514
              type => syslog
-           }
+          }
           beats {
             port => 5044
           }
