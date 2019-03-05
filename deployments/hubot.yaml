@@ -23,6 +23,6 @@ spec:
         HUBOT_GRAFANA_S3_STYLE: "path"
         HUBOT_GRAFANA_S3_BUCKET: "public"
         HUBOT_GRAFANA_S3_REGION: "us-east-1"
-        HUBOT_HOME_ASSISTANT_EVENTS_DESTINATION: "#general"
+        HUBOT_HOME_ASSISTANT_EVENTS_DESTINATION: "#ha"
   valueFileSecrets:
     - name: "hubot-values"
