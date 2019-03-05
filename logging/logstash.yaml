@@ -11,7 +11,7 @@ spec:
   releaseName: logstash
   chart:
     git: git@gitlab.holthome.net:k8s-services/k8s-helm
-    path: charts/nzbget
+    path: charts/logstash
     ref: master
   values:
     image:
