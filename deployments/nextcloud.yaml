@@ -10,16 +10,20 @@ metadata:
 spec:
   releaseName: nextcloud
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: nextcloud
-    version: 1.0.1
+    #repository: https://kubernetes-charts.storage.googleapis.com/
+    #name: nextcloud
+    #version: 1.0.1
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/nextcloud
+    ref: master
   values:
     image:
       repository: nextcloud
       tag: 15.0-apache
     persistence:
       enabled: true
-      existingClaim: nfs-data-nextcloud-pvc-10g
+      existingClaim: tank-docker-pvc
+      subPath: nextcloud
     ingress:
       enabled: true
       annotations:
