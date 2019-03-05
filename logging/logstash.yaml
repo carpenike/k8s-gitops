@@ -54,8 +54,8 @@ spec:
       main: |-
         input {
           udp {
-             port => 1514
-             type => syslog
+            port => 1514
+            type => syslog
           }
           # tcp {
           #    port => 1514
