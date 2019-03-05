@@ -1,0 +1,28 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: comcast
+  namespace: default
+  annotations:
+    # flux.weave.works/automated: "true"
+    # flux.weave.works/tag.chart-image: glob:latest
+spec:
+  releaseName: comcast
+  chart:
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/comcast
+    ref: master
+  values:
+    image:
+      repository: billimek/comcastusage-for-influxdb
+      tag: latest
+    debug: true
+    config:
+      delay: 3600
+      influxdb:
+        host: influxdb
+        port: 8086
+        database: comcast
+  valueFileSecrets:
+    - name: "comcast-values"

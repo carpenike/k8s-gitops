@@ -10,9 +10,9 @@ metadata:
 spec:
   releaseName: logstash
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: logstash
-    version: 1.5.1
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/nzbget
+    ref: master
   values:
     image:
       repository: "docker.elastic.co/logstash/logstash-oss"
