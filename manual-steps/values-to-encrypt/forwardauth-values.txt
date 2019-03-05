@@ -11,5 +11,5 @@ applicationYaml:
       audience: https://${AUTH0_DOMAIN}.auth0.com/api/v2/
       scope: "profile openid email"
       redirect-uri: https://auth.${DOMAIN}/oauth2/signin
-      token-cookie-domain: ${DOMAIN}
+      token-cookie-domain: ryanholt.net
       verify-access-token: false
