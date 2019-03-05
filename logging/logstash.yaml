@@ -26,28 +26,28 @@ spec:
     service:
       type: LoadBalancer
       ports:
-        # syslog-udp:
-        #   port: 1514
-        #   targetPort: syslog-udp
-        #   protocol: UDP
-        syslog-tcp:
+        syslog-udp:
           port: 1514
-          targetPort: syslog-tcp
-          protocol: TCP
-        beats:
-          port: 5044
-          targetPort: beats
-          protocol: TCP
+          targetPort: syslog-udp
+          protocol: UDP
+        # syslog-tcp:
+        #   port: 1514
+        #   targetPort: syslog-tcp
+        #   protocol: TCP
+        # beats:
+        #   port: 5044
+        #   targetPort: beats
+        #   protocol: TCP
     ports:
-      # - name: syslog-udp
-      #   containerPort: 1514
-      #   protocol: UDP
-      - name: syslog-tcp
+      - name: syslog-udp
         containerPort: 1514
-        protocol: TCP
-      - name: beats
-        containerPort: 5044
-        protocol: TCP
+        protocol: UDP
+      # - name: syslog-tcp
+      #   containerPort: 1514
+      #   protocol: TCP
+      # - name: beats
+      #   containerPort: 5044
+      #   protocol: TCP
     env:
       ELASTICSEARCH_URL: "http://elasticsearch-client.logs:9200"
     inputs:
@@ -57,13 +57,13 @@ spec:
              port => 1514
              type => syslog
           }
-          tcp {
-             port => 1514
-             type => syslog
-          }
-          beats {
-            port => 5044
-          }
+          # tcp {
+          #    port => 1514
+          #    type => syslog
+          # }
+          # beats {
+          #   port => 5044
+          # }
           # http {
           #   port => 8080
           # }
