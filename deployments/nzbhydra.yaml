@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: linuxserver/hydra2
-      tag: amd64-v2.3.15-ls9
+      tag: amd64-v2.3.15-ls10
     service:
       type: ClusterIP
     ingress:
@@ -35,4 +35,4 @@ spec:
         storageClass: "fast-disks"
         size: 30Gi
   valueFileSecrets:
-    - name: "nzbhydra-values"
+  - name: "nzbhydra-values"
