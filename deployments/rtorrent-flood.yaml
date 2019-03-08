@@ -1,0 +1,44 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: rtorrent-flood
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: glob:0.9.*
+spec:
+  releaseName: rtorrent-flood
+  chart:
+    repository: https://billimek.github.io/helm-repo/
+    name: rtorrent-flood
+    version: 0.0.2
+  values:
+    image:
+      repository: wonderfall/rtorrent-flood
+      tag: 0.9.7-0.13.7
+    uid: 50000
+    gid: 50000
+    guiService:
+      type: ClusterIP
+      port: 3000
+    btService:
+      type: LoadBalancer
+      port: 49184
+      loadBalancerIP: 10.2.0.159
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    persistence:
+      config:
+        enabled: true
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: slow-disks
+      data:
+        enabled: true
+        existingClaim: tank-docker-pvc
+        subPath: docker/flood
+  valueFileSecrets:
+    - name: "rtorrent-flood-values"

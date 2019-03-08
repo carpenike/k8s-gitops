@@ -52,7 +52,7 @@ kseal values-to-encrypt/comcast-values.txt > ../secrets/comcast-values.yaml
 # kseal values-to-encrypt/uptimerobot-values.txt > ../secrets/uptimerobot-values.yaml
 kseal values-to-encrypt/grafana-values.txt > ../secrets/grafana-values.yaml
 kseal values-to-encrypt/minio-values.txt > ../secrets/minio-values.yaml
-# kseal values-to-encrypt/rtorrent-flood-values.txt > ../secrets/rtorrent-flood-values.yaml
+kseal values-to-encrypt/rtorrent-flood-values.txt > ../secrets/rtorrent-flood-values.yaml
 kseal values-to-encrypt/nzbget-values.txt > ../secrets/nzbget-values.yaml
 # kseal values-to-encrypt/plex-values.txt > ../secrets/plex-values.yaml
 kseal values-to-encrypt/radarr-values.txt > ../secrets/radarr-values.yaml
