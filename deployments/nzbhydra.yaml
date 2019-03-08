@@ -7,7 +7,7 @@ metadata:
   annotations:
     release: "nzbhydra"
     flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: "glob:amd64-v20.*-*"
+    flux.weave.works/tag.chart-image: "glob:amd64-v2.*.*-*"
 spec:
   releaseName: nzbhydra
   chart:
@@ -16,8 +16,8 @@ spec:
     ref: master
   values:
     image:
-      repository: linuxserver/hydra
-      tag: amd64-v20.0-ls5
+      repository: linuxserver/hydra2
+      tag: amd64-v2.3.15-ls9
     service:
       type: ClusterIP
     ingress:
