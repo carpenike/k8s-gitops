@@ -25,7 +25,7 @@ spec:
     btService:
       type: LoadBalancer
       port: 49184
-      loadBalancerIP: 10.2.0.159
+      loadBalancerIP: 10.20.50.154
     ingress:
       enabled: true
       annotations:
