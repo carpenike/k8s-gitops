@@ -19,7 +19,7 @@ spec:
       device: ttyACM0
     image:
       repository: homeassistant/home-assistant
-      tag: 0.88.2
+      tag: 0.89.0
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
@@ -42,7 +42,7 @@ spec:
           ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
           ingress.kubernetes.io/auth-trust-headers: "true"
   valueFileSecrets:
-    - name: "hass-values"
+  - name: "hass-values"
 ---
 apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
@@ -72,4 +72,4 @@ spec:
     metrics:
       enabled: true
   valueFileSecrets:
-    - name: "hass-mysql-values"
+  - name: "hass-mysql-values"
