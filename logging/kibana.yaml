@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: "docker.elastic.co/kibana/kibana-oss"
-      tag: "6.6.1"
+      tag: "6.6.2"
     persistentVolumeClaim:
       enabled: true
     ingress:
@@ -30,4 +30,4 @@ spec:
     env:
       ELASTICSEARCH_URL: "http://elasticsearch-client.logs:9200"
   valueFileSecrets:
-    - name: "kibana-values"
+  - name: "kibana-values"
