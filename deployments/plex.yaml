@@ -12,7 +12,7 @@ spec:
     git: git@gitlab.holthome.net:k8s-services/k8s-helm
     path: charts/kube-plex
     ref: master
-    version: 0.2.4
+    version: 0.2.5
   values:
     image:
       tag: 1.15.3.876-ad6e39743
