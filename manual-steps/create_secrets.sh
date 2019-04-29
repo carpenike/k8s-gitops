@@ -54,7 +54,7 @@ kseal values-to-encrypt/grafana-values.txt > ../secrets/grafana-values.yaml
 kseal values-to-encrypt/minio-values.txt > ../secrets/minio-values.yaml
 kseal values-to-encrypt/rtorrent-flood-values.txt > ../secrets/rtorrent-flood-values.yaml
 kseal values-to-encrypt/nzbget-values.txt > ../secrets/nzbget-values.yaml
-# kseal values-to-encrypt/plex-values.txt > ../secrets/plex-values.yaml
+kseal values-to-encrypt/plex-values.txt > ../secrets/plex-values.yaml
 kseal values-to-encrypt/radarr-values.txt > ../secrets/radarr-values.yaml
 kseal values-to-encrypt/sonarr-values.txt > ../secrets/sonarr-values.yaml
 kseal values-to-encrypt/nzbhydra-values.txt > ../secrets/nzbhydra-values.yaml
