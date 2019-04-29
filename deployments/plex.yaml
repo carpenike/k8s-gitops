@@ -9,8 +9,9 @@ metadata:
 spec:
   releaseName: plex
   chart:
-    repository: https://billimek.github.io/helm-repo/
-    name: kube-plex
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/kube-plex
+    ref: master
     version: 0.2.4
   values:
     image:
@@ -30,9 +31,12 @@ spec:
         enabled: true
         claimName: perf-docker-pvc
         subPath: plex/transcode
-      data:
+      movies:
         enabled: true
-        claimName: tank-media-pvc
+        claimName: tank-media-movies-pvc
+      tv:
+        enabled: true
+        claimName: tank-media-tv-pvc
       config:
         storageClass: "fast-disks"
         accessMode: ReadWriteOnce
