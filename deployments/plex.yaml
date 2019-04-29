@@ -1,0 +1,47 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: plex
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: glob:1.*
+spec:
+  releaseName: plex
+  chart:
+    repository: https://billimek.github.io/helm-repo/
+    name: kube-plex
+    version: 0.2.4
+  values:
+    image:
+      tag: 1.15.3.876-ad6e39743
+    kubePlex:
+      enabled: false
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    timezone: "America/New_York"
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 10.20.50.155
+    persistence:
+      transcode:
+        enabled: true
+        storageClass: "fast-disks"
+        #claimName: nfs-data-pvc-10g
+        #subPath: plex
+      data:
+        enabled: true
+        claimName: tank-media-pvc
+      config:
+        storageClass: "fast-disks"
+        accessMode: ReadWriteOnce
+    #resources:
+      #limits:
+       #gpu.intel.com/i915: 1
+      # requests:
+      #  gpu.intel.com/i915: 1
+  valueFileSecrets:
+  - name: "plex-values"
