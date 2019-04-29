@@ -1,4 +1,3 @@
----
 apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
 metadata:
@@ -29,9 +28,8 @@ spec:
     persistence:
       transcode:
         enabled: true
-        storageClass: "fast-disks"
-        #claimName: nfs-data-pvc-10g
-        #subPath: plex
+        claimName: perf-docker-pvc
+        subPath: plex/transcode
       data:
         enabled: true
         claimName: tank-media-pvc
@@ -39,9 +37,9 @@ spec:
         storageClass: "fast-disks"
         accessMode: ReadWriteOnce
     #resources:
-      #limits:
-       #gpu.intel.com/i915: 1
-      # requests:
-      #  gpu.intel.com/i915: 1
+    #limits:
+    #gpu.intel.com/i915: 1
+    # requests:
+    #  gpu.intel.com/i915: 1
   valueFileSecrets:
-  - name: "plex-values"
+    - name: "plex-values"
