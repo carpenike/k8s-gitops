@@ -1,0 +1,35 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: tautulli
+  namespace: default
+  annotations:
+    release: "tautulli"
+    #flux.weave.works/automated: "true"
+    #flux.weave.works/tag.chart-image: "glob:latest"
+spec:
+  releaseName: nzbhydra
+  chart:
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/tautulli
+    ref: master
+  values:
+    image:
+      repository: tautulli/tautulli
+      tag: latest
+    tautulli:
+      tz: "America/New_York"
+    service:
+      type: ClusterIP
+    getGeoCity:
+      enabled: true
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    persistence:
+      enabled: true
+      storageClass: "fast-disks"
+  valueFileSecrets:
+    - name: "tautulli-values"
