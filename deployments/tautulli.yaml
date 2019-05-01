@@ -9,7 +9,7 @@ metadata:
     #flux.weave.works/automated: "true"
     #flux.weave.works/tag.chart-image: "glob:latest"
 spec:
-  releaseName: nzbhydra
+  releaseName: tautulli
   chart:
     git: git@gitlab.holthome.net:k8s-services/k8s-helm
     path: charts/tautulli
