@@ -34,6 +34,9 @@ spec:
       movies:
         enabled: true
         claimName: tank-media-movies-pvc
+      data:
+        enabled: true
+        claimName: tank-media-pvc
       tv:
         enabled: true
         claimName: tank-media-tv-pvc
