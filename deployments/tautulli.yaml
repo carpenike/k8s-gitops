@@ -23,7 +23,7 @@ spec:
     service:
       type: ClusterIP
     getGeoCity:
-      enabled: true
+      enabled: false
     ingress:
       enabled: true
       annotations:
