@@ -13,8 +13,17 @@ spec:
     version: 0.8.3
   values:
     configInline:
+        peers:
+        - peer-address: 10.20.0.1
+          peer-asn: 64512
+          my-asn: 64512
         address-pools:
         - name: default
-          protocol: layer2
+          protocol: bgp
           addresses:
-          - 10.20.50.100-10.20.50.250
+          - 10.20.50.0/24
+        #address-pools:
+        #- name: default
+        #  protocol: layer2
+        #  addresses:
+        #  - 10.20.50.100-10.20.50.250
