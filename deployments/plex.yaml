@@ -15,7 +15,7 @@ spec:
     version: 0.2.7
   values:
     image:
-      tag: 1.15.4.993-bb4a2cb6c
+      tag: 1.15.4.994-107756f7e
     kubePlex:
       enabled: false
     ingress:
