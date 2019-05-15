@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: koenkk/zigbee2mqtt
-      tag: 1.3.1
+      tag: 1.4.0
     device: ttyACM1
     persistence:
       enabled: true
