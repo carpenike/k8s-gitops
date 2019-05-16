@@ -1,0 +1,29 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: netdata
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    #flux.weave.works/tag.chart-image: "semver:~1"
+spec:
+  releaseName: netdata
+  chart:
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/netdata
+    ref: master
+  values:
+    image:
+      repository: netdata/netdata
+      tag: latest
+    master:
+      database:
+        storageclass: slow-disks
+      alarms:
+        storageclass: slow-disks
+    notifications:
+      slackurl: https://hooks.slack.com/services/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
+      slackrecipient: "#alerts"
+    ingress:
+      hosts: netdata.holthome.net
