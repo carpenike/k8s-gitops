@@ -30,6 +30,20 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "traefik"
+    appdaemon:
+      enabled: true
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "traefik"
+        hosts:
+        - appdaemon.holthome.net
+      hassApiUrl: https://ha.holthome.net
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwY2VkMzFmM2MxYTc0NTE3YmRiMjRlNTU4MmFiY2E4OCIsImlhdCI6MTU1ODA0MjU3MCwiZXhwIjoxODczNDAyNTcwfQ.k4CYUPa8B3QcReJJXh1rZU9qq5P2cTHXjET4TTaDGsA
+      dashurl: https://appdaemon.holthome.net
+      persistence:
+        enabled: true
+        storageClass: "fast-disks"
     configurator:
       enabled: true
       image:
