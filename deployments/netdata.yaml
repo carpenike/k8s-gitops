@@ -28,3 +28,5 @@ spec:
     ingress:
       hosts: 
       - netdata.holthome.net
+      annotations: 
+      - kubernetes.io/ingress.class: traefik
