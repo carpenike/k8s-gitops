@@ -26,4 +26,5 @@ spec:
       slackurl: https://hooks.slack.com/services/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
       slackrecipient: "#alerts"
     ingress:
-      hosts: netdata.holthome.net
+      hosts: 
+      - netdata.holthome.net
