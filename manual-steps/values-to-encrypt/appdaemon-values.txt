@@ -1,5 +1,5 @@
 ingress:
   hosts: [appdaemon.$DOMAIN]
 haurl: "https://ha.holthome.net"
-token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwY2VkMzFmM2MxYTc0NTE3YmRiMjRlNTU4MmFiY2E4OCIsImlhdCI6MTU1ODA0MjU3MCwiZXhwIjoxODczNDAyNTcwfQ.k4CYUPa8B3QcReJJXh1rZU9qq5P2cTHXjET4TTaDGsA"
+token: $HA_TOKEN
 dashurl: "https://appdaemon.holthome.net"
