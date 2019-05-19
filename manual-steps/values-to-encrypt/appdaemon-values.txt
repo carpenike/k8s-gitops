@@ -2,4 +2,4 @@ ingress:
   hosts: [appdaemon.$DOMAIN]
 haurl: "https://ha.holthome.net"
 token: $HA_TOKEN
-dashurl: "https://appdaemon.holthome.net"
+dashurl: "http://$HOSTNAME:5050"
