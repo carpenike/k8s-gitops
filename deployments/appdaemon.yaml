@@ -1,0 +1,30 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: appdaemon
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    #flux.weave.works/tag.chart-image: "glob:amd64-0.*.*.*"
+spec:
+  releaseName: appdaemon
+  chart:
+    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    path: charts/appdaemon
+    ref: master
+  values:
+    image:
+      repository: acockburn/appdaemon
+      tag: latest
+      pullPolicy: Always
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "fast-disks"
+  valueFileSecrets:
+  - name: "appdaemon-values"

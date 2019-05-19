@@ -65,3 +65,4 @@ kseal values-to-encrypt/node-red-values.txt > ../secrets/node-red-values.yaml
 kseal values-to-encrypt/rabbitmq-values.txt > ../secrets/rabbitmq-values.yaml
 kseal values-to-encrypt/nextcloud-values.txt > ../secrets/nextcloud-values.yaml
 kseal values-to-encrypt/tautulli-values.txt > ../secrets/tautulli-values.yaml
+kseal values-to-encrypt/appdaemon-values.txt > ../secrets/appdaemon-values.yaml
