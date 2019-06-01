@@ -5,7 +5,7 @@ metadata:
   name: radarr
   namespace: default
   annotations:
-    flux.weave.works/automated: "true"
+    flux.weave.works/automated: "false"
     flux.weave.works/tag.chart-image: "glob:amd64-0.*.*.*"
 spec:
   releaseName: radarr
@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: linuxserver/radarr
-      tag: "amd64-0.2.0.1350-ls17"
+      tag: "preview"
       pullPolicy: Always
     ingress:
       enabled: true
