@@ -9,8 +9,3 @@ configurator:
     - ha-config.$DOMAIN
   hassApiPassword: $HASS_API_PASSWORD
   hassApiUrl: https://ha.$DOMAIN/api/
-vscode:
-  ingress:
-    hosts:
-    - ha-vscode.$DOMAIN
-  hassApiToken: $HA_TOKEN
