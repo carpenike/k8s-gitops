@@ -10,7 +10,7 @@ metadata:
 spec:
   releaseName: netdata
   chart:
-    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
     path: charts/netdata
     ref: master
   values:
