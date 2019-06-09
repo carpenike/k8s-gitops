@@ -10,7 +10,7 @@ metadata:
 spec:
   releaseName: zigbee2mqtt
   chart:
-    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
     path: charts/zigbee2mqtt
     ref: master
   values:
