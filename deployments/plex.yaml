@@ -9,7 +9,7 @@ metadata:
 spec:
   releaseName: plex
   chart:
-    git: git@gitlab.holthome.net:k8s-services/k8s-helm
+    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
     path: charts/kube-plex
     ref: master
     version: 0.2.7
