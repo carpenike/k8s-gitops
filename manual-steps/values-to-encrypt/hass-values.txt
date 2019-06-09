@@ -13,3 +13,4 @@ vscode:
   ingress:
     hosts:
     - ha-vscode.$DOMAIN
+  hassApiToken: $HA_TOKEN
