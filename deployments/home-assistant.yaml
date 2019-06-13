@@ -10,14 +10,10 @@ metadata:
 spec:
   releaseName: hass
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/home-assistant
-    ref: master
-    version: 0.6.0
+    git: https://kubernetes-charts.storage.googleapis.com/
+    name: home-assistant
+    version: 0.9.2
   values:
-    zwave:
-      enabled: false
-      device: ttyACM0
     image:
       repository: homeassistant/home-assistant
       tag: 0.94.3
@@ -26,15 +22,12 @@ spec:
       accessMode: ReadWriteOnce
       size: 10Gi
       storageClass: "fast-disks"
-    hostNetwork: false
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "traefik"
-    configurator:
+    vscode:
       enabled: true
-      image:
-        tag: 0.3.4-x86_64
       ingress:
         enabled: true
         annotations:
