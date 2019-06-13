@@ -17,6 +17,10 @@ spec:
     image:
       repository: robertslando/zwave2mqtt
       tag: latest
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
     device: ttyACM0
     persistence:
       enabled: true
