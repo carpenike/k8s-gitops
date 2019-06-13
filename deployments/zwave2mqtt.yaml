@@ -21,3 +21,5 @@ spec:
     persistence:
       enabled: true
       storageClass: slow-disks
+  valueFileSecrets:
+  - name: "zwave2mqtt-values"
