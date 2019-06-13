@@ -1,0 +1,23 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: "semver:~1"
+spec:
+  releaseName: zigbee2mqtt
+  chart:
+    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
+    path: charts/zigbee2mqtt
+    ref: master
+  values:
+    image:
+      repository: koenkk/zigbee2mqtt
+      tag: 1.4.0
+    device: ttyACM1
+    persistence:
+      enabled: true
+      storageClass: slow-disks
