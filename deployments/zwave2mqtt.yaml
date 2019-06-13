@@ -2,7 +2,7 @@
 apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
 metadata:
-  name: zigbee2mqtt
+  name: zwave2mqtt
   namespace: default
   annotations:
     flux.weave.works/automated: "true"
@@ -11,12 +11,12 @@ spec:
   releaseName: zigbee2mqtt
   chart:
     git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/zigbee2mqtt
+    path: charts/zwave2mqtt
     ref: master
   values:
     image:
-      repository: koenkk/zigbee2mqtt
-      tag: 1.4.0
+      repository: robertslando/zwave2mqtt
+      tag: latest
     device: ttyACM1
     persistence:
       enabled: true
