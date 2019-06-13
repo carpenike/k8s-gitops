@@ -16,7 +16,7 @@ spec:
     version: 0.6.0
   values:
     zwave:
-      enabled: true
+      enabled: false
       device: ttyACM0
     image:
       repository: homeassistant/home-assistant
