@@ -20,4 +20,6 @@ spec:
     device: ttyACM1
     persistence:
       enabled: true
-      storageClass: slow-disks
+      storageClass: nfs-client-slow
+    nodeSelector:
+      zwave: present

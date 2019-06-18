@@ -28,5 +28,7 @@ done
 
 #kapply yamls/rook-dashboard-ingress.txt
 
+kapply yamls/cert-manager-letsencrypt.txt
+
 # loki trial on grafana.net
 #kapply yamls/loki.txt

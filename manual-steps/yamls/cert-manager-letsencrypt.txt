@@ -1,0 +1,45 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    dns01:
+      providers:
+        - name: route53
+          route53:
+            region: us-east-1
+            accessKeyID: $AWS_ACCESS_KEY_ID
+            secretAccessKeySecretRef:
+              name: route53-api-key
+              key: api-key
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: kube-system
+spec:
+  secretName: acme-crt-secret
+  commonName: "*.$DOMAIN"
+  dnsNames:
+  - $DOMAIN
+  - '*.$DOMAIN'
+  - '*.k.$DOMAIN'
+  - '*.nd.$DOMAIN'
+  acme:
+    config:
+    - dns01:
+        provider: route53
+      domains:
+      - $DOMAIN
+      - '*.$DOMAIN'
+      - '*.k.$DOMAIN'
+      - '*.nd.$DOMAIN'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

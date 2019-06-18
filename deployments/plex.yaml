@@ -15,7 +15,7 @@ spec:
     version: 0.2.7
   values:
     image:
-      tag: 1.15.4.994-107756f7e
+      tag: 1.16.0.1226-7eb2c8f6f
     kubePlex:
       enabled: false
     ingress:
@@ -29,19 +29,19 @@ spec:
     persistence:
       transcode:
         enabled: true
-        claimName: perf-docker-pvc
+        claimName: nfs-perf-docker-pvc
         subPath: plex/transcode
       movies:
-        enabled: true
-        claimName: tank-media-movies-pvc
+        enabled: true 
+        claimName: nfs-tank-media-movies-pvc
       data:
-        enabled: true
+        enabled: false 
         claimName: tank-media-pvc
       tv:
-        enabled: true
-        claimName: tank-media-tv-pvc
+        enabled: true 
+        claimName: nfs-tank-media-tv-pvc
       config:
-        storageClass: "fast-disks"
+        storageClass: "nfs-client-slow"
         accessMode: ReadWriteOnce
     #resources:
     #limits:

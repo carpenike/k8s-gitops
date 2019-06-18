@@ -6,35 +6,63 @@ metadata:
   namespace: default
   annotations:
     flux.weave.works/automated: "false"
-    flux.weave.works/tag.chart-image: glob:3.*-alpine
+    flux.weave.works/tag.chart-image: 'regexp:^(3\.[0-9]+\.[0-9]+-alpine)$'
 spec:
   releaseName: rabbitmq
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: rabbitmq-ha
-    version: 1.19.0
+    version: 1.25.0
   values:
     image:
       repository: rabbitmq
-      tag: 3.7-alpine
+      tag: 3.7.15-alpine
     rabbitmqMQTTPlugin:
       enabled: true
     rabbitmqWebMQTTPlugin:
       enabled: true
     service:
-      type: LoadBalancer
       clusterIP: ""
       loadBalancerIP: "10.20.50.152"
+      type: LoadBalancer
     persistentVolume:
       enabled: true
-      storageClass: "fast-disks"
-    rabbitmqCert:
-      enabled: true
-      existingSecret: "mqtt-cert"
+      storageClass: nfs-client-slow
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "traefik"
     rabbitmqErlangCookie: "w6wnR9PNxskikfzIyVQjsnOUwwFS3Wj3JXcRVu5PS1IviZi3kjH38bHKGpovhk59xKO2aSyzyS5zseeWIbFvpgUiVe7gVKD5ZtVYmLSS62xt95YoyLHU0n6cZHBxZe7Od1vt4JhUS1hXx1PuyTBBnxEoCAHP5Mv6ZuN2UlntzIBFXWVyjD5niMmkQ7pPeUEPjycvbOkREKHapfWMJpQ3yGV4RNky3tpfUEK6tlmSXxd3R1DFX3dznOCZNS"
+    definitions:
+      permissions: |-
+        {
+          "user": "mqtt",
+          "vhost": "/",
+          "configure": ".*",
+          "write": ".*",
+          "read": ".*"
+        }
+      queues: |-
+    #    {
+    #       "name":"myName",
+    #       "vhost":"/rabbit",
+    #       "durable":true,
+    #       "auto_delete":false,
+    #       "arguments":{}
+    #    }
+    ## Sets the policies in definitions.json. This can be used to control the high
+    ## availability of queues by mirroring them to multiple nodes.
+    ## Ref: https://www.rabbitmq.com/ha.html
+      policies: |-
+        {
+          "name": "ha-all",
+          "pattern": ".*",
+          "vhost": "/",
+          "definition": {
+            "ha-mode": "all",
+            "ha-sync-mode": "automatic",
+            "ha-sync-batch-size": 1
+          }
+        } 
   valueFileSecrets:
     - name: "rabbitmq-values"

@@ -45,6 +45,6 @@ spec:
             - name: SLACK_ICON_EMOJI
               value: ":heart:"
             - name: GITHUB_URL
-              value: "https://gitlab.holthome.net/k8s-services/k8s-gitops/"
+              value: "https://dev.azure.com/ryholt/HomeAutomation/_git/k8s-gitops"
             - name: LISTEN_ADDRESS
               value: ":3032"

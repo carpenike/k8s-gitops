@@ -6,13 +6,13 @@ metadata:
   namespace: default
   annotations:
     flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: semver:~5
+    flux.weave.works/tag.chart-image: 'regexp:^(5\.[0-9][0-9]\.[0-9]+)$'
 spec:
   releaseName: unifi
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: unifi
-    version: 0.3.1
+    version: 0.4.2
   values:
     image:
       repository: jacobalberty/unifi
@@ -21,7 +21,7 @@ spec:
       enabled: true
       accessMode: ReadWriteOnce
       size: 20Gi
-      storageClass: slow-disks
+      storageClass: nfs-client-slow
     timezone: "America/New_York"
     runAsRoot: false
     ingress:

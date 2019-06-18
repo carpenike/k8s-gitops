@@ -1,25 +1,25 @@
----
-apiVersion: flux.weave.works/v1beta1
-kind: HelmRelease
-metadata:
-  name: zwave2mqtt
-  namespace: default
-  annotations:
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: "semver:~1"
-spec:
-  releaseName: zwave2mqtt
-  chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/zwave2mqtt
-    ref: master
-  values:
-    image:
-      repository: robertslando/zwave2mqtt
-      tag: latest
-    device: ttyACM0
-    persistence:
-      enabled: true
-      storageClass: slow-disks
-  valueFileSecrets:
-  - name: "zwave2mqtt-values"
+# ---
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: zwave2mqtt
+#   namespace: default
+#   annotations:
+#     flux.weave.works/automated: "true"
+#     flux.weave.works/tag.chart-image: "semver:~1"
+# spec:
+#   releaseName: zwave2mqtt
+#   chart:
+#     git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
+#     path: charts/zwave2mqtt
+#     ref: master
+#   values:
+#     image:
+#       repository: robertslando/zwave2mqtt
+#       tag: latest
+#     device: ttyACM0
+#     persistence:
+#       enabled: true
+#       storageClass: slow-disks
+#   valueFileSecrets:
+#   - name: "zwave2mqtt-values"

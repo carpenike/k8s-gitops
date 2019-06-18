@@ -30,13 +30,14 @@ kseal() {
 kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$AZURE_ACCOUNT_NAME" --from-literal=AZURE_ACCOUNT_KEY="$AZURE_STORAGE_KEY" --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret.yaml
 kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$AZURE_ACCOUNT_NAME" --from-literal=AZURE_ACCOUNT_KEY="$AZURE_STORAGE_KEY" --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret-kube-system.yaml
 kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$AZURE_ACCOUNT_NAME" --from-literal=AZURE_ACCOUNT_KEY="$AZURE_STORAGE_KEY" --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --namespace logs --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret-logs.yaml
+kubectl create secret generic route53-api-key --from-literal=api-key="$AWS_ACCESS_KEY_SECRET" --namespace cert-manager --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/route53-api-key.yaml
 
 ###################
 # helm chart values
 ###################
 
 # NS=kube-system kseal values-to-encrypt/consul-values.txt > ../secrets/consul-values.yaml
-# NS=kube-system kseal values-to-encrypt/traefik-values.txt > ../secrets/traefik-values.yaml
+NS=kube-system kseal values-to-encrypt/traefik-values.txt > ../secrets/traefik-values.yaml
 NS=kube-system kseal values-to-encrypt/kubernetes-dashboard-values.txt > ../secrets/kubernetes-dashboard-values.yaml
 # NS=kube-system kseal values-to-encrypt/kured-values.txt > ../secrets/kured-values.yaml
 NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwardauth-values.yaml
@@ -44,7 +45,7 @@ NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwa
 NS=logs kseal values-to-encrypt/kibana-values.txt > ../secrets/kibana-values.yaml
 
 
-kseal values-to-encrypt/influxdb-values.txt > ../secrets/influxdb-values.yaml
+NS=monitoring kseal values-to-encrypt/influxdb-values.txt > ../secrets/influxdb-values.yaml
 kseal values-to-encrypt/chronograf-values.txt > ../secrets/chronograf-values.yaml
 kseal values-to-encrypt/prometheus-values.txt > ../secrets/prometheus-values.yaml
 kseal values-to-encrypt/hubot-values.txt > ../secrets/hubot-values.yaml

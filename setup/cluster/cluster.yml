@@ -1,0 +1,49 @@
+nodes:
+  - address: 10.20.30.10
+    hostname_override: k8s-master-a
+    user: ubuntu
+    role: [controlplane,etcd]
+  - address: 10.20.30.11
+    hostname_override: k8s-master-b
+    user: ubuntu
+    role: [controlplane,etcd]
+  - address: 10.20.30.12
+    hostname_override: k8s-master-c
+    user: ubuntu
+    role: [controlplane,etcd]
+  - address: 10.20.40.10
+    hostname_override: k8s-1
+    user: ubuntu
+    role: [worker]
+  - address: 10.20.40.11
+    hostname_override: k8s-2
+    user: ubuntu
+    role: [worker]
+    #labels:
+    #  app: intel-gpu-plugin
+  - address: 10.20.40.12
+    hostname_override: k8s-3
+    user: ubuntu
+    role: [worker]
+authentication:
+    strategy: x509
+    sans:
+      - "10.9.18.10"
+      - "lb-ha"
+ssh_key: /Users/ryan/.ssh/id_rsa
+#ssh_agent_auth: true
+services:
+  kubelet:
+    extra_args:
+      read-only-port: 10255
+    extra_binds:
+    - "/lib/modules:/lib/modules"
+    - "/mnt:/mnt:rshared"
+#    etcd:
+#      extra_args:
+#        listen-metrics-urls: http://0.0.0.0:2379
+cluster_name: k8s
+kubernetes_version: v1.14.1-rancher1-2
+ingress:
+    provider: none
+

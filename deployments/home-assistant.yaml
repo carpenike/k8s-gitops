@@ -10,9 +10,9 @@ metadata:
 spec:
   releaseName: hass
   chart:
-    git: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://kubernetes-charts.storage.googleapis.com/
     name: home-assistant
-    version: 0.9.2
+    version: 0.9.3
   values:
     image:
       repository: homeassistant/home-assistant
@@ -21,7 +21,7 @@ spec:
       enabled: true
       accessMode: ReadWriteOnce
       size: 10Gi
-      storageClass: "fast-disks"
+      storageClass: nfs-client-slow
     ingress:
       enabled: true
       annotations:
@@ -35,6 +35,11 @@ spec:
           ingress.kubernetes.io/auth-type: "forward"
           ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
           ingress.kubernetes.io/auth-trust-headers: "true"
+    zwave:
+      enabled: true 
+      device: ttyACM0
+    nodeSelector:
+      zwave: present
   valueFileSecrets:
   - name: "hass-values"
 ---
@@ -51,7 +56,7 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: mysql
-    version: 0.12.0
+    version: 1.0.0
   values:
     image: "mysql"
     imageTag: "5.7.25"
@@ -61,7 +66,7 @@ spec:
       enabled: true
       accessMode: ReadWriteOnce
       size: 20Gi
-      storageClass: "fast-disks"
+      storageClass: nfs-client-slow
       annotations: {}
     metrics:
       enabled: true
