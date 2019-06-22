@@ -41,8 +41,9 @@ spec:
         enabled: true 
         claimName: nfs-tank-media-tv-pvc
       config:
-        storageClass: "nfs-client-slow"
+        #storageClass: "nfs-client-slow"
         accessMode: ReadWriteOnce
+        size: 300Gi
     #resources:
     #limits:
     #gpu.intel.com/i915: 1

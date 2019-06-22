@@ -20,6 +20,6 @@ spec:
     device: ttyACM1
     persistence:
       enabled: true
-      storageClass: nfs-client-slow
+      storageClass: rook-ceph-block
     nodeSelector:
       zwave: present

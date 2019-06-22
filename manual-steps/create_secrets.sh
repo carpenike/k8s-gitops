@@ -22,8 +22,8 @@ kseal() {
 #kubectl create secret generic restic-secret --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/restic-secret.yaml
 #kubectl create secret generic restic-secret --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/restic-secret-kube-system.yaml
 #kubectl create secret generic restic-secret --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --namespace logs --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/restic-secret-logs.yaml
-# kubectl create secret generic ceph-admin-secret --from-literal=auth="$EXTERNAL_CEPH_ADMIN_SECRET" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/external-ceph-admin-secret-kube-system.yaml
-# kubectl create secret generic ceph-secret --from-literal=auth="$EXTERNAL_CEPH_SECRET" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/external-ceph-secret-kube-system.yaml
+kubectl create secret generic ceph-admin-secret --from-literal=auth="$EXTERNAL_CEPH_ADMIN_SECRET" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/external-ceph-admin-secret-kube-system.yaml
+kubectl create secret generic ceph-secret --from-literal=auth="$EXTERNAL_CEPH_SECRET" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/external-ceph-secret-kube-system.yaml
 # kubectl create secret generic registry-storage --from-file=config=values-to-encrypt/registry-storage.txt --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/registry-storage.yaml
 # kubectl create secret generic gitlab-rails-storage --from-file=connection=values-to-encrypt/rails.txt --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/rails.yaml
 # kubectl create secret generic s3cmd-config --from-file=config=values-to-encrypt/s3cmd.config --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/s3cmd-config.yaml
@@ -45,9 +45,13 @@ NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwa
 NS=logs kseal values-to-encrypt/kibana-values.txt > ../secrets/kibana-values.yaml
 
 
+NS=monitoring kseal values-to-encrypt/prometheus-operator-values.txt > ../secrets/prometheus-operator-values.yaml
+
+
 NS=monitoring kseal values-to-encrypt/influxdb-values.txt > ../secrets/influxdb-values.yaml
 kseal values-to-encrypt/chronograf-values.txt > ../secrets/chronograf-values.yaml
-kseal values-to-encrypt/prometheus-values.txt > ../secrets/prometheus-values.yaml
+#kseal values-to-encrypt/prometheus-values.txt > ../secrets/prometheus-values.yaml
+
 kseal values-to-encrypt/hubot-values.txt > ../secrets/hubot-values.yaml
 kseal values-to-encrypt/comcast-values.txt > ../secrets/comcast-values.yaml
 # kseal values-to-encrypt/uptimerobot-values.txt > ../secrets/uptimerobot-values.yaml

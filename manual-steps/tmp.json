@@ -1,0 +1,19 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "creationTimestamp": "2019-06-20T00:41:58Z",
+        "deletionTimestamp": "2019-06-20T13:37:49Z",
+        "name": "rook-ceph",
+        "resourceVersion": "1920346",
+        "selfLink": "/api/v1/namespaces/rook-ceph",
+        "uid": "3619eff1-92f4-11e9-885c-b656d9a956a0"
+    },
+    "spec": {
+        "finalizers": [
+        ]
+    },
+    "status": {
+        "phase": "Terminating"
+    }
+}

@@ -21,7 +21,7 @@ spec:
       enabled: true
       accessMode: ReadWriteOnce
       size: 20Gi
-      storageClass: nfs-client-slow
+      storageClass: rook-ceph-block
     timezone: "America/New_York"
     runAsRoot: false
     ingress:

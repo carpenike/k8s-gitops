@@ -4,6 +4,7 @@ metadata:
   name: stash-plex
   namespace: default
 spec:
+  paused: true
   selector:
     matchLabels:
       app: kube-plex

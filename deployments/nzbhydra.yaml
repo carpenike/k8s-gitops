@@ -28,11 +28,11 @@ spec:
     persistence:
       downloads:
         enabled: true
-        existingClaim: tank-docker-pvc
+        existingClaim: nfs-tank-docker-pvc
         subPath: nzbget/downloads
       config:
         enabled: true
-        storageClass: "fast-disks"
-        size: 30Gi
+        #storageClass: "nfs-client-slow"
+        size: 5Gi
   valueFileSecrets:
   - name: "nzbhydra-values"

@@ -27,7 +27,7 @@ spec:
       type: LoadBalancer
     persistentVolume:
       enabled: true
-      storageClass: nfs-client-slow
+      storageClass: rook-ceph-block
     ingress:
       enabled: true
       annotations:

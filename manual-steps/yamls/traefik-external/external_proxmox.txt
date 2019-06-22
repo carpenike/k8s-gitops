@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: external-proxmox
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    ingress.kubernetes.io/protocol: https
+    ingress.kubernetes.io/auth-type: "forward"
+    ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
+    ingress.kubernetes.io/auth-trust-headers: "true"
+    traefik.ingress.kubernetes.io/preserve-host: "true"
+spec:
+  rules:
+  - host: pve.$DOMAIN
+    http:
+      paths:
+      - path: /      
+        backend:
+          serviceName: external-proxmox
+          servicePort: 8006
+      - path: "/vncwebsocket.*"
+        backend:
+            serviceName: external-proxmox-wss
+            servicePort: 8006
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-proxmox
+spec:
+  ports:
+  - name: http
+    port: 8006
+  type: ExternalName
+  externalName: pve-01.holthome.net
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-proxmox-wss
+spec:
+  ports:
+  - name: wss
+    port: 8006
+  type: ExternalName
+  externalName: pve-01.holthome.net

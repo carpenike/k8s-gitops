@@ -26,15 +26,15 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: "fast-disks"
+        storageClass: rook-ceph-block
       downloads:
         enabled: true
-        existingClaim: tank-docker-pvc
+        existingClaim: nfs-tank-docker-pvc
         subPath: nzbget/downloads
         accessMode: ReadWriteMany
       tv:
         enabled: true
-        existingClaim: tank-media-tv-pvc
+        existingClaim: nfs-tank-media-tv-pvc
         accessMode: ReadWriteMany
   valueFileSecrets:
   - name: "sonarr-values"
