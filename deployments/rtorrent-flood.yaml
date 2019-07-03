@@ -5,18 +5,18 @@ metadata:
   name: rtorrent-flood
   namespace: default
   annotations:
-    flux.weave.works/automated: "true"
+    flux.weave.works/automated: "false"
     flux.weave.works/tag.chart-image: glob:0.9.*
 spec:
   releaseName: rtorrent-flood
   chart:
-    repository: https://billimek.github.io/helm-repo/
+    repository: https://billimek.com/billimek-charts/
     name: rtorrent-flood
-    version: 0.0.2
+    version: 2.0.8
   values:
     image:
       repository: wonderfall/rtorrent-flood
-      tag: 0.9.7-0.13.7
+      tag: new
     uid: 50000
     gid: 50000
     guiService:
@@ -35,10 +35,10 @@ spec:
         enabled: true
         accessMode: ReadWriteOnce
         size: 1Gi
-        storageClass: slow-disks
+        storageClass: rook-ceph-block
       data:
         enabled: true
-        existingClaim: tank-docker-pvc
+        existingClaim: nfs-tank-docker-pvc
         subPath: docker/flood
   valueFileSecrets:
     - name: "rtorrent-flood-values"

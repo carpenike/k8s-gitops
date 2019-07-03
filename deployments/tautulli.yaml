@@ -30,6 +30,7 @@ spec:
         kubernetes.io/ingress.class: "traefik"
     persistence:
       enabled: true
-      storageClass: "fast-disks"
+      storageClass: rook-ceph-block
+      size: 5Gi
   valueFileSecrets:
     - name: "tautulli-values"

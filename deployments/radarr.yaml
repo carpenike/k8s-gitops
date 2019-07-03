@@ -6,7 +6,7 @@ metadata:
   namespace: default
   annotations:
     flux.weave.works/automated: "false"
-    flux.weave.works/tag.chart-image: "glob:amd64-0.*.*.*"
+    flux.weave.works/tag.chart-image: "glob:2.0.0.*-*-*"
 spec:
   releaseName: radarr
   chart:
@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: linuxserver/radarr
-      tag: "preview"
+      tag: 2.0.0.1359-kkgahlfs-ls7
       pullPolicy: Always
     ingress:
       enabled: true
@@ -26,15 +26,16 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: "fast-disks"
+        storageClass: rook-ceph-block
+        size: 5Gi
       downloads:
         enabled: true
-        existingClaim: tank-docker-pvc
+        existingClaim: nfs-tank-docker-pvc
         subPath: nzbget/downloads
         accessMode: ReadWriteMany
       movies:
         enabled: true
-        existingClaim: tank-media-movies-pvc
+        existingClaim: nfs-tank-media-movies-pvc
         accessMode: ReadWriteMany
   valueFileSecrets:
   - name: "radarr-values"
