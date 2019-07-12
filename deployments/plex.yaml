@@ -15,7 +15,7 @@ spec:
     version: 0.2.7
   values:
     image:
-      tag: 1.16.0.1226-7eb2c8f6f
+      tag: 1.16.1.1291-158e5b199
     kubePlex:
       enabled: false
     ingress:
@@ -29,7 +29,7 @@ spec:
     persistence:
       transcode:
         enabled: true
-        claimName: nfs-perf-docker-pvc
+        claimName: nfs-tank-docker-pvc
         subPath: plex/transcode
       movies:
         enabled: true 

@@ -15,6 +15,8 @@ nodes:
     hostname_override: k8s-1
     user: ubuntu
     role: [worker]
+    labels:
+      zwave: present
   - address: 10.20.40.11
     hostname_override: k8s-2
     user: ubuntu
