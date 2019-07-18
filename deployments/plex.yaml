@@ -1,3 +1,4 @@
+---
 apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
 metadata:
@@ -5,17 +6,19 @@ metadata:
   namespace: default
   annotations:
     flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: glob:1.*
+    flux.weave.works/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+\.[0-9]+-.*)$'
 spec:
   releaseName: plex
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/kube-plex
-    ref: master
-    version: 0.2.7
+    repository: https://billimek.com/billimek-charts/
+    name: kube-plex
+    version: 0.2.4
   values:
     image:
-      tag: 1.16.1.1291-158e5b199
+      repository: plexinc/pms-docker
+      tag: 1.16.2.1297-4b7ace214
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
     kubePlex:
       enabled: false
     ingress:
@@ -28,26 +31,23 @@ spec:
       loadBalancerIP: 10.20.50.155
     persistence:
       transcode:
-        enabled: true
-        claimName: nfs-tank-docker-pvc
+        enabled: false
+        claimName: pvc-smb-flexvol
+        storageClass: ""
         subPath: plex/transcode
-      movies:
-        enabled: true 
-        claimName: nfs-tank-media-movies-pvc
       data:
-        enabled: false 
-        claimName: tank-media-pvc
-      tv:
-        enabled: true 
-        claimName: nfs-tank-media-tv-pvc
+        enabled: false
+        claimName: pvc-smb-flexvol
+        storageClass: ""
+        subPath: plex/data
       config:
-        #storageClass: "nfs-client-slow"
-        accessMode: ReadWriteOnce
-        size: 300Gi
-    #resources:
-    #limits:
-    #gpu.intel.com/i915: 1
-    # requests:
-    #  gpu.intel.com/i915: 1
+        claimName: pvc-smb-flexvol
+        storageClass: ""
+        subPath: plex/config
+    # resources:
+    #   limits:
+    #     gpu.intel.com/i915: 1
+      # requests:
+      #  gpu.intel.com/i915: 1
   valueFileSecrets:
-    - name: "plex-values"
+  - name: "plex-values"

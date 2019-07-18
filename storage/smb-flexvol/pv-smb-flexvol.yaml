@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-smb-flexvol
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  flexVolume:
+    driver: "microsoft.com/smb"
+    secretRef:
+      name: smbcreds
+    options:
+      source: "//sofs.ad.holthome.net/VD-CIFS-01"
+      mountoptions: "vers=3.0,dir_mode=0777,file_mode=0777"
+
