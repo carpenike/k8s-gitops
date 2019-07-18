@@ -31,19 +31,19 @@ spec:
       loadBalancerIP: 10.20.50.155
     persistence:
       transcode:
-        enabled: false
+        enabled: true
         claimName: pvc-smb-flexvol
         storageClass: ""
-        subPath: plex/transcode
+        subPath: "plex/transcode"
       data:
-        enabled: false
+        enabled: true
         claimName: pvc-smb-flexvol
         storageClass: ""
-        subPath: plex/data
+        subPath: "plex/data"
       config:
         claimName: pvc-smb-flexvol
         storageClass: ""
-        subPath: plex/config
+        subPath: "plex/config"
     # resources:
     #   limits:
     #     gpu.intel.com/i915: 1
