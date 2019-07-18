@@ -1,26 +1,26 @@
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: rook-ceph-mgr-dashboard
-  namespace: rook-ceph
-  annotations:
-    #kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: traefik
-    ingress.kubernetes.io/protocol: http
-    #ingress.kubernetes.io/auth-type: "forward"
-    #ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
-    #ingress.kubernetes.io/auth-trust-headers: "true"
-    #traefik.ingress.kubernetes.io/preserve-host: "true"
-spec:
-  # tls:
-  #  - hosts:
-  #    - rook-ceph.holthome.net
-  #    secretName: acme-crt-secret
-  rules:
-  - host: rook-ceph.holthome.net
-    http:
-      paths:
-      # - path: /
-      - backend:
-          serviceName: rook-ceph-mgr-dashboard
-          servicePort: https-dashboard
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: rook-ceph-mgr-dashboard
+#   namespace: rook-ceph
+#   annotations:
+#     #kubernetes.io/tls-acme: "true"
+#     kubernetes.io/ingress.class: traefik
+#     ingress.kubernetes.io/protocol: http
+#     #ingress.kubernetes.io/auth-type: "forward"
+#     #ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
+#     #ingress.kubernetes.io/auth-trust-headers: "true"
+#     #traefik.ingress.kubernetes.io/preserve-host: "true"
+# spec:
+#   # tls:
+#   #  - hosts:
+#   #    - rook-ceph.holthome.net
+#   #    secretName: acme-crt-secret
+#   rules:
+#   - host: rook-ceph.holthome.net
+#     http:
+#       paths:
+#       # - path: /
+#       - backend:
+#           serviceName: rook-ceph-mgr-dashboard
+#           servicePort: https-dashboard

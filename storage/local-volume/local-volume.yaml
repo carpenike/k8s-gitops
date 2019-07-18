@@ -1,26 +1,26 @@
-apiVersion: flux.weave.works/v1beta1
-kind: HelmRelease
-metadata:
-  name: local-volume-provisioner
-  namespace: kube-system
-  annotations:
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: semver:~v3.1
-spec:
-  releaseName: local-volume-provisioner
-  chart:
-    git: git@gitlab.holthome.net:k8s-services/k8s-helm
-    path: charts/local-volume
-    ref: master
-  values:
-    common:
-      namespace: kube-system
-      classes:
-        - name: fast-disks
-          hostDir: /mnt/perf/k8s
-          volumeMode: Filesystem
-          fsType: zfs
-        - name: slow-disks
-          hostDir: /mnt/tank/k8s
-          volumeMode: Filesystem
-          fsType: zfs
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: local-volume-provisioner
+#   namespace: kube-system
+#   annotations:
+#     flux.weave.works/automated: "true"
+#     flux.weave.works/tag.chart-image: semver:~v3.1
+# spec:
+#   releaseName: local-volume-provisioner
+#   chart:
+#     git: git@gitlab.holthome.net:k8s-services/k8s-helm
+#     path: charts/local-volume
+#     ref: master
+#   values:
+#     common:
+#       namespace: kube-system
+#       classes:
+#         - name: fast-disks
+#           hostDir: /mnt/perf/k8s
+#           volumeMode: Filesystem
+#           fsType: zfs
+#         - name: slow-disks
+#           hostDir: /mnt/tank/k8s
+#           volumeMode: Filesystem
+#           fsType: zfs
