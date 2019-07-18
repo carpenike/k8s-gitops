@@ -1,8 +1,8 @@
-apiVersion: ceph.rook.io/v1
-kind: CephObjectStoreUser
-metadata:
-  name: ryan
-  namespace: rook-ceph
-spec:
-  store: ceph-object-store
-  displayName: "Ryan Holt"
+# apiVersion: ceph.rook.io/v1
+# kind: CephObjectStoreUser
+# metadata:
+#   name: ryan
+#   namespace: rook-ceph
+# spec:
+#   store: ceph-object-store
+#   displayName: "Ryan Holt"
