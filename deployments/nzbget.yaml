@@ -28,10 +28,12 @@ spec:
     persistence:
       downloads:
         enabled: true
-        existingClaim: nfs-tank-docker-pvc
+        existingClaim: smb-flexvol-pvc
         subPath: nzbget/downloads
       config:
         enabled: true
+        existingClaim: smb-flexvol-pvc
+        subPath: nzbget/config
         #storageClass: "fast-disks"
         size: 1Gi
   valueFileSecrets:

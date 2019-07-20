@@ -32,16 +32,16 @@ spec:
     persistence:
       transcode:
         enabled: true
-        claimName: pvc-smb-flexvol
+        claimName: smb-flexvol-pvc
         storageClass: ""
         subPath: "plex/transcode"
       data:
         enabled: true
-        claimName: pvc-smb-flexvol
+        claimName: smb-flexvol-pvc
         storageClass: ""
         subPath: "plex/data"
       config:
-        claimName: pvc-smb-flexvol
+        claimName: smb-flexvol-pvc
         storageClass: ""
         subPath: "plex/config"
     # resources:

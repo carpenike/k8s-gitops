@@ -1,0 +1,7 @@
+Name|IPAddress|Gateway|DNSServers|DNSNameSearch|GuestOSID|Generation|CPU|Memory|MaximumMemory|Network|VLAN
+k8s-master-a|10.20.30.10/16|10.20.0.1|10.20.0.1|ad.holthome.net, holthome.net|iid-local01|1|2|1073741824|25769803776|VMNetwork|20
+k8s-master-b|10.20.30.11/16|10.20.0.1|10.20.0.1|ad.holthome.net, holthome.net|iid-local01|1|2|1073741824|25769803776|VMNetwork|20
+k8s-master-c|10.20.30.12/16|10.20.0.1|10.20.0.1|ad.holthome.net, holthome.net|iid-local01|1|2|1073741824|25769803776|VMNetwork|20
+k8s-1|10.20.40.10/16|10.20.0.1|10.20.0.1|ad.holthome.net, holthome.net|iid-local01|1|2|1073741824|25769803776|VMNetwork|20
+k8s-2|10.20.40.11/16|10.20.0.1|10.20.0.1|ad.holthome.net, holthome.net|iid-local01|1|2|1073741824|25769803776|VMNetwork|20
+k8s-3|10.20.40.12/16|10.20.0.1|10.20.0.1|ad.holthome.net, holthome.net|iid-local01|1|2|1073741824|25769803776|VMNetwork|20
