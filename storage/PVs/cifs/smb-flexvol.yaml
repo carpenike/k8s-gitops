@@ -13,14 +13,15 @@ spec:
     name: smb-flexvol-pvc
   storageClassName: smb
   flexVolume:
-    #driver: "microsoft.com/smb"
-    driver: "fstab/cifs"
+    driver: "microsoft.com/smb"
+    #driver: "fstab/cifs"
     secretRef:
-      name: cifs-secret
+      name: smbcreds
     options:
-      networkPath: "//sofs.ad.holthome.net/VD-CIFS-01"
-      #source: "//sofs.ad.holthome.net/VD-CIFS-01"
-      mountOptions: "vers=3.0,dir_mode=0755,file_mode=0644"
+      #networkPath: "//sofs.ad.holthome.net/VD-CIFS-01"
+      source: "//sofs.ad.holthome.net/VD-CIFS-01"
+      #mountOptions: "vers=3.0,dir_mode=0755,file_mode=0644"
+      mountOptions: "dir_mode=0755,file_mode=0644"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

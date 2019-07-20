@@ -35,8 +35,5 @@ spec:
         existingClaim: smb-flexvol-pvc
         subPath: nzbget/config
         #storageClass: "fast-disks"
-        existingClaim: smb-flexvol-pvc
-        subPath: nzbget/config
-        size: 1Gi
   valueFileSecrets:
     - name: "nzbget-values"

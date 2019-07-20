@@ -31,6 +31,7 @@ kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$A
 kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$AZURE_ACCOUNT_NAME" --from-literal=AZURE_ACCOUNT_KEY="$AZURE_STORAGE_KEY" --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --namespace kube-system --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret-kube-system.yaml
 kubectl create secret generic azure-secret --from-literal=AZURE_ACCOUNT_NAME="$AZURE_ACCOUNT_NAME" --from-literal=AZURE_ACCOUNT_KEY="$AZURE_STORAGE_KEY" --from-literal=RESTIC_PASSWORD="$RESTIC_PASSWORD" --namespace logs --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/azure-secret-logs.yaml
 kubectl create secret generic route53-api-key --from-literal=api-key="$AWS_ACCESS_KEY_SECRET" --namespace cert-manager --dry-run -o json | kubeseal --format=yaml --cert=../pub-cert.pem > ../secrets/route53-api-key.yaml
+kubectl create secret generic smbcreds --from-literal=username="$SMB_USERNAME" --from-literal=password="$SMB_PASSWORD" --namespace default --type="microsoft.com/smb" --dry-run -o json  > ../secrets/smbcreds-default.yaml #| kubeseal --format=yaml --cert=../pub-cert.pem
 
 ###################
 # helm chart values
