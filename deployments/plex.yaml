@@ -32,6 +32,7 @@ spec:
     persistence:
       transcode:
         enabled: true
+<<<<<<< HEAD
         storageClass: "nfs-client"
       data:
         enabled: true
@@ -39,6 +40,20 @@ spec:
         storageClass: "nfs-client"
       config:
         storageClass: "nfs-client"
+=======
+        claimName: smb-flexvol-pvc
+        storageClass: ""
+        subPath: "plex/transcode"
+      data:
+        enabled: true
+        claimName: smb-flexvol-pvc
+        storageClass: ""
+        subPath: "plex/data"
+      config:
+        claimName: smb-flexvol-pvc
+        storageClass: ""
+        subPath: "plex/config"
+>>>>>>> b434ec925a91271a64aeb85e1e40d9edf9ad58b2
     # resources:
     #   limits:
     #     gpu.intel.com/i915: 1

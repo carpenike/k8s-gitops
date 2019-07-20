@@ -32,6 +32,8 @@ spec:
         subPath: nzbget/downloads
       config:
         enabled: true
+        existingClaim: smb-flexvol-pvc
+        subPath: nzbget/config
         #storageClass: "fast-disks"
         existingClaim: smb-flexvol-pvc
         subPath: nzbget/config
