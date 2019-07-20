@@ -27,8 +27,8 @@ nodes:
     hostname_override: k8s-3
     user: ubuntu
     role: [worker]
-network:
-  plugin: calico
+# network:
+#   plugin: calico
 authentication:
     strategy: x509
     sans:

@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: plexinc/pms-docker
-      tag: 1.16.2.1297-4b7ace214
+      tag: 1.16.2.1321-ad17d5f9e
     podAnnotations:
       backup.velero.io/backup-volumes: config
     kubePlex:
@@ -31,19 +31,14 @@ spec:
       loadBalancerIP: 10.20.50.155
     persistence:
       transcode:
-        enabled: false
-        claimName: pvc-smb-flexvol
-        storageClass: ""
-        subPath: plex/transcode
+        enabled: true
+        storageClass: "nfs-client"
       data:
-        enabled: false
-        claimName: pvc-smb-flexvol
-        storageClass: ""
-        subPath: plex/data
+        enabled: true
+        claimName: nfs-tank-media-pvc
+        storageClass: "nfs-client"
       config:
-        claimName: pvc-smb-flexvol
-        storageClass: ""
-        subPath: plex/config
+        storageClass: "nfs-client"
     # resources:
     #   limits:
     #     gpu.intel.com/i915: 1

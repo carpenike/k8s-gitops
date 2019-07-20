@@ -11,9 +11,9 @@ metadata:
 spec:
   releaseName: nzbget
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/nzbget
-    ref: master
+    repository: http://charts.blazure.com
+    name: nzbget
+    version: 0.1.4
   values:
     image:
       repository: linuxserver/nzbget
@@ -28,11 +28,13 @@ spec:
     persistence:
       downloads:
         enabled: true
-        existingClaim: nfs-tank-docker-pvc
+        existingClaim: smb-flexvol-pvc
         subPath: nzbget/downloads
       config:
         enabled: true
         #storageClass: "fast-disks"
+        existingClaim: smb-flexvol-pvc
+        subPath: nzbget/config
         size: 1Gi
   valueFileSecrets:
     - name: "nzbget-values"

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-tank-media-tv-pv
+  name: nfs-tank-media-pv
 spec:
   capacity:
     storage: 1Mi
@@ -9,16 +9,16 @@ spec:
     - ReadWriteMany
   claimRef:
     namespace: default
-    name: nfs-tank-media-tv-pvc
+    name: nfs-tank-media-pvc
   storageClassName: nfs-client
   nfs:
-    server: 10.20.0.20
-    path: "/mnt/tank/media/tv"
+    server: storage.holthome.net
+    path: "/mnt/tank/media"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-tank-media-tv-pvc
+  name: nfs-tank-media-pvc
 spec:
   accessModes:
     - ReadWriteMany
