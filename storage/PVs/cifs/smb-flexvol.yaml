@@ -4,7 +4,7 @@ metadata:
   name: smb-flexvol-pv
 spec:
   capacity:
-    storage: 100Gi
+    storage: 400Gi
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
@@ -14,14 +14,17 @@ spec:
   storageClassName: smb
   flexVolume:
     driver: "microsoft.com/smb"
-    #driver: "fstab/cifs"
+    #driver: "juliohm/cifs"
     secretRef:
+      #name: juliohm-smbcreds
       name: smbcreds
     options:
-      #networkPath: "//sofs.ad.holthome.net/VD-CIFS-01"
       source: "//sofs.ad.holthome.net/VD-CIFS-01"
-      #mountOptions: "vers=3.0,dir_mode=0755,file_mode=0644"
-      mountOptions: "dir_mode=0755,file_mode=0644"
+      #mountptions: "vers=3.0,dir_mode=0755,file_mode=0644"
+      mountoptions: "uid=1000,gid=1000,dir_mode=0777,file_mode=0777,noperm"
+      # server: sofs.ad.holthome.net
+      # share: VD-CIFS-01
+      # opts: sec=ntlm,vers=3.0,dir_mode=0777,dir_mode=0777
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -33,4 +36,4 @@ spec:
   storageClassName: smb
   resources:
     requests:
-      storage: 10Gi
+      storage: 400Gi

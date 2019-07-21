@@ -14,6 +14,18 @@ Access toolbox: `kubectl -n rook-ceph exec -it $(kubectl -n rook-ceph get pod -l
 
 Decode admin password: `kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath="{['data']['password']}" | base64 --decode && echo`
 
+## Fix Rook Ceph Dashboard
+
+```
+ceph dashboard ac-role-create admin-no-iscsi
+
+for scope in dashboard-settings log rgw prometheus grafana nfs-ganesha manager hosts rbd-image config-opt rbd-mirroring cephfs user osd pool monitor; do
+    ceph dashboard ac-role-add-scope-perms admin-no-iscsi ${scope} create delete read update;
+done
+
+ceph dashboard ac-user-set-roles admin admin-no-iscsi
+```
+
 ## Creating the Base Template
 
 qm create 9001 --memory 4096 --cores 4 --net0 virtio,bridge=vmbr0,tag=20

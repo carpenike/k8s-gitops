@@ -38,7 +38,8 @@ spec:
         claimName: nfs-tank-media-pvc
         storageClass: "nfs-client"
       config:
-        storageClass: "nfs-client"
+        storageClass: "rook-ceph-block"
+        size: 250Gi
     # resources:
     #   limits:
     #     gpu.intel.com/i915: 1

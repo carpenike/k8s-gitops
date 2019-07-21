@@ -1,6 +1,6 @@
 ingress:
   hosts: [nzbget.$DOMAIN]
-puid: 50000
-pgid: 50000
+puid: 1000
+pgid: 1000
 timezone: "America/New_York"
 imagePullSecrets: registrypullsecret
