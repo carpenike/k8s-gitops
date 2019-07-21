@@ -11,11 +11,11 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: influxdb
-    version: 1.1.4
+    version: 1.1.7
   values:
     image:
       repo: influxdb
-      tag: "1.7.3-alpine"
+      tag: "1.7.7-alpine"
     service:
       type: LoadBalancer
       loadBalancerIP: 10.20.50.151

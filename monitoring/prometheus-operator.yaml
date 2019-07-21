@@ -150,11 +150,11 @@ spec:
           honor_labels: true
           static_configs:
           - targets:
-            - pve-01.holthome.net:19999
+            #- pve-01.holthome.net:19999
             #- proxmox-b:19999
             #- proxmox-c:19999
-            - pi-01.holthome.net:19999
-            - pi-02.holthome.net:19999
+            #- pi-01.holthome.net:19999
+            #- pi-02.holthome.net:19999
             - k8s-master-a.holthome.net:19999
             - k8s-master-b.holthome.net:19999
             - k8s-master-c.holthome.net:19999
