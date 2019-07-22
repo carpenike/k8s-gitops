@@ -28,12 +28,11 @@ spec:
     persistence:
       downloads:
         enabled: true
-        existingClaim: smb-flexvol-pvc
+        existingClaim: nfs-perf-share-pvc
         subPath: nzbget/downloads
       config:
         enabled: true
-        existingClaim: smb-flexvol-pvc
-        subPath: nzbget/config
-        #storageClass: "fast-disks"
+        storageClass: rook-ceph-block
+        size: 1Gi
   valueFileSecrets:
     - name: "nzbget-values"

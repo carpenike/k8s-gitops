@@ -1,0 +1,19 @@
+configuration:
+  provider: azure
+  backupStorageLocation:
+    name: azure
+    bucket: velero
+    config:
+      resourceGroup: $AZURE_VELERO_RESOURCE_GROUP
+      storageAccount: $AZURE_VELERO_STORAGE_ACCOUNT
+  volumeSnapshotLocation:
+    name: azure
+    config:
+      apitimeout: 60
+credentials:
+  secretContents: |
+      AZURE_SUBSCRIPTION_ID=$AZURE_VELERO_SUBSCRIPTION_ID
+      AZURE_TENANT_ID=$AZURE_VELERO_TENANT_ID
+      AZURE_CLIENT_ID=$AZURE_VELERO_CLIENT_ID
+      AZURE_CLIENT_SECRET=$AZURE_VELERO_CLIENT_SECRET
+      AZURE_RESOURCE_GROUP=$AZURE_VELERO_RESOURCE_GROUP

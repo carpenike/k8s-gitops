@@ -34,6 +34,8 @@ kubectl create secret generic route53-api-key --from-literal=api-key="$AWS_ACCES
 kubectl create secret generic smbcreds --from-literal=username="$SMB_USERNAME" --from-literal=password="$SMB_PASSWORD" --namespace default --type="microsoft.com/smb" --dry-run -o json  > ../secrets/smbcreds-default.yaml #| kubeseal --format=yaml --cert=../pub-cert.pem
 kubectl create secret generic juliohm-smbcreds --from-literal=username="$SMB_USERNAME" --from-literal=password="$SMB_PASSWORD" --namespace default --type="juliohm/cifs" --dry-run -o json  > ../secrets/juliohm-smbcreds-default.yaml #| kubeseal --format=yaml --cert=../pub-cert.pem
 
+NS=velero kseal values-to-encrypt/velero-values.txt > ../secrets/velero-values.yaml
+
 
 ###################
 # helm chart values

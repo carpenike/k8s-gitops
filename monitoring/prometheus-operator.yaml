@@ -162,6 +162,7 @@ spec:
             - k8s-2.holthome.net:19999
             - k8s-3.holthome.net:19999
             - fw.holthome.net:19999
+            - fw.holthome.net:9100
         - job_name: 'stash-scrape'
           metrics_path: '/metrics'
           params:
