@@ -11,7 +11,7 @@ configuration:
     config:
       apitimeout: 60
 credentials:
-  secretContents: |
+  secretContents:
       AZURE_SUBSCRIPTION_ID=$AZURE_VELERO_SUBSCRIPTION_ID
       AZURE_TENANT_ID=$AZURE_VELERO_TENANT_ID
       AZURE_CLIENT_ID=$AZURE_VELERO_CLIENT_ID
