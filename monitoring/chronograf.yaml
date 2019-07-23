@@ -2,7 +2,7 @@ apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
 metadata:
   name: chronograf
-  namespace: default
+  namespace: monitoring
   annotations:
     flux.weave.works/automated: "true"
     flux.weave.works/tag.chart-image: glob:1.*-alpine
@@ -11,14 +11,14 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: chronograf
-    version: 1.0.1
+    version: 1.0.2
   values:
     image:
-      tag: "1.7-alpine"
       repo: docker.io/chronograf
+      tag: "1.7-alpine"
     persistence:
       enabled: true
-      storageClass: fast-disks
+      storageClass: rook-ceph-block
       #size: 8Gi
     ingress:
       enabled: true

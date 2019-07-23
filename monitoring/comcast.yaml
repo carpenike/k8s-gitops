@@ -3,16 +3,16 @@ apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
 metadata:
   name: comcast
-  namespace: default
+  namespace: monitoring
   annotations:
     # flux.weave.works/automated: "true"
     # flux.weave.works/tag.chart-image: glob:latest
 spec:
   releaseName: comcast
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/comcast
-    ref: master
+    repository: https://billimek.com/billimek-charts/
+    name: comcast
+    version: 1.0.4
   values:
     image:
       repository: billimek/comcastusage-for-influxdb

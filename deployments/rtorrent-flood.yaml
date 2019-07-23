@@ -12,13 +12,13 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: rtorrent-flood
-    version: 2.0.8
+    version: 3.0.1
   values:
     image:
       repository: wonderfall/rtorrent-flood
       tag: new
-    uid: 50000
-    gid: 50000
+    uid: 1000
+    gid: 1000
     guiService:
       type: ClusterIP
       port: 3000
@@ -38,7 +38,7 @@ spec:
         storageClass: rook-ceph-block
       data:
         enabled: true
-        existingClaim: nfs-tank-docker-pvc
-        subPath: docker/flood
+        existingClaim: nfs-perf-share-pvc
+        subPath: flood
   valueFileSecrets:
     - name: "rtorrent-flood-values"

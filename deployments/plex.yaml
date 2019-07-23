@@ -32,7 +32,9 @@ spec:
     persistence:
       transcode:
         enabled: true
-        storageClass: "nfs-client"
+        claimName: nfs-perf-share-pvc
+        subPath: plex/transcode
+        #storageClass: "nfs-client"
       data:
         enabled: true
         claimName: nfs-tank-media-pvc
