@@ -54,7 +54,7 @@ NS=monitoring kseal values-to-encrypt/prometheus-operator-values.txt > ../secret
 
 
 NS=monitoring kseal values-to-encrypt/influxdb-values.txt > ../secrets/influxdb-values.yaml
-kseal values-to-encrypt/chronograf-values.txt > ../secrets/chronograf-values.yaml
+NS=monitoring kseal values-to-encrypt/chronograf-values.txt > ../secrets/chronograf-values.yaml
 #kseal values-to-encrypt/prometheus-values.txt > ../secrets/prometheus-values.yaml
 
 kseal values-to-encrypt/hubot-values.txt > ../secrets/hubot-values.yaml

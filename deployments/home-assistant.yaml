@@ -5,6 +5,7 @@ metadata:
   name: hass
   namespace: default
   annotations:
+    flux.weave.works/ignore: "false"
     flux.weave.works/automated: "true"
     flux.weave.works/tag.chart-image: semver:~0
 spec:
@@ -12,11 +13,11 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: home-assistant
-    version: 0.9.3
+    version: 0.9.4
   values:
     image:
       repository: homeassistant/home-assistant
-      tag: 0.94.3
+      tag: 0.96.3
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
@@ -36,10 +37,10 @@ spec:
           ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
           ingress.kubernetes.io/auth-trust-headers: "true"
     zwave:
-      enabled: true 
+      enabled: false 
       device: ttyACM0
-    nodeSelector:
-      zwave: present
+    # nodeSelector:
+    #   zwave: present
   valueFileSecrets:
   - name: "hass-values"
 ---
@@ -56,7 +57,7 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: mysql
-    version: 1.0.0
+    version: 1.2.0
   values:
     image: "mysql"
     imageTag: "5.7.25"
