@@ -27,6 +27,8 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "traefik"
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
     vscode:
       enabled: true
       ingress:
