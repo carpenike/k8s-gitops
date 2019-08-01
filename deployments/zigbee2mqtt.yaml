@@ -10,16 +10,23 @@ metadata:
 spec:
   releaseName: zigbee2mqtt
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/zigbee2mqtt
-    ref: master
+    repository: http://charts.blazure.com
+    name: zigbee2mqtt
+    version: 0.1.3
   values:
     image:
       repository: koenkk/zigbee2mqtt
       tag: 1.4.0
-    device: ttyACM1
+    device: zigbee
     persistence:
       enabled: true
       storageClass: rook-ceph-block
-    nodeSelector:
-      zwave: present
+    virtualhere:
+      enabled: true
+      persistence:
+        enabled: true
+        storageClass: rook-ceph-block
+        accessMode: ReadWriteOnce
+        size: 1Gi
+    # nodeSelector:
+    #   zwave: present
