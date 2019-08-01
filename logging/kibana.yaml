@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://helm.elastic.co
     name: kibana
-    version: 7.1.1
+    version: 7.2.0
   values:
     # image: "docker.elastic.co/kibana/kibana"
     # imageTag: "7.1.1"
@@ -23,8 +23,8 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "traefik"
         ingress.kubernetes.io/protocol: "http"
-        ingress.kubernetes.io/auth-type: "basic"
-        ingress.kubernetes.io/auth-secret: "traefik-basic-auth-jeff"
+        # ingress.kubernetes.io/auth-type: "basic"
+        # ingress.kubernetes.io/auth-secret: "traefik-basic-auth-jeff"
     kibanaConfig:
       kibana.yml: |
         server.name: kibana

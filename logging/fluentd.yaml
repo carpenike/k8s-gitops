@@ -15,7 +15,7 @@ spec:
     version: 3.0.1
   values:
     image:
-      repository: gcr.io/fluentd-elasticsearch/fluentd
+      repository: quay.io/fluentd_elasticsearch/fluentd
       tag: v2.6.0
     elasticsearch:
       host: 'elasticsearch-master.logs'
