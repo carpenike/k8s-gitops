@@ -40,7 +40,7 @@ spec:
     grafana:
       image:
         repository: grafana/grafana
-        tag: 6.2.4
+        tag: 6.3.2
       deploymentStrategy: Recreate
       persistence:
         enabled: true
