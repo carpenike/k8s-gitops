@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: nextcloud
-      tag: 15.0-apache
+      tag: 15.0.11-rc-apache
     persistence:
       enabled: true
       existingClaim: tank-docker-pvc
