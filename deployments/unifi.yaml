@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 5.10.25
+      tag: 5.10.26
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
@@ -52,4 +52,4 @@ spec:
     podAnnotations:
       backup.velero.io/backup-volumes: unifi-data
   valueFileSecrets:
-    - name: "unifi-values"
+  - name: "unifi-values"

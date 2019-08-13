@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: netdata/netdata
-      tag: v1.15.0
+      tag: v1.16.1
     master:
       database:
         storageclass: rook-ceph-block
@@ -25,12 +25,12 @@ spec:
         storageclass: rook-ceph-block
     slave:
       tolerations:
-        - operator: Exists
+      - operator: Exists
     notifications:
       slackurl: https://hooks.slack.com/services/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
       slackrecipient: "#alerts"
     ingress:
-      hosts: 
+      hosts:
       - netdata.holthome.net
       annotations:
         kubernetes.io/ingress.class: traefik

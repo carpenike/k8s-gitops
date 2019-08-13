@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: linuxserver/nzbget
-      tag: v21.0-ls19
+      tag: '161'
     service:
       type: ClusterIP
     ingress:
@@ -35,4 +35,4 @@ spec:
         storageClass: rook-ceph-block
         size: 1Gi
   valueFileSecrets:
-    - name: "nzbget-values"
+  - name: "nzbget-values"
