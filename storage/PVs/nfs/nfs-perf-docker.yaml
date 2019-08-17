@@ -1,29 +1,29 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: nfs-perf-docker-pv
-spec:
-  capacity:
-    storage: 1Mi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  claimRef:
-    namespace: default
-    name: nfs-perf-docker-pvc
-  storageClassName: nfs-client
-  nfs:
-    server: 10.20.0.20
-    path: "/mnt/perf/docker"
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nfs-perf-docker-pvc
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: nfs-client
-  resources:
-    requests:
-      storage: 1Mi
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: nfs-perf-docker-pv
+# spec:
+#   capacity:
+#     storage: 1Mi
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   claimRef:
+#     namespace: default
+#     name: nfs-perf-docker-pvc
+#   storageClassName: nfs-client
+#   nfs:
+#     server: 10.20.0.20
+#     path: "/mnt/perf/docker"
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: nfs-perf-docker-pvc
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   storageClassName: nfs-client
+#   resources:
+#     requests:
+#       storage: 1Mi
