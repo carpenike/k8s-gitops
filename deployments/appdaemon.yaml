@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: acockburn/appdaemon
-      tag: 3.0.5
+      tag: 4.0.0b1
       pullPolicy: Always
     ingress:
       enabled: true
