@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: "docker.elastic.co/logstash/logstash-oss"
-      tag: "6.8.2"
+      tag: "6.8.3"
     persistence:
       enabled: true
       storageClass: "slow-disks"
