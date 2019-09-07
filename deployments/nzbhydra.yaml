@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: linuxserver/hydra2
-      tag: amd64-v2.6.16-ls36
+      tag: amd64-v2.6.17-ls36
     service:
       type: ClusterIP
     ingress:
