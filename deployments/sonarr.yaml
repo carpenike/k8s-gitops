@@ -10,13 +10,13 @@ metadata:
 spec:
   releaseName: sonarr
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/sonarr
-    ref: master
+    repository: http://charts.blazure.com
+    name: sonarr
+    version: 0.1.1
   values:
     image:
       repository: linuxserver/sonarr
-      tag: "amd64-2.0.0.5322-ls20"
+      tag: "amd64-2.0.0.5338-ls6"
       pullPolicy: Always
     ingress:
       enabled: true
@@ -29,12 +29,12 @@ spec:
         storageClass: rook-ceph-block
       downloads:
         enabled: true
-        existingClaim: nfs-tank-docker-pvc
+        existingClaim: nfs-perf-share-pvc
         subPath: nzbget/downloads
         accessMode: ReadWriteMany
       tv:
         enabled: true
-        existingClaim: nfs-tank-media-tv-pvc
-        accessMode: ReadWriteMany
+        existingClaim: nfs-tank-media-pvc
+        subPath: tv
   valueFileSecrets:
   - name: "sonarr-values"

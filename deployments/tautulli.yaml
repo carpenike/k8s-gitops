@@ -11,9 +11,9 @@ metadata:
 spec:
   releaseName: tautulli
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/tautulli
-    ref: master
+    repository: http://charts.blazure.com
+    name: tautulli
+    version: 0.1.0
   values:
     image:
       repository: tautulli/tautulli

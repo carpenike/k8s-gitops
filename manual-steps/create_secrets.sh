@@ -34,6 +34,8 @@ kubectl create secret generic route53-api-key --from-literal=api-key="$AWS_ACCES
 kubectl create secret generic smbcreds --from-literal=username="$SMB_USERNAME" --from-literal=password="$SMB_PASSWORD" --namespace default --type="microsoft.com/smb" --dry-run -o json  > ../secrets/smbcreds-default.yaml #| kubeseal --format=yaml --cert=../pub-cert.pem
 kubectl create secret generic juliohm-smbcreds --from-literal=username="$SMB_USERNAME" --from-literal=password="$SMB_PASSWORD" --namespace default --type="juliohm/cifs" --dry-run -o json  > ../secrets/juliohm-smbcreds-default.yaml #| kubeseal --format=yaml --cert=../pub-cert.pem
 
+NS=velero kseal values-to-encrypt/velero-values.txt > ../secrets/velero-values.yaml
+
 
 ###################
 # helm chart values
@@ -42,7 +44,7 @@ kubectl create secret generic juliohm-smbcreds --from-literal=username="$SMB_USE
 # NS=kube-system kseal values-to-encrypt/consul-values.txt > ../secrets/consul-values.yaml
 NS=kube-system kseal values-to-encrypt/traefik-values.txt > ../secrets/traefik-values.yaml
 NS=kube-system kseal values-to-encrypt/kubernetes-dashboard-values.txt > ../secrets/kubernetes-dashboard-values.yaml
-# NS=kube-system kseal values-to-encrypt/kured-values.txt > ../secrets/kured-values.yaml
+NS=kube-system kseal values-to-encrypt/kured-values.txt > ../secrets/kured-values.yaml
 NS=kube-system kseal values-to-encrypt/forwardauth-values.txt > ../secrets/forwardauth-values.yaml
 
 NS=logs kseal values-to-encrypt/kibana-values.txt > ../secrets/kibana-values.yaml
@@ -52,7 +54,7 @@ NS=monitoring kseal values-to-encrypt/prometheus-operator-values.txt > ../secret
 
 
 NS=monitoring kseal values-to-encrypt/influxdb-values.txt > ../secrets/influxdb-values.yaml
-kseal values-to-encrypt/chronograf-values.txt > ../secrets/chronograf-values.yaml
+NS=monitoring kseal values-to-encrypt/chronograf-values.txt > ../secrets/chronograf-values.yaml
 #kseal values-to-encrypt/prometheus-values.txt > ../secrets/prometheus-values.yaml
 
 kseal values-to-encrypt/hubot-values.txt > ../secrets/hubot-values.yaml

@@ -40,7 +40,7 @@ spec:
     grafana:
       image:
         repository: grafana/grafana
-        tag: 6.2.4
+        tag: 6.3.5
       deploymentStrategy: Recreate
       persistence:
         enabled: true
@@ -150,11 +150,11 @@ spec:
           honor_labels: true
           static_configs:
           - targets:
-            #- pve-01.holthome.net:19999
+            - pve-01.holthome.net:19999
             #- proxmox-b:19999
             #- proxmox-c:19999
-            #- pi-01.holthome.net:19999
-            #- pi-02.holthome.net:19999
+            - pi-01.holthome.net:19999
+            - pi-02.holthome.net:19999
             - k8s-master-a.holthome.net:19999
             - k8s-master-b.holthome.net:19999
             - k8s-master-c.holthome.net:19999
@@ -162,6 +162,7 @@ spec:
             - k8s-2.holthome.net:19999
             - k8s-3.holthome.net:19999
             - fw.holthome.net:19999
+            - fw.holthome.net:9100
         - job_name: 'stash-scrape'
           metrics_path: '/metrics'
           params:

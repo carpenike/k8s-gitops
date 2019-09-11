@@ -1,25 +1,32 @@
----
-apiVersion: flux.weave.works/v1beta1
-kind: HelmRelease
-metadata:
-  name: zigbee2mqtt
-  namespace: default
-  annotations:
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: "semver:~1"
-spec:
-  releaseName: zigbee2mqtt
-  chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/zigbee2mqtt
-    ref: master
-  values:
-    image:
-      repository: koenkk/zigbee2mqtt
-      tag: 1.4.0
-    device: ttyACM1
-    persistence:
-      enabled: true
-      storageClass: rook-ceph-block
-    nodeSelector:
-      zwave: present
+# ---
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: zigbee2mqtt
+#   namespace: default
+#   annotations:
+#     flux.weave.works/automated: "true"
+#     flux.weave.works/tag.chart-image: "semver:~1"
+# spec:
+#   releaseName: zigbee2mqtt
+#   chart:
+#     repository: http://charts.blazure.com
+#     name: zigbee2mqtt
+#     version: 0.1.23
+#   values:
+#     image:
+#       repository: koenkk/zigbee2mqtt
+#       tag: 1.5.1
+#     device: zigbee
+#     persistence:
+#       enabled: true
+#       storageClass: rook-ceph-block
+#     virtualhere:
+#       enabled: true
+#       persistence:
+#         enabled: true
+#         storageClass: rook-ceph-block
+#         accessMode: ReadWriteOnce
+#         size: 1Gi
+#     # nodeSelector:
+#     #   zwave: present

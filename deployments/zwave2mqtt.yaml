@@ -10,16 +10,17 @@
 # spec:
 #   releaseName: zwave2mqtt
 #   chart:
-#     git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-#     path: charts/zwave2mqtt
-#     ref: master
+#     repository: http://charts.blazure.com
+#     name: zwave2mqtt
+#     version: 0.1.1
 #   values:
 #     image:
 #       repository: robertslando/zwave2mqtt
 #       tag: latest
-#     device: ttyACM0
 #     persistence:
 #       enabled: true
-#       storageClass: slow-disks
+#       storageClass: rook-ceph-block
+#     ingress:
+#       enabled: true
 #   valueFileSecrets:
 #   - name: "zwave2mqtt-values"

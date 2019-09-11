@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 5.10.25
+      tag: 5.11.39
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
@@ -49,5 +49,7 @@ spec:
         metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
       loadBalancerIP: 10.20.50.153
+    podAnnotations:
+      backup.velero.io/backup-volumes: unifi-data
   valueFileSecrets:
-    - name: "unifi-values"
+  - name: "unifi-values"

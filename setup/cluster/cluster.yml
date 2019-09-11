@@ -48,7 +48,7 @@ services:
       extra_args:
         listen-metrics-urls: http://0.0.0.0:2379
 cluster_name: k8s
-kubernetes_version: v1.14.1-rancher1-2
+kubernetes_version: v1.14.3-rancher1-1
 ingress:
     provider: none
 

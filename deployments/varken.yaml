@@ -1,0 +1,30 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: varken
+  namespace: default
+  annotations:
+    release: "varken"
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: "glob:1.*.*"
+spec:
+  releaseName: varken
+  chart:
+    repository: http://charts.blazure.com
+    name: varken
+    version: 0.1.1
+  values:
+    image:
+      repository: boerderij/varken
+      tag: 1.7.3-arm
+    varken:
+      env:
+        TZ: "America/New_York"
+        PUID: 1000
+        PGID: 1000
+    persistence:
+      config:
+        enabled: true
+        storageClass: rook-ceph-block
+        size: 5Gi

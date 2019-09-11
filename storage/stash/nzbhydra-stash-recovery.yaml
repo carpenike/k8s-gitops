@@ -1,0 +1,21 @@
+# apiVersion: stash.appscode.com/v1alpha1
+# kind: Recovery
+# metadata:
+#   name: stash-nzbhydra
+#   namespace: default
+# spec:
+#   repository:
+#     name: deployment.nzbhydra
+#     namespace: default
+#   snapshot: deployment.nzbhydra-6478832d
+#   backend:
+#     azure:
+#       container: backups
+#       prefix: stash
+#     storageSecretName: azure-secret
+#   paths:
+#     - /config
+#   recoveredVolumes:
+#     - mountPath: /config
+#       persistentVolumeClaim:
+#         claimName: nzbhydra-config

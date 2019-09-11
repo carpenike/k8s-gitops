@@ -10,13 +10,13 @@ metadata:
 spec:
   releaseName: radarr
   chart:
-    git: git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-helm
-    path: charts/radarr
-    ref: master
+    repository: http://charts.blazure.com
+    name: radarr
+    version: 0.1.3
   values:
     image:
       repository: linuxserver/radarr
-      tag: 2.0.0.1359-kkgahlfs-ls7
+      tag: 2.0.0.1404-ls14
       pullPolicy: Always
     ingress:
       enabled: true
@@ -30,12 +30,11 @@ spec:
         size: 5Gi
       downloads:
         enabled: true
-        existingClaim: nfs-tank-docker-pvc
+        existingClaim: nfs-perf-share-pvc
         subPath: nzbget/downloads
-        accessMode: ReadWriteMany
       movies:
         enabled: true
-        existingClaim: nfs-tank-media-movies-pvc
-        accessMode: ReadWriteMany
+        existingClaim: nfs-tank-media-pvc
+        subPath: movies
   valueFileSecrets:
   - name: "radarr-values"

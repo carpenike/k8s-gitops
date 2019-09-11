@@ -1,39 +1,39 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: smb-flexvol-pv
-spec:
-  capacity:
-    storage: 400Gi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  claimRef:
-    namespace: default
-    name: smb-flexvol-pvc
-  storageClassName: smb
-  flexVolume:
-    driver: "microsoft.com/smb"
-    #driver: "juliohm/cifs"
-    secretRef:
-      #name: juliohm-smbcreds
-      name: smbcreds
-    options:
-      source: "//sofs.ad.holthome.net/VD-CIFS-01"
-      #mountptions: "vers=3.0,dir_mode=0755,file_mode=0644"
-      mountoptions: "uid=1000,gid=1000,dir_mode=0777,file_mode=0777,noperm"
-      # server: sofs.ad.holthome.net
-      # share: VD-CIFS-01
-      # opts: sec=ntlm,vers=3.0,dir_mode=0777,dir_mode=0777
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: smb-flexvol-pvc
-spec:
-  accessModes:
-  - ReadWriteMany
-  storageClassName: smb
-  resources:
-    requests:
-      storage: 400Gi
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: smb-flexvol-pv
+# spec:
+#   capacity:
+#     storage: 400Gi
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   claimRef:
+#     namespace: default
+#     name: smb-flexvol-pvc
+#   storageClassName: smb
+#   flexVolume:
+#     driver: "microsoft.com/smb"
+#     #driver: "juliohm/cifs"
+#     secretRef:
+#       #name: juliohm-smbcreds
+#       name: smbcreds
+#     options:
+#       source: "//sofs.ad.holthome.net/VD-CIFS-01"
+#       #mountptions: "vers=3.0,dir_mode=0755,file_mode=0644"
+#       mountoptions: "uid=1000,gid=1000,dir_mode=0777,file_mode=0777,noperm"
+#       # server: sofs.ad.holthome.net
+#       # share: VD-CIFS-01
+#       # opts: sec=ntlm,vers=3.0,dir_mode=0777,dir_mode=0777
+# ---
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#   name: smb-flexvol-pvc
+# spec:
+#   accessModes:
+#   - ReadWriteMany
+#   storageClassName: smb
+#   resources:
+#     requests:
+#       storage: 400Gi
