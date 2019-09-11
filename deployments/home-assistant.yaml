@@ -13,7 +13,7 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: home-assistant
-    version: 0.9.4
+    version: 0.9.6
   values:
     image:
       repository: homeassistant/home-assistant
@@ -31,6 +31,9 @@ spec:
       backup.velero.io/backup-volumes: config
     vscode:
       enabled: true
+      image:
+        repository: codercom/code-server
+        tag: 2.preview.11-vsc1.37.0
       ingress:
         enabled: true
         annotations:
@@ -38,9 +41,9 @@ spec:
           ingress.kubernetes.io/auth-type: "forward"
           ingress.kubernetes.io/auth-url: "http://auth0-forwardauth.kube-system.svc.cluster.local/authorize"
           ingress.kubernetes.io/auth-trust-headers: "true"
-    zwave:
-      enabled: false
-      device: ttyACM0
+    #zwave:
+    #  enabled: false
+    #  device: ttyACM0
     # nodeSelector:
     #   zwave: present
   valueFileSecrets:
