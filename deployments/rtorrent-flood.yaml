@@ -1,45 +1,45 @@
-# ---
-# apiVersion: flux.weave.works/v1beta1
-# kind: HelmRelease
-# metadata:
-#   name: rtorrent-flood
-#   namespace: default
-#   annotations:
-#     flux.weave.works/ignore: "false"
-#     flux.weave.works/automated: "false"
-#     flux.weave.works/tag.chart-image: glob:0.9.*
-# spec:
-#   releaseName: rtorrent-flood
-#   chart:
-#     repository: https://billimek.com/billimek-charts/
-#     name: rtorrent-flood
-#     version: 3.0.1
-#   values:
-#     image:
-#       repository: wonderfall/rtorrent-flood
-#       tag: new
-#     uid: 1000
-#     gid: 1000
-#     guiService:
-#       type: ClusterIP
-#       port: 3000
-#     btService:
-#       type: LoadBalancer
-#       port: 49184
-#       loadBalancerIP: 10.20.50.154
-#     ingress:
-#       enabled: true
-#       annotations:
-#         kubernetes.io/ingress.class: "traefik"
-#     persistence:
-#       config:
-#         enabled: true
-#         accessMode: ReadWriteOnce
-#         size: 1Gi
-#         storageClass: rook-ceph-block
-#       data:
-#         enabled: true
-#         existingClaim: nfs-perf-share-pvc
-#         subPath: flood
-#   valueFileSecrets:
-#     - name: "rtorrent-flood-values"
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: rtorrent-flood
+  namespace: default
+  annotations:
+    flux.weave.works/ignore: "false"
+    flux.weave.works/automated: "false"
+    flux.weave.works/tag.chart-image: glob:0.9.*
+spec:
+  releaseName: rtorrent-flood
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: rtorrent-flood
+    version: 3.0.1
+  values:
+    image:
+      repository: themetabay/flood
+      tag: latest
+    uid: 1000
+    gid: 1000
+    guiService:
+      type: ClusterIP
+      port: 3000
+    btService:
+      type: LoadBalancer
+      port: 49184
+      loadBalancerIP: 10.20.50.154
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    persistence:
+      config:
+        enabled: true
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: rook-ceph-block
+      data:
+        enabled: true
+        existingClaim: nfs-perf-share-pvc
+        subPath: flood
+  valueFileSecrets:
+    - name: "rtorrent-flood-values"
