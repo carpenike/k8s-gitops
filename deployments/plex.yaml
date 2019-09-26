@@ -42,6 +42,8 @@ spec:
       config:
         storageClass: "rook-ceph-block"
         size: 250Gi
+    nodeSelector:
+      gpu: true
     # resources:
     #   limits:
     #     gpu.intel.com/i915: 1
