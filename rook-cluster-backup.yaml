@@ -1,0 +1,61 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  annotations:
+    fluxcd.io/sync-checksum: 48033adf1f61a064862687817ced78d3dec92818
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"CephCluster","metadata":{"annotations":{"fluxcd.io/sync-checksum":"48033adf1f61a064862687817ced78d3dec92818"},"labels":{"fluxcd.io/sync-gc-mark":"sha256.6UhLqHfoDTY5XAMRB8GKGzb-zBEG6ELozVFwZyZcN7c"},"name":"rook-ceph","namespace":"rook-ceph"},"spec":{"annotations":null,"cephVersion":{"allowUnsupported":false,"image":"ceph/ceph:v14.2.1-20190430"},"dashboard":{"enabled":true,"ssl":false},"dataDirHostPath":"/var/lib/rook","mon":{"allowMultiplePerNode":false,"count":3},"network":{"hostNetwork":false},"placement":{"osd":{"nodeAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"node-role.kubernetes.io/controlplane","operator":"In","values":["true"]}]}]}},"tolerations":[{"operator":"Exists"}]}},"rbdMirroring":{"workers":0},"resources":null,"storage":{"config":null,"deviceFilter":null,"location":null,"useAllDevices":true,"useAllNodes":true}}}
+  creationTimestamp: "2019-09-27T01:26:30Z"
+  finalizers:
+  - cephcluster.ceph.rook.io
+  generation: 34
+  labels:
+    fluxcd.io/sync-gc-mark: sha256.6UhLqHfoDTY5XAMRB8GKGzb-zBEG6ELozVFwZyZcN7c
+  name: rook-ceph
+  namespace: rook-ceph
+  resourceVersion: "24457781"
+  selfLink: /apis/ceph.rook.io/v1/namespaces/rook-ceph/cephclusters/rook-ceph
+  uid: d55ac2a0-e0c5-11e9-8a38-00155d12a147
+spec:
+  cephVersion:
+    image: ceph/ceph:v14.2.1-20190430
+  dashboard:
+    enabled: true
+    ssl: false
+  dataDirHostPath: /var/lib/rook
+  mon:
+    allowMultiplePerNode: false
+    count: 3
+    preferredCount: 0
+  network:
+    hostNetwork: false
+  placement:
+    osd:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/controlplane
+              operator: In
+              values:
+              - "true"
+      tolerations:
+      - operator: Exists
+  rbdMirroring:
+    workers: 0
+  storage:
+    config: null
+    useAllDevices: true
+    useAllNodes: true
+status:
+  ceph:
+    details:
+      MON_DISK_LOW:
+        message: mon a is low on available space
+        severity: HEALTH_WARN
+      PG_AVAILABILITY:
+        message: 'Reduced data availability: 100 pgs inactive'
+        severity: HEALTH_WARN
+    health: HEALTH_WARN
+    lastChecked: "2019-09-27T03:59:58Z"
+  state: Created
