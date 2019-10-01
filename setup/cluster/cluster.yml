@@ -34,7 +34,7 @@ authentication:
     sans:
       - "10.20.200.50"
       - "lb-ha"
-ssh_key_path: /home/ryan/.ssh/id_rsa_macos
+        #ssh_key_path: /home/ryan/.ssh/id_rsa_macos
 #ssh_agent_auth: true
 services:
   kubelet:
@@ -48,6 +48,6 @@ services:
       extra_args:
         listen-metrics-urls: http://0.0.0.0:2379
 cluster_name: k8s
-kubernetes_version: v1.14.6-rancher1-1
+kubernetes_version: v1.15.2-rancher1-1
 ingress:
     provider: none
