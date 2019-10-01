@@ -1,9 +1,9 @@
 # Distribute Files to HV Host
 $vmPath = "C:\users\ryan\scratch\VM"
 $vhdx = "$($vmPath)\k8s-template.vhdx"
-$destinationPath = "\\hv02\c$\clusterstorage\VD-VM-01"
+$destinationPath = "\\hv01.ad.holthome.net\c$\clusterstorage\VD-VM-01"
 $clean = $false
-$vmHost = "HV02"
+$vmHost = "HV01"
 
 $VMs = Import-Csv -Path $PSScriptRoot\vmInventory.csv -Delimiter "|"
 

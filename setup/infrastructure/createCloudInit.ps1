@@ -8,7 +8,7 @@ $VMs = Import-Csv -Path $PSScriptRoot\vmInventory.csv -Delimiter "|"
 $oscdimgPath = "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\oscdimg.exe"
 $vmPath = "C:\users\ryan\scratch\VM"
 $imageCachePath = "C:\users\ryan\scratch"
-$destinationPath = "\\hv01\c$\ClusterStorage\VD-VM-01"
+$destinationPath = "\\hv01.ad.holthome.net\c$\ClusterStorage\VD-VM-01"
 
 foreach ($VM in $VMs) {
   $cloudInitISO = "$($vmPath)\$($VM.Name)-cloudinit.iso"
@@ -35,7 +35,6 @@ foreach ($VM in $VMs) {
       - ceph-common
       - gdisk
       - iperf
-      - qemu-guest-agent
       - nfs-common
       - linux-image-extra-virtual
       - docker.io
