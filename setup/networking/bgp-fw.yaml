@@ -1,7 +1,7 @@
-apiVersion: projectcalico.org/v3
-kind: BGPPeer
-metadata:
-  name: bgppeer-global-2001
-spec:
-  peerIP: 10.20.0.1 
-  asNumber: 64512 
+# apiVersion: projectcalico.org/v3
+# kind: BGPPeer
+# metadata:
+#   name: bgppeer-global-2001
+# spec:
+#   peerIP: 10.20.0.1 
+#   asNumber: 64512 
