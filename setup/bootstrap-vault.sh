@@ -174,7 +174,7 @@ loadSecretsToVault() {
 #   kvault "default/rabbitmq/rabbitmq-helm-values.txt"
 #   kvault "default/radarr/radarr-helm-values.txt"
 #   kvault "default/rtorrent-flood/rtorrent-flood-helm-values.txt"
-#   kvault "default/sonarr/sonarr-helm-values.txt"
+  kvault "default/sonarr/sonarr-helm-values.txt"
 #   kvault "default/unifi/unifi-helm-values.txt"
   kvault "velero/velero/velero-helm-values.txt"
 }
