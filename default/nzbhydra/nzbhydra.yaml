@@ -13,11 +13,13 @@ spec:
   chart:
     repository: http://charts.blazure.com
     name: nzbhydra
-    version: 0.1.0
+    version: 0.1.2
   values:
     image:
       repository: linuxserver/hydra2
       tag: v2.6.18-ls38
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
     service:
       type: ClusterIP
     ingress:
