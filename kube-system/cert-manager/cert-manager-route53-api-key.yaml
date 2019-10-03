@@ -1,0 +1,11 @@
+  
+apiVersion: ricoberger.de/v1alpha1
+kind: VaultSecret
+metadata:
+  name: route53-api-key
+  namespace: kube-system
+spec:
+  keys:
+    - api-key
+  path: secrets/kube-system/route53-api-key
+  type: Opaque

@@ -1,0 +1,51 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: plex
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+\.[0-9]+-.*)$'
+spec:
+  releaseName: plex
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: kube-plex
+    version: 0.2.4
+  values:
+    image:
+      repository: plexinc/pms-docker
+      tag: 1.17.0.1841-d42cfa161
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    kubePlex:
+      enabled: false
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    timezone: "America/New_York"
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 10.20.50.155
+    persistence:
+      transcode:
+        enabled: true
+        claimName: nfs-tank-share-pvc
+        subPath: plex/transcode
+      data:
+        enabled: true
+        claimName: nfs-tank-media-pvc
+      config:
+        storageClass: "rook-ceph-block"
+        size: 250Gi
+    nodeSelector:
+      gpu: "true"
+    #resources:
+    #   limits:
+    #     gpu.intel.com/i915: 1
+      # requests:
+      #  gpu.intel.com/i915: 1
+  valueFileSecrets:
+  - name: "plex-helm-values"

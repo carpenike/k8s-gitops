@@ -1,0 +1,59 @@
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: grafana
+#   namespace: default
+#   annotations:
+#     flux.weave.works/automated: "true"
+#     flux.weave.works/tag.chart-image: glob:master
+# spec:
+#   releaseName: grafana
+#   chart:
+#     repository: https://kubernetes-charts.storage.googleapis.com/
+#     name: grafana
+#     version: 1.21.3
+#   values:
+#     image:
+#       repository: grafana/grafana
+#       tag: master
+#     chownDataImage:
+#       repository: busybox
+#       tag: 1.30.0
+#     securityContext:
+#       runAsUser: 0
+#       fsGroup: 0
+#     persistence:
+#       enabled: true
+#       storageClassName: "slow-disks"
+#       accessModes:
+#         - ReadWriteOnce
+#       size: 10Gi
+#     env:
+#       GF_EXPLORE_ENABLED: true
+#     ingress:
+#       enabled: true
+#       annotations:
+#         kubernetes.io/ingress.class: "traefik"
+#     datasources:
+#       datasources.yaml:
+#         apiVersion: 1
+#         datasources:
+#           - name: Prometheus
+#             type: prometheus
+#             url: http://prometheus-server
+#             access: proxy
+#             isDefault: true
+#     grafana.ini:
+#       paths:
+#         data: /var/lib/grafana/data
+#         logs: /var/log/grafana
+#         plugins: /var/lib/grafana/plugins
+#         provisioning: /etc/grafana/provisioning
+#       analytics:
+#         check_for_updates: true
+#       log:
+#         mode: console
+#       grafana_net:
+#         url: https://grafana.net
+#   valueFileSecrets:
+#     - name: "grafana-values"

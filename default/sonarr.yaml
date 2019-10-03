@@ -1,0 +1,40 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: sonarr
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: "glob:amd64-2.*.*.*"
+spec:
+  releaseName: sonarr
+  chart:
+    repository: http://charts.blazure.com
+    name: sonarr
+    version: 0.1.1
+  values:
+    image:
+      repository: linuxserver/sonarr
+      tag: "amd64-2.0.0.5338-ls35"
+      pullPolicy: Always
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+    timezone: "America/New_York"
+    persistence:
+      config:
+        enabled: true
+        storageClass: rook-ceph-block
+      downloads:
+        enabled: true
+        existingClaim: nfs-perf-share-pvc
+        subPath: nzbget/downloads
+        accessMode: ReadWriteMany
+      tv:
+        enabled: true
+        existingClaim: nfs-tank-media-pvc
+        subPath: tv
+  valueFileSecrets:
+  - name: "sonarr-values"

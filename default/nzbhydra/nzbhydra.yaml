@@ -1,0 +1,42 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: nzbhydra
+  namespace: default
+  annotations:
+    release: "nzbhydra"
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: "glob:amd64-v2.*.*-*"
+spec:
+  releaseName: nzbhydra
+  chart:
+    repository: http://charts.blazure.com
+    name: nzbhydra
+    version: 0.1.0
+  values:
+    image:
+      repository: linuxserver/hydra2
+      tag: v2.6.18-ls38
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    timezone: "America/New_York"
+    persistence:
+      downloads:
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        subPath: nzbget/downloads
+      config:
+        enabled: true
+        storageClass: rook-ceph-block
+        size: 5Gi
+    nzbhydra:
+      env:
+        PUID: 1001
+        PGID: 1001
+  valueFileSecrets:
+  - name: "nzbhydra-helm-values"

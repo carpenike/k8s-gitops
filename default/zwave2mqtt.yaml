@@ -1,0 +1,26 @@
+# ---
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: zwave2mqtt
+#   namespace: default
+#   annotations:
+#     flux.weave.works/automated: "true"
+#     flux.weave.works/tag.chart-image: "semver:~1"
+# spec:
+#   releaseName: zwave2mqtt
+#   chart:
+#     repository: http://charts.blazure.com
+#     name: zwave2mqtt
+#     version: 0.1.1
+#   values:
+#     image:
+#       repository: robertslando/zwave2mqtt
+#       tag: latest
+#     persistence:
+#       enabled: true
+#       storageClass: rook-ceph-block
+#     ingress:
+#       enabled: true
+#   valueFileSecrets:
+#   - name: "zwave2mqtt-values"

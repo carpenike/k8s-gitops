@@ -1,0 +1,28 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: minio
+  namespace: default
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: glob:RELEASE.*
+spec:
+  releaseName: minio
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: minio
+    version: 2.5.11
+  values:
+    image:
+      repository: minio/minio
+      tag: RELEASE.2019-09-26T19-42-35Z
+    persistence:
+      existingClaim: "nfs-tank-share-pvc"
+      subPath: "minio"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+  valueFileSecrets:
+  - name: "minio-helm-values"

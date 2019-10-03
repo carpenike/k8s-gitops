@@ -10,11 +10,12 @@ spec:
       name: letsencrypt-prod
     dns01:
       providers:
-        - name: cf-dns
-          cloudflare:
-            email: $EMAIL
-            apiKeySecretRef:
-              name: cloudflare-api-key
+        - name: route53
+          route53:
+            region: us-east-1
+            accessKeyID: $AWS_ACCESS_KEY_ID
+            secretAccessKeySecretRef:
+              name: route53-api-key
               key: api-key
 ---
 apiVersion: certmanager.k8s.io/v1alpha1
@@ -33,7 +34,7 @@ spec:
   acme:
     config:
     - dns01:
-        provider: cf-dns
+        provider: route53
       domains:
       - $DOMAIN
       - '*.$DOMAIN'
