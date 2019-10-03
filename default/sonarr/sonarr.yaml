@@ -36,5 +36,7 @@ spec:
         enabled: true
         existingClaim: nfs-tank-media-pvc
         subPath: tv
+    puid: 1000
+    pgid: 1000
   valueFileSecrets:
   - name: "sonarr-helm-values"

@@ -36,7 +36,7 @@ spec:
         size: 5Gi
     nzbhydra:
       env:
-        PUID: 1001
-        PGID: 1001
+        PUID: 1000
+        PGID: 1000
   valueFileSecrets:
   - name: "nzbhydra-helm-values"

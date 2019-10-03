@@ -35,5 +35,7 @@ spec:
         enabled: true
         storageClass: rook-ceph-block
         size: 1Gi
+    puid: 1000
+    pgid: 1000
   valueFileSecrets:
   - name: "nzbget-helm-values"
