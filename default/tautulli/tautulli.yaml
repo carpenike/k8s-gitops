@@ -27,10 +27,10 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "traefik"
+        kubernetes.io/ingress.class: "nginx"
     persistence:
       enabled: true
       storageClass: rook-ceph-block
       size: 5Gi
   valueFileSecrets:
-    - name: "tautulli-values"
+    - name: "tautulli-helm-values"
