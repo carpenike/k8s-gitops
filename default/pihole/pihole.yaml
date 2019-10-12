@@ -20,6 +20,10 @@ spec:
     image:
       repository: pihole/pihole
       tag: 4.3.2-1
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
     replicaCount: 2
     DNS1: 10.20.0.1
     DNS2: 10.20.0.1
@@ -42,7 +46,7 @@ spec:
         metallb.universe.tf/allow-shared-ip: pihole-svc
     persistentVolumeClaim:
       enabled: true
-      existingClaim: "nfs-tank-share"
+      existingClaim: "nfs-tank-share-pvc"
       subPath: "pihole"
   valueFileSecrets:
   - name: "pihole-helm-values"

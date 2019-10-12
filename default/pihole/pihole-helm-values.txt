@@ -1,3 +1,8 @@
+ingress:
+  hosts: [pihole.$DOMAIN]
+  tls:
+  - hosts:
+    - pihole.$DOMAIN
 adminPassword: "$PIHOLE_ADMIN_PASSWORD"
 extraEnvVars:
   TZ: "UTC"
