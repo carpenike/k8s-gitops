@@ -28,23 +28,27 @@ spec:
     spec:
       containers:
         - name: fluxcloud
-          image: justinbarrick/fluxcloud:v0.3.4
+          image: justinbarrick/fluxcloud:v0.3.8
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3032
           env:
-            - name: SLACK_URL
-              value: "https://hooks.slack.com/services/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"
-            - name: SLACK_CHANNEL
-              value: "#flux"
-            # Or configure multiple channels
-            # (comma separated <channel>=<namespace>) string:
-            #  value: "#kubernetes=*,#team=team"
-            - name: SLACK_USERNAME
-              value: Flux Deployer
-            - name: SLACK_ICON_EMOJI
-              value: ":heart:"
-            - name: GITHUB_URL
-              value: "https://dev.azure.com/ryholt/HomeAutomation/_git/k8s-gitops"
-            - name: LISTEN_ADDRESS
-              value: ":3032"
+          - name: SLACK_URL
+            valueFrom:
+              secretKeyRef:
+                name: fluxcloud
+                key: slack_url
+          - name: SLACK_CHANNEL
+            value: "#flux"
+          # Or configure multiple channels
+          # (comma separated <channel>=<namespace>) string:
+          #  value: "#kubernetes=*,#team=team"
+          - name: SLACK_USERNAME
+            value: Flux Deployer
+          - name: SLACK_ICON_EMOJI
+            value: ":heart:"
+          - name: GITHUB_URL
+            value: "https://dev.azure.com/ryholt/HomeAutomation/_git/k8s-gitops"
+          - name: LISTEN_ADDRESS
+            value: ":3032"
+            

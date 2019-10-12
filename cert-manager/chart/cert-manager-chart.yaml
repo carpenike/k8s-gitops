@@ -1,21 +1,23 @@
 ---
-apiVersion: flux.weave.works/v1beta1
+apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: cert-manager
-  namespace: kube-system
+  namespace: cert-manager
   annotations:
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: semver:~v0.
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~v0.
 spec:
   releaseName: cert-manager
+  rollback:
+    enable: false
   chart:
     repository: https://charts.jetstack.io/
     name: cert-manager
-    version: v0.10.1
+    version: v0.11.0
   values:
     webhook:
-      enabled: false
+      enabled: true
     extraArgs:
     - --dns01-recursive-nameservers=1.1.1.1:53
     - --dns01-recursive-nameservers-only
