@@ -111,11 +111,11 @@ loginVault() {
 
 setupVaultSecretsOperator() {
   message "configuring vault for vault-secrets-operator"
-  vault secrets enable -path=secrets -version=1 kv
+  vault secrets enable -path=secrets -version=2 kv
 
   # create read-only policy for kubernetes
   cat <<EOF | vault policy write vault-secrets-operator -
-  path "secrets/*" {
+  path "secrets/data/*" {
     capabilities = ["read"]
   }
 EOF
@@ -168,6 +168,7 @@ loadSecretsToVault() {
 #   kvault "default/nextcloud/nextcloud-helm-values.txt"
 #   kvault "default/node-red/node-red-helm-values.txt"
   kvault "default/nzbget/nzbget-helm-values.txt"
+  kvault "default/pihole/pihole-helm-values.txt"
   kvault "default/nzbhydra/nzbhydra-helm-values.txt"
 #   # kvault "default/pihole/pihole-helm-values.txt"
   kvault "default/plex/plex-helm-values.txt"

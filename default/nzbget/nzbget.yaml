@@ -1,23 +1,24 @@
 ---
-apiVersion: flux.weave.works/v1beta1
+apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: nzbget
   namespace: default
   annotations:
-    release: "nzbget"
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: "regexp:^([0-9][0-9][0-9]+)$"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: 'regexp:^(v[0-9]+\.[0-9]+-ls.*)$'
 spec:
   releaseName: nzbget
+  rollback:
+    enable: true
   chart:
     repository: https://billimek.com/billimek-charts/
     name: nzbget
-    version: 2.0.7
+    version: 2.0.8
   values:
     image:
       repository: linuxserver/nzbget
-      tag: v21.0-ls28
+      tag: v21.0-ls29
     service:
       type: LoadBalancer
       loadBalancerIP: 10.20.50.156
