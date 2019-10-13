@@ -1,0 +1,10 @@
+apiVersion: ricoberger.de/v1alpha1
+kind: VaultSecret
+metadata:
+  name: gitea-helm-values
+  namespace: default
+spec:
+  keys:
+    - values.yaml
+  path: secrets/default/gitea/gitea-helm-values
+  type: Opaque
