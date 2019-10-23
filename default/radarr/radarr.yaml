@@ -9,6 +9,8 @@ metadata:
     flux.weave.works/tag.chart-image: 'glob:amd64-v0.*.*.*'
 spec:
   releaseName: radarr
+  rollback:
+    enable: true
   chart:
     repository: https://billimek.com/billimek-charts/
     name: radarr
@@ -16,7 +18,7 @@ spec:
   values:
     image:
       repository: linuxserver/radarr
-      tag: 'amd64-v0.2.0.1358-ls36'
+      tag: 'amd64-v0.2.0.1358-ls39'
       pullPolicy: Always
     podAnnotations:
       backup.velero.io/backup-volumes: config
