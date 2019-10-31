@@ -40,7 +40,7 @@ spec:
       config:
         enabled: true
         size: 1Gi
-        storageClass: nfs-client
+        storageClass: rook-ceph-block
       data:
         enabled: true
         existingClaim: nfs-tank-share-pvc
