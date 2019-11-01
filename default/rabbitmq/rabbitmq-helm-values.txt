@@ -1,0 +1,59 @@
+ingress:
+  hostName: rabbitmq.$DOMAIN
+managementPassword: $RABBITMQ_PASSWORD
+rabbitmqUsername: admin
+rabbitmqPassword: $RABBITMQ_PASSWORD
+rabbitmqMQTTPlugin:
+  config: |
+    mqtt.default_user     = admin
+    mqtt.default_pass     = $RABBITMQ_PASSWORD
+    mqtt.allow_anonymous  = true
+    mqtt.subscription_ttl = 86400000
+    mqtt.listeners.tcp.default = 1883
+    mqtt.listeners.ssl.default = 8883
+    ssl_options.cacertfile = /etc/cert/cacert.pem
+    ssl_options.certfile = /etc/cert/cert.pem
+    ssl_options.keyfile = /etc/cert/key.pem
+    ssl_options.verify = verify_peer
+definitions:
+  users: |-
+    {
+      "name": "mqtt",
+      "password": "$RABBITMQ_MQTT_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "homeassistant",
+      "password": "$RABBITMQ_HOMEASSISTANT_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "piz",
+      "password": "$RABBITMQ_PIZ_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "zigbee",
+      "password": "$RABBITMQ_ZIGBEE_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "sonoff",
+      "password": "$RABBITMQ_SONOFF_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "node-red",
+      "password": "$RABBITMQ_NODE_RED_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "ryan",
+      "password": "$RABBITMQ_RYAN_USER_PASSWORD",
+      "tags": "mqtt"
+    },
+    {
+      "name": "stefanie",
+      "password": "$RABBITMQ_STEFANIE_USER_PASSWORD",
+      "tags": "mqtt"
+    }

@@ -1,22 +1,23 @@
 ---
-apiVersion: flux.weave.works/v1beta1
+apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: rabbitmq
+  name: rabbitmq-ha
   namespace: default
   annotations:
-    flux.weave.works/automated: "false"
-    flux.weave.works/tag.chart-image: 'regexp:^(3\.[0-9]+\.[0-9]+-alpine)$'
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: 'regexp:^(3\.[0-9]+\.[0-9]+-alpine)$'
 spec:
-  releaseName: rabbitmq
+  releaseName: rabbitmq-ha
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: rabbitmq-ha
-    version: 1.25.0
+    version: 1.34.1
   values:
     image:
       repository: rabbitmq
-      tag: 3.7.15-alpine
+      tag: 3.7.20-alpine
     rabbitmqMQTTPlugin:
       enabled: true
     rabbitmqWebMQTTPlugin:
@@ -39,8 +40,19 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "traefik"
+        kubernetes.io/ingress.class: "nginx"
     rabbitmqErlangCookie: "w6wnR9PNxskikfzIyVQjsnOUwwFS3Wj3JXcRVu5PS1IviZi3kjH38bHKGpovhk59xKO2aSyzyS5zseeWIbFvpgUiVe7gVKD5ZtVYmLSS62xt95YoyLHU0n6cZHBxZe7Od1vt4JhUS1hXx1PuyTBBnxEoCAHP5Mv6ZuN2UlntzIBFXWVyjD5niMmkQ7pPeUEPjycvbOkREKHapfWMJpQ3yGV4RNky3tpfUEK6tlmSXxd3R1DFX3dznOCZNS"
+    forceBoot:
+      enabled: true
+    tolerations:
+    - key: "arm"
+      operator: "Exists"
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 512Mi
     definitions:
       permissions: |-
         {
@@ -122,4 +134,4 @@ spec:
           }
         } 
   valueFileSecrets:
-    - name: "rabbitmq-values"
+    - name: "rabbitmq-helm-values"
