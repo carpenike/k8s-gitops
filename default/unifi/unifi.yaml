@@ -1,22 +1,25 @@
 ---
-apiVersion: flux.weave.works/v1beta1
+apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: unifi
   namespace: default
   annotations:
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: 'regexp:^(5\.[0-9][0-9]\.[0-9]+)$'
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: 'regexp:^(5\.[0-9][0-9]\.[0-9]+)$'
 spec:
   releaseName: unifi
+  rollback:
+    enable: true
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: unifi
-    version: 0.4.2
+    version: 0.5.1
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 5.11.46
+      tag: 5.12.22
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
@@ -27,7 +30,8 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "traefik"
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     guiService:
       annotations:
         metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
@@ -51,5 +55,11 @@ spec:
       loadBalancerIP: 10.20.50.153
     podAnnotations:
       backup.velero.io/backup-volumes: unifi-data
+      resources:
+      requests:
+        memory: 500Mi
+        cpu: 15m
+      limits:
+        memory: 750Mi
   valueFileSecrets:
-  - name: "unifi-values"
+  - name: "unifi-helm-values"

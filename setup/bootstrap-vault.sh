@@ -155,6 +155,7 @@ loadSecretsToVault() {
   # helm chart values
   ####################
 #   kvault "kube-system/kured/kured-helm-values.txt"
+  kvault "kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
 #   kvault "logs/kibana/kibana-helm-values.txt"
 #   kvault "monitoring/chronograf/chronograf-helm-values.txt"
 #   kvault "monitoring/comcast/comcast-helm-values.txt"
@@ -162,8 +163,8 @@ loadSecretsToVault() {
   kvault "monitoring/botkube/botkube-helm-values.txt"
 #   kvault "monitoring/uptimerobot/uptimerobot-helm-values.txt"
 #   kvault "default/frigate/frigate-helm-values.txt"
-#   kvault "default/home-assistant/home-assistant-helm-values.txt"
-#   kvault "default/home-assistant/hass-postgresql-helm-values.txt"
+  kvault "default/home-assistant/home-assistant-helm-values.txt"
+  kvault "default/home-assistant/postgresql-helm-values.txt"
 #   kvault "default/hubot/hubot-helm-values.txt"
   kvault "default/minio/minio-helm-values.txt"
 #   kvault "default/nextcloud/nextcloud-helm-values.txt"
@@ -177,7 +178,7 @@ loadSecretsToVault() {
   kvault "default/rtorrent-flood/rtorrent-flood-helm-values.txt"
   kvault "default/sonarr/sonarr-helm-values.txt"
   kvault "default/tautulli/tautulli-helm-values.txt"
-#   kvault "default/unifi/unifi-helm-values.txt"
+  kvault "default/unifi/unifi-helm-values.txt"
   kvault "default/qbittorrent/qbittorrent-helm-values.txt"
   kvault "velero/velero/velero-helm-values.txt"
   kvault "default/gitea/gitea-helm-values.txt"
