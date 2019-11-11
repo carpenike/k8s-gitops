@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: plexinc/pms-docker
-      tag: 1.18.0.1944-f2cae8d6b
+      tag: 1.18.1.1973-0f4abfbcc
     podAnnotations:
       backup.velero.io/backup-volumes: config
     kubePlex:
@@ -45,10 +45,12 @@ spec:
         size: 250Gi
     nodeSelector:
       gpu: "true"
-    #resources:
-    #   limits:
-    #     gpu.intel.com/i915: 1
-      # requests:
-      #  gpu.intel.com/i915: 1
+    resources:
+      limits:
+        # gpu.intel.com/i915: 1
+        memory: 4900Mi
+      requests:
+        cpu: 35m
+        memory: 1500Mi
   valueFileSecrets:
-  - name: "plex-helm-values"
+    - name: "plex-helm-values"
