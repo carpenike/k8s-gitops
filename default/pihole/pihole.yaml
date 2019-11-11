@@ -13,8 +13,8 @@ spec:
   rollback:
     enable: true
   chart:
-    git: https://github.com/carpenike/pihole-kubernetes
-    ref: integration
+    git: https://github.com/MoJo2600/pihole-kubernetes.git
+    ref: master
     path: pihole
   values:
     image:
@@ -28,8 +28,8 @@ spec:
     DNS1: 10.20.0.1
     DNS2: 10.20.0.1
     tolerations:
-    - key: "arm"
-      operator: "Exists"
+      - key: "arm"
+        operator: "Exists"
     serviceTCP:
       type: LoadBalancer
       externalTrafficPolicy: Local
@@ -49,4 +49,4 @@ spec:
       existingClaim: "nfs-tank-share-pvc"
       subPath: "pihole"
   valueFileSecrets:
-  - name: "pihole-helm-values"
+    - name: "pihole-helm-values"
