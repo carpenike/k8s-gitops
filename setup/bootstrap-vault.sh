@@ -168,7 +168,7 @@ loadSecretsToVault() {
 #   kvault "default/hubot/hubot-helm-values.txt"
   kvault "default/minio/minio-helm-values.txt"
 #   kvault "default/nextcloud/nextcloud-helm-values.txt"
-#   kvault "default/node-red/node-red-helm-values.txt"
+  kvault "default/node-red/node-red-helm-values.txt"
   kvault "default/nzbget/nzbget-helm-values.txt"
   kvault "default/pihole/pihole-helm-values.txt"
   kvault "default/nzbhydra/nzbhydra-helm-values.txt"

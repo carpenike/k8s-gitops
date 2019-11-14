@@ -9,7 +9,7 @@ spec:
   chart:
     repository: https://charts.fluxcd.io/
     name: helm-operator
-    version: 0.2.0
+    version: 0.2.1
   createCRD: true
   git:
     ssh:
