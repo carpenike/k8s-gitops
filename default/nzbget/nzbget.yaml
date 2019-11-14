@@ -26,7 +26,7 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-        ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
     timezone: "America/New_York"
     persistence:
       downloads:
