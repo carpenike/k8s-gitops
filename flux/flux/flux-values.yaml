@@ -1,7 +1,7 @@
 helmOperator:
   create: false
 git:
-  url: "git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-gitops2"
+  url: "git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-gitops"
 registry:
   rps: 1
   burst: 1
@@ -10,7 +10,7 @@ registry:
 #   - key: "arm"
 #     operator: "Exists"
 additionalArgs:
-- --connect=ws://fluxcloud
+  - --connect=ws://fluxcloud
 prometheus:
   enabled: true
 syncGarbageCollection:

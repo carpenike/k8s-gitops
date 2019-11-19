@@ -184,7 +184,7 @@ loadSecretsToVault() {
 }
 
 FIRST_RUN=1
-#export KUBECONFIG="$REPO_ROOT/setup/kubeconfig"
+export KUBECONFIG="$REPO_ROOT/setup/kubeconfig"
 initVault
 loginVault
 if [ $FIRST_RUN == 0 ]; then 
