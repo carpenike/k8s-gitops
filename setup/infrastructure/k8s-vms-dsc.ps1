@@ -66,7 +66,7 @@ configuration k8s-vms
             Switchname    = $SwitchName
             ProcessorCount =  $CPU
             Generation    = $Generation
-            State   = 'Running'
+            State   = 'Off'
             StartupMemory = $Memory
             DependsOn     = '[WindowsFeature]HyperVPowerShell', '[xVHD]k8s-vm-disk'
         }
