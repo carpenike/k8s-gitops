@@ -1,0 +1,28 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: metallb
+  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "true"
+spec:
+  releaseName: metallb
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: metallb
+    version: 0.12.0
+  values:
+    configInline:
+      address-pools:
+        - name: default
+          protocol: layer2
+          addresses:
+            - 10.20.50.100-10.20.50.250
+    controller:
+      tolerations:
+        - key: "arm"
+          operator: "Exists"
+    speaker:
+      tolerations:
+        - key: "arm"
+          operator: "Exists"
