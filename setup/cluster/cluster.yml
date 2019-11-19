@@ -2,15 +2,15 @@ nodes:
   - address: 10.20.30.10
     hostname_override: k8s-master-a
     user: ubuntu
-    role: [controlplane,etcd]
+    role: [controlplane, etcd]
   - address: 10.20.30.11
     hostname_override: k8s-master-b
     user: ubuntu
-    role: [controlplane,etcd]
+    role: [controlplane, etcd]
   - address: 10.20.30.12
     hostname_override: k8s-master-c
     user: ubuntu
-    role: [controlplane,etcd]
+    role: [controlplane, etcd]
   - address: 10.20.40.10
     hostname_override: k8s-1
     user: ubuntu
@@ -30,24 +30,24 @@ nodes:
 # network:
 #   plugin: calico
 authentication:
-    strategy: x509
-    sans:
-      - "10.20.200.50"
-      - "lb-ha"
-        #ssh_key_path: /home/ryan/.ssh/id_rsa_macos
+  strategy: x509
+  sans:
+    - "10.20.200.50"
+    - "lb-ha"
+      #ssh_key_path: /home/ryan/.ssh/id_rsa_macos
 #ssh_agent_auth: true
 services:
   kubelet:
     extra_args:
-#      volume-plugin-dir: "/var/lib/kubelet/volumeplugins"
+      #      volume-plugin-dir: "/var/lib/kubelet/volumeplugins"
       read-only-port: 10255
     extra_binds:
-    - "/lib/modules:/lib/modules"
-    - "/mnt:/mnt:rshared"
+      - "/lib/modules:/lib/modules"
+      - "/mnt:/mnt:rshared"
     etcd:
       extra_args:
         listen-metrics-urls: http://0.0.0.0:2379
 cluster_name: k8s
-kubernetes_version: v1.15.2-rancher1-1
+#kubernetes_version: v1.15.2-rancher1-1
 ingress:
-    provider: none
+  provider: none

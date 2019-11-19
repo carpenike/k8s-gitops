@@ -58,3 +58,16 @@ exit
 
 qm shutdown 9002
 qm template 9002
+
+## Removing Disks from S2D for Passthrough
+
+Identity all the disks and retire them:
+
+```
+Get-PhysicalDisk
+
+Get-PhysicalDisk -SerialNumber S1E4NYAF801949 | set-physicaldisk -Usage Retired
+
+$disks = Get-PhysicalDisk -Usage Retired
+Set-ClusterS2DDisk -CanBeClaimed 0 -PhysicalDisk $Disks
+```

@@ -23,6 +23,7 @@ message() {
 
 kvault() {
   name="secrets/$(dirname "$@")/$(basename -s .txt "$@")"
+  echo "Writing $name to vault"
   if output=$(envsubst < "$REPO_ROOT/$*"); then
     printf '%s' "$output" | vault kv put "$name" values.yaml=-
   fi
@@ -60,7 +61,6 @@ initVault() {
     vault_init=$(kubectl -n kube-system exec "vault-0" -- vault operator init -format json -recovery-shares=1 -recovery-threshold=1) || exit 1
     export VAULT_RECOVERY_TOKEN=$(echo $vault_init | jq -r '.recovery_keys_b64[0]')
     export VAULT_ROOT_TOKEN=$(echo $vault_init | jq -r '.root_token')
-    echo "$vault_init"
     echo "VAULT_RECOVERY_TOKEN is: $VAULT_RECOVERY_TOKEN"
     echo "VAULT_ROOT_TOKEN is: $VAULT_ROOT_TOKEN"
 
@@ -148,43 +148,43 @@ EOF
 loadSecretsToVault() {
   message "writing secrets to vault"
   vault kv put secrets/flux/fluxcloud slack_url="$SLACK_WEBHOOK_URL"
-#   vault kv put secrets/kube-system/nginx-basic-auth-jeff auth="$JEFF_AUTH"
+  # vault kv put secrets/kube-system/nginx-basic-auth-jeff auth="$JEFF_AUTH"
   vault kv put secrets/kube-system/route53-api-key api-key="$AWS_ACCESS_KEY_SECRET"
 
   ####################
   # helm chart values
   ####################
-#   kvault "kube-system/kured/kured-helm-values.txt"
+  # kvault "kube-system/kured/kured-helm-values.txt"
+  # kvault "kube-system/longhorn/longhorn-helm-values.txt"
   kvault "kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
-#   kvault "logs/kibana/kibana-helm-values.txt"
-#   kvault "monitoring/chronograf/chronograf-helm-values.txt"
-#   kvault "monitoring/comcast/comcast-helm-values.txt"
-  kvault "monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
+  # kvault "logs/kibana/kibana-helm-values.txt"
   kvault "monitoring/botkube/botkube-helm-values.txt"
-#   kvault "monitoring/uptimerobot/uptimerobot-helm-values.txt"
-#   kvault "default/frigate/frigate-helm-values.txt"
+  # kvault "monitoring/chronograf/chronograf-helm-values.txt"
+  # kvault "monitoring/comcast/comcast-helm-values.txt"
+  kvault "monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
+  # kvault "monitoring/uptimerobot/uptimerobot-helm-values.txt"
+  # kvault "default/frigate/frigate-helm-values.txt"
+  # kvault "default/goldilocks/goldilocks-helm-values.txt"
   kvault "default/home-assistant/home-assistant-helm-values.txt"
   kvault "default/home-assistant/postgresql-helm-values.txt"
-#   kvault "default/hubot/hubot-helm-values.txt"
+  kvault "default/hubot/hubot-helm-values.txt"
   kvault "default/minio/minio-helm-values.txt"
-#   kvault "default/nextcloud/nextcloud-helm-values.txt"
+  # kvault "default/nextcloud/nextcloud-helm-values.txt"
   kvault "default/node-red/node-red-helm-values.txt"
   kvault "default/nzbget/nzbget-helm-values.txt"
   kvault "default/pihole/pihole-helm-values.txt"
-  kvault "default/nzbhydra/nzbhydra-helm-values.txt"
   kvault "default/plex/plex-helm-values.txt"
+  kvault "default/qbittorrent/qbittorrent-helm-values.txt"
   kvault "default/rabbitmq/rabbitmq-helm-values.txt"
   kvault "default/radarr/radarr-helm-values.txt"
-  kvault "default/rtorrent-flood/rtorrent-flood-helm-values.txt"
+  # kvault "default/rtorrent-flood/rtorrent-flood-helm-values.txt"
   kvault "default/sonarr/sonarr-helm-values.txt"
-  kvault "default/tautulli/tautulli-helm-values.txt"
   kvault "default/unifi/unifi-helm-values.txt"
-  kvault "default/qbittorrent/qbittorrent-helm-values.txt"
   kvault "velero/velero/velero-helm-values.txt"
-  kvault "default/gitea/gitea-helm-values.txt"
 }
 
 FIRST_RUN=1
+#export KUBECONFIG="$REPO_ROOT/setup/kubeconfig"
 initVault
 loginVault
 if [ $FIRST_RUN == 0 ]; then 
