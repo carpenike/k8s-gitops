@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: rabbitmq
-      tag: 3.7.20-alpine
+      tag: 3.7.21-alpine
     rabbitmqMQTTPlugin:
       enabled: true
     rabbitmqWebMQTTPlugin:
@@ -111,7 +111,7 @@ spec:
           "write": ".*",
           "read": ".*"
         }
-      queues: |-
+      queues: |
     #    {
     #       "name":"myName",
     #       "vhost":"/rabbit",
@@ -134,4 +134,4 @@ spec:
           }
         } 
   valueFileSecrets:
-    - name: "rabbitmq-helm-values"
+  - name: "rabbitmq-helm-values"
