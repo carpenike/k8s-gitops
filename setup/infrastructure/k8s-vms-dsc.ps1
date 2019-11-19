@@ -26,13 +26,7 @@ configuration k8s-vms
         [int]$VLANID,
 
         [Parameter(Mandatory)]
-        [Uint64]$StartupMemory,
-
-        [Parameter(Mandatory)]
-        [Uint64]$MinimumMemory,
-
-        [Parameter(Mandatory)]
-        [Uint64]$MaximumMemory
+        [Uint64]$Memory
     )
 
     Import-DscResource -module xHyper-V
@@ -73,9 +67,7 @@ configuration k8s-vms
             ProcessorCount =  $CPU
             Generation    = $Generation
             State   = 'Running'
-            StartupMemory = $StartupMemory
-            MinimumMemory = $MinimumMemory
-            MaximumMemory = $MaximumMemory
+            StartupMemory = $Memory
             DependsOn     = '[WindowsFeature]HyperVPowerShell', '[xVHD]k8s-vm-disk'
         }
         xVMDvdDrive K8S-VMS-DVD
@@ -101,7 +93,7 @@ configuration k8s-vms
 $VMs = Import-Csv -Path $PSScriptRoot\vmInventory.csv -Delimiter "|"
 
 foreach ($VM in $VMS) {
-    k8s-vms -NodeName HV02 -VMName $($VM.Name) -StartupMemory $($VM.Memory) -MinimumMemory $($VM.Memory) -MaximumMemory $($VM.MaximumMemory) -Ensure 'Present' -Path "C:\ClusterStorage\VD-VM-01" -SwitchName "VMNetwork" -VLANID $($VM.VLAN) -Generation $($VM.Generation) -CPU $($VM.CPU)
+    k8s-vms -NodeName HV02 -VMName $($VM.Name) -Memory $($VM.Memory) -Ensure 'Present' -Path "C:\ClusterStorage\VD-VM-01" -SwitchName "VMNetwork" -VLANID $($VM.VLAN) -Generation $($VM.Generation) -CPU $($VM.CPU)
     Start-DscConfiguration -Verbose -Force -Wait -Path .\k8s-vms
 }
 #k8s-vms -NodeName HV02 -VMName k8s-master-a -StartupMemory 1073741824 -MinimumMemory 1073741824 -MaximumMemory 25769803776 -Path "c:\ClusterStorage\disk0\" -SwitchName "VMNetwork" -VLANID 20 -Generation 1 -CPU 2
