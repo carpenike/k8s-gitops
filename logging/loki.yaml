@@ -1,35 +1,35 @@
----
-apiVersion: flux.weave.works/v1beta1
-kind: HelmRelease
-metadata:
-  name: loki
-  namespace: logs
-  annotations:
-    flux.weave.works/ignore: "false"
-    flux.weave.works/automated: "true"
-    flux.weave.works/tag.loki: glob:latest
-    flux.weave.works/tag.promtail: glob:latest
-spec:
-  releaseName: loki
-  chart:
-    repository: https://grafana.github.io/loki/charts
-    name: loki-stack
-    version: 0.9.5
-  values:
-    loki:
-      replicas: 1
-      deploymentStrategy: Recreate
-      image:
-        repository: grafana/loki
-        tag: latest
-        pullPolicy: Always # Always pull while in BETA
-      persistence:
-        enabled: true
-        size: 50Gi
-        storageClassName: rbd
-    promtail:
-      image:
-        repository: grafana/promtail
-        tag: latest 
-      nameOverride: promtail-local
-      deploymentStrategy: RollingUpdate
+# ---
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: loki
+#   namespace: logs
+#   annotations:
+#     flux.weave.works/ignore: "false"
+#     flux.weave.works/automated: "true"
+#     flux.weave.works/tag.loki: glob:latest
+#     flux.weave.works/tag.promtail: glob:latest
+# spec:
+#   releaseName: loki
+#   chart:
+#     repository: https://grafana.github.io/loki/charts
+#     name: loki-stack
+#     version: 0.9.5
+#   values:
+#     loki:
+#       replicas: 1
+#       deploymentStrategy: Recreate
+#       image:
+#         repository: grafana/loki
+#         tag: latest
+#         pullPolicy: Always # Always pull while in BETA
+#       persistence:
+#         enabled: true
+#         size: 50Gi
+#         storageClassName: rbd
+#     promtail:
+#       image:
+#         repository: grafana/promtail
+#         tag: latest
+#       nameOverride: promtail-local
+#       deploymentStrategy: RollingUpdate

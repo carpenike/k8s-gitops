@@ -1,28 +1,28 @@
----
-apiVersion: flux.weave.works/v1beta1
-kind: HelmRelease
-metadata:
-  name: comcast
-  namespace: monitoring
-  annotations:
-    # flux.weave.works/automated: "true"
-    # flux.weave.works/tag.chart-image: glob:latest
-spec:
-  releaseName: comcast
-  chart:
-    repository: https://billimek.com/billimek-charts/
-    name: comcast
-    version: 1.0.4
-  values:
-    image:
-      repository: billimek/comcastusage-for-influxdb
-      tag: latest
-    debug: true
-    config:
-      delay: 3600
-      influxdb:
-        host: influxdb
-        port: 8086
-        database: comcast
-  valueFileSecrets:
-    - name: "comcast-values"
+# ---
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: comcast
+#   namespace: monitoring
+#   annotations:
+#     # flux.weave.works/automated: "true"
+#     # flux.weave.works/tag.chart-image: glob:latest
+# spec:
+#   releaseName: comcast
+#   chart:
+#     repository: https://billimek.com/billimek-charts/
+#     name: comcast
+#     version: 1.0.4
+#   values:
+#     image:
+#       repository: billimek/comcastusage-for-influxdb
+#       tag: latest
+#     debug: true
+#     config:
+#       delay: 3600
+#       influxdb:
+#         host: influxdb
+#         port: 8086
+#         database: comcast
+#   valueFileSecrets:
+#     - name: "comcast-values"
