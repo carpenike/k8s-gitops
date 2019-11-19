@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # nodes
-K3S_MASTER="k8s-master-a k8s-master-b k8s-master-c"
+K3S_MASTER="k8s-master-a"
 K3S_WORKERS_AMD64="k8s-1 k8s-2 k8s-3"
 # K3S_WORKERS_ODROID="k8s-4"
 # K3S_WORKERS_RPI="pi4-a pi4-b pi4-c"
@@ -96,8 +96,9 @@ installFlux() {
   # grab output the key
   FLUX_KEY=$(kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2)
 
-  message "adding the key to github automatically"
-  "$REPO_ROOT"/setup/add-repo-key.sh "$FLUX_KEY"
+  message "add the following-key to devops"
+  message $FLUX_KEY
+  #"$REPO_ROOT"/setup/add-repo-key.sh "$FLUX_KEY"
 }
 
 k3sMasterNode
