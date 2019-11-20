@@ -8,15 +8,15 @@ spec:
     email: $EMAIL
     privateKeySecretRef:
       name: letsencrypt-prod
-    dns01:
-      providers:
-        - name: route53
-          route53:
-            region: us-east-1
-            accessKeyID: $AWS_ACCESS_KEY_ID
-            secretAccessKeySecretRef:
-              name: route53-api-key
-              key: api-key
+    solvers:
+    - selector: {}
+      dns01:
+        route53:
+          region: us-east-1
+          accessKeyID: $AWS_ACCESS_KEY_ID
+          secretAccessKeySecretRef:
+            name: route53-api-key
+            key: api-key
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
