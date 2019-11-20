@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: linuxserver/hydra2
-      tag: v2.6.18-ls38
+      tag: amd64-v2.9.2-ls43
     podAnnotations:
       backup.velero.io/backup-volumes: config
     service:
