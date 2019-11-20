@@ -33,13 +33,9 @@ foreach ($VM in $VMs) {
       - zsh
       - jq
       - ceph-common
-      - gdisk
+      - nethogs
       - iperf
       - nfs-common
-      - linux-image-extra-virtual
-      - docker.io
-      - jq
-      - cifs-utils
     package_upgrade: true
 "@
   
