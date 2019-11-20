@@ -44,7 +44,7 @@ spec:
         storageClass: "rook-ceph-block"
         size: 250Gi
     nodeSelector:
-      gpu: "true"
+      app: "nvidia-gpu-plugin"
     resources:
       limits:
         # gpu.intel.com/i915: 1
@@ -53,4 +53,4 @@ spec:
         cpu: 35m
         memory: 1500Mi
   valueFileSecrets:
-  - name: "plex-helm-values"
+    - name: "plex-helm-values"
