@@ -97,7 +97,7 @@ installFlux() {
   FLUX_KEY=$(kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2)
 
   message "add the following-key to devops"
-  message $FLUX_KEY
+  message "$FLUX_KEY"
   #"$REPO_ROOT"/setup/add-repo-key.sh "$FLUX_KEY"
 }
 

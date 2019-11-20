@@ -71,3 +71,7 @@ Get-PhysicalDisk -SerialNumber S1E4NYAF801949 | set-physicaldisk -Usage Retired
 $disks = Get-PhysicalDisk -Usage Retired
 Set-ClusterS2DDisk -CanBeClaimed 0 -PhysicalDisk $Disks
 ```
+
+## Setup Networking in Hyper-V Host
+
+http://blog.mscloud.guru/2016/12/08/create-a-set-team-in-server-2016-howto/
