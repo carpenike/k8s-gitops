@@ -149,7 +149,7 @@ loadSecretsToVault() {
   message "writing secrets to vault"
   vault kv put secrets/flux/fluxcloud slack_url="$SLACK_WEBHOOK_URL"
   # vault kv put secrets/kube-system/nginx-basic-auth-jeff auth="$JEFF_AUTH"
-  vault kv put secrets/kube-system/route53-api-key api-key="$AWS_ACCESS_KEY_SECRET"
+  vault kv put secrets/cert-manager/route53-api-key api-key="$AWS_ACCESS_KEY_SECRET"
 
   ####################
   # helm chart values
