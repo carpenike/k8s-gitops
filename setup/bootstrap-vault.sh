@@ -180,6 +180,7 @@ loadSecretsToVault() {
   # kvault "default/rtorrent-flood/rtorrent-flood-helm-values.txt"
   kvault "default/sonarr/sonarr-helm-values.txt"
   kvault "default/tautulli/tautulli-helm-values.txt"
+  kvault "default/gitea/gitea-helm-values.txt"
   kvault "default/unifi/unifi-helm-values.txt"
   kvault "velero/velero/velero-helm-values.txt"
 }
