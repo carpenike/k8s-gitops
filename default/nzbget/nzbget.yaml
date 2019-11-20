@@ -18,7 +18,7 @@ spec:
   values:
     image:
       repository: linuxserver/nzbget
-      tag: v21.0-ls29
+      tag: v21.0-ls32
     service:
       type: LoadBalancer
       loadBalancerIP: 10.20.50.156
@@ -40,4 +40,4 @@ spec:
     puid: 1000
     pgid: 1000
   valueFileSecrets:
-    - name: "nzbget-helm-values"
+  - name: "nzbget-helm-values"
