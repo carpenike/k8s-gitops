@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: nzbget
-    version: 2.0.8
+    version: 2.0.9
   values:
     image:
       repository: linuxserver/nzbget
@@ -26,7 +26,6 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-        nginx.ingress.kubernetes.io/ssl-redirect: "true"
     timezone: "America/New_York"
     persistence:
       downloads:
@@ -39,5 +38,16 @@ spec:
         size: 1Gi
     puid: 1000
     pgid: 1000
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: config
+    tolerations:
+      - key: "arm"
+        operator: "Exists"
+    resources:
+      requests:
+        memory: 300Mi
+        cpu: 25m
+      limits:
+        memory: 400Mi
   valueFileSecrets:
-  - name: "nzbget-helm-values"
+    - name: "nzbget-helm-values"
