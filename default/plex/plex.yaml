@@ -43,7 +43,7 @@ spec:
       config:
         storageClass: "rook-ceph-block"
         size: 250Gi
-        accessmode: "ReadWriteOnce"
+        accessMode: "ReadWriteOnce"
     nodeSelector:
       app: "nvidia-gpu-plugin"
     resources:
