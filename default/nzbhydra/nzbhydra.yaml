@@ -34,7 +34,7 @@ spec:
       #   existingClaim: nfs-tank-share-pvc
       #   subPath: nzbget/downloads
       enabled: true
-      storageClass: rook-ceph-block
+      storageClassName: rook-ceph-block
       #size: 5Gi
     nzbhydra2:
       uid: 1000
