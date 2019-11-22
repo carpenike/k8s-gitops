@@ -8,7 +8,7 @@ metadata:
     release: "nzbhydra"
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: "glob:amd64-v2.*.*-*"
+    fluxcd.io/tag.chart-image: "glob:2.*.*-*-*"
 spec:
   releaseName: nzbhydra
   chart:
@@ -17,8 +17,8 @@ spec:
     version: 2.9.4
   values:
     image:
-      repository: linuxserver/hydra2
-      tag: v2.9.3-ls44
+      #   repository: linuxserver/hydra2
+      tag: 2.9.3-1-01
     podAnnotations:
       backup.velero.io/backup-volumes: config
     service:
