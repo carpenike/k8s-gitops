@@ -20,7 +20,7 @@ spec:
       #   repository: linuxserver/hydra2
       tag: 2.9.3-1-01
     podAnnotations:
-      backup.velero.io/backup-volumes: config
+      backup.velero.io/backup-volumes: nzbhydra2-config
     service:
       type: ClusterIP
     ingress:
