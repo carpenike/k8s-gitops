@@ -17,8 +17,8 @@ spec:
     version: 2.9.5
   values:
     image:
-      #   repository: linuxserver/hydra2
-      tag: 2.9.3-1-01
+      #   repository: binhex/arch-nzbhydra2
+      tag: 2.9.4-1-01
     podAnnotations:
       backup.velero.io/backup-volumes: nzbhydra2-config
     service:
