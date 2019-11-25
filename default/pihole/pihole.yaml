@@ -51,5 +51,11 @@ spec:
     persistentVolumeClaim:
       enabled: true
       existingClaim: "nfs-client"
+    resources:
+      requests:
+        memory: 300Mi
+        cpu: 25m
+      limits:
+        memory: 400Mi
   valueFileSecrets:
     - name: "pihole-helm-values"
