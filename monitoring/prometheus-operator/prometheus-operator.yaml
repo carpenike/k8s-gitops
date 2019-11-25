@@ -43,7 +43,7 @@ spec:
     grafana:
       image:
         repository: grafana/grafana
-        tag: 6.5.0
+        tag: 6.4.4
       # tolerations:
       # - key: "arm"
       #   operator: "Exists"
@@ -54,7 +54,7 @@ spec:
         storageClassName: "rook-ceph-block"
         size: 10Gi
         accessModes:
-          - ReadWriteOnce
+        - ReadWriteOnce
       env:
         GF_EXPLORE_ENABLED: true
       ingress:
@@ -62,19 +62,19 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
       plugins:
-        - natel-discrete-panel
+      - natel-discrete-panel
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
           providers:
-            - name: "default"
-              orgId: 1
-              folder: ""
-              type: file
-              disableDeletion: false
-              editable: true
-              options:
-                path: /var/lib/grafana/dashboards/default
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
       dashboards:
         default:
           nginx-dashboard:
@@ -105,40 +105,40 @@ spec:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/netdata.json
           #   datasource: Prometheus
       additionalDataSources:
-        - name: loki
-          type: loki
-          access: proxy
-          url: http://loki.logs.svc.cluster.local:3100
-        - name: influxdb
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: telegraf
-        - name: cable_modem_stats
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: cable_modem_stats
-        - name: comcast
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: comcast
-        - name: home_assistant
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: home_assistant
-        - name: speedtests
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: speedtests
-        - name: uptimerobot
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: uptimerobot
+      - name: loki
+        type: loki
+        access: proxy
+        url: http://loki.logs.svc.cluster.local:3100
+      - name: influxdb
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: telegraf
+      - name: cable_modem_stats
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: cable_modem_stats
+      - name: comcast
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: comcast
+      - name: home_assistant
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: home_assistant
+      - name: speedtests
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: speedtests
+      - name: uptimerobot
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: uptimerobot
       grafana.ini:
         paths:
           data: /var/lib/grafana/data
@@ -159,8 +159,8 @@ spec:
       enabled: false
     prometheus-node-exporter:
       tolerations:
-        - key: "arm"
-          operator: "Exists"
+      - key: "arm"
+        operator: "Exists"
     prometheus:
       ingress:
         enabled: true
@@ -213,12 +213,12 @@ spec:
           #   static_configs:
           #     - targets:
           #         - nvr:9182
-          - job_name: "home-assistant"
-            scrape_interval: 60s
-            metrics_path: /api/prometheus
-            bearer_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiM2FjNjVlNjQ1OTU0NWNhOWJiZWZiZDE5OWM4MDMzMiIsImlhdCI6MTU2NzEyODYwOCwiZXhwIjoxODgyNDg4NjA4fQ.NkSaaxMnJMYy-38gBsdlKt35-aKKSMDofGzBeBQmVnw"
-            scheme: http
-            static_configs:
-              - targets: ["home-assistant.default.svc:8123"]
+        - job_name: "home-assistant"
+          scrape_interval: 60s
+          metrics_path: /api/prometheus
+          bearer_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiM2FjNjVlNjQ1OTU0NWNhOWJiZWZiZDE5OWM4MDMzMiIsImlhdCI6MTU2NzEyODYwOCwiZXhwIjoxODgyNDg4NjA4fQ.NkSaaxMnJMYy-38gBsdlKt35-aKKSMDofGzBeBQmVnw"
+          scheme: http
+          static_configs:
+          - targets: ["home-assistant.default.svc:8123"]
   valueFileSecrets:
-    - name: "prometheus-operator-helm-values"
+  - name: "prometheus-operator-helm-values"
