@@ -50,7 +50,6 @@ spec:
         metallb.universe.tf/allow-shared-ip: pihole-svc
     persistentVolumeClaim:
       enabled: true
-      existingClaim: "nfs-tank-share-pvc"
-      subPath: "pihole"
+      existingClaim: "nfs-client"
   valueFileSecrets:
     - name: "pihole-helm-values"
