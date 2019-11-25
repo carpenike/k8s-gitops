@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: homeassistant/home-assistant
-      tag: 0.102.1
+      tag: 0.102.2
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
@@ -50,4 +50,4 @@ spec:
     # nodeSelector:
     #   zwave: present
   valueFileSecrets:
-  - name: "home-assistant-helm-values"
+    - name: "home-assistant-helm-values"
