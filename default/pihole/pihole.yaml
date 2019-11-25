@@ -15,7 +15,7 @@ spec:
   chart:
     git: https://github.com/MoJo2600/pihole-kubernetes
     ref: master
-    path: pihole-kubernetes
+    path: pihole
   values:
     image:
       repository: pihole/pihole
