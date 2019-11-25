@@ -2,10 +2,10 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: nzbhydra
+  name: nzbhydra2
   namespace: default
   annotations:
-    release: "nzbhydra"
+    release: "nzbhydra2"
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: "glob:2.*.*-*-*"
