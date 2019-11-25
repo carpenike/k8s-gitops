@@ -159,7 +159,7 @@ loadSecretsToVault() {
   kvault "kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
   # kvault "logs/kibana/kibana-helm-values.txt"
   kvault "monitoring/botkube/botkube-helm-values.txt"
-  # kvault "monitoring/chronograf/chronograf-helm-values.txt"
+  kvault "monitoring/chronograf/chronograf-helm-values.txt"
   # kvault "monitoring/comcast/comcast-helm-values.txt"
   kvault "monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
   # kvault "monitoring/uptimerobot/uptimerobot-helm-values.txt"
