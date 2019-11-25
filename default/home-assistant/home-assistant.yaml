@@ -10,7 +10,7 @@ metadata:
     fluxcd.io/tag.chart-image: semver:~0.
     # filter.fluxcd.io/vscode: "regex:^2.[0-9]+-.*$"
 spec:
-  releaseName: hass
+  releaseName: home-assistant
   rollback:
     enable: true
   chart:
@@ -50,4 +50,4 @@ spec:
     # nodeSelector:
     #   zwave: present
   valueFileSecrets:
-  - name: "home-assistant-helm-values"
+    - name: "home-assistant-helm-values"
