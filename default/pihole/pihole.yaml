@@ -50,7 +50,7 @@ spec:
         metallb.universe.tf/allow-shared-ip: pihole-svc
     persistentVolumeClaim:
       enabled: true
-      existingClaim: "nfs-client"
+      storageClass: "nfs-client"
     resources:
       requests:
         memory: 300Mi
