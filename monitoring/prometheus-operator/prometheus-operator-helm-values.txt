@@ -4,6 +4,9 @@ alertmanager:
     tls:
     - hosts:
       - prom-alert.$DOMAIN
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: "https://auth.$DOMAIN/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: https://auth.$DOMAIN/oauth2/start
 prometheus:
   ingress:
     hosts: [prom-server.$DOMAIN]
@@ -20,6 +23,8 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.${DOMAIN}
+    auth.basic:
+      disable_login_form: true
     auth.generic_oauth:
       enabled: true
       allow_sign_up: true
