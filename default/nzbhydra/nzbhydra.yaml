@@ -10,7 +10,7 @@ metadata:
     fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: "glob:2.*.*-*-*"
 spec:
-  releaseName: nzbhydra
+  releaseName: nzbhydra2
   chart:
     repository: https://halkeye.github.io/helm-charts
     name: nzbhydra2
