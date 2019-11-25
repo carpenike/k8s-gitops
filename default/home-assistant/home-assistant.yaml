@@ -50,4 +50,4 @@ spec:
     # nodeSelector:
     #   zwave: present
   valueFileSecrets:
-    - name: "home-assistant-helm-values"
+  - name: "home-assistant-helm-values"
