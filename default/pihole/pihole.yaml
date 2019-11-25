@@ -14,8 +14,8 @@ spec:
     enable: true
   chart:
     git: https://github.com/carpenike/pihole-kubernetes
-    ref: integration
-    path: pihole
+    ref: master
+    path: pihole-kubernetes
   values:
     image:
       repository: pihole/pihole
