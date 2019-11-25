@@ -1,4 +1,4 @@
- ingress:
+ingress:
   hosts: 
   - ha.$DOMAIN
   tls:
