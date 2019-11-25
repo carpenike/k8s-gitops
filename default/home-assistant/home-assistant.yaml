@@ -23,8 +23,8 @@ spec:
       tag: 0.102.2
     persistence:
       enabled: true
-      accessMode: ReadWriteOnce
-      size: 10Gi
+      # accessMode: ReadWriteOnce
+      # size: 10Gi
       storageClass: nfs-client
     ingress:
       enabled: true
