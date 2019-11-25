@@ -29,6 +29,8 @@ spec:
     DNS2: 127.0.0.1#5054
     doh:
       enabled: true
+    extraEnvVars:
+      TZ: America/New_York
     tolerations:
       - key: "arm"
         operator: "Exists"
