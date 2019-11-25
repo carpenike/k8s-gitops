@@ -23,9 +23,9 @@ spec:
       tag: 0.102.2
     persistence:
       enabled: true
-      # accessMode: ReadWriteOnce
-      # size: 10Gi
-      storageClass: nfs-client
+      accessMode: ReadWriteOnce
+      size: 10Gi
+      storageClass: rook-ceph-block
     ingress:
       enabled: true
       annotations:
