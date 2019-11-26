@@ -1,0 +1,9 @@
+notifications:
+  slackurl: $NETDATA_SLACK_WEBHOOK_URL
+  slackrecipient: "#alerts"
+ingress:
+  hosts:
+    - netdata.$DOMAIN
+  tls:
+  - hosts:
+    - netdata.$DOMAIN
