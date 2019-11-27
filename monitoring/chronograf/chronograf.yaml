@@ -13,9 +13,14 @@ spec:
   rollback:
     enable: true
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: chronograf
-    version: 1.1.0
+    git: git@github.com:carpenike/charts
+    path: stable/chronograf
+    ref: master
+    #version: 1.1.11
+    # repository: https://kubernetes-charts.storage.googleapis.com/
+    # name: chronograf
+    # version: 1.1.0
+
   values:
     image:
       repository: "chronograf"
