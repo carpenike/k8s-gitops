@@ -36,6 +36,7 @@ spec:
     volumePermissions:
       enabled: true
     service:
+      type: LoadBalancer
       loadbalancerIP: 10.20.50.158
   valueFileSecrets:
     - name: "postgresql-helm-values"
