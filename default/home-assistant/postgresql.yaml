@@ -35,5 +35,7 @@ spec:
         enabled: true
     volumePermissions:
       enabled: true
+    service:
+      loadbalancerIP: 10.20.50.158
   valueFileSecrets:
-  - name: "postgresql-helm-values"
+    - name: "postgresql-helm-values"
