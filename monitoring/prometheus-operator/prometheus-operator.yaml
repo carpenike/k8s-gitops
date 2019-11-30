@@ -191,13 +191,13 @@ spec:
               # You can use `prometheus_all_hosts` if you want Prometheus to set the `instance` to your hostname instead of IP
               format: [prometheus]
             honor_labels: true
-          static_configs:
-          - targets:
-            - k8s-1:19999
-            - k8s-2:19999
-            - k8s-3:19999
-            - k8s-master-a:19999
-            - fw.holthome.net:19999
+            static_configs:
+              - targets:
+                  - k8s-1:19999
+                  - k8s-2:19999
+                  - k8s-3:19999
+                  - k8s-master-a:19999
+                  - fw.holthome.net:19999
           #   - k3s-2:19999
           #   - k8s-4:19999
           #   - lb:19999
