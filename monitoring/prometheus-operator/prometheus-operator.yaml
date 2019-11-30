@@ -216,9 +216,9 @@ spec:
           - job_name: "home-assistant"
             scrape_interval: 60s
             metrics_path: /api/prometheus
-            bearer_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiM2FjNjVlNjQ1OTU0NWNhOWJiZWZiZDE5OWM4MDMzMiIsImlhdCI6MTU2NzEyODYwOCwiZXhwIjoxODgyNDg4NjA4fQ.NkSaaxMnJMYy-38gBsdlKt35-aKKSMDofGzBeBQmVnw"
+            bearer_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIyNGYzMzU0YjNhZTI0YWM4YTg5MTM2ZWJiZmI3NjIyYSIsImlhdCI6MTU3NTE0MTkwOCwiZXhwIjoxODkwNTAxOTA4fQ.wEgPgM6ZtLo6hJ8Z8RDt7HiXxefpE0wI1YZyUHnMxu8"
             scheme: http
             static_configs:
-              - targets: ["home-assistant.default.svc:8123"]
+              - targets: ["ha.holthome.net:443"]
   valueFileSecrets:
     - name: "prometheus-operator-helm-values"
