@@ -1,47 +1,47 @@
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  name: influxdb
-  namespace: monitoring
-  annotations:
-    fluxcd.io/ignore: false
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+)$'
-spec:
-  releaseName: influxdb
-  rollback:
-    enable: true
-  chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: influxdb
-    version: 3.0.1
-  values:
-    image:
-      repository: "influxdb"
-      tag: "1.7.9"
-    service:
-      type: LoadBalancer
-      loadBalancerIP: 10.20.50.151
-    persistence:
-      enabled: true
-      size: 50Gi
-      storageClass: nfs-client
-    resources:
-      requests:
-        memory: 2000Mi
-        cpu: 100m
-      limits:
-        memory: 3000Mi
-    livenessProbe:
-      timeoutSeconds: 10
-    readinessProbe:
-      timeoutSeconds: 10
-    config:
-      opentsdb:
-        enabled: true
-    podAnnotations:
-      backup.velero.io/backup-volumes: data
-    # tolerations:
-    # - key: "arm"
-    #   operator: "Exists"
+# ---
+# apiVersion: helm.fluxcd.io/v1
+# kind: HelmRelease
+# metadata:
+#   name: influxdb
+#   namespace: monitoring
+#   annotations:
+#     fluxcd.io/ignore: false
+#     fluxcd.io/automated: "true"
+#     fluxcd.io/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+)$'
+# spec:
+#   releaseName: influxdb
+#   rollback:
+#     enable: true
+#   chart:
+#     repository: https://kubernetes-charts.storage.googleapis.com/
+#     name: influxdb
+#     version: 3.0.1
+#   values:
+#     image:
+#       repository: "influxdb"
+#       tag: "1.7.9"
+#     service:
+#       type: LoadBalancer
+#       loadBalancerIP: 10.20.50.151
+#     persistence:
+#       enabled: true
+#       size: 50Gi
+#       storageClass: nfs-client
+#     resources:
+#       requests:
+#         memory: 2000Mi
+#         cpu: 100m
+#       limits:
+#         memory: 3000Mi
+#     livenessProbe:
+#       timeoutSeconds: 10
+#     readinessProbe:
+#       timeoutSeconds: 10
+#     config:
+#       opentsdb:
+#         enabled: true
+#     podAnnotations:
+#       backup.velero.io/backup-volumes: data
+#     # tolerations:
+#     # - key: "arm"
+#     #   operator: "Exists"
