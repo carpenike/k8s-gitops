@@ -1,38 +1,38 @@
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  name: tautulli
-  namespace: default
-  annotations:
-    release: "tautulli"
-    #fluxcd.io/automated: "true"
-    #fluxcd.io/tag.chart-image: "glob:latest"
-spec:
-  releaseName: tautulli
-  chart:
-    repository: http://charts.blazure.com
-    name: tautulli
-    version: 0.1.2
-  values:
-    image:
-      repository: tautulli/tautulli
-      tag: latest
-    tautulli:
-      tz: "America/New_York"
-    service:
-      type: ClusterIP
-    getGeoCity:
-      enabled: false
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-    persistence:
-      enabled: true
-      storageClass: rook-ceph-block
-      size: 5Gi
-  valueFileSecrets:
-    - name: "tautulli-helm-values"
+# ---
+# apiVersion: helm.fluxcd.io/v1
+# kind: HelmRelease
+# metadata:
+#   name: tautulli
+#   namespace: default
+#   annotations:
+#     release: "tautulli"
+#     #fluxcd.io/automated: "true"
+#     #fluxcd.io/tag.chart-image: "glob:latest"
+# spec:
+#   releaseName: tautulli
+#   chart:
+#     repository: http://charts.blazure.com
+#     name: tautulli
+#     version: 0.1.2
+#   values:
+#     image:
+#       repository: tautulli/tautulli
+#       tag: latest
+#     tautulli:
+#       tz: "America/New_York"
+#     service:
+#       type: ClusterIP
+#     getGeoCity:
+#       enabled: false
+#     ingress:
+#       enabled: true
+#       annotations:
+#         kubernetes.io/ingress.class: "nginx"
+#     podAnnotations:
+#       backup.velero.io/backup-volumes: config
+#     persistence:
+#       enabled: true
+#       storageClass: rook-ceph-block
+#       size: 5Gi
+#   valueFileSecrets:
+#     - name: "tautulli-helm-values"
