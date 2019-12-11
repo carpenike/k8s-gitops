@@ -1,46 +1,46 @@
----
-apiVersion: flux.weave.works/v1beta1
-kind: HelmRelease
-metadata:
-  name: radarr
-  namespace: default
-  annotations:
-    flux.weave.works/automated: "false"
-    flux.weave.works/tag.chart-image: 'glob:amd64-v0.*.*.*'
-spec:
-  releaseName: radarr
-  rollback:
-    enable: true
-  chart:
-    repository: https://billimek.com/billimek-charts/
-    name: radarr
-    version: 2.0.8
-  values:
-    image:
-      repository: linuxserver/radarr
-      tag: 'amd64-v0.2.0.1358-ls39'
-      pullPolicy: Always
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-    timezone: "America/New_York"
-    persistence:
-      config:
-        enabled: true
-        storageClass: rook-ceph-block
-        size: 5Gi
-      downloads:
-        enabled: true
-        existingClaim: nfs-tank-share-pvc
-        subPath: nzbget/downloads
-      movies:
-        enabled: true
-        existingClaim: nfs-tank-media-pvc
-        subPath: movies
-    puid: 1000
-    pgid: 1000
-  valueFileSecrets:
-  - name: "radarr-helm-values"
+# ---
+# apiVersion: flux.weave.works/v1beta1
+# kind: HelmRelease
+# metadata:
+#   name: radarr
+#   namespace: default
+#   annotations:
+#     flux.weave.works/automated: "false"
+#     flux.weave.works/tag.chart-image: 'glob:amd64-v0.*.*.*'
+# spec:
+#   releaseName: radarr
+#   rollback:
+#     enable: true
+#   chart:
+#     repository: https://billimek.com/billimek-charts/
+#     name: radarr
+#     version: 2.0.8
+#   values:
+#     image:
+#       repository: linuxserver/radarr
+#       tag: 'amd64-v0.2.0.1358-ls39'
+#       pullPolicy: Always
+#     podAnnotations:
+#       backup.velero.io/backup-volumes: config
+#     ingress:
+#       enabled: true
+#       annotations:
+#         kubernetes.io/ingress.class: "nginx"
+#     timezone: "America/New_York"
+#     persistence:
+#       config:
+#         enabled: true
+#         storageClass: rook-ceph-block
+#         size: 5Gi
+#       downloads:
+#         enabled: true
+#         existingClaim: nfs-tank-share-pvc
+#         subPath: nzbget/downloads
+#       movies:
+#         enabled: true
+#         existingClaim: nfs-tank-media-pvc
+#         subPath: movies
+#     puid: 1000
+#     pgid: 1000
+#   valueFileSecrets:
+#   - name: "radarr-helm-values"
