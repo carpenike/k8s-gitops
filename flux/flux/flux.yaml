@@ -12,23 +12,19 @@ spec:
   chart:
     repository: https://charts.fluxcd.io/
     name: flux
-    version: 0.15.0
+    version: 0.16.0
   values:
-    image:
-      repository: docker.io/fluxcd/flux
-      tag: 1.15.0
     helmOperator:
-      create: true
-      createCRD: true
+      create: false
     git:
       url: "git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-gitops"
     registry:
       rps: 1
       burst: 1
-    # memcached:
-    #   tolerations:
-    #   - key: "arm"
-    #     operator: "Exists"
+    memcached:
+      tolerations:
+        - key: "arm"
+          operator: "Exists"
     additionalArgs:
       - --connect=ws://fluxcloud
     prometheus:

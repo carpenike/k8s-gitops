@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # nodes
-K3S_MASTER="k8s-master-a"
-K3S_WORKERS_AMD64="k8s-1 k8s-2 k8s-3"
-# K3S_WORKERS_ODROID="k8s-4"
-# K3S_WORKERS_RPI="pi4-a pi4-b pi4-c"
-K3S_VERSION="v0.10.2"
+K3S_MASTER="k3s-0"
+K3S_WORKERS_AMD64="k3s-1 k3s-2"
+K3S_WORKERS_ODROID=""
+K3S_WORKERS_RPI=""
+K3S_VERSION="v1.0.0"
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
@@ -36,10 +36,10 @@ ks3amd64WorkerNodes() {
   for node in $K3S_WORKERS_AMD64; do
     message "joining amd64 $node to $K3S_MASTER"
     EXTRA_ARGS=""
-    if [ "$node" == "k8s-1" ]; then
-      EXTRA_ARGS="--node-label app=nvidia-gpu-plugin"
+    if [ "$node" == "k3s-1" ]; then
+      EXTRA_ARGS="--node-label app=intel-gpu-plugin"
     fi
-    ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k8s-master-a:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - $EXTRA_ARGS"
+    ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k3s-0:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - $EXTRA_ARGS"
   done
 }
 
@@ -47,7 +47,7 @@ ks3OdroidWorkerNodes() {
   NODE_TOKEN=$(ssh -o "StrictHostKeyChecking=no" ubuntu@"$K3S_MASTER" "sudo cat /var/lib/rancher/k3s/server/node-token")
   for node in $K3S_WORKERS_ODROID; do
     message "joining amd64 $node to $K3S_MASTER"
-    ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k8s-master-a:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - --node-label tpu=google-coral --node-label app=intel-gpu-plugin"
+    ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k3s-0:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - --node-label tpu=google-coral --node-label app=intel-gpu-plugin"
   done
 }
 
@@ -59,7 +59,7 @@ ks3armWorkerNodes() {
     if [ "$node" == "pi4-c" ]; then
       EXTRA_ARGS="--node-label usb=alarmdecoder"
     fi
-    ssh -o "StrictHostKeyChecking=no" pi@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k8s-master-a:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - --node-taint arm=true:NoExecute --data-dir /mnt/usb/var/lib/rancher $EXTRA_ARGS"
+    ssh -o "StrictHostKeyChecking=no" pi@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k3s-0:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - --node-taint arm=true:NoExecute --data-dir /mnt/usb/var/lib/rancher $EXTRA_ARGS"
   done
 }
 
@@ -96,8 +96,7 @@ installFlux() {
   # grab output the key
   FLUX_KEY=$(kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2)
 
-  message "add the following-key to devops"
-  message "$FLUX_KEY"
+  #message "adding the key to github automatically"
   #"$REPO_ROOT"/setup/add-repo-key.sh "$FLUX_KEY"
 }
 

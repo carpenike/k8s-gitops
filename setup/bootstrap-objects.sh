@@ -50,7 +50,8 @@ installManualObjects(){
     ROOK_NAMESPACE_READY="$?"
     sleep 5
   done
-  kapply "$REPO_ROOT"/rook-ceph/dashboard/ingress.txt
+  #kapply "$REPO_ROOT"/rook-ceph/dashboard/ingress.txt
+  "$REPO_ROOT"/rook-ceph/ceph-external/import-external-cluster.sh
 
   #########################
   # cert-manager bootstrap
