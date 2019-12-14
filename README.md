@@ -75,3 +75,7 @@ Set-ClusterS2DDisk -CanBeClaimed 0 -PhysicalDisk $Disks
 ## Setup Networking in Hyper-V Host
 
 http://blog.mscloud.guru/2016/12/08/create-a-set-team-in-server-2016-howto/
+
+## Add CEPH Storage to KVM
+
+https://blog.modest-destiny.com/posts/kvm-libvirt-add-ceph-rbd-pool/

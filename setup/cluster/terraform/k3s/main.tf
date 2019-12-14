@@ -1,6 +1,6 @@
 provider "proxmox" {
   pm_tls_insecure = true
-  pm_api_url      = "https://pve-01:8006/api2/json"
+  pm_api_url      = "https://pve-02.holthome.net:8006/api2/json"
   pm_user         = "terraform@pve"
 }
 
@@ -22,18 +22,18 @@ module "k3s-cluster" {
     "52:7F:22:E5:1F:1F",
   ]
   nodes = [
-    "pve-01",
-    "pve-02",
-    "pve-03",
+    "pve-01.holthome.net",
+    "pve-02.holthome.net",
+    "pve-03.holthome.net",
   ]
   sshkeys      = <<EOF
-
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCeHXfsp4E0Wz2yY0oD5TcAVL35B9H36Vt64e3xIoSMg8K9IykmBJgbo6GizQEWyOx8SZOVAidRmHmtbZAKvaKovN45YKii7BjUOO/dWB3ELvt9o0ExCibzFReeajKaiIDOmjXeKFf4i8f01fFFC9a/SfM+jJK+8Ukd4LWrE8kgJriR/iR1P/fed01kmVF6+JzjmTC2mDcva8zkDCS21zssQG5Vap1U1yYa7UzZSlVHYJIlL29y/l3M9Wl/ABeT/iX4kWDIesvKFmhyeCehi6UBFtWzfQ216loCopXUGPUlTT0YidUEKkk5Zs1mz5kMhv21C48ATs3bkFnEAV2TF5ff ryan@RyMac.local
 EOF
   gateway      = "10.20.0.1"
   vlanid       = "20"
   bridge       = "vmbr0"
   storage_size = "64G"
-  storage_pool = "proxmox"
+  storage_pool = "pve_rbd"
   storage_type = "raw"
   memory       = "8192"
   # storage_size2 = "500G"
