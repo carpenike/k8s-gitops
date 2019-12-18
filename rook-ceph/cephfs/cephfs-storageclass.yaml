@@ -12,11 +12,12 @@ parameters:
 
   # Ceph pool into which the volume shall be created
   # Required for provisionVolume: "true"
-  pool: cephfs_data
-
+  #pool: cephfs_data
+  provisionVolume: "false"
   # Root path of an existing CephFS volume
   # Required for provisionVolume: "false"
   # rootPath: /absolute/path
+  rootPath: /k8s
 
   # The secrets contain Ceph admin credentials. These are generated automatically by the operator
   # in the same namespace as the cluster.
