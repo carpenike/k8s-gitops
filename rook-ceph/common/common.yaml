@@ -1,3 +1,4 @@
+--- # ---
 ###################################################################################################################
 # Create the common resources that are necessary to start the operator and the ceph cluster.
 # These resources *must* be created before the operator.yaml and cluster.yaml or their variants.
@@ -11,13 +12,12 @@
 ###################################################################################################################
 
 # Namespace where the operator and other rook resources are created
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: rook-ceph
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: rook-ceph
 # OLM: BEGIN CEPH CRD
 # The CRD declarations
----
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
