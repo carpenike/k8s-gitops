@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://halkeye.github.io/helm-charts
     name: nzbhydra2
-    version: 2.9.5
+    version: 2.10.2
   values:
     image:
       #   repository: binhex/arch-nzbhydra2
