@@ -1,53 +1,53 @@
-# ---
-# apiVersion: helm.fluxcd.io/v1
-# kind: HelmRelease
-# metadata:
-#   name: nzbget
-#   namespace: default
-#   annotations:
-#     fluxcd.io/automated: "true"
-#     fluxcd.io/tag.chart-image: 'regexp:^(v[0-9]+\.[0-9]+-ls.*)$'
-# spec:
-#   releaseName: nzbget
-#   rollback:
-#     enable: true
-#   chart:
-#     repository: https://billimek.com/billimek-charts/
-#     name: nzbget
-#     version: 2.0.9
-#   values:
-#     image:
-#       repository: linuxserver/nzbget
-#       tag: v21.0-ls33
-#     service:
-#       type: LoadBalancer
-#       loadBalancerIP: 10.20.50.156
-#     ingress:
-#       enabled: true
-#       annotations:
-#         kubernetes.io/ingress.class: "nginx"
-#     timezone: "America/New_York"
-#     persistence:
-#       downloads:
-#         enabled: true
-#         existingClaim: nfs-tank-share-pvc
-#         subPath: nzbget/downloads
-#       config:
-#         enabled: true
-#         storageClass: rook-ceph-block
-#         size: 1Gi
-#     puid: 1000
-#     pgid: 1000
-#     # podAnnotations:
-#     #   backup.velero.io/backup-volumes: config
-#     tolerations:
-#     - key: "arm"
-#       operator: "Exists"
-#     resources:
-#       requests:
-#         memory: 300Mi
-#         cpu: 25m
-#       limits:
-#         memory: 400Mi
-#   valueFileSecrets:
-#   - name: "nzbget-helm-values"
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: nzbget
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: 'regexp:^(v[0-9]+\.[0-9]+-ls.*)$'
+spec:
+  releaseName: nzbget
+  rollback:
+    enable: true
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: nzbget
+    version: 2.0.9
+  values:
+    image:
+      repository: linuxserver/nzbget
+      tag: v21.0-ls33
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 10.20.50.156
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    timezone: "America/New_York"
+    persistence:
+      downloads:
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        subPath: nzbget/downloads
+      config:
+        enabled: true
+        storageClass: rook-ceph-block
+        size: 1Gi
+    puid: 1000
+    pgid: 1000
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: config
+    tolerations:
+      - key: "arm"
+        operator: "Exists"
+    resources:
+      requests:
+        memory: 300Mi
+        cpu: 25m
+      limits:
+        memory: 400Mi
+  valueFileSecrets:
+    - name: "nzbget-helm-values"
