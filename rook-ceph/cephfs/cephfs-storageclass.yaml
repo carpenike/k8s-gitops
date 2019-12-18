@@ -8,11 +8,11 @@ parameters:
   clusterID: rook-ceph
 
   # CephFS filesystem name into which the volume shall be created
-  fsName: cephfs_k8s
+  fsName: cephfs
 
   # Ceph pool into which the volume shall be created
   # Required for provisionVolume: "true"
-  pool: cephfs_k8s-data0
+  pool: cephfs_data
 
   # Root path of an existing CephFS volume
   # Required for provisionVolume: "false"
