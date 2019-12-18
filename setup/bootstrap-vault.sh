@@ -169,7 +169,7 @@ loadSecretsToVault() {
   # kvault "default/home-assistant/home-assistant-helm-values.txt"
   kvault "default/home-assistant/postgresql-helm-values.txt"
   kvault "default/home-assistant/pgadmin-helm-values.txt"
-  kvault "default/hubot/hubot-helm-values.txt"
+  # kvault "default/hubot/hubot-helm-values.txt"
   kvault "default/minio/minio-helm-values.txt"
   # kvault "default/nextcloud/nextcloud-helm-values.txt"
   kvault "default/node-red/node-red-helm-values.txt"

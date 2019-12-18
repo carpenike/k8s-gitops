@@ -6,14 +6,14 @@ metadata:
   namespace: monitoring
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
+    fluxcd.io/automated: "false"
     fluxcd.io/tag.grafana: semver:~6
 spec:
   releaseName: prometheus-operator
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: prometheus-operator
-    version: 8.2.2
+    version: 8.3.3
   values:
     server:
       resources:
@@ -47,6 +47,8 @@ spec:
       # tolerations:
       # - key: "arm"
       #   operator: "Exists"
+      deploymentStrategy:
+        type: Recreate
       podAnnotations:
         backup.velero.io/backup-volumes: storage
       persistence:
@@ -193,10 +195,9 @@ spec:
             honor_labels: true
             static_configs:
               - targets:
-                  - k8s-1:19999
-                  - k8s-2:19999
-                  - k8s-3:19999
-                  - k8s-master-a:19999
+                  - k3s-0:19999
+                  - k3s-1:19999
+                  - k3s-2:19999
                   - fw.holthome.net:19999
             #   - k3s-2:19999
             #   - k8s-4:19999
