@@ -6,7 +6,7 @@ alertmanager:
       - prom-alert.$DOMAIN
     annotations:
       nginx.ingress.kubernetes.io/auth-url: "https://auth.$DOMAIN/oauth2/auth"
-      nginx.ingress.kubernetes.io/auth-signin: https://auth.$DOMAIN/oauth2/start
+      nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/oauth2/start"
 prometheus:
   ingress:
     hosts: [prom-server.$DOMAIN]
@@ -37,4 +37,3 @@ grafana:
       auth_url: https://${AUTH0_DOMAIN}.auth0.com/authorize
       token_url: https://${AUTH0_DOMAIN}.auth0.com/oauth/token
       api_url: https://${AUTH0_DOMAIN}.auth0.com/userinfo
-      role_attribute_path = contains(info.groups[*], 'admin') && 'Admin' || contains(info.groups[*], 'editor') && 'Editor' || 'Viewer'
