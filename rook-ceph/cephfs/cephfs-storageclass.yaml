@@ -1,21 +1,18 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: rook-cephfs
-  # annotations:
-  #   storageclass.kubernetes.io/is-default-class: "true"
-# Change "rook-ceph" provisioner prefix to match the operator namespace if needed
+  name: csi-cephfs
 provisioner: rook-ceph.cephfs.csi.ceph.com
 parameters:
   # clusterID is the namespace where operator is deployed.
   clusterID: rook-ceph
 
   # CephFS filesystem name into which the volume shall be created
-  fsName: cephfs
+  fsName: cephfs_k8s
 
   # Ceph pool into which the volume shall be created
   # Required for provisionVolume: "true"
-  pool: cephfs-data
+  pool: cephfs_k8s-data0
 
   # Root path of an existing CephFS volume
   # Required for provisionVolume: "false"
@@ -28,6 +25,11 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
   csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
 
-  mounter: kernel
-
+  # (optional) The driver can use either ceph-fuse (fuse) or ceph kernel client (kernel)
+  # If omitted, default volume mounter will be used - this is determined by probing for ceph-fuse
+  # or by setting the default mounter explicitly via --volumemounter command-line argument.
+  # mounter: kernel
 reclaimPolicy: Delete
+mountOptions:
+  # uncomment the following line for debugging
+  #- debug
