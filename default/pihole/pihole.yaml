@@ -51,6 +51,8 @@ spec:
     persistentVolumeClaim:
       enabled: true
       storageClass: rook-cephfs
+      accessModes:
+        - ReadWriteMany
     resources:
       requests:
         memory: 300Mi
