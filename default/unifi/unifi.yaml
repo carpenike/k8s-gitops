@@ -15,7 +15,7 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: unifi
-    version: 0.5.1
+    version: 0.5.2
   values:
     image:
       repository: jacobalberty/unifi
@@ -55,7 +55,7 @@ spec:
       loadBalancerIP: 10.20.50.153
     podAnnotations:
       backup.velero.io/backup-volumes: unifi-data
-      resources:
+    resources:
       requests:
         memory: 500Mi
         cpu: 15m
