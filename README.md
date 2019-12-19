@@ -79,3 +79,12 @@ http://blog.mscloud.guru/2016/12/08/create-a-set-team-in-server-2016-howto/
 ## Add CEPH Storage to KVM
 
 https://blog.modest-destiny.com/posts/kvm-libvirt-add-ceph-rbd-pool/
+
+## Set application info on CephFS
+
+Sometimes needed for CephFS. Likely to be fixed in future
+
+```
+ceph osd pool application set cephfs-metadata cephfs metadata cephfs
+ceph osd pool application set cephfs-data0 cephfs data cephfs
+```
