@@ -1,12 +1,12 @@
 ---
-apiVersion: flux.weave.works/v1beta1
+apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: radarr
   namespace: default
   annotations:
-    flux.weave.works/automated: "false"
-    flux.weave.works/tag.chart-image: "glob:amd64-v0.*.*.*"
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: "glob:amd64-v0.*.*.*"
 spec:
   releaseName: radarr
   rollback:
