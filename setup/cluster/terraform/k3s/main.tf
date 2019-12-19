@@ -1,6 +1,6 @@
 provider "proxmox" {
   pm_tls_insecure = true
-  pm_api_url      = "https://pve-02.holthome.net:8006/api2/json"
+  pm_api_url      = "https://pve-01.holthome.net:8006/api2/json"
   pm_user         = "terraform@pve"
 }
 
@@ -33,7 +33,7 @@ EOF
   vlanid       = "20"
   bridge       = "vmbr0"
   storage_size = "64G"
-  storage_pool = "pve_rbd"
+  storage_pool = "pve-rbd"
   storage_type = "raw"
   memory       = "8192"
   # storage_size2 = "500G"
