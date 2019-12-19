@@ -63,6 +63,7 @@ installManualObjects(){
     CERT_MANAGER_READY="$?"
     sleep 5
   done
+  sleep 5
   kapply "$REPO_ROOT"/cert-manager/route53/cert-manager-letsencrypt.txt
 
 }

@@ -88,3 +88,7 @@ Sometimes needed for CephFS. Likely to be fixed in future
 ceph osd pool application set cephfs-metadata cephfs metadata cephfs
 ceph osd pool application set cephfs-data0 cephfs data cephfs
 ```
+
+## Enable Glances web service
+
+https://github.com/nicolargo/glances/wiki/Start-Glances-through-Systemd
