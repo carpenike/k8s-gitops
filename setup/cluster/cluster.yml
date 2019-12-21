@@ -1,32 +1,32 @@
 nodes:
-  - address: 10.20.30.10
-    hostname_override: k8s-master-a
-    user: ubuntu
-    role: [controlplane, etcd]
-  - address: 10.20.30.11
-    hostname_override: k8s-master-b
-    user: ubuntu
-    role: [controlplane, etcd]
-  - address: 10.20.30.12
-    hostname_override: k8s-master-c
-    user: ubuntu
-    role: [controlplane, etcd]
   - address: 10.20.40.10
+    hostname_override: k8s-0
+    user: ubuntu
+    role: [controlplane, etcd]
+#  - address: 10.20.30.11
+#    hostname_override: k8s-master-b
+#    user: ubuntu
+#    role: [controlplane, etcd]
+#  - address: 10.20.30.12
+#    hostname_override: k8s-master-c
+#    user: ubuntu
+#    role: [controlplane, etcd]
+  - address: 10.20.40.11
     hostname_override: k8s-1
     user: ubuntu
     role: [worker]
     labels:
       gpu: true
-  - address: 10.20.40.11
+  - address: 10.20.40.12
     hostname_override: k8s-2
     user: ubuntu
     role: [worker]
     #labels:
     #  app: intel-gpu-plugin
-  - address: 10.20.40.12
-    hostname_override: k8s-3
-    user: ubuntu
-    role: [worker]
+#  - address: 10.20.40.12
+#    hostname_override: k8s-3
+#    user: ubuntu
+#    role: [worker]
 # network:
 #   plugin: calico
 authentication:
