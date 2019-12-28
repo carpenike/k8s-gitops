@@ -1,0 +1,38 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ombi
+  namespace: default
+  annotations:
+    release: "ombi"
+    #fluxcd.io/automated: "true"
+    #fluxcd.io/tag.chart-image: "glob:latest"
+spec:
+  releaseName: ombi
+  chart:
+    repository: http://charts.blazure.com
+    name: ombi
+    version: 1.1
+  values:
+    image:
+      repository: linuxserver/ombi
+      tag: latest
+    ombi:
+      tz: "America/New_York"
+      PUID: 1000
+      PGID: 1000
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    persistence:
+      enabled: true
+      storageClassName: rook-ceph-block
+      size: 5Gi
+  valueFileSecrets:
+    - name: "ombi-helm-values"

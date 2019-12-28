@@ -1,0 +1,5 @@
+ingress:
+  hosts: [requests.$DOMAIN]
+  tls:
+  - hosts:
+    - requests.$DOMAIN
