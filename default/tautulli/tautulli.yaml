@@ -32,7 +32,7 @@ spec:
       backup.velero.io/backup-volumes: config
     persistence:
       enabled: true
-      storageClass: rook-ceph-block
+      storageClassName: rook-ceph-block
       size: 5Gi
   valueFileSecrets:
     - name: "tautulli-helm-values"
