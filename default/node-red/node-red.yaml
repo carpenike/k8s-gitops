@@ -23,6 +23,9 @@ spec:
     persistence:
       enabled: true
       storageClass: rook-cephfs
+    tolerations:
+    - key: "arm"
+      operator: "Exists"
     flows: "flows.json"
     ingress:
       enabled: true
