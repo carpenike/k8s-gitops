@@ -8,3 +8,5 @@ sourceControl:
   github:
     clientID: $DRONE_CLIENTID
     clientSecretValue: $DRONE_CLIENTSECRETVALUE
+server:
+  host: drone.$DOMAIN
