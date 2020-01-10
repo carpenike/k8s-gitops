@@ -1,0 +1,10 @@
+ingress:
+  hosts:
+    - drone.$DOMAIN
+  tls:
+  - hosts:
+    - drone.$DOMAIN
+sourceControl:
+  github:
+    clientID: $DRONE_CLIENTID
+    clientSecretValue: $DRONE_CLIENTSECRETVALUE

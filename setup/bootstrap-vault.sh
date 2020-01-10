@@ -187,6 +187,7 @@ loadSecretsToVault() {
   kvault "default/gitea/gitea-helm-values.txt"
   kvault "default/unifi/unifi-helm-values.txt"
   kvault "velero/velero/velero-helm-values.txt"
+  kvault "default/drone/drone-helm-values.txt"
 }
 
 FIRST_RUN=1
