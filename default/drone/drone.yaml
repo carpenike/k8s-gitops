@@ -46,6 +46,7 @@ spec:
       provider: github
     server:
       adminUser: carpenike
+      protocol: https
     resources:
       requests:
         memory: 32Mi
