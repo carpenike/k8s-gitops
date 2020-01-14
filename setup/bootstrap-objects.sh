@@ -30,6 +30,7 @@ installManualObjects(){
   ##########
   #kubectl --namespace kube-system delete secret vault > /dev/null 2>&1
   #kubectl --namespace kube-system create secret generic vault --from-literal=vault-unwrap-token="$VAULT_UNSEAL_TOKEN"
+  kubectl --namespace kube-system delete secret azure-vault > /dev/null 2>&1
   kubectl --namespace kube-system create secret generic azure-vault --from-literal=AZURE_TENANT_ID="$AZURE_TENANT_ID" --from-literal=AZURE_CLIENT_ID="$AZURE_CLIENT_ID" --from-literal=AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" --from-literal=VAULT_AZUREKEYVAULT_VAULT_NAME="$VAULT_AZUREKEYVAULT_VAULT_NAME" --from-literal=VAULT_AZUREKEYVAULT_KEY_NAME="$VAULT_AZUREKEYVAULT_KEY_NAME"
 
   ###################
