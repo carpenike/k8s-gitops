@@ -47,6 +47,7 @@ spec:
     server:
       adminUser: carpenike
       protocol: https
+      alwaysAuth: true
     resources:
       requests:
         memory: 32Mi
