@@ -11,9 +11,9 @@ metadata:
 spec:
   releaseName: tautulli
   chart:
-    repository: http://charts.blazure.com
+    repository: https://charts.blazure.com
     name: tautulli
-    version: 0.1.2
+    version: 0.1.3
   values:
     image:
       repository: tautulli/tautulli
