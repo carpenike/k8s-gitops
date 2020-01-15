@@ -23,7 +23,7 @@ spec:
       tz: America/New_York
     persistence:
       enabled: true
-      storageClass: rook-ceph-block
+      storageClassName: rook-ceph-block
     # tolerations:
     # - key: "arm"
     #   operator: "Exists"
