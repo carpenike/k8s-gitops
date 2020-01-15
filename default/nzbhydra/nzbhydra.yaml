@@ -18,7 +18,7 @@ spec:
   values:
     image:
       #   repository: binhex/arch-nzbhydra2
-      tag: 2.10.2-1-01
+      tag: 2.11.1-1-01
     podAnnotations:
       backup.velero.io/backup-volumes: nzbhydra2-config
     service:
