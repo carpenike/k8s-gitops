@@ -10,3 +10,5 @@ env:
   SMTP_HOST: smtp.holthome.net
   SMTP_FROM: bitwarden@holthome.net
   ADMIN_TOKEN: $BITWARDEN_ADMIN_TOKEN
+  SMTP_PORT: 25
+  SMTP_SSL: false

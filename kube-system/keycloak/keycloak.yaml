@@ -17,3 +17,5 @@ spec:
         deployPostgres: true
         storageClass: rook-ceph-block
         dbVendor: postgres
+  valueFileSecrets:
+    - name: "keycloak-helm-values"
