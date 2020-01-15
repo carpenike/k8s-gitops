@@ -1,0 +1,12 @@
+ingress:
+  hosts:
+    - bitwarden.$DOMAIN
+  tls:
+  - hosts:
+    - bitwarden.$DOMAIN
+env:
+  SERVER_ADMIN_EMAIL: ryan@ryanholt.net
+  DOMAIN: bitwarden.holthome.net
+  SMTP_HOST: smtp.holthome.net
+  SMTP_FROM: bitwarden@holthome.net
+  ADMIN_TOKEN: $BITWARDEN_ADMIN_TOKEN

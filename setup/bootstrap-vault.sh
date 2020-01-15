@@ -189,6 +189,7 @@ loadSecretsToVault() {
   kvault "velero/velero/velero-helm-values.txt"
   kvault "default/drone/drone-helm-values.txt"
   kvault "default/heimdall/heimdall-helm-values.txt"
+  kvault "default/bitwarden/bitwarden-helm-values.txt"
   kvault "kube-system/keycloak/keycloak-helm-values.txt"
 }
 
