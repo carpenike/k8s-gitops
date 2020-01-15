@@ -16,3 +16,4 @@ spec:
       persistence:
         deployPostgres: true
         storageClass: rook-ceph-block
+        dbVendor: postgres
