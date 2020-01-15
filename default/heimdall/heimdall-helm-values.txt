@@ -1,0 +1,6 @@
+ingress:
+  hosts:
+    - www.$DOMAIN
+  tls:
+  - hosts:
+    - www.$DOMAIN
