@@ -16,7 +16,7 @@ spec:
     version: 5.0.5
   values:
     image:
-      repository: jessestuart/minio
+      repository: minio/minio
       tag: RELEASE.2020-01-03T19-12-21Z
     persistence:
       existingClaim: "nfs-tank-share-pvc"
