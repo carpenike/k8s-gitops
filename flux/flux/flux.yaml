@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://charts.fluxcd.io/
     name: flux
-    version: 0.16.0
+    version: 1.0.0
   values:
     helmOperator:
       create: false
