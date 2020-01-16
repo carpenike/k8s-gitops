@@ -202,6 +202,10 @@ spec:
                   - k3s-1:19999
                   - k3s-2:19999
                   - fw.holthome.net:19999
+                  - pve-01.holthome.net:19999
+                  - pve-02.holthome.net:19999
+                  - pve-03.holthome.net:19999
+                  - pve-05.holthome.net:19999
           - job_name: "ceph-scrape"
             params:
               # format: prometheus | prometheus_all_hosts
