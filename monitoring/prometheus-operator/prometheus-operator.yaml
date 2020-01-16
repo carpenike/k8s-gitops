@@ -206,6 +206,7 @@ spec:
                   - pve-02.holthome.net:19999
                   - pve-03.holthome.net:19999
                   - pve-05.holthome.net:19999
+                  - plex.holthome.net:19999
           - job_name: "ceph-scrape"
             params:
               # format: prometheus | prometheus_all_hosts
