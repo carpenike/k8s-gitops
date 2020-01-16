@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: netdata/netdata
-      tag: v1.19.1
+      tag: v1.19.0
     ingress:
       enabled: true
       annotations:
