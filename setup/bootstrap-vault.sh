@@ -161,7 +161,7 @@ loadSecretsToVault() {
   kvault "monitoring/botkube/botkube-helm-values.txt"
   kvault "monitoring/chronograf/chronograf-helm-values.txt"
   kvault "monitoring/netdata/netdata-helm-values.txt"
-  # kvault "monitoring/comcast/comcast-helm-values.txt"
+  kvault "monitoring/comcast/comcast-helm-values.txt"
   kvault "monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
   # kvault "monitoring/uptimerobot/uptimerobot-helm-values.txt"
   # kvault "default/frigate/frigate-helm-values.txt"
