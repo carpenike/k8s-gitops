@@ -3,7 +3,7 @@
 # nodes
 K3S_MASTER="k3s-0"
 K3S_WORKERS_AMD64="k3s-1 k3s-2"
-K3S_WORKERS_ODROID=""
+K3S_WORKERS_ODROID="k3s-3"
 K3S_WORKERS_RPI=""
 K3S_VERSION="v1.17.0+k3s.1"
 
@@ -36,9 +36,6 @@ ks3amd64WorkerNodes() {
   for node in $K3S_WORKERS_AMD64; do
     message "joining amd64 $node to $K3S_MASTER"
     EXTRA_ARGS="--docker"
-    # if [ "$node" == "k3s-1" ]; then
-    #   EXTRA_ARGS="--node-label app=intel-gpu-plugin"
-    # fi
     ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k3s-0:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - $EXTRA_ARGS"
   done
 }
@@ -47,7 +44,11 @@ ks3OdroidWorkerNodes() {
   NODE_TOKEN=$(ssh -o "StrictHostKeyChecking=no" ubuntu@"$K3S_MASTER" "sudo cat /var/lib/rancher/k3s/server/node-token")
   for node in $K3S_WORKERS_ODROID; do
     message "joining amd64 $node to $K3S_MASTER"
-    ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k3s-0:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - --node-label tpu=google-coral --node-label app=intel-gpu-plugin"
+    EXTRA_ARGS="--docker"
+    if [ "$node" == "k3s-3" ]; then
+      EXTRA_ARGS="$EXTRA_ARGS --node-label tpu=google-coral"
+    fi
+    ssh -o "StrictHostKeyChecking=no" ubuntu@"$node" "curl -sfL https://get.k3s.io | K3S_URL=https://k3s-0:6443 K3S_TOKEN=$NODE_TOKEN INSTALL_K3S_VERSION='$K3S_VERSION' sh -s - $EXTRA_ARGS"
   done
 }
 
