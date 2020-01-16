@@ -210,7 +210,7 @@ spec:
             params:
               # format: prometheus | prometheus_all_hosts
               # You can use `prometheus_all_hosts` if you want Prometheus to set the `instance` to your hostname instead of IP
-              format: [prometheus]
+              #format: [prometheus]
             honor_labels: true
             static_configs:
               - targets:
