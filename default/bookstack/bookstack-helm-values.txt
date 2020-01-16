@@ -1,0 +1,6 @@
+ingress:
+  hosts:
+    - bookstack.$DOMAIN
+  tls:
+  - hosts:
+    - bookstack.$DOMAIN

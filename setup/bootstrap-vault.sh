@@ -193,6 +193,7 @@ loadSecretsToVault() {
   kvault "kube-system/keycloak/keycloak-helm-values.txt"
   kvault "kube-system/consul/consul-helm-values.txt"
   kvault "default/bazarr/bazarr-helm-values.txt"
+  kvault "default/bookstack/bookstack-helm-values.txt"
 }
 
 FIRST_RUN=1

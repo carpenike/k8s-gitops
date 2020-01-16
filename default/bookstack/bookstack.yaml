@@ -1,0 +1,40 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: bazarr
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: 'regexp:*-ls*)$'
+spec:
+  releaseName: bazarr
+  rollback:
+    enable: true
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: bookstack
+    version: 1.2.0
+  values:
+    image:
+      repository: solidnerd/bookstack
+      tag: 0.27.5
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+    mariadb:
+      master:
+        persistence:
+          enabled: true
+          storageClass: rook-ceph-block
+    persistence:
+      upload:
+        storageClass: rook-ceph-block
+      storage:
+        storageClass: rook-ceph-block
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: data
+  valueFileSecrets:
+    - name: "bookstack-helm-values"
