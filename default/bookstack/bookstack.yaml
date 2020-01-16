@@ -5,8 +5,8 @@ metadata:
   name: bookstack
   namespace: default
   annotations:
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: ''
+    # fluxcd.io/automated: "false"
+    # fluxcd.io/tag.chart-image: ''
 spec:
   releaseName: bookstack
   rollback:
