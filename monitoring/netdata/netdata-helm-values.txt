@@ -13,7 +13,7 @@ master:
       SEND_EMAIL="NO"
       SEND_SLACK="YES"
       SLACK_WEBHOOK_URL=$NETDATA_SLACK_WEBHOOK_URL
-      DEFAULT_RECIPIENT_SLACK=""
+      DEFAULT_RECIPIENT_SLACK=$NETDATA_SLACK_RECIPIENT
       role_recipients_slack[sysadmin]="${DEFAULT_RECIPIENT_SLACK}"
       role_recipients_slack[domainadmin]="${DEFAULT_RECIPIENT_SLACK}"
       role_recipients_slack[dba]="${DEFAULT_RECIPIENT_SLACK}"
