@@ -15,3 +15,5 @@ spec:
   values:
     csi:
       kubeletDirPath: /var/lib/kubelet
+      cephcsi:
+        image: colek42/csi-node-driver-registrar:latest
