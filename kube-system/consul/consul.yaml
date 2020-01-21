@@ -10,7 +10,7 @@ spec:
     enabled: true
   chart:
     git: https://github.com/hashicorp/consul-helm
-    ref: v0.15.0
+    ref: v0.16.2
     path: .
   values:
     server:
