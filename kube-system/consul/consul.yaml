@@ -14,6 +14,7 @@ spec:
     path: .
   values:
     server:
+      enabled: "true"
       # tolerations: |
       #   - key: "arm"
       #     operator: "Exists"
