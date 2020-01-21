@@ -14,12 +14,12 @@ spec:
     path: .
   values:
     server:
-      tolerations: |
-        - key: "arm"
-          operator: "Exists"
+      # tolerations: |
+      #   - key: "arm"
+      #     operator: "Exists"
       storageClass: rook-cephfs
       storage: 10Gi
-    client:
-      tolerations: |
-        - key: "arm"
-          operator: "Exists"
+    # client:
+    #   tolerations: |
+    #     - key: "arm"
+    #       operator: "Exists"
