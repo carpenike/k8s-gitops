@@ -15,12 +15,12 @@ spec:
   values:
     server:
       enabled: "true"
-      # tolerations: |
-      #   - key: "arm"
-      #     operator: "Exists"
-      storageClass: rook-cephfs
+      tolerations: |
+        - key: "arm"
+          operator: "Exists"
+      storageClass: nfs-client
       storage: 10Gi
-    # client:
-    #   tolerations: |
-    #     - key: "arm"
-    #       operator: "Exists"
+    client:
+      tolerations: |
+        - key: "arm"
+          operator: "Exists"
