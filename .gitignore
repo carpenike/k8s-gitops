@@ -1,2 +1,3 @@
 #.env
 setup/cluster/.DS_Store
+setup/keyvault.env
