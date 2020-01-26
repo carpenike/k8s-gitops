@@ -1,7 +1,7 @@
 #!/bin/bash
 
 K3S_MASTER="k3s-0"
-K3S_WORKERS_AMD64="k3s-1 k3s-2"
+K3S_WORKERS_AMD64="k3s-1 k3s-2 n2-0"
 K3S_WORKERS_RPI=""
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
