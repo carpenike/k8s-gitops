@@ -20,3 +20,9 @@ spec:
       kubeletDirPath: /var/lib/kubelet
       cephcsi:
         image: carpenike/cephcsi:v2.0-canary
+      pluginTolerations: |
+        - key: "arm"
+          operator: "Exists"
+      provisionerTolerations: |
+        - key: "arm"
+          operator: "Exists"
