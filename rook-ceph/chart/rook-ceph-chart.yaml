@@ -13,5 +13,10 @@ spec:
     name: rook-ceph
     version: v1.2.0
   values:
+    tolerations: |
+      - key: "arm"
+        operator: "Exists"
     csi:
       kubeletDirPath: /var/lib/kubelet
+      cephcsi:
+        image: carpenike/cephcsi:v2.0-canary
