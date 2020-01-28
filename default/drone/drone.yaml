@@ -48,6 +48,8 @@ spec:
       adminUser: carpenike
       protocol: https
       alwaysAuth: true
+      env:
+        DRONE_USER_FILTER: blazure,carpenike
     resources:
       requests:
         memory: 32Mi
