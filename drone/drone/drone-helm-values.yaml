@@ -2,9 +2,9 @@ apiVersion: ricoberger.de/v1alpha1
 kind: VaultSecret
 metadata:
   name: drone-helm-values
-  namespace: default
+  namespace: drone
 spec:
   keys:
     - values.yaml
-  path: secrets/default/drone/drone-helm-values
+  path: secrets/drone/drone/drone-helm-values
   type: Opaque
