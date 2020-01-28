@@ -21,6 +21,7 @@ spec:
       extraArgs: >
         -Dkeycloak.import=/realm/realm.json
         -Dkeycloak.migration.strategy=IGNORE_EXISTING
+        -Dkeycloak.migration.action=import
       extraVolumes: |
         - name: realm-secret
           secret:
