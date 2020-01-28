@@ -18,7 +18,9 @@ spec:
         deployPostgres: true
         storageClass: rook-ceph-block
         dbVendor: postgres
-      extraArgs: -Dkeycloak.import=/realm/realm.json
+      extraArgs: >
+        -Dkeycloak.import=/realm/realm.json
+        -Dkeycloak.migration.strategy=IGNORE_EXISTING
       extraVolumes: |
         - name: realm-secret
           secret:
