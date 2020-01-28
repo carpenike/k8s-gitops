@@ -28,8 +28,8 @@ spec:
         configMap:
           name: keycloak-configmap
           items:
-          - key: realm.json
-            path: realm.json
+            - key: realm.json
+              path: realm.json
     extraVolumeMounts: |
       - name: keycloak-config
         mountPath: /opt/jboss/keycloak/standalone/configuration/import/realm.json
