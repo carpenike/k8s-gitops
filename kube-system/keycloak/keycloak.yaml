@@ -18,5 +18,21 @@ spec:
         deployPostgres: true
         storageClass: rook-ceph-block
         dbVendor: postgres
+    extraArgs: >
+      -Dkeycloak.migration.action=import
+      -Dkeycloak.migration.provider=singleFile
+      -Dkeycloak.migration.file=/opt/jboss/keycloak/standalone/configuration/import/realm.json
+      -Dkeycloak.migration.strategy=IGNORE_EXISTING
+    extraVolumes: |
+      - name: keycloak-config
+        configMap:
+          name: keycloak-configmap
+          items:
+          - key: realm.json
+            path: realm.json
+    extraVolumeMounts: |
+      - name: keycloak-config
+        mountPath: /opt/jboss/keycloak/standalone/configuration/import/realm.json
+        subPath: realm.json
   valueFileSecrets:
     - name: "keycloak-helm-values"
