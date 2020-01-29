@@ -1,0 +1,19 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: keycloak
+  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: keycloak
+  chart:
+    git: https://github.com/stakater/ProxyInjector
+    ref: v0.0.23
+    path: deployments/kubernetes/chart/proxyinjector
+  values:
+    proxyinjector:
+      mount: "secret"
+      existingSecret: "proxyinjector-secret"
+#   valueFileSecrets:
+#     - name: "keycloak-helm-values"
