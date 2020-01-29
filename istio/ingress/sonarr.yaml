@@ -1,0 +1,19 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: sonarr 
+spec:
+  hosts:
+  - "sonarr.holthome.net"
+  gateways:
+  - ingressgateway 
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 8989 
+        host: sonarr 
