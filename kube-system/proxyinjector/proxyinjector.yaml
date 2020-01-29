@@ -14,6 +14,4 @@ spec:
   values:
     proxyinjector:
       mount: "secret"
-      existingSecret: "proxyinjector-secret"
-#   valueFileSecrets:
-#     - name: "keycloak-helm-values"
+      existingSecret: "proxyinjector-config"

@@ -20,11 +20,11 @@ spec:
         dbVendor: postgres
       extraArgs: -Dkeycloak.import=/realm/realm.json
       extraVolumes: |
-        - name: realm-secret
+        - name: keycloak-realm
           secret:
-            secretName: realm-secret
+            secretName: keycloak-realm
       extraVolumeMounts: |
-        - name: realm-secret
+        - name: keycloak-realm
           mountPath: "/realm/"
           readOnly: true
   valueFileSecrets:
