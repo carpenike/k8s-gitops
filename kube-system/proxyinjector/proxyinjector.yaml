@@ -9,7 +9,7 @@ spec:
   releaseName: proxyinjector
   chart:
     git: https://github.com/stakater/ProxyInjector
-    ref: master
+    ref: v0.0.23
     path: deployments/kubernetes/chart/proxyinjector
   values:
     proxyinjector:
