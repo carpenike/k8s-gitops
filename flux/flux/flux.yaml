@@ -17,7 +17,7 @@ spec:
     helmOperator:
       create: false
     git:
-      url: "git@ssh.dev.azure.com:v3/ryholt/HomeAutomation/k8s-gitops"
+      url: "git@github.com:carpenike/k8s-gitops"
     registry:
       rps: 1
       burst: 1
