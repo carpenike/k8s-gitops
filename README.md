@@ -1,3 +1,7 @@
+# Introduction
+
+Shamelessly stolen a lot of this from https://github.com/billimek/k8s-gitops. Thank you for the inspiration!
+
 # Helpful Links
 
 ## General
