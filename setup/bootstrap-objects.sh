@@ -33,6 +33,8 @@ installManualObjects(){
   kubectl --namespace kube-system delete secret azure-vault > /dev/null 2>&1
   #kubectl --namespace kube-system create secret generic azure-vault --from-literal=AZURE_TENANT_ID="$AZURE_TENANT_ID" --from-literal=AZURE_CLIENT_ID="$AZURE_CLIENT_ID" --from-literal=AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" --from-literal=VAULT_AZUREKEYVAULT_VAULT_NAME="$VAULT_AZUREKEYVAULT_VAULT_NAME" --from-literal=VAULT_AZUREKEYVAULT_KEY_NAME="$VAULT_AZUREKEYVAULT_KEY_NAME"
   kubectl -n kube-system create secret generic kms-vault --from-literal=config.hcl="$(echo $VAULT_KMS_CONFIG | base64 --decode)"
+  kubectl -n kube-system create secret generic keycloak-realm --from-literal=realm.json="$(echo $KEYCLOAK_REALM | base64 --decode)"
+  kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(echo $PROXYINJECTOR_CONFIG | base64 --decode)"
 
   ###################
   # nginx-external
