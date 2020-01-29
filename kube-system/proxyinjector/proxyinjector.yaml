@@ -1,12 +1,12 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: keycloak
+  name: proxyinjector
   namespace: kube-system
   annotations:
     fluxcd.io/automated: "false"
 spec:
-  releaseName: keycloak
+  releaseName: proxyinjector
   chart:
     git: https://github.com/stakater/ProxyInjector
     ref: v0.0.23
