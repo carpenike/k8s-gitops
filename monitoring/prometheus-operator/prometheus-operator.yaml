@@ -94,6 +94,9 @@ spec:
           vernemq:
             url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
             datasource: Prometheus
+          velero:
+            url: https://grafana.com/grafana/dashboards/11055/revisions/2/download
+            datasource: Prometheus
           # cable-modem-stats:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/cable_modem_stats.json
           #   datasource: influxdb
