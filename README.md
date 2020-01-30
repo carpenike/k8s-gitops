@@ -9,8 +9,8 @@ Kicking the tires on a switch to Istio from standard Ingress Controllers Generat
 Ref: https://istio.io/docs/setup/install/istioctl/
 
 1. Dump Default ISTIO Config:
-`istioctl profile dump default --set values.grafana.enabled=true --set values.tracing.enabled=true`
-2. Modify the ingressgateway section, to look like the below:
+`istioctl profile dump default --set values.grafana.enabled=true --set values.tracing.enabled=true > istio-manifest.yaml`
+2. Modify the ingressgateway section within the istio-manifest.yaml file, to look like the below:
 ```
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
