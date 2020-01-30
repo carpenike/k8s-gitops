@@ -2,6 +2,48 @@
 
 Shamelessly stolen a lot of this from https://github.com/billimek/k8s-gitops. Thank you for the inspiration!
 
+# Istio
+
+Kicking the tires on a switch to Istio from standard Ingress Controllers Generated the manifest files via istioctl
+
+Ref: https://istio.io/docs/setup/install/istioctl/
+
+1. Dump Default ISTIO Config:
+`istioctl profile dump default --set values.grafana.enabled=true --set values.tracing.enabled=true`
+2. Modify the ingressgateway section, to look like the below:
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ingressgateway
+  namespace: istio-system
+  labels:
+    release: istio
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+      - "*"
+    tls:
+      httpsRedirect: true
+  - hosts:
+    - '*'
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: acme-crt
+      mode: SIMPLE
+      privateKey: use sds
+      serverCertificate: use sds
+```
+
 # Helpful Links
 
 ## General
@@ -96,3 +138,4 @@ ceph osd pool application set cephfs-data0 cephfs data cephfs
 ## Enable Glances web service
 
 https://github.com/nicolargo/glances/wiki/Start-Glances-through-Systemd
+

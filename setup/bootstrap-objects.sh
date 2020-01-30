@@ -71,6 +71,19 @@ installManualObjects(){
   sleep 5
   kapply "$REPO_ROOT"/cert-manager/route53/cert-manager-letsencrypt.txt
 
+  #########################
+  # istio-system bootstrap
+  #########################
+  ISTIO_SYSTEM_READY=1
+  while [ $ISTIO_SYSTEM_READY != 0 ]; do
+    echo "waiting for istio-system to be fully ready..."
+    kubectl -n istio-system wait --for condition=Available deploy/istio-ingressgateway > /dev/null 2>&1
+    ISTIO_SYSTEM_READY="$?"
+    sleep 5
+  done
+  sleep 5
+  kapply "$REPO_ROOT"/istio-system/secret/kiali-secret.txt
+
 }
 
 export KUBECONFIG="$REPO_ROOT/setup/kubeconfig"
