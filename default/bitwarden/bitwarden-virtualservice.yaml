@@ -1,0 +1,19 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bitwarden
+spec:
+  hosts:
+  - "bitwarden.holthome.net"
+  gateways:
+  - ingressgateway.istio-system.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 80
+        host: bitwarden-bitwarden-k8s
