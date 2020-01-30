@@ -14,8 +14,8 @@ spec:
     enable: true
   chart:
     git: https://github.com/MoJo2600/pihole-kubernetes
-    ref: master
-    path: pihole
+    ref: pihole-1.3.1
+    path: charts/pihole
   values:
     image:
       repository: pihole/pihole
