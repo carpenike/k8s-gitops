@@ -12,23 +12,7 @@ spec:
   chart:
     repository: https://charts.fluxcd.io/
     name: flux
-    version: 1.0.0
-  values:
-    helmOperator:
-      create: false
-    git:
-      url: "git@github.com:carpenike/k8s-gitops"
-    registry:
-      rps: 1
-      burst: 1
-    memcached:
-      tolerations:
-        - key: "arm"
-          operator: "Exists"
-    additionalArgs:
-      - --connect=ws://fluxcloud
-    prometheus:
-      enabled: true
-    syncGarbageCollection:
-      enabled: true
-      dry: false
+    version: 1.1.0
+  valuesFrom:
+  - externalSourceRef:
+      url: https://raw.githubusercontent.com/carpenike/k8s-gitops/master/flux/flux/flux-values.yaml
