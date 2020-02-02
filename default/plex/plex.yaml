@@ -49,6 +49,7 @@
 #     resources:
 #       limits:
 #         # gpu.intel.com/i915: 1
+#         nvidia.com/gpu: 1
 #         memory: 4900Mi
 #       requests:
 #         cpu: 35m
