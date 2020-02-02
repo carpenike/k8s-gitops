@@ -5,10 +5,10 @@ git:
 registry:
   rps: 1
   burst: 1
-# memcached:
-#   tolerations:
-#   - key: "arm"
-#     operator: "Exists"
+memcached:
+  tolerations:
+  - key: "arm"
+    operator: "Exists"
 additionalArgs:
   - --connect=ws://fluxcloud
 prometheus:
