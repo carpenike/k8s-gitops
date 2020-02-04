@@ -1,0 +1,14 @@
+---
+
+- name: Deploy Flux
+  delegate_to: localhost
+  command: "{{ item }}"
+  become: no
+  with_items:
+    - helm repo add fluxcd https://charts.fluxcd.io
+    - helm upgrade --install flux --values {{ base }}/flux/flux/flux-values.yaml --namespace flux fluxcd/flux
+    - helm upgrade --install helm-operator --values {{ base }}/flux/helm-operator/flux-helm-operator-values.yaml --namespace flux fluxcd/helm-operator
+  register: flux_result
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  changed_when: "'created' in flux_result.stdout"

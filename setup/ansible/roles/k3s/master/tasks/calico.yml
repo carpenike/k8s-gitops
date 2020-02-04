@@ -1,0 +1,16 @@
+---
+
+- name: Deploy Calico Config
+  delegate_to: localhost
+  command: "{{ item }}"
+  become: no
+  with_items:
+    - kubectl apply -f {{ kubernetes_calico_manifest_file }}
+    - calicoctl apply -f {{ kubernetes_calico_bgp_file }}
+  register: calico_result
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+    CALICO_DATASTORE_TYPE: kubernetes
+    CALICO_KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  changed_when: "'created' in calico_result.stdout"
+  when: kubernetes_pod_network.cni == 'calico'

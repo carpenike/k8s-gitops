@@ -1,0 +1,11 @@
+# Setup tools on local host
+
+# kubectl
+# helm
+# calicoctl
+# velero
+# fluxctl
+# istioctl
+# restic
+# tiller
+# vault

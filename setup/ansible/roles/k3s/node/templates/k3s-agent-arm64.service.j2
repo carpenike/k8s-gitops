@@ -7,8 +7,8 @@ Wants=network-online.target
 WantedBy=multi-user.target
 
 [Service]
-Type=notify
-EnvironmentFile=/etc/systemd/system/k3s.service.env
+Type=exec
+EnvironmentFile=/etc/systemd/system/k3s-agent.service.env
 KillMode=process
 Delegate=yes
 LimitNOFILE=infinity
@@ -21,12 +21,8 @@ RestartSec=5s
 ExecStartPre=-/sbin/modprobe br_netfilter
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=/usr/local/bin/k3s \
-    server \
-        '--tls-san' \
-        '{{ k3s_master }}' \
-        '--no-deploy' \
-        'servicelb' \
-        '--no-deploy' \
-        'traefik' \
+    agent \
+        '--node-taint' \
+        'arm=true:NoExecute' \
         '--docker' \
         '--flannel-backend=none' \

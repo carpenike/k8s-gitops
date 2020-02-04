@@ -1,0 +1,4 @@
+---
+  - include: basics.yml
+  - include: docker.yml
+  - include: network.yml

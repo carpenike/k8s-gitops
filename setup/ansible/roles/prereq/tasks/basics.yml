@@ -1,0 +1,26 @@
+---
+  - name: Sets timezone to New_York.
+    command: timedatectl set-timezone America/New_York
+    become: true
+
+  - name: Update APT package manager repositories cache.
+    apt:
+      update_cache: yes
+    become: true
+
+  - name: Installing common tools.
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - htop
+      - unzip
+      - ntp
+      - glances
+      - iotop
+      - jq
+      - ceph-common
+      - nethogs
+      - iperf3
+      - nfs-common
+    become: true

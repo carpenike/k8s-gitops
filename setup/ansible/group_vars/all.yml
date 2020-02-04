@@ -1,6 +1,13 @@
 k3s_version: v1.17.2+k3s1
 ansible_user: ryan
+install_user: ryan
 systemd_dir: /etc/systemd/system
 master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
-K3S_MASTER: "k3s-master-a"
-K3S_VERSION: "v1.17.2+k3s1"
+k3s_master: "k3s-master-a"
+base: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
+kubernetes_pod_network:
+  cni: calico
+  cidr: '10.244.0.0/16'
+kubernetes_calico_manifest_file: "{{ base }}/kube-system/calico/calico.yaml"
+kubernetes_calico_bgp_file: "{{ base }}/kube-system/calico/bgp-fw.yaml"
+kubernetes_helm_: "{{ base }}/kube-system/calico/bgp-fw.yaml"
