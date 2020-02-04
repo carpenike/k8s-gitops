@@ -22,5 +22,4 @@ ExecStartPre=-/sbin/modprobe br_netfilter
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=/usr/local/bin/k3s \
     agent \
-        '--docker' \
-        '--no-flannel'
+        '--docker' 

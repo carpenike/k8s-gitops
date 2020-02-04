@@ -2,6 +2,7 @@ helmOperator:
   create: false
 git:
   url: "git@github.com:carpenike/k8s-gitops"
+  path: "devops"
 registry:
   rps: 1
   burst: 1
