@@ -11,4 +11,4 @@ spec:
     repository: https://nvidia.github.io/gpu-operator
     name: nvidia/gpu-operator
     version: nightly-43ad8fa9
-  values:
+  # values:
