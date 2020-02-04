@@ -99,18 +99,30 @@
     path: /var/lib/rancher/k3s/server
     mode: "{{ p.stat.mode }}"
 
-# - name: Create directory .kube
-#   file:
-#     path: ../kube-config
-#     state: directory
-#     owner: "{{ ansible_user }}"
-#   when: ( k3sfile.changed == True )
+- name: Create directory .kube
+  delegate_to: localhost
+  become: no
+  file:
+    path: ~/.kube
+    state: directory
+    owner: "{{ ansible_user }}"
+  when: ( k3sfile.changed == True )
 
 - name: Copy config file to user setup directory
   run_once: yes
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: '{{ base }}/setup/kubeconfig'
+    owner: "{{ ansible_user }}"
+    flat: yes
+  when: ( k3sfile.changed == True )
+
+- name: Copy config file to user home directory
+  run_once: yes
+  become: no
+  fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: '~/.kube/config'
     owner: "{{ ansible_user }}"
     flat: yes
   when: ( k3sfile.changed == True )

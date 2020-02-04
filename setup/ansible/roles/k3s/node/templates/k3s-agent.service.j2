@@ -23,4 +23,4 @@ ExecStartPre=-/sbin/modprobe overlay
 ExecStart=/usr/local/bin/k3s \
     agent \
         '--docker' \
-        '--flannel-backend=none' \
+        '--no-flannel'

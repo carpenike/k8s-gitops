@@ -24,8 +24,7 @@
     owner: root
     group: root
     mode: 0755
-  when: ( ansible_facts.architecture is search "arm" and 
-          ansible_facts.userspace_bits == "64" )
+  when: ( ansible_facts.architecture is search "arm" or ansible_facts.architecture is search "aarch64" ) and (ansible_facts.userspace_bits == "64" )
 
 - name: Copy K3s service env file (arm64)
   template:
@@ -34,8 +33,7 @@
     owner: root
     group: root
     mode: 0400
-  when: ( ansible_facts.architecture is search "arm" and 
-          ansible_facts.userspace_bits == "64" )
+  when: ( ansible_facts.architecture is search "arm" or ansible_facts.architecture is search "aarch64" ) and (ansible_facts.userspace_bits == "64" )
 
 - name: Copy K3s service file (x86_x64)
   template:
