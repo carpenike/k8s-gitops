@@ -15,6 +15,7 @@
   roles:
     - { role: k3s/master }
     - { role: k3s/helm }
+    - { role: k3s/flux }
 
 - hosts: nodes
 #  gather_facts: yes

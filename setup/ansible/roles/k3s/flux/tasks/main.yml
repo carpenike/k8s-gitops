@@ -12,3 +12,18 @@
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   changed_when: "'created' in flux_result.stdout"
+
+- name: Get Flux identity
+  delegate_to: localhost
+  command: "{{ item }}"
+  become: no
+  with_items:
+    - fluxctl identity
+  register: flux_identity
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  # retries: 5
+  # delay: 10
+
+- debug:
+    var: flux_identity
