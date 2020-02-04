@@ -16,3 +16,4 @@ Moving to a declarative deployment model leveraging Ansible.
 - curl
 - kubectl
 - fluxctl
+- calicoctl
