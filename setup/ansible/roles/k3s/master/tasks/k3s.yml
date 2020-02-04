@@ -98,7 +98,7 @@
   file:
     path: ~/.kube
     state: directory
-    owner: {{ ansible_user }}
+    owner: '{{ ansible_user }}'
   when: ( k3sfile.changed == True )
 
 - name: Copy config file to user setup directory
@@ -106,7 +106,7 @@
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: '{{ base }}/setup/kubeconfig'
-    owner: {{ ansible_user }}
+    owner: '{{ ansible_user }}'
     flat: yes
   when: ( k3sfile.changed == True )
 
@@ -116,7 +116,7 @@
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: '~/.kube/config'
-    owner: {{ ansible_user }}
+    owner: '{{ ansible_user }}'
     flat: yes
   when: ( k3sfile.changed == True )
 
