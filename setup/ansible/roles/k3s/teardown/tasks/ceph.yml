@@ -1,0 +1,36 @@
+---
+
+- name: Zap the drives
+  become: true
+  command: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - sgdisk --zap-all /dev/sdb
+    - sgdisk --zap-all /dev/sdc
+    - sgdisk --zap-all /dev/sdd
+  when: ( storage == 'ceph')
+
+- name: Remove LVM partitions
+  become: true
+  command: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
+  when: ( storage == 'ceph')
+
+- name: Wipe the block device
+  become: true
+  command: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - wipefs -af /dev/sdb
+    - wipefs -af /dev/sdc
+    - wipefs -af /dev/sdd
+  when: ( storage == 'ceph')
+
+# - name: Rebooting hosts
+#   reboot:
+#     msg: "Systems are being rebooted"
+#     reboot_timeout: 60
+#   ignore_errors: true
+#   when: ( storage == 'ceph')

@@ -19,13 +19,6 @@
     mode: 0755
   when: ( k3sfile.changed == True )
 
-  # - name: Install K3S on master.
-  #   command: /home/{{ install_user }}/k3s-installer.sh server --bind-address {{ node_ip }} --node-label kubernetes.io/role=master --node-label node-role.kubernetes.io/master=true --node-taint node-role.kubernetes.io/master=true:NoSchedule
-  #   environment:
-  #     INSTALL_K3S_VERSION: "{{ k3s_version }}"
-  #   when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
-  #   become: true
-
 - name: Copy K3s service file
   register: k3s_service
   template:
@@ -105,7 +98,7 @@
   file:
     path: ~/.kube
     state: directory
-    owner: "{{ ansible_user }}"
+    owner: 1000
   when: ( k3sfile.changed == True )
 
 - name: Copy config file to user setup directory
@@ -113,7 +106,7 @@
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: '{{ base }}/setup/kubeconfig'
-    owner: "{{ ansible_user }}"
+    owner: 1000
     flat: yes
   when: ( k3sfile.changed == True )
 
@@ -123,7 +116,7 @@
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: '~/.kube/config'
-    owner: "{{ ansible_user }}"
+    owner: 1000
     flat: yes
   when: ( k3sfile.changed == True )
 
