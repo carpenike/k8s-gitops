@@ -1,6 +1,7 @@
 ---
 
 - name: apply storage annotations
+  ignore_errors: yes
   command: kubectl label node {{ item }} node-role.kubernetes.io/storage=true
   with_items:
     - r610-0
@@ -10,6 +11,7 @@
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
 
 - name: apply worker annotations
+  ignore_errors: yes
   command: kubectl label node {{ item }} node-role.kubernetes.io/worker=true
   with_items:
     - r610-0
