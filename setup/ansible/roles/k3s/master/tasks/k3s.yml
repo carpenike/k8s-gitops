@@ -112,7 +112,7 @@
 
 - name: Copy config file to user home directory
   run_once: yes
-  become: no
+  become: yes
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: '~/.kube/config'
@@ -121,9 +121,21 @@
   when: ( k3sfile.changed == True )
 
 - name: Replace https://localhost:6443 by https://{{ k3s_master }}:6443
-  connection: local
+  run_once: yes
+  become: no
+  delegate_to: localhost
   replace:
     path: '{{ base }}/setup/kubeconfig'
+    regexp: 'https://127.0.0.1:6443'
+    replace: 'https://{{ k3s_master }}:6443'
+  when: ( k3sfile.changed == True )
+
+- name: Replace https://localhost:6443 by https://{{ k3s_master }}:6443 (Home File)
+  run_once: yes  
+  become: no
+  delegate_to: localhost
+  replace:
+    path: '~/.kube/config'
     regexp: 'https://127.0.0.1:6443'
     replace: 'https://{{ k3s_master }}:6443'
   when: ( k3sfile.changed == True )
