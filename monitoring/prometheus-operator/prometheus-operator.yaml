@@ -232,12 +232,12 @@ spec:
             #   static_configs:
             #     - targets:
             #         - nvr:9182
-          - job_name: "home-assistant"
-            scrape_interval: 60s
-            metrics_path: /api/prometheus
-            bearer_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIyNGYzMzU0YjNhZTI0YWM4YTg5MTM2ZWJiZmI3NjIyYSIsImlhdCI6MTU3NTE0MTkwOCwiZXhwIjoxODkwNTAxOTA4fQ.wEgPgM6ZtLo6hJ8Z8RDt7HiXxefpE0wI1YZyUHnMxu8"
-            scheme: https
-            static_configs:
-              - targets: ["ha.holthome.net:443"]
+          # - job_name: "home-assistant"
+          #   scrape_interval: 60s
+          #   metrics_path: /api/prometheus
+          #   
+          #   scheme: https
+          #   static_configs:
+          #     - targets: ["ha.holthome.net:443"]
   valueFileSecrets:
     - name: "prometheus-operator-helm-values"
