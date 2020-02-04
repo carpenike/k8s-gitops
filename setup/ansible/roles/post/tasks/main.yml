@@ -1,1 +1,20 @@
-# apply taints / node types
+---
+
+- name: apply storage annotations
+  command: kubectl label node {{ item }} node-role.kubernetes.io/storage=true
+  with_items:
+    - r610-0
+    - r610-1
+    - r610-2
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+
+- name: apply worker annotations
+  command: kubectl label node {{ item }} node-role.kubernetes.io/worker=true
+  with_items:
+    - r610-0
+    - r610-1
+    - r610-2
+    - n2-0
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
