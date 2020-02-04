@@ -11,3 +11,4 @@ kubernetes_pod_network:
 kubernetes_calico_manifest_file: "{{ base }}/devops/kube-system/calico/calico.yaml"
 kubernetes_calico_bgp_file: "{{ base }}/devops/kube-system/calico/bgp-fw.yaml"
 kubernetes_helm_: "{{ base }}/devops/kube-system/calico/bgp-fw.yaml"
+kubernetes_prometheus_servicemonitor_manifest_file: "https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml"
