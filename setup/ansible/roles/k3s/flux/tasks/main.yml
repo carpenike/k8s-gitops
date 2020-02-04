@@ -12,6 +12,8 @@
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   changed_when: "'created' in flux_result.stdout"
+  retries: 5
+  delay: 10
 
 - name: Get Flux identity
   delegate_to: localhost
@@ -22,8 +24,9 @@
   register: flux_identity
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
-  # retries: 5
-  # delay: 10
+    FLUX_FORWARD_NAMESPACE: flux
+  retries: 5
+  delay: 10
 
 - debug:
     var: flux_identity
