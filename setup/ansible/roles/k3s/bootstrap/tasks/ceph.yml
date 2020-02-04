@@ -1,4 +1,4 @@
-- name: Check for Ceph being Ready
+- name: Wait for Ceph to be ready
   command: "{{ item }}"
   with_items:
     - kubectl -n rook-ceph wait --for condition=Established crd/volumes.rook.io
