@@ -29,4 +29,5 @@ ExecStart=/usr/local/bin/k3s \
         '--no-deploy' \
         'traefik' \
         '--docker' \
-        '--flannel-backend=none'
+        '--flannel-backend=none' \
+        '--default-local-storage-path /dev/shm'
