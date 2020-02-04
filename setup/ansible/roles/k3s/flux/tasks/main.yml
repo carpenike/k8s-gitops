@@ -1,9 +1,7 @@
 ---
 
 - name: Add Flux Repo
-  # delegate_to: localhost
   command: "{{ item }}"
-  # become: no
   with_items:
     - helm repo add fluxcd https://charts.fluxcd.io
   register: flux_repo_results
@@ -15,9 +13,7 @@
   delay: 10
 
 - name: Deploy Flux
-  # delegate_to: localhost
   command: "{{ item }}"
-  # become: no
   with_items:
     - helm upgrade --install flux --values {{ base }}/devops/flux/flux/flux-values.yaml --namespace flux fluxcd/flux
     - helm upgrade --install helm-operator --values {{ base }}/devops/flux/helm-operator/flux-helm-operator-values.yaml --namespace flux fluxcd/helm-operator
@@ -30,10 +26,7 @@
   delay: 10
 
 - name: Get Flux identity
-  # delegate_to: localhost
-  # ignore_errors: yes
   command: "{{ item }}"
-  # become: no
   with_items:
     - fluxctl identity
   register: flux_identity
@@ -45,7 +38,5 @@
   delay: 10
 
 - name: Register Flux Identity with GitHub
-  # delegate_to: localhost
-  # become: no
   script: "{{ base }}/setup/add-repo-key.sh '{{ flux_identity.results[0].stdout }}'"
   register: register_result
