@@ -14,11 +14,19 @@
   become: yes
   roles:
     - { role: k3s/master }
-    - { role: k3s/helm }
-    - { role: k3s/flux }
+    # - { role: k3s/helm }
+    # - { role: k3s/flux }
 
 - hosts: nodes
 #  gather_facts: yes
   become: yes
   roles:
     - { role: k3s/node }
+
+# Bootstrap the required components
+- hosts: localhost
+#  gather_facts: yes
+  become: no
+  roles:
+    - { role: k3s/helm }
+    - { role: k3s/flux }

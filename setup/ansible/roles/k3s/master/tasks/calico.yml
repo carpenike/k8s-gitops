@@ -13,4 +13,8 @@
     CALICO_DATASTORE_TYPE: kubernetes
     CALICO_KUBECONFIG: "{{ base }}/setup/kubeconfig"
   changed_when: "'created' in calico_result.stdout"
+  #until: "'created' in calico_result.stdout or 'unchanged' in calico_result.stdout"
+  until: calico_result is succeeded
+  retries: 6
+  delay: 10
   when: kubernetes_pod_network.cni == 'calico'
