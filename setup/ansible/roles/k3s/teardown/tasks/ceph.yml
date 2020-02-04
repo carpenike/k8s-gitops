@@ -28,9 +28,9 @@
     - wipefs -af /dev/sdd
   when: ( storage == 'ceph')
 
-# - name: Rebooting hosts
-#   reboot:
-#     msg: "Systems are being rebooted"
-#     reboot_timeout: 60
-#   ignore_errors: true
-#   when: ( storage == 'ceph')
+- name: Rebooting hosts
+  reboot:
+    msg: "Systems are being rebooted"
+    reboot_timeout: 60
+  ignore_errors: true
+  when: ( storage == 'ceph')

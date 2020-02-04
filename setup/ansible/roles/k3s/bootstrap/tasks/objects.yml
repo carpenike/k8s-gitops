@@ -1,0 +1,25 @@
+---
+
+- name: Bootstrap Kubernetes Secrets
+  command: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - kubectl -n kube-system create secret generic kms-vault --from-literal=config.hcl="$(echo $VAULT_KMS_CONFIG | base64 --decode)"
+    - kubectl -n kube-system create secret generic keycloak-realm --from-literal=realm.json="$(echo $KEYCLOAK_REALM | base64 --decode)"
+    - kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(echo $PROXYINJECTOR_CONFIG | base64 --decode)"
+  register: kms_secret_results
+  environment:
+    VAULT_KMS_CONFIG: "{{ VAULT_KMS_CONFIG }}"
+    KEYCLOAK_REALM: "{{ KEYCLOAK_REALM }}"
+    PROXYINJECTOR_CONFIG: "{{ PROXYINJECTOR_CONFIG }}"
+  # changed_when: "'All items completed' in kms_secret_results.msg"
+
+
+# - name: Load Values into Vault
+#   script: "{{ base }}/setup/kapply.sh {{ item }}"
+#   with_items:
+#     - "{{}}""
+
+- name: Output KMS Config Variable
+  debug:
+    var: kms_secret_results

@@ -1,0 +1,4 @@
+---
+  - include: objects.yml
+  - include: ceph.yml
+  # - include: crd.yml

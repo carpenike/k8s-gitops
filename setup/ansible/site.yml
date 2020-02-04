@@ -29,3 +29,4 @@
     - { role: k3s/helm }
     - { role: k3s/flux }
     - { role: post }
+    - { role: k3s/bootstrap }
