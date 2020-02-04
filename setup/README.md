@@ -9,6 +9,7 @@ Moving to a declarative deployment model leveraging Ansible.
 - https://github.com/geerlingguy/ansible-role-kubernetes
 - https://github.com/onedr0p/k3s-gitops
 - https://coderwall.com/p/13lh6w/dump-all-variables
+- https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#best-practices-for-variables-and-vaults
 
 ## Requirements
 - Ansible
