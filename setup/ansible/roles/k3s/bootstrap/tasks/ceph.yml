@@ -9,6 +9,3 @@
   until: "'customresourcedefinition.apiextensions.k8s.io/volumes.rook.io condition met' in ceph_status.stdout"
   retries: 30
   delay: 60
-
-- debug:
-    var: ceph_status
