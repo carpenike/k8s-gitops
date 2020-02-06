@@ -139,3 +139,10 @@ ceph osd pool application set cephfs-data0 cephfs data cephfs
 
 https://github.com/nicolargo/glances/wiki/Start-Glances-through-Systemd
 
+## GPG Configuration & GPT-Crypt setup
+
+Looking to use this to encrypt the vault unlock key -- allows storage of everything needed by Ansible for deployment in the repository.
+
+- Generate GPG Keys: https://www.thesecuritybuddy.com/pgp-and-gpg/how-to-generate-gpg-key
+- Backup GPG Keys: https://tunjos.co/blog/backup-your-gpg-key/
+- Use Keys with Git-Crypt: https://wwsean08.com/2018/05/git-crypt/
