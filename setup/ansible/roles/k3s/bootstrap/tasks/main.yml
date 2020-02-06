@@ -1,4 +1,4 @@
 ---
   - include: objects.yml
   - include: ceph.yml
-  # - include: crd.yml
+  - include: cert-manager.yml
