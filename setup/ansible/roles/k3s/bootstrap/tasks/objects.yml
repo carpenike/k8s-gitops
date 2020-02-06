@@ -19,7 +19,3 @@
 #   script: "{{ base }}/setup/kapply.sh {{ item }}"
 #   with_items:
 #     - "{{}}""
-
-- name: Output KMS Config Variable
-  debug:
-    var: kms_secret_results
