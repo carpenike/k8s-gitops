@@ -1,4 +1,4 @@
-- hosts: localhost
+- hosts: vault
   gather_facts: true
   tasks:
   - name: output all variables
