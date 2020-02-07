@@ -12,44 +12,113 @@
   retries: 30
   delay: 60
 
-- name: Check Vault Sealed Status
+- name: Check Vault Initialized Status
   shell: "{{ item }}"
   with_items:
     - kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.initialized'
-  register: vault_sealed_status
+  register: initialized_vault_status
 
-- name: Unseal (if Sealed)
+- debug:
+    var: initialized_vault_status
+
+- name: Check Vault Sealed Status
+  shell: "{{ item }}"
+  with_items:
+    - kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.sealed'
+  register: sealed_vault_status
+
+- debug:
+    var: sealed_vault_status
+
+- name: Initialize Vault
   shell: "{{ item }}"
   with_items:
     - kubectl -n kube-system exec "vault-0" -- vault operator init -format json -recovery-shares=1 -recovery-threshold=1 
   register: initialize_vault_status
-  when: ( vault_sealed_status.results[0].stdout == false )
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+
+- name: Store Recovery & Root Token
+  set_fact:
+    VAULT_RECOVERY_TOKEN: "{{ (initialize_vault_status.results[0].stdout | from_json).recovery_keys_b64 | first }}"
+    VAULT_ROOT_TOKEN: "{{ (initialize_vault_status.results[0].stdout | from_json).root_token }}"
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- name: Decrypt Vault Secret File
+  ignore_errors: yes
+  command: "ansible-vault decrypt group_vars/vault/vault.yml" 
+  register: vault_decrypt
+  when: ( vault_initialized_status.results[0].stdout == "false" )
+
+- name: Update ansible-vault secret wtih root token
+  lineinfile:
+    dest: group_vars/vault/vault.yml
+    regexp: '^vault_VAULT_ROOT_TOKEN'
+    line: "vault_VAULT_ROOT_TOKEN: {{ VAULT_ROOT_TOKEN }}"
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- name: Update ansible-vault secret wtih recovery token
+  lineinfile:
+    dest: group_vars/vault/vault.yml
+    regexp: '^vault_VAULT_RECOVERY_TOKEN:'
+    line: "vault_VAULT_RECOVERY_TOKEN: {{ VAULT_RECOVERY_TOKEN }}"
+  when: ( initialized_vault_status.results[0].stdout == "false" ) 
+
+- name: Encrypt Vault Secret File
+  command: "ansible-vault encrypt group_vars/vault/vault.yml"
+  register: vault_encrypt
+  changed_when: "'Encryption successful' in vault_encrypt.stdout"
+  when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - debug:
-    var: initialize_vault_status
+   var: vault_encrypt
 
+- name: Unseal Vault
+  shell: "{{ item }}"
+  with_items:
+    - kubectl -n kube-system exec "vault-0" -- vault operator unseal $VAULT_RECOVERY_TOKEN 
+  environment:
+    VAULT_RECOVERY_TOKEN: "{{ VAULT_RECOVERY_TOKEN }}"
+  register: unseal_vault_status
+  when: ( sealed_vault_status.results[0].stdout == "true" )
 
-#- name: Decrypt Vault Secret File
-#  ignore_errors: yes
-#  command: "ansible-vault decrypt group_vars/vault/vault.yml" 
-#  register: vault_decrypt
+- debug:
+    var: unseal_vault_status
 
+- name: Port Forward Vault
+  shell: "{{ item }}"
+  with_items:
+    - kubectl -n kube-system port-forward svc/vault 8200:8200 &
+  async: 300
+  poll: 0
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  register: vault_port_forward
 
-#- name: Encrypt Vault Secret File
-#  command: "ansible-vault encrypt group_vars/vault/vault.yml"
-#  register: vault_encrypt
+- debug:
+    var: VAULT_ROOT_TOKEN
 
-#- debug:
-#    var: vault_encrypt
+- name: Login to Vault
+  shell: "{{ item }}"
+  with_items:
+    - vault login $VAULT_ROOT_TOKEN
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_ROOT_TOKEN: "{{ VAULT_ROOT_TOKEN }}"
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  register: vault_login
 
-#- name: Create Kiali Secret
-#  command: "{{ item }}"
-#  with_items:
-#    - "{{ base }}/setup/kapply.sh {{ base }}/devops/istio-system/secret/kiali-secret.txt" 
-#  register: kiali_status
-#  environment:
-#    KUBECONFIG: "{{ base }}/setup/kubeconfig"
-#    KIALI_USERNAME: "{{ KIALI_USERNAME }}" 
-#    KIALI_PASSPHRASE: "{{ KIALI_PASSPHRASE }}"
-#  changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
+- debug:
+    var: vault_login
 
+- name: Show Vault Auth Providers
+  shell: "{{ item }}"
+  with_items:
+    - vault auth list
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  register: vault_auth_list
+
+- debug:
+    var: vault_auth_list
