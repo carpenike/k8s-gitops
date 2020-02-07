@@ -1,33 +1,6 @@
 ---
 
-- hosts: k3s_cluster
-  gather_facts: yes
-  become: yes
-  roles:
-    - { role: prereq }
-    - { role: download }
-    #- { role: raspbian }
-
-
-- hosts: master
-  gather_facts: yes
-  become: yes
-  roles:
-    - { role: k3s/master }
-
-- hosts: nodes
-#  gather_facts: yes
-  become: yes
-  roles:
-    - { role: k3s/node }
-
-# Bootstrap the required components
-- hosts: localhost
-#  gather_facts: yes
-  become: no
-  roles:
-    - { role: k3s/helm }
-    - { role: k3s/flux }
-    - { role: post }
-    - { role: k3s/bootstrap }
-    - { role: k3s/vault }
+- include: pre-reqs.yml
+- include: k3s-master.yml
+- include: k3s-nodes.yml
+- include: k3s-bootstrap.yml

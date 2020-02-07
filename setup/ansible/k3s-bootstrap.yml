@@ -1,0 +1,11 @@
+---
+
+- hosts: localhost
+#  gather_facts: yes
+  become: no
+  roles:
+    - { role: k3s/helm }
+    - { role: k3s/flux }
+    - { role: post }
+    - { role: k3s/bootstrap }
+    - { role: k3s/vault }

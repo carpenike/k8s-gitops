@@ -18,16 +18,15 @@
     - kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.initialized'
   register: vault_sealed_status
 
-
 - name: Unseal (if Sealed)
   shell: "{{ item }}"
   with_items:
-    - 
-  register: vault_unsealed
+    - kubectl -n kube-system exec "vault-0" -- vault operator init -format json -recovery-shares=1 -recovery-threshold=1 
+  register: initialize_vault_status
   when: ( vault_sealed_status.results[0].stdout == false )
 
 - debug:
-    var: vault_sealed_status
+    var: initialize_vault_status
 
 
 #- name: Decrypt Vault Secret File

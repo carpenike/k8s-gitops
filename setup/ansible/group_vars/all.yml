@@ -8,6 +8,10 @@ base: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
 kubernetes_pod_network:
   cni: calico
   cidr: '10.244.0.0/16'
+allowed_kubernetes_access:
+  - 10.9.18.225
+  - 2601:154:c101:5801:8005:69ff:fe55:bc21
+  - 10.20.100.46
 kubernetes_calico_manifest_file: "{{ base }}/devops/kube-system/calico/calico.yaml"
 kubernetes_calico_bgp_file: "{{ base }}/devops/kube-system/calico/bgp-fw.yaml"
 kubernetes_helm_: "{{ base }}/devops/kube-system/calico/bgp-fw.yaml"
