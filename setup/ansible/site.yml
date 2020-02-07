@@ -10,7 +10,7 @@
 
 
 - hosts: master
-#  gather_facts: yes
+  gather_facts: yes
   become: yes
   roles:
     - { role: k3s/master }
@@ -30,3 +30,4 @@
     - { role: k3s/flux }
     - { role: post }
     - { role: k3s/bootstrap }
+    - { role: k3s/vault }

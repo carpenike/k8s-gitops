@@ -1,0 +1,25 @@
+---
+
+- name: Wait for Istio-System to be ready
+  command: "{{ item }}"
+  with_items:
+    - kubectl -n istio-system wait --for condition=Available deployment/istio-ingressgateway
+  register: istio_status
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  changed_when: "'deployment.apps/cert-manager condition met' in istio_status.stdout"
+  until: "'deployment.apps/istio-ingressgateway condition met' in istio_status.stdout"
+  retries: 30
+  delay: 60
+
+- name: Create Kiali Secret
+  command: "{{ item }}"
+  with_items:
+    - "{{ base }}/setup/kapply.sh {{ base }}/devops/istio-system/secret/kiali-secret.txt" 
+  register: kiali_status
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+    KIALI_USERNAME: "{{ KIALI_USERNAME }}" 
+    KIALI_PASSPHRASE: "{{ KIALI_PASSPHRASE }}"
+#  changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
+

@@ -1,0 +1,56 @@
+---
+
+- name: Wait for Vault to be ready
+  command: "{{ item }}"
+  with_items:
+    - kubectl -n kube-system wait --for condition=Initialized pod/vault-0
+  register: vault_pod_status
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  changed_when: "'pod/vault-0 condition met' in vault_pod_status.stdout"
+  until: "'pod/vault-0 condition met' in vault_pod_status.stdout"
+  retries: 30
+  delay: 60
+
+- name: Check Vault Sealed Status
+  shell: "{{ item }}"
+  with_items:
+    - kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.initialized'
+  register: vault_sealed_status
+
+
+- name: Unseal (if Sealed)
+  shell: "{{ item }}"
+  with_items:
+    - 
+  register: vault_unsealed
+  when: ( vault_sealed_status.results[0].stdout == false )
+
+- debug:
+    var: vault_sealed_status
+
+
+#- name: Decrypt Vault Secret File
+#  ignore_errors: yes
+#  command: "ansible-vault decrypt group_vars/vault/vault.yml" 
+#  register: vault_decrypt
+
+
+#- name: Encrypt Vault Secret File
+#  command: "ansible-vault encrypt group_vars/vault/vault.yml"
+#  register: vault_encrypt
+
+#- debug:
+#    var: vault_encrypt
+
+#- name: Create Kiali Secret
+#  command: "{{ item }}"
+#  with_items:
+#    - "{{ base }}/setup/kapply.sh {{ base }}/devops/istio-system/secret/kiali-secret.txt" 
+#  register: kiali_status
+#  environment:
+#    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+#    KIALI_USERNAME: "{{ KIALI_USERNAME }}" 
+#    KIALI_PASSPHRASE: "{{ KIALI_PASSPHRASE }}"
+#  changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
+

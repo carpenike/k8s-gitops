@@ -1,7 +1,7 @@
 ---
 
 - name: Bootstrap Kubernetes Secrets
-  command: "{{ item }}"
+  shell: "{{ item }}"
   ignore_errors: yes
   with_items:
     - kubectl -n kube-system create secret generic kms-vault --from-literal=config.hcl="$(echo $VAULT_KMS_CONFIG | base64 --decode)"
