@@ -22,7 +22,7 @@
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   changed_when: "'has been upgraded' in flux_results.stdout"
   until: "'has been upgraded' in flux_results.stdout"
-  retries: 6
+  retries: 10
   delay: 10
 
 - name: Get Flux identity
@@ -34,7 +34,7 @@
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
     FLUX_FORWARD_NAMESPACE: flux
   until: "'ssh-rsa' in flux_identity.stdout"
-  retries: 6
+  retries: 10
   delay: 10
 
 - name: Register Flux Identity with GitHub
