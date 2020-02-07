@@ -1,5 +1,19 @@
 ---
 
+
+- name: Delete Kubernetes Secrets
+  shell: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - kubectl -n kube-system delete secret kms-vault
+    - kubectl -n kube-system create secret keycloak-realm
+    - kubectl -n kube-system create secret proxyinjector-config
+  register: kms_delete_secret_results
+
+- debug:
+    var: kms_delete_secret_results
+    
+
 - name: Bootstrap Kubernetes Secrets
   shell: "{{ item }}"
   ignore_errors: yes
@@ -13,9 +27,3 @@
     KEYCLOAK_REALM: "{{ KEYCLOAK_REALM }}"
     PROXYINJECTOR_CONFIG: "{{ PROXYINJECTOR_CONFIG }}"
   # changed_when: "'All items completed' in kms_secret_results.msg"
-
-
-# - name: Load Values into Vault
-#   script: "{{ base }}/setup/kapply.sh {{ item }}"
-#   with_items:
-#     - "{{}}""
