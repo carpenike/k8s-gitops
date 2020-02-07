@@ -18,17 +18,11 @@
     - kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.initialized'
   register: initialized_vault_status
 
-- debug:
-    var: initialized_vault_status
-
 - name: Check Vault Sealed Status
   shell: "{{ item }}"
   with_items:
     - kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.sealed'
   register: sealed_vault_status
-
-- debug:
-    var: sealed_vault_status
 
 - name: Initialize Vault
   shell: "{{ item }}"
@@ -48,7 +42,7 @@
   ignore_errors: yes
   command: "ansible-vault decrypt group_vars/vault/vault.yml" 
   register: vault_decrypt
-  when: ( vault_initialized_status.results[0].stdout == "false" )
+  when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Update ansible-vault secret wtih root token
   lineinfile:
@@ -70,9 +64,6 @@
   changed_when: "'Encryption successful' in vault_encrypt.stdout"
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
-- debug:
-   var: vault_encrypt
-
 - name: Unseal Vault
   shell: "{{ item }}"
   with_items:
@@ -82,43 +73,29 @@
   register: unseal_vault_status
   when: ( sealed_vault_status.results[0].stdout == "true" )
 
-- debug:
-    var: unseal_vault_status
-
-- name: Port Forward Vault
+- name: Get Vault Service
   shell: "{{ item }}"
   with_items:
-    - kubectl -n kube-system port-forward svc/vault 8200:8200 &
-  async: 300
-  poll: 0
+    - kubectl get -n kube-system svc/vault -o jsonpath='{.spec.clusterIP}'
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
-  register: vault_port_forward
-
-- debug:
-    var: VAULT_ROOT_TOKEN
+  register: vault_service_IP
 
 - name: Login to Vault
   shell: "{{ item }}"
   with_items:
     - vault login $VAULT_ROOT_TOKEN
   environment:
-    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
     VAULT_ROOT_TOKEN: "{{ VAULT_ROOT_TOKEN }}"
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   register: vault_login
-
-- debug:
-    var: vault_login
 
 - name: Show Vault Auth Providers
   shell: "{{ item }}"
   with_items:
     - vault auth list
   environment:
-    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   register: vault_auth_list
-
-- debug:
-    var: vault_auth_list
