@@ -2,7 +2,7 @@ apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: gpu-operator
-  namespace: kube-system
+  namespace: gpu-operator
   annotations:
     fluxcd.io/automated: "false"
 spec:
