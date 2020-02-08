@@ -120,9 +120,9 @@
   command: "{{ item }}"
   with_items:
     - kubectl -n kube-system get sa vault-secrets-operator
-  register: sa_present
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  register: sa_present
   changed_when: "sa_present is succeeded"
   until: "sa_present is succeeded"
   retries: 30
@@ -155,6 +155,8 @@
 
 - name: Enable Kubernetes Authentication on Vault
   shell: vault auth enable kubernetes
+  environment:
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
   register: k8s_auth_enable
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
@@ -164,6 +166,8 @@
       token_reviewer_jwt="{{ sa_jwt_token.stdout }}" \
       kubernetes_host="{{ k8s_host.stdout }}" \
       kubernetes_ca_cert="{{ sa_ca_crt.stdout }}"
+  environment:
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Create Vault-Secrets-Operator Role in Vault
@@ -173,4 +177,6 @@
       bound_service_account_namespaces="{{ vault_secrets_operator_namespace.stdout }}" \
       policies=vault-secrets-operator \
       ttl=24h
+  environment:
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
   when: ( initialized_vault_status.results[0].stdout == "false" )
