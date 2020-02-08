@@ -6,13 +6,9 @@
   ignore_errors: yes
   with_items:
     - kubectl -n kube-system delete secret kms-vault
-    - kubectl -n kube-system create secret keycloak-realm
-    - kubectl -n kube-system create secret proxyinjector-config
+    - kubectl -n kube-system delete secret keycloak-realm
+    - kubectl -n kube-system delete secret proxyinjector-config
   register: kms_delete_secret_results
-
-- debug:
-    var: kms_delete_secret_results
-    
 
 - name: Bootstrap Kubernetes Secrets
   shell: "{{ item }}"

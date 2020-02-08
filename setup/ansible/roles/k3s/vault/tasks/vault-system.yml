@@ -31,7 +31,6 @@
   register: initialize_vault_status
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
-
 - name: Store Recovery & Root Token
   set_fact:
     VAULT_RECOVERY_TOKEN: "{{ (initialize_vault_status.results[0].stdout | from_json).recovery_keys_b64 | first }}"
@@ -91,11 +90,93 @@
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   register: vault_login
 
-- name: Show Vault Auth Providers
-  shell: "{{ item }}"
-  with_items:
-    - vault auth list
+# - name: Show Vault Auth Providers
+#   shell: "{{ item }}"
+#   with_items:
+#     - vault auth list
+#   environment:
+#     VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+#     KUBECONFIG: "{{ base }}/setup/kubeconfig"
+#   register: vault_auth_list
+
+- name: Enable Vault Secrets on Path "Secrets"
+  shell: vault secrets enable -path=secrets -version=2 kv
   environment:
     VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
-    KUBECONFIG: "{{ base }}/setup/kubeconfig"
-  register: vault_auth_list
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+  
+- name: Create Kubernetes Auth Policy
+  shell: |
+    cat << EOF | vault policy write vault-secrets-operator -
+    path "secrets/data/*" {
+      capabilities= ["read"]
+    }
+    EOF
+  environment:
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- name: Get Vault Secrets Operator Namespace
+  shell: kubectl -n kube-system get sa vault-secrets-operator -o jsonpath="{.metadata.namespace}"
+  register: vault_secrets_operator_namespace
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- debug:
+    var: vault_secrets_operator_namespace
+
+- name: Get Vault Secret Name
+  shell: kubectl -n kube-system get sa vault-secrets-operator -o jsonpath="{.secrets[*]['name']}"
+  register: vault_secret_name
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- debug:
+    var: vault_secret_name
+
+- name: Get SA_JWT_TOKEN
+  shell: kubectl -n kube-system get secret {{ vault_secret_name.stdout }} -o jsonpath="{.data.token}" | base64 --decode; echo
+  register: sa_jwt_token
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- debug:
+    var: sa_jwt_token
+
+- name: Get SA_CA_CRT
+  shell: kubectl -n kube-system get secret {{ vault_secret_name.stdout }} -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo
+  register: sa_ca_crt
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- debug:
+    var: sa_ca_crt
+
+- name: Get K8S_HOST
+  shell: kubectl -n kube-system config view --minify -o jsonpath='{.clusters[0].cluster.server}'
+  register: k8s_host
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- debug:
+    var: k8s_host
+
+- name: Enable Kubernetes Authentication on Vault
+  shell: vault auth enable kubernetes
+  register: k8s_auth_enable
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- debug:
+    var: k8s_auth_enable
+
+- name: Tell Vault how to Auth with K8S Cluster
+  shell: |
+    vault write auth/kubernetes/config \
+      token_reviewer_jwt="{{ sa_jwt_token.stdout }}" \
+      kubernetes_host="{{ k8s_host.stdout }}" \
+      kubernetes_ca_cert="{{ sa_ca_crt.stdout }}"
+  when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- name: Create Vault-Secrets-Operator Role in Vault
+  shell: |
+    vault write auth/kubernetes/role/vault-secrets-operator \
+      bound_service_account_names="vault-secrets-operator" \
+      bound_service_account_namespaces="{{ vault_secrets_operator_namespace.stdout }}" \
+      policies=vault-secrets-operator \
+      ttl=24h
+  when: ( initialized_vault_status.results[0].stdout == "false" )
