@@ -1,5 +1,12 @@
 ---
 
+- name: Remove /var/lib/rook
+  ignore_errors: yes
+  file:
+    state: absent
+    path: "/var/lib/rook"
+  when: ( storage == 'ceph')
+
 - name: Zap the drives
   become: true
   command: "{{ item }}"
@@ -28,9 +35,9 @@
     - wipefs -af /dev/sdd
   when: ( storage == 'ceph')
 
-- name: Rebooting hosts
-  reboot:
-    msg: "Systems are being rebooted"
-    reboot_timeout: 60
-  ignore_errors: true
-  when: ( storage == 'ceph')
+# - name: Rebooting hosts
+#   reboot:
+#     msg: "Systems are being rebooted"
+#     reboot_timeout: 600
+#   ignore_errors: true
+#   when: ( storage == 'ceph')
