@@ -50,7 +50,7 @@ metadata:
   name: acme-crt
   namespace: istio-system
 spec:
-  secretName: acme-crt
+  secretName: acme-crt-secret
   commonName: "*.$DOMAIN"
   dnsNames:
   - $DOMAIN
