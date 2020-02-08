@@ -121,48 +121,30 @@
   register: vault_secrets_operator_namespace
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
-- debug:
-    var: vault_secrets_operator_namespace
-
 - name: Get Vault Secret Name
   shell: kubectl -n kube-system get sa vault-secrets-operator -o jsonpath="{.secrets[*]['name']}"
   register: vault_secret_name
   when: ( initialized_vault_status.results[0].stdout == "false" )
-
-- debug:
-    var: vault_secret_name
 
 - name: Get SA_JWT_TOKEN
   shell: kubectl -n kube-system get secret {{ vault_secret_name.stdout }} -o jsonpath="{.data.token}" | base64 --decode; echo
   register: sa_jwt_token
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
-- debug:
-    var: sa_jwt_token
-
 - name: Get SA_CA_CRT
   shell: kubectl -n kube-system get secret {{ vault_secret_name.stdout }} -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo
   register: sa_ca_crt
   when: ( initialized_vault_status.results[0].stdout == "false" )
-
-- debug:
-    var: sa_ca_crt
 
 - name: Get K8S_HOST
   shell: kubectl -n kube-system config view --minify -o jsonpath='{.clusters[0].cluster.server}'
   register: k8s_host
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
-- debug:
-    var: k8s_host
-
 - name: Enable Kubernetes Authentication on Vault
   shell: vault auth enable kubernetes
   register: k8s_auth_enable
   when: ( initialized_vault_status.results[0].stdout == "false" )
-
-- debug:
-    var: k8s_auth_enable
 
 - name: Tell Vault how to Auth with K8S Cluster
   shell: |
