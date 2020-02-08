@@ -14,4 +14,4 @@ spec:
         prefix: /
     route:
     - destination:
-        host: minio
+        host: minio.default.svc.cluster.local
