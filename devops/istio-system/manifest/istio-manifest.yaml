@@ -20385,7 +20385,7 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      credentialName: acme-crt
+      credentialName: acme-crt-secret
       mode: SIMPLE
       privateKey: use sds
       serverCertificate: use sds
