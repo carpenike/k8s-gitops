@@ -125,8 +125,8 @@
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   changed_when: "sa_present is succeeded"
   until: "sa_present is succeeded"
-  retries: 10
-  delay: 10
+  retries: 30
+  delay: 60
 
 - name: Get Vault Secrets Operator Namespace
   shell: kubectl -n kube-system get sa vault-secrets-operator -o jsonpath="{.metadata.namespace}"
