@@ -2,9 +2,13 @@
 
 - name: Load route53 API Key
   shell: vault kv put secrets/flux/fluxcloud slack_url="{{ SLACK_WEBHOOK_URL }}"
+  environment:
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
 
 - name: Load fluxcloud slack URL
   shell: vault kv put secrets/cert-manager/route53-api-key api-key="{{ AWS_ACCESS_KEY_SECRET }}"
+  environment:
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
 
 - name: Load Minio Helm Chart Values
   shell: "{{ base }}/setup/kvault.sh default/minio/minio-helm-values.txt"
@@ -12,3 +16,4 @@
     MINIO_ACCESS_KEY: "{{ MINIO_ACCESS_KEY }}"
     MINIO_SECRET_KEY: "{{ MINIO_SECRET_KEY }}"
     DOMAIN: "{{ DOMAIN }}"
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
