@@ -9,7 +9,7 @@ parameters:
   clusterID: rook-ceph
 
   # Ceph pool into which the RBD image shall be created
-  pool: k8s-rbd
+  pool: replicapool
 
   # RBD image format. Defaults to "2".
   imageFormat: "2"
