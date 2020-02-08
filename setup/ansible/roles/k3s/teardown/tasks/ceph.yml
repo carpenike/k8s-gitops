@@ -19,7 +19,7 @@
 
 - name: Remove LVM partitions
   become: true
-  command: "{{ item }}"
+  shell: "{{ item }}"
   ignore_errors: yes
   with_items:
     - ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
