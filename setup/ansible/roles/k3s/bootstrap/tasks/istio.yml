@@ -23,3 +23,8 @@
     KIALI_PASSPHRASE: "{{ KIALI_PASSPHRASE }}"
 #  changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
 
+- name: Label Default Namespace for Istio Sidecar
+  command: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - kubectl label namespace default istio-injection=enabled
