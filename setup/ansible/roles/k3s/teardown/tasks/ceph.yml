@@ -5,7 +5,9 @@
   file:
     state: absent
     path: "/var/lib/rook"
-  when: ( storage == 'ceph')
+  when: 
+    - storage is defined
+    - storage == 'ceph'
 
 - name: Zap the drives
   become: true
@@ -15,15 +17,22 @@
     - sgdisk --zap-all /dev/sdb
     - sgdisk --zap-all /dev/sdc
     - sgdisk --zap-all /dev/sdd
-  when: ( storage == 'ceph')
+  when: 
+    - storage is defined
+    - storage == 'ceph'
 
 - name: Remove LVM partitions
   become: true
   shell: "{{ item }}"
   ignore_errors: yes
   with_items:
-    - ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
-  when: ( storage == 'ceph')
+    - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
+    - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
+    - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
+    - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf % 
+  when:
+    - storage is defined
+    - storage == 'ceph' 
 
 - name: Wipe the block device
   become: true
@@ -33,7 +42,9 @@
     - wipefs -af /dev/sdb
     - wipefs -af /dev/sdc
     - wipefs -af /dev/sdd
-  when: ( storage == 'ceph')
+  when:
+    - storage is defined
+    - storage == 'ceph'
 
 # - name: Rebooting hosts
 #   reboot:
