@@ -43,7 +43,7 @@
   register: vault_decrypt
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
-- name: Update ansible-vault secret wtih root token
+- name: Update ansible-vault secret with root token
   lineinfile:
     dest: group_vars/vault/vault.yml
     regexp: '^vault_VAULT_ROOT_TOKEN'
@@ -115,6 +115,18 @@
   environment:
     VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
   when: ( initialized_vault_status.results[0].stdout == "false" )
+
+- name: Wait for Vault-Secret-Operator Service Account
+  command: "{{ item }}"
+  with_items:
+    - kubectl -n kube-system get sa vault-secrets-operator
+  register: sa_present
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+  changed_when: "sa_present is succeeded"
+  until: "sa_present is succeeded"
+  retries: 10
+  delay: 10
 
 - name: Get Vault Secrets Operator Namespace
   shell: kubectl -n kube-system get sa vault-secrets-operator -o jsonpath="{.metadata.namespace}"
