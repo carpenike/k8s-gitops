@@ -19,8 +19,6 @@
   register: kiali_status
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
-    KIALI_USERNAME: "{{ KIALI_USERNAME }}" 
-    KIALI_PASSPHRASE: "{{ KIALI_PASSPHRASE }}"
 #  changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
 
 - name: Label Default Namespace for Istio Sidecar

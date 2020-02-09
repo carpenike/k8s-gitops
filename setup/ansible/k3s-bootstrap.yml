@@ -3,6 +3,7 @@
 - hosts: localhost
 #  gather_facts: yes
   become: no
+  environment: "{{ vault_env }}"
   roles:
     - { role: k3s/helm }
     - { role: k3s/flux }

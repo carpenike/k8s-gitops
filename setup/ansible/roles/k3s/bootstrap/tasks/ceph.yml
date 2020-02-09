@@ -17,5 +17,4 @@
   register: rook_dashboard_ingress_status
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
-    DOMAIN: "{{ DOMAIN }}"
   changed_when: "'ingress.networking.k8s.io/rook-ceph-mgr-dashboard' in rook_dashboard_ingress_status.stdout"

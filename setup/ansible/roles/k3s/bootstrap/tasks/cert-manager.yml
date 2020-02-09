@@ -19,8 +19,5 @@
   register: cert_request_status
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
-    DOMAIN: "{{ DOMAIN }}"
-    EMAIL: "{{ EMAIL }}"
-    AWS_ACCESS_KEY_ID: "{{ AWS_ACCESS_KEY_ID }}"
   changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
 
