@@ -1,0 +1,16 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: k8up
+  namespace: k8up
+  annotations:
+    fluxcd.io/ignore: false
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: semver:~v1
+spec:
+  releaseName: k8up
+  chart:
+    repository: https://charts.appuio.ch
+    name: k8up
+    version: 0.2.5
