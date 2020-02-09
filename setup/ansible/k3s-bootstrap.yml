@@ -8,4 +8,3 @@
     - { role: k3s/flux }
     - { role: post }
     - { role: k3s/bootstrap }
-    - { role: k3s/vault }

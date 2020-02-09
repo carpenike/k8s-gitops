@@ -80,29 +80,44 @@
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   register: vault_service_IP
 
+- name: Set Vault_Service_IP to Fact
+  set_fact: 
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+
 - name: Login to Vault
   shell: "{{ item }}"
   with_items:
     - vault login $VAULT_ROOT_TOKEN
   environment:
-    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
-    VAULT_ROOT_TOKEN: "{{ VAULT_ROOT_TOKEN }}"
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   register: vault_login
+  when: ( initialized_vault_status.results[0].stdout == "true" )
+
+- name: Login to Vault (New Install)
+  shell: "{{ item }}"
+  with_items:
+    - vault login $VAULT_ROOT_TOKEN
+  environment:
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+    VAULT_ROOT_TOKEN: "{{ VAULT_ROOT_TOKEN }}"
+  register: vault_login
+  when: ( initialized_vault_status.results[0].stdout == "false" )
 
 # - name: Show Vault Auth Providers
 #   shell: "{{ item }}"
 #   with_items:
 #     - vault auth list
 #   environment:
-#     VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+#     VAULT_ADDR: "{{ VAULT_ADDR }}"
 #     KUBECONFIG: "{{ base }}/setup/kubeconfig"
 #   register: vault_auth_list
 
 - name: Enable Vault Secrets on Path "Secrets"
   shell: vault secrets enable -path=secrets -version=2 kv
   environment:
-    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
   
 - name: Create Kubernetes Auth Policy
@@ -113,7 +128,7 @@
     }
     EOF
   environment:
-    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Wait for Vault-Secret-Operator Service Account
@@ -156,7 +171,7 @@
 - name: Enable Kubernetes Authentication on Vault
   shell: vault auth enable kubernetes
   environment:
-    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
   register: k8s_auth_enable
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
@@ -167,7 +182,7 @@
       kubernetes_host="{{ k8s_host.stdout }}" \
       kubernetes_ca_cert="{{ sa_ca_crt.stdout }}"
   environment:
-    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Create Vault-Secrets-Operator Role in Vault
@@ -178,5 +193,5 @@
       policies=vault-secrets-operator \
       ttl=24h
   environment:
-    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
+    VAULT_ADDR: "{{ VAULT_ADDR }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
