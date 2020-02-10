@@ -1,0 +1,17 @@
+gatekeeper-image: "keycloak/keycloak-gatekeeper:6.0.1"
+discovery-url: https://keycloak.$DOMAIN/auth/realms/default
+client-id: gatekeeper
+client-secret: $KEYCLOAK_GATEKEEPER_SECRET
+enable-default-deny: true
+secure-cookie: false
+verbose: true
+enable-logging: true
+cors-origins:
+- '*'
+cors-methods:
+- GET
+- POST
+resources:
+- uri: '/*'
+scopes:
+- 'good-service'
