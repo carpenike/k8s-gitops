@@ -39,26 +39,26 @@
 
 - name: Decrypt Vault Secret File
   ignore_errors: yes
-  command: "ansible-vault decrypt group_vars/vault/encrypted-vault.yml"
+  command: "ansible-vault decrypt group_vars/vault/encrypted-vault.yaml"
   register: vault_decrypt
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Update ansible-vault secret with root token
   lineinfile:
-    dest: group_vars/vault/encrypted-vault.yml
+    dest: group_vars/vault/encrypted-vault.yaml
     regexp: '^vault_VAULT_ROOT_TOKEN'
     line: "vault_VAULT_ROOT_TOKEN: {{ VAULT_ROOT_TOKEN }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Update ansible-vault secret wtih recovery token
   lineinfile:
-    dest: group_vars/vault/encrypted-vault.yml
+    dest: group_vars/vault/encrypted-vault.yaml
     regexp: '^vault_VAULT_RECOVERY_TOKEN:'
     line: "vault_VAULT_RECOVERY_TOKEN: {{ VAULT_RECOVERY_TOKEN }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Encrypt Vault Secret File
-  command: "ansible-vault encrypt group_vars/vault/vault.yml"
+  command: "ansible-vault encrypt group_vars/vault/encrypted-vault.yaml"
   register: vault_encrypt
   changed_when: "'Encryption successful' in vault_encrypt.stdout"
   when: ( initialized_vault_status.results[0].stdout == "false" )
