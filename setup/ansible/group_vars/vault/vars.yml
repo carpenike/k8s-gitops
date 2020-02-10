@@ -64,3 +64,4 @@ vault_env:
   KMS_CLIENT_SECRET: "{{ vault_KMS_CLIENT_SECRET }}"
   KMS_VAULT_NAME: "{{ vault_KMS_VAULT_NAME }}"
   KMS_KEY_NAME: "{{ vault_KMS_KEY_NAME }}"
+  SMTP: "{{ vault_SMTP }}"
