@@ -141,7 +141,7 @@ https://github.com/nicolargo/glances/wiki/Start-Glances-through-Systemd
 
 ## GPG Configuration & GPT-Crypt setup
 
-Looking to use this to encrypt the vault unlock key -- allows storage of everything needed by Ansible for deployment in the repository.
+Looking to use this to encrypt the vault unlock key -- allows storage of everything needed by Ansible for deployment in the repository. Works quite well
 
 - Generate GPG Keys: https://www.thesecuritybuddy.com/pgp-and-gpg/how-to-generate-gpg-key
 - Backup GPG Keys: https://tunjos.co/blog/backup-your-gpg-key/
