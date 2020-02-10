@@ -1,3 +1,5 @@
+---
+
 - hosts: vault
   gather_facts: yes
   become: no
