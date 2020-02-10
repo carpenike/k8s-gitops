@@ -20,3 +20,11 @@
     - n2-0
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
+
+- name: apply master annotations
+  ignore_errors: yes
+  command: kubectl label --overwrite node {{ item }} node-role.kubernetes.io/master=true:NoSchedule
+  with_items:
+    - k3s-master-a
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
