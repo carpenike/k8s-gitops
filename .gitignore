@@ -1,7 +1,6 @@
 .env
 setup/cluster/.DS_Store
 setup/keyvault.env
-kubeconfig
 master.key
 auth
 *.snap
