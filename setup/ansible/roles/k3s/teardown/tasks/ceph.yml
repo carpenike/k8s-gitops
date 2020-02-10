@@ -5,9 +5,6 @@
   file:
     state: absent
     path: "/var/lib/rook"
-  when:
-    - storage is defined
-    - storage == 'ceph'
 
 - name: Zap the drives
   become: true

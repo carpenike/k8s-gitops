@@ -8,7 +8,7 @@
 
 - name: Uninstall K3S Worker on all nodes
   command: "{{ item }}"
-  become: no
+  become: yes
   with_items:
     - /usr/local/bin/k3s-agent-uninstall.sh
   register: k3s_agent_result
@@ -26,7 +26,7 @@
 
 - name: Uninstall K3S Master
   command: "{{ item }}"
-  become: no
+  become: yes
   with_items:
     - /usr/local/bin/k3s-uninstall.sh
   register: k3s_master_result
@@ -35,3 +35,8 @@
 - name: Validate k8s master uninstalled successfully
   debug:
     var: k3s_master_result.msg
+
+- name: Remove all docker containers
+  ignore_errors: yes
+  shell: "docker rm -f $(docker ps -a -q)"
+  when: ( p.stat.exists == true )
