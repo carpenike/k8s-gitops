@@ -1,6 +1,5 @@
 ---
 
-
 - name: Delete Kubernetes Secrets
   shell: "{{ item }}"
   ignore_errors: yes
@@ -16,7 +15,7 @@
   ignore_errors: yes
   with_items:
     - kubectl -n kube-system create secret generic kms-vault --from-literal=config.hcl="$(echo $VAULT_KMS_CONFIG | base64 --decode)"
-    - kubectl -n kube-system create secret generic keycloak-realm --from-literal=realm.json="$(echo $KEYCLOAK_REALM | base64 --decode)"
+    - kubectl -n kube-system create secret generic keycloak-realm --from-literal=realm.json="$(envsubst < {{ base }}/devops/kube-system/keycloak/keycloak-realm.json)"
     - kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(echo $PROXYINJECTOR_CONFIG | base64 --decode)"
     - kubectl create secret generic restic-backup-credentials --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY
     # - kubectl -n k8up create secret generic backup-repo --from-literal=password=$K8UP_ENCRYPTION_KEY
