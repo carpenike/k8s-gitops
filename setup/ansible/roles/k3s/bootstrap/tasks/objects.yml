@@ -8,7 +8,7 @@
     - kubectl -n kube-system delete secret kms-vault
     - kubectl -n kube-system delete secret keycloak-realm
     - kubectl -n kube-system delete secret proxyinjector-config
-    - kubectl -n stash delete secret restic-backup-credentials
+    - kubectl delete secret restic-backup-credentials
   register: kms_delete_secret_results
 
 - name: Bootstrap Kubernetes Secrets
@@ -18,7 +18,7 @@
     - kubectl -n kube-system create secret generic kms-vault --from-literal=config.hcl="$(echo $VAULT_KMS_CONFIG | base64 --decode)"
     - kubectl -n kube-system create secret generic keycloak-realm --from-literal=realm.json="$(echo $KEYCLOAK_REALM | base64 --decode)"
     - kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(echo $PROXYINJECTOR_CONFIG | base64 --decode)"
-    - kubectl -n stash create secret generic restic-backup-credentials --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY
+    - kubectl create secret generic restic-backup-credentials --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY
     # - kubectl -n k8up create secret generic backup-repo --from-literal=password=$K8UP_ENCRYPTION_KEY
   register: kms_secret_results
   # changed_when: "'All items completed' in kms_secret_results.msg"
