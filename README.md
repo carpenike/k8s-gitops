@@ -146,6 +146,8 @@ Looking to use this to encrypt the vault unlock key -- allows storage of everyth
 - Generate GPG Keys: https://www.thesecuritybuddy.com/pgp-and-gpg/how-to-generate-gpg-key
 - Backup GPG Keys: https://tunjos.co/blog/backup-your-gpg-key/
 - Use Keys with Git-Crypt: https://wwsean08.com/2018/05/git-crypt/
+- Setup pre-commit to ensure ansible-vault is encrypted before pushing to repo: https://www.pre-commit.com
+- Use Ansible-Vault plugin from this guy to hook into pre-commit: https://git.iamthefij.com/iamthefij/ansible-pre-commit
 
 ## Integrate Vault auth with Keycloak
 
