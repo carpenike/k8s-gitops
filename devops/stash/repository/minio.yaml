@@ -1,0 +1,12 @@
+# apiVersion: stash.appscode.com/v1alpha1
+# kind: Repository
+# metadata:
+#   name: minio
+#   namespace: stash
+# spec:
+#   backend:
+#     s3:
+#       endpoint: minio.holthome.net # use server URL for s3 compatible other storage service
+#       bucket: stash
+#       prefix: /backup
+#     storageSecretName: restic-backup-credentials
