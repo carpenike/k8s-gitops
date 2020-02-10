@@ -15,9 +15,8 @@
 - name: Create Cert-Manager Certificate Request
   command: "{{ item }}"
   with_items:
-    - "{{ base }}/setup/kapply.sh {{ base }}/devops/cert-manager/route53/cert-manager-letsencrypt.txt" 
+    - "{{ base }}/setup/kapply.sh {{ base }}/devops/cert-manager/route53/cert-manager-letsencrypt.txt"
   register: cert_request_status
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   changed_when: "'clusterissuer.cert-manager.io/letsencrypt-prod' in cert_request_status.stdout"
-

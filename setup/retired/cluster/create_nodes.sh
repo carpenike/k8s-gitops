@@ -21,7 +21,7 @@ qm set 201 --memory 12288
 qm migrate 201 pve-02
 
 qm clone "$TEMPLATE" 202 --name k8s-master-c
-qm set 202 --sshkey /home/ryan/ryan_id_rsa.pub 
+qm set 202 --sshkey /home/ryan/ryan_id_rsa.pub
 qm set 202 --ipconfig0 ip=10.20.30.12/16,gw=10.20.0.1
 qm set 202 --memory 12288
 qm migrate 202 pve-03

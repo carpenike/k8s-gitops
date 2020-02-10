@@ -1,5 +1,5 @@
 ingress:
-  hosts: 
+  hosts:
   - host: pgadmin.$DOMAIN
     paths:
       - /

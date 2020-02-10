@@ -38,4 +38,3 @@ store_secret_from_keyvault "DOMAIN" "DOMAIN"
 
 echo "# End of fetched secrets. "
 echo "# ----------------------- "
-

@@ -5488,7 +5488,7 @@ metadata:
   labels:
     release: istio
 data:
-  validatingwebhookconfiguration.yaml: |-    
+  validatingwebhookconfiguration.yaml: |-
     apiVersion: admissionregistration.k8s.io/v1beta1
     kind: ValidatingWebhookConfiguration
     metadata:
@@ -19888,7 +19888,7 @@ data:
       orgId: 1
       type: prometheus
       url: http://prometheus:9090
-    
+
   dashboardproviders.yaml: |
     apiVersion: 1
     providers:
@@ -19952,7 +19952,7 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
+
           volumeMounts:
           - name: data
             mountPath: /data/grafana
@@ -19994,7 +19994,7 @@ spec:
           - name: config
             mountPath: "/etc/grafana/provisioning/dashboards/dashboardproviders.yaml"
             subPath: dashboardproviders.yaml
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -20026,7 +20026,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - s390x      
+                - s390x
       volumes:
       - name: config
         configMap:
@@ -20752,7 +20752,7 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
   name: istio-sidecar-injector
-        
+
   labels:
     app: sidecar-injector
     release: istio
@@ -21296,7 +21296,7 @@ rules:
       - get
       - list
       - watch
-  - apiGroups: 
+  - apiGroups:
     - config.istio.io
     - networking.istio.io
     - authentication.istio.io
@@ -21365,7 +21365,7 @@ rules:
       - get
       - list
       - watch
-  - apiGroups: 
+  - apiGroups:
     - config.istio.io
     - networking.istio.io
     - authentication.istio.io
@@ -21477,14 +21477,14 @@ spec:
           httpGet:
             path: /kiali/healthz
             port: 20001
-            scheme:   'HTTP' 
+            scheme:   'HTTP'
           initialDelaySeconds: 5
           periodSeconds: 30
         livenessProbe:
           httpGet:
             path: /kiali/healthz
             port: 20001
-            scheme:   'HTTP' 
+            scheme:   'HTTP'
           initialDelaySeconds: 5
           periodSeconds: 30
         env:
@@ -21502,7 +21502,7 @@ spec:
         resources:
           requests:
             cpu: 10m
-          
+
       volumes:
       - name: kiali-configuration
         configMap:
@@ -21510,12 +21510,12 @@ spec:
       - name: kiali-cert
         secret:
           secretName: istio.kiali-service-account
-          optional: true      
+          optional: true
       - name: kiali-secret
         secret:
           secretName: kiali
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -23265,7 +23265,7 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
+
           volumeMounts:
           - name: config-volume
             mountPath: /etc/prometheus
@@ -23279,7 +23279,7 @@ spec:
         secret:
           defaultMode: 420
           secretName: istio.default
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -24893,7 +24893,7 @@ spec:
           - name: MEMORY_MAX_TRACES
             value: "50000"
           - name: QUERY_BASE_PATH
-            value:  /jaeger 
+            value:  /jaeger
           livenessProbe:
             httpGet:
               path: /
@@ -24908,8 +24908,8 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
-      affinity:      
+
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -24941,7 +24941,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - s390x      
+                - s390x
       volumes:
       - name: data
         emptyDir: {}
@@ -25067,4 +25067,3 @@ spec:
   selector:
     app: jaeger
 ---
-

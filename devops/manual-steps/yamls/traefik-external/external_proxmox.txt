@@ -14,7 +14,7 @@ spec:
   - host: pve.$DOMAIN
     http:
       paths:
-      - path: /      
+      - path: /
         backend:
           serviceName: external-proxmox
           servicePort: 8006

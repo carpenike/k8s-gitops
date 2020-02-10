@@ -39,7 +39,7 @@ if (!(test-path "$($imageCachePath)\ubuntu-$($stamp).img")) {
 # new-vm $VMName -MemoryStartupBytes 2048mb -VHDPath $vhdx -Generation 1 `
 #                -SwitchName $virtualSwitchName -Path $vmPath | Out-Null
 # set-vm -Name $VMName -ProcessorCount 2
-# Set-VMDvdDrive -VMName $VMName -Path $metaDataIso 
+# Set-VMDvdDrive -VMName $VMName -Path $metaDataIso
 # Start-VM $VMName
 
 # # Open up VMConnect

@@ -1,5 +1,5 @@
 ingress:
-  hosts: 
+  hosts:
   - ha.$DOMAIN
   tls:
   - hosts:
@@ -8,7 +8,7 @@ ingress:
 #  CAMERA_AUTH: $CAMERA_AUTH
 configurator:
   ingress:
-    hosts: 
+    hosts:
     - ha-config.$DOMAIN
     tls:
     - hosts:

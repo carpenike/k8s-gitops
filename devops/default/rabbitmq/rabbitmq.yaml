@@ -132,6 +132,6 @@
 #             "ha-sync-mode": "automatic",
 #             "ha-sync-batch-size": 1
 #           }
-#         } 
+#         }
 #   valueFileSecrets:
 #   - name: "rabbitmq-helm-values"

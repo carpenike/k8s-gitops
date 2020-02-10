@@ -16,7 +16,7 @@ foreach ($VM in $VMs) {
     instance-id: $($VM.GuestOSID)
     local-hostname: $($VM.Name)
 "@
-  
+
   $userdata = @"
     #cloud-config
     runcmd:
@@ -38,7 +38,7 @@ foreach ($VM in $VMs) {
       - nfs-common
     package_upgrade: true
 "@
-  
+
   $netdata = @"
   version: 2
   ethernets:
@@ -78,5 +78,5 @@ foreach ($VM in $VMs) {
   Move-Item -Path $cloudInitISO -Destination "$($destinationPath)\cloud-init" -Force
   # Clean up temp directory
   rd -Path $tempPath -Recurse -Force
-  
+
 }

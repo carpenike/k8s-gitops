@@ -35,9 +35,9 @@ initVault() {
   while [ $VAULT_READY != 0 ]; do
     kubectl -n kube-system wait --for condition=Initialized pod/vault-0 > /dev/null 2>&1
     VAULT_READY="$?"
-    if [ $VAULT_READY != 0 ]; then 
+    if [ $VAULT_READY != 0 ]; then
       echo "waiting for vault pod to be somewhat ready..."
-      sleep 10; 
+      sleep 10;
     fi
   done
   sleep 2
@@ -200,7 +200,7 @@ FIRST_RUN=1
 export KUBECONFIG="$REPO_ROOT/setup/kubeconfig"
 initVault
 loginVault
-if [ $FIRST_RUN == 0 ]; then 
+if [ $FIRST_RUN == 0 ]; then
   setupVaultSecretsOperator
 fi
 loadSecretsToVault

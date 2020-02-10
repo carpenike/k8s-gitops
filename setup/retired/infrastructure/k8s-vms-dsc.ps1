@@ -9,7 +9,7 @@ configuration k8s-vms
 
         [Parameter(Mandatory)]
         [string]$Generation,
-        
+
         [Parameter(Mandatory)]
         [string]$Path,
 

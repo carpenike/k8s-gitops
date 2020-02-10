@@ -60,13 +60,13 @@
     state: restarted
     enabled: yes
 
-- name: Create kubectl  link 
+- name: Create kubectl  link
   file:
     src: "/usr/local/bin/k3s"
     dest: "/usr/local/bin/kubectl"
     state: link
 
-- name: Create crictl link 
+- name: Create crictl link
   file:
     src: "/usr/local/bin/k3s"
     dest: "/usr/local/bin/crictl"

@@ -235,7 +235,7 @@ spec:
           # - job_name: "home-assistant"
           #   scrape_interval: 60s
           #   metrics_path: /api/prometheus
-          #   
+          #
           #   scheme: https
           #   static_configs:
           #     - targets: ["ha.holthome.net:443"]

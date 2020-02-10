@@ -5,7 +5,7 @@
   file:
     state: absent
     path: "/var/lib/rook"
-  when: 
+  when:
     - storage is defined
     - storage == 'ceph'
 
@@ -17,7 +17,7 @@
     - sgdisk --zap-all /dev/sdb
     - sgdisk --zap-all /dev/sdc
     - sgdisk --zap-all /dev/sdd
-  when: 
+  when:
     - storage is defined
     - storage == 'ceph'
 
@@ -29,10 +29,10 @@
     - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
     - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
     - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
-    - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf % 
+    - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf %
   when:
     - storage is defined
-    - storage == 'ceph' 
+    - storage == 'ceph'
 
 - name: Wipe the block device
   become: true

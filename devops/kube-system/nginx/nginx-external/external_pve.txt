@@ -39,7 +39,7 @@ spec:
             servicePort: 8006
   tls:
   - hosts:
-    - pve.$DOMAIN   
+    - pve.$DOMAIN
 ---
 apiVersion: v1
 kind: Service

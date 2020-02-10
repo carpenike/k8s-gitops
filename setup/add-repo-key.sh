@@ -50,7 +50,7 @@ if [ "$?" -eq 0 ] && [ "$rp" = "true" ]; then
                 -X "DELETE"\
                 -H"Authorization: token $github_access_token"\
                 https://api.github.com/repos/"$github_username"/"$reponame"/keys/"$_id" 2>/dev/null
-        done 
+        done
 
     # add the keyfile to github
     echo

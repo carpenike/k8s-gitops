@@ -27,7 +27,7 @@
 - name: Initialize Vault
   shell: "{{ item }}"
   with_items:
-    - kubectl -n kube-system exec "vault-0" -- vault operator init -format json -recovery-shares=1 -recovery-threshold=1 
+    - kubectl -n kube-system exec "vault-0" -- vault operator init -format json -recovery-shares=1 -recovery-threshold=1
   register: initialize_vault_status
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
@@ -39,7 +39,7 @@
 
 - name: Decrypt Vault Secret File
   ignore_errors: yes
-  command: "ansible-vault decrypt group_vars/vault/vault.yml" 
+  command: "ansible-vault decrypt group_vars/vault/vault.yml"
   register: vault_decrypt
   when: ( initialized_vault_status.results[0].stdout == "false" )
 
@@ -55,7 +55,7 @@
     dest: group_vars/vault/vault.yml
     regexp: '^vault_VAULT_RECOVERY_TOKEN:'
     line: "vault_VAULT_RECOVERY_TOKEN: {{ VAULT_RECOVERY_TOKEN }}"
-  when: ( initialized_vault_status.results[0].stdout == "false" ) 
+  when: ( initialized_vault_status.results[0].stdout == "false" )
 
 - name: Encrypt Vault Secret File
   command: "ansible-vault encrypt group_vars/vault/vault.yml"
@@ -66,7 +66,7 @@
 - name: Unseal Vault
   shell: "{{ item }}"
   with_items:
-    - kubectl -n kube-system exec "vault-0" -- vault operator unseal $VAULT_RECOVERY_TOKEN 
+    - kubectl -n kube-system exec "vault-0" -- vault operator unseal $VAULT_RECOVERY_TOKEN
   environment:
     VAULT_RECOVERY_TOKEN: "{{ VAULT_RECOVERY_TOKEN }}"
   register: unseal_vault_status
@@ -81,7 +81,7 @@
   register: vault_service_IP
 
 - name: Set Vault_Service_IP to Fact
-  set_fact: 
+  set_fact:
     VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
 
 - name: Login to Vault
@@ -119,7 +119,7 @@
   environment:
     VAULT_ADDR: "{{ VAULT_ADDR }}"
   when: ( initialized_vault_status.results[0].stdout == "false" )
-  
+
 - name: Create Kubernetes Auth Policy
   shell: |
     cat << EOF | vault policy write vault-secrets-operator -

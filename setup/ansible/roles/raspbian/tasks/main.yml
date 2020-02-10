@@ -9,4 +9,3 @@
   when: ( ansible_facts.architecture is search "arm" )
   notify:
     - Rebooting on Raspbian
-

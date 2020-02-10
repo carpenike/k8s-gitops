@@ -13,7 +13,7 @@
 - name: Create Rook Dashboard Ingress
   command: "{{ item }}"
   with_items:
-    - "{{ base }}/setup/kapply.sh {{ base }}/devops/rook-ceph/dashboard/ingress.txt" 
+    - "{{ base }}/setup/kapply.sh {{ base }}/devops/rook-ceph/dashboard/ingress.txt"
   register: rook_dashboard_ingress_status
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"

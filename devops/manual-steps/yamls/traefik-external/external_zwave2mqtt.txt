@@ -14,7 +14,7 @@ spec:
   - host: zwave.$DOMAIN
     http:
       paths:
-      - path: /      
+      - path: /
         backend:
           serviceName: external-zwave2mqtt
           servicePort: 8091

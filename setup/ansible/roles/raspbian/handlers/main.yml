@@ -1,2 +1,2 @@
-- name: Rebooting on Raspbian 
+- name: Rebooting on Raspbian
   reboot:

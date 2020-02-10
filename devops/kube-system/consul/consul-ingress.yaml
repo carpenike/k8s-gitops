@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: consul
 spec:
-  rules: 
+  rules:
   - host: consul.holthome.net
     http:
       paths:
@@ -14,4 +14,3 @@ spec:
         backend:
           serviceName: consul-consul-ui
           servicePort: 80
-    

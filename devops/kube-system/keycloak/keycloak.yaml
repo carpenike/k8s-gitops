@@ -12,7 +12,7 @@ spec:
     name: keycloak
     version: 6.1.0
   values:
-    keycloak: 
+    keycloak:
       replicas: 3
       persistence:
         deployPostgres: true

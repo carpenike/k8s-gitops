@@ -1,4 +1,4 @@
-vault_env:  
+vault_env:
   DOMAIN: "{{ vault_DOMAIN }}"
   EMAIL: "{{ vault_EMAIL }}"
   INFLUXDB_PASSWORD: "{{ vault_INFLUXDB_PASSWORD }}"

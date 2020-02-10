@@ -1,5 +1,5 @@
 notifications:
-  slackurl: 
+  slackurl:
   slackrecipient: "#alerts"
 ingress:
   hosts:

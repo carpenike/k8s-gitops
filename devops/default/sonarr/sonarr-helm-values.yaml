@@ -1,4 +1,4 @@
-  
+
 apiVersion: ricoberger.de/v1alpha1
 kind: VaultSecret
 metadata:
