@@ -1,6 +1,0 @@
-- id: encryption-check
-  name: Ansible Vault Encryption Check
-  description: Checks that vault files are encrypted
-  entry: encryption-check.sh
-  files: ((^|/)encrypted-vault.y[a]{0,1}ml$|.vault$)
-  language: script
