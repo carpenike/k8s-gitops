@@ -7,3 +7,4 @@ auth
 *.snap
 setup/cluster/*cluster.yml
 *.rkestate
+vault.yaml
