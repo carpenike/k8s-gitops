@@ -12,10 +12,17 @@
   retries: 30
   delay: 60
 
+- name: Create AzureDNS API Key
+  shell: "kubectl create -n cert-manager secret generic azuredns-config --from-literal=client-secret=$AZURE_CERTBOT_CLIENT_SECRET"
+  ignore_errors: yes
+  register: azure_dns_key_status
+  environment:
+    KUBECONFIG: "{{ base }}/setup/kubeconfig"
+
 - name: Create Cert-Manager Certificate Request
   command: "{{ item }}"
   with_items:
-    - "{{ base }}/setup/kapply.sh {{ base }}/devops/cert-manager/route53/cert-manager-letsencrypt.txt"
+    - "{{ base }}/setup/kapply.sh {{ base }}/devops/cert-manager/azuredns/cert-manager-letsencrypt.txt"
   register: cert_request_status
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
