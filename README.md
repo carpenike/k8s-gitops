@@ -2,6 +2,9 @@
 
 Shamelessly stolen a lot of this from https://github.com/billimek/k8s-gitops. Thank you for the inspiration!
 
+# Security
+TBD
+
 # Istio
 
 Kicking the tires on a switch to Istio from standard Ingress Controllers Generated the manifest files via istioctl
