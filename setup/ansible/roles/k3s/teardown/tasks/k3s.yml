@@ -6,6 +6,10 @@
   register: p
   when: ( type == 'worker')
 
+- name: Remove all docker containers
+  ignore_errors: yes
+  shell: "docker rm -f $(docker ps -a -q)"
+
 - name: Uninstall K3S Worker on all nodes
   command: "{{ item }}"
   become: yes
@@ -35,8 +39,3 @@
 - name: Validate k8s master uninstalled successfully
   debug:
     var: k3s_master_result.msg
-
-- name: Remove all docker containers
-  ignore_errors: yes
-  shell: "docker rm -f $(docker ps -a -q)"
-  when: ( p.stat.exists == true )
