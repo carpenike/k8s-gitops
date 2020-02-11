@@ -19,6 +19,26 @@ spec:
             key: api-key
 ---
 apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector: {}
+      dns01:
+        route53:
+          region: us-east-1
+          accessKeyID: $AWS_ACCESS_KEY_ID
+          secretAccessKeySecretRef:
+            name: route53-api-key
+            key: api-key
+---
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: acme-crt
@@ -41,7 +61,7 @@ spec:
       - '*.k.$DOMAIN'
       - '*.nd.$DOMAIN'
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt-staging
     kind: ClusterIssuer
 ---
 apiVersion: cert-manager.io/v1alpha2
@@ -67,5 +87,5 @@ spec:
       - '*.k.$DOMAIN'
       - '*.nd.$DOMAIN'
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt-staging
     kind: ClusterIssuer
