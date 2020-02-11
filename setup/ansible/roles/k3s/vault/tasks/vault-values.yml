@@ -1,12 +1,7 @@
 ---
 
-- name: Load route53 API Key
-  shell: vault kv put secrets/flux/fluxcloud slack_url="$SLACK_WEBHOOK_URL"
-  environment:
-    VAULT_ADDR: "{{ VAULT_ADDR }}"
-
 - name: Load fluxcloud slack URL
-  shell: vault kv put secrets/cert-manager/route53-api-key api-key="$AWS_ACCESS_KEY_SECRET"
+  shell: vault kv put secrets/flux/fluxcloud slack_url="$SLACK_WEBHOOK_URL"
   environment:
     VAULT_ADDR: "{{ VAULT_ADDR }}"
 
