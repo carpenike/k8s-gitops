@@ -3,8 +3,8 @@
 Shamelessly stolen a lot of this from https://github.com/billimek/k8s-gitops. Thank you for the inspiration!
 
 # Security
-TBD
 
+- Helpful in setting up git to sign with gpg key: https://medium.com/@devmount/signed-git-commits-in-vs-code-476fb74b8773
 - GPG Signing requires the following ~/.bashrc: `export GPG_TTY=$(tty)`
 
 # Istio
