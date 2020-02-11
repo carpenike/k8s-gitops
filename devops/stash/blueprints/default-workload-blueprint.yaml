@@ -7,8 +7,8 @@ spec:
   backend:
     s3:
       endpoint: minio.holthome.net # use server URL for s3 compatible other storage service
-      bucket: stash
-      prefix: stash-backup/${TARGET_NAMESPACE}/${TARGET_KIND}/${TARGET_NAME}
+      bucket: k8s-backups
+      prefix: /stash-backup/${TARGET_NAMESPACE}/${TARGET_KIND}/${TARGET_NAME}
     storageSecretName: restic-backup-credentials
   # ============== Blueprint for BackupConfiguration =================
   schedule: "*/5 * * * *"
