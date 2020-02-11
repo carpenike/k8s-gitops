@@ -35,6 +35,7 @@ spec:
       authproxy.stakater.com/listen: "0.0.0.0:3000"
       authproxy.stakater.com/target-port: 3000
       authproxy.stakater.com/upstream-url: "http://127.0.0.1:8989"
+      authproxy.stakater.com/redirection-url: "https://sonarr.holthome.net"
       authproxy.stakater.com/source-service-name: sonarr
       authproxy.stakater.com/resources: "uri=/api/*"
     persistence:
