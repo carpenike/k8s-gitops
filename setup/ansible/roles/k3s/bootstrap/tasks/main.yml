@@ -2,4 +2,4 @@
   - include: objects.yml
   - include: ceph.yml
   - include: cert-manager.yml
-  - include: istio.yml
+  # - include: istio.yml
