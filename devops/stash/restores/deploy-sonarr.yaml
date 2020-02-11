@@ -1,21 +1,21 @@
-# ---
+---
 
-# apiVersion: stash.appscode.com/v1beta1
-# kind: RestoreSession
-# metadata:
-#   name: sonarr-restore
-#   namespace: default
-# spec:
-#   repository:
-#     name: deploy-sonarr
-#   rules:
-#   - snapshots:
-#     - 8465724d
-#   target: # target indicates where the recovered data will be stored
-#     ref:
-#       apiVersion: apps/v1
-#       kind: Deployment
-#       name: sonarr
-#     volumeMounts:
-#     - name:  config
-#       mountPath:  /config
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: sonarr-restore
+  namespace: default
+spec:
+  repository:
+    name: deploy-sonarr
+  rules:
+  - snapshots:
+    - latest
+  target: # target indicates where the recovered data will be stored
+    ref:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: sonarr
+    volumeMounts:
+    - name:  config
+      mountPath:  /config
