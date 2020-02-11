@@ -31,11 +31,11 @@ spec:
       stash.appscode.com/backup-blueprint: default-workload-blueprint
       stash.appscode.com/target-paths: "/config"
       stash.appscode.com/volume-mounts: "config:/config"
-      authproxy.stakater.com/enabled: "true"
+      authproxy.stakater.com/enabled: "false"
       authproxy.stakater.com/listen: "0.0.0.0:3000"
       authproxy.stakater.com/target-port: 3000
       authproxy.stakater.com/upstream-url: "http://127.0.0.1:8989"
-      authproxy.stakater.com/redirection-url: "http://127.0.0.1:3000"
+      authproxy.stakater.com/redirection-url: "https://sonarr.holthome.net:3000"
       authproxy.stakater.com/source-service-name: sonarr
       authproxy.stakater.com/resources: uri=/*
     persistence:
