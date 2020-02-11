@@ -5,6 +5,8 @@ Shamelessly stolen a lot of this from https://github.com/billimek/k8s-gitops. Th
 # Security
 TBD
 
+- GPG Signing requires the following ~/.bashrc: `export GPG_TTY=$(tty)`
+
 # Istio
 
 Kicking the tires on a switch to Istio from standard Ingress Controllers Generated the manifest files via istioctl
