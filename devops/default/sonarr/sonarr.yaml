@@ -32,11 +32,11 @@ spec:
       stash.appscode.com/target-paths: "/config"
       stash.appscode.com/volume-mounts: "config:/config"
       authproxy.stakater.com/enabled: "true"
-      authproxy.stakater.com/listen: "0.0.0.0:80"
-      authproxy.stakater.com/target-port: 80
+      authproxy.stakater.com/listen: "0.0.0.0:3000"
+      authproxy.stakater.com/target-port: 3000
       authproxy.stakater.com/upstream-url: "http://127.0.0.1:8989"
       authproxy.stakater.com/source-service-name: sonarr
-      authproxy.stakater.com/resources: "uri=/*"
+      authproxy.stakater.com/resources: "uri=/api/*"
     persistence:
       config:
         enabled: true
