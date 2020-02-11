@@ -27,11 +27,11 @@ spec:
     timezone: "America/New_York"
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      sidecar.istio.io/inject: "true"
     deploymentAnnotations:
       stash.appscode.com/backup-blueprint: default-workload-blueprint
       stash.appscode.com/target-paths: "/config"
       stash.appscode.com/volume-mounts: "config:/config"
-      sidecar.istio.io/inject: "true"
     persistence:
       config:
         enabled: true
