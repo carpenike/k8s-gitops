@@ -40,7 +40,8 @@ spec:
       # - key: "arm"
       #   operator: "Exists"
       extraArgs:
-        default-ssl-certificate: "kube-system/acme-crt-secret"
+        # default-ssl-certificate: "kube-system/acme-crt-secret"
+        default-ssl-certificate: "kube-system/digicert-ingress-tls"
       resources:
         requests:
           memory: 500Mi
