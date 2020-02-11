@@ -11,9 +11,12 @@ metadata:
 spec:
   releaseName: minio
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    git: https://github.com/carpenike/charts
+    ref: master
+    path: stable/minio
+    # repository: https://kubernetes-charts.storage.googleapis.com/
     name: minio
-    version: 5.0.5
+    version: 5.0.7
   values:
     image:
       repository: jessestuart/minio
