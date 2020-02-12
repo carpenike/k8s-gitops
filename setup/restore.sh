@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#RBDTARGETS=("sonarr-config" "nzbhydra2-config" "radarr-config")
-RBDTARGETS=("radarr-config")
+#RBDTARGETS=("sonarr-config" "nzbhydra2-config" "radarr-config" "bitwarden-bitwarden-k8s")
+RBDTARGETS=("bitwarden-bitwarden-k8s")
 PVTARGETS=("nzbget-config")
-FOLDER="2019.11.20"
+FOLDER="2020.02.08"
 TOOLS=`kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}'`
 
 echo "Mounting NFS Storage Location where Backups are"
