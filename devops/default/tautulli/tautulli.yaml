@@ -13,7 +13,7 @@ spec:
   chart:
     repository: https://charts.blazure.com
     name: tautulli
-    version: 0.1.3
+    version: 0.1.5
   values:
     image:
       repository: tautulli/tautulli
@@ -28,8 +28,12 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-    podAnnotations:
-      backup.velero.io/backup-volumes: tautulli-config
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: tautulli-config
+    deploymentAnnotations:
+      stash.appscode.com/backup-blueprint: default-workload-blueprint
+      stash.appscode.com/target-paths: "/config"
+      stash.appscode.com/volume-mounts: "config:/config"
     persistence:
       enabled: true
       storageClassName: rook-ceph-block
