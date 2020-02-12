@@ -3,7 +3,7 @@ apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: kubedb-operator
-  namespace: kube-system
+  namespace: database
   annotations:
     fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: semver:~1.

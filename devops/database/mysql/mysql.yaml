@@ -1,0 +1,16 @@
+apiVersion: kubedb.com/v1alpha1
+kind: MySQL
+metadata:
+  name: mysql
+  namespace: database
+spec:
+  version: "8.0-v2"
+  storageType: Durable
+  storage:
+    storageClassName: "rook-ceph-block"
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+  terminationPolicy: DoNotTerminate
