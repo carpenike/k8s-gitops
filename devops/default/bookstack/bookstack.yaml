@@ -26,10 +26,10 @@ spec:
         kubernetes.io/tls-acme: "true"
     mariadb:
       enabled: false
-      # master:
-      #   persistence:
-      #     enabled: true
-      #     storageClass: rook-ceph-block
+      master:
+        persistence:
+          enabled: true
+          storageClass: rook-ceph-block
     persistence:
       uploads:
         storageClass: rook-ceph-block
