@@ -5,11 +5,15 @@
   command: "{{ item }}"
   become: no
   with_items:
+    - kubectl apply -f {{ kubernetes_prometheus_alertmanager_manifest_file }}
+    - kubectl apply -f {{ kubernetes_prometheus_podmonitor_manifest_file }}
+    - kubectl apply -f {{ kubernetes_prometheus_prometheus_manifest_file }}
+    - kubectl apply -f {{ kubernetes_prometheus_prometheusrules_manifest_file }}
     - kubectl apply -f {{ kubernetes_prometheus_servicemonitor_manifest_file }}
   register: prometheus_result
   environment:
     KUBECONFIG: "{{ base }}/setup/kubeconfig"
   #until: "'created' in calico_result.stdout or 'unchanged' in calico_result.stdout"
-  until: prometheus_result is succeeded
+  # until: prometheus_result is succeeded
   retries: 6
   delay: 10

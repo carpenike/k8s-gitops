@@ -15,4 +15,8 @@ allowed_kubernetes_access:
 kubernetes_calico_manifest_file: "{{ base }}/devops/kube-system/calico/calico.yaml"
 kubernetes_calico_bgp_file: "{{ base }}/devops/kube-system/calico/bgp-fw.yaml"
 kubernetes_helm_: "{{ base }}/devops/kube-system/calico/bgp-fw.yaml"
-kubernetes_prometheus_servicemonitor_manifest_file: "https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml"
+kubernetes_prometheus_alertmanager_manifest_file: https://raw.githubusercontent.com/helm/charts/master/stable/prometheus-operator/crds/crd-alertmanager.yaml
+kubernetes_prometheus_podmonitor_manifest_file: https://raw.githubusercontent.com/helm/charts/master/stable/prometheus-operator/crds/crd-podmonitor.yaml
+kubernetes_prometheus_prometheus_manifest_file: https://raw.githubusercontent.com/helm/charts/master/stable/prometheus-operator/crds/crd-prometheus.yaml
+kubernetes_prometheus_prometheusrules_manifest_file: https://raw.githubusercontent.com/helm/charts/master/stable/prometheus-operator/crds/crd-prometheusrules.yaml
+kubernetes_prometheus_servicemonitor_manifest_file: https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
