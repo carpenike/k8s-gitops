@@ -25,7 +25,7 @@ spec:
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
     mariadb:
-      enabled: true
+      enabled: false
       master:
         persistence:
           enabled: true
