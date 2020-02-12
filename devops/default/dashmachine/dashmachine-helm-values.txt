@@ -1,0 +1,6 @@
+ingress:
+  hosts:
+    - portal.$DOMAIN
+  tls:
+  - hosts:
+    - portal.$DOMAIN

@@ -21,6 +21,7 @@
     - "{{ base }}/setup/kvault.sh default/heimdall/heimdall-helm-values.txt"
     - "{{ base }}/setup/kvault.sh default/bazarr/bazarr-helm-values.txt"
     - "{{ base }}/setup/kvault.sh default/tautulli/tautulli-helm-values.txt"
+    - "{{ base }}/setup/kvault.sh default/dashmachine/dashmachine-helm-values.txt"
     - "{{ base }}/setup/kvault.sh velero/velero/velero-helm-values.txt"
     - "{{ base }}/setup/kvault.sh drone/drone/drone-helm-values.txt"
     - "{{ base }}/setup/kvault.sh kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
