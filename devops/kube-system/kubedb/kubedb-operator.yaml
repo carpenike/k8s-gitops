@@ -14,4 +14,4 @@ spec:
   chart:
     repository: https://charts.appscode.com/stable/
     name: kubedb-operator
-    version: v0.13.0-rc.0
+    version: v0.12.0
