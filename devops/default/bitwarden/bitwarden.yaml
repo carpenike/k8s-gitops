@@ -15,6 +15,7 @@ spec:
     git: https://github.com/cdwv/bitwarden-k8s
     ref: master
     path: .
+    version: 0.1.2
   values:
     ingress:
       enabled: true
@@ -28,5 +29,9 @@ spec:
       size: 5Gi
     podAnnotations:
       backup.velero.io/backup-volumes: data
+    deploymentAnnotations:
+      stash.appscode.com/backup-blueprint: default-workload-blueprint
+      stash.appscode.com/target-paths: "/data"
+      stash.appscode.com/volume-mounts: "data:/data"
   valueFileSecrets:
     - name: "bitwarden-helm-values"

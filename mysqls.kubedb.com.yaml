@@ -1,0 +1,33 @@
+apiVersion: v1
+items:
+- apiVersion: kubedb.com/v1alpha1
+  kind: MySQL
+  metadata:
+    annotations:
+      fluxcd.io/sync-checksum: ec25b98ddfebcf635b554a19b576a954b8477a41
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"kubedb.com/v1alpha1","kind":"MySQL","metadata":{"annotations":{"fluxcd.io/sync-checksum":"ec25b98ddfebcf635b554a19b576a954b8477a41"},"labels":{"fluxcd.io/sync-gc-mark":"sha256.mmd0yqYaTc1Id_zP3eC42j8LRYx45QXAHsrRITOrsyo"},"name":"mysql","namespace":"database"},"spec":{"storage":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}},"storageClassName":"rook-ceph-block"},"storageType":"Durable","terminationPolicy":"DoNotTerminate","version":"8.0-v2"}}
+    creationTimestamp: "2020-02-12T22:16:30Z"
+    generation: 1
+    labels:
+      fluxcd.io/sync-gc-mark: sha256.mmd0yqYaTc1Id_zP3eC42j8LRYx45QXAHsrRITOrsyo
+    name: mysql
+    namespace: database
+    resourceVersion: "398998"
+    selfLink: /apis/kubedb.com/v1alpha1/namespaces/database/mysqls/mysql
+    uid: 5ae247b9-c7d0-45a3-85f6-7529723c2864
+  spec:
+    storage:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: rook-ceph-block
+    storageType: Durable
+    terminationPolicy: DoNotTerminate
+    version: 8.0-v2
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
