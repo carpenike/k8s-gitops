@@ -1,6 +1,6 @@
 subcomponents:
   sonarr:
-    namespace: sonarr
+    namespace: default 
     injectNamespace: true
     config:
       image:
@@ -9,10 +9,10 @@ subcomponents:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
-        hosts: [sonarr.holthome.net]
+        hosts: [sonarr.$DOMAIN]
         tls:
         - hosts:
-          - sonarr.holthom.net
+          - sonarr.$DOMAIN
       persistence:
         config:
           enabled: true
