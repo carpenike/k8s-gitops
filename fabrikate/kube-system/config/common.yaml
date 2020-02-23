@@ -1,0 +1,19 @@
+subcomponents:
+  nfs-server-provisioner:
+    namespace: kube-system
+    injectNamespace: true
+    config:
+      image:
+        repository: quay.io/kubernetes_incubator/nfs-provisioner
+        tag: v2.3.0
+      persistence:
+        enabled: true
+        storageClass: "-"
+        size: 200Gi
+      storageClass:
+        default: false
+      nodeSelector:
+        node-role.kubernetes.io/nfs: "true"
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"

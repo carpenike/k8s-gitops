@@ -1,0 +1,14 @@
+name: default-namespace
+type: static
+path: "./manifests"
+subcomponents:
+  - name: "sonarr"
+    type: "helm"
+    method: "helm" # fetch the `source` via `helm fetch`
+    source: "https://billimek.com/billimek-charts/" # url of helm repo the chart resides
+    path: "sonarr" # name of chart in helm repository
+
+  - name: sealed-secrets
+    type: static
+    source: https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.9.7/controller.yaml
+    method: http

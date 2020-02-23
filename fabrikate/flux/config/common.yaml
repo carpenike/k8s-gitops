@@ -1,0 +1,25 @@
+subcomponents:
+  flux:
+    namespace: flux
+    injectNamespace: true
+    config:
+      helmOperator:
+        create: false
+      git:
+        url: "git@github.com:k8s-at-home/k8s-cluster"
+        path: "cluster"
+      registry:
+        rps: 1
+        burst: 1
+      memcached:
+        enabled: true
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          create: true
+          interval: 30s
+          scrapeTimeout: 10s
+          namespace: flux
+      syncGarbageCollection:
+        enabled: true
+        dry: false

@@ -1,0 +1,9 @@
+name: kube-system-namespace
+type: static
+path: "./manifests"
+subcomponents:
+  - name: nfs-server-provisioner
+    type: "helm"
+    method: "helm" # fetch the `source` via `helm fetch`
+    source: "https://kubernetes-charts.storage.googleapis.com" # url of helm repo the chart resides
+    path: "nfs-server-provisioner" # name of chart in helm repository

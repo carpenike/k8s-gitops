@@ -1,0 +1,297 @@
+---
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  labels:
+    app: nfs-server-provisioner
+    chart: nfs-server-provisioner-1.0.0
+    heritage: Tiller
+    release: nfs-server-provisioner
+  name: nfs
+  namespace: kube-system
+mountOptions:
+- vers=3
+provisioner: cluster.local/nfs-server-provisioner
+reclaimPolicy: Delete
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: nfs-server-provisioner
+    chart: nfs-server-provisioner-1.0.0
+    heritage: Tiller
+    release: nfs-server-provisioner
+  name: nfs-server-provisioner
+  namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: nfs-server-provisioner
+    chart: nfs-server-provisioner-1.0.0
+    heritage: Tiller
+    release: nfs-server-provisioner
+  name: nfs-server-provisioner
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  verbs:
+  - get
+- apiGroups:
+  - extensions
+  resourceNames:
+  - nfs-provisioner
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - update
+  - patch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: nfs-server-provisioner
+    chart: nfs-server-provisioner-1.0.0
+    heritage: Tiller
+    release: nfs-server-provisioner
+  name: nfs-server-provisioner
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nfs-server-provisioner
+subjects:
+- kind: ServiceAccount
+  name: nfs-server-provisioner
+  namespace: kube-system
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nfs-server-provisioner
+    chart: nfs-server-provisioner-1.0.0
+    heritage: Tiller
+    release: nfs-server-provisioner
+  name: nfs-server-provisioner
+  namespace: kube-system
+spec:
+  ports:
+  - name: nfs
+    port: 2049
+    protocol: TCP
+    targetPort: nfs
+  - name: nfs-udp
+    port: 2049
+    protocol: UDP
+    targetPort: nfs-udp
+  - name: nlockmgr
+    port: 32803
+    protocol: TCP
+    targetPort: nlockmgr
+  - name: nlockmgr-udp
+    port: 32803
+    protocol: UDP
+    targetPort: nlockmgr-udp
+  - name: mountd
+    port: 20048
+    protocol: TCP
+    targetPort: mountd
+  - name: mountd-udp
+    port: 20048
+    protocol: UDP
+    targetPort: mountd-udp
+  - name: rquotad
+    port: 875
+    protocol: TCP
+    targetPort: rquotad
+  - name: rquotad-udp
+    port: 875
+    protocol: UDP
+    targetPort: rquotad-udp
+  - name: rpcbind
+    port: 111
+    protocol: TCP
+    targetPort: rpcbind
+  - name: rpcbind-udp
+    port: 111
+    protocol: UDP
+    targetPort: rpcbind-udp
+  - name: statd
+    port: 662
+    protocol: TCP
+    targetPort: statd
+  - name: statd-udp
+    port: 662
+    protocol: UDP
+    targetPort: statd-udp
+  selector:
+    app: nfs-server-provisioner
+    release: nfs-server-provisioner
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nfs-server-provisioner
+    chart: nfs-server-provisioner-1.0.0
+    heritage: Tiller
+    release: nfs-server-provisioner
+  name: nfs-server-provisioner
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-server-provisioner
+      release: nfs-server-provisioner
+  serviceName: nfs-server-provisioner
+  template:
+    metadata:
+      labels:
+        app: nfs-server-provisioner
+        chart: nfs-server-provisioner-1.0.0
+        heritage: Tiller
+        release: nfs-server-provisioner
+    spec:
+      containers:
+      - args:
+        - -provisioner=cluster.local/nfs-server-provisioner
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SERVICE_NAME
+          value: nfs-server-provisioner
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: quay.io/kubernetes_incubator/nfs-provisioner:v2.3.0
+        imagePullPolicy: IfNotPresent
+        name: nfs-server-provisioner
+        ports:
+        - containerPort: 2049
+          name: nfs
+          protocol: TCP
+        - containerPort: 2049
+          name: nfs-udp
+          protocol: UDP
+        - containerPort: 32803
+          name: nlockmgr
+          protocol: TCP
+        - containerPort: 32803
+          name: nlockmgr-udp
+          protocol: UDP
+        - containerPort: 20048
+          name: mountd
+          protocol: TCP
+        - containerPort: 20048
+          name: mountd-udp
+          protocol: UDP
+        - containerPort: 875
+          name: rquotad
+          protocol: TCP
+        - containerPort: 875
+          name: rquotad-udp
+          protocol: UDP
+        - containerPort: 111
+          name: rpcbind
+          protocol: TCP
+        - containerPort: 111
+          name: rpcbind-udp
+          protocol: UDP
+        - containerPort: 662
+          name: statd
+          protocol: TCP
+        - containerPort: 662
+          name: statd-udp
+          protocol: UDP
+        securityContext:
+          capabilities:
+            add:
+            - DAC_READ_SEARCH
+            - SYS_RESOURCE
+        volumeMounts:
+        - mountPath: /export
+          name: data
+      nodeSelector:
+        node-role.kubernetes.io/nfs: "true"
+      serviceAccountName: nfs-server-provisioner
+      terminationGracePeriodSeconds: 100
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 200Gi
+      storageClassName: ""
