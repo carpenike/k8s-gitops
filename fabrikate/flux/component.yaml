@@ -1,9 +1,0 @@
-name: namespace
-type: static
-path: "./manifests"
-subcomponents:
-  - name: flux
-    type: "helm"
-    method: "helm" # fetch the `source` via `helm fetch`
-    source: "https://charts.fluxcd.io" # url of helm repo the chart resides
-    path: "flux" # name of chart in helm repository
