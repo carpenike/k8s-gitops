@@ -53,8 +53,12 @@ spec:
         metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
       loadBalancerIP: 10.20.50.153
-    podAnnotations:
-      backup.velero.io/backup-volumes: unifi-data
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: unifi-data
+    deploymentAnnotations:
+      stash.appscode.com/backup-blueprint: default-workload-blueprint
+      stash.appscode.com/target-paths: "/unifi/data,/unifi/log,/unifi/cert,/unifi/init.d"
+      stash.appscode.com/volume-mounts: "unifi-data:/unifi/data,unifi-data:/unifi/log,unifi-data:/unifi/cert,unifi-data:/unifi/init.d"
     resources:
       requests:
         memory: 500Mi

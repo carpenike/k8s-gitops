@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #RBDTARGETS=("sonarr-config" "nzbhydra2-config" "radarr-config" "bitwarden-bitwarden-k8s" "tautulli-config" "unifi")
-RBDTARGETS=("nzbhydra2-config")
+RBDTARGETS=("unifi")
 NFSTARGETS=("nzbget-config")
 FOLDER="2020.02.08"
 TOOLS=`kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}'`
