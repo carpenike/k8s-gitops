@@ -1,0 +1,6 @@
+---
+
+- include: server_deps.yml
+- include: k3s.yml
+- include: k3s_bootstrap.yml
+- include: k3s_vault.yml

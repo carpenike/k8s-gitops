@@ -1,0 +1,59 @@
+---
+- name: Configure ufw defaults for incoming traffic
+  ufw:
+    direction: incoming
+    policy: deny
+
+- name: Configure ufw defaults for outgoing traffic
+  ufw:
+    direction: outgoing
+    policy: allow
+
+- name: Add ssh as allowed port from certain ips
+  ufw:
+    rule: allow
+    port: 22
+    src: "{{ item }}"
+    proto: tcp
+  with_items: "{{ allowed_kubernetes_access }}"
+
+- name: Add kubernetes api as allowed port from certain ips
+  ufw:
+    rule: allow
+    port: 6443
+    src: "{{ item }}"
+    proto: tcp
+  with_items: "{{ allowed_kubernetes_access }}"
+
+- name: Add kubernetes api as allowed port from the nodes
+  ufw:
+    rule: allow
+    port: 6443
+    src: "{{ hostvars[item]['node_ip'] }}"
+    proto: tcp
+  with_items: "{{ groups['k3scluster'] }}"
+
+- name: Add kubernetes udp port as allowed from node ips
+  ufw:
+    rule: allow
+    port: 8472
+    src: "{{ hostvars[item]['node_ip'] }}"
+    proto: udp
+  with_items: "{{ groups['k3scluster'] }}"
+
+- name: Allow traffic for everyone on these ports (web traffic)
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  with_items:
+    - 80
+    - 443
+
+- name: Enable ufw logging
+  ufw:
+    logging: on
+
+- name: Enable ufw.
+  ufw:
+    state: enabled

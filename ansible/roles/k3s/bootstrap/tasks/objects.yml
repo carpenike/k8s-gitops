@@ -1,0 +1,28 @@
+---
+- name: Delete Kubernetes Secrets
+  shell: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - kubectl -n kube-system delete secret kms-vault
+    - kubectl -n kube-system delete secret keycloak-realm
+    - kubectl -n kube-system delete secret proxyinjector-config
+    - kubectl delete secret restic-backup-credentials
+    - kubectl delete -n kube-system secret digicert-ingress-tls
+  register: delete_bootstrap_results
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
+- name: Bootstrap Kubernetes Secrets
+  shell: "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - kubectl -n kube-system create secret generic kms-vault --from-literal=config.hcl="$(envsubst < {{ REPO_ROOT }}/cluster/kube-system/vault/kms-config.txt)"
+    - kubectl -n kube-system create secret generic keycloak-realm --from-literal=realm.json="$(envsubst < {{ REPO_ROOT }}/cluster/kube-system/keycloak/keycloak-realm.json)"
+    - kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(envsubst < {{ REPO_ROOT }}/cluster/kube-system/proxyinjector/proxyinjector.txt)"
+    - kubectl create secret generic restic-backup-credentials --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY
+    - "envsubst < {{ REPO_ROOT }}/cluster/kube-system/nginx/digicert-ingress-tls.txt | kubectl apply -f -"
+    # - kubectl -n k8up create secret generic backup-repo --from-literal=password=$K8UP_ENCRYPTION_KEY
+  register: bootstrap_results
+  # changed_when: "'All items completed' in kms_secret_results.msg"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"

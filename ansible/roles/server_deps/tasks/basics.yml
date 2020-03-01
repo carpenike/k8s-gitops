@@ -1,0 +1,110 @@
+---
+- name: Set timezone
+  command: "timedatectl set-timezone {{ timezone | default('America/New_York') }}"
+  become: true
+
+- name: Add the rbd module
+  modprobe:
+    name: rbd
+    state: present
+
+- name: Remove System provided resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+
+- name: Symlink systemd resolv.conf to system
+  file:
+    src: /run/systemd/resolve/resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+
+- name: Copy unattended-upgrades configuration files in place
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/apt/apt.conf.d/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - 10periodic
+    - 50unattended-upgrades
+
+- name: Update APT package manager repositories cache.
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Upgrade system
+  apt:
+    upgrade: dist
+    # Need the force_apt_get until
+    # https://github.com/ansible/ansible/issues/56832
+    force_apt_get: true
+  register: apt_upgrade
+  retries: 5
+  until: apt_upgrade is success
+
+- name: Upgrade all packages to the latest version
+  apt:
+    name: "*"
+    state: latest
+    # Need the force_apt_get until
+    # https://github.com/ansible/ansible/issues/56832
+    force_apt_get: true
+  register: apt_update
+  retries: 5
+  until: apt_update is success
+
+- name: Installing common tools.
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: present
+    install_recommends: false
+    update_cache: true
+    force_apt_get: true
+  with_items:
+    - htop
+    - unzip
+    - glances
+    - iotop
+    - jq
+    - lvm2
+    - nethogs
+    - iperf3
+    - nfs-common
+    - neofetch
+  register: apt_install_common
+  retries: 5
+  until: apt_install_common is success
+
+- name: Clean up apt
+  apt:
+    autoremove: true
+    # Need the force_apt_get until
+    # https://github.com/ansible/ansible/issues/56832
+    force_apt_get: true
+
+- name: Restart systemd-timesyncd service
+  systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: restarted
+
+- name: Enable systemd-timesyncd service and assure it is started
+  systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: started
+
+- name: Disable SWAP
+  shell: |
+    swapoff -a
+
+- name: Disable SWAP in fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+  become: true

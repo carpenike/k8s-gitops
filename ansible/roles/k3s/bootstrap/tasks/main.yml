@@ -1,0 +1,9 @@
+---
+
+- include: calico.yml
+  when: k3s_no_flannel == true
+- include: crd.yml
+- include: labels_taints.yml
+# - include: objects.yml
+# - include: ceph.yml
+# - include: cert_manager.yml

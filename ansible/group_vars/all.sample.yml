@@ -1,0 +1,51 @@
+---
+# k3s options
+k3s_release_version: false
+k3s_no_traefik: true
+k3s_no_servicelb: true
+k3s_use_experimental: false
+k3s_control_workers: true
+k3s_cluster_cidr: "10.42.0.0/16"
+k3s_service_cidr: "10.43.0.0/16"
+k3s_use_docker: false
+k3s_no_flannel: false
+#k3s_flannel_backend: "host-gw"
+k3s_copy_config_local: false
+k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
+
+# ansible options
+ansible_user: "ubuntu"
+local_user: "{{ ansible_user }}"
+
+# k3s options
+#k3s_master: "{{ hostvars[groups['master'][0]]['ansible_nodename'] }}" ## Only used in tear-down. Needs to be re-worked.
+#master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+
+# github options
+github_username:
+github_k8s_reponame: k8s-cluster
+github_k8s_reponame_branch: master
+
+# ceph options
+ceph:
+  converged: true
+  zap_disks: false
+  disks:
+    - /dev/sdb
+    - /dev/sdc
+    - /dev/sdd
+
+# helm options
+helm_operator: enabled
+helm_operator_values: "{{ REPO_ROOT }}/manifests/helm-operator/helm-operator-values.yaml"
+
+# server options
+timezone: America/New_York
+REPO_ROOT: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
+
+# calico options
+calico:
+  manifest_file: "{{ REPO_ROOT }}/manifests/calico/calico.yaml"
+  bgp: disabled
+  bgp_peer: 10.20.0.1
+  bgp_as: 64512

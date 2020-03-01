@@ -1,0 +1,5 @@
+---
+- name: Zap Drives to Prep for Ceph
+  become: true
+  shell: "sgdisk -z {{ item }}"
+  loop: "{{ ceph.disks }}"

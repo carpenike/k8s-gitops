@@ -1,0 +1,5 @@
+- hosts: vault
+  gather_facts: true
+  tasks:
+  - name: output all variables
+    action: template src=debug/dumpall.j2 dest=debug/ansible.all

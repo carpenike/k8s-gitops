@@ -1,0 +1,4 @@
+env_vault:
+  DOMAIN: "{{ vault_DOMAIN }}"
+  VAULT_RECOVERY_TOKEN: "{{ vault_VAULT_RECOVERY_TOKEN }}"
+  VAULT_ROOT_TOKEN: "{{ vault_VAULT_ROOT_TOKEN }}"

@@ -1,0 +1,37 @@
+---
+- name: Apply storage annotations
+  command: kubectl label --overwrite node {{ item }} node-role.kubernetes.io/storage=true
+  loop: "{{ groups['storage'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
+- name: Apply ceph annotations
+  command: kubectl label --overwrite node {{ item }} node-role.kubernetes.io/ceph=true
+  loop: "{{ groups['ceph'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
+- name: Apply nfs annotations
+  command: kubectl label --overwrite node {{ item }} node-role.kubernetes.io/nfs=true
+  loop: "{{ groups['nfs'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
+- name: Apply worker annotations
+  command: kubectl label --overwrite node {{ item }} node-role.kubernetes.io/worker=true
+  loop: "{{ groups['nodes'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
+- name: Apply Ceph Taints if not converged
+  command: kubectl taint --overwrite node {{ item }} node-role.kubernetes.io/ceph=true:NoSchedule
+  loop: "{{ groups['ceph'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+  when: ceph.converged|bool == false
+
+- name: Apply master annotations
+  command: kubectl taint --overwrite node {{ item }} node-role.kubernetes.io/master=true:NoSchedule
+  loop: "{{ groups['master'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"

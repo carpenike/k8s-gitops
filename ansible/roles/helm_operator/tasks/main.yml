@@ -1,0 +1,31 @@
+---
+
+- name: Add Flux Repo
+  command: "{{ item }}"
+  with_items:
+    - helm repo add fluxcd https://charts.fluxcd.io
+  register: flux_repo_results
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+  changed_when: "'has been added to your repositories' in flux_repo_results.stdout"
+  until: "'has been added to your repositories' in flux_repo_results.stdout"
+  retries: 6
+  delay: 10
+
+- name: Deploy Helm Operator
+  shell: |
+    helm upgrade -i helm-operator fluxcd/helm-operator \
+    --version 0.7.0 \
+    --namespace flux \
+    --set 'createCRD=false' \
+    --set 'git.ssh.secretName=flux-git-deploy' \
+    --set 'helm.versions=v3' \
+    --set 'chartsSyncInterval=10m' \
+    --set 'statusUpdateInterval=10m' \
+    --set 'prometheus.enabled=true' \
+    --set 'prometheus.serviceMonitor.create=false' \
+    --set 'prometheus.serviceMonitor.interval=30s' \
+    --set 'prometheus.serviceMonitor.scrapeTimeout=10s' \
+    --set 'prometheus.serviceMonitor.namespace=flux'
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
