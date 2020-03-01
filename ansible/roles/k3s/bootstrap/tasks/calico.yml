@@ -4,14 +4,13 @@
   command: "{{ item }}"
   become: no
   with_items:
-    - kubectl apply -f {{ kubernetes_pod_network.calico_manifest_file }}
+    - kubectl apply -f {{ calico.manifest_file }}
   register: calico_result
   environment:
     KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
     CALICO_DATASTORE_TYPE: kubernetes
     CALICO_KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
-  changed_when: "'created' in calico_result.stdout"
-  #until: "'created' in calico_result.stdout or 'unchanged' in calico_result.stdout"
+  #changed_when: "'created' in calico_result.stdout"
   until: calico_result is succeeded
   retries: 6
   delay: 10
