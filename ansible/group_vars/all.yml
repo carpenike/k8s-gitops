@@ -11,6 +11,7 @@ k3s_use_docker: false
 k3s_no_flannel: true 
 k3s_flannel_backend: "none"
 k3s_copy_config_local: false
+k3s_control_node_address: "k8s.holthome.net"
 k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
 
 # ansible options
