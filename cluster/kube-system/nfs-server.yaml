@@ -1,0 +1,84 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-nfs-server-pv
+spec:
+  capacity:
+    storage: 200Gi
+  storageClassName: nfs-server
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/tank/share/
+  claimRef:
+    namespace: kube-system
+    name: data-nfs-server-pvc
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: data-nfs-server-pvc
+  namespace: kube-system
+spec:
+  storageClassName: nfs-server
+  resources:
+    requests:
+      storage: 200Gi
+  accessModes:
+    - ReadWriteOnce
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nfs-server
+  namespace: kube-system
+spec:
+  ports:
+    - name: nfs
+      port: 2049
+  selector:
+    role: nfs-server
+  type: LoadBalancer
+  loadBalancerIP: 10.20.50.100
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-server
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: nfs-server
+  template:
+    metadata:
+      labels:
+        role: nfs-server
+    spec:
+      volumes:
+      - name: nfs-vol
+        persistentVolumeClaim:
+          claimName: data-nfs-server-pvc
+      restartPolicy: Always
+      containers:
+      - name: nfs-server
+        image: itsthenetwork/nfs-server-alpine
+        env:
+        - name: SHARED_DIRECTORY
+          value: /mnt/tank/share
+        ports:
+          - name: nfs
+            containerPort: 2049
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /mnt/tank/share
+            name: nfs-vol
+      nodeSelector:
+        node-role.kubernetes.io/nfs: "true"
+
+
