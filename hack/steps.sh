@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# This script used to manually build manifests off of helm chart. Not in use currently
+
 namespace="kube-system"
 chart_name="nfs-server-provisioner"
 chart_version="1.0.0"
