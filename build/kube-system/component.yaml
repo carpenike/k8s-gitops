@@ -28,6 +28,10 @@ subcomponents:
     source: https://kubernetes-charts.storage.googleapis.com # url of helm repo the chart resides
     path: nfs-server-provisioner # name of chart in helm repository
 
+  - name: nfs-server
+    type: static
+    path: "./nfs-server"
+
   - name: sealed-secrets
     type: static
     source: https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.9.7/controller.yaml

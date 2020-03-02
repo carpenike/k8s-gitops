@@ -1,4 +1,4 @@
-name: k3s
+name: IGNORE_ME 
 subcomponents:
   - name: default 
     type: component 

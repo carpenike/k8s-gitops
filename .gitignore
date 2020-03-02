@@ -8,3 +8,4 @@ setup/cluster/*cluster.yml
 *.rkestate
 helm_repos
 generated
+IGNORE_ME.yaml
