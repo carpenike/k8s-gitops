@@ -4,7 +4,7 @@ path: "./manifests"
 subcomponents:
   - name: consul
     type: helm
-    method: git 
+    method: git
     source: https://github.com/hashicorp/consul-helm
     path: .
     branch: v0.16.2
@@ -36,3 +36,10 @@ subcomponents:
     type: static
     source: https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.9.7/controller.yaml
     method: http
+
+  - name: metallb
+    type: helm
+    method: helm
+    source: https://kubernetes-charts.storage.googleapis.com
+    path: metallb
+    version: 0.12.0

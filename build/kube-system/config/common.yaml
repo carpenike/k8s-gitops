@@ -66,3 +66,13 @@ subcomponents:
         kubernetesPath: auth/kubernetes
         kubernetesRole: vault-secrets-operator
         reconciliationTime: "300"
+  metallb:
+    namespace: kube-system
+    injectNamespace: true
+    config:
+      configInline:
+        address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+              - 10.20.50.100-10.20.50.250
