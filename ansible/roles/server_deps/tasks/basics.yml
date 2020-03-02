@@ -7,6 +7,7 @@
   modprobe:
     name: rbd
     state: present
+  when: ansible_architecture == "x86_64"
 
 - name: Remove System provided resolv.conf
   file:
