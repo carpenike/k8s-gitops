@@ -1,0 +1,35 @@
+subcomponents:
+  sonarr:
+    namespace: default
+    injectNamespace: true
+    config:
+      image:
+        tag: 2.0.0.5337-ls99
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts: [sonarr.$DOMAIN]
+        tls:
+        - hosts:
+          - sonarr.$DOMAIN
+      persistence:
+        config:
+          enabled: true
+          storageClass: rook-ceph-block
+        downloads:
+          enabled: true
+          existingClaim: nfs-tank-share-pvc
+          subPath: nzbget/downloads
+        tv:
+          enabled: true
+          existingClaim: nfs-tank-media-pvc
+          subPath: tv
+      resource:
+        requests:
+          memory: 350Mi
+          cpu: 25m
+        limits:
+          memory: 500Mi
+      puid: 1000
+      pgid: 1000

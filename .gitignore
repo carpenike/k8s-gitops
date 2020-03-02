@@ -6,3 +6,5 @@ auth
 *.snap
 setup/cluster/*cluster.yml
 *.rkestate
+helm_repos
+generated

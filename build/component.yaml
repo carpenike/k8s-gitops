@@ -1,0 +1,12 @@
+name: k3s
+subcomponents:
+  - name: default 
+    type: component 
+    source: "./default" 
+  - name: kube-system
+    type: component
+    source: "./kube-system"
+  - name: PVs
+    type: component
+    source: "./PVs"
+

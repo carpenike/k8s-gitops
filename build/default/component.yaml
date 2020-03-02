@@ -1,0 +1,10 @@
+name: namespace
+type: static
+path: "./manifests"
+subcomponents:
+  - name: "sonarr"
+    type: "helm"
+    method: "helm" # fetch the `source` via `helm fetch`
+    source: "https://billimek.com/billimek-charts/" # url of helm repo the chart resides
+    path: "sonarr" # name of chart in helm repository
+
