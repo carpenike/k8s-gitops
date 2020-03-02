@@ -16,11 +16,11 @@ subcomponents:
     path: .
     branch: v0.3.3
 
-#  - name: vault-secrets-operator
-#    type: helm
-#    method: helm
-#    source: https://ricoberger.github.io/helm-charts
-#    path: vault-secrets-operator
+  - name: vault-secrets-operator
+    type: helm
+    method: helm
+    source: https://ricoberger.github.io/helm-charts
+    path: vault-secrets-operator
 
   - name: nfs-server-provisioner
     type: helm
