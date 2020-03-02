@@ -630,7 +630,7 @@ spec:
             # chosen from this range. Changing this value after installation will have
             # no effect. This should fall within `--cluster-cidr`.
             - name: CALICO_IPV4POOL_CIDR
-              value: "10.244.0.0/16"
+              value: "10.42.0.0/16"
             - name: CALICO_ADVERTISE_CLUSTER_IPS
               value: "10.43.0.0/16"
             # Disable file logging so `kubectl logs` works.
