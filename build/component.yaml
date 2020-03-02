@@ -6,6 +6,9 @@ subcomponents:
   - name: kube-system
     type: component
     source: "./kube-system"
+  - name: flux
+    type: component
+    source: "./flux"
   - name: PVs
     type: component
     source: "./PVs"

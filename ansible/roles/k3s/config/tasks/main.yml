@@ -16,7 +16,6 @@
     dest: '{{ REPO_ROOT }}/kubeconfig'
     owner: '{{ local_user }}'
     flat: yes
-  when: ( k3s_copy_config_local == true )
 
 - name: Copy config file to user home directory
   run_once: yes
@@ -27,22 +26,21 @@
     flat: yes
   when: ( k3s_copy_config_local == true )
 
-- name: Replace https://localhost:6443 by https://{{ k3s_master_lb }}:6443
+- name: Replace https://localhost:6443 by https://{{ k3s_control_node_address }}:6443
   run_once: yes
   become: no
   delegate_to: localhost
   replace:
     path: '{{ REPO_ROOT }}/kubeconfig'
     regexp: 'https://127.0.0.1:6443'
-    replace: 'https://{{ k3s_master_lb }}:6443'
-  when: ( k3s_copy_config_local == true )
+    replace: 'https://{{ k3s_control_node_address }}:6443'
 
-- name: Replace https://localhost:6443 by https://{{ k3s_master_lb }}:6443 (Home File)
+- name: Replace https://localhost:6443 by https://{{ k3s_control_node_address }}:6443 (Home File)
   run_once: yes
   become: no
   delegate_to: localhost
   replace:
     path: '~/.kube/config'
     regexp: 'https://127.0.0.1:6443'
-    replace: 'https://{{ k3s_master_lb }}:6443'
+    replace: 'https://{{ k3s_control_node_address }}:6443'
   when: ( k3s_copy_config_local == true )
