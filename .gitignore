@@ -9,4 +9,3 @@ setup/cluster/*cluster.yml
 helm_repos
 generated
 IGNORE_ME.yaml
-kubeconfig
