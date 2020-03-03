@@ -15,7 +15,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: rook-ceph-block
+  storageClassName: nfs
 
 ---
 apiVersion: v1
@@ -103,7 +103,7 @@ spec:
           subPath: nzbget/downloads
         - mountPath: /tv
           name: tv
-          subPath: tv
+          subPath: media/tv
       volumes:
       - name: config
         persistentVolumeClaim:
@@ -113,7 +113,7 @@ spec:
           claimName: nfs-tank-share-pvc
       - name: tv
         persistentVolumeClaim:
-          claimName: nfs-tank-media-pvc
+          claimName: nfs-tank-share-pvc
 
 ---
 apiVersion: extensions/v1beta1
@@ -130,7 +130,7 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: sonarr.$DOMAIN
+  - host: sonarr.holthome.net
     http:
       paths:
       - backend:
@@ -139,6 +139,5 @@ spec:
         path: /
   tls:
   - hosts:
-    - sonarr.$DOMAIN
+    - sonarr.holthome.net
     secretName: null
-

@@ -33,6 +33,9 @@
   retries: 30
   delay: 30
 
+- debug:
+    var: initialized_vault_status
+
 - name: Check Vault Sealed Status
   shell: kubectl -n kube-system exec "vault-0" -- vault status -format=json 2> /dev/null | jq -r '.sealed'
   register: sealed_vault_status
@@ -55,11 +58,11 @@
     VAULT_ROOT_TOKEN: "{{ (initialize_vault_status.stdout | from_json).root_token }}"
   when: ( initialized_vault_status.stdout == "false" )
 
-#- name: Decrypt Vault Secret File
-#  ignore_errors: yes
-#  command: "ansible-vault decrypt group_vars/vault/encrypted-vault.yaml"
-#  register: vault_decrypt
-#  when: ( initialized_vault_status.results[0].stdout == "false" )
+- name: Decrypt Vault Secret File
+  ignore_errors: yes
+  command: "ansible-vault decrypt group_vars/vault/encrypted-vault.yaml"
+  register: vault_decrypt
+  when: ( initialized_vault_status.stdout == "false" )
 
 - name: Update ansible-vault secret with root token
   lineinfile:
@@ -75,11 +78,11 @@
    line: "vault_VAULT_RECOVERY_TOKEN: {{ VAULT_RECOVERY_TOKEN }}"
   when: ( initialized_vault_status.stdout == "false" )
 
-#- name: Encrypt Vault Secret File
-#  command: "ansible-vault encrypt group_vars/vault/encrypted-vault.yaml"
-#  register: vault_encrypt
-#  changed_when: "'Encryption successful' in vault_encrypt.stdout"
-#  when: ( initialized_vault_status.results[0].stdout == "false" )
+- name: Encrypt Vault Secret File
+  command: "ansible-vault encrypt group_vars/vault/encrypted-vault.yaml"
+  register: vault_encrypt
+  changed_when: "'Encryption successful' in vault_encrypt.stdout"
+  when: ( initialized_vault_status.stdout == "false" )
 
 - name: Unseal Vault (0)
   shell: kubectl -n kube-system exec "vault-0" -- vault operator unseal {{ item }}
@@ -123,7 +126,7 @@
 
 - name: Set Vault_Service_IP to Fact (Calico)
   set_fact:
-    VAULT_ADDR: "http://{{ vault_service_IP.stdout }}:8200"
+    VAULT_ADDR: "http://{{ vault_service_IP.results[0].stdout }}:8200"
   when: k3s_no_flannel == true
 
 - name: Set Vault_Service_IP to Fact (Flannel)
@@ -262,3 +265,4 @@
 
 - name: Kill all kubectl port-forwards
   shell: killall kubectl
+  when: k3s_no_flannel == false
