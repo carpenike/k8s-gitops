@@ -1,5 +1,24 @@
 ---
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/instance: nzbget
+    app.kubernetes.io/managed-by: Tiller
+    app.kubernetes.io/name: nzbget
+    helm.sh/chart: nzbget-3.1.1
+  name: nzbget-config
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -88,7 +107,7 @@ spec:
       volumes:
       - name: config
         persistentVolumeClaim:
-          claimName: nfs-tank-share-pvc
+          claimName: nzbget-config
       - name: downloads
         persistentVolumeClaim:
           claimName: nfs-tank-share-pvc
