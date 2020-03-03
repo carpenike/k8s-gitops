@@ -30,7 +30,7 @@ spec:
   storageClassName: nfs-client
   nfs:
     server: 10.20.50.100
-    path: "/mnt/tank/share"
+    path: "/"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
