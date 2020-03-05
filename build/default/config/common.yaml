@@ -26,8 +26,8 @@ subcomponents:
           subPath: nzbget/downloads
         config:
           enabled: true
-          existingClaim: nfs-tank-share-pvc
-          subPath: nzbget/config
+          storageClass: nfs
+          size: 1Gi
       puid: 1000
       pgid: 1000
       #deploymentAnnotations:
