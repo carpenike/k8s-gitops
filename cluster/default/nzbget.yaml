@@ -92,12 +92,12 @@ spec:
           tcpSocket:
             port: http
           timeoutSeconds: 10
-        resources:
-          limits:
-            memory: 400Mi
-          requests:
-            cpu: 25m
-            memory: 300Mi
+        #resources:
+        #  limits:
+        #    memory: 400Mi
+        #  requests:
+        #    cpu: 25m
+        #    memory: 300Mi
         volumeMounts:
         - mountPath: /config
           name: config
