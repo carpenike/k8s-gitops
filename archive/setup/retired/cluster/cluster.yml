@@ -1,39 +1,34 @@
 nodes:
-  - address: 10.20.40.10
-    hostname_override: k8s-0
-    user: ubuntu
+  - address: 10.20.10.16
+    hostname_override: h2-0
+    user: ryan
     role: [controlplane, etcd]
-#  - address: 10.20.30.11
-#    hostname_override: k8s-master-b
-#    user: ubuntu
-#    role: [controlplane, etcd]
-#  - address: 10.20.30.12
-#    hostname_override: k8s-master-c
-#    user: ubuntu
-#    role: [controlplane, etcd]
-  - address: 10.20.40.11
-    hostname_override: k8s-1
-    user: ubuntu
+  - address: 10.20.10.10
+    hostname_override: r610-0
+    user: ryan
     role: [worker]
-    labels:
-      gpu: true
-  - address: 10.20.40.12
-    hostname_override: k8s-2
-    user: ubuntu
+    #labels:
+    #  gpu: true
+  - address: 10.20.10.11
+    hostname_override: r610-1
+    user: ryan
     role: [worker]
     #labels:
     #  app: intel-gpu-plugin
-#  - address: 10.20.40.12
-#    hostname_override: k8s-3
-#    user: ubuntu
-#    role: [worker]
-# network:
-#   plugin: calico
+  - address: 10.20.10.12
+    hostname_override: r610-2
+    user: ryan
+    role: [worker]
+  - address: 10.20.10.15
+    hostname_override: r720-0
+    user: ryan
+    role: [worker]
+network:
+  plugin: calico
 authentication:
   strategy: x509
   sans:
-    - "10.20.200.50"
-    - "lb-ha"
+    - "k8s.holthome.net"
       #ssh_key_path: /home/ryan/.ssh/id_rsa_macos
 #ssh_agent_auth: true
 services:
