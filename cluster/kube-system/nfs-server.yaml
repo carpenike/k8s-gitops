@@ -10,7 +10,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/tank/share
+    path: /mnt/tank/share/
   claimRef:
     namespace: kube-system
     name: data-nfs-server-pvc
