@@ -17,6 +17,16 @@ spec:
   dashboard:
     enabled: true
   # cluster level storage configuration and selection
+  placement:
+    all:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/ceph
+              operator: In
+              values:
+              - "true"
   resources:
     api:
       requests:
@@ -49,9 +59,13 @@ spec:
       limits:
         memory: 512Mi
   storage:
-    useAllNodes: true
+    useAllNodes: false
     useAllDevices: true
     deviceFilter:
+    nodes:
+      - name: r610-0
+      - name: r610-1
+      - name: r610-2
     location:
     config:
       metadataDevice:

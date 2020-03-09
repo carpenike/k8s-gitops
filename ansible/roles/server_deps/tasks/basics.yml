@@ -55,6 +55,7 @@
     update_cache: true
     force_apt_get: true
   with_items:
+    - gdisk
     - python-simplejson
     - htop
     - unzip

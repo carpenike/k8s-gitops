@@ -14,3 +14,10 @@ subcomponents:
     method: "helm" # fetch the `source` via `helm fetch`
     source: "https://billimek.com/billimek-charts/" # url of helm repo the chart resides
     path: "sonarr" # name of chart in helm repository
+
+  - name: plex
+    type: helm
+    method: git
+    source: https://github.com/munnerz/kube-plex
+    path: charts/kube-plex
+    version: master

@@ -13,6 +13,7 @@ k3s_flannel_backend: "none"
 k3s_copy_config_local: true
 k3s_control_node_address: "k8s.holthome.net"
 k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
+k3s_default_local_storage_path: "/dev/shm/k8s"
 
 # ansible options
 ansible_user: "ryan"
