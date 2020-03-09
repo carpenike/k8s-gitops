@@ -18,6 +18,19 @@ spec:
   dashboard:
     enabled: true
   # cluster level storage configuration and selection
+  placement:
+    all:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: role
+              operator: In
+              values:
+              - ceph
+      tolerations:
+      - key: ceph
+        operator: Exists
   resources:
     api:
       requests:
