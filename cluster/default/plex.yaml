@@ -12,7 +12,7 @@ metadata:
   namespace: default
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 20Gi
@@ -32,7 +32,7 @@ metadata:
   namespace: default
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 300Gi
