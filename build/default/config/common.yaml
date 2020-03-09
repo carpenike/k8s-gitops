@@ -57,7 +57,7 @@ subcomponents:
       persistence:
         config:
           enabled: true
-          storageClass: nfs
+          storageClass: rook-ceph-block
         downloads:
           enabled: false
         tv:
