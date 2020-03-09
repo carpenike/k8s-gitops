@@ -45,7 +45,7 @@ subcomponents:
     injectNamespace: true
     config:
       image:
-        tag: 2.0.0.5337-ls99
+        tag: 2.0.0.5338-ls24
       ingress:
         enabled: true
         annotations:
@@ -59,13 +59,14 @@ subcomponents:
           enabled: true
           storageClass: nfs
         downloads:
-          enabled: true
-          existingClaim: nfs-tank-share-pvc
-          subPath: nzbget/downloads
+          enabled: false
         tv:
-          enabled: true
-          existingClaim: nfs-tank-share-pvc
-          subPath: media/tv
+          enabled: false
+        extraExistingClaimMounts:
+          - name: media
+            existingClaim: nfs-tank-share-pvc
+            mountPath: /media
+            readOnly: false
       resource:
         requests:
           memory: 350Mi
