@@ -50,9 +50,13 @@ spec:
       limits:
         memory: 512Mi
   storage:
-    useAllNodes: true
+    useAllNodes: false
     useAllDevices: true
     deviceFilter:
+    nodes:
+      - name: r610-0
+      - name: r610-1
+      - name: r610-2
     location:
     config:
       metadataDevice:
