@@ -17,3 +17,8 @@ subcomponents:
   - name: ceph-block
     type: static
     path: ./ceph-block
+
+  - name: toolbox
+    type: static
+    source: https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
+    method: http
