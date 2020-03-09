@@ -24,7 +24,7 @@ spec:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
-            - key: role
+            - key: node-role.kubernetes.io
               operator: In
               values:
               - ceph
