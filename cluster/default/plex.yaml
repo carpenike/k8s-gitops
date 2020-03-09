@@ -86,7 +86,7 @@ metadata:
   name: plex-kube-plex
   namespace: default
 spec:
-  replicas: 0
+  replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:

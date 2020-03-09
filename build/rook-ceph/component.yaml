@@ -20,5 +20,5 @@ subcomponents:
 
   - name: toolbox
     type: static
-    source: https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
+    source: https://raw.githubusercontent.com/billimek/k8s-gitops/master/rook-ceph/toolbox/toolblox.yaml
     method: http
