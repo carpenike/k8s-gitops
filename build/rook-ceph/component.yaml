@@ -1,0 +1,15 @@
+name: namespace
+type: static
+path: "./manifests"
+subcomponents:
+
+  - name: rook-ceph
+    type: helm
+    method: helm
+    source: https://charts.rook.io/release
+    path: rook-ceph
+    version: v1.2.5
+
+  - name: cluster
+    type: static
+    path: ./cluster

@@ -9,17 +9,6 @@
     state: present
   when: ansible_architecture == "x86_64"
 
-- name: Remove System provided resolv.conf
-  file:
-    path: /etc/resolv.conf
-    state: absent
-
-- name: Symlink systemd resolv.conf to system
-  file:
-    src: /run/systemd/resolve/resolv.conf
-    dest: /etc/resolv.conf
-    state: link
-
 - name: Copy unattended-upgrades configuration files in place
   copy:
     src: "{{ item }}"
@@ -66,6 +55,7 @@
     update_cache: true
     force_apt_get: true
   with_items:
+    - python-simplejson
     - htop
     - unzip
     - glances

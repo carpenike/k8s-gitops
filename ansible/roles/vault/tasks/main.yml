@@ -60,7 +60,7 @@
 
 - name: Decrypt Vault Secret File
   ignore_errors: yes
-  command: "ansible-vault decrypt group_vars/vault/encrypted-vault.yaml"
+  command: "ansible-vault decrypt group_vars/vault/encrypted-vault.yml"
   register: vault_decrypt
   when: ( initialized_vault_status.stdout == "false" )
 
@@ -79,7 +79,7 @@
   when: ( initialized_vault_status.stdout == "false" )
 
 - name: Encrypt Vault Secret File
-  command: "ansible-vault encrypt group_vars/vault/encrypted-vault.yaml"
+  command: "ansible-vault encrypt group_vars/vault/encrypted-vault.yml"
   register: vault_encrypt
   changed_when: "'Encryption successful' in vault_encrypt.stdout"
   when: ( initialized_vault_status.stdout == "false" )

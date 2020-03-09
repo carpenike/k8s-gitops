@@ -1,0 +1,14 @@
+subcomponents:
+  rook-ceph:
+    namespace: rook-ceph
+    injectNamespace: true
+    config:
+      csi:
+        kubeletDirPath: /var/lib/kubelet
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
