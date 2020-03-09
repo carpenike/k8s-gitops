@@ -38,6 +38,8 @@ spec:
             name: sysbus
           - mountPath: /lib/modules
             name: libmodules
+          - mountPath: /mnt/tank/share
+            name: share
           - name: mon-endpoint-volume
             mountPath: /etc/rook
       # if hostNetwork: false, the "rbd map" command hangs, see https://github.com/rook/rook/issues/2021
@@ -52,6 +54,9 @@ spec:
         - name: libmodules
           hostPath:
             path: /lib/modules
+        - name: share
+          hostPath:
+            path: /mnt/tank/share
         - name: mon-endpoint-volume
           configMap:
             name: rook-ceph-mon-endpoints
