@@ -13,3 +13,7 @@ subcomponents:
   - name: cluster
     type: static
     path: ./cluster
+
+  - name: ceph-block
+    type: static
+    path: ./ceph-block
