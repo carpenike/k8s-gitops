@@ -34,4 +34,3 @@ spec:
             name: nfs-vol
       nodeSelector:
         node-role.kubernetes.io/nfs: "true"
-

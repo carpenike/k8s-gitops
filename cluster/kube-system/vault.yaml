@@ -211,4 +211,3 @@ spec:
   updateStrategy:
     type: OnDelete
   volumeClaimTemplates: null
-
