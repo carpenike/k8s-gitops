@@ -24,10 +24,10 @@ spec:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
-            - key: node-role.kubernetes.io
+            - key: node-role.kubernetes.io/ceph
               operator: In
               values:
-              - ceph
+              - "true"
   resources:
     api:
       requests:
