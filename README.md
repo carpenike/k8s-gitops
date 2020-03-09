@@ -7,48 +7,6 @@ Shamelessly stolen a lot of this from https://github.com/billimek/k8s-gitops. Th
 - Helpful in setting up git to sign with gpg key: https://medium.com/@devmount/signed-git-commits-in-vs-code-476fb74b8773
 - GPG Signing requires the following ~/.bashrc: `export GPG_TTY=$(tty)`
 
-# Istio
-
-Kicking the tires on a switch to Istio from standard Ingress Controllers Generated the manifest files via istioctl
-
-Ref: https://istio.io/docs/setup/install/istioctl/
-
-1. Dump Default ISTIO Config:
-`istioctl profile dump default --set values.grafana.enabled=true --set values.tracing.enabled=true > istio-manifest.yaml`
-2. Modify the ingressgateway section within the istio-manifest.yaml file, to look like the below:
-```
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: ingressgateway
-  namespace: istio-system
-  labels:
-    release: istio
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-      - "*"
-    tls:
-      httpsRedirect: true
-  - hosts:
-    - '*'
-    port:
-      name: https
-      number: 443
-      protocol: HTTPS
-    tls:
-      credentialName: acme-crt-secret
-      mode: SIMPLE
-      privateKey: use sds
-      serverCertificate: use sds
-```
-
 # Helpful Links
 
 ## General
@@ -159,3 +117,6 @@ Looking to use this to encrypt the vault unlock key -- allows storage of everyth
 ## Integrate Vault auth with Keycloak
 
 For exploration. https://devopstales.github.io/sso/hashicorp-sso/
+
+## Storage Perf testing
+https://thesanguy.com/2018/01/24/storage-performance-benchmarking-with-fio/
