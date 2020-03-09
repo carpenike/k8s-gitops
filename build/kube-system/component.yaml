@@ -34,7 +34,7 @@ subcomponents:
 
   - name: sealed-secrets
     type: static
-    source: https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.9.7/controller.yaml
+    source: https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.10.0/controller.yaml
     method: http
 
   - name: metallb
