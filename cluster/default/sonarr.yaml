@@ -73,7 +73,7 @@ spec:
           value: "1000"
         - name: PGID
           value: "1000"
-        image: linuxserver/sonarr:2.0.0.5337-ls99
+        image: linuxserver/sonarr:2.0.0.5338-ls24
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 5
@@ -100,18 +100,20 @@ spec:
           name: config
         - mountPath: /downloads
           name: downloads
-          subPath: nzbget/downloads
         - mountPath: /tv
           name: tv
-          subPath: media/tv
+        - mountPath: /media
+          name: media
+          readOnly: false
       volumes:
       - name: config
         persistentVolumeClaim:
           claimName: sonarr-config
-      - name: downloads
-        persistentVolumeClaim:
-          claimName: nfs-tank-share-pvc
-      - name: tv
+      - emptyDir: {}
+        name: downloads
+      - emptyDir: {}
+        name: tv
+      - name: media
         persistentVolumeClaim:
           claimName: nfs-tank-share-pvc
 
