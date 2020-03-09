@@ -28,9 +28,6 @@ spec:
               operator: In
               values:
               - ceph
-      tolerations:
-      - key: ceph
-        operator: Exists
   resources:
     api:
       requests:
