@@ -15,7 +15,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: nfs
+  storageClassName: rook-ceph-block
 
 ---
 apiVersion: v1
