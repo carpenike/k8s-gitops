@@ -1,0 +1,108 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: external-prox
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    #nginx.ingress.kubernetes.io/preserve-host: "true"
+    nginx.ingress.kubernetes.io/auth-url: "https://auth.$DOMAIN/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: https://auth.$DOMAIN/oauth2/start
+spec:
+  rules:
+  - host: pve.$DOMAIN
+    http:
+      paths:
+      - path: /
+        backend:
+            serviceName: external-prox-a
+            servicePort: 8006
+      - path: /
+        backend:
+            serviceName: external-prox-b
+            servicePort: 8006
+      - path: /
+        backend:
+            serviceName: external-prox-c
+            servicePort: 8006
+      - path: "/vncwebsocket.*"
+        backend:
+            serviceName: external-prox-a-wss
+            servicePort: 8006
+      - path: "/vncwebsocket.*"
+        backend:
+            serviceName: external-prox-b-wss
+            servicePort: 8006
+      - path: "/vncwebsocket.*"
+        backend:
+            serviceName: external-prox-c-wss
+            servicePort: 8006
+  tls:
+  - hosts:
+    - pve.$DOMAIN
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-prox-a
+spec:
+  ports:
+  - name: https
+    port: 8006
+  type: ExternalName
+  externalName: pve-01.holthome.net
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-prox-b
+spec:
+  ports:
+  - name: https
+    port: 8006
+  type: ExternalName
+  externalName: pve-02.holthome.net
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-prox-c
+spec:
+  ports:
+  - name: https
+    port: 8006
+  type: ExternalName
+  externalName: pve-03.holthome.net
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-prox-a-wss
+spec:
+  ports:
+  - name: wss
+    port: 8006
+  type: ExternalName
+  externalName: pve-01.holthome.net
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-prox-b-wss
+spec:
+  ports:
+  - name: wss
+    port: 8006
+  type: ExternalName
+  externalName: pve-02.holthome.net
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-prox-c-wss
+spec:
+  ports:
+  - name: wss
+    port: 8006
+  type: ExternalName
+  externalName: pve-03.holthome.net

@@ -1,0 +1,84 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: nginx-ingress
+  namespace: kube-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: semver:~0.
+spec:
+  releaseName: nginx-ingress
+  rollback:
+    enable: true
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: nginx-ingress
+    version: 1.33.4
+  values:
+    controller:
+      # image:
+      #   repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+      #   tag: "0.25.1"
+      replicaCount: 2
+      config:
+        ssl-protocols: "TLSv1.3 TLSv1.2"
+        custom-http-errors: "404,403,500,503"
+        use-proxy-protocol: "false"
+        proxy-body-size: "50m"
+        use-forwarded-headers: "true"
+        forwarded-for-header: "CF-Connecting-IP"
+        # Cloudflare IP Addresses - Used to forward the real client IP address to the backend service
+        # https://www.cloudflare.com/ips/
+        proxy-real-ip-cidr: "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,104.16.0.0/12,108.162.192.0/18,131.0.72.0/22,141.101.64.0/18,162.158.0.0/15,172.64.0.0/13,173.245.48.0/20,188.114.96.0/20,190.93.240.0/20,197.234.240.0/22,198.41.128.0/17,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32"
+      service:
+        loadBalancerIP: 10.20.50.150
+        externalTrafficPolicy: Local
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: kube-system
+          namespaceSelector:
+            any: true
+        prometheusRule:
+          enabled: true
+          namespace: kube-system
+          rules:
+            - alert: TooMany500s
+              expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"5.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
+              for: 1m
+              labels:
+                severity: critical
+              annotations:
+                description: Too many 5XXs
+                summary: More than 5% of the all requests did return 5XX, this require your attention
+            - alert: TooMany400s
+              expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"4.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
+              for: 1m
+              labels:
+                severity: critical
+              annotations:
+                description: Too many 4XXs
+                summary: More than 5% of the all requests did return 4XX, this require your attention
+      extraArgs:
+        default-ssl-certificate: "kube-system/acme-crt-secret"
+        #default-ssl-certificate: "kube-system/digicert-ingress-tls"
+      resources:
+        requests:
+          memory: 500Mi
+          cpu: 25m
+        limits:
+          memory: 600Mi
+    defaultBackend:
+      enabled: true
+      image:
+        repository: billimek/custom-error-pages
+        tag: 0.4.4
+      resources:
+        requests:
+          memory: 250Mi
+          cpu: 25m
+        limits:
+          memory: 350Mi

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: digicert-ingress-tls
+  namespace: kube-system
+type: kubernetes.io/tls
+data:
+  tls.crt: $DIGICERT_HOLTHOME_CERT
+  tls.key: $DIGICERT_HOLTHOME_KEY
