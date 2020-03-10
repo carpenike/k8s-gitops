@@ -27,7 +27,6 @@ subcomponents:
         storage: 10Gi
       tests:
         enabled: false
-
   vault:
     namespace: kube-system
     injectNamespace: true

@@ -43,3 +43,9 @@ subcomponents:
     source: https://kubernetes-charts.storage.googleapis.com
     path: metallb
     version: 0.12.0
+
+  - name: gpu-operator
+    type: helm
+    method: helm
+    source: https://nvidia.github.io/gpu-operator
+    path: gpu-operator

@@ -12,6 +12,9 @@ subcomponents:
   - name: rook-ceph
     type: component
     source: "./rook-ceph"
+  - name: gpu-operator
+    type: component
+    source: "./gpu-operator"
   - name: PVs
     type: component
     source: "./PVs"
