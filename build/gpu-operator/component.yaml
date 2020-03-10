@@ -1,8 +1,0 @@
-name: IGNORE_ME
-subcomponents:
-
-  - name: gpu-operator
-    type: helm
-    method: helm
-    source: https://nvidia.github.io/gpu-operator
-    path: gpu-operator
