@@ -1,38 +1,37 @@
 ---
----
-# Source: gpu-operator/templates/0000_namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: gpu-operator
----
+  namespace: kube-system
 
-# Source: gpu-operator/templates/0010_namespace.yaml
+---
 apiVersion: v1
 kind: Namespace
 metadata:
-    name: gpu-operator-resources
+  name: gpu-operator-resources
+  namespace: kube-system
 
 ---
-
-# Source: gpu-operator/templates/nfd-master.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: node-feature-discovery # NFD namespace
----
+  name: node-feature-discovery
+  namespace: kube-system
 
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: nfd-master
   namespace: node-feature-discovery
----
 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: nfd-master
+  namespace: kube-system
 rules:
 - apiGroups:
   - ""
@@ -42,12 +41,13 @@ rules:
   - get
   - patch
   - update
----
 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: nfd-master
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -56,8 +56,8 @@ subjects:
 - kind: ServiceAccount
   name: nfd-master
   namespace: node-feature-discovery
----
 
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -74,85 +74,54 @@ spec:
       labels:
         app: nfd-master
     spec:
-      serviceAccount: nfd-master
+      containers:
+      - command:
+        - nfd-master
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: quay.io/kubernetes_incubator/node-feature-discovery:v0.4.0
+        name: nfd-master
       nodeSelector:
         node-role.kubernetes.io/master: ""
+      serviceAccount: nfd-master
       tolerations:
-        - key: "node-role.kubernetes.io/master"
-          operator: "Equal"
-          value: ""
-          effect: "NoSchedule"
-      containers:
-        - env:
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          image: quay.io/kubernetes_incubator/node-feature-discovery:v0.4.0
-          name: nfd-master
-          command:
-            - "nfd-master"
-## Enable TLS authentication
-## The example below assumes having the root certificate named ca.crt stored in
-## a ConfigMap named nfd-ca-cert, and, the TLS authentication credentials stored
-## in a TLS Secret named nfd-master-cert.
-## Additional hardening can be enabled by specifying --verify-node-name in
-## args, in which case every nfd-worker requires a individual node-specific
-## TLS certificate.
-#          args:
-#            - "--ca-file=/etc/kubernetes/node-feature-discovery/trust/ca.crt"
-#            - "--key-file=/etc/kubernetes/node-feature-discovery/certs/tls.key"
-#            - "--cert-file=/etc/kubernetes/node-feature-discovery/certs/tls.crt"
-#          volumeMounts:
-#            - name: nfd-ca-cert
-#              mountPath: "/etc/kubernetes/node-feature-discovery/trust"
-#              readOnly: true
-#            - name: nfd-master-cert
-#              mountPath: "/etc/kubernetes/node-feature-discovery/certs"
-#              readOnly: true
-#      volumes:
-#        - name: nfd-ca-cert
-#          configMap:
-#            name: nfd-ca-cert
-#        - name: nfd-master-cert
-#          secret:
-#            secretName: nfd-master-cert
----
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Equal
+        value: ""
 
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: nfd-master
   namespace: node-feature-discovery
 spec:
+  ports:
+  - port: 8080
+    protocol: TCP
   selector:
     app: nfd-master
-  ports:
-  - protocol: TCP
-    port: 8080
   type: ClusterIP
 
-
 ---
-
-# Source: gpu-operator/templates/0320_configmap.yaml
 apiVersion: v1
+data:
+  dcgmExporter: nvidia/dcgm-exporter:1.0.0-beta-ubuntu18.04
+  dcgmPodExporter: nvidia/pod-gpu-metrics-exporter:v1.0.0-alpha
+  devicePlugin: nvidia/k8s-device-plugin:1.0.0-beta4
+  driver: nvidia/driver:440.33.01
+  toolkit: nvidia/container-toolkit:1.0.0-alpha.3
+  unsupported: openshift
 kind: ConfigMap
 metadata:
   name: operator-config
   namespace: gpu-operator
-data:
-  unsupported: openshift
-
-  driver: "nvidia/driver:440.33.01"
-  toolkit: "nvidia/container-toolkit:1.0.0-alpha.3"
-  devicePlugin: "nvidia/k8s-device-plugin:1.0.0-beta4"
-  dcgmExporter: "nvidia/dcgm-exporter:1.0.0-beta-ubuntu18.04"
-  dcgmPodExporter: "nvidia/pod-gpu-metrics-exporter:v1.0.0-alpha"
 
 ---
-
-# Source: gpu-operator/templates/0100_service_account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -160,19 +129,18 @@ metadata:
   namespace: gpu-operator
 
 ---
-
-# Source: gpu-operator/templates/nfd-worker-daemonset.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: nfd-worker
   namespace: node-feature-discovery
----
 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: nfd-worker
+  namespace: kube-system
 rules:
 - apiGroups:
   - ""
@@ -182,12 +150,13 @@ rules:
   - get
   - patch
   - update
----
 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: nfd-worker
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -196,8 +165,8 @@ subjects:
 - kind: ServiceAccount
   name: nfd-worker
   namespace: node-feature-discovery
----
 
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -214,82 +183,59 @@ spec:
       labels:
         app: nfd-worker
     spec:
-      serviceAccountName: nfd-worker
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
-        - env:
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          image: quay.io/kubernetes_incubator/node-feature-discovery:v0.4.0
-          name: nfd-worker
-          command:
-            - "nfd-worker"
-          args:
-            - "--sleep-interval=60s"
-            - "--server=nfd-master:8080"
-            - "--options={\"sources\": {\"pci\": { \"deviceLabelFields\": [\"vendor\"] }}}"
-## Enable TLS authentication (1/3)
-## The example below assumes having the root certificate named ca.crt stored in
-## a ConfigMap named nfd-ca-cert, and, the TLS authentication credentials stored
-## in a TLS Secret named nfd-worker-cert
-#            - "--ca-file=/etc/kubernetes/node-feature-discovery/trust/ca.crt"
-#            - "--key-file=/etc/kubernetes/node-feature-discovery/certs/tls.key"
-#            - "--cert-file=/etc/kubernetes/node-feature-discovery/certs/tls.crt"
-          volumeMounts:
-            - name: host-boot
-              mountPath: "/host-boot"
-              readOnly: true
-            - name: host-os-release
-              mountPath: "/host-etc/os-release"
-              readOnly: true
-            - name: host-sys
-              mountPath: "/host-sys"
-            - name: source-d
-              mountPath: "/etc/kubernetes/node-feature-discovery/source.d/"
-            - name: features-d
-              mountPath: "/etc/kubernetes/node-feature-discovery/features.d/"
-## Enable TLS authentication (2/3)
-#            - name: nfd-ca-cert
-#              mountPath: "/etc/kubernetes/node-feature-discovery/trust"
-#              readOnly: true
-#            - name: nfd-worker-cert
-#              mountPath: "/etc/kubernetes/node-feature-discovery/certs"
-#              readOnly: true
+      - args:
+        - --sleep-interval=60s
+        - --server=nfd-master:8080
+        - '--options={"sources": {"pci": { "deviceLabelFields": ["vendor"] }}}'
+        command:
+        - nfd-worker
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: quay.io/kubernetes_incubator/node-feature-discovery:v0.4.0
+        name: nfd-worker
+        volumeMounts:
+        - mountPath: /host-boot
+          name: host-boot
+          readOnly: true
+        - mountPath: /host-etc/os-release
+          name: host-os-release
+          readOnly: true
+        - mountPath: /host-sys
+          name: host-sys
+        - mountPath: /etc/kubernetes/node-feature-discovery/source.d/
+          name: source-d
+        - mountPath: /etc/kubernetes/node-feature-discovery/features.d/
+          name: features-d
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      serviceAccountName: nfd-worker
       volumes:
-        - name: host-boot
-          hostPath:
-            path: "/boot"
-        - name: host-os-release
-          hostPath:
-            path: "/etc/os-release"
-        - name: host-sys
-          hostPath:
-            path: "/sys"
-        - name: source-d
-          hostPath:
-            path: "/etc/kubernetes/node-feature-discovery/source.d/"
-        - name: features-d
-          hostPath:
-            path: "/etc/kubernetes/node-feature-discovery/features.d/"
-## Enable TLS authentication (3/3)
-#        - name: nfd-ca-cert
-#          configMap:
-#            name: nfd-ca-cert
-#        - name: nfd-worker-cert
-#          secret:
-#            secretName: nfd-worker-cert
-
+      - hostPath:
+          path: /boot
+        name: host-boot
+      - hostPath:
+          path: /etc/os-release
+        name: host-os-release
+      - hostPath:
+          path: /sys
+        name: host-sys
+      - hostPath:
+          path: /etc/kubernetes/node-feature-discovery/source.d/
+        name: source-d
+      - hostPath:
+          path: /etc/kubernetes/node-feature-discovery/features.d/
+        name: features-d
 
 ---
-
-# Source: gpu-operator/templates/0500_sro_crd.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: specialresources.sro.openshift.io
+  namespace: kube-system
 spec:
   group: sro.openshift.io
   names:
@@ -298,18 +244,17 @@ spec:
     plural: specialresources
     singular: specialresource
   scope: Namespaced
-  version: v1alpha1
   subresources:
     status: {}
+  version: v1alpha1
 
 ---
-
-# Source: gpu-operator/templates/0200_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: special-resource-operator
+  namespace: kube-system
 rules:
 - apiGroups:
   - rbac.authorization.k8s.io
@@ -373,24 +318,21 @@ rules:
   - create
 
 ---
-
-# Source: gpu-operator/templates/0300_role_binding.yaml
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
+  name: special-resource-operator
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
   name: special-resource-operator
 subjects:
 - kind: ServiceAccount
   name: special-resource-operator
   namespace: gpu-operator
-roleRef:
-  kind: ClusterRole
-  name: special-resource-operator
-  apiGroup: rbac.authorization.k8s.io
 
 ---
-
-# Source: gpu-operator/templates/0400_operator.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -403,54 +345,47 @@ spec:
       name: special-resource-operator
   template:
     metadata:
-      labels:
-        name: special-resource-operator
       annotations:
         openshift.io/scc: restricted-readonly
+      labels:
+        name: special-resource-operator
     spec:
-      serviceAccount: special-resource-operator
-      serviceAccountName: special-resource-operator
-      # readOnlyRootFilesystem: true
-
       containers:
-      - name: special-resource-operator
-        image: nvidia/gpu-operator:1.0.0
-        imagePullPolicy: IfNotPresent
-        command: ["gpu-operator"]
-
+      - command:
+        - gpu-operator
         env:
         - name: NVIDIA_DRIVER
           valueFrom:
             configMapKeyRef:
-              name: operator-config
               key: driver
+              name: operator-config
         - name: NVIDIA_TOOLKIT_DEFAULT_RUNTIME
-          value: "docker"
+          value: docker
         - name: NVIDIA_TOOLKIT
           valueFrom:
             configMapKeyRef:
-              name: operator-config
               key: toolkit
+              name: operator-config
         - name: NVIDIA_DEVICE_PLUGIN
           valueFrom:
             configMapKeyRef:
-              name: operator-config
               key: devicePlugin
+              name: operator-config
         - name: NVIDIA_DCGM_EXPORTER
           valueFrom:
             configMapKeyRef:
-              name: operator-config
               key: dcgmExporter
+              name: operator-config
         - name: NVIDIA_DCGM_POD_EXPORTER
           valueFrom:
             configMapKeyRef:
-              name: operator-config
               key: dcgmPodExporter
+              name: operator-config
         - name: KUBE_UNSUPPORTED_FLAVOR
           valueFrom:
             configMapKeyRef:
-              name: operator-config
               key: unsupported
+              name: operator-config
         - name: WATCH_NAMESPACE
           value: ""
         - name: POD_NAME
@@ -458,23 +393,27 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: OPERATOR_NAME
-          value: "special-resource-operator"
-
-        readinessProbe:
-          exec:
-            command: ["stat", "/tmp/operator-sdk-ready"]
-
-          initialDelaySeconds: 4
-          periodSeconds: 10
-          failureThreshold: 1
+          value: special-resource-operator
+        image: nvidia/gpu-operator:1.0.0
+        imagePullPolicy: IfNotPresent
+        name: special-resource-operator
         ports:
         - containerPort: 60000
           name: metrics
-
+        readinessProbe:
+          exec:
+            command:
+            - stat
+            - /tmp/operator-sdk-ready
+          failureThreshold: 1
+          initialDelaySeconds: 4
+          periodSeconds: 10
       nodeSelector:
         node-role.kubernetes.io/master: ""
+      serviceAccount: special-resource-operator
+      serviceAccountName: special-resource-operator
       tolerations:
-        - key: "node-role.kubernetes.io/master"
-          operator: "Equal"
-          value: ""
-          effect: "NoSchedule"
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Equal
+        value: ""
