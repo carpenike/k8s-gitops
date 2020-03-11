@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-server
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: nfs-server
+  template:
+    metadata:
+      labels:
+        role: nfs-server
+    spec:
+      volumes:
+      - name: nfs-vol
+        persistentVolumeClaim:
+          claimName: data-nfs-server-pvc
+      restartPolicy: Always
+      containers:
+      - name: nfs-server
+        image: itsthenetwork/nfs-server-alpine
+        env:
+        - name: SHARED_DIRECTORY
+          value: /mnt/tank/share
+        ports:
+          - name: nfs
+            containerPort: 2049
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /mnt/tank/share
+            name: nfs-vol
+      nodeSelector:
+        node-role.kubernetes.io/nfs: "true"
