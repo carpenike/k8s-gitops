@@ -38,8 +38,7 @@ ceph:
     - /dev/sdd
 
 # helm options
-helm_operator: disabled
-helm_operator_values: "{{ REPO_ROOT }}/manifests/helm-operator/helm-operator-values.yaml"
+helm_operator: enabled
 
 # server options
 timezone: America/New_York

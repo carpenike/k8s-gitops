@@ -12,6 +12,12 @@
   retries: 6
   delay: 10
 
+- name: Apply Helm Operator CRDs
+  command: kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/crds.yaml
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
+
 - name: Deploy Helm Operator
   shell: |
     helm upgrade -i helm-operator fluxcd/helm-operator \

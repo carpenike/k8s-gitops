@@ -7,7 +7,7 @@ FOLDER="2020.02.08"
 TOOLS=`kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}'`
 
 echo "Mounting NFS Storage Location where Backups are"
-kubectl -n rook-ceph exec -it "$TOOLS" -- sh -c "mkdir -p /mnt/nfs && mount -t nfs storage:/mnt/tank/share /mnt/nfs || /bin/true"
+kubectl -n rook-ceph exec -it "$TOOLS" -- sh -c "mkdir -p /mnt/nfs && mount -t nfs 10.20.50.100:/ /mnt/nfs || /bin/true"
 
 for i in "${RBDTARGETS[@]}"
 do
