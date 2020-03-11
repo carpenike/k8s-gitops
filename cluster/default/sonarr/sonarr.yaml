@@ -33,15 +33,15 @@ spec:
       config:
         enabled: true
         storageClass: rook-ceph-block
-        downloads:
-          enabled: false
-        tv:
-          enabled: false
-        extraExistingClaimMounts:
-          - name: media
-            existingClaim: nfs-tank-share-pvc
-            mountPath: /media
-            readOnly: false
+      downloads:
+        enabled: false
+      tv:
+        enabled: false
+      extraExistingClaimMounts:
+        - name: media
+          existingClaim: nfs-tank-share-pvc
+          mountPath: /media
+          readOnly: false
     resources:
       requests:
         memory: 350Mi
