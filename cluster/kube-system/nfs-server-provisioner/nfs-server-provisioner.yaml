@@ -10,7 +10,7 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: nfs-server-provisioner
-    version: 0.12.0
+    version: 1.0.0
   values:
     image:
       repository: quay.io/kubernetes_incubator/nfs-provisioner
