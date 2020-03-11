@@ -24,5 +24,7 @@ spec:
           operator: "Exists"
     speaker:
       tolerations:
-        - key: "arm"
+        - key: "node-role.kubernetes.io/arm"
+          operator: "Exists"
+        - key: "node-role.kubernetes.io/master"
           operator: "Exists"
