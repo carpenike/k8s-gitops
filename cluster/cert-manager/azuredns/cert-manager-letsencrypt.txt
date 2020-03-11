@@ -1,0 +1,73 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector: {}
+      dns01:
+        azuredns:
+          clientID: $AZURE_CERTBOT_CLIENT_ID
+          clientSecretSecretRef:
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: $AZURE_CERTBOT_SUBSCRIPTION_ID
+          tenantID: $AZURE_CERTBOT_TENANT_ID
+          resourceGroupName: $AZURE_CERTBOT_RESOURCE_GROUP_NAME
+          hostedZoneName: $AZURE_CERTBOT_HOSTED_ZONE_NAME
+          environment: $AZURE_CERTBOT_ENVIRONMENT
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector: {}
+      dns01:
+        azuredns:
+          clientID: $AZURE_CERTBOT_CLIENT_ID
+          clientSecretSecretRef:
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: $AZURE_CERTBOT_SUBSCRIPTION_ID
+          tenantID: $AZURE_CERTBOT_TENANT_ID
+          resourceGroupName: $AZURE_CERTBOT_RESOURCE_GROUP_NAME
+          hostedZoneName: $AZURE_CERTBOT_HOSTED_ZONE_NAME
+          environment: $AZURE_CERTBOT_ENVIRONMENT
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: kube-system
+spec:
+  secretName: acme-crt-secret
+  commonName: "*.$DOMAIN"
+  dnsNames:
+  - $DOMAIN
+  - '*.$DOMAIN'
+  - '*.k.$DOMAIN'
+  - '*.nd.$DOMAIN'
+  acme:
+    config:
+    - dns01:
+        provider: azuredns
+      domains:
+      - $DOMAIN
+      - '*.$DOMAIN'
+      - '*.k.$DOMAIN'
+      - '*.nd.$DOMAIN'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
