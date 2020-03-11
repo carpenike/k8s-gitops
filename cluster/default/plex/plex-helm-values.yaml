@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: plex-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgAU/yQbT9JGouaqwkhB+SP315kR4Yw/zpILZ6K/Uo1FTiOMDVlcG/EwLFwMGMP0y1Y0rtZLmEUQpWHt/l8aKjxpztxl2VDf6Ukxowd3IFunUP5NrHQPnkI3K7W5Ov6pxu6unpEBgsKqUwqZ0Dq8v0ydgFF8OhYBoHMc6mHUkVXYx9Bh7OhlUvwMAeL598WUhgtd8WbvcucuqVBMgyGgrsJx1zajLDk5sL4si7bJSFAYefcTDpNAG4OZfdWvpxN6spR8w6TamazNw0bJNic6F5AB4ki8JQ/iS3AQhaemS+3p+yEllE34kPYgSe3SPXVgxRpqL8Yq5N2b/SaQ+HfeDkCrE8qpwJgRqY/3eQqX1W3HMyPjY2gSdi45isD/+otvqWcrhAOSsogDoAdeJ3CMiFS9cjHjGnqPU7GxQZzyKi3Kl466/kg3dVWr7iqB7CdscBBRhxGpOD/Vlc4M9et8s6mKRZFHYqCCqyfESjOpDYvnDyUZCWhL9DAP28VtPdf3+D+V8BvmTnK3VzsxBgIawz/Rk+7pBgMOETlXZeESkL0443w9Nt5hqXeeu9lkncmSvi0XFr6KmPzbXqAtc+/smfwncIIGrn6fPiYBH3ktXJK/YxdPt23ipdeKs96m920mdv83moeURdJxsenZf/ubT0XS45Pa9XFs9TYEcbLyZ/TlQ2AieIxWmG4WEwp6pR8L3GhTE5Fc1kojsJ+Sn+0JaGRhqrzLMXmtA0vfQRGJo1FGD5XHx8KnMwzZheWIdNsvBknSzqWamHlGT3yG2rhceXEaA96IVntxkztTH6LhxxEuPEHrkMFmhusvn0sQcrOgcQ==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: plex-helm-values
+      namespace: default
+status: {}
