@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: sonarr-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgBR+cLSJo5f87rOsUflsWe7b4C6StuRTdUFxohNwkxJ1buSTHGTUFb3YHLYUo9NvC/8HpUUgUmFY1UGg7lujAsHQ1Gtg0oq5JEWJRkAuFq8DaC5QzoFgu6mwXehkQHtBPB2e+4B/1oOFVmp0YoxZCI62y4MxWIXSYbVtcuHIHoPhC8C9Snw3Zv0L6nMoQ7dGdFW7CIjbQ1ia2Yid6C9PyqnaNB+n+NWElRN68KS6IkFjisPysczZrtWTCGfQCprzzhx3RHCNTfS10GJwUVxmFPKWQ9y/Gl8fjkwRwSKBUC7EKYKdt13A61kOqnmjwaR/nvo9/q/bcuaK3Vt3gn8AjB3Ucu10/86Zw2nNDFdwiTyZbeP4ejhK8BJoT7gp1YBMxVtrK/W3fUA6e2axu6lzee+/47XMXEcZcj1D2GpOosvs5GsHu04wsw070e3kQDo087WIAuN/FARJXPt1kugnV1RW+6C30ypCkeKPE6Rn2CGd7oPnrgUdDmtIfqs55Nla/6ESe8XPM8TPBTcCcpJYo6DRgtvstmGX3S+IKHdIdsR+6R3F4tt4VZDGjK/C5GZpB29/jJs2odBysfB7kn5uftYw+fCqkmDYv6vQcpRoX5rYjn1MVHGf2phDIoWuYzD7MMfdxP5VTBlZzbWwzLs7/TBHfvpul3YrHTudE+gfrUfZuPy0L0P3jMj0AHr2Qyl6msl2SYH+wIgEC01pQ7WenmhpvjLR61LqLBZApIG9igjs7+JJbDtKYT5f0kpoOa+EzU6RsOLH2kR4mFRQVLqc0UIg8Z+jmi/xGMvExsGK54EBUmY3BA=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: sonarr-helm-values
+      namespace: default
+status: {}
