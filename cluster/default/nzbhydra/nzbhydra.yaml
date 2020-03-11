@@ -12,13 +12,13 @@ metadata:
 spec:
   releaseName: nzbhydra2
   chart:
-    repository: https://halkeye.github.io/helm-charts
+    repository: https://billimek.com/billimek-charts/
     name: nzbhydra2
-    version: 2.14.1
+    version: 2.0.3
   values:
     image:
-      repository: binhex/arch-nzbhydra2
-      tag: 2.14.2-1-01
+      repository: linuxserver/hydra2
+      tag: v0.12.1132-ls37
     service:
       type: ClusterIP
     ingress:
@@ -29,8 +29,7 @@ spec:
     persistence:
       enabled: true
       storageClassName: rook-ceph-block
-    nzbhydra2:
-      uid: 1000
-      gid: 1000
+    uid: 1000
+    gid: 1000
   valueFileSecrets:
     - name: "nzbhydra-helm-values"
