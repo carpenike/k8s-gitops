@@ -14,13 +14,11 @@ spec:
   chart:
     repository: https://halkeye.github.io/helm-charts
     name: nzbhydra2
-    version: 2.10.2
+    version: 2.14.1
   values:
     image:
-      #   repository: binhex/arch-nzbhydra2
-      tag: 2.14.1-1-01
-    podAnnotations:
-      backup.velero.io/backup-volumes: nzbhydra2-config
+      repository: binhex/arch-nzbhydra2
+      tag: 2.14.2-1-01
     service:
       type: ClusterIP
     ingress:
@@ -29,13 +27,8 @@ spec:
         kubernetes.io/ingress.class: "nginx"
     timezone: "America/New_York"
     persistence:
-      # downloads:
-      #   enabled: true
-      #   existingClaim: nfs-tank-share-pvc
-      #   subPath: nzbget/downloads
       enabled: true
       storageClassName: rook-ceph-block
-      #size: 5Gi
     nzbhydra2:
       uid: 1000
       gid: 1000
