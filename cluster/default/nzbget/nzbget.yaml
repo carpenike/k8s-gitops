@@ -34,7 +34,7 @@ spec:
         subPath: nzbget/downloads
       config:
         enabled: true
-        storageClass: nfs-client
+        storageClass: nfs
         size: 1Gi
     puid: 1000
     pgid: 1000
