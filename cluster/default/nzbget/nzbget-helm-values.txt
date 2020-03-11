@@ -1,0 +1,5 @@
+ingress:
+  hosts: [nzbget.$DOMAIN]
+  tls:
+  - hosts:
+    - nzbget.$DOMAIN
