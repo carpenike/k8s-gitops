@@ -58,6 +58,7 @@ subcomponents:
         config:
           enabled: true
           storageClass: rook-ceph-block
+
         downloads:
           enabled: false
         tv:
