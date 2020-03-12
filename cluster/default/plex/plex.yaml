@@ -37,8 +37,8 @@ spec:
     persistence:
       transcode:
         enabled: true
-        storageClass: local-path
-        accessMode: ReadWriteOnce
+        storageClass: nfs
+        accessMode: ReadWriteMany
       data:
         enabled: true
         claimName: nfs-tank-share-pvc
