@@ -6,12 +6,12 @@ spec:
   # ============== Blueprint for Repository ==========================
   backend:
     s3:
-      endpoint: minio.holthome.net # use server URL for s3 compatible other storage service
+      endpoint: minio.default.svc.cluster.local:9000 # use server URL for s3 compatible other storage service
       bucket: k8s-backups
       prefix: /stash-backup/${TARGET_NAMESPACE}/${TARGET_KIND}/${TARGET_NAME}
     storageSecretName: restic-backup-credentials
   # ============== Blueprint for BackupConfiguration =================
-  schedule: "0 */4 * * *"
+  schedule: "0/30 * * * *"
   retentionPolicy:
     name: 'keep-last-30'
     keepLast: 30
