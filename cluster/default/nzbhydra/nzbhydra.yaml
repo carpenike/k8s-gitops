@@ -31,8 +31,9 @@ spec:
         kubernetes.io/ingress.class: "nginx"
     timezone: "America/New_York"
     persistence:
-      enabled: true
-      storageClass: rook-ceph-block
+      config:
+        enabled: true
+        storageClass: rook-ceph-block
     uid: 1000
     gid: 1000
   valueFileSecrets:
