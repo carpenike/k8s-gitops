@@ -3,4 +3,3 @@ ingress:
   tls:
   - hosts:
     - plex.$DOMAIN
-claimToken: "$PLEX_CLAIM_TOKEN"
