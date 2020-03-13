@@ -32,7 +32,7 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClassName: rook-ceph-block
+        storageClass: rook-ceph-block
         size: 5Gi
     resources:
       requests:
