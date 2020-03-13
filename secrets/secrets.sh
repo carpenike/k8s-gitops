@@ -57,11 +57,12 @@ kseal() {
 kseal "${REPO_ROOT}/cluster/default/minio/minio-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/nzbget/nzbget-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/nzbhydra/nzbhydra-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/bitwarden/bitwarden-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/bazarr/bazarr-helm-values.txt"
 #kseal "${REPO_ROOT}/deployments/default/ombi/ombi-helm-values.txt"
 #kseal "${REPO_ROOT}/deployments/default/tautulli/tautulli-helm-values.txt"
 #kseal "${REPO_ROOT}/deployments/default/jackett/jackett-helm-values.txt"
-#kseal "${REPO_ROOT}/deployments/default/nzbhydra2/nzbhydra2-helm-values.txt"
-#kseal "${REPO_ROOT}/deployments/default/radarr/radarr-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/radarr/radarr-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/sonarr/sonarr-helm-values.txt"
 #kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/plex/plex-helm-values.txt"
@@ -71,13 +72,22 @@ kseal "${REPO_ROOT}/cluster/default/plex/plex-helm-values.txt"
 # Generic Secrets
 #
 
+# Vault Auto Unlock - kube-system namespace
+kubectl create secret generic kms-vault \
+ --from-literal=config.hcl="$(envsubst < "$REPO_ROOT"/cluster/kube-system/vault/kms-config.txt)" \
+ --namespace kube-system --dry-run -o json \
+ | \
+ kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/cluster/kube-system/vault/vault-kms-config.yaml
+
+
 # AzureDNS - cert-manager namespace
 kubectl create secret generic azuredns-config  \
  --from-literal=client-secret="$AZURE_CERTBOT_CLIENT_SECRET" \
  --namespace cert-manager --dry-run -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/cert-manager/azuredns/cert-manager-letsencrypt.yaml
+   > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
 
 # Restic Password for Stash - default namespace
 kubectl create secret generic restic-backup-credentials  \
