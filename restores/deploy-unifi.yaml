@@ -1,0 +1,27 @@
+---
+
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: unifi-restore
+  namespace: default
+spec:
+  repository:
+    name: deploy-unifi
+  rules:
+  - snapshots:
+    - latest
+  target: # target indicates where the recovered data will be stored
+    ref:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: unifi
+    volumeMounts:
+    - name: unifi-data:/unifi/data
+      mountPath:  /unifi/data
+    - name: unifi-data:/unifi/log
+      mountPath: /unifi/log
+    - name: unifi-data:/unifi/cert
+      mountPath: /unifi/cert
+    - name: unifi-data:/unifi/init.d
+      mountPath: /unifi/init.d
