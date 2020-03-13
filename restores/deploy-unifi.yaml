@@ -17,11 +17,11 @@ spec:
       kind: Deployment
       name: unifi
     volumeMounts:
-    - name: unifi-data:/unifi/data
+    - name: unifi-data
       mountPath:  /unifi/data
-    - name: unifi-data:/unifi/log
+    - name: unifi-data
       mountPath: /unifi/log
-    - name: unifi-data:/unifi/cert
+    - name: unifi-data
       mountPath: /unifi/cert
-    - name: unifi-data:/unifi/init.d
+    - name: unifi-data
       mountPath: /unifi/init.d
