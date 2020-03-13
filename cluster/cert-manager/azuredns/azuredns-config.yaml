@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: azuredns-config
+  namespace: cert-manager
+spec:
+  encryptedData:
+    client-secret: AgBIZ+/mB01X/X+uQPm4u1mMlWWUrxEYtcVjxYEh3yMaY5Qt4ZlNfuuzgRaa/vA4lOoVrXg+xTG/84UOGCb2WBrnoRLc7N7QMycColb0+ViTzEBEMLkgaF9jMfwBKCvcBkFn+kN5S7xOSykdPGBnC0lKgLMPUk9I8hDLdIRJnctVAiPElra2PVnJM4WeYZqScN/8VbBqF06jn9qY9YJgUDVIHT8Fhzmal7nw7O2AIRT40GbhK+s3IOmFbAWy3cZ/iTL99S3a/k9vDZuyNu2NT+I/jgYV2Btoy+jZ6ysrz6PbzZN7pZXXEAvJGL8ggmFGm8T//Q0cKO6hvZL3wwVMyZhmq9HAHPahdzeYAekKHdBmTFIf7ZmW0SA7nlnqQZAfMK9+cZJUKjX5BjqIT1CV2p8vHeMYnuw5FWZQTxdpSzJRXev+BTOvAwPIz2U6WrRvJBU5/AyR//wHuR1gH49swA5oll1bs/LQEGaTgKLHILXZU4jR8Jj/Tr7suHJpNyXo2+jcUxJmIc77jqc4McXlFeO69UFpG3msYl1aYpW4JA4BsktfJJ5EdYUcegX8Aczc02wFYIx0keMA3CkIH9LvhqPCTvrmO77jEH3BQu1Gte8hr2Do7SZemS9/07E8EK6XtwBzS8sUHJaDLM53bN7mRLdifJfXQCZyJ8SMgNo7akpxI94+zTTiwESZOF2kreAvMv78R4eRH2noLHU18d+o0l5nwOIMSzVqV+VxYIIxxKMZpg==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: azuredns-config
+      namespace: cert-manager
+status: {}

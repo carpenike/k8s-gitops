@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: kms-vault
+  namespace: kube-system
+spec:
+  encryptedData:
+    config.hcl: AgCRqQrjG2uEs+Qf9Nw/4uST0r49xI1mhVKqsMlGVqt9n5+NL9L78Hj1ryt4eCqbeNFZSzTT/RPbgQtpWkjYyDgTMAPN/fK55lvExKRdir65m4NpyYHee3QJSZTL9IjvoTYAwvkezAKlL2jlDYJ1g6Wo3D/LrpxnomarcBeyibAdI081wDlXuCMVDCuPrUmDvphMzV3TTqBgNJ2UpZIwxFNHT5dVKgkAk0wzAPAnJ0DF2mhZhEAURh4ljbrEAqmiUE4klljZpwZdHikedYmP9qFjiUxH5/NdZtCTo9q4aCt8KZkOTVMP6cEmDARr0lrt/VY3JQgnQ4BjGFfzzo9vSORuNPJxNyEbO3VkbfNskrKKrIWqXW83b9dFC+zFYcGty80femCICrCCSNsMdgSpmYR+zvh5IwgdVDzSDq+KUCp+bWp0D9JMyvRpr8wV7k5rjFuJpF4EMBeatr4kYN1G+cQtrAO5QAclrsyvGvs4kC4bwGM66jyoBkSuTRW/wCGYeLipFqFquvUY/ZJCgiLlNUhPvmaMdpryb6MGudOO2aETBczE5ALxhxRkcz6xyU1ycbORIOl2H59jLcDcLPxt/XxIKZFQb6EIrs9/R2y/ZMmXZIwmvf7/GdUEK7/qN9qJNzCqVlcfFmX7gzMaFf/T5sjyBCvN3LMXDIfDrXsz84hoJhMsKKo4Xew2rrg0x16aRN7xL0bUneRF/qlU9BDXUQJh161VPcyePl/MG/yJ74eXBeMYxDKi2wRwQPHeLa8W2TL5D/DiP/1QYfHhIIF0PxGck9AuyTIv4gVNfFpTYm/Gpl1QQuJYAmAVF0tsPLJQXMIOeY5A6hD3gAUV7fZCl0a5eI6IOTBKFxs5vbl+f4P15IMwnEJVhw==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: kms-vault
+      namespace: kube-system
+status: {}
