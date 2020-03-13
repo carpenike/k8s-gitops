@@ -1,0 +1,68 @@
+alertmanager:
+  ingress:
+    hosts: [prom-alert.$DOMAIN]
+    tls:
+    - hosts:
+      - prom-alert.$DOMAIN
+    annotations:
+      #nginx.ingress.kubernetes.io/auth-url: "https://auth.$DOMAIN/oauth2/auth"
+      #nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/oauth2/start"
+prometheus:
+  ingress:
+    hosts: [prom-server.$DOMAIN]
+    tls:
+    - hosts:
+      - prom-server.$DOMAIN
+    annotations:
+      #nginx.ingress.kubernetes.io/auth-url: "https://auth.$DOMAIN/oauth2/auth"
+      #nginx.ingress.kubernetes.io/auth-signin: https://auth.$DOMAIN/oauth2/start
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: "netdata-scrape"
+        metrics_path: "/api/v1/allmetrics"
+        params:
+          # format: prometheus | prometheus_all_hosts
+          # You can use `prometheus_all_hosts` if you want Prometheus to set the `instance` to your hostname instead of IP
+          format: [prometheus]
+        honor_labels: true
+        static_configs:
+          - targets:
+              - r610-0.$DOMAIN:19999
+              - r610-1.$DOMAIN:19999
+              - r610-2.$DOMAIN:19999
+              - r720-0.$DOMAIN:19999
+              - n2-0.$DOMAIN:19999
+              - h2-0.$DOMAIN:19999
+              - fw.$DOMAIN:19999
+    #- job_name: 'home-assistant'
+    #  scrape_interval: 60s
+    #  metrics_path: '/api/prometheus'
+    #  bearer_token: '$PROM_HASS_TOKEN'
+    #  scheme: http
+    #  static_configs:
+    #  - targets: 
+    #    - home-assistant.default.svc:8123
+grafana:
+  ingress:
+    hosts: [grafana.$DOMAIN]
+    tls:
+    - hosts:
+      - grafana.$DOMAIN
+  adminPassword: "$GRAFANA_PASSWORD"
+  grafana.ini:
+    server:
+      root_url: https://grafana.${DOMAIN}
+    auth.basic:
+      disable_login_form: false
+    auth.generic_oauth:
+      enabled: false
+      allow_sign_up: true
+      team_ids:
+      allowed_organizations:
+      name: Auth0
+      client_id: $AUTH0_GRAFANA_CLIENT_ID
+      client_secret: $AUTH0_GRAFANA_CLIENT_SECRET
+      scopes: openid profile email
+      auth_url: https://${AUTH0_DOMAIN}.auth0.com/authorize
+      token_url: https://${AUTH0_DOMAIN}.auth0.com/oauth/token
+      api_url: https://${AUTH0_DOMAIN}.auth0.com/userinfo
