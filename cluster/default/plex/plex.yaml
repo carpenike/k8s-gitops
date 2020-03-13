@@ -37,8 +37,9 @@ spec:
     persistence:
       transcode:
         enabled: true
-        storageClass: nfs
+        storageClass: rook-ceph-block
         accessMode: ReadWriteMany
+        size: 30Gi
       data:
         enabled: true
         claimName: nfs-tank-share-pvc
