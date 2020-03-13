@@ -1,0 +1,21 @@
+---
+
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: plex-restore
+  namespace: default
+spec:
+  repository:
+    name: deploy-plex-kube-plex
+  rules:
+  - snapshots:
+    - latest
+  target: # target indicates where the recovered data will be stored
+    ref:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: plex-kube-plex
+    volumeMounts:
+    - name:  config
+      mountPath:  /config
