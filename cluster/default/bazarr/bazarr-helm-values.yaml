@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: bazarr-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgCLsPgUDW1EgRMbMciUsiHMLxhNQYYiIGnillSxIRDADArFe+26RgVQiIpVrIEpbehHOp5bTBfF3jmx8KOe16usWopQoLUGNY1adAcEJ8j+EUiM32olZUK7E/XrAKRmgm033UpxVBXzIbvQUQxgLlbBJqFn7tCYpDU3hHFJUq7DC4avA/XdAIMHyGEjhNjdn1Nk5dWrc3nHwDC0eS6RMFbX3pmQQ2QQo5STSf+KYZ5JF3UP03MupaaULad4F/ETfPzl55GhtUSlh2LoRFIMsv0JsNWHXUVN00U7a34JtFVJWnkQj10HdEF7xH5PnrX0huxyMjo7E/z7tskgJ0A4eaOeRgiu/J667EH7JR89s7Dj7pPfhBqG1msFnSjRMVC3Hfs4n+JHtzRCb79GkFrfmVf9r9rZtlHXNgABNcJszD+F9PVye8lO5OJb9IqHbT1IDULyhGtiVw6rTbuD70TR5luZBLcd+Yqp2ASeH9IOT8h9/fb6RmetjXV0KLZy1WjFYKRRbElgGWdsfvW53QRhmexfw0jeMV3ByYTpc08aAurCHxG6L2JzMZv5DCvUmjLzaHQ9QKMykcQCFJDuFcZGj9mWAOcWwatGhNpW+Hd7OHlRe16UEuZ8MujD/FYljyE63Amx102mpC2jWQo0wm2L0Ff+8LY+/xSSZhl+wuNx6tqM1mUniRmf8Wtk7WKuJ2WnnCTH9dnECd22a7zPUTisP1Z6vaTyFefrgzisTYn3e2T2TNz5lQ5srXLidUKRyPIEgiqjrRkSwsinU2btzfm0p+LKJXCaJ6Zez24X1JAgSg8VTCLRHqIdy3xf
+  template:
+    metadata:
+      creationTimestamp: null
+      name: bazarr-helm-values
+      namespace: default
+status: {}

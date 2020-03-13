@@ -1,0 +1,6 @@
+ingress:
+  hosts:
+    - bazarr.$DOMAIN
+  tls:
+  - hosts:
+    - bazarr.$DOMAIN
