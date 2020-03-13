@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: dashmachine-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgAZdFg7hNq21G4XenC8fQKuhIcp1N766pTRg7ZBOqV35C/mLuQMNKuQX5ByWYBKUolvrgwNsnvw6PMlHjq3Ob+H/6Jz5NBOwtrVCEoVCFDM8NdEs82aZSTFCGKktZaKnM0GUKyDc6+BSBAUaJ3pWJGVe20TpAScjH4h79UPQRD2620uFYoq+E/yKS1Bh/7RiEApWT59YQMZHnt3yk1RL6ZmLDLXDsSubeVpL8zcCUVbjHm3+qhTOJy9/l4j2iZhgT1oCva9BOYFJ5NCYS2IUf9SfmlXVjmbdJenZ1DhH9YuhdHaNQSX+EMLjjpK1YdjEhcZWMGMGo5MEd2XjoEnim9rs38N+4Egfe71+3Ykm2b9vuCIsc2/eWSFZU0dO9EdFMJ5SCfOuH1Lk9aDWoOKbCSr9wvfNz2vCruqRPDmdkYqm3T8/rAR/dJNeTesUGOQt0I3kMVPalfLgyCPVl29U6/lt7Pp41EA9pf9RYihTobDPUACzP5l4nv3vyTmWG3Cz0prX3DFOxMsatzoN+WsnSuDfh3jTUtpnnuoIJJI2VT+e8p/L54CzzmyB8BRYcuvq/Cc4PdgDBYwXVONZlYj0izukopockGpf2TJkdj495kXo10zCoCDEYARTRoVdlG3IXVeKqypyKqBARWR9FqDjuwcujsPMyNXMy62UaMw5unBs9Oh65lprQBMGAu4Kzp9xQ8eGk7lCZgEVaCTDnQjZgTAPyQNe4BM+LDpfyl5kbnU2dsxBk9sxF+SzcEF544qtwbmqjsPpas/hnFTtCf2aignHmri5pi283V1L5l/S9ymQsJAyfztUDxU
+  template:
+    metadata:
+      creationTimestamp: null
+      name: dashmachine-helm-values
+      namespace: default
+status: {}
