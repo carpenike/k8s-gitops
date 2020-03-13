@@ -66,7 +66,7 @@ kseal "${REPO_ROOT}/cluster/default/unifi/unifi-helm-values.txt"
 #kseal "${REPO_ROOT}/deployments/default/jackett/jackett-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/radarr/radarr-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/sonarr/sonarr-helm-values.txt"
-#kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/qbittorrent/qbittorrent-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/plex/plex-helm-values.txt"
 #kseal "${REPO_ROOT}/deployments/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
 

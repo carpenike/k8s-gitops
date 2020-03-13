@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: qbittorrent-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgCEQUT75xnNayUamcNmj8rdHyHTO68IDjmZbz+DsjPp2lZWQbpXTPQS4eXfqhic0XUx1P7YVc56+TLh6BBBIbXff45te1Aa167lOHMx3wCPJCsuwa6MdTP4cZ1plEoW+FgDCMOgMIiB/Vztug1PudT2sdjh731PmB0UOQaLoRaSjl4+IgFKVLY9huE/BbZwwy6uAZ2RtRAo0KyC170+lmzTS83uYvx/Tzwe61wk2lh1fSr/HWNVj5BPLm4Z8h6Md4wNdQuOVhiu0uiiammYpOIb2asbMxxReOXcLu15JIxIyKN5yIy1m/eG7kaO0QarJVIfqxukJb2pAoWNEIWcPpkp4iloc9hjWdAqnTAoZEIlGT80zJohUEj759so1z97TrQ0Ot7GiyTC3KhCs1oTrg+Oxn5wkr6wDqtE1eGx4u0ZBRZyuYPLCs+c9TSTOAzu5TsydQUzheZA+I4W0bDZBPwop1u1Bg2DKMpqWfA1BbYNZujBTVOiadPlwbgPwa1Cja/qjCoItyEhvIDakVKAQjj8WSHbsI22RJiIAHHzNCOnFHRlYLI1wUxybhj0YLzknr7YjBWu2cKNt27PXZAaN6w2OY0S3flEGrQXq1v6dcYgypyyJG4+ToA3rNv85Y/Lpxnzbb7p5BQUuQuTRywcU8w4cUefIgZ9S6hBcNDop+Bb+KyEFjjDJkq2G047I7/Uvtknh2GFqZBWHR+2jB4AfJ52YMr3bOiR4Z52Ap5S3lBsccRwru6dvj2ovnRHHFrYa4L3uOQ76zTQethvDPybCEHreFHSa873aZne3mcS
+  template:
+    metadata:
+      creationTimestamp: null
+      name: qbittorrent-helm-values
+      namespace: default
+status: {}
