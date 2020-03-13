@@ -5,7 +5,7 @@ metadata:
   name: sonarr
   namespace: default
   annotations:
-    fluxcd.io/automated: "true"
+    fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: "glob:2.*.*.*-ls*"
 spec:
   releaseName: sonarr
@@ -18,7 +18,7 @@ spec:
   values:
     image:
       repository: linuxserver/sonarr
-      tag: "2.0.0.5343-ls99"
+      tag: 3.0.3.727-ls183
       pullPolicy: Always
     ingress:
       enabled: true
