@@ -175,25 +175,24 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
-          prometheusSpec:
-            ruleSelector: {}
-            ruleNamespaceSelector: {}
-            ruleSelectorNilUsesHelmValues: false
-            serviceMonitorSelector: {}
-            serviceMonitorNamespaceSelector: {}
-            serviceMonitorSelectorNilUsesHelmValues: false
-            podMonitorSelector: {}
-            podMonitorNamespaceSelector: {}
-            podMonitorSelectorNilUsesHelmValues: false
-            retention: 30d
-            enableAdminAPI: true
-            serviceMonitorSelectorNilUsesHelmValues: false
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  storageClassName: rook-ceph-block
-                  resources:
-                    requests:
-                      storage: 100Gi
+      prometheusSpec:
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        retention: 30d
+        enableAdminAPI: true
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: rook-ceph-block
+              resources:
+                requests:
+                  storage: 100Gi
   valueFileSecrets:
     - name: "prometheus-operator-helm-values"
