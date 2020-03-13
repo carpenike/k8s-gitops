@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: unifi-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgAbiGFawSZu3DtumOeE7dEbMjXRZcIW/hStWcQbknxbdDCs1yGmdD4WdC26qDzLhiHr5P9pBdOba2W1WyW8e83XmffPqjI/r5T/UjYM4NDulNCSDyBCT5usWF1jelbUZwR/b8mHlTBssf+vWx8bCe17nR/qDf3I9Nze99jKcbO5ZtwqoHfjvDeLFPEY9J4qE0FfnOV43Ob3DYi6Tro9/9wzKlc2/NUycIX3fXb6CAUAQnYGlAV/ZW3DtALUAzd1GpXlDXSYb8ixdZBZLlGUwQd2VZ4rKia8voWwQo5LhHUq4lCuzdNC4OSGnNMNXrYNcQmLaMJAS7ixuRXX9zkH0kwH7swDyAnYYQj15/2yxriapFXAswUKUn1jp6x9QbazkMH37NeC4S3h4A/gOrvwvOZGE4mzOOvhC6mtg39+LLoqPqcdRc74pUbnlucf0fgGlt0gkM96ImIMGBea9rYcn1VGgNgi3GqUHk+CvROAIg7soAZs0iU7UMyOx2xLW1aI2FvniDhMmEo5gJ09Ap7nFJ5mAUa8w1N0QLZt3D5TLdxWoAOKyLxHJmvtf6zFkCgaG7aO7OLU7a4NIxI0Z1DF2kwA/lXMEj9hRJ2zqV8Ml60rUjmUy9tT6NYWPT57ZGOBUJsUHRXfb/JMLfesVMwpk32ijPCBNzbB6xn1Q3ULLZ4qA9iJFn6t145uiooQAPKLiSsfG3DoPBzN3J9tRuyBNlck69Wbb/ieVru5lx/nKiR76skSDRrxTk5/Mxa3PrtEGXd8wt5mohB+1Th4WEtTnWPqUd/7fONUys98UVPhisFc0PO/
+  template:
+    metadata:
+      creationTimestamp: null
+      name: unifi-helm-values
+      namespace: default
+status: {}
