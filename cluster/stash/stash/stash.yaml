@@ -16,11 +16,8 @@ spec:
     version: v0.9.0-rc.6
   values:
     monitoring:
-      agent: prometheus.io/coreos-operator
+      agent: prometheus.io/builtin
       backup: true
       operator: true
       prometheus:
         namespace: monitoring
-      serviceMonitor:
-        labels:
-          k8s-app: prometheus
