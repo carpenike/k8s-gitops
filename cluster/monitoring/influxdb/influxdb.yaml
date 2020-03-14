@@ -13,7 +13,7 @@ spec:
   rollback:
     enable: true
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://helm.influxdata.com/
     name: influxdb
     version: 4.4.1
   values:
