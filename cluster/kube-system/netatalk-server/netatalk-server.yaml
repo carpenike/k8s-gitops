@@ -20,19 +20,19 @@ spec:
       restartPolicy: Always
       containers:
       - name: netatalk-server
-        image: cptactionhank/netatalk
-        env:
-        - name: AFP_UID
-          value: "1000"
-        - name: AFP_GID
-          value: "1000"
+        image: netatalk-timemachine
+        # env:
+        # - name: AFP_UID
+        #   value: "1000"
+        # - name: AFP_GID
+        #   value: "1000"
         ports:
           - name: afp
             containerPort: 548
         # securityContext:
         #   privileged: true
         volumeMounts:
-          - mountPath: /mnt/tank/share/netatalk
+          - mountPath: /timemachine
             name: netatalk-vol
       nodeSelector:
         node-role.kubernetes.io/nfs: "true"
