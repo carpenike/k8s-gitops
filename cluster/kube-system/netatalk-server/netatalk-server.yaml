@@ -20,7 +20,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: netatalk-server
-        image: netatalk-timemachine
+        image: vi7al/netatalk-timemachine
         # env:
         # - name: AFP_UID
         #   value: "1000"
