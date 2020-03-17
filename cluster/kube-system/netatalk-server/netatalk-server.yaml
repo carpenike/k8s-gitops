@@ -23,9 +23,9 @@ spec:
         image: cptactionhank/netatalk
         env:
         - name: AFP_UID
-          value: 1000
+          value: "1000"
         - name: AFP_GID
-          value: 1000
+          value: "1000"
         ports:
           - name: afp
             containerPort: 548
