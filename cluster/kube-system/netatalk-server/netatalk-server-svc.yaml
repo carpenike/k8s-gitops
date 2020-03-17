@@ -10,4 +10,4 @@ spec:
   selector:
     role: netatalk-server
   type: LoadBalancer
-  loadBalancerIP: 10.20.50.101
+  loadBalancerIP: 10.20.50.120
