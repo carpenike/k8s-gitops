@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: ombi-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgAuFh23tTdPgu0CA1iOM9tj5LJ/f00sJVKM+o+yjouMNw6MarNG/G8Nlxcf4crt012b/qEddQ5Sx5UijasLFgb9U1AIdWkOs01Jbm4XN3xywwygPKiFzhZcSSyHZ+zhiLa/BjiKQ95Kgi2e2sQQEzaZRhtgCYBdiY/VUtLq6qIU4ktN51Y2k/r9i8oD2TMEfotuTy2Gl+pFnY7ey+rLS44BEIRxiREt8zLDIYCSA+qplEY0rT2UzNblTopozWdMBCYJxQK61WtI5h9eS8zDrejRBwK/sPlSgtSz1j7ZADH7UxBTy+9MCNiYreq68liq9y8Am52Rx1tQZ0p5A1gMXQuDDUIiq5Nl/1MqKjgvGNzpdqDvV1f6sLl25VVqBhWB5ClOFealhqlxuF3OU1dw4eH8NivKcbX4qPsaz6PIXm7jF9gt7/FCacpxqA1A82lVmMDu5qFAY2JiqF9/lkv486hXvbQCnyxEi0/IgEm39a1N1j0heiHkhsNL5erdctQ/mfAH2t+o299hxzL2g73QbfENbp4AwnqnyqA8N5Xi4xx1lgGvdfd72e2P6DP/aupw//1G1orWMZQOmrD/QcgrndU+8BN/s2t7Jy+Kd7Rz/0Cuzl9EenyblGsDQI1F33nzjUOP3GSnArTMDaO8u9Tgb+qUxdY3CJH5Qu2C5x47zj5hAbd63cfqvWlRi4FtYPVL8vAsFcwY3CkW5XjoD6bLBg5uHF5GtCbX2qUZEHneI2zcBaQIi5WBrXuN1qK/4dzOiaTG1RQCzT1pFGlfz/tJxWKBA3O3Zygg8F2NwJiE9FrdFSavPCLoK0E=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: ombi-helm-values
+      namespace: default
+status: {}
