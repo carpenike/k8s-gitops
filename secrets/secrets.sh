@@ -71,6 +71,7 @@ kseal "${REPO_ROOT}/cluster/default/plex/plex-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-mariadb-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 
 #
 # Generic Secrets
