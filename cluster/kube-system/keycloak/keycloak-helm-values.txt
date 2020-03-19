@@ -1,0 +1,5 @@
+keycloak:
+  ingress:
+    enabled: true
+    hosts:
+      - keycloak.$DOMAIN

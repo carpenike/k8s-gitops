@@ -1,0 +1,31 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: keycloak
+  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: keycloak
+  chart:
+    repository: https://codecentric.github.io/helm-charts
+    name: keycloak
+    version: 6.1.0
+  values:
+    keycloak:
+      replicas: 3
+      persistence:
+        deployPostgres: true
+        storageClass: rook-ceph-block
+        dbVendor: postgres
+      extraArgs: -Dkeycloak.import=/realm/realm.json
+      extraVolumes: |
+        - name: keycloak-realm
+          secret:
+            secretName: keycloak-realm
+      extraVolumeMounts: |
+        - name: keycloak-realm
+          mountPath: "/realm/"
+          readOnly: true
+  valueFileSecrets:
+    - name: "keycloak-helm-values"

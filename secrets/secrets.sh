@@ -103,6 +103,14 @@ kubectl create secret generic restic-backup-credentials  \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
 
+# Keycloak Realm - kube-system namespace
+kubectl create secret generic keycloak-realm  \
+ --from-literal=realm.json="$(envsubst < "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.txt)" \
+ --namespace kube-system --dry-run -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
+
 # NginX Basic Auth - default namespace
 #kubectl create secret generic nginx-basic-auth \
 #  --from-literal=auth="$NGINX_BASIC_AUTH" \
