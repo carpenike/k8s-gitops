@@ -33,7 +33,7 @@ spec:
           - https://1.0.0.1/dns-query
       conditional:
         mapping:
-          local: udp:10.20.0.1
+          holthome.net: udp:10.20.0.1
       blocking:
         blackLists:
           ads:
