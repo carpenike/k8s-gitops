@@ -30,15 +30,11 @@ spec:
         kubernetes.io/tls-acme: "true"
     mariadb:
       enabled: false
-      master:
-        persistence:
-          enabled: true
-          storageClass: rook-ceph-block
     persistence:
       uploads:
-        storageClass: rook-ceph-block
+        storageClass: nfs
       storage:
-        storageClass: rook-ceph-block
+        storageClass: nfs
     externalDatabase:
       host: bookstack-mariadb
   valueFileSecrets:
