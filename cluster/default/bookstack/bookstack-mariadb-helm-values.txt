@@ -1,0 +1,4 @@
+rootUser:
+  password: $BOOKSTACK_MARIADB_ROOT_PASSWORD
+db:
+  password: $BOOKSTACK_MARIADB_USER_PASSWORD

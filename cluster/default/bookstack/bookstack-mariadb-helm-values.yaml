@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: bookstack-mariadb-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgAoOJK2z6+VjiKnMB86ANIk3Wpyx+WJCnptmPIZQLb/oJQJqiDxRz4E+pLZSkCwePtmokMuwI9xf5FuML+4758nLNpSfBUk4Tm7y0EU1KrfZhx4C1wjRRuHeBNiRBeaH9z9FuBym6AVf5Vs4ZJ0KPK2/KIOnT4A6YgMs24vZpYj8UWhKHKihXt0I+D7iXpvpBc3VkIj159s3A8tkt/Maaejy5KMahJUBCaLP7WZuHNXjYVVN8GR+w/pW26H/2SiWPVUUzUIKu830H56r+Uz3mubFgRsacmCTFtHnLBsao3f7JnvUqt7PL+lEA7ZRLvc5mapi5Ytdi1HG4f7tvrgZ46HdG8YDe0q/fBZtp7FMNEl1tzDLVDQ6tch4j7lkhYC2fu2Q9YeEU8XaLEKojtn1Te5C8NIvzQcFOzb0zhGh3OCp7NV51Xgw1EIrLcHPRpxj2E3/nUZz902bI/yXkJoE/6JvN573l/E4PR+ICVLCHDY5zSd32Cn3kNOS8esdBP5v/JYcV3uF2qJb/ReVwHB8rL7magIFL5cJzmrO2/hUBDnsPg3WeqaGqW2SJVrU70B1Lt78OvQtJb4sEQxhOKNCmbdSddZi07REww360pWHQl//Yw7E9k7E27Mp3brKHBuLT3dO4/q0RDPuoyOpFWpngm+Kz058uCydlVi1h9ZydGEvZRH81D/onBdiM+mi3gZgb/zaVNMPnip4DTznd9CEUzfQgvVV50LQBZ5JCBxeqi2YRZrA7fXiv1rKbxL5qhuwmoDDg7/0foM0Mp+jY2PlTrFZ4ntJQ==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: bookstack-mariadb-helm-values
+      namespace: default
+status: {}
