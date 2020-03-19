@@ -20,8 +20,8 @@ spec:
       repository: solidnerd/bookstack
       tag: 0.27.5
     env:
-      SESSION_SECURITY_COOKIE: true
-      ALLOW_CONTENT_SCRIPTS: true
+      # SESSION_SECURITY_COOKIE: true
+      # ALLOW_CONTENT_SCRIPTS: true
       # STORAGE_TYPE: local_secure
     ingress:
       enabled: true
