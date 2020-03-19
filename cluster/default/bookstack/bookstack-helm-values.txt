@@ -1,10 +1,10 @@
 ingress:
   hosts:
-    - bookstack.$DOMAIN
+    - wiki.$DOMAIN
   tls:
   - hosts:
-    - bookstack.$DOMAIN
+    - wiki.$DOMAIN
 externalDatabase:
   password: $BOOKSTACK_MARIADB_USER_PASSWORD
 env:
-  - APP_URL: https://bookstack.$DOMAIN
+  APP_URL: https://bookstack.$DOMAIN
