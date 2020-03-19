@@ -3,3 +3,6 @@ keycloak:
     enabled: true
     hosts:
       - keycloak.$DOMAIN
+    tls:
+      - hosts:
+        - keycloak.$DOMAIN
