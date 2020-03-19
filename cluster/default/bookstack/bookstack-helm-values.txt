@@ -7,4 +7,4 @@ ingress:
 externalDatabase:
   password: $BOOKSTACK_MARIADB_USER_PASSWORD
 env:
-  APP_URL: bookstack.$DOMAIN
+  APP_URL: https://bookstack.$DOMAIN
