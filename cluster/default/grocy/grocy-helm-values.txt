@@ -1,0 +1,5 @@
+ingress:
+  hosts: [grocy.$DOMAIN]
+  tls:
+  - hosts:
+    - grocy.$DOMAIN

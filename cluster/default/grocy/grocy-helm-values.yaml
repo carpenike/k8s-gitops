@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: grocy-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgAWp9m47R++Djen1RvagUdTRuCeXPqpQeiA4qoOKoK7B9+3/6xi4E/7yb7x0yfNpu4yXtKhCBb1B8bsjpfNsSE8RcpFWpkJZX2qFikbPYD7TTt0rL2Ahy+93r1YD3ArW4bzrCzD63S+4UbwIMQ0n+wNKKurUgxq/ex2tknUFEszVKoGQrNa8rAz3/8WKEbU8jjPUp6gt7Fx72Yi7g6AizSrbK42S02hK62IpC3Y5Ko7ugHkLR53jge1nkAIkcVfOTDUeozdoWqopklwSS7Jbw/PGeD/XMGmuSqGe0ND3Ga0QM9blc+FZCT7G+TQ7HcNaABmqXryQCiAYwmcNaO968mTM4IDmc4yYZSNUn+5hPaVCzREvyLXUVz0dUHED+5FgcKiD3AWaItmvulI2zOsnJj8t4rHz3rGmEnQuU82H2cfYlXvDDxAlKe89a6SQGEM36peoPaUSoCa6Ea1VK+Z0K5PAog2q+R6ihcpEgm5g20r6nGzis7LJmU4TltXkg7u7eeU11hItcJ/g7PbWP1/hAfybDDJ/KXIHXsMkAt+X0C7iYE3N1dRETSwq+iIAdQCghrpIlax/SlzbKTjUH08MvSPdHUTRZByB0YJkGbB6hndbgNG1Sh7C7vo4PE7izKPz9IC5UMvij7kuQQqTTxayLxjOb0AR9pUy+cFC7MZEqGn6jm7hTLBDLTDkHQZwy/adEq94E/N4C4MWvLb7jaz3hahTzD9DPs+a+8qqK6s9e3aUSrkOx3fvCT45ywwhFJmapnil0sLJWhfi12toWqjSmMaGtRZJd3kayoKrAFV0Ah/9xDM
+  template:
+    metadata:
+      creationTimestamp: null
+      name: grocy-helm-values
+      namespace: default
+status: {}
