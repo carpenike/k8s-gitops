@@ -25,4 +25,4 @@ spec:
   - name: http
     port: 8123
   type: ExternalName
-  externalName: 10.20.100.25
+  externalName: hass.$DOMAIN
