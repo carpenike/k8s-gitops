@@ -120,29 +120,29 @@ kubectl create secret generic keycloak-realm  \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
 
-# NginX Basic Auth - default namespace
-#kubectl create secret generic nginx-basic-auth \
-#  --from-literal=auth="$NGINX_BASIC_AUTH" \
-#  --namespace default --dry-run -o json \
-#  | \
-#kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-default.yaml
+#NginX Basic Auth - default namespace
+kubectl create secret generic nginx-basic-auth \
+ --from-literal=auth="$NGINX_BASIC_AUTH" \
+ --namespace default --dry-run -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-default.yaml
 
 # NginX Basic Auth - kube-system namespace
-#kubectl create secret generic nginx-basic-auth \
-#  --from-literal=auth="$NGINX_BASIC_AUTH" \
-#  --namespace kube-system --dry-run -o json \
-#  | \
-#kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
+kubectl create secret generic nginx-basic-auth \
+ --from-literal=auth="$NGINX_BASIC_AUTH" \
+ --namespace kube-system --dry-run -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-kube-system.yaml
 
 # NginX Basic Auth - monitoring namespace
-#kubectl create secret generic nginx-basic-auth \
-#  --from-literal=auth="$NGINX_BASIC_AUTH" \
-#  --namespace monitoring --dry-run -o json \
-#  | \
-#kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-monitoring.yaml
+kubectl create secret generic nginx-basic-auth \
+ --from-literal=auth="$NGINX_BASIC_AUTH" \
+ --namespace monitoring --dry-run -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-monitoring.yaml
 
 # Cloudflare API Key - cert-manager namespace
 #kubectl create secret generic cloudflare-api-key \

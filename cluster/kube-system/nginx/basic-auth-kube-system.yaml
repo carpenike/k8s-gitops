@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: nginx-basic-auth
+  namespace: kube-system
+spec:
+  encryptedData:
+    auth: AgAdkLTosEsoBS1KMn9Clhk6vS3vDkuLwc4fMnsa/tF/GOLZUl2u6/woct8m2j7Ha3kUoc/xBnhM6mdfU2rGYZcXRH0UouBeizCylPu2RskbpYUSd6Fe2Ws2lKMSu5ERuXTsf4eC8L9aiOu3WWFu6QFtstXC7YHMj4h2g22i9WayNguvzhP70p6/b1KIoUmxbvD7vveUHRZvfvltwP/8MIQ5Im+d1U8w5laOgQW1eJM8AKSsDokogmUetOlct/7yJKTpzcDSoJVho6tigvvInXzNPULsEAHq9KHtasnNUORlCrfkEINo60apBUJD/lcPmo60kDh1KkECzRBCIS0mjd0RSGmr9iGxWsw1au580Ngk9g9y8IoMmwXznbfi4+3E/pWohsSQKD287h/Gl6Hj9PviV2pGWKVSbGJst9cRyn4FC7LlwzINaYdlSXLMVCVW8IEzydVYOZpfdzyKE6uI+qjnrPdRrJQEi6NySATRCg/hfbNymM2m9cAszK+Km/iTJZ3opyPYF/XBDJAuceQoIQA9DyUvhXij8+EmHfyIrKme3ftS9dBjXfCyJDZ7NN7mSzTyvc8pawIb3tzpaqZPsPE0j9UmhXX/Uz/SwycyVQ/Ulm9NLkgK5oS2jHvDnkzWYDKwhVTuZGwHZxuFjX67FfmDSKyXJ2OIs8ufcgcmfLo5YUsGIxhNe73jee644Jz0KAundXTTeT15ebxgd29sXhk6s3gW
+  template:
+    metadata:
+      creationTimestamp: null
+      name: nginx-basic-auth
+      namespace: kube-system
+status: {}
