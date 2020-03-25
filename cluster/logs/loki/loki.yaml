@@ -23,7 +23,7 @@ spec:
       persistence:
         enabled: true
         size: 50Gi
-        storageClassName: nfs-client
+        storageClassName: nfs
       serviceMonitor:
         enabled: true
       tolerations:
