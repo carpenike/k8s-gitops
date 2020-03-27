@@ -43,7 +43,7 @@ spec:
       config:
         enabled: true
         storageClass: rook-ceph-block
-        accessMode: ReadWriteMany
+        accessMode: ReadWriteOnce
         size: 30Gi
       media:
         enabled: true
