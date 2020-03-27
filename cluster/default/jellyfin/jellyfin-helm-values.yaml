@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: jellyfin-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgCmZHWVMH9yPK08bHvtVcOwfeaWszhFXVIlMBuy6TaSRZ5IHcSDrhWOVI3l6evcJQwGVUn8+HxPnwvRK+6rX47YHBlUeMNe/mefbFKYpLA0k24lbl/BSrqTOpw4UX3VjOq/MSMWgALMD5UJmaYIKUHiFKHCsjRdjrBrQfeeCgxE0Vv5bMQr6MKiDq8OV8gtjGs0M/cGcegaoa+bpVt2kOYfRtpkuRo/zNOfDCvluQXS5vDlm4O63IZumXrtruHIlfS553qo07NIEUORJJI3Gs9TW9b2VtJtnknYLvRbloze0umH6rJ/otGncAYnmk0oi7Q3HkrP8iXfmv/tHv5psNKKr/EXEUbGCVbbanbGa0yqVDlgwW1Qym8+yAJ9HI4FZGxiS6vkYIoq4dbyR1+c7O/CJyFlCYyA4Nk3CPJNAPpjt/4USs2LkAhvdzewC7DlcgCKofgghUyobagsa1CFU92ClZ/3IdBMluEC2drxBybl8mF2LA9Jcx7bwbGso/iaNC22xewp8++qsJqapHzcm2dAT7im2Gm8oNz2fZzh1aG8BNqR+SdrF6fLzJnhJerIbO3+gwW57UHFVEz/iFjbrFtfpV5si5sBYHf9j1itZQ8bgHdWsvNf907jVJMeVyXSlxw9mRXLLq5mIapSZdW5gVMmxXvqygimFHsNr+2Bmgk9WMfXJ/rC/J9yvskqeP/FHTlYDtY+9awrDjUMAi8keGUcVaCwsxPBh17IZMl9izMgD+GiAqXA41sVvS8nFJU8OjsNv1zaM0tdfCOXzixQreYliuVpEUpHzcr4VsH8oY6bM4UO4gZPX/c+
+  template:
+    metadata:
+      creationTimestamp: null
+      name: jellyfin-helm-values
+      namespace: default
+status: {}

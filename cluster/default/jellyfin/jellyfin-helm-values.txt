@@ -1,0 +1,5 @@
+ingress:
+  hosts: [jellyfin.$DOMAIN]
+  tls:
+  - hosts:
+    - jellyfin.$DOMAIN
