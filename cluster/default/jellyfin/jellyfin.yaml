@@ -47,7 +47,7 @@ spec:
         size: 30Gi
       media:
         enabled: true
-        claimName: nfs-tank-share-pvc
+        existingClaim: nfs-tank-share-pvc
     # nodeSelector:
     #   app: "nvidia-gpu-plugin"
     resources:
