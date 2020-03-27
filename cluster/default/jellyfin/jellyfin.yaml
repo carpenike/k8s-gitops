@@ -37,7 +37,6 @@ spec:
           proxy_set_header X-Forwarded-Host $http_host;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection $http_connection;
-          proxy_buffering off;
     timezone: "America/New_York"
     persistence:
       config:
