@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: node-red-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgCg9LBXpfz68l6CN1f7Ldf1b8ZNA7tNMGHIF8xOXjryjgq8+qnZmwQicc/Eq63a8msTUwtpDWlw8kaepLHO5qvoQYpL4+BlDRbK5Y3kvmOy7qItNIJ7jqso1LNj95GzvRKy6ANSgmDzjJsdoC2dyBP8krVmAm9FJ3d8FeUTPlms7uVBncBrJ1onOrLHBwc8rQeP1+QHzHwRiqUVrFEGoOwEo8rq9FJJT9PeGJ2bTKcOXwqMz0O1A2q9JmPCGXgzDWSaTgYpebj3g+tOTKD79iDdxBaW6X73Ruz3qn31zy+qMkI/F2WpEF73TM4Crfxs05L78C1GF9otCoFmw0KlM/WseNCjPjVPaXOEiK2Alyfl9Mg7nJD6OA9dT5l0wiTdU1WjJ5DG8uF7gfNPwEENCkRLAm8Xp1Gl5+n5vjSV/Y+J5n/DEwKY38MzDWvPVMOjfjrnEkAB6Rorrn3Q1gSVb55kKJL9n6Z5zjStI/XI/D+LlsdBcfOLKpT1PB1oGNNPl41qCsk5tfUpuzMXOwzRfwpJDCaC82vGxJP3iZ1i9R0RrOgaPj0X2UTTTXraQYPR9jMnXNuhz6T6/E9T/t8iI8iRXTNQWOnS1Td2pAtP3YeG20b7HFh/MexnrqfKBad+YSMSqZBQn5zNdaoorUdhUWkHWn4JgxKGau3EJl7/k27zgPqKjO9XWd9G74ZSHSqHpJ3hThZoDSOQNwdM1c0O2W1pwwT0Kj5IfiaBAMX0DpizSzMG0gO/q9/f1l9xRRrk2YpypDeKt/NzUy14UjFbGXWJtI+4yRRZpfSqLqTE6bJjvi9aNjqcdd5c
+  template:
+    metadata:
+      creationTimestamp: null
+      name: node-red-helm-values
+      namespace: default
+status: {}
