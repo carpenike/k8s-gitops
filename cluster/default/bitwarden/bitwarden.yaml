@@ -17,6 +17,9 @@ spec:
     path: .
     version: 0.1.2
   values:
+    image:
+      repository: bitwardenrs/server
+      tag: latest
     ingress:
       enabled: true
       annotations:
