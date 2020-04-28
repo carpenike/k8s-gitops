@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: "influxdb"
-      tag: "1.7.10"
+      tag: "1.8.0"
     service:
       type: LoadBalancer
       loadBalancerIP: 10.20.50.151
