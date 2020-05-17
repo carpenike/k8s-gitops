@@ -1,5 +1,9 @@
-ingress:
-  hosts: [pdns.$DOMAIN]
-  tls:
-  - hosts:
-    - pdns.$DOMAIN
+powerdns:
+  domain: $DOMAIN
+  default_soa_name: ns1.$DOMAIN
+  mysql_rootpass: $POWERDNS_MARIADB_ROOT_PASSWORD
+  mysql_pass: $POWERDNS_MARIADB_USER_PASSWORD
+powerdnsadmin:
+  mysql_pass: $POWERDNS_MARIADB_USER_PASSWORD
+  ingress:
+    hostname: pdns-admin.$DOMAIN
