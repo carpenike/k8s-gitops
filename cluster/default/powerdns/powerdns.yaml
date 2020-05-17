@@ -25,10 +25,10 @@ spec:
         repository: pschiffe/pdns-mysql
         tag: alpine
       service:
-        dns-tcp:
+        dns_tcp:
           type: LoadBalancer
           port: 53
-        dns-udp:
+        dns_udp:
           type: LoadBalancer
           port: 53
         api:
