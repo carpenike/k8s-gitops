@@ -36,7 +36,7 @@ spec:
       dnsupdate:
         enabled: yes
     mariadb:
-      enabled: false
+      enabled: true
       persistence:
         enabled: true
         storageClass: rook-ceph-block
