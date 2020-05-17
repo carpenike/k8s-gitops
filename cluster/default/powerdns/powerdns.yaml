@@ -33,6 +33,8 @@ spec:
     service:
       type: LoadBalancer
       loadBalancerIP: 10.20.50.165
+      annotations:
+        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-powerdns
     pdns:
       dnsupdate:
         enabled: yes
