@@ -6,4 +6,4 @@ powerdns:
 powerdnsadmin:
   mysql_pass: $POWERDNS_MARIADB_USER_PASSWORD
   ingress:
-    hostname: pdns-admin.$DOMAIN
+    hostname: pdns-admin
