@@ -1,0 +1,4 @@
+rootUser:
+  password: $POWERDNS_MARIADB_ROOT_PASSWORD
+db:
+  password: $POWERDNS_MARIADB_USER_PASSWORD

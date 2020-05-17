@@ -36,12 +36,7 @@ spec:
       dnsupdate:
         enabled: yes
     mariadb:
-      enabled: true
-      persistence:
-        enabled: true
-        storageClass: rook-ceph-block
-        accessMode: ReadWriteOnce
-        size: 10Gi
+      enabled: false
     resources:
       requests:
         memory: 350Mi
