@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: powerdns-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgCQ/S3uaW8W/vcv1JcIM5qGko87kwnG3Mn5dOK9zGuaaL4yp2CCWHCJQrBkHZ95MYD7CMBMNL8F2sQtaq7lyP9c73u3fYR7+zZO0xZps0AEXQs2zO4m3kB2pFhQkz2JMDB/xdFOK8nrZeEsKr3KacZej+1e+FXBOlsYp3Vd48Kq5hx08tHJDusozXkczciVcJHupwdsTrEXBoe1EOWTQoRoP8Mw8IA7qj/oA1igC0Vsz4CFGSiqqmQfqKvC5FwuyszXTfKFpbfhIo0XUQXOUezXMw/8tYrkLBW5U+OBFe9g648/6LaYk4yNeMPjA4jPg7c7qf+sppA9f50wsQqysDcYR/QNk91NQ0n4mt3ckD5mgpka/IxDKKu4tfYVrqIgyT5nr6TU142AWZvSL6aoQ/oQZaPv5eGCuDX4uH1QicKRAhobvWEzy+vYYsOF7YAMvHVmLZBwbE6vo9feOC0DlIFAOl8O4ulURPKhsTxFIg0kc3XEABcVIZnTkbgzawdzbsn+kPrndbrlSz0RPPuOGODiuokQoJ7+sr3G95RabpUl386qbOJwen37n33ME9f8XOgNtpV2lGwXI1LcVvkf0okCZmJSHTGim5eSDcabXAnjaX7gVjHnUFbd65ApB0TR+bx2M1heGXtN0qm/7M3Kl0tGEYMm46cSdjJJdB/8ak84y6gv1F0V6iL+9dGJiBWZj8L9ICx2i8QwTz+fQ0emcvQOVHqce8M3x9yHci1XspsO1dKIo8bX43Yo7A5J8+ElsIgPjtDmH6g/2jLVEuXwGpZOusGy20bHMZ+i2ecAdqo=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: powerdns-helm-values
+      namespace: default
+status: {}
