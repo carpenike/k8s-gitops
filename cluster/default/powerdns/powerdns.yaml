@@ -25,12 +25,15 @@ spec:
         repository: pschiffe/pdns-mysql
         tag: alpine
       service:
-        dns:
+        dns-tcp:
+          type: LoadBalancer
+          port: 53
+        dns-udp:
           type: LoadBalancer
           port: 53
         api:
-          type: LoadBalancer
-          port: 53
+          type: ClusterIP
+          port: 8081
       master: yes
       api: yes
       webserver: yes
