@@ -27,11 +27,17 @@ spec:
       service:
         dns:
           tcp:
+            loadBalancerIP: 10.20.50.165
             type: LoadBalancer
             port: 53
+            annotations:
+              metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-powerdns
           udp:
+            loadBalancerIP: 10.20.50.165
             type: LoadBalancer
             port: 53
+            annotations:
+              metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-powerdns
         api:
           type: ClusterIP
           port: 8081
