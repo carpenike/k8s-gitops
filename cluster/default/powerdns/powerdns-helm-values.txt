@@ -1,5 +1,5 @@
 ingress:
-  hosts: [dns.$DOMAIN]
+  hosts: [pdns.$DOMAIN]
   tls:
   - hosts:
-    - dns.$DOMAIN
+    - pdns.$DOMAIN
