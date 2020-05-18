@@ -44,14 +44,18 @@ spec:
       master: yes
       api: yes
       webserver: yes
-      mysql_host: powerdns-mariadb
     mariadb:
-      enabled: false
+      enabled: true
+      image:
+        repository: mariadb
+        tag: latest
+      persistence:
+        storageClass: rook-ceph-block
+        size: 10Gi
     powerdnsadmin:
       enabled: true
       service:
         type: ClusterIP
-      mysql_host: powerdns-mariadb
       ingress:
         enabled: true
         class: nginx

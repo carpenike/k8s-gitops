@@ -1,61 +1,61 @@
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  name: powerdns-mariadb
-  namespace: default
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-spec:
-  releaseName: powerdns-mariadb
-  rollback:
-    enable: false
-  chart:
-    repository: https://charts.bitnami.com/bitnami
-    name: mariadb
-    version: 7.3.14
-  values:
-    image:
-      repository: bitnami/mariadb
-      tag: 10.3.22-debian-10-r44
-    # deploymentAnnotations:
-    #   stash.appscode.com/backup-blueprint: default-workload-blueprint
-    #   stash.appscode.com/target-paths: "/config"
-    #   stash.appscode.com/volume-mounts: "config:/config"
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-    service:
-      type: ClusterIP
-    securityContext:
-      fsGroup: 1000
-      runAsUser: 1000
-    db:
-      user: powerdns
-      name: powerdns
-    master:
-      persistence:
-        enabled: true
-        storageClass: rook-ceph-block
-        accessMode: ReadWriteOnce
-        # size: 200Mi
-    slave:
-      persistence:
-        enabled: true
-        storageClass: rook-ceph-block
-        accessMode: ReadWriteOnce
-        # size: 200Mi
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-    resources:
-      requests:
-        memory: 350Mi
-        cpu: 25m
-      limits:
-        memory: 1000Mi
-  valueFileSecrets:
-  - name: "powerdns-mariadb-helm-values"
+# ---
+# apiVersion: helm.fluxcd.io/v1
+# kind: HelmRelease
+# metadata:
+#   name: powerdns-mariadb
+#   namespace: default
+#   annotations:
+#     fluxcd.io/ignore: "false"
+#     fluxcd.io/automated: "false"
+# spec:
+#   releaseName: powerdns-mariadb
+#   rollback:
+#     enable: false
+#   chart:
+#     repository: https://charts.bitnami.com/bitnami
+#     name: mariadb
+#     version: 7.3.14
+#   values:
+#     image:
+#       repository: bitnami/mariadb
+#       tag: 10.3.22-debian-10-r44
+#     # deploymentAnnotations:
+#     #   stash.appscode.com/backup-blueprint: default-workload-blueprint
+#     #   stash.appscode.com/target-paths: "/config"
+#     #   stash.appscode.com/volume-mounts: "config:/config"
+#     ingress:
+#       enabled: true
+#       annotations:
+#         kubernetes.io/ingress.class: "nginx"
+#     service:
+#       type: ClusterIP
+#     securityContext:
+#       fsGroup: 1000
+#       runAsUser: 1000
+#     db:
+#       user: powerdns
+#       name: powerdns
+#     master:
+#       persistence:
+#         enabled: true
+#         storageClass: rook-ceph-block
+#         accessMode: ReadWriteOnce
+#         # size: 200Mi
+#     slave:
+#       persistence:
+#         enabled: true
+#         storageClass: rook-ceph-block
+#         accessMode: ReadWriteOnce
+#         # size: 200Mi
+#     metrics:
+#       enabled: true
+#       serviceMonitor:
+#         enabled: true
+#     resources:
+#       requests:
+#         memory: 350Mi
+#         cpu: 25m
+#       limits:
+#         memory: 1000Mi
+#   valueFileSecrets:
+#   - name: "powerdns-mariadb-helm-values"
