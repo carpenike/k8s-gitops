@@ -10,12 +10,13 @@ metadata:
     fluxcd.io/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+-12-minimal)$'
 spec:
   releaseName: node-red
+  helmVersion: v3
   rollback:
     enable: true
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: node-red
-    version: 1.4.1
+    version: 1.4.2
   values:
     image:
       repository: nodered/node-red
