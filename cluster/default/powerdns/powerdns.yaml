@@ -22,8 +22,8 @@ spec:
     powerdns:
       enabled: true
       image:
-        repository: psitrax/powerdns
-        tag: latest
+        repository: pschiffe/pdns-mysql
+        tag: alpine
       service:
         dns:
           tcp:
