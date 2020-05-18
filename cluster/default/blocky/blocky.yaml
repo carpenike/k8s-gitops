@@ -17,7 +17,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: blocky
-    version: 2.2.1
+    version: 3.0.0
   values:
     image:
       repository: spx01/blocky
@@ -31,9 +31,6 @@ spec:
         externalResolvers:
         - https://1.1.1.1/dns-query
         - https://1.0.0.1/dns-query
-      conditional:
-        mapping:
-          holthome.net: udp:10.20.0.1
       blocking:
         blackLists:
           ads:

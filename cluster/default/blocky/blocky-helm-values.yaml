@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: blocky-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgB37e4mOCgniLZpnIeeFex+N9Y0SEkPlzmLs9Mjn2wtuBGF8AHbVov5cSenQQH5vN2cmVTeKd25eqIqNI1+SuaKT4XcUaKEQ7Pu53K7V0b09wXEdBkAYfEIIy76io4trYLWCvAFLwWR81ujBqM1ZXTF9EdkVlSR4dwIhEZ3LAt2xPZbwzSbPInb35sSm1IHCrPgp/SAEAxzBxudjqv1zYopFPxNRCSoZ6quGNtQ8YtQxB5Zeh9SzJ46s731kVOJ+2WigyEiADBF8kW4YjyXvuzEl4yqv4RJiqxJdDPgh6nnIVCcWdF3gYECLM14Pk8F0auJbkb2U5wzR4BkOVPjbAeQ4bD65hNlGFeUjZ9TjLik6n1iOv9dG0VzNqGxhoPXW6fRvJ2qvcYgACPflXi2xh6DiPEGM3g48u33ThbMQ6SFlhk+FHIjmKKirtZuTPaowb7gbYqCurG4Lf2kmYw6ujeySJtT2W41UnZtsCt/+4kijzIPQ7bHy90MDk5MadsuZ6lLdz4sZJheSyeByMRfF9iLgvnwtfpcnvNZrSaBkhjF9MFcJ4iGmcY2zabZKFrIjC83fSP3QR/qKmmCBu7VX8JXnobN6lTxiz5j3rrWnHdA8WkuiTumjn1ZJdPMhivFNDTFVdvIDtC05GWIqOdeYoaRCl5IVxw9pTKQ0tyearGLGWxNznS/uiqc3uWhf/ayyr8Y6PQPNQfP3XoG175EjviM8vV5asCbM2dqTZiCSdGXQgm/Ji6SRY/s5erbeKV4YiBpy4050/w6QLYNKRkFbjDEtmgp6/FrQ2WyIV7h7dt4uxV5zEq6RVKPZ9FmTLhF9JMjAB9IOtuCjopcpBFKdyOWLj0opxgaTp46kuWzfQNHLrGnwV4WMWw1AGcJYw5IdQ0CzrIPIV0/EOjomkKtQf2N
+  template:
+    metadata:
+      creationTimestamp: null
+      name: blocky-helm-values
+      namespace: default
+status: {}
