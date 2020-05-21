@@ -1,8 +1,8 @@
 config:
   conditional:
     mapping:
-      $DOMAIN: udp:10.20.0.1
-      local: udp:10.20.0.1
+      $DOMAIN: udp:10.20.50.165
+      local: udp:10.20.50.165
   customDNS:
       mapping:
         fw.$DOMAIN: 10.20.0.1
