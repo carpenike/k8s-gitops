@@ -1,5 +1,7 @@
 ingress:
-  hosts: [pdns-admin.$DOMAIN]
+  hosts:
+    - host: pdns-admin.$DOMAIN
+      path: /
   tls:
   - hosts:
     - pdns-admin.$DOMAIN
