@@ -87,6 +87,7 @@ kseal "${REPO_ROOT}/cluster/default/node-red/node-red-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/goldilocks/goldilocks-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
 
 #
 # Generic Secrets
@@ -126,6 +127,14 @@ kubectl create secret generic keycloak-realm  \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
+
+# External-DNS PowerDNS API Key - kube-system namespace
+kubectl create secret generic powerdns-api-key  \
+ --from-literal=pdns_api_key=$PDNS_API_KEY \
+ --namespace kube-system --dry-run=client -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/external-dns/powerdns-api-key.yaml
 
 #NginX Basic Auth - default namespace
 kubectl create secret generic nginx-basic-auth \

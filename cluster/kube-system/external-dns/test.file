@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+spec:
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+      - image: hashicorp/http-echo
+        name: echo
+        ports:
+        - containerPort: 5678
+        args:
+          - -text="Hello World"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: echo.holthome.net
+spec:
+  selector:
+    app: echo
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5678
