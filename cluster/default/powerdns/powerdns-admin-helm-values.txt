@@ -1,0 +1,7 @@
+ingress:
+  hosts: [pdns-admin.$DOMAIN]
+  tls:
+  - hosts:
+    - pdns-admin.$DOMAIN
+db:
+  password: $POWERDNS_MARIADB_USER_PASSWORD

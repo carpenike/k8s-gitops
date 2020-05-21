@@ -42,7 +42,7 @@ kseal() {
   envsubst < "$@" | tee values.yaml \
     | \
   kubectl -n "${namespace}" create secret generic "${secret_name}" \
-    --from-file=values.yaml --dry-run -o json \
+    --from-file=values.yaml --dry-run=client -o json \
     | \
   kubeseal --format=yaml --cert="$PUB_CERT" \
     > "${secret}.yaml"
@@ -82,7 +82,7 @@ kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/grocy/grocy-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-mariadb-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-admin-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-admin-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/node-red/node-red-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/goldilocks/goldilocks-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
@@ -95,7 +95,7 @@ kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 # Vault Auto Unlock - kube-system namespace
 kubectl create secret generic kms-vault \
  --from-literal=config.hcl="$(envsubst < "$REPO_ROOT"/cluster/kube-system/vault/kms-config.txt)" \
- --namespace kube-system --dry-run -o json \
+ --namespace kube-system --dry-run=client -o json \
  | \
  kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/cluster/kube-system/vault/vault-kms-config.yaml
@@ -104,7 +104,7 @@ kubectl create secret generic kms-vault \
 # AzureDNS - cert-manager namespace
 kubectl create secret generic azuredns-config  \
  --from-literal=client-secret="$AZURE_CERTBOT_CLIENT_SECRET" \
- --namespace cert-manager --dry-run -o json \
+ --namespace cert-manager --dry-run=client -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
@@ -114,7 +114,7 @@ kubectl create secret generic restic-backup-credentials  \
  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
  --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
  --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
- --namespace default --dry-run -o json \
+ --namespace default --dry-run=client -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
@@ -122,7 +122,7 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # Keycloak Realm - kube-system namespace
 kubectl create secret generic keycloak-realm  \
  --from-literal=realm.json="$(envsubst < "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.txt)" \
- --namespace kube-system --dry-run -o json \
+ --namespace kube-system --dry-run=client -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
@@ -130,7 +130,7 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 #NginX Basic Auth - default namespace
 kubectl create secret generic nginx-basic-auth \
  --from-literal=auth="$NGINX_BASIC_AUTH" \
- --namespace default --dry-run -o json \
+ --namespace default --dry-run=client -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-default.yaml
@@ -138,7 +138,7 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # NginX Basic Auth - kube-system namespace
 kubectl create secret generic nginx-basic-auth \
  --from-literal=auth="$NGINX_BASIC_AUTH" \
- --namespace kube-system --dry-run -o json \
+ --namespace kube-system --dry-run=client -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-kube-system.yaml
@@ -146,7 +146,7 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # NginX Basic Auth - monitoring namespace
 kubectl create secret generic nginx-basic-auth \
  --from-literal=auth="$NGINX_BASIC_AUTH" \
- --namespace monitoring --dry-run -o json \
+ --namespace monitoring --dry-run=client -o json \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-monitoring.yaml
@@ -154,7 +154,7 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # Cloudflare API Key - cert-manager namespace
 #kubectl create secret generic cloudflare-api-key \
 #  --from-literal=api-key="$CF_API_KEY" \
-#  --namespace cert-manager --dry-run -o json \
+#  --namespace cert-manager --dry-run=client -o json \
 #  | \
 #kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
@@ -163,27 +163,27 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 #kubectl create secret generic qbittorrent-prune \
 #  --from-literal=username="$QB_USERNAME" \
 #  --from-literal=password="$QB_PASSWORD" \
-#  --namespace default --dry-run -o json \
+#  --namespace default --dry-run=client -o json \
 #  | kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
 
 # sonarr episode prune - default namespace
 #kubectl create secret generic sonarr-episode-prune \
 #  --from-literal=api-key="$SONARR_APIKEY" \
-#  --namespace default --dry-run -o json \
+#  --namespace default --dry-run=client -o json \
 #  | kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
 
 # sonarr exporter
 #kubectl create secret generic sonarr-exporter \
 #  --from-literal=api-key="$SONARR_APIKEY" \
-#  --namespace monitoring --dry-run -o json \
+#  --namespace monitoring --dry-run=client -o json \
 #  | kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
 
 # radarr exporter
 #kubectl create secret generic radarr-exporter \
 #  --from-literal=api-key="$RADARR_APIKEY" \
-#  --namespace monitoring --dry-run -o json \
+#  --namespace monitoring --dry-run=client -o json \
 #  | kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
