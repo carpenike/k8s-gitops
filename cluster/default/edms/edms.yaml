@@ -40,6 +40,8 @@ spec:
         storageClass: rook-ceph-block
     redis:
       enabled: true
+      global:
+        storageClass: rook-ceph-block
     # deploymentAnnotations:
     #   stash.appscode.com/backup-blueprint: default-workload-blueprint
     #   stash.appscode.com/target-paths: "/dashmachine/dashmachine/user_data"
