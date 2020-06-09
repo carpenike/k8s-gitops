@@ -1,6 +1,6 @@
 ingress:
   hosts:
-    - edms.$DOMAIN
+    - host: edms.$DOMAIN
   tls:
   - hosts:
     - edms.$DOMAIN
