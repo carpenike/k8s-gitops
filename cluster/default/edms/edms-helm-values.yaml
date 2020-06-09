@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: edms-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgBHe5XSX6AwllryC0qTNo4osYjf7AST4YzUHX8WPYXljD5VTcl0EH4UNWgzt3nweoEZ8msIF6fAEPqyvWXT83BxqP2vBCvli0s7261qKfDAehiqDLpOX2gfZB80NRmdsMjqlChExVdNuDX8vhcF0gaFnK0Pjrm8msGSX4CsqDT77Vjkri/TqnJdMuCKP0gc6K7mzV1i7WzQcrh/QkysBxSZFHVDy8AhXPxb29k+y+cSkutkuuaMlkdCJDnCYnki0/YKUD/Dsgt+UJRLtlGDN2F/5blWm2A/SVfrcQVlVadK0mgzO1QNL1e9bEK5GSKSst8Q6S/oAgBxrHTVUw3J8KSg2AQd2Tr2XbMvrk/aGtBwNFbx7/rVU0LwwNcD616yrxaxVY+4ykq14LskBttJ+i2lk0CEl3dC5uEaGzqmTxsw6t132FncwjnXE5R2fZ2kP+DfOD8icU6DFHwK5Oh6Dqp2g1fOJktMtgMAA1xtEKR24SUa1buSaq0hUh59Br6l8xJwYm67r0r7FEN9F1ubNUcsP/hYIU5s1wVnJluC04yU9c0CiX//b4aFbIOhFmux78iQ7XC2b5ztpbLE8FqBhcPLRg+bnX2yicVBFbBdkMK9JFXcxVxtv1ydctwuMDYklCKnUSFalT2htgNImyFsbqFE1ZkO/akZ7zPYyblj+iZVDj8fYt4HshWbGUi1jCibhW5aUHmHL3BlNjn+HOfrMd2D6vFJkQtMpnKUoPVQTA43NQIiJgg+m3epZSNDJyKwo4HllCaNen0Jytv6C+KlV2uJOxRLLtsHNOQULQJ5PGuk0oynMcFX1q+KW7ML78p9iT+xlxCDWVIuuHecUXO0jZ6mDcv386DjmMRzZwD1OLMW1rFGNBmKwCSFfc5J3YQK9MyU/YAMyCBKn03pOD/eWo88doMafAQiNpovZtDRkciADCh0r/3DIQODoz88ADb9YI87/XRnQUgTw/IHx1FppO7DEYJV5pb+4gnn9p5wjiuAQw26QhZRQZG29w/j1i/4Nd6rR30Y4/zOjNBB7mF5GVMxf98SvTmBC3noE4v1FHgVO2w4cdkgfx5JZ62VPdmpt9ZNjZb7FNLRS/nLUbm0PQY=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: edms-helm-values
+      namespace: default
+status: {}
