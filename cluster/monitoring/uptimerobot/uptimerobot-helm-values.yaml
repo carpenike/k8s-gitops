@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: uptimerobot-helm-values
+  namespace: monitoring
+spec:
+  encryptedData:
+    values.yaml: AgAMKX7r4eeYkBLlr5H2IF6Bwu9nFHNF93fiG+k295yyWTJCVcVTWI7aTEGrDVhzuv283INRrCQnFIyt2b1iZxi6gEcr/hxaAcSY0/X/tp9rjQSiJ2CJQydUbdnwep4JKXBE9ecioQCa/45Vskh81w+OLylcO+V1+BOGi1wg1kHFthOTopQ0iTCS+l5s6rRH7+3JpsOoW8V+8SzeemoWIRBfcLdpuL8WYcI0erkXiy4i49zcWzyE0MEq6h7XVlaEDDYXZqoDIvrXQ6QXsqQMRjTx3gFgcH8cEIDZVZjKwMIOLygrek7aDHpC+xpf5YRZJbh/f+BfAl+U+0AJha3gxN6EwWgdrMIFeM5J0Rzq9BNvBvHhUi2kZfGTmm5CGGJKfz5Fg1enpHYliYPkJGO8WW2WKWWwgT2YRWKb/e8T5veLy1RfgWN41d8et4/nutZtVIhEEU/Q0YluqeSR1LWknbgLNG2y8+cDYKtMIVDEZHTy4E5ON5aMfsyYR3pL/1y5hsQLMDxf3yUNF4JV68OQuUWJJiGxRJbG9xfVSrp0YB7BimQUQ4nuur6tGASIIj5vfNaWmQGlArt2rUhWHKBJgsLJw+S698WppQsZlGERu55Vza9qyaaVD2Zqoeg6HMIX7Zt5ztW8MCAQvtOEmC9rlp8LpI74UYdsFaSeBk0OAckvG2d/QDmdq9ZoWnPShUlAdoeMQ8bNfPU+7GFXQiuyF1KRN+UbeuukgYOsPaQa/j2Z5mK52BwTWZjbKCjYtXF5lR6Dh91+EjzeJ7BZbsZLsNUADL0GBWA=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: uptimerobot-helm-values
+      namespace: monitoring
+status: {}
