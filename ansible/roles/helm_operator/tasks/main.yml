@@ -21,7 +21,7 @@
 - name: Deploy Helm Operator
   shell: |
     helm upgrade -i helm-operator fluxcd/helm-operator \
-    --version 0.7.0 \
+    --version 1.1.0 \
     --namespace flux \
     --set 'createCRD=false' \
     --set 'git.ssh.secretName=flux-git-deploy' \
