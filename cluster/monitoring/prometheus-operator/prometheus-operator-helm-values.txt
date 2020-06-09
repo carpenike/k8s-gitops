@@ -33,7 +33,7 @@ prometheus:
               - r720-0.$DOMAIN:19999
               - n2-0.$DOMAIN:19999
               - h2-0.$DOMAIN:19999
-              - fw.$DOMAIN:19999
+              #- fw.$DOMAIN:19999
     #- job_name: 'home-assistant'
     #  scrape_interval: 60s
     #  metrics_path: '/api/prometheus'
