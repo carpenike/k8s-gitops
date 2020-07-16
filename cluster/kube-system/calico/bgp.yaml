@@ -3,8 +3,6 @@ kind: BGPConfiguration
 metadata:
   name: default
 spec:
-  peerIP: 10.20.0.1
-  asNumber: 64512
   serviceClusterIPs:
   - cidr: 10.43.0.0/16
   serviceExternalIPs:
