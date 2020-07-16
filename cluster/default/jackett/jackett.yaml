@@ -14,11 +14,11 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: jackett
-    version: 2.2.1
+    version: 2.3.0
   values:
     image:
       repository: linuxserver/jackett
-      tag: v0.13.633-ls56
+      tag: v0.16.848-ls8
     deploymentAnnotations:
       stash.appscode.com/backup-blueprint: default-workload-blueprint
       stash.appscode.com/target-paths: "/config"
