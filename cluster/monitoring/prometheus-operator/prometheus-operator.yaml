@@ -15,12 +15,12 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: prometheus-operator
-    version: 8.9.2
+    version: 8.12.13
   values:
     server:
       resources:
         requests:
-          memory: 1000Mi
+          memory: 1500Mi
           cpu: 25m
         limits:
           memory: 2000Mi
@@ -35,6 +35,9 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
+        tolerations:
+        - key: "arm"
+          operator: "Exists"
       ingress:
         enabled: true
         annotations:
@@ -66,6 +69,7 @@ spec:
           - ReadWriteOnce
       env:
         GF_EXPLORE_ENABLED: true
+        GF_DISABLE_SANITIZE_HTML: true
       ingress:
         enabled: true
         annotations:
@@ -74,6 +78,7 @@ spec:
         - natel-discrete-panel
         - pr0ps-trackmap-panel
         - grafana-piechart-panel
+        - https://github.com/panodata/grafana-map-panel/releases/download/0.9.0/grafana-map-panel-0.9.0.zip;grafana-worldmap-panel-ng
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
@@ -140,16 +145,6 @@ spec:
           access: proxy
           url: http://influxdb:8086
           database: telegraf
-        - name: cable_modem_stats
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: cable_modem_stats
-        - name: comcast
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: comcast
         - name: home_assistant
           type: influxdb
           access: proxy
@@ -185,10 +180,10 @@ spec:
       enabled: false
     prometheus-node-exporter:
       tolerations:
-        - key: "node-role.kubernetes.io/arm"
-          operator: "Exists"
-        - key: "node-role.kubernetes.io/master"
-          operator: "Exists"
+      - key: "arm"
+        operator: "Exists"
+      - key: "armhf"
+        operator: "Exists"
     prometheus:
       ingress:
         enabled: true
