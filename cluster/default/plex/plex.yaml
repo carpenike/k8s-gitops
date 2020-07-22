@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: plexinc/pms-docker
-      tag: 1.19.4.2935-79e214ead
+      tag: 1.19.5.3112-b23ab3896
     deploymentAnnotations:
       stash.appscode.com/backup-blueprint: default-workload-blueprint
       stash.appscode.com/target-paths: "/config"
