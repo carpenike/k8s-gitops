@@ -1,5 +1,10 @@
 ---
-- name: Zap Drives to Prep for Ceph
-  become: true
-  shell: "sgdisk -z {{ item }}"
-  loop: "{{ ceph.disks }}"
+- name: create longhorn lvm directory
+  file:
+    path: /var/lib/longhorn
+    state: directory
+  when: "'longhorn' in group_names"
+
+- name: Include lvm
+  include_role:
+    name: mrlesmithjr.manage-lvm
