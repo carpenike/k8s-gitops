@@ -113,14 +113,14 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
 
 # Restic Password for Stash - default namespace
-kubectl create secret generic restic-backup-credentials  \
- --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
- --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
- --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
- --namespace default --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
+# kubectl create secret generic restic-backup-credentials  \
+#  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
+#  --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
+#  --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
+#  --namespace default --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
 
 # Keycloak Realm - kube-system namespace
 kubectl create secret generic keycloak-realm  \
