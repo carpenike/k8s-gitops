@@ -14,6 +14,7 @@ k3s_copy_config_local: true
 k3s_control_node_address: "k8s.holthome.net"
 k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
 k3s_default_local_storage_path: "/dev/shm/k8s"
+k3s_become_for_all: true
 
 # ansible options
 ansible_user: "ryan"
@@ -37,6 +38,10 @@ ceph:
     - /dev/sdc
     - /dev/sdd
 
+# Longhorn options
+storage:
+  longhorn: true
+
 # helm options
 helm_operator: enabled
 
@@ -46,7 +51,7 @@ REPO_ROOT: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
 
 # calico options
 calico:
-  manifest_file: "{{ REPO_ROOT }}/manifests/calico/calico.yaml"
+  operator_manifest_file: "https://docs.projectcalico.org/manifests/tigera-operator.yaml"
   bgp: enabled
   bgp_peer: 10.20.0.1
   bgp_as: 64512
