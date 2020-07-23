@@ -27,7 +27,7 @@ spec:
         kubernetes.io/tls-acme: "true"
     persistence:
       enabled: true
-      storageClass: "rook-ceph-block"
+      storageClass: longhorn
       accessMode: ReadWriteOnce
       size: 5Gi
     podAnnotations:
