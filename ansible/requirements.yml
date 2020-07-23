@@ -1,3 +1,6 @@
 ---
 - src: xanmanning.k3s
   version: v1.8.1
+
+- src: mrlesmithjr.manage-lvm
+  version: v0.2.0
