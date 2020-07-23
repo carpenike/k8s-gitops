@@ -1,10 +1,10 @@
 ---
-- name: Deploy Calico Config
+- name: Deploy Calico Operator
   delegate_to: localhost
   command: "{{ item }}"
   become: no
   with_items:
-    - kubectl apply -f {{ calico.manifest_file }}
+    - kubectl apply -f {{ calico.operator_manifest_file }}
   register: calico_result
   environment:
     KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
@@ -14,6 +14,28 @@
   until: calico_result is succeeded
   retries: 6
   delay: 10
+
+- name: Configure Calico Settings
+  delegate_to: localhost
+  shell: |
+    cat << EOF | kubectl apply -f -
+      apiVersion: operator.tigera.io/v1
+      kind: Installation
+      metadata:
+        name: default
+      spec:
+        # Configures Calico networking.
+        calicoNetwork:
+          # Note: The ipPools section cannot be modified post-install.
+          ipPools:
+          - blockSize: 26
+            cidr: 10.43.0.0/16
+            encapsulation: VXLANCrossSubnet
+            natOutgoing: Enabled
+            nodeSelector: all()
+  environment:
+    CALICO_DATASTORE_TYPE: kubernetes
+    CALICO_KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
 
 - name: Configure BGP Settings for Calico
   delegate_to: localhost
