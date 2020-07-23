@@ -1,13 +1,41 @@
 ---
+- name: Extend the logical volume to consume all remaining space in the volume group
+  lvol:
+    vg: ubuntu-vg
+    lv: ubuntu-lv
+    size: +100%FREE
+    resizefs: true
+  ignore_errors: yes
+
+- name: Add the inventory into /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{item}}"
+    state: present
+  when: hostvars[item]['ansible_facts']['default_ipv4'] is defined
+  with_items:
+    - "{{ groups['all'] }}"
+
+- name: Add k8s.holthome.net into /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: 'k8s.holthome.net$'
+    line: "10.20.10.16 k8s.holthome.net"
+    state: present
+  when: hostvars[item]['ansible_facts']['default_ipv4'] is defined
+  with_items:
+    - "{{ groups['all'] }}"
+
 - name: Set timezone
   command: "timedatectl set-timezone {{ timezone | default('America/New_York') }}"
   become: true
 
-- name: Add the rbd module
-  modprobe:
-    name: rbd
-    state: present
-  when: ansible_architecture == "x86_64"
+# - name: Add the rbd module
+#   modprobe:
+#     name: rbd
+#     state: present
+#   when: ansible_architecture == "x86_64"
 
 - name: Copy unattended-upgrades configuration files in place
   copy:
@@ -66,6 +94,7 @@
     - nethogs
     - iperf3
     - nfs-common
+    - open-iscsi
     - neofetch
   register: apt_install_common
   retries: 5
