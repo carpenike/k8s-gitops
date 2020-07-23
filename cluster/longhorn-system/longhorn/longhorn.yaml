@@ -1,0 +1,22 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: longhorn
+  helmVersion: v3
+  chart:
+    git: git@github.com:longhorn/longhorn
+    ref: master
+    path: chart
+  values:
+    persistence:
+      defaultClassReplicaCount: 3
+    defaultSettings:
+      defaultReplicaCount: 3
+      create-default-disk-labeled-nodes: true
