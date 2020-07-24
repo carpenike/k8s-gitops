@@ -30,6 +30,8 @@ spec:
         enabled: true
     serviceTypeFilter:
       - LoadBalancer
+    sources:
+      - ingress
     resources:
       requests:
         memory: 350Mi
