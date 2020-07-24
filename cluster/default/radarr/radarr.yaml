@@ -35,14 +35,9 @@ spec:
         storageClass: longhorn
         size: 5Gi
       media:
-        enabled: false
-      movies:
-        enabled: false
-      extraExistingClaimMounts:
-        - name: media
-          existingClaim: nfs-tank-share-pvc
-          mountPath: /media
-          readOnly: false
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        skipuninstall: true
     resources:
       requests:
         memory: 350Mi
