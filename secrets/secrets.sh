@@ -90,6 +90,7 @@ kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-h
 kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/longhorn-system/longhorn/longhorn-backup-secret.txt"
 
 #
 # Generic Secrets
