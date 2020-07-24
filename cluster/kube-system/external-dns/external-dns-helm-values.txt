@@ -1,5 +1,5 @@
 pdns:
-  apiUrl: https://pdns.$DOMAIN
+  apiUrl: http://powerdns-pdns-tcp
   secretName: powerdns-api-key
 domainFilters:
   - $DOMAIN

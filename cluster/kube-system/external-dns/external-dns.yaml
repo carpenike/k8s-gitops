@@ -13,14 +13,14 @@ spec:
   chart:
     repository: https://charts.bitnami.com/bitnami
     name: external-dns
-    version: 3.0.2
+    version: 3.2.4
   values:
     image:
       repository: bitnami/external-dns
-      tag: 0.7.1
+      tag: 0.7.2
     provider: pdns
     pdns:
-      apiPort: 443
+      apiPort: 8081
     createSecret: true
     crd:
       create: true
