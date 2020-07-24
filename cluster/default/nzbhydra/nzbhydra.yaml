@@ -17,8 +17,8 @@ spec:
     version: 2.3.0
   values:
     image:
-      repository: linuxserver/hydra2
-      tag: v2.19.6-ls69
+      repository: linuxserver/nzbhydra2
+      tag: v2.25.0-ls13
     service:
       type: ClusterIP
     ingress:
