@@ -15,7 +15,7 @@ spec:
     git: https://github.com/cdwv/bitwarden-k8s
     ref: master
     path: .
-    version: 0.1.2
+    version: 0.1.5
   values:
     image:
       repository: bitwardenrs/server

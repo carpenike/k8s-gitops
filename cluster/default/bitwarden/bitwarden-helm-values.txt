@@ -6,7 +6,7 @@ ingress:
     - bitwarden.$DOMAIN
 env:
   SERVER_ADMIN_EMAIL: $EMAIL
-  DOMAIN: bitwarden.$DOMAIN
+  DOMAIN: https://bitwarden.$DOMAIN
   SMTP_HOST: smtp.$DOMAIN
   SMTP_FROM: bitwarden@$DOMAIN
   ADMIN_TOKEN: $BITWARDEN_ADMIN_TOKEN
