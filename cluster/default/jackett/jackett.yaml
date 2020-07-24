@@ -33,7 +33,7 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: "rook-ceph-block"
+        storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 200Mi
     resources:

@@ -33,7 +33,7 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: rook-ceph-block
+        storageClass: longhorn
     uid: 1000
     gid: 1000
   valueFileSecrets:
