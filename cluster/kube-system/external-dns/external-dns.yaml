@@ -28,6 +28,8 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
+    sources:
+      - ingress
     resources:
       requests:
         memory: 350Mi
