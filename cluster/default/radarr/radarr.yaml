@@ -34,7 +34,7 @@ spec:
         enabled: true
         storageClass: longhorn
         size: 5Gi
-      downloads:
+      media:
         enabled: false
       movies:
         enabled: false

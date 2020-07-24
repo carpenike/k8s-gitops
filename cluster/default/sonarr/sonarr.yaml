@@ -30,7 +30,7 @@ spec:
         enabled: true
         storageClass: longhorn
         size: 10Gi
-      downloads:
+      media:
         enabled: false
       tv:
         enabled: false
