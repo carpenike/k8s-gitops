@@ -16,8 +16,8 @@ spec:
     version: 5.0.32
   values:
     image:
-      repository: jessestuart/minio
-      tag: RELEASE.2020-02-07T23-28-16Z
+      repository: minio/minio
+      tag: RELEASE.2020-07-22T00-26-33Z
     persistence:
       existingClaim: "nfs-tank-share-pvc"
       subPath: "minio"
