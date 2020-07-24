@@ -20,6 +20,8 @@ spec:
     defaultSettings:
       defaultReplicaCount: 3
       createDefaultDiskLabeledNodes: true
+      backupTarget: s3://longhorn@minio/backups
+      backupTargetCredentialSecret: longhorn-backup-secret
     ingress:
       enabled: true
       host: longhorn.holthome.net
