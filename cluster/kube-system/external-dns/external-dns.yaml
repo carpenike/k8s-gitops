@@ -18,6 +18,7 @@ spec:
     image:
       repository: bitnami/external-dns
       tag: 0.7.2
+    publishHostIP: false
     provider: pdns
     pdns:
       apiPort: 8081
