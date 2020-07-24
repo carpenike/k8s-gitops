@@ -15,16 +15,12 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: qbittorrent
-    version: 3.1.1
+    version: 3.2.0
   values:
     image:
       repository: linuxserver/qbittorrent
-      tag: 14.2.0.99201912180418-6819-118af03ubuntu18.04.1-ls62
+      tag: 4.3.0202007231034-7027-2a638d1ubuntu18.04.1-ls66
     timezone: America/New_York
-    deploymentAnnotations:
-      stash.appscode.com/backup-blueprint: default-workload-blueprint
-      stash.appscode.com/target-paths: "/config"
-      stash.appscode.com/volume-mounts: "config:/config"
     puid: 1000
     pgid: 1000
     umask: "022"
@@ -42,7 +38,7 @@ spec:
       config:
         enabled: true
         size: 1Gi
-        storageClass: rook-ceph-block
+        storageClass: longhorn
       downloads:
         enabled: false
       extraMounts:
