@@ -15,7 +15,7 @@ spec:
   chart:
     repository: https://helm.influxdata.com/
     name: influxdb
-    version: 4.4.4
+    version: 4.8.1
   values:
     image:
       repository: "influxdb"
@@ -26,7 +26,7 @@ spec:
     persistence:
       enabled: true
       size: 50Gi
-      storageClass: nfs
+      storageClass: longhorn
     resources:
       requests:
         memory: 2000Mi
@@ -44,3 +44,6 @@ spec:
     config:
       opentsdb:
         enabled: true
+    tolerations:
+      - key: "arm"
+        operator: "Exists"
