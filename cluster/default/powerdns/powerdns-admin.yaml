@@ -30,6 +30,7 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        external-dns.alpha.kubernetes.io/hostname: pdns-admin.holthome.net
     db:
       type: mysql
       host: powerdns-mariadb
