@@ -20,6 +20,7 @@ spec:
       tag: 0.7.2
     publishHostIP: false
     provider: pdns
+    policy: sync
     pdns:
       apiPort: 8081
     createSecret: true
