@@ -14,24 +14,25 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: radarr
-    version: 3.0.2
+    version: 4.1.1
   values:
     image:
       repository: linuxserver/radarr
-      tag: 3.0.0.2719-ls1
-    deploymentAnnotations:
-      stash.appscode.com/backup-blueprint: default-workload-blueprint
-      stash.appscode.com/target-paths: "/config"
-      stash.appscode.com/volume-mounts: "config:/config"
+      tag: 3.0.0.3249-ls15
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
     timezone: "America/New_York"
+    exportarr:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        namespace: default
     persistence:
       config:
         enabled: true
-        storageClass: rook-ceph-block
+        storageClass: longhorn
         size: 5Gi
       downloads:
         enabled: false
