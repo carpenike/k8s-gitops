@@ -8,7 +8,7 @@ config:
   clientSecret: "$AUTH0_CLIENT_SECRET"
 extraArgs:
   provider: keycloak
-  login-url: "https://keycloak.$DOMAIN/realms/default/protocol/openid-connect/auth"
-  redeem-url: "https://keycloak.$DOMAIN/realms/default/protocol/openid-connect/token"
-  validate-url: "https://keycloak.$DOMAIN/realms/default/protocol/openid-connect/userinfo"
+  login-url: "https://keycloak.$DOMAIN/auth/realms/default/protocol/openid-connect/auth"
+  redeem-url: "https://keycloak.$DOMAIN/auth/realms/default/protocol/openid-connect/token"
+  validate-url: "https://keycloak.$DOMAIN/auth/realms/default/protocol/openid-connect/userinfo"
   keycloak-group: "users"
