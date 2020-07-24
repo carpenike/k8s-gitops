@@ -28,8 +28,8 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-    sources:
-      - ingress
+    serviceTypeFilter:
+      - LoadBalancer
     resources:
       requests:
         memory: 350Mi
