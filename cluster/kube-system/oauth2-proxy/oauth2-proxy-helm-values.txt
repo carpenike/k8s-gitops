@@ -4,8 +4,8 @@ ingress:
   - hosts:
     - auth.$DOMAIN
 config:
-  clientID: "$AUTH0_CLIENT_ID"
-  clientSecret: "$AUTH0_CLIENT_SECRET"
+  clientID: "$OAUTH2_KEYCLOAK_CLIENT_ID"
+  clientSecret: "$OAUTH2_KEYCLOAK_CLIENT_SECRET"
 extraArgs:
   provider: keycloak
   login-url: "https://keycloak.$DOMAIN/auth/realms/default/protocol/openid-connect/auth"
