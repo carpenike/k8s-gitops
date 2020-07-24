@@ -183,40 +183,40 @@ spec:
           # netdata:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/netdata.json
           #   datasource: Prometheus
-        sidecar:
-          datasources:
-            enabled: true
-            defaultDatasourceEnabled: false
-        additionalDataSources:
-        - name: Prometheus
-          type: prometheus
-          access: proxy
-          url: http://thanos-query-http:10902/
-          isDefault: true
-        - name: loki
-          type: loki
-          access: proxy
-          url: http://loki.logs.svc.cluster.local:3100
-        - name: influxdb
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: telegraf
-        - name: home_assistant
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: home_assistant
-        - name: speedtests
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: speedtests
-        - name: uptimerobot
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: uptimerobot
+      sidecar:
+        datasources:
+          enabled: true
+          defaultDatasourceEnabled: false
+      additionalDataSources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://thanos-query-http:10902/
+        isDefault: true
+      - name: loki
+        type: loki
+        access: proxy
+        url: http://loki.logs.svc.cluster.local:3100
+      - name: influxdb
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: telegraf
+      - name: home_assistant
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: home_assistant
+      - name: speedtests
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: speedtests
+      - name: uptimerobot
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: uptimerobot
       grafana.ini:
         paths:
           data: /var/lib/grafana/data
