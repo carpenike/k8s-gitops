@@ -18,7 +18,6 @@ spec:
     image:
       repository: bitnami/external-dns
       tag: 0.7.2
-    publishHostIP: false
     provider: pdns
     policy: sync
     pdns:
@@ -30,10 +29,6 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-    serviceTypeFilter:
-      - LoadBalancer
-    sources:
-      - ingress
     resources:
       requests:
         memory: 350Mi
