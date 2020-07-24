@@ -14,11 +14,11 @@ spec:
   chart:
     repository: https://charts.bitnami.com/bitnami
     name: mariadb
-    version: 7.3.14
+    version: 7.7.0
   values:
     image:
       repository: bitnami/mariadb
-      tag: 10.3.22-debian-10-r44
+      tag: 10.4.13
     # deploymentAnnotations:
     #   stash.appscode.com/backup-blueprint: default-workload-blueprint
     #   stash.appscode.com/target-paths: "/config"
@@ -38,13 +38,13 @@ spec:
     master:
       persistence:
         enabled: true
-        storageClass: rook-ceph-block
+        storageClass: longhorn
         accessMode: ReadWriteOnce
         # size: 200Mi
     slave:
       persistence:
         enabled: true
-        storageClass: rook-ceph-block
+        storageClass: longhorn
         accessMode: ReadWriteOnce
         # size: 200Mi
     metrics:
