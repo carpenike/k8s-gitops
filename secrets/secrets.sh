@@ -90,7 +90,6 @@ kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-h
 kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/longhorn-system/longhorn/longhorn-backup-secret.txt"
 
 #
 # Generic Secrets
@@ -112,6 +111,16 @@ kubectl create secret generic azuredns-config  \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
+
+# Longhorn Backup - cert-manager namespace
+kubectl create secret generic longhorn-backup-secret  \
+ --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
+ --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
+ --from-literal=AWS_ENDPOINTS=http://minio.default:9000 \
+ --namespace longhorn-system --dry-run=true -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/longhorn-system/longhorn/longhorn-backup-secret.yaml
 
 # Restic Password for Stash - default namespace
 # kubectl create secret generic restic-backup-credentials  \
