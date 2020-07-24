@@ -27,7 +27,7 @@ spec:
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
     persistence:
       enabled: false
-      storageClass: "rook-ceph-block"
+      storageClass: longhorn
       size: 10Gi
     objectstorage:
       enabled: true
@@ -38,14 +38,10 @@ spec:
       postgresqlDatabase: mayan
       postgresqlUsername: mayan
       persistence:
-        storageClass: rook-ceph-block
+        storageClass: longhorn
     redis:
       enabled: true
       global:
-        storageClass: rook-ceph-block
-    # deploymentAnnotations:
-    #   stash.appscode.com/backup-blueprint: default-workload-blueprint
-    #   stash.appscode.com/target-paths: "/dashmachine/dashmachine/user_data"
-    #   stash.appscode.com/volume-mounts: "config:/dashmachine/dashmachine/user_data"
+        storageClass: longhorn
   valueFileSecrets:
     - name: "edms-helm-values"
