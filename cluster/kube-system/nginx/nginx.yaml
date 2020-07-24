@@ -18,6 +18,8 @@ spec:
     version: 1.33.4
   values:
     controller:
+      publishService:
+        enabled: true
       # image:
       #   repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
       #   tag: "0.25.1"
