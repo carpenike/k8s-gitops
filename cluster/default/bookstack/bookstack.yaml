@@ -32,9 +32,9 @@ spec:
       enabled: false
     persistence:
       uploads:
-        storageClass: nfs
+        storageClass: longhorn
       storage:
-        storageClass: nfs
+        storageClass: longhorn
     externalDatabase:
       host: bookstack-mariadb
   valueFileSecrets:
