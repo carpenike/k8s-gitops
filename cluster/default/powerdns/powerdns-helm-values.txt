@@ -9,4 +9,4 @@ mariadb:
 powerdnsadmin:
   mysql_pass: 
   ingress:
-    hostname: pdns-admin.$DOMAIN
+    hostname: pdns-admin
