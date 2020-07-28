@@ -27,10 +27,10 @@ spec:
   claimRef:
     namespace: default
     name: nfs-tank-share-pvc
-  storageClassName: nfs-client
+  storageClassName: nfs
   nfs:
-    server: 10.20.50.100
-    path: "/"
+    server: 10.20.10.15
+    path: "/mnt/tank/share"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -39,7 +39,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: nfs-client
+  storageClassName: nfs
   resources:
     requests:
       storage: 1Mi
