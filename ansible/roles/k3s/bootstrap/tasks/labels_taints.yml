@@ -23,6 +23,12 @@
   environment:
     KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
 
+- name: Apply system-upgrade node annotations
+  command: kubectl label --overwrite node {{ item }} k3s-upgrade=true
+  loop: "{{ groups['nodes'] }}"
+  environment:
+    KUBECONFIG: "{{ REPO_ROOT }}/kubeconfig"
+
 - name: Apply Ceph Taints if not converged
   command: kubectl taint --overwrite node {{ item }} node-role.kubernetes.io/ceph=true:NoSchedule
   loop: "{{ groups['ceph'] }}"
