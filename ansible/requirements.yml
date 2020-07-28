@@ -4,3 +4,6 @@
 
 - src: mrlesmithjr.manage-lvm
   version: v0.2.0
+
+- src: geerlingguy.nfs
+  version: 1.6.0
