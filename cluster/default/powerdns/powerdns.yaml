@@ -29,7 +29,7 @@ spec:
           udp:
             enabled: true
             loadBalancerIP: 10.20.50.165
-            anntations:
+            annotations:
               metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-powerdns
       image:
         repository: pschiffe/pdns-mysql
