@@ -21,7 +21,7 @@ prometheus:
       - job_name: 'node-exporter'
         static_configs:
         - targets:
-          - 10.20.0.1:9100
+          - vyos.holthome.net:9100
       - job_name: "netdata-scrape"
         metrics_path: "/api/v1/allmetrics"
         params:
