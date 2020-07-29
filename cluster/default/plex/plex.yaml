@@ -31,13 +31,15 @@ spec:
     advertiseIp: "http://10.20.50.155:32400"
     serviceTCP:
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.155
+      externalIPs:
+      - 10.45.100.100
       externalTrafficPolicy: Local
       annotations:
         metallb.universe.tf/allow-shared-ip: plex
     serviceUDP:
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.155
+      externalIPs:
+      - 10.45.100.100
       externalTrafficPolicy: Local
       annotations:
         metallb.universe.tf/allow-shared-ip: plex
