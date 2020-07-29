@@ -81,6 +81,7 @@ kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-mariadb-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/grocy/grocy-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/samba/samba-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-mariadb-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-admin-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/node-red/node-red-helm-values.txt"
@@ -92,7 +93,7 @@ kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/samba/samba-helm-values.txt"
+
 
 #
 # Generic Secrets

@@ -2,7 +2,7 @@ apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: samba
-  namespace: kube-system
+  namespace: default
   annotations:
     fluxcd.io/automated: "false"
 spec:
@@ -30,4 +30,3 @@ spec:
       node-role.kubernetes.io/nfs: "true"
   valueFileSecrets:
     - name: "samba-helm-values"
-    
