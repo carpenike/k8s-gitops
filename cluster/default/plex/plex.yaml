@@ -21,10 +21,6 @@ spec:
     image:
       repository: plexinc/pms-docker
       tag: 1.19.5.3112-b23ab3896
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
     timezone: "America/New_York"
     allowedNetworks:
       - 10.42.0.0/16
@@ -34,6 +30,8 @@ spec:
       externalIPs:
       - 10.45.100.100
       externalTrafficPolicy: Local
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: plex.holthome.net.
     serviceUDP:
       type: NodePort
       externalIPs:
@@ -62,5 +60,3 @@ spec:
       requests:
         cpu: 35m
         memory: 1500Mi
-  valueFileSecrets:
-  - name: "plex-helm-values"
