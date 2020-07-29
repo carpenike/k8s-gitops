@@ -34,15 +34,11 @@ spec:
       externalIPs:
       - 10.45.100.100
       externalTrafficPolicy: Local
-      annotations:
-        metallb.universe.tf/allow-shared-ip: plex
     serviceUDP:
       type: NodePort
       externalIPs:
       - 10.45.100.100
       externalTrafficPolicy: Local
-      annotations:
-        metallb.universe.tf/allow-shared-ip: plex
     persistence:
       transcode:
         enabled: true
