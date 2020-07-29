@@ -30,8 +30,6 @@ spec:
       externalIPs:
       - 10.45.100.100
       externalTrafficPolicy: Local
-      annotations:
-        external-dns.alpha.kubernetes.io/hostname: plex.holthome.net.
     serviceUDP:
       type: NodePort
       externalIPs:
