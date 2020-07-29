@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: samba-helm-values
+  namespace: kube-system
+spec:
+  encryptedData:
+    values.yaml: AgCf8e7n19wSqbgNKx6bM/VYiImVJcoQpAUuAR4Ydpzky/QtsF2eALA2EGKQwN+MTDcFcXlGnh94b5auYxw0UNoyLfE6arE1yiUMmfTmiNHt9Rnc21pKrHXtk2Y/FRTo0rbK+InvPE+EJUo0DHWhH5gOhwdC8nJjg2SDJnw55m0F4mqSnDixTpuJc9ZjbGH6i8/tPRTvNvFjssME37vai/XOoCKD2zLtf6GS+Ea6SzK0bMMNwtcVaFMKZc5HJT2dAqqZZeiTs9tOypBOClNAA9ub/NNd42FFW8quk3qmZwhJOHSjn8BJk6TnSAVBdr6cs4wgWkgV5/Lq29+aJDbZRol6cOyFKWrtqhLO8+M84wxxi/Hkxj54DcQmILCe18H3mmiyYEqg1c/JghBlmCoNQkr3rNX2eeWNrVN5w6LLHewE/Pz1ytie1UxbXsBSFDQVK6VCk9aWFj+KPLWGuuh62jKnLkROAjeqAK3fJIZMsU9qbxobFgROGAAg9YJ1h3DFxxemkvgmJ1CMCr3fTxDja870EaRDzSFZBWkD92axXBLHfOnIRVkZeH6sbAg8bRzd8Fh56W3q27rNxpq9Ds+pJ8kIyBwjmWKGE7BQxRMzMZDv7GhjyapEQ9sjgzMeeswgaG7T245lHTTR0GADPdsivfzdch0F0ee3Qqrn1nQhNZgEcOXJiHpZqDPh628YtSBBeumPi9aUjKEwcO42tPflKfZWwovWdyA01SDboNfzBanx8BlOSqxQrtB9W3dkodINmmWzaRPIMxoBuJzbrkdR59BBccCjZrSqzt5v3XCdGe83WwDhXsJcLi6BfmkP+eEjUGc4i7YPbvv/DgRyV4zsOcXUEzc=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: samba-helm-values
+      namespace: kube-system
+
