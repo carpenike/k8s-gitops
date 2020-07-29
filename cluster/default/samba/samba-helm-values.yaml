@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: samba-helm-values
+  namespace: default
+spec:
+  encryptedData:
+    values.yaml: AgCcE/+IAxbV3a+gpiTkGxK49NLB9vEFjRmEjfvxt6iXq1gDTpJBeKtqnMiivBNPndJmVbsDC/6K0ULQSztx3SEYLTmf3qZIH451D8EpxIvwdnbjGIJvVZ9nfMXwVVYrrfqLjpzLuwKLNZgXvmXSL+P15WvEQkBqoeoMdVmk3milk4jX/JRTdvT/cktpm/m3567Pl0bGVxe0GVNI/VLSVg1Q2HTdIa4r+t45W0nIVyARhqoZmYYpFTA0IcEhnFP2WCYNXt+ROKbmv5NZ6mIeTLMmGtYpYFCxZLp9qOEq4NT9Lw6fhvH3T98m8C1f6UrdbFcO44LKyut0MGjqRZyWXv3NJNS85Fl1tlp2vtlP25fHpM9rhw5FDpJNT39dxdSatRzX+oGQ/9wfHVcFRmoLLSPof/xGjWvz8Aouf6SEyPFv02SFtj+q+oWA4FSKiLYbREjfqTIsFFb17XQIlHaQ6WgIXmy5a/J6p/y/S6wnXEEoHjibXpBp7spcBI3uGRg8oz7S2zG2U8ETflptRmveeKsel1XrvcMWL6zNFSAQrto+9Ch8rWLS/3TUiwmqLEpP41DoxJqeTt7l4Y6W3KX4fJoA+wu7+Pb4GSl/59ATJjz0UcdpPtBXUXiWuQtKi8LOO0bc/9oA/HD1dba/VFB4gVOXVqhtFNJPG2nux6nvui3j73T+9izBPVxzVRx1yqRu1WAxg8CvU3kYul3HmJ87cM3mocNh5eH+IyrI2VC/Yokhlk2gQllspNSAj605QF1omu3EHRrls4BjKEOkChEQUJO0PaQRUC5Z53dICbpspDg0ztS/EQ68Ty6Psri/6lPt8pE0SFW8Qe//WCt7tdtMqrZuEUg=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: samba-helm-values
+      namespace: default
+
