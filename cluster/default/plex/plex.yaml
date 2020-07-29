@@ -28,16 +28,16 @@ spec:
     timezone: "America/New_York"
     allowedNetworks:
       - 10.42.0.0/16
-    advertiseIp: "http://10.20.50.155:32400"
+    advertiseIp: "http://10.45.100.100:32400"
     serviceTCP:
-      type: LoadBalancer
+      type: NodePort
       externalIPs:
       - 10.45.100.100
       externalTrafficPolicy: Local
       annotations:
         metallb.universe.tf/allow-shared-ip: plex
     serviceUDP:
-      type: LoadBalancer
+      type: NodePort
       externalIPs:
       - 10.45.100.100
       externalTrafficPolicy: Local
