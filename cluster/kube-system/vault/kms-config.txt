@@ -1,7 +1,0 @@
-seal "azurekeyvault" {
-  tenant_id      = "$KMS_TENANT_ID"
-  client_id      = "$KMS_CLIENT_ID"
-  client_secret  = "$KMS_CLIENT_SECRET"
-  vault_name     = "$KMS_VAULT_NAME"
-  key_name       = "$KMS_KEY_NAME"
-}
