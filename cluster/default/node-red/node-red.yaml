@@ -13,14 +13,22 @@ spec:
   helmVersion: v3
   rollback:
     enable: true
+  # chart:
+  #   repository: https://billimek.com/billimek-charts/
+  #   name: node-red
+  #   version: 2.0.1
   chart:
-    repository: https://billimek.com/billimek-charts/
-    name: node-red
-    version: 2.0.1
+    git: https://github.com/carpenike/billimek-charts/
+    ref: node-red-deployment-annotations
+    path: charts/node-red
+    version: 2.0.2
   values:
     image:
       repository: nodered/node-red
       tag: 1.1.2-12-minimal
+    deploymentAnnotations:
+      authproxy.stakater.com/enabled: true
+      authproxy.stakater.com/source-service-name: node-red
     persistence:
       enabled: true
       storageClass: longhorn
