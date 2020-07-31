@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: r720-0-dns
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: r720-0.holthome.net.
+spec:
+  type: ExternalName
+  externalName: 10.20.10.15
