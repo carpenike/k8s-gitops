@@ -49,6 +49,6 @@ spec:
       - name: KEYCLOAK_USER
         value: keycloak
       - name: KEYCLOAK_PASSWORD_FILE
-        value: /secrets/keycloak-password
+        value: /secrets/keycloak-password/password
   valueFileSecrets:
     - name: "keycloak-helm-values"
