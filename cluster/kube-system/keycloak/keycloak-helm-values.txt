@@ -6,3 +6,4 @@ ingress:
   tls:
     - hosts:
       - keycloak.$DOMAIN
+        secretName: acme-crt-secret
