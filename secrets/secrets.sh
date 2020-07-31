@@ -55,7 +55,7 @@ kseal() {
 #
 
 # HASS External
-envsubst < "${REPO_ROOT}/cluster/kube-system/nginx/nginx-external/external_ha.txt" | kubectl apply -f -
+#envsubst < "${REPO_ROOT}/cluster/kube-system/nginx/nginx-external/external_ha.txt" | kubectl apply -f -
 
 #
 # Helm Secrets
