@@ -5,5 +5,5 @@ ingress:
       - /
   tls:
     - hosts:
-      - keycloak.holthome.net
+      - keycloak.$DOMAIN
       secretName: acme-crt-secret
