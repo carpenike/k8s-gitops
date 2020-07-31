@@ -3,3 +3,7 @@ ingress:
   - host: keycloak.$DOMAIN
     paths:
       - /
+  tls:
+    - hosts:
+      - keycloak.holthome.net
+      secretName: acme-crt-secret

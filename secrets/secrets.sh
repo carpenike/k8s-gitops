@@ -99,13 +99,13 @@ kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.tx
 # Generic Secrets
 #
 
-# Vault Auto Unlock - kube-system namespace
-kubectl create secret generic kms-vault \
- --from-literal=config.hcl="$(envsubst < "$REPO_ROOT"/cluster/kube-system/vault/kms-config.txt)" \
- --namespace kube-system --dry-run=true -o json \
- | \
- kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/cluster/kube-system/vault/vault-kms-config.yaml
+# # Vault Auto Unlock - kube-system namespace
+# kubectl create secret generic kms-vault \
+#  --from-literal=config.hcl="$(envsubst < "$REPO_ROOT"/cluster/kube-system/vault/kms-config.txt)" \
+#  --namespace kube-system --dry-run=true -o json \
+#  | \
+#  kubeseal --format=yaml --cert="$PUB_CERT" \
+#     > "$REPO_ROOT"/cluster/kube-system/vault/vault-kms-config.yaml
 
 
 # AzureDNS - cert-manager namespace
