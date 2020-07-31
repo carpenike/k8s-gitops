@@ -15,7 +15,7 @@ spec:
     image:
       repository: docker.io/jboss/keycloak
       tag: 11.0.0
-    replicas: 3
+    replicas: 1
     ingress:
       enabled: true
     serviceMonitor:
