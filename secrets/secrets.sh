@@ -144,6 +144,15 @@ kubectl create secret generic keycloak-realm  \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
 
+# Keycloak admin password - kube-system namespace
+kubectl create secret generic keycloak-password  \
+ --from-literal=password="$KEYCLOAK_PASSWORD" \
+ --namespace kube-system --dry-run=true -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-password.yaml
+
+
 # External-DNS PowerDNS API Key - kube-system namespace
 kubectl create secret generic powerdns-api-key  \
  --from-literal=pdns_api_key=$PDNS_API_KEY \
