@@ -31,6 +31,9 @@ spec:
       - name: keycloak-realm
         secret:
           secretName: keycloak-realm
+      - name: keycloak-password
+        secret:
+          secretName: keycloak-password
     extraVolumeMounts: |
       - name: keycloak-realm
         mountPath: "/realm/"
