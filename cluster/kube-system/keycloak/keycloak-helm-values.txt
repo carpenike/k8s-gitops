@@ -1,8 +1,8 @@
-keycloak:
-  ingress:
-    enabled: true
-    hosts:
+ingress:
+  rules:
+  - host: keycloak.$DOMAIN
+    paths:
+      - /
+  tls:
+    - hosts:
       - keycloak.$DOMAIN
-    tls:
-      - hosts:
-        - keycloak.$DOMAIN
