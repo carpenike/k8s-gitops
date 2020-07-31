@@ -30,8 +30,8 @@ spec:
       authproxy.stakater.com/enabled: true
       authproxy.stakater.com/source-service-name: node-red
       authproxy.stakater.com/listen: "0.0.0.0:3000"
-      authproxy.stakater.com/target-port: "1880"
-      authproxy.stakater.com/upstream-url: "http://127.0.0.1:1880"
+      authproxy.stakater.com/target-port: "3000"
+      authproxy.stakater.com/upstream-url: "http://node-red:1880"
       authproxy.stakater.com/resources: uri=/*
       authproxy.stakater.com/skipPattern: uri=^/api/*
     persistence:
