@@ -16,7 +16,6 @@ spec:
       repository: docker.io/jboss/keycloak
       tag: 11.0.0
     replicas: 3
-    username: keycloak
     ingress:
       enabled: true
     serviceMonitor:
