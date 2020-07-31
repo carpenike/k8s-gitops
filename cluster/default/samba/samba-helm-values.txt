@@ -2,5 +2,3 @@ samba:
   users:
   - username: ryan
     password: $SAMBA_RYAN_PASSWORD
-  - username: paperless
-    password: $SAMBA_PAPERLESS_PASSWORD
