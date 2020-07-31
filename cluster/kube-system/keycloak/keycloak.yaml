@@ -49,7 +49,7 @@ spec:
       - name: PROXY_ADDRESS_FORWARDING
         value: "true"
       - name: KEYCLOAK_USER
-        value: keycloak
+        value: ryan
       - name: KEYCLOAK_PASSWORD_FILE
         value: /secrets/keycloak-password/password
   valueFileSecrets:
