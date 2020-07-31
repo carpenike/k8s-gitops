@@ -35,10 +35,17 @@ spec:
       - name: keycloak-realm
         mountPath: "/realm/"
         readOnly: true
+      - name: keycloak-password
+        mountPath: "/secrets/keycloak-password/password"
+        readOnly: true
     extraEnv: |
       - name: KEYCLOAK_IMPORT
         value: /realm/realm.json
       - name: KEYCLOAK_STATISTICS
         value: all
+      - name: KEYCLOAK_USER
+        value: keycloak
+      - name: KEYCLOAK_PASSWORD_FILE
+        value: /secrets/keycloak-password
   valueFileSecrets:
     - name: "keycloak-helm-values"
