@@ -39,7 +39,7 @@ spec:
         mountPath: "/realm/"
         readOnly: true
       - name: keycloak-password
-        mountPath: "/secrets/keycloak-password/password"
+        mountPath: "/secrets/keycloak-password/"
         readOnly: true
     extraEnv: |
       - name: KEYCLOAK_IMPORT
