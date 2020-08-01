@@ -29,6 +29,7 @@ spec:
       - 10.45.10.11
       ws:
         enabled: true
+        nodePort: 80808
       mqtt:
         enabled: true
         nodePort: 30000
