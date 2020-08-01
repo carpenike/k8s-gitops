@@ -19,23 +19,23 @@ spec:
               serviceName: authelia
               servicePort: 9091
 ---
-kind: NetworkPolicy
-apiVersion: networking.k8s.io/v1
-metadata:
-  name: authelia
-  namespace: kube-system
-spec:
-  podSelector:
-    matchLabels:
-      app: authelia
-  ingress:
-  - ports:
-    - port: 9091
-    from:
-    - namespaceSelector:
-        matchLabels:
-          name: kube-system
----
+# kind: NetworkPolicy
+# apiVersion: networking.k8s.io/v1
+# metadata:
+#   name: authelia
+#   namespace: kube-system
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: authelia
+#   ingress:
+#   - ports:
+#     - port: 9091
+#     from:
+#     - namespaceSelector:
+#         matchLabels:
+#           name: kube-system
+# ---
 apiVersion: v1
 kind: Service
 metadata:
