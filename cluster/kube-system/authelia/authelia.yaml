@@ -1,0 +1,146 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: authelia
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/enable-global-auth: "false"
+spec:
+  tls:
+    - hosts:
+        - auth.holthome.net
+  rules:
+    - host: auth.holthome.net
+      http:
+        paths:
+          - backend:
+              serviceName: authelia
+              servicePort: 9091
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: authelia
+  namespace: kube-system
+spec:
+  podSelector:
+    matchLabels:
+      app: authelia
+  ingress:
+  - ports:
+    - port: 9091
+    from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authelia
+  namespace: kube-system
+spec:
+  selector:
+    app: authelia
+  ports:
+  - name: authelia
+    port: 9091
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authelia
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authelia
+  template:
+    metadata:
+      labels:
+        app: authelia
+    spec:
+      volumes:
+        - name: authelia-config
+          projected:
+            sources:
+              - secret:
+                  name: authelia-users
+                  items:
+                    - key: users.yaml
+                      path: users.yaml
+              - configMap:
+                  name: authelia-custom
+                  items:
+                    - key: custom.yaml
+                      path: custom.yaml
+        - name: authelia-secrets
+          secret:
+            secretName: authelia-secrets
+      containers:
+        - name: authelia
+          image: authelia/authelia:4
+          # image: alpine
+          env:
+            - name: AUTHELIA_JWT_SECRET_FILE
+              value: /secrets/jwt
+            - name: AUTHELIA_SESSION_SECRET_FILE
+              value: /secrets/session
+          ports:
+            - name: authelia
+              containerPort: 9091
+          volumeMounts:
+            - name: authelia-config
+              mountPath: /config
+              readOnly: true
+            - name: authelia-secrets
+              mountPath: /secrets
+              readOnly: true
+          # command: ["sleep"]
+          # args: ["10000000"]
+          command: ["authelia"]
+          args: ["--config", "/config/custom.yaml"]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-custom
+  namespace: kube-system
+data:
+  custom.yaml: |
+    ---
+    host: 0.0.0.0
+    port: 9091
+    access_control:
+      default_policy: deny
+      rules:
+        - domain:
+            - "*.holthome.net"
+          policy: one_factor
+    authentication_backend:
+      disable_reset_password: true
+      file:
+        path: /config/users.yaml
+        password:
+          algorithm: argon2id
+          iterations: 1
+          salt_length: 16
+          parallelism: 8
+          memory: 1024
+    storage:
+      local:
+        path: /tmp/db.sqlite3
+    session:
+      name: authelia_session
+      expiration: 1h
+      inactivity: 5m
+      remember_me_duration:  1M  # 1 month
+      domain: holthome.net
+    notifier:
+      disable_startup_check: true
+      filesystem:
+        filename: /dev/null
+---

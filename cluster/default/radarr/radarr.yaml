@@ -23,6 +23,8 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
     timezone: "America/New_York"
     exportarr:
       enabled: false

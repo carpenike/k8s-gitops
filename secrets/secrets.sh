@@ -90,9 +90,9 @@ kseal "${REPO_ROOT}/cluster/default/edms/edms-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
 
 
 #
@@ -116,7 +116,7 @@ kubectl create secret generic azuredns-config  \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
 
-# Longhorn Backup - cert-manager namespace
+# Longhorn Backup - longhorn-system namespace
 kubectl create secret generic longhorn-backup-secret  \
  --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
  --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
@@ -125,6 +125,24 @@ kubectl create secret generic longhorn-backup-secret  \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/longhorn-system/longhorn/longhorn-backup-secret.yaml
+
+# Authelia Secrets - kube-system namespace
+kubectl create secret generic authelia-secrets \
+ --from-literal=jwt=$AUTHELIA_JWT \
+ --from-literal=session=$AUTHELIA_SESSION \
+ --namespace kube-system --dry-run=true -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-secrets.yaml
+
+# Authelia Users - kube-system namespace
+kubectl create secret generic authelia-users  \
+ --from-literal=users.yaml="$(envsubst < "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.txt)" \
+ --namespace kube-system --dry-run=true -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.yaml
+
 
 # Restic Password for Stash - default namespace
 # kubectl create secret generic restic-backup-credentials  \
@@ -136,21 +154,21 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
 
-# Keycloak Realm - kube-system namespace
-kubectl create secret generic keycloak-realm  \
- --from-literal=realm.json="$(envsubst < "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.txt)" \
- --namespace kube-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
+# # Keycloak Realm - kube-system namespace
+# kubectl create secret generic keycloak-realm  \
+#  --from-literal=realm.json="$(envsubst < "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.txt)" \
+#  --namespace kube-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
 
-# Keycloak admin password - kube-system namespace
-kubectl create secret generic keycloak-password  \
- --from-literal=password="$KEYCLOAK_PASSWORD" \
- --namespace kube-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-password.yaml
+# # Keycloak admin password - kube-system namespace
+# kubectl create secret generic keycloak-password  \
+#  --from-literal=password="$KEYCLOAK_PASSWORD" \
+#  --namespace kube-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-password.yaml
 
 
 # External-DNS PowerDNS API Key - kube-system namespace

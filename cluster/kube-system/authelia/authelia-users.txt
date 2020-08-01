@@ -1,0 +1,7 @@
+users:
+  $USERNAME:
+    displayname: "$FULL_NAME"
+    password: "$AUTHELIA_RYAN_PASSWORD"
+    email: $EMAIL
+    groups:
+      - admins
