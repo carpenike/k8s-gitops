@@ -29,7 +29,7 @@ spec:
       - 10.45.10.11
       ws:
         enabled: true
-        nodePort: 38080
+        nodePort: 32080
       mqtt:
         enabled: true
         nodePort: 31883
