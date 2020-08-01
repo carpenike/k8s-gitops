@@ -29,6 +29,9 @@ spec:
       - 10.45.10.11
       ws:
         enabled: true
+      mqtt:
+        enabled: true
+        nodePort: 30000
     statefulset:
       podAnnotations:
         prometheus.io/scrape: "true"
