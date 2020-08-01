@@ -32,7 +32,7 @@ spec:
         nodePort: 80808
       mqtt:
         enabled: true
-        nodePort: 30000
+        nodePort: 18838
     statefulset:
       podAnnotations:
         prometheus.io/scrape: "true"
