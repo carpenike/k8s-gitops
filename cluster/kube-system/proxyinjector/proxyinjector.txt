@@ -13,5 +13,3 @@ cors-methods:
 - POST
 resources:
 - uri: '/*'
-scopes:
-- 'good-service'

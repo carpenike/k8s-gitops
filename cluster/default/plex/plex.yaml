@@ -39,7 +39,7 @@ spec:
       transcode:
         enabled: true
         storageClass: longhorn
-        accessMode: ReadWriteMany
+        accessMode: ReadWriteOnce
         size: 30Gi
       data:
         enabled: true
