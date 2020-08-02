@@ -12,10 +12,10 @@ spec:
   rollback:
     enable: false
   chart:
-    git: https://github.com/aescanero/helm-charts
-    ref: master
+    git: https://github.com/carpenike/billimek-charts
+    ref: powerdns-chart
     path: charts/powerdns
-    version: 0.1.7
+    version: 0.2.0
   values:
     powerdns:
       enabled: true
@@ -23,14 +23,12 @@ spec:
         dns:
           tcp:
             enabled: true
-            loadBalancerIP: 10.20.50.165
-            annotations:
-              metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-powerdns
+            externalIPs:
+            - 10.40.10.12
           udp:
             enabled: true
-            loadBalancerIP: 10.20.50.165
-            annotations:
-              metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-powerdns
+            externalIPs:
+            - 10.40.10.12
       image:
         repository: pschiffe/pdns-mysql
         tag: alpine
