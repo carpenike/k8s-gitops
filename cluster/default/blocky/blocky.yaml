@@ -17,14 +17,13 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: blocky
-    version: 3.2.0
+    version: 3.2.1
   values:
     image:
       repository: spx01/blocky
-      tag: v0.9
+      tag: v0.9.1
     replicas: 3
     timeZone: "America/New_York"
-
     # blocky configuration
     config:
       upstream:
@@ -71,24 +70,23 @@ spec:
         initialDelaySeconds: 5
         failureThreshold: 30
         periodSeconds: 10
+    service:
+      type: NodePort
+      externalIPs:
+      - 10.45.10.13
+      externalTrafficPolicy: Local
     serviceTCP:
       enabled: true
-      type: LoadBalancer
+      type: NodePort
+      externalIPs:
+      - 10.45.10.13
       externalTrafficPolicy: Local
-      loadBalancerIP: 10.20.50.160
-        # a fixed LoadBalancer IP
-      annotations:
-        metallb.universe.tf/address-pool: network-services
-        metallb.universe.tf/allow-shared-ip: blocky-svc
     serviceUDP:
       enabled: true
-      type: LoadBalancer
+      type: NodePort
+      externalIPs:
+      - 10.45.10.13
       externalTrafficPolicy: Local
-      loadBalancerIP: 10.20.50.160
-        # a fixed LoadBalancer IP
-      annotations:
-        metallb.universe.tf/address-pool: network-services
-        metallb.universe.tf/allow-shared-ip: blocky-svc
     serviceMonitor:
       enabled: true
     tolerations:
