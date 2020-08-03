@@ -15,7 +15,7 @@ spec:
     git: https://github.com/carpenike/billimek-charts
     ref: powerdns-chart
     path: charts/powerdns
-    version: 0.2.5
+    version: 0.2.6
   values:
     powerdns:
       enabled: true
