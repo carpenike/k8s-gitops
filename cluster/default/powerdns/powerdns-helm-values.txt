@@ -3,10 +3,11 @@ powerdns:
   default_soa_name: ns1.$DOMAIN
   mysql_rootpass: $PDNS_MYSQL_ROOT_PASS
   mysql_pass: $PDNS_MYSQL_PASS
+  apikey: $PDNS_API_KEY
 mariadb:
   mysql_rootpass: $PDNS_MYSQL_ROOT_PASS
   mysql_pass: $PDNS_MYSQL_PASS
 powerdnsadmin:
-  mysql_pass: 
+  mysql_pass: $PDNS_MYSQL_PASS
   ingress:
     hostname: pdns-admin
