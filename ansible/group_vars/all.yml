@@ -15,6 +15,8 @@ k3s_control_node_address: "k8s.holthome.net"
 k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
 k3s_default_local_storage_path: "/dev/shm/k8s"
 k3s_become_for_all: true
+k3s_kubelet_args: 
+  - feature-gates: ExternalPolicyForExternalIP=true
 
 # ansible options
 ansible_user: "ryan"
