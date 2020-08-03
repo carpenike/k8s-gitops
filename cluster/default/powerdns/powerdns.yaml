@@ -15,7 +15,7 @@ spec:
     git: https://github.com/carpenike/billimek-charts
     ref: powerdns-chart
     path: charts/powerdns
-    version: 0.2.4
+    version: 0.2.5
   values:
     powerdns:
       enabled: true
@@ -31,7 +31,7 @@ spec:
             - 10.45.10.12
       image:
         repository: psitrax/powerdns
-        tag: latest
+        tag: 4.1.2
       default_ttl: 300
       resources:
         requests:
