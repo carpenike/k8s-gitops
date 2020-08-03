@@ -59,7 +59,7 @@ spec:
       service:
         type: ClusterIP
       image:
-        repository: aescanero/powerdns-admin
+        repository: ngoduykhanh/powerdns-admin
         tag: latest
       resources:
         requests:
