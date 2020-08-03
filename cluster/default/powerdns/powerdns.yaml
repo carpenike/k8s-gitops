@@ -24,11 +24,11 @@ spec:
           tcp:
             enabled: true
             externalIPs:
-            - 10.40.10.12
+            - 10.45.10.12
           udp:
             enabled: true
             externalIPs:
-            - 10.40.10.12
+            - 10.45.10.12
       image:
         repository: pschiffe/pdns-mysql
         tag: alpine
