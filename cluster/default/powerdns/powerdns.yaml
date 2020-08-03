@@ -30,8 +30,8 @@ spec:
             externalIPs:
             - 10.45.10.12
       image:
-        repository: pschiffe/pdns-mysql
-        tag: alpine
+        repository: psitrax/powerdns
+        tag: latest
       default_ttl: 300
       resources:
         requests:
