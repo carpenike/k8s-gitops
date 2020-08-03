@@ -5,8 +5,8 @@ alertmanager:
     - hosts:
       - prom-alert.$DOMAIN
     annotations:
-      nginx.ingress.kubernetes.io/auth-url: https://auth.$DOMAIN/api/verify
-      nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/?rd=https://$host$escaped_request_uri"
+      #nginx.ingress.kubernetes.io/auth-url: https://auth.$DOMAIN/api/verify
+      #nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/?rd=https://$host$escaped_request_uri"
 prometheus:
   ingress:
     hosts: [prom-server.$DOMAIN]
@@ -14,8 +14,8 @@ prometheus:
     - hosts:
       - prom-server.$DOMAIN
     annotations:
-      nginx.ingress.kubernetes.io/auth-url: https://auth.$DOMAIN/api/verify
-      nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/?rd=https://$host$escaped_request_uri"
+      #nginx.ingress.kubernetes.io/auth-url: https://auth.$DOMAIN/api/verify
+      #nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/?rd=https://$host$escaped_request_uri"
   prometheusSpec:
     additionalScrapeConfigs:
       - job_name: 'node-exporter'
