@@ -15,60 +15,60 @@ spec:
     git: https://github.com/carpenike/billimek-charts
     ref: powerdns-chart
     path: charts/powerdns
-    version: 0.2.6
+    version: 0.2.0
   values:
     powerdns:
-      enabled: true
-      service:
-        dns:
-          tcp:
-            enabled: true
-            externalIPs:
-            - 10.45.10.12
-          udp:
-            enabled: true
-            externalIPs:
-            - 10.45.10.12
       image:
         repository: psitrax/powerdns
         tag: v4.3.0
-      default_ttl: 300
+      mysql:
+        host: powerdns-mariadb
       # resources:
       #   requests:
       #     memory: 350Mi
       #     cpu: 25m
       #   limits:
       #     memory: 1000Mi
+    service:
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+      ExternalIPs:
+      - 10.45.10.12
     mariadb:
       enabled: true
       image:
         repository: mariadb
         tag: 10.5.4
-      persistence:
-        enabled: true
-        storageClass: longhorn
-        size: 10Gi
+      db:
+        user: pdns
+      replication:
+        enabled: false
+      master:
+        persistence:
+          enabled: true
+          storageClass: longhorn
+          size: 10Gi
       # resources:
       #   requests:
       #     memory: 350Mi
       #     cpu: 25m
       #   limits:
       #     memory: 1000Mi
-    powerdnsadmin:
-      enabled: true
-      service:
-        type: ClusterIP
-      image:
-        repository: ngoduykhanh/powerdns-admin
-        tag: latest
+    # powerdnsadmin:
+    #   enabled: true
+    #   service:
+    #     type: ClusterIP
+    #   image:
+    #     repository: ngoduykhanh/powerdns-admin
+    #     tag: latest
       # resources:
       #   requests:
       #     memory: 350Mi
       #     cpu: 25m
       #   limits:
       #     memory: 1000Mi
-      ingress:
-        enabled: true
-        class: nginx
+      # ingress:
+      #   enabled: true
+      #   class: nginx
   valueFileSecrets:
   - name: "powerdns-helm-values"
