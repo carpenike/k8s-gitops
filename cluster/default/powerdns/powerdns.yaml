@@ -31,9 +31,9 @@ spec:
       #   limits:
       #     memory: 1000Mi
     service:
-      type: LoadBalancer
+      type: Node
       externalTrafficPolicy: Local
-      ExternalIPs:
+      externalIPs:
       - 10.45.10.12
     mariadb:
       enabled: true
