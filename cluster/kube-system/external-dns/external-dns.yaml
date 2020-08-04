@@ -21,7 +21,7 @@ spec:
     provider: pdns
     policy: sync
     pdns:
-      apiUrl: http://powerdns-service-api.default.svc.cluster.local
+      apiUrl: http://powerdns-webserver.default.svc.cluster.local
       secretName: powerdns-api-key
       apiPort: 8081
     domainFilters:
