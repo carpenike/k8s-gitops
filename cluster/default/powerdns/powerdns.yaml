@@ -33,12 +33,12 @@ spec:
         repository: psitrax/powerdns
         tag: v4.3.0
       default_ttl: 300
-      resources:
-        requests:
-          memory: 350Mi
-          cpu: 25m
-        limits:
-          memory: 1000Mi
+      # resources:
+      #   requests:
+      #     memory: 350Mi
+      #     cpu: 25m
+      #   limits:
+      #     memory: 1000Mi
     mariadb:
       enabled: true
       image:
@@ -48,12 +48,12 @@ spec:
         enabled: true
         storageClass: longhorn
         size: 10Gi
-      resources:
-        requests:
-          memory: 350Mi
-          cpu: 25m
-        limits:
-          memory: 1000Mi
+      # resources:
+      #   requests:
+      #     memory: 350Mi
+      #     cpu: 25m
+      #   limits:
+      #     memory: 1000Mi
     powerdnsadmin:
       enabled: true
       service:
@@ -61,12 +61,12 @@ spec:
       image:
         repository: ngoduykhanh/powerdns-admin
         tag: latest
-      resources:
-        requests:
-          memory: 350Mi
-          cpu: 25m
-        limits:
-          memory: 1000Mi
+      # resources:
+      #   requests:
+      #     memory: 350Mi
+      #     cpu: 25m
+      #   limits:
+      #     memory: 1000Mi
       ingress:
         enabled: true
         class: nginx
