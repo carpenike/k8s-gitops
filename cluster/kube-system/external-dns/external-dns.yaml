@@ -21,7 +21,11 @@ spec:
     provider: pdns
     policy: sync
     pdns:
+      apiUrl: http://powerdns-service-api.default.svc.cluster.local:8081
+      secretName: powerdns-api-key
       apiPort: 8081
+    domainFilters:
+      - holthome.net
     createSecret: true
     crd:
       create: true
@@ -35,5 +39,3 @@ spec:
         cpu: 25m
       limits:
         memory: 500Mi
-  valueFileSecrets:
-    - name: "external-dns-helm-values"
