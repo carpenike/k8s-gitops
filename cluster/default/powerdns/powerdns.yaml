@@ -31,7 +31,7 @@ spec:
       #   limits:
       #     memory: 1000Mi
     service:
-      type: Node
+      type: NodePort
       externalTrafficPolicy: Local
       externalIPs:
       - 10.45.10.12
