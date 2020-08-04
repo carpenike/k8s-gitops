@@ -1,5 +1,5 @@
 pdns:
-  apiUrl: http://powerdns-service-api.default.svc.cluster.local
+  apiUrl: http://powerdns-service-api.default.svc.cluster.local:8081
   secretName: powerdns-api-key
 domainFilters:
   - $DOMAIN
