@@ -37,7 +37,7 @@ spec:
     mariadb:
       enabled: true
       image:
-        repository: mariadb
+        repository: bitnami/mariadb
         tag: 10.5.4
       db:
         user: pdns
