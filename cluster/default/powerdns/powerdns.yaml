@@ -15,7 +15,7 @@ spec:
     git: https://github.com/carpenike/billimek-charts
     ref: powerdns-chart
     path: charts/powerdns
-    version: 0.2.1
+    version: 0.2.2
   values:
     powerdns:
       domain: holthome.net
@@ -47,7 +47,7 @@ spec:
         enabled: false
       master:
         persistence:
-          enabled: true
+          enabled: false
           storageClass: longhorn
           size: 10Gi
       # resources:
