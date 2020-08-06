@@ -1,8 +1,8 @@
 config:
   conditional:
     mapping:
-      $DOMAIN: udp:10.20.50.165
-      local: udp:10.20.50.165
+      $DOMAIN: udp:10.45.10.12
+      local: udp:10.45.10.12
   customDNS:
       mapping:
-        fw.$DOMAIN: 10.20.0.1
+        vyos.$DOMAIN: 10.20.0.1
