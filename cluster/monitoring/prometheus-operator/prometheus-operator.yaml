@@ -167,7 +167,10 @@ spec:
             datasource: Prometheus
           1-node-exporter:
             url: https://grafana.com/api/dashboards/11074/revisions/4/download
-            datasource: Prometheus 
+            datasource: Prometheus
+          zfs:
+            url: https://grafana.com/api/dashboards/11337/revisions/1/download
+            datasource: Prometheus
           # cable-modem-stats:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/cable_modem_stats.json
           #   datasource: influxdb
