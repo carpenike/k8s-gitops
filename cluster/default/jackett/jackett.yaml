@@ -18,7 +18,7 @@ spec:
   values:
     image:
       repository: linuxserver/jackett
-      tag: v0.16.896-ls10
+      tag: v0.16.962-ls13
     timezone: "America/New_York"
     puid: 1000
     pgid: 1000
