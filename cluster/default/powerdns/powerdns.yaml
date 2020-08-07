@@ -17,7 +17,6 @@ spec:
     version: 1.0.0
   values:
     powerdns:
-      domain: holthome.net
       image:
         repository: psitrax/powerdns
         tag: v4.3.0
