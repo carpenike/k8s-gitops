@@ -1,10 +1,10 @@
 powerdns:
   domain: $DOMAIN
   config:
-  - default-soa-mail: $EMAIL
-  - default-soa-name: ns1.$DOMAIN
-  - default-ttl: 300
-  - master: yes
+    default-soa-mail: $EMAIL
+    default-soa-name: ns1.$DOMAIN
+    default-ttl: 300
+    master: yes
   api_key: $PDNS_API_KEY
   mysql:
     password: $PDNS_MYSQL_PASS
