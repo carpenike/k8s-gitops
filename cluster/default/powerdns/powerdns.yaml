@@ -12,18 +12,15 @@ spec:
   rollback:
     enable: false
   chart:
-    git: https://github.com/carpenike/billimek-charts
-    ref: powerdns-chart
-    path: charts/powerdns
-    version: 0.3.0
+    repository: https://billimek.com/billimek-charts/
+    name: powerdns
+    version: 1.0.0
   values:
     powerdns:
       domain: holthome.net
       image:
         repository: psitrax/powerdns
         tag: v4.3.0
-      mysql:
-        host: powerdns-mariadb
       # resources:
       #   requests:
       #     memory: 350Mi
