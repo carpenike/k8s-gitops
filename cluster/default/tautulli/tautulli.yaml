@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: linuxserver/tautulli
-      tag: v2.5.3-ls10
+      tag: v2.5.4-ls11
     ingress:
       enabled: true
       annotations:
