@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: botkube-helm-values
+  namespace: monitoring
+spec:
+  encryptedData:
+    values.yaml: AgAS1Jvo/lTG+/7rdLNJHJuytU4SzVcRUbUJfRSZPgDA1YlAbvQY7DCcS2r9xr/Q2QJxrwgjGM+DKXmW11GJBZx85uZCJTZSOTiCfUD8Hio59626ueQd7S1Ork53EF/bjzwsE8gYksjCC14u351I+NiCQFuocZLP5Qh9JV9RMa8iGM02aPYuD+Sk4OmDJ2qRwVjgdvsHdTjr0QucnWUSr/z8u4UFNhSakgMayy9TGc7Q+p7wC5GwrJPFePnJi5e4O/sLZvuyWqYyZZGYeLUZbaXGmCNtU76r7fPMk94B/wjQgbqYZDKMaGk9uz0U2yboOKZWTL0UCKJBAfAK271/1llUYz0RR8lg2DpNnAeTZEq/uZyWt7ciOpE5USvD6zQlwnGmsvi3QcKKSfnQLjsHD/DjYAxjH4eWGPu5+kq3Oga8hJqIf4uSv9I1YiEktflz99DFuDc/7jPI0tMUk7NWOn/NMu7HE+7hvj+QaUKoYDF9Mt3mfUhsVjVOrtYBB6uGT1TRaVnxddHErIe/VFh+Ccsh+x6+ksdvSDiAlcGDvhe/emggm2LLczm9eMqs+ZmABQ3MoVvf6UnTg5aONxgZQUp+uZLqwTJm5GqhtNkGRUdPUAUc4W50auOxZwrgfXSjNEEpclU0mzf76kiqentIhS1hU/0hr2SlYEZLsSVczwTVtqpZxs+n+QZXPtzcpVlYC70I6f/1X/UecBUgDbF2p4JPZUpBJ3mszWash1sUAJprzFf7q/PYUrv2wTt3jnk3IOg99DIcZTQynZpIXtnWJxXhpoVPJhQJY7VcUQf6jAzJTIF8tLQzTeSf/9QQZIxCL3YBVKtpwFVLeTDCGBEGe/zLwVVPkl7DeOOCzoQUOOpxoLkkvM9IMUaikIf/Ma2pJ8ZMAsRbFwu/NzRZD41toAnuDJ6MoVsKesNRzIxCdMrucWfDN1X+befuRd3a1M2VKF53IbTBqT2fEob9m80=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: botkube-helm-values
+      namespace: monitoring
+
