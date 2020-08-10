@@ -6,15 +6,6 @@ ingress:
     - ha.$DOMAIN
 # extraEnv:
 #   CAMERA_AUTH: $CAMERA_AUTH
-configurator:
-  ingress:
-    hosts: 
-    - ha-config.$DOMAIN
-    tls:
-    - hosts:
-      - ha-config.$DOMAIN
-  hassApiPassword: $HASS_API_PASSWORD
-  hassApiUrl: https://ha.$DOMAIN/api/
 vscode:
   ingress:
     hosts: 

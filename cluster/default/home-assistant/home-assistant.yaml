@@ -21,6 +21,8 @@ spec:
     image:
       repository: homeassistant/home-assistant
       tag: 0.113.3
+    extraEnv:
+      TZ: "America/New_York"
     persistence:
       enabled: true
       size: 10Gi
@@ -30,9 +32,9 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "nginx"
     service:
-      type: ClusterIP
-    #   externalIPs:
-    #   - 10.45.10.14
+      type: LoadBalancer
+      externalIPs:
+      - 10.45.10.14
     hostNetwork: false
     tolerations:
     - key: "arm"
