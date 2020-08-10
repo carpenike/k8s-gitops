@@ -28,6 +28,21 @@ spec:
     config:
       settings:
         clustername: k8s
+        kubectl:
+          enabled: true
+          commands:
+            restrictAccess: true
+            verbs:
+              - get
+              - top
+            resources:
+              - deployments
+              - pods
+              - namespaces
+              - daemonsets
+              - statefulsets
+              - storageclasses
+              - nodes
       resources:
         - name: pod                # Name of the resources e.g pod, deployment, ingress, etc. (Resource name must be in singular form)
           namespaces:
