@@ -30,9 +30,9 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "nginx"
     service:
-      type: LoadBalancer
-      externalIPs:
-      - 10.45.10.14
+      type: ClusterIP
+    #   externalIPs:
+    #   - 10.45.10.14
     hostNetwork: false
     tolerations:
     - key: "arm"
