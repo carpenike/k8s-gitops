@@ -1,0 +1,28 @@
+ingress:
+  hosts: 
+  - ha.$DOMAIN
+  tls:
+  - hosts:
+    - ha.$DOMAIN
+# extraEnv:
+#   CAMERA_AUTH: $CAMERA_AUTH
+configurator:
+  ingress:
+    hosts: 
+    - ha-config.$DOMAIN
+    tls:
+    - hosts:
+      - ha-config.$DOMAIN
+  hassApiPassword: $HASS_API_PASSWORD
+  hassApiUrl: https://ha.$DOMAIN/api/
+vscode:
+  ingress:
+    hosts: 
+    - ha-vscode.$DOMAIN
+    tls:
+    - hosts:
+      - ha-vscode.$DOMAIN
+  password: $HASS_API_PASSWORD
+  extraEnv:
+    HASS_SERVER: http://localhost:8123
+    HASS_TOKEN: $HASS_TOKEN

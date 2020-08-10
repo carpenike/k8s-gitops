@@ -1,0 +1,65 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: home-assistant
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~0.
+    filter.fluxcd.io/vscode: "regex:^3.[0-9]+-.*$"
+spec:
+  releaseName: home-assistant
+  rollback:
+    enable: true
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: home-assistant
+    version: 1.0.1
+  values:
+    image:
+      repository: homeassistant/home-assistant
+      tag: 0.113.3
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "longhorn"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    service:
+      type: LoadBalancer
+      externalIPs:
+      - 10.45.10.14
+    hostNetwork: false
+    tolerations:
+    - key: "arm"
+      operator: "Exists"
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+    vscode:
+      enabled: true
+      image:
+        repository: codercom/code-server
+        tag: 3.4.1
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
+    resources:
+      limits:
+        memory: 2500Mi
+      requests:
+        cpu: 35m
+        memory: 2000Mi
+    monitoring:
+      enabled: false
+  valueFileSecrets:
+  - name: "home-assistant-helm-values"
