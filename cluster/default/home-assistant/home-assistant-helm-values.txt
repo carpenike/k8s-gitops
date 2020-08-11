@@ -13,7 +13,6 @@ vscode:
     tls:
     - hosts:
       - ha-vscode.$DOMAIN
-  password: $HASS_API_PASSWORD
   extraEnv:
     HASS_SERVER: http://localhost:8123
     HASS_TOKEN: $HASS_TOKEN
