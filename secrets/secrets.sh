@@ -92,6 +92,7 @@ kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-h
 kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/botkube/botkube-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/logs/loki/loki-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"

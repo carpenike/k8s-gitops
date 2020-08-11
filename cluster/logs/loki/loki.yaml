@@ -5,52 +5,112 @@ metadata:
   name: loki
   namespace: logs
   annotations:
-    fluxcd.io/ignore: false
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.loki: semver:~v1.3
-    fluxcd.io/tag.promtail: semver:~v1.3
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.loki: semver:~v1.
+    fluxcd.io/tag.promtail: semver:~v1.
 spec:
   releaseName: loki
   chart:
     repository: https://grafana.github.io/loki/charts
     name: loki-stack
-    version: 0.32.1
+    version: 0.38.3
   values:
     loki:
-      image:
-        repository: grafana/loki
-        tag: v1.3.0
+      # image:
+      #   repository: grafana/loki
+      #   tag: 1.5.0
+      replicas: 3
       persistence:
-        enabled: true
-        size: 50Gi
-        storageClassName: nfs
+        enabled: false
+      config:
+        auth_enabled: false
+        server:
+          http_listen_port: 3100
+        distributor:
+          ring:
+            kvstore:
+              store: memberlist
+        ingester:
+          lifecycler:
+            ring:
+              kvstore:
+                store: memberlist
+              replication_factor: 1
+            final_sleep: 0s
+          chunk_idle_period: 5m
+          chunk_retain_period: 30s
+        memberlist:
+          abort_if_cluster_join_fails: false
+          # Expose this port on all distributor, ingester
+          # and querier replicas.
+          bind_port: 7946
+          # You can use a headless k8s service for all distributor,
+          # ingester and querier components.
+          join_members:
+          - loki-headless.logs.svc.cluster.local:7946
+          # max_join_backoff: 1m
+          # max_join_retries: 10
+          # min_join_backoff: 1s
+        schema_config:
+          configs:
+          - from: 2020-05-15
+            store: boltdb-shipper
+            object_store: s3
+            schema: v11
+            index:
+              prefix: index_
+              period: 168h
+        storage_config:
+          boltdb_shipper:
+            active_index_directory: /data/loki/index
+            cache_location: /data/loki/index_cache
+            resync_interval: 5s
+            shared_store: s3
+        limits_config:
+          enforce_metric_name: false
+          reject_old_samples: true
+          reject_old_samples_max_age: 168h
+      extraPorts:
+      - port: 7956
+        protocol: TCP
+        name: loki-gossip-ring
+        targetPort: 7946
       serviceMonitor:
         enabled: true
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "http-metrics"
+        # backup.velero.io/backup-volumes: storage
       tolerations:
       - key: "arm"
         operator: "Exists"
     promtail:
-      image:
-        repository: grafana/promtail
-        tag: v1.3.0
+      # image:
+      #   repository: grafana/promtail
+      #   tag: 1.5.0
       serviceMonitor:
         enabled: true
       tolerations:
       - key: "arm"
-        operator: "Exists"
-      - key: "armhf"
         operator: "Exists"
       extraScrapeConfigs:
       - job_name: syslog
         syslog:
           listen_address: 0.0.0.0:1514
+          label_structured_data: yes
           labels:
             job: "syslog"
         relabel_configs:
         - source_labels: ['__syslog_message_hostname']
           target_label: 'host'
+        - source_labels: ['__syslog_message_app_name']
+          target_label: 'app'
       syslogService:
         enabled: true
         type: LoadBalancer
         port: 1514
-        loadBalancerIP: 10.20.50.159
+        loadBalancerIP: 10.45.10.15
+  valuesFrom:
+  - secretKeyRef:
+      name: loki-helm-values

@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: loki-helm-values
+  namespace: logs
+spec:
+  encryptedData:
+    values.yaml: AgAj47zCSSVUheGkphWm0GOOkG7LSiU8C7YIEaB3JC3ocCv1xzUExZ3DTIZtF7BPY2WbBbA2WT/Bsjg9S+GbwrilC/M4hB18Gf5ONP/eaOlXwHyYlWd6URARtMU9C1mdFp8WYchOPMv9iZg5HRyBwMJ4+pyQiQ+m5L+YVv66HD/t4NYH9wzqI2USUWJx8+epPM8syyeFXCNzZ7lQxDvfSJhFN/lDiggsTQdvj28HzoNBz4bfPB9MH/TNZaEX7aP6j99aciQsK7dxO/YnqVhFUJmi5tFaQ/ZwqVkc8/eh4rboj6VxNVEFrnc+xRbtPzoU3vPP8Ojh2EWhaP5AUJx7v5BTKmtegGfVoAI05Ju6JP2Sim8+AHAW0RISj6XhtrBbDpfbU7v3euh9vk4oyX9eB6qXGeOnahjsgM1s0gkfPUTsss7lAd7RMyA3OjenJ13m+UPEhNTv/13eu1QCe0105Lpf3IlqSEzpRKnvX52i/EZIdmnk0fLq38w4LNdEneGbzTrm+1m6LRJ0S2OIconMTt/m6YI2B8I/oxjCJic+VEX14hguvhKkBO5wGTHz7NYGCdz/4z0rFR+0YbL6UeeLd/wnHVD3M3fKvODGIY07p7QuylrsC+dioBEBsnvHPhHaCaWN56ErWqk8CuTHcHVw6LMrEkOlRiHE4uZ7H2r60nmRULPWM5J5iK7Hw4MK3pNxeROBafbdKQz7V0/+OePewJOlBaKgN+UxcsoU6o/cfdzHVtAlNFx1mxQPfwT9eSg6uCsj78lCVrSKLYV1b3ayTBB5ECzP0K2CKla5sOhZDB+Y07sXu0XdWO1mprIZz/YnrSUpJ5eCns7gSmULvkU+GgxlmctwZdLrVmz9YtnXfEURdUODZnJbQA==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: loki-helm-values
+      namespace: logs
+
