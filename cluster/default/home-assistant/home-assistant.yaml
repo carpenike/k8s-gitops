@@ -32,9 +32,9 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "nginx"
     service:
-      type: ClusterIP
-      # externalIPs:
-      # - 10.45.10.14
+      type: LoadBalancer
+      externalIPs:
+      - 10.45.10.14
     hostNetwork: false
     tolerations:
     - key: "arm"
@@ -45,7 +45,7 @@ spec:
       readiness:
         enabled: false
     vscode:
-      enabled: false
+      enabled: true
       image:
         repository: codercom/code-server
         tag: 3.4.1
