@@ -22,7 +22,8 @@ spec:
       tag: "1.8.1"
     service:
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.151
+      externalIPs:
+      - 10.45.10.15
     persistence:
       enabled: true
       size: 50Gi
