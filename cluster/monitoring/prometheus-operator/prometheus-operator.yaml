@@ -187,6 +187,9 @@ spec:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/netdata.json
           #   datasource: Prometheus
       sidecar:
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
         datasources:
           enabled: true
           defaultDatasourceEnabled: false
