@@ -111,7 +111,7 @@ spec:
         type: LoadBalancer
         port: 1514
         externalIPs:
-        - 10.45.10.15
+        - 10.45.10.16
   valuesFrom:
   - secretKeyRef:
       name: loki-helm-values
