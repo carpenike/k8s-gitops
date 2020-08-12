@@ -51,7 +51,7 @@ spec:
     mariadb:
       enabled: false
     postgres:
-      enabled: true
+      enabled: false
     vscode:
       enabled: true
       image:
