@@ -48,6 +48,8 @@ spec:
         enabled: false
       readiness:
         enabled: false
+    mariadb:
+      enabled: true
     vscode:
       enabled: true
       image:
