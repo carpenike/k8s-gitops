@@ -24,6 +24,7 @@ spec:
       type: LoadBalancer
       externalIPs:
       - 10.45.10.15
+      externalTrafficPolicy: Local
     persistence:
       enabled: true
       size: 50Gi
