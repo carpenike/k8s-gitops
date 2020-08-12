@@ -20,7 +20,7 @@ spec:
     git: https://github.com/carpenike/billimek-charts
     ref: home-assistant/db-dependencies
     path: charts/home-assistant
-    version: 1.2.2
+    version: 1.2.3
   values:
     image:
       repository: homeassistant/home-assistant
@@ -50,7 +50,7 @@ spec:
         enabled: false
     mariadb:
       enabled: false
-    postgres:
+    postgresql:
       enabled: true
     vscode:
       enabled: true
