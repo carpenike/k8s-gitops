@@ -21,9 +21,9 @@ spec:
       repository: "influxdb"
       tag: "1.8.1"
     service:
-      type: LoadBalancer
-      externalIPs:
-      - 10.45.10.15
+      type: ClusterIP
+      # externalIPs:
+      # - 10.45.10.15
     persistence:
       enabled: true
       size: 50Gi
