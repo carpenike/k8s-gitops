@@ -156,9 +156,6 @@ spec:
           vernemq:
             url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
             datasource: Prometheus
-          # velero:
-          #   url: https://grafana.com/api/dashboards/11055/revisions/2/download
-          #   datasource: Prometheus
           flux:
             url: https://grafana.com/api/dashboards/10475/revisions/1/download
             datasource: Prometheus
@@ -168,15 +165,12 @@ spec:
           1-node-exporter:
             url: https://grafana.com/api/dashboards/11074/revisions/4/download
             datasource: Prometheus
+          speedtest:
+            url: https://raw.githubusercontent.com/billimek/prometheus-speedtest-exporter/master/speedtest-exporter.json
+            datasource: Prometheus
           zfs:
             url: https://grafana.com/api/dashboards/11337/revisions/1/download
             datasource: Prometheus
-          # cable-modem-stats:
-          #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/cable_modem_stats.json
-          #   datasource: influxdb
-          # comcast-sucks:
-          #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/comcast_sucks.json
-          #   datasource: influxdb
           # home-assistant:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/home_assistant.json
           #   datasource: influxdb
