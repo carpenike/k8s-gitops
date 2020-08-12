@@ -49,7 +49,7 @@ spec:
       readiness:
         enabled: false
     mariadb:
-      enabled: true
+      enabled: false
     vscode:
       enabled: true
       image:
