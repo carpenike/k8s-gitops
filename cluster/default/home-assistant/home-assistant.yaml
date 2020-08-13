@@ -56,7 +56,7 @@ spec:
       enabled: true
       image:
         repository: esphome/esphome
-        tag: 0.14.5
+        tag: a9d75ca
       ingress:
         enabled: true
         annotations:
