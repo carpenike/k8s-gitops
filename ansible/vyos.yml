@@ -1,0 +1,3 @@
+- hosts: vyos
+  roles:
+    - cloudalchemy.node-exporter

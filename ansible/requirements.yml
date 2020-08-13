@@ -7,3 +7,6 @@
 
 - src: geerlingguy.nfs
   version: 1.6.0
+
+- src: cloudalchemy.node-exporter
+  version: 0.21.5
