@@ -52,6 +52,24 @@ spec:
       enabled: false
     postgresql:
       enabled: true
+    esphome:
+      enabled: true
+      image:
+        repository: esphome/esphome
+        tag: 0.14.5
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts:
+          - esphome.holthome.net
+        tls:
+          - hosts:
+            - esphome.holthome.net
+      persistence:
+        enabled: true
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
     vscode:
       enabled: true
       image:
