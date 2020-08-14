@@ -57,6 +57,7 @@ spec:
       image:
         repository: esphome/esphome
         tag: 9a57e8f
+      hostNetwork: true
       ingress:
         enabled: true
         annotations:
