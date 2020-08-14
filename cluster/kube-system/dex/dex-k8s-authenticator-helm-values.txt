@@ -1,0 +1,21 @@
+dexK8sAuthenticator:
+  clusters:
+  - name: k8s
+    short_description: "Holthome k8s cluster"
+    description: "My home k8s cluster for local media purposes"
+    client_secret: $DEX_K8S_AUTHENTICATOR_CLIENT_SECRET
+    issuer: https://dex.holthome.net
+    k8s_master_uri: https://k8s.holthome.net:6443
+    client_id: dex-k8s-authenticator
+    redirect_uri: https://login.holthome.net/callback/
+    k8s_ca_pem: |
+      -----BEGIN CERTIFICATE-----
+      MIIBVzCB/qADAgECAgEAMAoGCCqGSM49BAMCMCMxITAfBgNVBAMMGGszcy1zZXJ2
+      ZXItY2FAMTU5NTQ3NDA5NTAeFw0yMDA3MjMwMzE0NTVaFw0zMDA3MjEwMzE0NTVa
+      MCMxITAfBgNVBAMMGGszcy1zZXJ2ZXItY2FAMTU5NTQ3NDA5NTBZMBMGByqGSM49
+      AgEGCCqGSM49AwEHA0IABJJuzH/epM3NcX6o7PVY32HUdc26go3WyakSsAJktiRe
+      iOk/QJpMMdSp55RMskBhMm6jEGFqBd4LCJqc1LkLGnWjIzAhMA4GA1UdDwEB/wQE
+      AwICpDAPBgNVHRMBAf8EBTADAQH/MAoGCCqGSM49BAMCA0gAMEUCIDQKceLW7qXb
+      gOPEHkDbP2Bsl7ELRbzZZvLl0UzrPkYTAiEA6O9ATmS/IPPTwEwBzcqB9dQsY3/+
+      svM0lcArq6LiHiU=
+      -----END CERTIFICATE-----

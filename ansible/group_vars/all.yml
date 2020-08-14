@@ -17,6 +17,11 @@ k3s_default_local_storage_path: "/dev/shm/k8s"
 k3s_become_for_all: true
 k3s_kubelet_args: 
   - feature-gates: ExternalPolicyForExternalIP=true
+k3s_kube_apiserver_args:
+  - oidc-client-id: dex-k8s-authenticator
+  - oidc-groups-claim: groups
+  - oidc-issuer-url: https://dex.holthome.net
+  - oidc-username-claim: email
 
 # ansible options
 ansible_user: "ryan"
