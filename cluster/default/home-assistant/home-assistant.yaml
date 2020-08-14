@@ -56,7 +56,7 @@ spec:
       enabled: true
       image:
         repository: esphome/esphome
-        tag: a9d75ca
+        tag: 9a57e8f
       ingress:
         enabled: true
         annotations:
@@ -64,10 +64,10 @@ spec:
           nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
           nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
         hosts:
-          - esphome.holthome.net
+        - esphome.holthome.net
         tls:
-          - hosts:
-            - esphome.holthome.net
+        - hosts:
+          - esphome.holthome.net
       persistence:
         enabled: true
         storageClass: longhorn
