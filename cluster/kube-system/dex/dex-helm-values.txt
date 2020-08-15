@@ -60,3 +60,9 @@ config: |-
     secret: $DEX_K8S_AUTHENTICATOR_CLIENT_SECRET
     redirectURIs:
       - https://login.holthome.net/callback/
+
+  - id: grafana
+    name: grafana
+    secret: $DEX_GRAFANA_AUTHENTICATOR_CLIENT_SECRET
+    redirectURIs:
+    - 'https://grafana.holthome.net/login/generic_oauth'
