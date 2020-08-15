@@ -73,5 +73,5 @@ grafana:
 
     auth.generic_oauth.group_mapping:
      # role_attribute_path = contains(groups[*], 'k8s-admins') && 'Admin' || contains(groups[*], 'oscall') && 'Editor' || 'Viewer'
-      role_attribute_path = contains(groups[*], 'k8s-admins') && 'Admin' || 'Viewer'
+      role_attribute_path: contains(groups[*], 'k8s-admins') && 'Admin' || 'Viewer'
       org_id =1
