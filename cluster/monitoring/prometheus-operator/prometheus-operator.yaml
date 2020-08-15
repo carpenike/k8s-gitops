@@ -273,5 +273,6 @@ spec:
           objectStorageConfig:
             name: thanos
             key: object-store.yaml
-  valueFileSecrets:
-    - name: "prometheus-operator-helm-values"
+  valuesFrom:
+  - secretKeyRef:
+      name: "prometheus-operator-helm-values"
