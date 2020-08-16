@@ -67,7 +67,7 @@ grafana:
       client_id: grafana
       client_secret: $DEX_GRAFANA_AUTHENTICATOR_CLIENT_SECRET
       scopes: openid profile email groups
-      auth_url: https://dex.${DOMAIN}/authorize
+      auth_url: https://dex.${DOMAIN}/auth
       token_url: https://dex.${DOMAIN}/token
       api_url: https://dex.${DOMAIN}/userinfo
 
