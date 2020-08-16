@@ -70,4 +70,4 @@ grafana:
       api_url: https://dex.${DOMAIN}/userinfo
     auth.generic_oauth.group_mapping:
       role_attribute_path: "contains(groups[*], 'holthome:k8s-admins') && 'Admin' || 'Viewer'"
-      org_id =1
+      org_id: 1
