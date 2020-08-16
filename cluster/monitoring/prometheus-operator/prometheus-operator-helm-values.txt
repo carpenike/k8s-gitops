@@ -61,18 +61,13 @@ grafana:
     auth.generic_oauth:
       enabled: true
       allow_sign_up: true
-      team_ids: 
-      allowed_organizations:
       name: Dex
       client_id: grafana
       client_secret: $DEX_GRAFANA_AUTHENTICATOR_CLIENT_SECRET
       scopes: openid profile email groups
-      role_attribute_path: groups[0]
       auth_url: https://dex.${DOMAIN}/auth
       token_url: https://dex.${DOMAIN}/token
       api_url: https://dex.${DOMAIN}/userinfo
-
     auth.generic_oauth.group_mapping:
-     # role_attribute_path = contains(groups[*], 'k8s-admins') && 'Admin' || contains(groups[*], 'oscall') && 'Editor' || 'Viewer'
       role_attribute_path: "contains(groups[*], 'holthome:k8s-admins') && 'Admin' || 'Viewer'"
-     # org_id =1
+      org_id =1
