@@ -61,7 +61,7 @@ grafana:
     auth.generic_oauth:
       enabled: true
       allow_sign_up: true
-      team_ids: k8s-admins
+      team_ids: 
       allowed_organizations: holthome
       name: Dex
       client_id: grafana
