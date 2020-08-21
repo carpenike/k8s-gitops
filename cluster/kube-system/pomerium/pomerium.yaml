@@ -1,0 +1,55 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: pomerium
+  namespace: kube-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: semver:~v0.10
+spec:
+  releaseName: pomerium
+  chart:
+    repository: https://helm.pomerium.io
+    name: pomerium
+    version: 12.1.0
+  values:
+    image:
+      repository: pomerium/pomerium
+      tag: v0.10.1
+    ingress:
+      secretName: acme-crt-secret
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    config:
+      rootDomain: holthome.net
+      generateTLS: true
+      policy:
+        - from: https://httpbin.holthome.net
+          to: http://httpbin.default.svc.cluster.local:8000
+          allowed_groups:
+            - k8s-admins
+        - from: https://sonarr.holthome.net
+          to: http://sonarr.default.svc.cluster.local:8989
+          prefix: /api/
+          allow_public_unauthenticated_access: true
+          allow_websockets: true
+        - from: https://sonarr.holthome.net
+          to: http://sonarr.default.svc.cluster.local:8989
+          allowed_groups:
+            - k8s-admins
+    proxy:
+      authenticateServiceUrl: https://authenticate.holthome.net
+    metrics:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+    resources:
+      requests:
+        memory: 350Mi
+        cpu: 25m
+      limits:
+        memory: 500Mi
+  valueFileSecrets:
+    - name: "pomerium-helm-values"
