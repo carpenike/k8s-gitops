@@ -30,6 +30,7 @@ spec:
           to: http://httpbin.default.svc.cluster.local:8000
           allowed_groups:
             - k8s-admins
+        # Sonarr
         - from: https://sonarr.holthome.net
           to: http://sonarr.default.svc.cluster.local:8989
           prefix: /api/
@@ -39,6 +40,7 @@ spec:
           to: http://sonarr.default.svc.cluster.local:8989
           allowed_groups:
             - k8s-admins
+        # Radarr
         - from: https://radarr.holthome.net
           to: http://radarr.default.svc.cluster.local:7878
           prefix: /api/
@@ -48,6 +50,16 @@ spec:
           to: http://radarr.default.svc.cluster.local:7878
           allowed_groups:
             - k8s-admins
+        # HASS
+        - from: https://esphome.holthome.net
+          to: http://home-assistant-esphome.default.svc.cluster.local:6052
+          allowed_groups:
+            - k8s-admins
+        - from: https://ha-vscode.holthome.net
+          to: http://home-assistant.default.svc.cluster.local:80
+          allowed_groups:
+            - k8s-admins
+
     proxy:
       authenticateServiceUrl: https://authenticate.holthome.net
     metrics:
