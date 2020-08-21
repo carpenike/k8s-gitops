@@ -14,39 +14,6 @@ spec:
     app: httpbin
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: pomerium-proxy
-spec:
-  type: ExternalName
-  externalName: pomerium-proxy.kube-system.svc.cluster.local
-  ports:
-  - port: 443
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: httpbin
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    # ingress.pomerium.io/from: '["https://httpbin.holthome.net"]'
-    # ingress.pomerium.io/to: '["http://httpbin.default.svc"]'
-    # ingress.pomerium.io/allowed_domains: '["holthome.net"]'
-    # external-dns.alpha.kubernetes.io/hostname: httpbin.holthome.net.
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-spec:
-  rules:
-  - host: httpbin.holthome.net
-    http:
-      paths:
-      - backend:
-          serviceName: pomerium-proxy
-          servicePort: 443
-  tls:
-  - hosts:
-    - httpbin.holthome.net
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
