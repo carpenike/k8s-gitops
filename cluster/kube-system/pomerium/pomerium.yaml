@@ -39,6 +39,15 @@ spec:
           to: http://sonarr.default.svc.cluster.local:8989
           allowed_groups:
             - k8s-admins
+        - from: https://radarr.holthome.net
+          to: http://radarr.default.svc.cluster.local:7878
+          prefix: /api/
+          allow_public_unauthenticated_access: true
+          allow_websockets: true
+        - from: https://sonarr.holthome.net
+          to: http://radarr.default.svc.cluster.local:7878
+          allowed_groups:
+            - k8s-admins
     proxy:
       authenticateServiceUrl: https://authenticate.holthome.net
     metrics:
