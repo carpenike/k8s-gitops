@@ -13,17 +13,22 @@ spec:
   chart:
     repository: https://charts.bitnami.com/bitnami
     name: external-dns
-    version: 3.2.3
+    version: 3.3.0
   values:
     image:
       repository: bitnami/external-dns
-      tag: 0.7.2
+      tag: 0.7.3
     provider: pdns
     policy: sync
     pdns:
       apiUrl: http://powerdns-webserver.default.svc.cluster.local
       secretName: powerdns-api-key
       apiPort: 8081
+    sources:
+      - service
+      - ingress
+      - istio-gateway
+      - istio-virtualservice
     domainFilters:
       - holthome.net
     createSecret: true
