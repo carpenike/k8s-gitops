@@ -59,7 +59,7 @@ spec:
         tag: 9a57e8f
       hostNetwork: true
       ingress:
-        enabled: true
+        enabled: false
         annotations:
           kubernetes.io/ingress.class: "nginx"
           # nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
@@ -74,7 +74,7 @@ spec:
         storageClass: longhorn
         accessMode: ReadWriteOnce
     vscode:
-      enabled: true
+      enabled: false
       image:
         repository: codercom/code-server
         tag: 3.4.1
