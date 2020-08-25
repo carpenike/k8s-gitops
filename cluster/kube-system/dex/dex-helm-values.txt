@@ -67,6 +67,12 @@ config: |-
     redirectURIs:
       - https://grafana.holthome.net/login/generic_oauth
 
+  - id: nextcloud
+    name: nextcloud
+    secret: $DEX_NEXTCLOUD_CLIENT_SECRET
+    redirectURIs:
+      - https://
+
   - id: oauth2-proxy
     name: oauth2-proxy
     secret: $DEX_OAUTH2_PROXY_CLIENT_SECRET
