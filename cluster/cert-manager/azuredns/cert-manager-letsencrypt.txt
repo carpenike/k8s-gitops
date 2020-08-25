@@ -71,3 +71,30 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
+
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: istio-system
+spec:
+  secretName: acme-crt-secret
+  commonName: "*.$DOMAIN"
+  dnsNames:
+  - $DOMAIN
+  - '*.$DOMAIN'
+  - '*.k.$DOMAIN'
+  - '*.nd.$DOMAIN'
+  acme:
+    config:
+    - dns01:
+        provider: azuredns
+      domains:
+      - $DOMAIN
+      - '*.$DOMAIN'
+      - '*.k.$DOMAIN'
+      - '*.nd.$DOMAIN'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
