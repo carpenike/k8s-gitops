@@ -13,7 +13,7 @@ spec:
   chart:
     repository: https://charts.longhorn.io
     name: longhorn
-    version: 1.0.1
+    version: 1.0.2
   values:
     persistence:
       defaultClassReplicaCount: 3
@@ -23,7 +23,7 @@ spec:
       backupTarget: s3://longhorn@minio/backups
       backupTargetCredentialSecret: longhorn-backup-secret
     ingress:
-      enabled: true
+      enabled: false
       host: longhorn.holthome.net
       annotations:
         kubernetes.io/ingress.class: nginx

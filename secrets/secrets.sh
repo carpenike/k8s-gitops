@@ -93,12 +93,13 @@ kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/botkube/botkube-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/logs/loki/loki-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/kube-system/pomerium/pomerium-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-k8s-authenticator-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
-
+# kseal "${REPO_ROOT}/cluster/actions-runner-system/actions-runner-controller/dex-helm-values.txt"
 
 #
 # Generic Secrets
@@ -147,6 +148,16 @@ kubectl create secret generic authelia-users  \
  | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.yaml
+
+# Actions-Runner-system GH Creds - actions-runner-system namespace
+kubectl create secret generic controller-manager  \
+ --from-literal=github_app_id=$ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_ID \
+ --from-literal=github_app_installation_id=$ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_INSTALLATION_ID \
+ --from-literal=github_app_private_key="$(echo $ACTIONS_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY | base64 -d)" \
+ --namespace actions-runner-system --dry-run=true -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/actions-runner-system/actions-runner-controller/actions-system-runner-gh-creds.yaml
 
 
 # Restic Password for Stash - default namespace

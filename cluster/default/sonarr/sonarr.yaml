@@ -21,7 +21,7 @@ spec:
       tag: 3.0.3.906-ls36
       # pullPolicy: Always
     ingress:
-      enabled: true
+      enabled: false
       annotations:
         kubernetes.io/ingress.class: "nginx"
     timezone: "America/New_York"

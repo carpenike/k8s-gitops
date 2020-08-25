@@ -7,6 +7,7 @@ repos:
   - id: check-yaml
     args: [--allow-multiple-documents]
   - id: check-added-large-files
+    args: ['--maxkb=1024']
 
 - repo: https://git.iamthefij.com/iamthefij/ansible-pre-commit
   rev: v0.1.2

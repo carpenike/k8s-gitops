@@ -20,7 +20,7 @@ spec:
       repository: linuxserver/radarr
       tag: 3.0.0.3406-ls19
     ingress:
-      enabled: true
+      enabled: false
       annotations:
         kubernetes.io/ingress.class: "nginx"
         #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
