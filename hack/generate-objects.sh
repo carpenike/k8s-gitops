@@ -49,4 +49,4 @@ while [ $CERT_MANAGER_READY != 0 ]; do
 done
 kapply "$REPO_ROOT"/cluster/cert-manager/azuredns/cert-manager-letsencrypt.txt
 
-kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(envsubst < $REPO_ROOT/cluster/kube-system/proxyinjector/proxyinjector.txt)"
+# kubectl -n kube-system create secret generic proxyinjector-config --from-literal=config.yml="$(envsubst < $REPO_ROOT/cluster/kube-system/proxyinjector/proxyinjector.txt)"
