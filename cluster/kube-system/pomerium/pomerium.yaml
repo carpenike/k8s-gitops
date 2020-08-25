@@ -68,6 +68,9 @@ spec:
           allow_websockets: true
           allowed_groups:
             - k8s-admins
+        - from: https://nextcloud.holthome.net
+          to: http://nextcloud.default.svc.cluster.local:8080
+          allow_public_unauthenticated_access: true
 
     proxy:
       authenticateServiceUrl: https://authenticate.holthome.net
