@@ -6,7 +6,7 @@ metadata:
   namespace: kube-system
   annotations:
     fluxcd.io/automated: "true"
-    fluxcd.io/tag.chart-image: semver:~v4
+    fluxcd.io/tag.chart-image: semver:~v5
 spec:
   releaseName: oauth2-proxy
   chart:
