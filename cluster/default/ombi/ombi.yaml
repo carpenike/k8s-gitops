@@ -19,21 +19,24 @@ spec:
     image:
       repository: linuxserver/ombi
       tag: 3.0.5083-ls6
-    deploymentAnnotations:
-      stash.appscode.com/backup-blueprint: default-workload-blueprint
-      stash.appscode.com/target-paths: "/config"
-      stash.appscode.com/volume-mounts: "config:/config"
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+      hosts:
+        - requests.holthome.net
+      tls:
+        - hosts:
+          - requests.holthome.net
     timezone: "America/New_York"
     puid: 1000
     pgid: 1000
     persistence:
       config:
         enabled: true
-        storageClass: "rook-ceph-block"
+        storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 200Mi
     resources:
