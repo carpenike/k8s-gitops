@@ -1,0 +1,29 @@
+mariadb:
+  db:
+    password: $NEXTCLOUD_MARIADB_PASSWORD
+nextcloud:
+  password: $NEXTCLOUD_ADMIN_PASSWORD
+  configs:
+    generic.config.php: |-
+      <?php
+      $NEXTCLOUD_CONFIG_ARRAY = array (
+        'overwriteprotocol' => 'https',
+      );
+
+    s3.config.php: |-
+      <?php
+      $NEXTCLOUD_CONFIG_ARRAY = array (
+        'objectstore' => array (
+          'class' => '\\OC\\Files\\ObjectStore\\S3',
+          'arguments'        => array (
+            'bucket'         => 'nextcloud',
+            'autocreate'     => true,
+            'key'            => '$MINIO_ACCESS_KEY',
+            'secret'         => '$MINIO_SECRET_KEY',
+            'hostname'       => 'minio.default.svc',
+            'port'           => '9000',
+            'use_ssl'        => false,
+            'use_path_style' => true,
+          ),
+        ),
+      );
