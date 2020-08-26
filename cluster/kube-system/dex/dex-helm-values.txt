@@ -22,7 +22,7 @@ config: |-
     theme: "coreos"
     issuer: "holthome"
     issuerUrl: "https://holthome.net"
-    logoUrl: https://example.com/images/logo-250x25.png
+    logoUrl: http://icons.iconarchive.com/icons/icons-land/metro-halloween/512/Cool-icon.png
 
   expiry:
     signingKeys: "6h"
@@ -71,7 +71,7 @@ config: |-
     name: nextcloud
     secret: $DEX_NEXTCLOUD_CLIENT_SECRET
     redirectURIs:
-      - http://nextcloud.holthome.net/apps/oidc_login/oidc
+      - https://nextcloud.holthome.net/apps/oidc_login/oidc
 
   - id: oauth2-proxy
     name: oauth2-proxy
