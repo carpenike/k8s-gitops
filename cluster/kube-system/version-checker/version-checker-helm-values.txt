@@ -1,3 +1,2 @@
 docker:
-  username: carpenike
   token: $VERSION_CHECKER_DOCKER_TOKEN

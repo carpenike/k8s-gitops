@@ -20,5 +20,5 @@ spec:
       tag: v0.1.1
     serviceMonitor:
       enabled: true
-  # valueFileSecrets:
-  #   - name: "version-checker-helm-values"
+  valueFileSecrets:
+    - name: "version-checker-helm-values"
