@@ -71,7 +71,7 @@ config: |-
     name: nextcloud
     secret: $DEX_NEXTCLOUD_CLIENT_SECRET
     redirectURIs:
-      - https://nextcloud.holthome.net/index.php/apps/user_oidc/code
+      - https://nextcloud.holthome.net/apps/user_oidc/code
 
   #- id: oauth2-proxy
   #  name: oauth2-proxy
