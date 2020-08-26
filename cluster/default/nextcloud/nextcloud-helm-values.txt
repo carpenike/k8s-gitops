@@ -105,7 +105,7 @@ nextcloud:
         'oidc_login_proxy_ldap' => false,
     
         // Disable creation of new users from OIDC login
-        'oidc_login_disable_registration' => true,
+        'oidc_login_disable_registration' => false,
     
         // Fallback to direct login if login from OIDC fails
         // Note that no error message will be displayed if enabled
