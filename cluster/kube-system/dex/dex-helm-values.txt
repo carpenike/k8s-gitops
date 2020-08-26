@@ -74,11 +74,11 @@ config: |-
       - https://nextcloud.holthome.net/apps/user_oidc/code
       - https://nextcloud.holthome.net/apps/oidc_login/oidc
 
-  #- id: oauth2-proxy
-  #  name: oauth2-proxy
-  #  secret: $DEX_OAUTH2_PROXY_CLIENT_SECRET
-  #  redirectURIs:
-  #    - https://auth.holthome.net/oauth2/callback
+  - id: oauth2-proxy
+    name: oauth2-proxy
+    secret: $DEX_OAUTH2_PROXY_CLIENT_SECRET
+    redirectURIs:
+      - https://auth.holthome.net/oauth2/callback
 
   #- id: pomerium
   #  name: pomerium
