@@ -11,7 +11,7 @@ metadata:
 spec:
   releaseName: minio
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://helm.min.io/
     name: minio
     version: 6.0.4
   values:
