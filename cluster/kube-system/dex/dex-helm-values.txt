@@ -73,14 +73,14 @@ config: |-
     redirectURIs:
       - https://nextcloud.holthome.net/apps/oidc_login/oidc
 
-  - id: oauth2-proxy
-    name: oauth2-proxy
-    secret: $DEX_OAUTH2_PROXY_CLIENT_SECRET
-    redirectURIs:
-      - https://
+  #- id: oauth2-proxy
+  #  name: oauth2-proxy
+  #  secret: $DEX_OAUTH2_PROXY_CLIENT_SECRET
+  #  redirectURIs:
+  #    - https://
 
-  - id: pomerium
-    name: pomerium
-    secret: $DEX_POMERIUM_CLIENT_SECRET
-    redirectURIs:
-      - https://
+  #- id: pomerium
+  #  name: pomerium
+  #  secret: $DEX_POMERIUM_CLIENT_SECRET
+  #  redirectURIs:
+  #    - https://
