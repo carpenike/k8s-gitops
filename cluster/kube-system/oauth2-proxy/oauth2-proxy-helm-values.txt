@@ -1,0 +1,29 @@
+ingress:
+  hosts: [auth.$DOMAIN]
+  tls:
+  - hosts:
+    - auth.$DOMAIN
+config:
+  clientID: "oauth2-proxy"
+  clientSecret: "$DEX_OAUTH2_PROXY_CLIENT_SECRET"
+  cookieSecret: "$OAUTH2_PROXY_COOKIE_SECRET"
+extraArgs:
+  provider: oidc
+  provider-display-name: 'DEX OIDC Provider'
+  cookie-secure: true
+  oidc-issuer-url: https://dex.holthome.net
+  session-store-type: cookie
+  pass-basic-auth: false
+  pass-access-token: true
+  pass-authorization-header: true
+  set-authorization-header: true
+  set-xauthrequest: true
+  standard-logging: true
+  auth-logging: true
+  request-logging: true
+  skip-provider-button: true
+  ssl-insecure-skip-verify: true
+  upstream: static://200
+  email-domain: "*"
+  cookie-domain: .$DOMAIN
+  whitelist-domain: .$DOMAIN
