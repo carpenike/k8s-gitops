@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: version-checker-helm-values
+  namespace: kube-system
+spec:
+  encryptedData:
+    values.yaml: AgB+ukpdnf+zS/JS2ti3CV1dITwfJQlg8snM4mP1By2t+gS2lyTvM5eUyijVjep9vBra+yn5ec3x8N1dGL/OjawFN2t7AsOPe+f+WRahSz0+1PWCZeBzobujwdbfrwRDl4M7rL+2QO98HdRSl1k+83klSjue/QF7AGw6hhkSdO4leKFGAn58E/quvwHd065YLdkhK+vMLgqvkuDiRCx77QMHzAJxn6t2zB/cxQhM0w34Dg6lTJog7xMQ7adonZejHHIemEE9H7WWbdEnefU1e043Iw5fZFei0v/VIQClMBrdM3zcOt7cUbYkEvAg898Cw2fEp99RrPemd2KnON1mhSHoIR8d82IEAN19+Ii5RirpkFqDnt5kTP5wLOcf2h5eCTLkjxg01dxO19jKDmJdhpNS+rVK6h12zza8F5PaJIHXJ7C/5AtIX0FKQHEHiBV8uNNWcNcJk1Qv6lqKQG8I5VXxR4G8pqElcQi594Ibz8Wh2kdkrqAjDXz0rYfHR8LoRw4gHCzd/3eci7DS/fCpdAIttopBrxl9hHbhzpn1UjGnuohYKKffjwQ10kOEyvjFPOm/6xgSeAN3t8HErdbGi8ixp2mXOS1TU7kgiNta8F+l3wviPcXvSJW1K8FVb7xgFEOGLpG9k6HYXXqUqqHtkr7YFcYo3qYL1/jx911UBfN5WtKSzjn3i3o4nLFQWcH0nThP84AOfK7QTuYOwTr+plAM1NWRsk/0Njdar8S5nKtwqJvZazZoJfteF9ZeWXZhU/BxTFsBWrA=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: version-checker-helm-values
+      namespace: kube-system
+

@@ -171,6 +171,9 @@ spec:
           zfs:
             url: https://grafana.com/api/dashboards/11337/revisions/1/download
             datasource: Prometheus
+          version-checker:
+            url: https://grafana.com/api/dashboards/12833/revisions/1/download
+            datasource: Prometheus
           # home-assistant:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/home_assistant.json
           #   datasource: influxdb
