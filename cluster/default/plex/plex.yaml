@@ -54,7 +54,8 @@ spec:
       limits:
         # gpu.intel.com/i915: 1
         # nvidia.com/gpu: 1
-        memory: 4900Mi
+        memory: 5009Mi
+        cpu: 763m
       requests:
-        cpu: 35m
-        memory: 1500Mi
+        cpu: 763m
+        memory: 5009Mi
