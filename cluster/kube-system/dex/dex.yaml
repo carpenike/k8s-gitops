@@ -20,7 +20,7 @@ spec:
       repository: quay.io/coreos/dex
       tag: v2.10.0
     ingress:
-      enabled: true
+      enabled: false
       annotations:
         kubernetes.io/ingress.class: "nginx"
       hosts:
