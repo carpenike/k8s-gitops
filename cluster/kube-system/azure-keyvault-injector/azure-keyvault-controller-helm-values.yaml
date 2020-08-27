@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: azure-keyvault-controller-helm-values
+  namespace: kube-system
+spec:
+  encryptedData:
+    values.yaml: AgB/gfzkIFLpfJg3QncmYhslRi2puivqUIY+1ypJePA9ls0Hs05F+uL1w6djtshD9H0AcSfDheB+AzVK/qYeHCjd3brX0uGo8RMzxKD921X76Jj6lsUcDCxuFAa1nq2Oohfsz7SmRnatVtwZTX2I/HFiBInhE1UCQn/73Rimh56fHTsFxA6P8A/BPyHMuIfIW6wpOhiZ2QQg/dNVJ9msk/Rduxx+h+G/C6XBXCklrbCwhXvWiCk4AwFGCIh8xlkHfNB4VlKapt6cu3F11ZejU6j6A6AAVQXUkuGeOdEsKmtaJCrSOsgIOOwjHFP+EW1qXEAbmAyIgaofZkgPmzeWthbGFXKXD1hYSkhET2YTDRkC+290cVDNKpJB0ko3TuB7PjIpc7yrH7oPXgr+DMqfHg2WzwzGg98agjTsplJZyYX0uOp2dmfI5twPybbfwe04dNc30GYdvjaiUK5qQ7qqhXUfoIuZBGu7maXyJxsAOk7MkuUlIEwXrp5WlwCyJYWY7PTrSI1ZGNiPoDZ/I5ar53jIMtmhcMzufyeiROh2SXH3pj7I5jW29GJs+/QNnpqGhxdeJLe1yqFjS9LgjucZpRSiBcmZo+IhVlwB/+i7O0eojoiJ8zVIlXFrrCOC9bUmz3x1iXFoZ6i8HMEfockSFYuM4M620TytDfJJ9MWLZlg6jSGIPoOzlqGoh0OQKbN3bXZU6SNp2mNmTid/qlQAgzxygHNUxi+YgJAAMK/G5kD6KK1kVCe00LintaVsIfpEYDoOCSAcEsZ+Ua+ak36hrphhaB8Z9fazCKlk+V/Cp6s5PxT5/k9VDQdPKKuSB6+HcgwFzcCpM4GayKDN4Pbi1Pali9MTcKjzrhvOS8OlQfT4EiiJsVpUwJx7jfACCQf6l/lnIWd9HZvAwNl843Iddho4izdoeOl4WympD/WARH8D
+  template:
+    metadata:
+      creationTimestamp: null
+      name: azure-keyvault-controller-helm-values
+      namespace: kube-system
+
