@@ -5,7 +5,7 @@ metadata:
   name: kiali
   namespace: istio-system
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: kiali.holthome.net
+    external-dns.alpha.kubernetes.io/target: 10.45.10.20
 spec:
   hosts:
     - 'kiali.holthome.net'
