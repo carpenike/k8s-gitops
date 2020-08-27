@@ -380,6 +380,7 @@ spec:
     kiali:
       contextPath: /kiali
       createDemoSecret: false
+      prometheusAddr: http://prometheus-operator-prometheus.monitoring.svc.cluster.local:9000
       dashboard:
         auth:
           strategy: anonymous
