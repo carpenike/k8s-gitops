@@ -4,9 +4,9 @@ metadata:
   name: ombi-authn-filter
   namespace: default
 spec:
-  # workloadSelector:
-  #   labels:
-  #     app.kubernetes.io/name: ombi
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: ombi
   configPatches:
     - applyTo: HTTP_FILTER
       match:
