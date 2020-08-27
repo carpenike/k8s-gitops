@@ -71,10 +71,11 @@ spec:
         #default-ssl-certificate: "kube-system/digicert-ingress-tls"
       resources:
         requests:
-          memory: 500Mi
-          cpu: 25m
+          memory: 825Mi
+          cpu: 93m
         limits:
-          memory: 600Mi
+          memory: 825Mi
+          cpu: 93m
     defaultBackend:
       enabled: true
       image:
@@ -85,4 +86,5 @@ spec:
           memory: 250Mi
           cpu: 25m
         limits:
-          memory: 350Mi
+          memory: 250Mi
+          cpu: 25m
