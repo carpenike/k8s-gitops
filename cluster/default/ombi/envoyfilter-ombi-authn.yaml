@@ -26,8 +26,8 @@ spec:
             '@type': type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz
             http_service:
               server_uri:
-                uri: https://auth.holthome.net
-                cluster: outbound|443||auth.holthome.net
+                uri: http://oauth2-proxy.kube-system.svc.cluster.local:80
+                cluster: outbound|80||oauth2-proxy.kube-system.svc.cluster.local
                 timeout: 10s
               authorizationRequest:
                 allowedHeaders:
