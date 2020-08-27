@@ -393,6 +393,9 @@ spec:
       nodeSelector: {}
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
+      external_services:
+        prometheus:
+          custom_metrics_url: http://prometheus-operator-prometheus.monitoring.svc.cluster.local:9090
       security:
         cert_file: /kiali-cert/cert-chain.pem
         # TODO: Investigate security.enabled=true
