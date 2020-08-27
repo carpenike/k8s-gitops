@@ -79,8 +79,7 @@ config: |-
     secret: $DEX_OAUTH2_PROXY_CLIENT_SECRET
     redirectURIs:
       - https://auth.holthome.net/oauth2/callback
-      - https://auth.holthome.net/authorize
-      - https://auth.holthome.net/oauth2/signin
+      - https://requests.holthome.net/oauth2/callback
 
   #- id: pomerium
   #  name: pomerium
