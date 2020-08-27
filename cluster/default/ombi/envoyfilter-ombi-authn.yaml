@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   workloadSelector:
-    annotations:
+    labels:
       app: ombi
   configPatches:
     - applyTo: HTTP_FILTER
