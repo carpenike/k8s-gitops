@@ -6,7 +6,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: ombi
+      app.kubernetes.io/name: ombi
   configPatches:
     - applyTo: HTTP_FILTER
       match:
