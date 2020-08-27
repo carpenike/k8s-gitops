@@ -2,14 +2,14 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: azure-key-vault-env-injector
+  name: azure-keyvault-env-injector
   namespace: kube-system
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: glob:RELEASE.*
 spec:
-  releaseName: azure-key-vault-env-injector
+  releaseName: azure-keyvault-env-injector
   chart:
     repository: http://charts.spvapi.no
     name: azure-key-vault-env-injector

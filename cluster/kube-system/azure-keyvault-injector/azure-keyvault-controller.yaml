@@ -2,14 +2,14 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: azure-key-vault-controller
+  name: azure-keyvault-controller
   namespace: kube-system
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: glob:RELEASE.*
 spec:
-  releaseName: azure-key-vault-controller
+  releaseName: azure-keyvault-controller
   chart:
     repository: http://charts.spvapi.no
     name: azure-key-vault-controller
