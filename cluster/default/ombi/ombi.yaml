@@ -45,3 +45,5 @@ spec:
         cpu: 25m
       limits:
         memory: 1000Mi
+    podAnnotations:
+      app: ombi
