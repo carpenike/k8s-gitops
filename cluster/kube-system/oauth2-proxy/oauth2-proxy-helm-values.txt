@@ -22,7 +22,7 @@ extraArgs:
   auth-logging: true
   request-logging: true
   skip-provider-button: true
-  ssl-insecure-skip-verify: true
+  ssl-insecure-skip-verify: false
   upstream: static://200
   email-domain: "*"
   cookie-domain: .$DOMAIN
