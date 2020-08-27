@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: bitnami/external-dns
-      tag: 0.7.3
+      tag: 0.7.3-debian-10-r11
     provider: pdns
     policy: sync
     pdns:
