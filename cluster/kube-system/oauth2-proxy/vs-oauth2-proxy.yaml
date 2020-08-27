@@ -4,6 +4,8 @@ kind: VirtualService
 metadata:
   name: auth
   namespace: kube-system
+  annotations:
+    external-dns.alpha.kubernetes.io/target: 10.45.10.20
 spec:
   hosts:
     - 'auth.holthome.net'
