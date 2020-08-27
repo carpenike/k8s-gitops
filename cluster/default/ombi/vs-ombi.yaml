@@ -1,0 +1,21 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: requests
+  namespace: default
+  annotations:
+    external-dns.alpha.kubernetes.io/target: 10.45.10.20
+spec:
+  hosts:
+    - 'requests.holthome.net'
+  gateways:
+    - istio-system/istio-system-ingress-gateway
+  http:
+    - match:
+        - port: 443
+      route:
+        - destination:
+            port:
+              number: 3579
+            host: ombi.default.svc.cluster.local
