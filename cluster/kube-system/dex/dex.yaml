@@ -28,12 +28,13 @@ spec:
       tls:
         - hosts:
           - dex.holthome.net
-    # resources:
-    #   requests:
-    #     memory: 350Mi
-    #     cpu: 25m
-    #   limits:
-    #     memory: 500Mi
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 250Mi
+        cpu: 25m
   valueFileSecrets:
     - name: "dex-helm-values"
       
