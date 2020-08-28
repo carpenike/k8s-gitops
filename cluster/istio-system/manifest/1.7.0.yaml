@@ -108,6 +108,35 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+    policy:
+      enabled: false
+      k8s:
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+        hpaSpec:
+          maxReplicas: 5
+          metrics:
+            - resource:
+                name: cpu
+                targetAverageUtilization: 80
+              type: Resource
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-policy
+        resources:
+          requests:
+            cpu: 10m
+            memory: 100Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 25%
   values:
     base:
       validationURL: ''
