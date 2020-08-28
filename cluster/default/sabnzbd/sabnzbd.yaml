@@ -47,7 +47,8 @@ spec:
         claimName: nfs-tank-share-pvc
     resources:
       requests:
-        memory: 300Mi
-        cpu: 250m
+        memory: 250Mi
+        cpu: 25m
       limits:
-        memory: 6000Mi
+        memory: 250Mi
+        cpu: 25m
