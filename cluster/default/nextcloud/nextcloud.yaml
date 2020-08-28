@@ -66,7 +66,7 @@ spec:
       global:
         storageClass: longhorn
     metrics:
-      enabled: true
+      enabled: false
       resources:
         limits:
           cpu: 11m
