@@ -104,10 +104,11 @@ spec:
           topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
-        memory: 275Mi
-        cpu: 50m
+        memory: 125Mi
+        cpu: 12m
       limits:
-        memory: 1000Mi
+        memory: 125Mi
+        cpu: 12m
   valuesFrom:
   - secretKeyRef:
       name: blocky-helm-values
