@@ -7,6 +7,7 @@ metadata:
 spec:
   # profile: default
   tag: 1.7.0
+  hub: docker.io/querycapistio
   addonComponents:
     grafana:
       enabled: false
