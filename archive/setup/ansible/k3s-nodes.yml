@@ -1,8 +1,0 @@
----
-
-- hosts: nodes
-#  gather_facts: yes
-  become: yes
-  roles:
-    - { role: download }
-    - { role: k3s/node }

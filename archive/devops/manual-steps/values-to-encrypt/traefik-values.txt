@@ -1,7 +1,0 @@
-dashboard:
-  domain: t.k.$DOMAIN
-  ingress:
-    tls:
-      - secretName: acme-crt-secret
-        hosts:
-          - t.k.$DOMAIN

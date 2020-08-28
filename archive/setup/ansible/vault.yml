@@ -1,8 +1,0 @@
----
-
-- hosts: vault
-  gather_facts: yes
-  become: no
-  environment: "{{ vault_env }}"
-  roles:
-    - { role: k3s/vault }

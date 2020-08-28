@@ -1,7 +1,0 @@
-host: consul.$DOMAIN
-http:
-  paths:
-  - backend:
-      serviceName: consul-consul-ui
-      servicePort: 80
-    path: /

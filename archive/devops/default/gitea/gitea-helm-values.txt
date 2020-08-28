@@ -1,7 +1,0 @@
-ingress:
-  tls:
-  - hosts:
-    - git.$DOMAIN
-service:
-  http:
-    externalHost: git.$DOMAIN

@@ -1,7 +1,0 @@
----
-
-- include: pre-reqs.yml
-- include: k3s-master.yml
-- include: k3s-nodes.yml
-- include: k3s-bootstrap.yml
-- include: vault.yml

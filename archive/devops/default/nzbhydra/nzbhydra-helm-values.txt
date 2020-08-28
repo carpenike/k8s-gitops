@@ -1,5 +1,0 @@
-ingress:
-  hosts: [nzbhydra.$DOMAIN]
-  tls:
-  - hosts:
-    - nzbhydra.$DOMAIN

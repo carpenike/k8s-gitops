@@ -1,5 +1,0 @@
-ingress:
-  hosts: [radarr.$DOMAIN]
-puid: 1000
-pgid: 1000
-timezone: "America/New_York"

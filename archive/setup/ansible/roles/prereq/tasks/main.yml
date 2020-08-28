@@ -1,5 +1,0 @@
----
-  - include: basics.yml
-  # - include: firewall.yml
-  - include: docker.yml
-  - include: network.yml

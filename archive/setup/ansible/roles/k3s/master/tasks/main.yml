@@ -1,4 +1,0 @@
----
-  - include: k3s.yml
-  - include: calico.yml
-  - include: crd.yml

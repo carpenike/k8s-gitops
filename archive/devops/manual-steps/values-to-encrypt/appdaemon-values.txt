@@ -1,5 +1,0 @@
-ingress:
-  hosts: [appdaemon.$DOMAIN]
-haurl: "https://ha.holthome.net"
-token: $HA_TOKEN
-dashurl: "http://appdaemon.holthome.net:5050"
