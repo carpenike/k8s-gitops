@@ -47,4 +47,4 @@ spec:
         memory: 155Mi
         cpu: 12m
     podAnnotations:
-      app: ombi
+      sidecar.istio.io/inject: "true"
