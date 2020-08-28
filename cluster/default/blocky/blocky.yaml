@@ -26,6 +26,9 @@ spec:
     timeZone: "America/New_York"
     # blocky configuration
     config:
+      conditional:
+        mapping:
+          holthome.net: udp:10.45.10.12
       upstream:
         externalResolvers:
         - https://1.1.1.1/dns-query
@@ -109,6 +112,3 @@ spec:
       limits:
         memory: 125Mi
         cpu: 12m
-  valuesFrom:
-  - secretKeyRef:
-      name: blocky-helm-values

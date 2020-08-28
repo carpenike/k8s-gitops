@@ -1,8 +1,0 @@
-config:
-  conditional:
-    mapping:
-      $DOMAIN: udp:10.45.10.12
-      local: udp:10.45.10.12
-  customDNS:
-      mapping:
-        vyos.$DOMAIN: 10.20.0.1
