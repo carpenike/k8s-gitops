@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: nextcloud
-      tag: 19.0.1
+      tag: 19.0.2-fpm
     ingress:
       enabled: true
       annotations:
