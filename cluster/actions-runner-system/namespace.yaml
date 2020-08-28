@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: actions-runner-system
   labels:
-    istio-injection: enabled
+    istio-injection: disbled
