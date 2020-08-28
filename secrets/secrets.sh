@@ -62,7 +62,7 @@ kseal() {
 #
 
 kseal "${REPO_ROOT}/cluster/default/minio/minio-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/blocky/blocky-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/blocky/blocky-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/nzbget/nzbget-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/nzbhydra/nzbhydra-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/bitwarden/bitwarden-helm-values.txt"
