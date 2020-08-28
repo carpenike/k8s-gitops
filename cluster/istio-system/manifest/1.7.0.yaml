@@ -139,6 +139,8 @@ spec:
             maxSurge: 100%
             maxUnavailable: 25%
   values:
+    global:
+      configValidation: true
     base:
       validationURL: ''
     clusterResources: true
