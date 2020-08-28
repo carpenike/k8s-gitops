@@ -20,6 +20,7 @@ repos:
   rev: v1.1.9
   hooks:
   - id: forbid-crlf
+  - id: remove-crlf
   - id: forbid-tabs
 
 - repo: https://github.com/jumanjihouse/pre-commit-hooks
