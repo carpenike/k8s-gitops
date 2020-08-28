@@ -7,6 +7,23 @@ metadata:
 spec:
   # profile: default
   tag: 1.7.0
+  addonComponents:
+    grafana:
+      enabled: false
+      k8s:
+        replicaCount: 1
+    istiocoredns:
+      enabled: false
+    kiali:
+      enabled: true
+      k8s:
+        replicaCount: 1
+    prometheus:
+      enabled: false
+      k8s:
+        replicaCount: 1
+    tracing:
+      enabled: true
   components:
     cni:
       enabled: false
@@ -45,3 +62,50 @@ spec:
                 port: 15443
                 targetPort: 15443
         name: istio-ingressgateway
+  values:
+    base:
+      validationURL: ''
+    clusterResources: true
+    gateways:
+      istio-egressgateway:
+        autoscaleEnabled: false
+        env: {}
+        name: istio-egressgateway
+        secretVolumes:
+          - mountPath: /etc/istio/egressgateway-certs
+            name: egressgateway-certs
+            secretName: istio-egressgateway-certs
+          - mountPath: /etc/istio/egressgateway-ca-certs
+            name: egressgateway-ca-certs
+            secretName: istio-egressgateway-ca-certs
+        type: ClusterIP
+        zvpn: {}
+      istio-ingressgateway:
+        applicationPorts: ''
+        autoscaleEnabled: false
+        debug: info
+        domain: ''
+        env: {}
+        meshExpansionPorts:
+          - name: tcp-pilot-grpc-tls
+            port: 15011
+            targetPort: 15011
+          - name: tcp-istiod
+            port: 15012
+            targetPort: 15012
+          - name: tcp-citadel-grpc-tls
+            port: 8060
+            targetPort: 8060
+          - name: tcp-dns-tls
+            port: 853
+            targetPort: 8853
+        name: istio-ingressgateway
+        secretVolumes:
+          - mountPath: /etc/istio/ingressgateway-certs
+            name: ingressgateway-certs
+            secretName: istio-ingressgateway-certs
+          - mountPath: /etc/istio/ingressgateway-ca-certs
+            name: ingressgateway-ca-certs
+            secretName: istio-ingressgateway-ca-certs
+        type: LoadBalancer
+        zvpn: {}
