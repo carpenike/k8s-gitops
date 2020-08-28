@@ -73,6 +73,41 @@ spec:
         name: istio-ingressgateway
     istiodRemote:
       enabled: false
+    pilot:
+      enabled: true
+      k8s:
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: GODEBUG
+            value: gctrace=1
+          - name: PILOT_TRACE_SAMPLING
+            value: '100'
+          - name: CONFIG_NAMESPACE
+            value: istio-config
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 10m
+            memory: 100Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 25%
   values:
     base:
       validationURL: ''
