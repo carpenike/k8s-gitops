@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: cert-manager
   labels:
-    istio-injection: enabled
+    istio-injection: disabled
