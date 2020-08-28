@@ -5,7 +5,7 @@ metadata:
   namespace: istio-system
   name: istio
 spec:
-  profile: default
+  # profile: default
   components:
     cni:
       enabled: false
