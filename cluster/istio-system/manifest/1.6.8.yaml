@@ -8,7 +8,7 @@ spec:
   # revision: canary
   addonComponents:
     grafana:
-      enabled: false
+      enabled: true
       k8s:
         replicaCount: 1
     istiocoredns:
@@ -18,7 +18,7 @@ spec:
       k8s:
         replicaCount: 1
     prometheus:
-      enabled: false
+      enabled: true
       k8s:
         replicaCount: 1
     tracing:
@@ -380,11 +380,10 @@ spec:
     kiali:
       contextPath: /kiali
       createDemoSecret: false
-      prometheusAddr: http://prometheus-operator-prometheus.monitoring.svc.cluster.local:9090
       dashboard:
         auth:
           strategy: anonymous
-        grafanaInClusterURL: http://prometheus-operator-grafana.monitoring.svc.cluster.local
+        grafanaInClusterURL: http://grafana
         jaegerInClusterURL: http://tracing/jaeger
         passphraseKey: passphrase
         secretName: kiali
