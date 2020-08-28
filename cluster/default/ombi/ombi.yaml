@@ -29,7 +29,7 @@ spec:
         - requests.holthome.net
       tls:
         - hosts:
-          - requests.holthome.net
+            - requests.holthome.net
     timezone: "America/New_York"
     puid: 1000
     pgid: 1000

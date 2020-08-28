@@ -31,8 +31,8 @@ spec:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-            - matchExpressions:
-                - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
+          - matchExpressions:
+            - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
     persistence:
       enabled: true
       storageClass: "longhorn"

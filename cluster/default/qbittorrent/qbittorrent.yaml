@@ -45,8 +45,8 @@ spec:
         - name: media
           claimName: nfs-tank-share-pvc
     tolerations:
-    - key: "arm"
-      operator: "Exists"
+      - key: "arm"
+        operator: "Exists"
     resources:
       requests:
         memory: 250Mi
@@ -54,4 +54,4 @@ spec:
       limits:
         memory: 3000Mi
   valueFileSecrets:
-  - name: "qbittorrent-helm-values"
+    - name: "qbittorrent-helm-values"

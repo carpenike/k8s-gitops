@@ -29,7 +29,7 @@ spec:
         - login.holthome.net
       tls:
         - hosts:
-          - login.holthome.net
+            - login.holthome.net
     # resources:
     #   requests:
     #     memory: 350Mi

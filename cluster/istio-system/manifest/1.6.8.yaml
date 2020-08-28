@@ -52,7 +52,7 @@ spec:
               memory: 40Mi
           service:
             externalIPs:
-            - 10.45.10.20
+              - 10.45.10.20
             ports:
               - name: status-port
                 port: 15020

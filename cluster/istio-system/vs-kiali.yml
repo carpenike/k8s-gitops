@@ -12,11 +12,11 @@ spec:
   gateways:
     - istio-system/istio-system-ingress-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        port:
-          number: 20001
-        host: kiali.istio-system.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 20001
+            host: kiali.istio-system.svc.cluster.local

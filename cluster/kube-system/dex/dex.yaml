@@ -27,7 +27,7 @@ spec:
         - dex.holthome.net
       tls:
         - hosts:
-          - dex.holthome.net
+            - dex.holthome.net
     resources:
       requests:
         memory: 250Mi

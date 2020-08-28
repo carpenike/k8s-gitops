@@ -29,13 +29,13 @@ spec:
             - name: TZ
               value: "America/New_York"
           volumeMounts:
-          - mountPath: /dev/hidraw0
-            name: usb
-          - mountPath: /wyzesense2mqtt/config
-            name: config
-          - mountPath: /wyzesense2mqtt/logs
-            name: config
-            subPath: logs
+            - mountPath: /dev/hidraw0
+              name: usb
+            - mountPath: /wyzesense2mqtt/config
+              name: config
+            - mountPath: /wyzesense2mqtt/logs
+              name: config
+              subPath: logs
           resources:
             requests:
               memory: 128Mi
@@ -44,21 +44,21 @@ spec:
               memory: 500Mi
               cpu: 1000m
       volumes:
-      - name: config
-        persistentVolumeClaim:
-          claimName: wyzesense2mqtt
-      - name: usb
-        hostPath:
-          path: /dev/hidraw0
+        - name: config
+          persistentVolumeClaim:
+            claimName: wyzesense2mqtt
+        - name: usb
+          hostPath:
+            path: /dev/hidraw0
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: feature.node.kubernetes.io/custom-wyze-sense
-                operator: In
-                values:
-                - "true"
+              - matchExpressions:
+                  - key: feature.node.kubernetes.io/custom-wyze-sense
+                    operator: In
+                    values:
+                      - "true"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

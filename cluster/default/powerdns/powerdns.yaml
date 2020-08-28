@@ -20,12 +20,12 @@ spec:
       image:
         repository: psitrax/powerdns
         tag: v4.3.0
-      # resources:
-      #   requests:
-      #     memory: 350Mi
-      #     cpu: 25m
-      #   limits:
-      #     memory: 1000Mi
+        # resources:
+        #   requests:
+        #     memory: 350Mi
+        #     cpu: 25m
+        #   limits:
+        #     memory: 1000Mi
     service:
       type: NodePort
       externalTrafficPolicy: Local

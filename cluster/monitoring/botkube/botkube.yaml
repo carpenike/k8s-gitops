@@ -235,4 +235,4 @@ spec:
             - delete
             - error
   valueFileSecrets:
-  - name: "botkube-helm-values"
+    - name: "botkube-helm-values"

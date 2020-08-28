@@ -38,8 +38,8 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8888"
     additionalEnv:
-      - name: DOCKER_VERNEMQ_ACCEPT_EULA
-        value: "yes"
-      - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
-        value: "on"
+    - name: DOCKER_VERNEMQ_ACCEPT_EULA
+      value: "yes"
+    - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+      value: "on"
     podAntiAffinity: hard

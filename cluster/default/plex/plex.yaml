@@ -28,12 +28,12 @@ spec:
     serviceTCP:
       type: NodePort
       externalIPs:
-      - 10.45.100.100
+        - 10.45.100.100
       externalTrafficPolicy: Local
     serviceUDP:
       type: NodePort
       externalIPs:
-      - 10.45.100.100
+        - 10.45.100.100
       externalTrafficPolicy: Local
     persistence:
       transcode:

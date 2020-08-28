@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -1701,16 +1702,16 @@ spec:
         name: manager
         args: ["manager", "--operator-roles", "all", "--log-verbosity=0"]
         env:
-          - name: OPERATOR_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: WEBHOOK_SECRET
-            value: elastic-webhook-server-cert
-          - name: WEBHOOK_PODS_LABEL
-            value: elastic-operator
-          - name: OPERATOR_IMAGE
-            value: docker.elastic.co/eck/eck-operator:1.0.1
+        - name: OPERATOR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: WEBHOOK_SECRET
+          value: elastic-webhook-server-cert
+        - name: WEBHOOK_PODS_LABEL
+          value: elastic-operator
+        - name: OPERATOR_IMAGE
+          value: docker.elastic.co/eck/eck-operator:1.0.1
         resources:
           limits:
             cpu: 1
@@ -1723,15 +1724,15 @@ spec:
           name: webhook-server
           protocol: TCP
         volumeMounts:
-          - mountPath: /tmp/k8s-webhook-server/serving-certs
-            name: cert
-            readOnly: true
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
       terminationGracePeriodSeconds: 10
       volumes:
-        - name: cert
-          secret:
-            defaultMode: 420
-            secretName: elastic-webhook-server-cert
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: elastic-webhook-server-cert
 
 ---
 apiVersion: v1
@@ -1746,42 +1747,42 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: elastic-webhook.k8s.elastic.co
 webhooks:
-  - clientConfig:
-      caBundle: Cg==
-      service:
-        name: elastic-webhook-server
-        namespace: elastic-system
-        path: /validate-elasticsearch-k8s-elastic-co-v1-elasticsearch
-    failurePolicy: Ignore
-    name: elastic-es-validation-v1.k8s.elastic.co
-    rules:
-      - apiGroups:
-          - elasticsearch.k8s.elastic.co
-        apiVersions:
-          - v1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - elasticsearches
-  - clientConfig:
-      caBundle: Cg==
-      service:
-        name: elastic-webhook-server
-        namespace: elastic-system
-        path: /validate-elasticsearch-k8s-elastic-co-v1beta1-elasticsearch
-    failurePolicy: Ignore
-    name: elastic-es-validation-v1beta1.k8s.elastic.co
-    rules:
-      - apiGroups:
-          - elasticsearch.k8s.elastic.co
-        apiVersions:
-          - v1beta1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - elasticsearches
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: elastic-webhook-server
+      namespace: elastic-system
+      path: /validate-elasticsearch-k8s-elastic-co-v1-elasticsearch
+  failurePolicy: Ignore
+  name: elastic-es-validation-v1.k8s.elastic.co
+  rules:
+  - apiGroups:
+    - elasticsearch.k8s.elastic.co
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - elasticsearches
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: elastic-webhook-server
+      namespace: elastic-system
+      path: /validate-elasticsearch-k8s-elastic-co-v1beta1-elasticsearch
+  failurePolicy: Ignore
+  name: elastic-es-validation-v1beta1.k8s.elastic.co
+  rules:
+  - apiGroups:
+    - elasticsearch.k8s.elastic.co
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - elasticsearches
 ---
 apiVersion: v1
 kind: Service
@@ -1790,8 +1791,8 @@ metadata:
   namespace: elastic-system
 spec:
   ports:
-    - port: 443
-      targetPort: 9443
+  - port: 443
+    targetPort: 9443
   selector:
     control-plane: elastic-operator
 ---
