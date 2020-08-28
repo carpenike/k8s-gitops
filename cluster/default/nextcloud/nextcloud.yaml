@@ -67,13 +67,25 @@ spec:
         storageClass: longhorn
     metrics:
       enabled: true
+      resources:
+        limits:
+          cpu: 11m
+          memory: 83Mi
+        requests:
+          cpu: 11m
+          memory: 83Mi
     nextcloud:
       host: nextcloud.holthome.net
       username: admin
     internalDatabase:
       enabled: false
-    podAnnotations:
-      sidecar.istio.io/inject: "false"
+    resources:
+      limits:
+        cpu: 23m
+        memory: 283Mi
+      requests:
+        cpu: 23m
+        memory: 283Mi
   valuesFrom:
     - secretKeyRef:
         name: nextcloud-helm-values
