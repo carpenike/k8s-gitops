@@ -41,9 +41,10 @@ spec:
         size: 200Mi
     resources:
       requests:
-        memory: 350Mi
-        cpu: 25m
+        memory: 155Mi
+        cpu: 12m
       limits:
-        memory: 1000Mi
+        memory: 155Mi
+        cpu: 12m
     podAnnotations:
       app: ombi
