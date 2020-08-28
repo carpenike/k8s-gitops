@@ -40,9 +40,10 @@ spec:
       enabled: false
     resources:
       requests:
-        memory: 350Mi
-        cpu: 25m
+        memory: 500Mi
+        cpu: 49m
       limits:
         memory: 500Mi
+        cpu: 49m
   valueFileSecrets:
     - name: "minio-helm-values"
