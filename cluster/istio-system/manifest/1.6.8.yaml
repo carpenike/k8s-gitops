@@ -8,7 +8,7 @@ spec:
   # revision: canary
   addonComponents:
     grafana:
-      enabled: true
+      enabled: false
       k8s:
         replicaCount: 1
     istiocoredns:
@@ -18,7 +18,7 @@ spec:
       k8s:
         replicaCount: 1
     prometheus:
-      enabled: true
+      enabled: false
       k8s:
         replicaCount: 1
     tracing:
