@@ -32,27 +32,30 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "nginx"
         nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      hosts:
+        - unifi.holthome.net
+      tls:
+        - hosts:
+            - unifi.holthome.net
     guiService:
-      annotations:
-        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
-      clusterIP: ""
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.153
+      externalIPs:
+        - 10.45.10.17
     controllerService:
-      annotations:
-        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.153
+      externalTrafficPolicy: local
+      externalIPs:
+        - 10.45.10.17
     stunService:
-      annotations:
-        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.153
+      externalTrafficPolicy: local
+      externalIPs:
+        - 10.45.10.17
     discoveryService:
-      annotations:
-        metallb.universe.tf/allow-shared-ip: this-is-the-shared-key-for-unifi
       type: LoadBalancer
-      loadBalancerIP: 10.20.50.153
+      externalTrafficPolicy: local
+      externalIPs:
+        - 10.45.10.17
     resources:
       requests:
         memory: 500Mi
