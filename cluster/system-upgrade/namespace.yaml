@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: system-upgrade
   labels:
-    istio-injection: enabled
+    istio-injection: diabled
