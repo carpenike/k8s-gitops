@@ -8,6 +8,7 @@ nextcloud:
       <?php
       $NEXTCLOUD_CONFIG_ARRAY = array (
         'overwriteprotocol' => 'https',
+        'loglevel'          => 0,
       );
 
     s3.config.php: |-
