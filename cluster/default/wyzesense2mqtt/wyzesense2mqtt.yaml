@@ -24,7 +24,7 @@ spec:
           image: raetha/wyzesense2mqtt:1.1
           imagePullPolicy: IfNotPresent
           securityContext:
-            privileged: true          
+            privileged: true
           env:
             - name: TZ
               value: "America/New_York"

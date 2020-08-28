@@ -38,4 +38,3 @@ spec:
     #     memory: 500Mi
   valueFileSecrets:
     - name: "dex-k8s-authenticator-helm-values"
-          

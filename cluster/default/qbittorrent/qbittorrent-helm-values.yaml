@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: qbittorrent-helm-values
       namespace: default
-

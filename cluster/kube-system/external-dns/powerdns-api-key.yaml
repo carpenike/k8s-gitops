@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: powerdns-api-key
       namespace: kube-system
-

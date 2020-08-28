@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: bookstack-mariadb-helm-values
       namespace: default
-

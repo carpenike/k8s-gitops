@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: goldilocks-helm-values
       namespace: default
-

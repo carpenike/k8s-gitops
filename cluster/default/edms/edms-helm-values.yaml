@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: edms-helm-values
       namespace: default
-

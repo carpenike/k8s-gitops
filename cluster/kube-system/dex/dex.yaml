@@ -37,4 +37,3 @@ spec:
         cpu: 25m
   valueFileSecrets:
     - name: "dex-helm-values"
-      

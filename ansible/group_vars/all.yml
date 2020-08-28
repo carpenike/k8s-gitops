@@ -10,12 +10,12 @@ k3s_service_cidr: "10.43.0.0/16"
 k3s_use_docker: false
 k3s_no_flannel: true
 k3s_flannel_backend: "none"
-k3s_copy_config_local: false 
+k3s_copy_config_local: false
 k3s_control_node_address: "k8s.holthome.net"
 k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
 k3s_default_local_storage_path: "/dev/shm/k8s"
 k3s_become_for_all: true
-k3s_kubelet_args: 
+k3s_kubelet_args:
   - feature-gates: ExternalPolicyForExternalIP=true
 k3s_kube_apiserver_args:
   - oidc-client-id: dex-k8s-authenticator

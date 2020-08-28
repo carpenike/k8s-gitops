@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: powerdns-helm-values
       namespace: default
-

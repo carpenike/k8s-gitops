@@ -1,4 +1,4 @@
-  
+
 ---
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
@@ -26,7 +26,7 @@ spec:
         # nginx.ingress.kubernetes.io/server-snippet: |-
         #   server_tokens off;
         #   proxy_hide_header X-Powered-By;
-     
+
         #   rewrite ^/.well-known/webfinger /public.php?service=webfinger last;
         #   rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
         #   rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json;

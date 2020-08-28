@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: loki-helm-values
       namespace: logs
-

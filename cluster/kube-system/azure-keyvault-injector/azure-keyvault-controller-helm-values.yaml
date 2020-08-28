@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: azure-keyvault-controller-helm-values
       namespace: kube-system
-

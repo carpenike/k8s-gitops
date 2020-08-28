@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: unifi-helm-values
       namespace: default
-

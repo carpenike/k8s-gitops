@@ -27,7 +27,7 @@ config: |-
   expiry:
     signingKeys: "6h"
     idTokens: "24h"
-  
+
   logger:
     level: debug
     format: json

@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: nzbhydra-helm-values
       namespace: default
-

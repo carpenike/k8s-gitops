@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: tautulli-helm-values
       namespace: default
-

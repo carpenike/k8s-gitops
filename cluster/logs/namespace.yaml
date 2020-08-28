@@ -4,5 +4,4 @@ kind: Namespace
 metadata:
   name: logs
   labels:
-    istio-injection: disabled 
-
+    istio-injection: disabled

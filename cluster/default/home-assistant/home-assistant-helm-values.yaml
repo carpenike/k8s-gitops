@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: home-assistant-helm-values
       namespace: default
-

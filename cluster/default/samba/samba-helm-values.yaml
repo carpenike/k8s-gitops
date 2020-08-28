@@ -12,4 +12,3 @@ spec:
       creationTimestamp: null
       name: samba-helm-values
       namespace: default
-
