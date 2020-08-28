@@ -7,6 +7,8 @@ metadata:
 spec:
   profile: default
   components:
+    cni:
+      enabled: false
     ingressGateways:
       - enabled: true
         k8s:
