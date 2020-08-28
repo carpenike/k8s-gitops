@@ -25,6 +25,8 @@ spec:
     tracing:
       enabled: true
   components:
+    base:
+      enabled: true
     cni:
       enabled: false
     egressGateways:
