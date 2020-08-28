@@ -38,6 +38,10 @@ spec:
         storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 30Gi
+      tvshows:
+        enabled: false
+      movies:
+        enabled: false
       extraExistingClaimMounts:
         - name: data
           mountPath: /data
