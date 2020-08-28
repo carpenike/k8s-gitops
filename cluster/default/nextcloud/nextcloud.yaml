@@ -69,6 +69,8 @@ spec:
       username: admin
     internalDatabase:
       enabled: false
+    podAnnotations:
+      sidecar.istio.io/inject: false
   valuesFrom:
     - secretKeyRef:
         name: nextcloud-helm-values
