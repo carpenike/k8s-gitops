@@ -55,8 +55,8 @@ spec:
           to: http://home-assistant-esphome.default.svc.cluster.local:6052
           allow_websockets: true
           allow_public_unauthenticated_access: true
-          allowed_groups:
-            - k8s-admins
+          # allowed_groups:
+          #   - k8s-admins
         - from: https://ha-vscode.holthome.net
           to: http://home-assistant.default.svc.cluster.local:80
           allow_websockets: true
