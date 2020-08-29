@@ -1,0 +1,25 @@
+name: lint
+on:
+  push:
+    branches:
+      - master
+jobs:
+  lint-yaml:
+    runs-on:
+    - ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Lint yaml
+      uses: ibiqlik/action-yamllint@v1
+  lint-shell:
+    runs-on:
+    - ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Lint scripts
+      uses: azohra/shell-linter@latest
+      with:
+        path: "hack"
+        severity: "error"
