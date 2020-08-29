@@ -16,7 +16,7 @@ spec:
     istiocoredns:
       enabled: false
     kiali:
-      enabled: true
+      enabled: false
       k8s:
         replicaCount: 1
     prometheus:
