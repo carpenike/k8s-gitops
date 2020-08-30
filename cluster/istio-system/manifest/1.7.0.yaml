@@ -180,3 +180,18 @@ spec:
             secretName: istio-ingressgateway-ca-certs
         type: LoadBalancer
         zvpn: {}
+    telemetry:
+      enabled: true
+      v1:
+        enabled: false
+      v2:
+        enabled: true
+        metadataExchange: {}
+        prometheus:
+          enabled: true
+        stackdriver:
+          configOverride: {}
+          enabled: false
+          logging: false
+          monitoring: false
+          topology: false
