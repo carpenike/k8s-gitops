@@ -131,6 +131,56 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+    telemetry:
+      enabled: false
+      k8s:
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: GOMAXPROCS
+            value: '6'
+        hpaSpec:
+          maxReplicas: 5
+          metrics:
+            - resource:
+                name: cpu
+                targetAverageUtilization: 80
+              type: Resource
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-telemetry
+        replicaCount: 1
+        resources:
+          limits:
+            cpu: 4800m
+            memory: 4G
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 25%
+  meshConfig:
+    enableAutoMtls: false
+    accessLogFile: /dev/stdout
+    defaultConfig:
+      proxyMetadata: {}
+    disablePolicyChecks: false
+    enablePrometheusMerge: false
+    # TODO: https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig
+    # enableTracing: true
+    # enableEnvoyAccessLogService: true
+    # outboundTrafficPolicy:
+    #   mode: 'REGISTRY_ONLY'
+    # defaultServiceExportTo: <TBC>
+    # defaultVirtualServiceExportTo: <TBC>
+    # defaultDestinationRuleExportTo: <TBC>
   values:
     global:
       configValidation: true
