@@ -54,7 +54,7 @@ spec:
         - hosts:
             - nextcloud.holthome.net
     persistence:
-      enabled: true
+      enabled: false
       storageClass: longhorn
     mariadb:
       enabled: false
