@@ -78,7 +78,7 @@ spec:
       host: nextcloud.holthome.net
       username: admin
     internalDatabase:
-      enabled: true
+      enabled: false
     # resources:
     #   limits:
     #     cpu: 23m
