@@ -39,12 +39,12 @@ spec:
         storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 200Mi
-    resources:
-      requests:
-        memory: 155Mi
-        cpu: 12m
-      limits:
-        memory: 155Mi
-        cpu: 12m
-    podAnnotations:
-      sidecar.istio.io/inject: "true"
+    # resources:
+    #   requests:
+    #     memory: 155Mi
+    #     cpu: 12m
+    #   limits:
+    #     memory: 155Mi
+    #     cpu: 12m
+    # podAnnotations:
+    #   sidecar.istio.io/inject: "true"
