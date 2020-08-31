@@ -54,7 +54,7 @@ spec:
         - hosts:
             - nextcloud.holthome.net
     persistence:
-      enabled: false
+      enabled: true
       storageClass: longhorn
     mariadb:
       enabled: false
@@ -79,13 +79,13 @@ spec:
       username: admin
     internalDatabase:
       enabled: true
-    resources:
-      limits:
-        cpu: 23m
-        memory: 283Mi
-      requests:
-        cpu: 23m
-        memory: 283Mi
+    # resources:
+    #   limits:
+    #     cpu: 23m
+    #     memory: 283Mi
+    #   requests:
+    #     cpu: 23m
+    #     memory: 283Mi
     livenessProbe:
       enabled: false
     readinessProbe:
