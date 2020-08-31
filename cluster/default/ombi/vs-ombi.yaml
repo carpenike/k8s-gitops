@@ -4,8 +4,8 @@ kind: VirtualService
 metadata:
   name: requests
   namespace: default
-  # annotations:
-  #   external-dns.alpha.kubernetes.io/target: 10.45.10.20
+  annotations:
+    external-dns.alpha.kubernetes.io/target: 10.45.10.20
 spec:
   hosts:
     - 'requests.holthome.net'
