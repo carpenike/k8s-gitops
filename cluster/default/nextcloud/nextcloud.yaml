@@ -57,7 +57,7 @@ spec:
       enabled: true
       storageClass: longhorn
     mariadb:
-      enabled: false
+      enabled: true
       master:
         persistence:
           enabled: true
@@ -66,14 +66,14 @@ spec:
       global:
         storageClass: longhorn
     metrics:
-      enabled: false
-      resources:
-        limits:
-          cpu: 11m
-          memory: 83Mi
-        requests:
-          cpu: 11m
-          memory: 83Mi
+      enabled: true
+      # resources:
+      #   limits:
+      #     cpu: 11m
+      #     memory: 83Mi
+      #   requests:
+      #     cpu: 11m
+      #     memory: 83Mi
     nextcloud:
       host: nextcloud.holthome.net
       username: admin
@@ -86,10 +86,10 @@ spec:
     #   requests:
     #     cpu: 23m
     #     memory: 283Mi
-    livenessProbe:
-      enabled: false
-    readinessProbe:
-      enabled: false
-  # valuesFrom:
-  #   - secretKeyRef:
-  #       name: nextcloud-helm-values
+    # livenessProbe:
+    #   enabled: false
+    # readinessProbe:
+    #   enabled: false
+  valuesFrom:
+    - secretKeyRef:
+        name: nextcloud-helm-values
