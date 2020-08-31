@@ -10,9 +10,9 @@ metadata:
 spec:
   releaseName: nextcloud
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://nextcloud.github.io/helm/
     name: nextcloud
-    version: 1.12.0
+    version: 2.1.0
     # git: https://github.com/carpenike/helm
     # ref: master
     # path: charts/nextcloud
@@ -86,10 +86,10 @@ spec:
       requests:
         cpu: 23m
         memory: 283Mi
-    # livenessProbe:
-    #   initialDelaySeconds: 60
-    # readinessProbe:
-    #   initialDelaySeconds: 60
+    livenessProbe:
+      enabled: false
+    readinessProbe:
+      enabled: false
   # valuesFrom:
   #   - secretKeyRef:
   #       name: nextcloud-helm-values
