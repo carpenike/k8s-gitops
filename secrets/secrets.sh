@@ -162,6 +162,14 @@ kubectl create secret generic controller-manager  \
 kubeseal --format=yaml --cert="$PUB_CERT" \
    > "$REPO_ROOT"/cluster/actions-runner-system/actions-runner-controller/actions-system-runner-gh-creds.yaml
 
+# Alertmanager-Bot - monitoring namespace
+kubectl create secret generic alertmanager-bot  \
+ --from-literal=admin=$TELEGRAM_USER_ID \
+ --from-literal=token=$TELEGRAM_AM_BOT_TOKEN \
+ --namespace monitoring --dry-run=true -o json \
+ | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+   > "$REPO_ROOT"/cluster/monitoring/alertmanager-bot/alertmanager-telegram-creds.yaml
 
 # Restic Password for Stash - default namespace
 # kubectl create secret generic restic-backup-credentials  \
