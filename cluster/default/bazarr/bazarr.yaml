@@ -34,7 +34,7 @@ spec:
         storageClass: longhorn
         size: 5Gi
       media:
-        existingClaim: nfs-tank-share-media
+        existingClaim: nfs-tank-share-pvc
     timezone: America/New_York
     puid: 1000
     pgid: 1000
