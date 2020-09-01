@@ -38,14 +38,14 @@ prometheus:
       #        - n2-0.$DOMAIN:19999
       #        - h2-0.$DOMAIN:19999
       #        #- fw.$DOMAIN:19999
-    #- job_name: 'home-assistant'
-    #  scrape_interval: 60s
-    #  metrics_path: '/api/prometheus'
-    #  bearer_token: '$PROM_HASS_TOKEN'
-    #  scheme: http
-    #  static_configs:
-    #  - targets:
-    #    - home-assistant.default.svc:8123
+    - job_name: 'home-assistant'
+      scrape_interval: 60s
+      metrics_path: '/api/prometheus'
+      bearer_token: '$HOMEASSISTANT_PROMETHEUS_TOKEN'
+      scheme: http
+      static_configs:
+      - targets:
+        - home-assistant.default.svc:8123
 grafana:
   ingress:
     hosts: [grafana.$DOMAIN]
