@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: nextcloud
-      tag: 19.0.2-fpm-alpine
+      tag: 19.0.2-fpm
     ingress:
       enabled: true
       annotations:
@@ -86,10 +86,10 @@ spec:
     #   requests:
     #     cpu: 23m
     #     memory: 283Mi
-    livenessProbe:
-      enabled: false
-    readinessProbe:
-      enabled: false
+    # livenessProbe:
+    #   enabled: false
+    # readinessProbe:
+    #   enabled: false
   valuesFrom:
     - secretKeyRef:
         name: nextcloud-helm-values
