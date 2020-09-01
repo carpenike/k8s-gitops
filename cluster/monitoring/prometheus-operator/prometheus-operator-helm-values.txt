@@ -22,22 +22,6 @@ prometheus:
         static_configs:
         - targets:
           - vyos.$DOMAIN:9100
-      #- job_name: "netdata-scrape"
-      #  metrics_path: "/api/v1/allmetrics"
-      #  params:
-      #    # format: prometheus | prometheus_all_hosts
-      #    # You can use `prometheus_all_hosts` if you want Prometheus to set the `instance` to your hostname instead of IP
-      #    format: [prometheus]
-      #  honor_labels: true
-      #  static_configs:
-      #    - targets:
-      #        - r610-0.$DOMAIN:19999
-      #        - r610-1.$DOMAIN:19999
-      #        - r610-2.$DOMAIN:19999
-      #        - r720-0.$DOMAIN:19999
-      #        - n2-0.$DOMAIN:19999
-      #        - h2-0.$DOMAIN:19999
-      #        #- fw.$DOMAIN:19999
     - job_name: 'home-assistant'
       scrape_interval: 60s
       metrics_path: '/api/prometheus'
