@@ -280,16 +280,6 @@ spec:
           objectStorageConfig:
             name: thanos
             key: object-store.yaml
-        additionalScrapeConfigs:
-        - job_name: istio
-          kubernetes_sd_configs:
-          - role: pod
-          relabel_configs:  # If first two labels are present, pod should be scraped  by the istio-secure job.
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels: [__meta_kubernetes_namespace]
-            action: replace
-            target_label: namespace
   valuesFrom:
   - secretKeyRef:
       name: "prometheus-operator-helm-values"
