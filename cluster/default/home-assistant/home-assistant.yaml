@@ -14,13 +14,9 @@ spec:
   rollback:
     enable: true
   chart:
-    # repository: https://billimek.com/billimek-charts/
-    # name: home-assistant
-    # version: 1.0.5
-    git: https://github.com/carpenike/billimek-charts
-    ref: home-assistant/db-dependencies
-    path: charts/home-assistant
-    version: 1.2.0
+    repository: https://k8s-at-home.com/charts
+    name: home-assistant
+    version: 2.0.0
   values:
     image:
       repository: homeassistant/home-assistant

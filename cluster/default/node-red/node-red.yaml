@@ -14,14 +14,9 @@ spec:
   rollback:
     enable: true
   chart:
-    repository: https://billimek.com/billimek-charts/
+    repository: https://k8s-at-home.com/charts
     name: node-red
-    version: 2.0.2
-  # chart:
-  #   git: https://github.com/carpenike/billimek-charts/
-  #   ref: node-red-deployment-annotations
-  #   path: charts/node-red
-  #   version: 2.0.2
+    version: 3.0.0
   values:
     image:
       repository: nodered/node-red

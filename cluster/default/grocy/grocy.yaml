@@ -11,9 +11,9 @@
 #   rollback:
 #     enable: true
 #   chart:
-#     git: https://github.com/carpenike/billimek-charts
-#     ref: grocy
-#     path: charts/grocy
+#     repository: https://k8s-at-home.com/charts
+#     name: grocy
+#     version: 2.0.0
 #   values:
 #     image:
 #       repository: linuxserver/grocy
