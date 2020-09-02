@@ -43,8 +43,8 @@ spec:
       movies:
         enabled: false
       extraExistingClaimMounts:
-        - name: media
-          mountPath: /media
+        - name: share
+          mountPath: /share
           existingClaim: nfs-tank-share-pvc
           readOnly: true
     # nodeSelector:
