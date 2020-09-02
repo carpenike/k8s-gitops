@@ -13,11 +13,11 @@ spec:
   chart:
     repository: http://charts.spvapi.no
     name: azure-key-vault-env-injector
-    version: 1.1.0-beta.19
+    version: 1.1.0-beta.30
   values:
     image:
       repository: spvest/azure-keyvault-webhook
-      tag: 1.1.0-beta.37
+      tag: 1.1.0-beta.44
     installCrd: false
     metrics:
       enabled: true
