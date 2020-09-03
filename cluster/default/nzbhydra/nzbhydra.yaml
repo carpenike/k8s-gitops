@@ -18,7 +18,7 @@ spec:
   values:
     image:
       repository: linuxserver/nzbhydra2
-      tag: v2.25.0-ls13
+      tag: v2.27.2-ls14
     service:
       type: ClusterIP
     ingress:
