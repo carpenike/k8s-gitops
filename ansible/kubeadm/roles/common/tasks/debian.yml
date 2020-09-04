@@ -1,0 +1,26 @@
+---
+- name: apt-get upgrade
+  apt:
+    upgrade: full
+    update_cache: yes
+    cache_valid_time: 3600
+    force_apt_get: true
+    autoclean: yes
+    autoremove: yes
+  register: apt_upgrade
+  retries: 5
+  until: apt_upgrade is success
+  when: common_upgrade_packages
+
+- name: install common packages
+  apt:
+    name: '{{ common_packages }}'
+    install_recommends: false
+    update_cache: yes
+    cache_valid_time: 3600
+    force_apt_get: true
+    autoclean: yes
+    autoremove: yes
+  register: apt_install_common
+  retries: 5
+  until: apt_install_common is success

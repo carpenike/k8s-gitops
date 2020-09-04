@@ -1,0 +1,11 @@
+---
+- name: preflight checks
+  include_tasks: pre_checks.yml
+  run_once: true
+
+- name: debian family specific tasks
+  include_tasks: debian.yml
+  when: ansible_os_family | lower == 'debian'
+
+- name: common tasks
+  include_tasks: common.yml

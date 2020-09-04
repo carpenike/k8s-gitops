@@ -1,0 +1,60 @@
+# Instructions: https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+---
+- name: 'debian : add an apt signing key for docker'
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_os_family | lower == 'debian'
+
+- name: 'debian : add apt repository for stable version'
+  apt_repository:
+    repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+    state: present
+  when: ansible_os_family | lower == 'debian'
+
+- name: 'debian : install docker and its dependencies'
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: yes
+  when: ansible_os_family | lower == 'debian'
+
+- name: 'archlinux : install docker and its dependencies'
+  pacman:
+    name:
+      - docker
+      - containerd
+    state: present
+    update_cache: yes
+  when: ansible_os_family | lower == 'archlinux'
+
+- name: ensure docker directory
+  file:
+    path: /etc/docker
+    state: directory
+    mode: 0755
+
+- name: copy docker daemon config
+  copy:
+    src: docker/daemon.json
+    dest: '/etc/docker/daemon.json'
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart docker
+
+- name: ensure systemd docker.d directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 0755
+
+- name: systemd docker drop-in
+  copy:
+    dest: /etc/systemd/system/docker.service.d/override.conf
+    mode: 0755
+    src: docker/override.conf
+  notify: restart docker

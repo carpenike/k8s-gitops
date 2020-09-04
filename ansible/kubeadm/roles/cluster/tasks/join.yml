@@ -1,0 +1,15 @@
+---
+- name: include token creation tasks
+  include_tasks: token.yml
+  when: not cluster_node_configured
+
+- name: generate kubeadm join configuration
+  template:
+    src: kubeadm-join.yml.j2
+    dest: /etc/kubernetes/kubeadm-join.yml
+  when: not cluster_node_configured
+
+- name: join node to cluster
+  command:
+    cmd: kubeadm join --config /etc/kubernetes/kubeadm-join.yml
+    creates: /etc/kubernetes/kubelet.conf

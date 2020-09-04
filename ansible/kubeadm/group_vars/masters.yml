@@ -1,0 +1,3 @@
+cluster_extra_sans:
+  - k8s.holthome.net
+cluster_control_plane_endpoint: "k8s.holthome.net:8443"

@@ -1,0 +1,57 @@
+---
+- name: 'validate variable : cluster_name'
+  assert:
+    that:
+      - cluster_name | type_debug == 'AnsibleUnicode'
+    fail_msg:
+      - "Variable 'cluster_name' should be of type AnsibleUnicode (string)"
+      - 'Type is: {{ cluster_name | type_debug }}'
+      - "Value is: {{ cluster_name | default('undefined') }}"
+
+- name: 'validate variable : cluster_extra_sans'
+  assert:
+    that:
+      - cluster_extra_sans | type_debug == 'list'
+    fail_msg:
+      - "Variable 'cluster_extra_sans' should be of type 'list'"
+      - 'Type is: {{ cluster_extra_sans | type_debug }}'
+      - "Value is: {{ cluster_extra_sans | default('undefined') }}"
+
+- name: 'validate variable : cluster_control_plane_endpoint'
+  assert:
+    that:
+      - (cluster_control_plane_endpoint | type_debug == 'AnsibleUnicode') or (cluster_control_plane_endpoint | type_debug == 'str')
+    fail_msg:
+      - "Variable 'cluster_control_plane_endpoint' should be of type AnsibleUnicode (string) or str"
+      - 'Type is: {{ cluster_control_plane_endpoint | type_debug }}'
+      - "Value is: {{ cluster_control_plane_endpoint | default('undefined') }}"
+
+- name: 'validate variable : cluster_pod_subnet'
+  assert:
+    that:
+      - cluster_pod_subnet | type_debug == 'AnsibleUnicode'
+      - cluster_pod_subnet | ipaddr
+    fail_msg:
+      - "Variable 'cluster_pod_subnet' should be of type AnsibleUnicode (string) and a valid CIDR (xx.xx.xx.xx/xx)"
+      - 'Type is: {{ cluster_pod_subnet | type_debug }}'
+      - "Value is: {{ cluster_pod_subnet | default('undefined') }}"
+  when:
+    - cluster_pod_subnet != "" # noqa 602
+
+- name: 'validate variable : cluster_etcd_heartbeat_interval'
+  assert:
+    that:
+      - cluster_etcd_heartbeat_interval | type_debug == 'int'
+    fail_msg:
+      - "Variable 'cluster_etcd_heartbeat_interval' should be of type 'int'"
+      - 'Type is: {{ cluster_etcd_heartbeat_interval | type_debug }}'
+      - "Value is: {{ cluster_etcd_heartbeat_interval | default('undefined') }}"
+
+- name: 'validate variable : cluster_etcd_election_timeout'
+  assert:
+    that:
+      - cluster_etcd_election_timeout | type_debug == 'int'
+    fail_msg:
+      - "Variable 'cluster_etcd_election_timeout' should be of type 'int'"
+      - 'Type is: {{ cluster_etcd_election_timeout | type_debug }}'
+      - "Value is: {{ cluster_etcd_election_timeout | default('undefined') }}"

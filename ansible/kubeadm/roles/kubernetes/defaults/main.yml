@@ -1,0 +1,4 @@
+---
+kubernetes_kubelet_version: 1.19.0-00
+kubernetes_kubeadm_version: 1.19.0-00
+kubernetes_kubectl_version: 1.19.0-00

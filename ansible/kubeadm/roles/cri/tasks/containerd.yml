@@ -1,0 +1,63 @@
+# Instructions: https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd
+---
+- name: copy containerd config file
+  copy:
+    src: containerd/containerd.conf
+    dest: '/etc/modules-load.d/containerd.conf'
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: load overlay
+  modprobe:
+    name: overlay
+    state: present
+
+- name: load br_netfilter
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: 'debian : add an apt signing key for docker'
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_os_family | lower == 'debian'
+
+# Hardcoding due to the 20.04 ubuntu dist not currently available.
+- name: 'debian : add apt repository for stable version'
+  apt_repository:
+    repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable
+    state: present
+  when: ansible_os_family | lower == 'debian'
+
+- name: 'debian : install containerd package'
+  apt:
+    name:
+      - containerd.io
+    state: present
+    update_cache: yes
+  when: ansible_os_family | lower == 'debian'
+
+- name: 'archlinux : install containerd package'
+  pacman:
+    name:
+      - containerd
+    state: present
+    update_cache: yes
+  when: ansible_os_family | lower == 'archlinux'
+
+- name: create containerd config directory
+  become: true
+  file:
+    path: /etc/containerd/
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: configure containerd
+  command:
+    cmd: containerd config default > /etc/containerd/config.toml
+    creates: /etc/containerd/config.toml
+  notify: restart containerd

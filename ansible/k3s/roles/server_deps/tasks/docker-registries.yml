@@ -1,0 +1,15 @@
+---
+- name: Ensure registries path is present
+  file:
+    path: /etc/rancher/k3s
+    state: directory
+
+- name: Copy registries configuration file for docker
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/rancher/k3s/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - registries.yaml

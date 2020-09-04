@@ -1,0 +1,136 @@
+---
+# Instructions: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+- name: add apt signing key for kubernetes (1/4)
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+# Removed the following repo due to stability issues: https://apt.kubernetes.io/
+- name: adding apt repository for kubernetes (2/4)
+  apt_repository:
+    repo: deb http://packages.cloud.google.com/apt/ kubernetes-xenial main
+    state: present
+  register: kubernetes_repository
+  retries: 10
+  until: kubernetes_repository is success
+
+# To downgrade these packages use the following apt options:
+#   dpkg_options: force-downgrade
+#   force: yes
+- name: install kubernetes packages (3/4)
+  apt:
+    name:
+      - kubelet={{ kubernetes_kubelet_version }}
+      - kubeadm={{ kubernetes_kubeadm_version }}
+      - kubectl={{ kubernetes_kubectl_version }}
+    state: present
+    force: yes
+    update_cache: yes
+  register: apt_install_kube
+  retries: 5
+  until: apt_install_kube is success
+
+- name: add apt-mark hold to avoid version skew issues. (4/4)
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - 'kubectl'
+    - 'kubelet'
+    - 'kubeadm'
+
+# Instructions: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#ensure-iptables-tooling-does-not-use-the-nftables-backend
+- name: install iptable packages
+  apt:
+    name:
+      - ebtables
+      - arptables
+    install_recommends: false
+    update_cache: true
+    force_apt_get: true
+  register: apt_install_iptabls
+  retries: 5
+  until: apt_install_iptabls is success
+
+- name: use arptables-legacy
+  alternatives:
+    name: arptables
+    path: /usr/sbin/arptables-legacy
+  failed_when: false
+
+- name: use ebtables-legacy
+  alternatives:
+    name: ebtables
+    path: /usr/sbin/ebtables-legacy
+  failed_when: false
+
+- name: use iptables-legacy
+  alternatives:
+    name: iptables
+    path: /usr/sbin/iptables-legacy
+  failed_when: false
+
+- name: use ip6tables-legacy
+  alternatives:
+    name: ip6tables
+    path: /usr/sbin/ip6tables-legacy
+  failed_when: false
+
+# Adding required Kubernetes cgroups
+- name: create the nobtcmd.txt file if it does not exist
+  become: true
+  file:
+    path: /boot/firmware/nobtcmd.txt
+    state: touch
+  when: ansible_architecture | regex_search('arm|aarch')
+
+- name: enable required cgroup features
+  lineinfile:
+    path: '{{ common_rpi_cmd_file }}'
+    state: present
+    backrefs: true
+    regexp: '^(.*fixrtc)$'
+    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+  notify: reboot hosts
+  when: ansible_architecture | regex_search('arm|aarch')
+
+# Set /proc/sys/net/bridge/bridge-nf-call-iptables to 1 by running
+# sysctl net.bridge.bridge-nf-call-iptables=1 to pass bridged IPv4 traffic to iptables’ chains.
+# This is a requirement for some CNI plugins to work.
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#letting-iptables-see-bridged-traffic
+
+# Ensure br_netfilter is loaded prior to attempting sysctl commands below
+- name: load br_netfilter
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Update bridged IPv4 traffic to iptables' chains
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+
+- name: Update bridged IPv4 traffic to ip6tables' chains
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+
+- name: Update bridged IPv4 traffic to arptables' chains
+  sysctl:
+    name: net.bridge.bridge-nf-call-arptables
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+
+# Required for containerd CRI prerequisites
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#prerequisites-1
+- name: Update bridged IPv4 traffic forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf

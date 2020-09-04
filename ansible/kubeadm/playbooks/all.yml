@@ -1,0 +1,4 @@
+---
+- import_playbook: common.yml
+# - import_playbook: masters.yml
+# - import_playbook: cluster.yml

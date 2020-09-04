@@ -1,0 +1,4 @@
+---
+common_timezone: America/New_York
+cri_plugin: containerd
+common_log2ram_enabled: false

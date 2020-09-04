@@ -1,0 +1,14 @@
+---
+- name: create longhorn lvm directory
+  file:
+    path: /var/lib/longhorn
+    state: directory
+
+- name: Include lvm
+  include_role:
+    name: mrlesmithjr.manage-lvm
+
+- name: Include NFS
+  include_role:
+    name: geerlingguy.nfs
+  when: "'nfs' in group_names"

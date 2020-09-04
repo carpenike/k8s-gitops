@@ -1,0 +1,12 @@
+---
+- src: xanmanning.k3s
+  version: v1.9.1
+
+- src: mrlesmithjr.manage-lvm
+  version: v0.2.0
+
+- src: geerlingguy.nfs
+  version: 1.6.0
+
+- src: cloudalchemy.node-exporter
+  version: 0.21.5

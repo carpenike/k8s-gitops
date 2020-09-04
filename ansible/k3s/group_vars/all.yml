@@ -1,0 +1,71 @@
+---
+# k3s options
+k3s_release_version: false
+k3s_no_traefik: true
+k3s_no_servicelb: true
+k3s_use_experimental: false
+k3s_control_workers: true
+k3s_cluster_cidr: "10.42.0.0/16"
+k3s_service_cidr: "10.43.0.0/16"
+k3s_use_docker: false
+k3s_no_flannel: true
+k3s_flannel_backend: "none"
+k3s_copy_config_local: true
+k3s_control_node_address: "k8s.holthome.net"
+k3s_master_lb: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"
+k3s_default_local_storage_path: "/dev/shm/k8s"
+k3s_become_for_all: true
+k3s_kubelet_args:
+  - feature-gates: ExternalPolicyForExternalIP=true
+  - max-pods: 500
+k3s_kube_apiserver_args:
+  - oidc-client-id: dex-k8s-authenticator
+  - oidc-groups-claim: groups
+  - oidc-issuer-url: https://dex.holthome.net
+  - oidc-username-claim: email
+k3s_kube_controller_manager_args:
+  - node-cidr-mask-size: 20
+
+# ansible options
+ansible_user: "ryan"
+local_user: "{{ ansible_user }}"
+
+# github options
+github_username: carpenike
+github_k8s_reponame: k8s-gitops
+github_k8s_reponame_branch: master
+
+# ceph options
+ceph:
+  converged: true
+  zap_disks: false
+  disks:
+    - /dev/sdb
+    - /dev/sdc
+    - /dev/sdd
+
+# Longhorn options
+storage:
+  type: longhorn
+
+# helm options
+helm_operator: enabled
+
+# server options
+timezone: America/New_York
+REPO_ROOT: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
+
+cni:
+  type: cilium # calico or cilium
+  podCIDR: "{{ k3s_cluster_cidr }}"
+  podMaskSize: 20
+  cilium:
+    helmVersion: 1.8.2
+    imageVersion: v1.8.2
+
+# Need to refactor calico ?
+# calico:
+#   operator_manifest_file: "https://docs.projectcalico.org/manifests/tigera-operator.yaml"
+#   bgp: enabled
+#   bgp_peer: 10.20.0.1
+#   bgp_as: 64512

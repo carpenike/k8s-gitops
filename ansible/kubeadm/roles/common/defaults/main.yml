@@ -1,0 +1,27 @@
+---
+common_packages: []
+common_upgrade_packages: true # Set to false to not run package upgrades
+common_reboot_handler_enabled: true # Set to false to not reboot after changes
+common_timezone: UTC
+
+common_usb_ssd_enabled: false # Set to true when having issues with the USB SSD disconnecting, currently ArchLinux only
+common_usb_ssd_device_id: "" # Device ID output from 'lsusb', prefixed with 0x, e.g.: '174c:55aa' -> '0x174c:0x55aa'
+
+common_rpi_cmd_file: /boot/firmware/cmdline.txt # For kernel arguments
+common_rpi_config_file: /boot/firmware/syscfg.txt # For RPi configuration
+
+common_rpi_gpu_memory: 16 # https://www.raspberrypi.org/documentation/configuration/config-txt/memory.md
+
+common_rpi_overclock: false # https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md
+common_rpi_overvoltage: 6 # See above mentioned docs
+common_rpi_arm_frequency: 2000 # CPU Frequency in MHz
+
+common_rpi_poe_hat: false # Set to true when you have a PoE Hat and would like to configure the fan settings
+common_rpi_poe_fan_temp0: 45000 # Temperature in millicelcius
+common_rpi_poe_fan_temp1: 50000 # Temperature in millicelcius
+common_rpi_poe_fan_temp2: 55000 # Temperature in millicelcius
+common_rpi_poe_fan_temp3: 60000 # Temperature in millicelcius
+
+common_log2ram_enabled: true # Set to false to skip installing log2ram
+common_log2ram_version: v1.4
+common_log2ram_size: 128M

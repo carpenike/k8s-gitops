@@ -1,0 +1,54 @@
+---
+- name: generate kubeadm token
+  kubeadm_generate:
+    kind: token
+  register: token
+  run_once: true
+  when: kubeadm_join_token is not defined
+
+- name: set kubeadm token fact
+  set_fact:
+    kubeadm_join_token: "{{ token.generated }}"
+  run_once: true
+  when: kubeadm_join_token is not defined
+
+- name: generate kubeadm certificate key
+  kubeadm_generate:
+    kind: certificate-key
+  register: certificate_key
+  run_once: true
+  when: kubeadm_certificate_key is not defined
+
+- name: set certificate-key fact
+  set_fact:
+    kubeadm_certificate_key: "{{ certificate_key.generated }}"
+  run_once: true
+  when: kubeadm_certificate_key is not defined
+
+- name: upload certificates
+  command: # noqa 301
+    cmd: "kubeadm init phase upload-certs --upload-certs --certificate-key {{ kubeadm_certificate_key }}"
+  run_once: true
+  delegate_to: "{{ cluster_main_master }}"
+  when: not cluster_initialized | default(False)
+
+- name: create join token
+  command: # noqa 301
+    cmd: "kubeadm token create --ttl 1h --description 'created by ansible' {{ kubeadm_join_token }}"
+  run_once: true
+  delegate_to: "{{ cluster_main_master }}"
+  when: not cluster_initialized | default(False)
+
+- name: get sha256 of ca certificate
+  openssl_certificate_info:
+    path: /etc/kubernetes/pki/ca.crt
+  register: cluster_ca_cert
+  run_once: true
+  delegate_to: "{{ cluster_main_master }}"
+  when: cluster_ca_sha256 is not defined
+
+- name: set cluster ca cert sha256
+  set_fact:
+    cluster_ca_sha256: "{{ cluster_ca_cert.public_key_fingerprints.sha256 | regex_replace(':') }}"
+  run_once: true
+  when: cluster_ca_sha256 is not defined

@@ -1,0 +1,65 @@
+---
+- name: generate kubeadm token
+  kubeadm_generate:
+    kind: token
+  register: token
+
+- name: generate kubeadm certificate key
+  kubeadm_generate:
+    kind: certificate-key
+  register: certificate_key
+
+- name: set kubeadm token and certificate-key fact
+  set_fact:
+    kubeadm_join_token: "{{ token.generated }}"
+    kubeadm_certificate_key: "{{ certificate_key.generated }}"
+  run_once: true
+
+- name: set cluster initialize fact
+  set_fact:
+    cluster_initialized: true
+  run_once: true
+
+- name: generate kubeadm configuration
+  template:
+    src: kubeadm-init.yml.j2
+    dest: /etc/kubernetes/kubeadm-init.yml
+
+- name: initialize cluster
+  command:
+    cmd: kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs
+    creates: /etc/kubernetes/admin.conf
+
+- name: get sha256 of ca certificate
+  openssl_certificate_info:
+    path: /etc/kubernetes/pki/ca.crt
+  register: cluster_ca_cert
+
+- name: set cluster ca cert sha256
+  set_fact:
+    cluster_ca_sha256: "{{ cluster_ca_cert.public_key_fingerprints.sha256 | regex_replace(':') }}"
+  run_once: true
+
+- name: create kubectl config directory
+  file:
+    path: /root/.kube/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: copy admin.conf to kubectl config directory
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    owner: root
+    group: root
+    mode: 0755
+    remote_src: yes
+    backup: yes
+
+- name: Copy Kubernetes config locally
+  fetch:
+    dest: output/k8s-config.yaml
+    flat: yes
+    src: /etc/kubernetes/admin.conf

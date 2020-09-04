@@ -1,0 +1,21 @@
+---
+# Role: common
+common_packages:
+  - apt-transport-https
+  - curl
+  - gdisk
+  - python-simplejson
+  - htop
+  - unzip
+  - glances
+  - iotop
+  - jq
+  - lvm2
+  - vim
+  - python3-openssl
+  - nethogs
+  - iperf3
+  - nfs-common
+  - open-iscsi
+  - neofetch
+  - net-tools

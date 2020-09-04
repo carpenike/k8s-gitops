@@ -1,0 +1,5 @@
+---
+cluster_main_master: "{{ groups['masters'][0] }}"
+cluster_etcd_datadir: /var/lib/etcd
+cluster_image_repository: k8s.gcr.io
+cluster_service_subnet: 10.43.0.0/12

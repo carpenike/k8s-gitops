@@ -1,0 +1,136 @@
+---
+- name: 'validate variable : common_packages'
+  assert:
+    that:
+      - common_packages | type_debug == 'list'
+    fail_msg:
+      - "Variable 'common_packages' should be of type 'list'"
+      - 'Type is: {{ common_packages | type_debug }}'
+      - "Value is: {{ common_packages | default('undefined') }}"
+
+- name: 'validate variable : common_log2ram_enabled'
+  assert:
+    that:
+      - common_log2ram_enabled | type_debug == 'bool'
+    fail_msg:
+      - "Variable 'common_log2ram_enabled' should be of type 'bool'"
+      - 'Type is: {{ common_log2ram_enabled | type_debug }}'
+      - "Value is: {{ common_log2ram_enabled | default('undefined') }}"
+
+- name: 'validate variable : common_timezone'
+  assert:
+    that:
+      - common_timezone | type_debug == 'AnsibleUnicode'
+    fail_msg:
+      - "Variable 'common_timezone' should be of type AnsibleUnicode (string)"
+      - 'Type is: {{ common_timezone | type_debug }}'
+      - "Value is: {{ common_timezone | default('undefined') }}"
+
+- name: 'validate variable : common_usb_ssd_enabled'
+  assert:
+    that:
+      - common_usb_ssd_enabled | type_debug == 'bool'
+    fail_msg:
+      - "Variable 'common_usb_ssd_enabled' should be of type 'bool'"
+      - 'Type is: {{ common_usb_ssd_enabled | type_debug }}'
+      - "Value is: {{ common_usb_ssd_enabled | default('undefined') }}"
+
+- name: 'validate variable : common_usb_ssd_device_id'
+  assert:
+    that:
+      - common_usb_ssd_device_id | type_debug == 'AnsibleUnicode'
+    fail_msg:
+      - "Variable 'common_usb_ssd_device_id' should be of type AnsibleUnicode (string)"
+      - 'Type is: {{ common_usb_ssd_device_id | type_debug }}'
+      - "Value is: {{ common_usb_ssd_device_id | default('undefined') }}"
+
+
+- name: 'validate variable : common_rpi_cmd_file'
+  assert:
+    that:
+      - common_rpi_cmd_file | type_debug == 'AnsibleUnicode'
+    fail_msg:
+      - "Variable 'common_rpi_cmd_file' should be of type AnsibleUnicode (string)"
+      - 'Type is: {{ common_rpi_cmd_file | type_debug }}'
+      - "Value is: {{ common_rpi_cmd_file | default('undefined') }}"
+
+- name: 'validate variable : common_rpi_config_file'
+  assert:
+    that:
+      - common_rpi_config_file | type_debug == 'AnsibleUnicode'
+    fail_msg:
+      - "Variable 'common_rpi_config_file' should be of type AnsibleUnicode (string)"
+      - 'Type is: {{ common_rpi_config_file | type_debug }}'
+      - "Value is: {{ common_rpi_config_file | default('undefined') }}"
+
+- name: 'validate variable : common_rpi_gpu_memory'
+  assert:
+    that:
+      - common_rpi_gpu_memory | type_debug == 'int'
+      - common_rpi_gpu_memory >= 16
+      - common_rpi_gpu_memory <= 944
+    fail_msg:
+      - "Variable 'common_rpi_gpu_memory' should be of type 'int' between 16 and 944"
+      - 'Type is: {{ common_rpi_gpu_memory | type_debug }}'
+      - "Value is: {{ common_rpi_gpu_memory | default('undefined') }}"
+
+- name: 'validate variable : common_rpi_overclock'
+  assert:
+    that:
+      - common_rpi_overclock | type_debug == 'bool'
+    fail_msg:
+      - "Variable 'common_rpi_overclock' should be of type 'bool'"
+      - 'Type is: {{ common_rpi_overclock | type_debug }}'
+      - "Value is: {{ common_rpi_overclock | default('undefined') }}"
+
+- name: 'validate variable : common_rpi_overvoltage'
+  assert:
+    that:
+      - common_rpi_overvoltage | type_debug == 'int'
+      - common_rpi_overvoltage >= -16
+      - common_rpi_overvoltage <= 6
+    fail_msg:
+      - "Variable 'common_rpi_overvoltage' should be of type 'int' between -16 and 6"
+      - 'Type is: {{ common_rpi_overvoltage | type_debug }}'
+      - "Value is: {{ common_rpi_overvoltage | default('undefined') }}"
+
+- name: 'validate variable : common_rpi_arm_frequency'
+  assert:
+    that:
+      - common_rpi_arm_frequency | type_debug == 'int'
+    fail_msg:
+      - "Variable 'common_rpi_arm_frequency' should be of type 'int'"
+      - 'Type is: {{ common_rpi_arm_frequency | type_debug }}'
+      - "Value is: {{ common_rpi_arm_frequency | default('undefined') }}"
+
+- name: 'validate variable : common_reboot_handler_enabled'
+  assert:
+    that:
+      - common_reboot_handler_enabled | type_debug == 'bool'
+    fail_msg:
+      - "Variable 'common_reboot_handler_enabled' should be of type 'bool'"
+      - 'Type is: {{ common_reboot_handler_enabled | type_debug }}'
+      - "Value is: {{ common_reboot_handler_enabled | default('undefined') }}"
+
+- name: 'validate variable : common_upgrade_packages'
+  assert:
+    that:
+      - common_upgrade_packages | type_debug == 'bool'
+    fail_msg:
+      - "Variable 'common_upgrade_packages' should be of type 'bool'"
+      - 'Type is: {{ common_upgrade_packages | type_debug }}'
+      - "Value is: {{ common_upgrade_packages | default('undefined') }}"
+
+- name: 'validate variable types'
+  assert:
+    that:
+      - vars[item.variable] | type_debug == item.type
+    fail_msg:
+      - "Variable '{{ item.variable }}' should be of type '{{ item.type }}'"
+      - "Type is: {{ vars[item.variable] | type_debug }}"
+      - "Value is: {{ vars[item.variable] | default('undefined') }}"
+  loop:
+    - { variable: 'common_rpi_poe_fan_temp0', type: 'int'}
+    - { variable: 'common_rpi_poe_fan_temp1', type: 'int'}
+    - { variable: 'common_rpi_poe_fan_temp2', type: 'int'}
+    - { variable: 'common_rpi_poe_fan_temp3', type: 'int'}

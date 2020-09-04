@@ -1,0 +1,41 @@
+---
+- name: disable swap since kubernetes can't work with swap enabled (1/2)
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: disable swap in /etc/fstab since kubernetes can't work with swap enabled (2/2)
+  mount:
+    name: '{{ item }}'
+    fstype: swap
+    state: absent
+  loop:
+    - swap
+    - none
+
+- name: start time services
+  service:
+    name: systemd-timesyncd
+    state: started
+    enabled: yes
+
+- name: run timedatectl status
+  command: /usr/bin/timedatectl show
+  changed_when: False
+  check_mode: no
+  register: timedatectl_result
+
+- name: copy timesyncd config
+  copy:
+    content: |
+      [Time]
+      NTP={{ common_ntp_servers | join(' ') }}
+      FallbackNTP={{ common_fallback_ntp_servers | join(' ') }}
+    dest: /etc/systemd/timesyncd.conf
+
+- name: set timezone
+  command: "/usr/bin/timedatectl set-timezone {{ common_timezone }}"
+  when: common_timezone not in timedatectl_result.stdout_lines[0]
+
+- name: enable ntp
+  command: /usr/bin/timedatectl set-ntp true
+  when: "'NTP=no' in timedatectl_result.stdout"
