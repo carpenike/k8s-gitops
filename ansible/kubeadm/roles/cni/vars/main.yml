@@ -1,0 +1,7 @@
+---
+cni_main_master: "{{ groups['masters'][0] }}"
+cni_supported_plugins:
+  - calico
+  - flannel
+  - weave
+  - cilium

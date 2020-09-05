@@ -1,0 +1,9 @@
+---
+- name: preflight checks
+  include_tasks: pre_checks.yml
+  run_once: true
+
+# Instructions: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network
+- name: 'setup {{ cni_plugin }} container network interface (cni)'
+  include_tasks: '{{ cni_plugin }}.yml'
+  when: inventory_hostname == cluster_main_master

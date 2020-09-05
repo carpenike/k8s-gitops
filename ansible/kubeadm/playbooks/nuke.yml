@@ -1,0 +1,59 @@
+---
+- hosts:
+    - masters
+    - workers
+  become: true
+  gather_facts: true
+  vars_prompt:
+    name: "nuke_confirmation"
+    prompt: "Are you sure you want to run this playbook? This will DESTROY your cluster. Answer with 'YES'"
+    default: "NO"
+    private: no
+  any_errors_fatal: yes
+  tasks:
+    - name: check confirmation
+      fail: msg="playbook run confirmation failed"
+      when: nuke_confirmation != "YES"
+
+    - name: reset kubeadm
+      command:
+        cmd: kubeadm reset --force
+        removes: /etc/kubernetes/kubelet.conf
+      register: kubeadm_reset
+      retries: 5
+      until: kubeadm_reset is success
+
+    - name: reset iptables
+      command: # noqa 301
+        cmd: "{{ item }}"
+      loop:
+        - iptables -P INPUT ACCEPT
+        - iptables -P FORWARD ACCEPT
+        - iptables -P OUTPUT ACCEPT
+        - iptables -t nat -F
+        - iptables -t mangle -F
+        - iptables -F
+        - iptables -X
+
+    - name: remove cni net.d folder
+      file:
+        path: /etc/cni/net.d
+        state: absent
+
+    - name: remove apt-mark hold
+      dpkg_selections:
+        name: "{{ item }}"
+        selection: purge
+      loop:
+        - 'kubectl'
+        - 'kubelet'
+        - 'kubeadm'
+      when: ansible_os_family | lower == 'debian'
+
+    # Issue caused when OpenEBS hasn't grafefully performed garbage collection when cluster is nuked.
+    # This ensures the directory is not left in a corrupted state:
+    # https://kubernetes.slack.com/archives/CUAKPFU78/p1597059291191700?thread_ts=1597053760.188200&cid=CUAKPFU78
+    - name: remove openebs directory
+      file:
+        path: /var/openebs
+        state: absent
