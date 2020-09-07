@@ -18,13 +18,13 @@
   notify:
     - restart kubelet
 
-# - name: systemd kubelet after docker drop-in
-#   copy:
-#     dest: /etc/systemd/system/kubelet.service.d/12-after-docker.conf
-#     mode: 0755
-#     src: 12-after-docker.conf
-#   notify:
-#     - restart kubelet
+- name: systemd kubelet after docker drop-in
+  copy:
+    dest: /etc/systemd/system/kubelet.service.d/12-after-docker.conf
+    mode: 0755
+    src: 12-after-docker.conf
+  notify:
+    - restart kubelet
 
 - name: kubelet defaults file
   template:

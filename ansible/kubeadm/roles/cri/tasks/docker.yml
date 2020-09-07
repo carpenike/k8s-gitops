@@ -8,7 +8,7 @@
 
 - name: 'debian : add apt repository for stable version'
   apt_repository:
-    repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+    repo: deb https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
     state: present
   when: ansible_os_family | lower == 'debian'
 

@@ -9,3 +9,4 @@
   roles:
     - cluster
     - cni
+    - helm-operator

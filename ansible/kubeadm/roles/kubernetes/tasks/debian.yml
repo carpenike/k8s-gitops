@@ -40,41 +40,41 @@
     - 'kubeadm'
 
 # Instructions: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#ensure-iptables-tooling-does-not-use-the-nftables-backend
-- name: install iptable packages
-  apt:
-    name:
-      - ebtables
-      - arptables
-    install_recommends: false
-    update_cache: true
-    force_apt_get: true
-  register: apt_install_iptabls
-  retries: 5
-  until: apt_install_iptabls is success
+# - name: install iptable packages
+#   apt:
+#     name:
+#       - ebtables
+#       - arptables
+#     install_recommends: false
+#     update_cache: true
+#     force_apt_get: true
+#   register: apt_install_iptabls
+#   retries: 5
+#   until: apt_install_iptabls is success
 
-- name: use arptables-legacy
-  alternatives:
-    name: arptables
-    path: /usr/sbin/arptables-legacy
-  failed_when: false
+# - name: use arptables-legacy
+#   alternatives:
+#     name: arptables
+#     path: /usr/sbin/arptables-legacy
+#   failed_when: false
 
-- name: use ebtables-legacy
-  alternatives:
-    name: ebtables
-    path: /usr/sbin/ebtables-legacy
-  failed_when: false
+# - name: use ebtables-legacy
+#   alternatives:
+#     name: ebtables
+#     path: /usr/sbin/ebtables-legacy
+#   failed_when: false
 
-- name: use iptables-legacy
-  alternatives:
-    name: iptables
-    path: /usr/sbin/iptables-legacy
-  failed_when: false
+# - name: use iptables-legacy
+#   alternatives:
+#     name: iptables
+#     path: /usr/sbin/iptables-legacy
+#   failed_when: false
 
-- name: use ip6tables-legacy
-  alternatives:
-    name: ip6tables
-    path: /usr/sbin/ip6tables-legacy
-  failed_when: false
+# - name: use ip6tables-legacy
+#   alternatives:
+#     name: ip6tables
+#     path: /usr/sbin/ip6tables-legacy
+#   failed_when: false
 
 # Adding required Kubernetes cgroups
 - name: create the nobtcmd.txt file if it does not exist
