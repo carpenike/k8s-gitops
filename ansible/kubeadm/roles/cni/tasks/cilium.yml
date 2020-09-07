@@ -33,6 +33,7 @@
 #     --set global.nativeRoutingCIDR="{{ cluster_pod_subnet }}" \
 #     --set global.externalIPs.enabled="true" \
 #     --set global.ipam.operator.clusterPoolIPv4PodCIDR="{{ cluster_pod_subnet }}" \
+#     --set global.ipam.operator.clusterPoolIPv4MaskSize="24" \
 #     --set global.kubeProxyReplacement=strict \
 #     --set global.k8sServiceHost=10.20.10.16 \
 #     --set global.k8sServicePort=6443 \

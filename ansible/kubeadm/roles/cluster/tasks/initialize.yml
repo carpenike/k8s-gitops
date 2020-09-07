@@ -27,7 +27,7 @@
 
 - name: initialize cluster
   command:
-    #cmd: kubeadm init --skip-phases=addon/kube-proxy --config /etc/kubernetes/kubeadm-init.yml --upload-certs
+    # cmd: kubeadm init --skip-phases=addon/kube-proxy --config /etc/kubernetes/kubeadm-init.yml --upload-certs
     cmd: kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs
     creates: /etc/kubernetes/admin.conf
 
