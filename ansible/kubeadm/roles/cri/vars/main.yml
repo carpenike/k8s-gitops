@@ -1,8 +1,0 @@
----
-cri_supported_os_families:
-  - debian
-  - archlinux
-
-cri_supported_plugins:
-  - docker
-  - containerd

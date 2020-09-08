@@ -1,4 +1,0 @@
-- name: include crd files
-  include_tasks: crds.yml
-  when:
-    - inventory_hostname == cluster_main_master

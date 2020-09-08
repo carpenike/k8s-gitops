@@ -1,7 +1,0 @@
----
-
-- hosts: vault
-  gather_facts: yes
-  become: no
-  roles:
-    - { role: vault }

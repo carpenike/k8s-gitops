@@ -1,6 +1,0 @@
----
-
-- include: calico.yml
-  when: cni.type == "calico"
-- include: cilium.yml
-  when: cni.type == "cilium"

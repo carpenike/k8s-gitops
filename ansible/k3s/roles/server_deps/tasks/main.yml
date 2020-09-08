@@ -1,9 +1,0 @@
----
-- include: basics.yml
-- include: user.yml
-# - include: firewall.yml
-- include: network.yml
-- include: disks.yml
-  when: storage.type == "longhorn"
-- include: docker-registries.yml
-  when: "'k3s_cluster' in group_names"

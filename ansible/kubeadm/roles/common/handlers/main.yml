@@ -1,6 +1,0 @@
----
-- name: "reboot hosts"
-  reboot:
-    msg: "Nodes are being rebooted"
-    reboot_timeout: '{{ reboot_timeout | default(600) }}'
-  when: common_reboot_handler_enabled

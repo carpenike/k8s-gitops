@@ -1,5 +1,0 @@
----
-- name: applying calico
-  command:
-    cmd: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-    creates: /etc/cni/net.d/10-calico.conflist

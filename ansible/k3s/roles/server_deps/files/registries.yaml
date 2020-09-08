@@ -1,7 +1,0 @@
-mirrors:
-  "docker.io":
-    endpoint:
-      - "http://10.20.10.18:8082"
-  "*":
-    endpoint:
-      - "http://10.20.10.18:8082"
