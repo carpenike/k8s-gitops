@@ -24,7 +24,7 @@ spec:
     serviceMonitor:
       create: true
     service:
-      type: NodePort
+      type: ClusterIP
       externalIPs:
       - 10.45.10.11
       ws:
