@@ -50,3 +50,15 @@ spec:
   ingress:
     - fromEndpoints:
         - {}
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "allow-all-from-httpbin"
+spec:
+  endpointSelector:
+    matchLabels:
+      app: httpbin
+  egress:
+    - toEndpoints:
+        - {}
