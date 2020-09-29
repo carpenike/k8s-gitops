@@ -24,7 +24,7 @@ spec:
     serviceMonitor:
       create: true
     service:
-      type: ClusterIP
+      type: LoadBalancer
       externalIPs:
       - 10.45.10.11
       ws:
