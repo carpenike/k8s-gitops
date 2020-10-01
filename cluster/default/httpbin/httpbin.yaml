@@ -7,8 +7,7 @@ metadata:
     app: httpbin
 spec:
   type: LoadBalancer
-  externalIPs:
-    - 10.45.10.75
+  LoadBalancerIP: 10.45.10.75
   ports:
     - name: http
       port: 8000
