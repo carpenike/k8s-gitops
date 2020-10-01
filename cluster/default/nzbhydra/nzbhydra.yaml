@@ -25,6 +25,11 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+      hosts:
+        - nzbhydra.holthome.net
+      tls:
+        - hosts:
+            - nzbhydra.holthome.net
     timezone: "America/New_York"
     persistence:
       config:
@@ -32,5 +37,3 @@ spec:
         storageClass: longhorn
     uid: 1000
     gid: 1000
-  valueFileSecrets:
-    - name: "nzbhydra-helm-values"
