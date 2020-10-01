@@ -6,7 +6,9 @@ metadata:
   labels:
     app: httpbin
 spec:
-  type: ClusterIP
+  type: LoadBalancer
+  externalIPs:
+    - 10.45.10.75
   ports:
     - name: http
       port: 8000
@@ -38,27 +40,27 @@ spec:
           ports:
             - containerPort: 80
 
----
-apiVersion: "cilium.io/v2"
-kind: CiliumNetworkPolicy
-metadata:
-  name: "allow-all-to-httpbin"
-spec:
-  endpointSelector:
-    matchLabels:
-      app: httpbin
-  ingress:
-    - fromEndpoints:
-        - {}
----
-apiVersion: "cilium.io/v2"
-kind: CiliumNetworkPolicy
-metadata:
-  name: "allow-all-from-httpbin"
-spec:
-  endpointSelector:
-    matchLabels:
-      app: httpbin
-  egress:
-    - toEndpoints:
-        - {}
+# ---
+# apiVersion: "cilium.io/v2"
+# kind: CiliumNetworkPolicy
+# metadata:
+#   name: "allow-all-to-httpbin"
+# spec:
+#   endpointSelector:
+#     matchLabels:
+#       app: httpbin
+#   ingress:
+#     - fromEndpoints:
+#         - {}
+# ---
+# apiVersion: "cilium.io/v2"
+# kind: CiliumNetworkPolicy
+# metadata:
+#   name: "allow-all-from-httpbin"
+# spec:
+#   endpointSelector:
+#     matchLabels:
+#       app: httpbin
+#   egress:
+#     - toEndpoints:
+#         - {}

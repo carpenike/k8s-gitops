@@ -1,0 +1,48 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: metallb
+  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "true"
+spec:
+  releaseName: metallb
+  helmVersion: v3
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: metallb
+    version: 0.12.0
+  values:
+    configInline:
+      peers:
+      - peer-address: 10.20.0.1
+        peer-asn: 64512
+        my-asn: 64513
+      address-pools:
+      - name: bgp
+        protocol: bgp
+        addresses:
+        - 10.45.10.0/24
+        avoid-buggy-ips: true
+    prometheus:
+      serviceMonitor:
+        enabled: true
+      prometheusRule:
+        enabled: true
+    controller:
+      image:
+        repository: metallb/controller
+        tag: v0.9
+      tolerations:
+      - key: "arm"
+        operator: "Exists"
+    speaker:
+      image:
+        repository: metallb/speaker
+        tag: v0.9
+      tolerations:
+      - key: "arm"
+        operator: "Exists"
+      - key: "armhf"
+        operator: "Exists"
