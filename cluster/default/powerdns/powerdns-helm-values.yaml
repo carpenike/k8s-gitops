@@ -1,14 +1,11 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: powerdns-helm-values
-  namespace: default
 spec:
-  encryptedData:
-    values.yaml: AgAFleZ2tvFZMVFnR2CRMVBnZFgqAVnsO+z00pN8VOOCSN5BuGW3XoYFO8UE6NL9NC2go+Oauz2W/KCKdQ+h8B0OckhMho09UcYd/qrttO2y/v9mtpdMxH+INTbnaJzqRMfjkcld30Rf+N2qZUQmXkyGaEw2AHJZlbeQjC9Uo/qxmmIwPtrGYa5PPAEQ4LCeQVr95Fk3CjKd2gxs1H9YsWJOyJ3JYdgwo3cHpcw1yYjHMivAr1olHzsjqFpudSBuxsAZcQjir7LRJpq4CcSxK9dLq/smFHvYHOy1HtLGRxRPef9CwZJPZVUcyeUZnh7fZRxPn3S3r6bcUEUbE8kX7279/c/LB9AsqPm4WR+loseMWE8vbsX+yeCNLncygyVmhIyFgkKn03yGOw6uhWnq4HHpzP619upxSVCRuAVk2fsm116Nfb2JPwo7Velu1V1Coj9byPaT0Q+3Dqh5T6hr2RM/9O4RH4PHdT3Vs8owOXRja6vh72uxMPfCBcBBqoptMmReRgSt7j2kC/62tx4k8BkZ65Sc/IshaoFfzuIo4NuNf6EGdIvFUv6ydSfKzcdVlfADiYMJ+AzC4lT/aZQBVdMspqQXPcLUA6hZ3iGsbv04jfx/IBvCjJf1f5Q+C6mvoDCm1f17F0mN9oPZXn99SYw1B0S58JLe5J/9n+aN8XsGMnM5AoqbdrfIzy6RpJBqQMCGiDVH8yCbnPZzQ74VEcI3zNMepN41IdYEoKXpOprPr4AeS5jWxuGQuaFWeA+6rkoHdk5kWP23bjhr5z8a6EYcVci7429Jg19oVufeXkVwz/5TbcSwER1oQsS95gywRxxpJNRrYo5ppCIK1sbY9NRMYA2ZanFqRU5Ifp6I8vVSbOptqtPMewDqpoUxPc4SF0b6q3X5hTqBQ5B1QTUYRCFpHMOMJoP3zn+uGZIZ+uHjJ7Q6xssWNf3JsXSVIfETdqNnIXJ6I7pC01Nzl5tu5oTLJEol/BK+Fz6Q8ubw4k1Z10csQlEPWGIEPRrXWVzkAB4nhHWwQJmZffx12NjhCZyD+nf+8oVD0Ua0GHuU0qywUwNtmS9KahzKCTyXraap9ifFnybTE4W7Fvzn51KZ1lqw
-  template:
-    metadata:
-      creationTimestamp: null
-      name: powerdns-helm-values
-      namespace: default
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: powerdns-helm-values
+      name: values.yaml
+      property: value

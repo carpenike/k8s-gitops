@@ -1,14 +1,12 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: powerdns-api-key
   namespace: kube-system
 spec:
-  encryptedData:
-    pdns_api_key: AgCbOlwFcuZGFTSWVI06DSxTvSnHP2yB0dRlU7kaNnkgNRSt3/8w0UBwJsSwNVs1uvfc0fcDYHwzpc7h2xnK6JMCCWrUMM+ln0M9plqsh/+c/XNx07ckHpulkQnV3WjaZHrZnZbwKDjVunf5D7y/5hefSMTRhzYZ+IbQHXJ+hrHI1V9ntBpSRWmu5dpqnjsb8fg3PIkE1BfjtqhokPKxP8vfq/g7kBjEq+xPvRQFTvjrm8Kk3Ek+MUNFvCRWYRcWnk3D06E7JS0zqCLtROupXg7Lq0yZoAn1wk7iJQoy7YMQZFWQ9NNEVVo+X5o8fFxLjXCVJxfFegX/E9PuLlAH7jXXMYu0K3QhzGcYHv7mmmJJbwacWdk3/nOhEPLJEJgC+xl2JHrXLVLNegtbc+luqINzdCMYvTi+w0FBmd5EVEzJ8B2tWms89qsNKX9zrFw+Z6LNFW1iAlkNuvkb8H7fuxQt9mEcC3Khx7Wz7W3797uX6g08B4Q6n/AkueBVNJ5ihDO4mCquc7gBvrqryfA7gJ2waWvCxzOfBrpw1+AvOptb2t0lxyuLQzsq7cGqCWrcnST5y0S6M2rD/84RXzQq0lism82Wp9WPTMvDw1YRYE+VndFXrfJdg0Lf/064taEDwZ9cI2ZTDN6354uhktDqwvAkBNEuychkuem5etXzsOu9n1LJ8K2QlR02RxhwYOypErNfK/2Owh+tUcii/Wb2XDVTGN5vUPqXK10=
-  template:
-    metadata:
-      creationTimestamp: null
-      name: powerdns-api-key
-      namespace: kube-system
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: pdns-api-key
+      name: pdns_api_key
+      property: value
