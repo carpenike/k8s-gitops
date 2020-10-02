@@ -21,6 +21,7 @@ spec:
     ref: master
     path: stable/coredns
   values:
+    nameOverride: coredns
     rbac:
       create: true
     replicaCount: 1
