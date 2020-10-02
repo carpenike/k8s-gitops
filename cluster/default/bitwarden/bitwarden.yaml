@@ -16,6 +16,8 @@ spec:
     name: bitwarden-k8s
     version: 0.1.5
   values:
+    nameOverride: bitwarden
+    fullnameOverride: bitwarden
     image:
       repository: bitwardenrs/server
       tag: latest
