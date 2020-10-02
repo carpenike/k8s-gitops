@@ -14,7 +14,7 @@ spec:
   chart:
     git: https://github.com/cdwv/bitwarden-k8s
     ref: master
-    path: .
+    path: chart/bitwarden-k8s
     version: 0.1.5
   values:
     image:
