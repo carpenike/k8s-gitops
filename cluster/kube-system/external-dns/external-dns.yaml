@@ -18,12 +18,18 @@ spec:
     image:
       repository: bitnami/external-dns
       tag: 0.7.3-debian-10-r11
-    provider: pdns
+    # provider: pdns
+    provider: coredns
+    coredns:
+      etcdEndpoints: https://10.20.10.16:2379
+      etcdTLS:
+        enabled: true
+        secretName: default/coredns-etcd-secret
     policy: sync
-    pdns:
-      apiUrl: http://powerdns-webserver.default.svc.cluster.local
-      secretName: powerdns-api-key
-      apiPort: 8081
+    # pdns:
+    #   apiUrl: http://powerdns-webserver.default.svc.cluster.local
+    #   secretName: powerdns-api-key
+    #   apiPort: 8081
     sources:
       - service
       - ingress
