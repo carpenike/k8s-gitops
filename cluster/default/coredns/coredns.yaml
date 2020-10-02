@@ -71,5 +71,5 @@ spec:
       monitor:
         enabled: true
     extraSecrets:
-      name: coredns-etcd-secret
-      mountPath: /etc/coredns
+    - name: coredns-etcd-secret
+      mountPath: /etc/coredns/coredns-etcd-secret
