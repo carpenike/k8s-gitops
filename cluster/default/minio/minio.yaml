@@ -27,6 +27,7 @@ spec:
     persistence:
       existingClaim: "nfs-tank-share-pvc"
       subPath: "minio"
+    existingSecret: minio-secret
     ingress:
       enabled: false
     metrics:
@@ -45,5 +46,3 @@ spec:
       limits:
         memory: 500Mi
         cpu: 49m
-  valueFileSecrets:
-    - name: "minio-helm-values"
