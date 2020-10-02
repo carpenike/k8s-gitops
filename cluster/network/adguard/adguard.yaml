@@ -44,6 +44,9 @@ spec:
         - adguard.holthome.net
     service:
       type: LoadBalancer
+      externalTrafficPolicy: Local
+      externalIPs:
+      - 10.45.10.13
     serviceTCP:
       enabled: true
       externalTrafficPolicy: Local
