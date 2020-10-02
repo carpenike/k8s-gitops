@@ -25,7 +25,7 @@ spec:
       repository: drnic/kubectl
       tag: 1.16
     persistence:
-      existingClaim: "nfs-tank-share-pvc"
+      existingClaim: "nfs-tmp-pvc"
       subPath: "minio"
     existingSecret: minio-secret
     ingress:

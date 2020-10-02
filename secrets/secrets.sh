@@ -7,10 +7,13 @@ need() {
     which "$1" &>/dev/null || die "Binary '$1' is missing but required"
 }
 
-need "kubeseal"
 need "kubectl"
 need "sed"
 need "envsubst"
+need "az"
+
+# Login to Azure
+az login --service-principal --username "$AZURE_KEVYAULT_CLIENT_ID" --password "$AZURE_KEVYAULT_CLIENT_SECRET" --tenant "$AZURE_KEVYAULT_TENANT_ID" > /dev/null
 
 if [ "$(uname)" == "Darwin" ]; then
   set -a
@@ -19,8 +22,6 @@ if [ "$(uname)" == "Darwin" ]; then
 else
   . "${REPO_ROOT}/secrets/.secrets.env"
 fi
-
-PUB_CERT="${REPO_ROOT}/secrets/pub-cert.pem"
 
 # Helper function to generate secrets
 kseal() {
@@ -39,13 +40,8 @@ kseal() {
   echo "Namespace: ${namespace}"
   # Create secret and put it in the applications deployment folder
   # e.g. "deployments/default/pihole/pihole-helm-values.yaml"
-  envsubst < "$@" | tee values.yaml \
-    | \
-  kubectl -n "${namespace}" create secret generic "${secret_name}" \
-    --from-file=values.yaml --dry-run=true -o json \
-    | \
-  kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "${secret}.yaml"
+  envsubst < "$@" | tee values.yaml > /dev/null
+  az keyvault secret set --name "${secret_name}" --vault-name holthome --file values.yaml > /dev/null
   # Clean up temp file
   rm values.yaml
 }
@@ -63,45 +59,45 @@ kseal() {
 
 kseal "${REPO_ROOT}/cluster/default/minio/minio-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/default/blocky/blocky-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/nzbget/nzbget-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/nzbhydra/nzbhydra-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/nzbget/nzbget-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/nzbhydra/nzbhydra-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/bitwarden/bitwarden-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/bazarr/bazarr-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/dashmachine/dashmachine-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/unifi/unifi-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/ombi/ombi-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/tautulli/tautulli-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/jackett/jackett-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/radarr/radarr-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/sonarr/sonarr-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/qbittorrent/qbittorrent-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/plex/plex-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/jellyfin/jellyfin-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-mariadb-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/grocy/grocy-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/samba/samba-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/home-assistant/home-assistant-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-mariadb-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-admin-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/node-red/node-red-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/goldilocks/goldilocks-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/edms/edms-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/default/nextcloud/nextcloud-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/monitoring/botkube/botkube-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/logs/loki/loki-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/pomerium/pomerium-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/azure-keyvault-injector/azure-keyvault-controller-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-k8s-authenticator-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/version-checker/version-checker-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/bazarr/bazarr-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/dashmachine/dashmachine-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/unifi/unifi-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/ombi/ombi-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/tautulli/tautulli-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/jackett/jackett-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/radarr/radarr-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/sonarr/sonarr-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/qbittorrent/qbittorrent-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/plex/plex-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/jellyfin/jellyfin-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-mariadb-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/bookstack/bookstack-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/grocy/grocy-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/samba/samba-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/home-assistant/home-assistant-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-mariadb-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/default/powerdns/powerdns-admin-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/node-red/node-red-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/goldilocks/goldilocks-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/edms/edms-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/default/nextcloud/nextcloud-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/monitoring/botkube/botkube-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/logs/loki/loki-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/pomerium/pomerium-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/azure-keyvault-injector/azure-keyvault-controller-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-k8s-authenticator-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
+# # kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/version-checker/version-checker-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/actions-runner-system/actions-runner-controller/dex-helm-values.txt"
 
 #
@@ -118,151 +114,151 @@ kseal "${REPO_ROOT}/cluster/kube-system/version-checker/version-checker-helm-val
 
 
 # AzureDNS - cert-manager namespace
-kubectl create secret generic azuredns-config  \
- --from-literal=client-secret="$AZURE_CERTBOT_CLIENT_SECRET" \
- --namespace cert-manager --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
+# kubectl create secret generic azuredns-config  \
+#  --from-literal=client-secret="$AZURE_CERTBOT_CLIENT_SECRET" \
+#  --namespace cert-manager --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
 
-# Longhorn Backup - longhorn-system namespace
-kubectl create secret generic longhorn-backup-secret  \
- --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
- --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
- --from-literal=AWS_ENDPOINTS=http://minio.default:9000 \
- --namespace longhorn-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/longhorn-system/longhorn/longhorn-backup-secret.yaml
-
-# Authelia Secrets - kube-system namespace
-kubectl create secret generic authelia-secrets \
- --from-literal=jwt=$AUTHELIA_JWT \
- --from-literal=session=$AUTHELIA_SESSION \
- --namespace kube-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-secrets.yaml
-
-# Authelia Users - kube-system namespace
-kubectl create secret generic authelia-users  \
- --from-literal=users.yaml="$(envsubst < "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.txt)" \
- --namespace kube-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.yaml
-
-# Actions-Runner-system GH Creds - actions-runner-system namespace
-kubectl create secret generic controller-manager  \
- --from-literal=github_app_id=$ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_ID \
- --from-literal=github_app_installation_id=$ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_INSTALLATION_ID \
- --from-literal=github_app_private_key="$(echo $ACTIONS_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY | base64 -d)" \
- --namespace actions-runner-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/actions-runner-system/actions-runner-controller/actions-system-runner-gh-creds.yaml
-
-# Alertmanager-Bot - monitoring namespace
-kubectl create secret generic alertmanager-bot  \
- --from-literal=admin=$TELEGRAM_USER_ID \
- --from-literal=token=$TELEGRAM_AM_BOT_TOKEN \
- --namespace monitoring --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/monitoring/alertmanager-bot/alertmanager-telegram-creds.yaml
-
-# Restic Password for Stash - default namespace
-# kubectl create secret generic restic-backup-credentials  \
-#  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
+# # Longhorn Backup - longhorn-system namespace
+# kubectl create secret generic longhorn-backup-secret  \
 #  --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
 #  --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
+#  --from-literal=AWS_ENDPOINTS=http://minio.default:9000 \
+#  --namespace longhorn-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/longhorn-system/longhorn/longhorn-backup-secret.yaml
+
+# # Authelia Secrets - kube-system namespace
+# kubectl create secret generic authelia-secrets \
+#  --from-literal=jwt=$AUTHELIA_JWT \
+#  --from-literal=session=$AUTHELIA_SESSION \
+#  --namespace kube-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-secrets.yaml
+
+# # Authelia Users - kube-system namespace
+# kubectl create secret generic authelia-users  \
+#  --from-literal=users.yaml="$(envsubst < "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.txt)" \
+#  --namespace kube-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/kube-system/authelia/authelia-users.yaml
+
+# # Actions-Runner-system GH Creds - actions-runner-system namespace
+# kubectl create secret generic controller-manager  \
+#  --from-literal=github_app_id=$ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_ID \
+#  --from-literal=github_app_installation_id=$ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_INSTALLATION_ID \
+#  --from-literal=github_app_private_key="$(echo $ACTIONS_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY | base64 -d)" \
+#  --namespace actions-runner-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/actions-runner-system/actions-runner-controller/actions-system-runner-gh-creds.yaml
+
+# # Alertmanager-Bot - monitoring namespace
+# kubectl create secret generic alertmanager-bot  \
+#  --from-literal=admin=$TELEGRAM_USER_ID \
+#  --from-literal=token=$TELEGRAM_AM_BOT_TOKEN \
+#  --namespace monitoring --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/monitoring/alertmanager-bot/alertmanager-telegram-creds.yaml
+
+# # Restic Password for Stash - default namespace
+# # kubectl create secret generic restic-backup-credentials  \
+# #  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
+# #  --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
+# #  --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
+# #  --namespace default --dry-run=true -o json \
+# #  | \
+# # kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
+
+# # # Keycloak Realm - kube-system namespace
+# # kubectl create secret generic keycloak-realm  \
+# #  --from-literal=realm.json="$(envsubst < "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.txt)" \
+# #  --namespace kube-system --dry-run=true -o json \
+# #  | \
+# # kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
+
+# # # Keycloak admin password - kube-system namespace
+# # kubectl create secret generic keycloak-password  \
+# #  --from-literal=password="$KEYCLOAK_PASSWORD" \
+# #  --namespace kube-system --dry-run=true -o json \
+# #  | \
+# # kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-password.yaml
+
+
+# # External-DNS PowerDNS API Key - kube-system namespace
+# kubectl create secret generic powerdns-api-key  \
+#  --from-literal=pdns_api_key=$PDNS_API_KEY \
+#  --namespace kube-system --dry-run=true -o json \
+#  | \
+# kubeseal --format=yaml --cert="$PUB_CERT" \
+#    > "$REPO_ROOT"/cluster/kube-system/external-dns/powerdns-api-key.yaml
+
+# #NginX Basic Auth - default namespace
+# kubectl create secret generic nginx-basic-auth \
+#  --from-literal=auth="$NGINX_BASIC_AUTH" \
 #  --namespace default --dry-run=true -o json \
 #  | \
 # kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
+#    > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-default.yaml
 
-# # Keycloak Realm - kube-system namespace
-# kubectl create secret generic keycloak-realm  \
-#  --from-literal=realm.json="$(envsubst < "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.txt)" \
+# # NginX Basic Auth - kube-system namespace
+# kubectl create secret generic nginx-basic-auth \
+#  --from-literal=auth="$NGINX_BASIC_AUTH" \
 #  --namespace kube-system --dry-run=true -o json \
 #  | \
 # kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-realm.yaml
+#    > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-kube-system.yaml
 
-# # Keycloak admin password - kube-system namespace
-# kubectl create secret generic keycloak-password  \
-#  --from-literal=password="$KEYCLOAK_PASSWORD" \
-#  --namespace kube-system --dry-run=true -o json \
+# # NginX Basic Auth - monitoring namespace
+# kubectl create secret generic nginx-basic-auth \
+#  --from-literal=auth="$NGINX_BASIC_AUTH" \
+#  --namespace monitoring --dry-run=true -o json \
 #  | \
 # kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/cluster/kube-system/keycloak/keycloak-password.yaml
+#    > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-monitoring.yaml
 
+# # Cloudflare API Key - cert-manager namespace
+# #kubectl create secret generic cloudflare-api-key \
+# #  --from-literal=api-key="$CF_API_KEY" \
+# #  --namespace cert-manager --dry-run=client -o json \
+# #  | \
+# #kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
 
-# External-DNS PowerDNS API Key - kube-system namespace
-kubectl create secret generic powerdns-api-key  \
- --from-literal=pdns_api_key=$PDNS_API_KEY \
- --namespace kube-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/external-dns/powerdns-api-key.yaml
+# # qBittorrent Prune - default namespace
+# #kubectl create secret generic qbittorrent-prune \
+# #  --from-literal=username="$QB_USERNAME" \
+# #  --from-literal=password="$QB_PASSWORD" \
+# #  --namespace default --dry-run=client -o json \
+# #  | kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
 
-#NginX Basic Auth - default namespace
-kubectl create secret generic nginx-basic-auth \
- --from-literal=auth="$NGINX_BASIC_AUTH" \
- --namespace default --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-default.yaml
+# # sonarr episode prune - default namespace
+# #kubectl create secret generic sonarr-episode-prune \
+# #  --from-literal=api-key="$SONARR_APIKEY" \
+# #  --namespace default --dry-run=client -o json \
+# #  | kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
 
-# NginX Basic Auth - kube-system namespace
-kubectl create secret generic nginx-basic-auth \
- --from-literal=auth="$NGINX_BASIC_AUTH" \
- --namespace kube-system --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-kube-system.yaml
+# # sonarr exporter
+# #kubectl create secret generic sonarr-exporter \
+# #  --from-literal=api-key="$SONARR_APIKEY" \
+# #  --namespace monitoring --dry-run=client -o json \
+# #  | kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
 
-# NginX Basic Auth - monitoring namespace
-kubectl create secret generic nginx-basic-auth \
- --from-literal=auth="$NGINX_BASIC_AUTH" \
- --namespace monitoring --dry-run=true -o json \
- | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-   > "$REPO_ROOT"/cluster/kube-system/nginx/basic-auth-monitoring.yaml
-
-# Cloudflare API Key - cert-manager namespace
-#kubectl create secret generic cloudflare-api-key \
-#  --from-literal=api-key="$CF_API_KEY" \
-#  --namespace cert-manager --dry-run=client -o json \
-#  | \
-#kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
-
-# qBittorrent Prune - default namespace
-#kubectl create secret generic qbittorrent-prune \
-#  --from-literal=username="$QB_USERNAME" \
-#  --from-literal=password="$QB_PASSWORD" \
-#  --namespace default --dry-run=client -o json \
-#  | kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
-
-# sonarr episode prune - default namespace
-#kubectl create secret generic sonarr-episode-prune \
-#  --from-literal=api-key="$SONARR_APIKEY" \
-#  --namespace default --dry-run=client -o json \
-#  | kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
-
-# sonarr exporter
-#kubectl create secret generic sonarr-exporter \
-#  --from-literal=api-key="$SONARR_APIKEY" \
-#  --namespace monitoring --dry-run=client -o json \
-#  | kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
-
-# radarr exporter
-#kubectl create secret generic radarr-exporter \
-#  --from-literal=api-key="$RADARR_APIKEY" \
-#  --namespace monitoring --dry-run=client -o json \
-#  | kubeseal --format=yaml --cert="$PUB_CERT" \
-#    > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
+# # radarr exporter
+# #kubectl create secret generic radarr-exporter \
+# #  --from-literal=api-key="$RADARR_APIKEY" \
+# #  --namespace monitoring --dry-run=client -o json \
+# #  | kubeseal --format=yaml --cert="$PUB_CERT" \
+# #    > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
