@@ -28,7 +28,7 @@ spec:
     config:
       conditional:
         mapping:
-          holthome.net: udp:10.45.10.12
+          holthome.net: udp:10.45.10.53
       upstream:
         externalResolvers:
         - https://1.1.1.1/dns-query
@@ -74,19 +74,19 @@ spec:
         failureThreshold: 30
         periodSeconds: 10
     service:
-      type: NodePort
+      type: LoadBalancer
       externalIPs:
       - 10.45.10.13
       externalTrafficPolicy: Local
     serviceTCP:
       enabled: true
-      type: NodePort
+      type: LoadBalancer
       externalIPs:
       - 10.45.10.13
       externalTrafficPolicy: Local
     serviceUDP:
       enabled: true
-      type: NodePort
+      type: LoadBalancer
       externalIPs:
       - 10.45.10.13
       externalTrafficPolicy: Local
