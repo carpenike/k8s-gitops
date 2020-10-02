@@ -1,14 +1,12 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: azuredns-config
   namespace: cert-manager
 spec:
-  encryptedData:
-    client-secret: AgCS1HeYBqLy+7T88mGkBZ4/CnKFVIrVWe/+ptEE3yoFMhDTydz0m82Yw0ebRgSdlGtdMi4Ca8oQv4fX2vR7P1y9U2Y+4zIHPPn/DOZQSFVKb2X+Oj7fakp4ySE6moFj0qlT9lXe6ADHk/L+lzMxqolf2E4r1mBEVXFZkXqDzFRjYnXQRhgjRMl5TO5VJZobR78xYnRM6XLreHOnra94db2wrGqCrJBWgAvg92yC85FtOjpcMXZ2yv3XSueyCXWmrUYVYRCwFXc8TJ3gMY0nM/mmoXmUoxBNhkQdHvxOMHVImqqlSVKxOB0oP5efcSx/tCiBIxQ7hvfBMJoyPVGpiHR0w0yMgCnMItwLtaC8hC1bv7cdw432tnuk3NJNTjqFFNbyLb+47rMI4CF7gHJEDib2FmVTcHdoutdiFE8bvgMGuv7fE4XFDatk2aoTtN5ely+ZhvESoCTkm1cOFiqoqt/HbkbCZaSB3/A67vWU2OzolLmSZUXPTKWA2nmtgmqtcXzcrQHeol6xXRAXgYFcbuJw6FOHe/CVzp1xRhtqJLLJnROAkec3qBj8TEbhIxHPWZgbnV6YAMypfhNurgUp8VnNNOVB14B4guwoPC5oWC3Z2OlWk+ei+TWJ/5WrOxhdlyV+Rb6liWGT/6DPxaBCRzUzbufJb9FVey6tdffQGcEhhJgEAYK3dee6Ez5wmkFy38GTaTCtZrkaFQbjbUv/BMTDy7Np2DOUjR8Rz/JRp+Gc5g==
-  template:
-    metadata:
-      creationTimestamp: null
-      name: azuredns-config
-      namespace: cert-manager
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: certbot-client-secret
+      name: client-secret
+      property: value
