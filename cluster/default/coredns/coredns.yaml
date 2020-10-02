@@ -62,7 +62,7 @@ spec:
         configBlock: |-
           stubzones
           path /skydns
-          endpoint https://k8s.holthome.net:2379
+          endpoint https://10.20.10.16:2379
     prometheus:
       service:
         enabled: true
