@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: r610-1-dns
+  namespace: network
   annotations:
     external-dns.alpha.kubernetes.io/hostname: r610-1.holthome.net.
 spec:

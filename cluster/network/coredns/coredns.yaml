@@ -3,7 +3,7 @@ apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: coredns
-  namespace: default
+  namespace: network
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
@@ -21,7 +21,6 @@ spec:
     ref: master
     path: stable/coredns
   values:
-    nameOverride: coredns
     rbac:
       create: true
     replicaCount: 1
