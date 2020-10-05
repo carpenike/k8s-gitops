@@ -62,7 +62,7 @@ spec:
         configBlock: |-
           stubzones
           path /skydns
-          endpoint https://10.20.10.16:2379
+          endpoint https://k8s.holthome.net:2379
           tls /etc/coredns/coredns-etcd-secret/cert.pem /etc/coredns/coredns-etcd-secret/key.pem /etc/coredns/coredns-etcd-secret/ca.crt
     prometheus:
       service:
