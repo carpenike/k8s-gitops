@@ -32,8 +32,13 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+        # nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+      hosts:
+      - node-red.holthome.net
+      tls:
+      - hosts:
+        - node-red.holthome.net
     timezone: "America/New_York"
     enableProjects: true
     resources:
@@ -42,5 +47,3 @@ spec:
         cpu: 25m
       limits:
         memory: 500Mi
-  valueFileSecrets:
-  - name: "node-red-helm-values"
