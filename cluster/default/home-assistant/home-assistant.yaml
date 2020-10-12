@@ -68,9 +68,10 @@ spec:
           - esphome.holthome.net
       persistence:
         enabled: true
-        storageClass: longhorn
-        accessMode: ReadWriteOnce
-        size: 1Gi
+        existingClaim: home-assistant-esphome
+        # storageClass: longhorn
+        # accessMode: ReadWriteOnce
+        # size: 1Gi
     vscode:
       enabled: true
       image:
