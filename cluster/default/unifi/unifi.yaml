@@ -13,9 +13,9 @@ spec:
   rollback:
     enable: false
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://k8s-at-home.com/charts
     name: unifi
-    version: 0.10.0
+    version: 1.0.0
   values:
     image:
       repository: jacobalberty/unifi
