@@ -70,6 +70,7 @@ spec:
         enabled: true
         storageClass: longhorn
         accessMode: ReadWriteOnce
+        size: 1Gi
     vscode:
       enabled: true
       image:
