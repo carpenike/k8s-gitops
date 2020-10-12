@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: adguard/adguardhome
-      tag: edge
+      tag: v0.104.0-beta2
     persistence:
       config:
         enabled: false
@@ -177,7 +177,8 @@ spec:
         - '@@||md.us^                                # Maryland Schools'
         - '@@||ccbsroncos.org^                 # Albuquerque Schools '
         - '@@||r20.rs6.net^'
-        - '@@||analytics.archive.org^         # Internet Archive because they need the stats'
+        - '@@||analytics.archive.org^         # Internet Archive because they need
+          the stats'
         - '@@||schwab.com^                    # My Bank'
         - '@@||chase.com^                     # Credit card company'
         - '@@||chasecdn.com^                  # Chases content delivery network'
