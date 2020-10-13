@@ -38,7 +38,7 @@ spec:
       ssh:
         type: LoadBalancer
         externalIPs:
-        - 10.45.10.22
+        - 10.45.10.10
         externalTrafficPolicy: Local
     gitea:
       admin:
