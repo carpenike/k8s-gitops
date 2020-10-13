@@ -1,0 +1,6 @@
+gitea:
+  admin:
+    password: "${GITEA_ADMIN_PASSWORD}"
+    email: "${EMAIL}"
+  security:
+    SECRET_KEY: "${GITEA_SECRET_KEY}"

@@ -1,0 +1,12 @@
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
+metadata:
+  name: gitea-helm-values
+  namespace: default
+spec:
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: gitea-helm-values
+      name: values.yaml
+      property: value

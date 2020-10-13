@@ -62,6 +62,7 @@ kseal() {
 # kseal "${REPO_ROOT}/cluster/default/nzbget/nzbget-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/default/nzbhydra/nzbhydra-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/default/bitwarden/bitwarden-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/default/gitea/gitea-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/default/bazarr/bazarr-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/default/dashmachine/dashmachine-helm-values.txt"
 # # kseal "${REPO_ROOT}/cluster/default/unifi/unifi-helm-values.txt"

@@ -1,0 +1,71 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: gitea
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: gitea
+  helmVersion: v3
+  rollback:
+    enable: false
+  chart:
+    repository: https://dl.gitea.io/charts/
+    name: gitea
+    version: 1.4.2
+  values:
+    image:
+      repository: gitea/gitea
+      tag: 1.12.3
+      pullPolicy: IfNotPresent
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "longhorn"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - "git.holthome.net"
+      tls:
+      - hosts:
+        - "git.holthome.net"
+    service:
+      ssh:
+        type: LoadBalancer
+        externalIPs:
+        - 10.45.10.22
+        externalTrafficPolicy: Local
+    gitea:
+      admin:
+        username: "ryan"
+      config:
+        APP_NAME: "Home Gitea"
+        respository:
+          DEFAULT_PRIVATE: true
+        admin:
+          DISABLE_REGULAR_ORG_CREATION: true
+        security:
+          PASSWORD_COMPLEXITY: "lower,upper"
+          MIN_PASSWORD_LENGTH: 12
+        service:
+          DISABLE_REGISTRATION: true
+          REQUIRE_SIGNIN_VIEW: true
+      database:
+        builtIn:
+          postgresql:
+            enabled: true
+    postgresql:
+      persistence:
+        storageClass: "longhorn"
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: default
+  valueFileSecrets:
+  - name: "gitea-helm-values"
