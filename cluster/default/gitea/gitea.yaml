@@ -36,9 +36,7 @@ spec:
         - "git.holthome.net"
     service:
       ssh:
-        type: LoadBalancer
-        externalIPs:
-        - 10.45.10.10
+        type: ClusterIP
         externalTrafficPolicy: Local
     gitea:
       admin:
