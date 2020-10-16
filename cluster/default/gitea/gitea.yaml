@@ -37,7 +37,7 @@ spec:
     service:
       ssh:
         type: ClusterIP
-        externalTrafficPolicy: Local
+        # externalTrafficPolicy: Local
     gitea:
       admin:
         username: "ryan"
