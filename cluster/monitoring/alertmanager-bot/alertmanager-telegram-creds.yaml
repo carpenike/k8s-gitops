@@ -1,15 +1,16 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+---
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: alertmanager-bot
   namespace: monitoring
 spec:
-  encryptedData:
-    admin: AgBLiucJ7OHB3/m+umpPbaUtmSEgIpgUBKfQI+YDZjQW/hKpPrxq7WGORbE5dl9ShH9w6A3cbVm9WzdqQG0o1u0/02UJTAvEC2W86cHV2xzwQ5vUodSTSu6LmUSQNnLHfJ1pejxgZuKtnYA3ifApihSV65ZIBkUj9v7VfZ8rfWUhvmBdIEQOpVGQMGc/DmebDuS9z9LTiWz1/St0UJ3N/aDqQE0CtWuCAqE9z2JpXzw+fP2kXL/4eUchSdsfWue7INxcq87z7ySkSlTT97PbIS2t6I1TbIldwzKr9gHj2t+FzQwGjqAlMx61XT/AS8tn1XLkhgWVaP7gX1xsQ16Ve+yS9GIhOmU1ufXJRPFhRYdDdKdW3uF1G/uL3mMlGACvj1gzXEaZi+6GE1tha12BnDEQabbXxvgLNtSXlujdohqgxXBX/MCAnyNl+2K9362/ezQlX0Ke+JxrA0zVi1oyCSid3YBkgT4unUHFF7/PBy5cE3bG+8U0mPqg/z94O+VsuEqDT3Lew2QtbDtlXs5H7AojF9XNWhbZEXUq9SIU0AgB5FvksD6pmj8kW5BzE3RxIFnbxJNMCYKwGsNXLkrq7Z/IUxK98yq5oYcuL+ECOf45I/TOu2raTWju7tTzIRuWw74akjVAb+k90Ttjj0TiqCAi9c9Zr+3hvQFxDtBP7/K0oZ1fP3yYeaOsq/vfud7Ikf9WznXsT9fa5Hd7
-    token: AgBSLNa4ns1PVRcrLeVMSml5FWZ9XS9i4liaDSp/V1mI+wUeWLkdu+rVlHt/M/ik2nyafR/2fmziq4Se5Cr02627ZDKIIE+bjzLO6zAbx5zUyuBJioNNb2w0CpS3KwvNGClURzjmYVvFvvs1AUmJo2VoOhz8ReBueCABuVfn7yPhO9MyWbWSj5h0vyUViUc0iMt7dxuRVaRlOPtNx7I3iepUt3H/aC0AU25oAgY9SK/7+g4Wzn4oOkvFH8C4Rrga3PQjFnU5/EOGDPNuSp4SnyjDC+PM6nO5/5hjNvgR2oeZElZSLBHajOsTPLfsOB9WFRXGAvprnR/vHkp8r2quX341iljosyNdvVYEFjdicirJZx2vBRv3P5XNkxcaRwty8AhYTqkIkx7W/dCnBh+fuPD6PMRHZjjG2rDwoiMuqhUm5gkim0HSW39BkXVHbTRtXZWoTRg2pg1V528FMPVTLd2ULGUCyS6n4o5T/tQcTdKcwFisjE5IKh/XZ9kxvAvyavKHQzSS5rg/w/jse8I0uqITAPfk5GNb0SMTCJTN9Dz08V8YXvBUTTdZhgscuaLAC3gVlcuI7c0czYCZ8PXvrN/fp3Ke80A44cJ1BbSUVghlo/HjA30U5DpOgg9vxSjssHq+/UagdP02yhsCV+ZeJuIWWAPGduIAId5juyIKrIEz8bDKW8XosT+w1RH3Vpowa8FUMJ5vYVgHGc++SJWiGcezEBhfTXNuVxwiy+AR7EbAFTvZs+ZxtmMwphhi9bZX
-  template:
-    metadata:
-      creationTimestamp: null
-      name: alertmanager-bot
-      namespace: monitoring
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: alertmanager-bot-admin
+      name: admin
+      property: value
+    - key: alertmanager-bot-token
+      name: token
+      property: value

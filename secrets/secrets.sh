@@ -168,6 +168,9 @@ kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.tx
 # kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/cluster/monitoring/alertmanager-bot/alertmanager-telegram-creds.yaml
 
+az keyvault secret set --name "alertmanager-bot-admin" --vault-name holthome --value $TELEGRAM_USER_ID
+az keyvault secret set --name "alertmanager-bot-token" --vault-name holthome --value $TELEGRAM_AM_BOT_TOKEN
+
 # # Restic Password for Stash - default namespace
 # # kubectl create secret generic restic-backup-credentials  \
 # #  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
