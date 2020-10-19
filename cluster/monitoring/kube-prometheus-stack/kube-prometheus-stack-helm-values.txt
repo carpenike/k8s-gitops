@@ -1,21 +1,4 @@
-alertmanager:
-  ingress:
-    hosts: [prom-alert.$DOMAIN]
-    tls:
-    - hosts:
-      - prom-alert.$DOMAIN
-    annotations:
-      #nginx.ingress.kubernetes.io/auth-url: https://auth.$DOMAIN/api/verify
-      #nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/?rd=https://$host$escaped_request_uri"
 prometheus:
-  ingress:
-    hosts: [prom-server.$DOMAIN]
-    tls:
-    - hosts:
-      - prom-server.$DOMAIN
-    annotations:
-      #nginx.ingress.kubernetes.io/auth-url: https://auth.$DOMAIN/api/verify
-      #nginx.ingress.kubernetes.io/auth-signin: "https://auth.$DOMAIN/?rd=https://$host$escaped_request_uri"
   prometheusSpec:
     additionalScrapeConfigs:
     - job_name: 'node'
@@ -31,15 +14,10 @@ prometheus:
       - targets:
         - home-assistant.default.svc:8123
 grafana:
-  ingress:
-    hosts: [grafana.$DOMAIN]
-    tls:
-    - hosts:
-      - grafana.$DOMAIN
   adminPassword: "$GRAFANA_PASSWORD"
   grafana.ini:
     server:
-      root_url: https://grafana.${DOMAIN}
+      root_url: https://grafana.holthome.net
     auth.basic:
       disable_login_form: true
     auth.generic_oauth:
@@ -49,9 +27,9 @@ grafana:
       client_id: grafana
       client_secret: $DEX_GRAFANA_AUTHENTICATOR_CLIENT_SECRET
       scopes: openid profile email groups
-      auth_url: https://dex.${DOMAIN}/auth
-      token_url: https://dex.${DOMAIN}/token
-      api_url: https://dex.${DOMAIN}/userinfo
+      auth_url: https://dex.holthome.net/auth
+      token_url: https://dex.holthome.net/token
+      api_url: https://dex.holthome.net/userinfo
     auth.generic_oauth.group_mapping:
       role_attribute_path: "contains(groups[*], 'holthome:k8s-admins') && 'Admin' || 'Viewer'"
       org_id: 1

@@ -1,0 +1,12 @@
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
+metadata:
+  name: kube-prometheus-stack-helm-values
+  namespace: monitoring
+spec:
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: kube-prometheus-stack-helm-values
+      name: values.yaml
+      property: value

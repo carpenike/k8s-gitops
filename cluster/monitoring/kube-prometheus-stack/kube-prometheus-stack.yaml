@@ -7,20 +7,20 @@ metadata:
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
-    fluxcd.io/tag.grafana: semver:~6
+    fluxcd.io/tag.grafana: semver:~7
 spec:
-  releaseName: prometheus-operator
+  releaseName: kube-prometheus-stack
   rollback:
     enable: true
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: prometheus-operator
-    version: 9.3.1
+    repository: https://prometheus-community.github.io/helm-charts
+    name: kube-prometheus-stack
+    version: 9.4.10
   values:
-    defaultRules:
-      rules:
-        kubeApiserverAvailability: false
-        kubeApiserver: false
+    # defaultRules:
+    #   rules:
+    #     kubeApiserverAvailability: false
+    #     kubeApiserver: false
     server:
       resources:
         requests:
@@ -29,13 +29,13 @@ spec:
         limits:
           memory: 2000Mi
     prometheusOperator:
-      createCustomResource: false
-      prometheusConfigReloaderImage:
-        repository: quay.io/coreos/prometheus-config-reloader
-        tag: v0.39.0
-      configmapReloadImage:
-        repository: jimmidyson/configmap-reload
-        tag: v0.3.0
+      createCustomResource: true
+      # prometheusConfigReloaderImage:
+      #   repository: quay.io/coreos/prometheus-config-reloader
+      #   tag: v0.39.0
+      # configmapReloadImage:
+      #   repository: jimmidyson/configmap-reload
+      #   tag: v0.3.0
     alertmanager:
       alertmanagerSpec:
         storage:
@@ -52,6 +52,13 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+        hosts:
+        - prom-alert.holthome.net
+        tls:
+        - hosts:
+          - prom-alert.holthome.net
       config:
         route:
           # group_by: ['alertname', 'job']
@@ -112,12 +119,12 @@ spec:
           - node
           targetLabel: instance
     grafana:
-      image:
-        repository: grafana/grafana
-        tag: 7.0.4
-      tolerations:
-      - key: "arm"
-        operator: "Exists"
+      # image:
+      #   repository: grafana/grafana
+      #   tag: 7.0.4
+      # tolerations:
+      # - key: "arm"
+      #   operator: "Exists"
       deploymentStrategy:
         type: Recreate
       persistence:
@@ -130,11 +137,15 @@ spec:
         GF_EXPLORE_ENABLED: true
         GF_DISABLE_SANITIZE_HTML: true
         GF_PANELS_DISABLE_SANITIZE_HTML: true
-        VAR_BLOCKY_URL: "http://blocky.default.svc.cluster.local:4000"
       ingress:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
+        hosts:
+        - grafana.holthome.net
+        tls:
+        - hosts:
+          - grafana.holthome.net
       plugins:
       - natel-discrete-panel
       - pr0ps-trackmap-panel
@@ -162,9 +173,6 @@ spec:
             datasource: Prometheus
           flux:
             url: https://grafana.com/api/dashboards/10475/revisions/1/download
-            datasource: Prometheus
-          blocky:
-            url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
             datasource: Prometheus
           1-node-exporter:
             url: https://grafana.com/api/dashboards/11074/revisions/4/download
@@ -239,8 +247,14 @@ spec:
     kubeEtcd:
       enabled: false
     kubeControllerManager:
-      enabled: false
+      enabled: true
+      endpoints:
+      - 10.20.10.16
     kubeScheduler:
+      enabled: true
+      endpoints:
+      - 10.20.10.16
+    kubeProxy:
       enabled: false
     prometheus-node-exporter:
       tolerations:
@@ -253,6 +267,13 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+        hosts:
+        - prom-server.holthome.net
+        tls:
+        - hosts:
+          - prom-server.holthome.net
       prometheusSpec:
         replicas: 2
         replicaExternalLabelName: "replica"
@@ -265,7 +286,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 30d
+        retention: 6h
         enableAdminAPI: true
         storageSpec:
           volumeClaimTemplate:
@@ -275,11 +296,11 @@ spec:
                 requests:
                   storage: 100Gi
         thanos:
-          image: quay.io/thanos/thanos:v0.13.0
-          version: v0.13.0
+          image: quay.io/thanos/thanos:v0.15.0
+          version: v0.15.0
           objectStorageConfig:
             name: thanos
             key: object-store.yaml
   valuesFrom:
   - secretKeyRef:
-      name: "prometheus-operator-helm-values"
+      name: "kube-prometheus-stack-helm-values"
