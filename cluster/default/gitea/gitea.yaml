@@ -55,7 +55,7 @@ spec:
           REQUIRE_SIGNIN_VIEW: true
         mailer:
           enabled: true
-          host: smtp.holthome.net
+          host: smtp.holthome.net:25
           from: git@holthome.net
           mailer_type: smtp
       database:
