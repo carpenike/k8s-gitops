@@ -2,7 +2,7 @@ apiVersion: kubernetes-client.io/v1
 kind: ExternalSecret
 metadata:
   name: dex-helm-values
-  namespace: default
+  namespace: kube-system
 spec:
   backendType: azureKeyVault
   keyVaultName: holthome
