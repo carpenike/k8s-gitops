@@ -8,4 +8,4 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: k8s.holthome.net.
 spec:
   type: ExternalName
-  externalName: 10.20.10.16
+  externalName: 10.20.0.1
