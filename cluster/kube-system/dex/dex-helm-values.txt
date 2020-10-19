@@ -81,6 +81,12 @@ config: |-
       - https://auth.holthome.net/oauth2/callback
       - https://requests.holthome.net/oauth2/callback
 
+  - id: gitea
+    name: gitea
+    secret: $DEX_GITEA_CLIENT_SECRET
+    redirectURIs:
+      - https://git.holthome.net/oauth2/dex/callback
+
   #- id: pomerium
   #  name: pomerium
   #  secret: $DEX_POMERIUM_CLIENT_SECRET
