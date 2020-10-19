@@ -196,6 +196,7 @@ spec:
         - name: google-home-kitchendisplay
           tags:
           - os_android
+          - device_tablet
           - user_child
           ids:
           - 10.30.50.114
