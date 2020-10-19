@@ -72,6 +72,15 @@ spec:
         # storageClass: longhorn
         # accessMode: ReadWriteOnce
         # size: 1Gi
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - "home-assistant"
     vscode:
       enabled: true
       image:
