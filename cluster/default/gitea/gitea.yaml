@@ -42,6 +42,8 @@ spec:
       admin:
         username: "ryan"
       config:
+        server:
+          root_url: https://git.holthome.net
         APP_NAME: "Home Gitea"
         respository:
           DEFAULT_PRIVATE: true
