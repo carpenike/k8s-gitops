@@ -191,7 +191,19 @@ spec:
           range_end: ""
           lease_duration: 86400
           icmp_timeout_msec: 1000
-        # clients:
+        clients:
+        - name: google-home-kitchendisplay
+          tags:
+          - google
+          - iot
+          ids:
+          - 10.30.50.114
+          use_global_settings: true
+          filtering_enabled: true
+          parental_enabled: true
+          safesearch_enabled: true
+          safebrowsing_enabled: true
+          use_global_blocked_services: true
         # - name: PCAmberWork
         #   tags:
         #   - device_laptop
