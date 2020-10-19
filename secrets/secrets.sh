@@ -13,7 +13,7 @@ need "envsubst"
 need "az"
 
 # Login to Azure
-az login --service-principal --username "$AZURE_KEVYAULT_CLIENT_ID" --password "$AZURE_KEVYAULT_CLIENT_SECRET" --tenant "$AZURE_KEVYAULT_TENANT_ID" > /dev/null
+az login --service-principal --username "$AZURE_KEVYAULT_CLIENT_ID" --password "$AZURE_KEVYAULT_CLIENT_SECRET" --tenant "$AZURE_KEVYAULT_TENANT_ID"
 
 if [ "$(uname)" == "Darwin" ]; then
   set -a
