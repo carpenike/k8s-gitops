@@ -88,7 +88,7 @@ kseal "${REPO_ROOT}/cluster/default/home-assistant/home-assistant-helm-values.tx
 # kseal "${REPO_ROOT}/cluster/default/nextcloud/nextcloud-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/monitoring/kube-prometheus-stack/kube-prometheus-stack-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/monitoring/uptimerobot/uptimerobot-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/monitoring/thanos/thanos-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/monitoring/botkube/botkube-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/logs/loki/loki-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/pomerium/pomerium-helm-values.txt"

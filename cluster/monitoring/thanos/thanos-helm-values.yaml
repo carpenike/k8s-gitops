@@ -1,14 +1,13 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+---
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: thanos-helm-values
   namespace: monitoring
 spec:
-  encryptedData:
-    values.yaml: AgAQ0Jm2g9uvWMmFYVVIPK/v3tVqwbRcpd3MxglZLd/RRHmclhpAbWY/b/dOgZOwu61tGAi68uqyWBTkHmo1fsDkzgFStZkioJYQXTLbcGrz4f7OPWma3gzjjAyMFbV9wu+QCd6hN4rV9EuIWyGvBTL3F27Cbuer8pQ9rboqc7r/nRmtQZEmYJ4C3m5dhfxl8+zPwu/41AZKc5uR1Ejil38DaiYp+u1azbsUvPHex4h6CQRHcR9Fef3KpK0efQLaV71wcGQ5Z57LRllApiAAM0yexAaVaN5gV+YPrJdkakq6Kk9dFtGH76yhLEpo/O1WrkqrExCJb/P7OzpLlzVIczRQheZfLZjF3ZTDOS82HsNguqJyQWQos3+5F5Qk4ROYBGz/c5/hueqp7wGwOODNGqcM8MiN9SX/xgubO1eg8LuMyRyoNDz0Lkkn5/ehMAYkZEPJhRI5Luas1rB4Pt9vafI+CkLT6WfxYNvBsWX1XPuUL3K4Hsppjo8iCv331oHcDA4G8kQyKuN3YCfb3YMGOKBBGo4B2ajAU0+Ejco6zQLQPx8UiDGaMAoSeDoLKaWACH37mMNUqgjQ3+p1xbF4MVhyYlrnp86vd3onZq3If2dnr9UZi1MvDblnI+GN0DStAogDca/0x4mWxhcWzWSvfjFwV0/+1KVGAlzIM5aF0pTVLIslCbZKEBo0hDoBOgjLHff+RsH3g6CRi8Mix/Vrdmj/XYikEgJ71DVvjkw27dVl1ZOCL/f8w43JH+6FJIa1yRRQV5GYhW0KMtF7364VNoJeakzg0M+XVn5i9yS8N+pp7+nc3uCN8ifGNdKP0yMh1v6g5DldGz5bHrJPcDzTPDCW+v7K7X4dXq6vsemEXe+YlXkGASbihq7ZPgMO1RgNbPFDZx26rTmRW0x+XmK+dlnpaiviLw8L1PsogfKV+vkJYWDw+/y3wf/5msJgucSWZLLu1gQVuBecngm8qkVrcVHrM/cJpIfEZ/CuUTqASzOBT8JQdy1gcANUrgsxUeuiVORKDazvcNOMt1IIUN3JHwX7dVtLIknrXdPCQ9ywfI82XMfY+l4np3QPgtAd0lKzdZuwKXEs4yQOHlhVAW0QtKQCOEz61P2cPoqcSz5vQ+i5eSepm5P3Kl3Xd+qxlvPOs0zNEeYKhZVtWeokwdgVMYjEcW4br3VNL/dVMl3dg33rrViv1tjRZjlCZU/ysztK5RYiHmod
-  template:
-    metadata:
-      creationTimestamp: null
-      name: thanos-helm-values
-      namespace: monitoring
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: thanos-helm-values
+      name: values.yaml
+      property: value
