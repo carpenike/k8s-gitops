@@ -53,15 +53,15 @@ spec:
         service:
           DISABLE_REGISTRATION: true
           REQUIRE_SIGNIN_VIEW: true
+        mailer:
+          enabled: true
+          host: smtp.holthome.net
+          from: git@holthome.net
+          mailer_type: smtp
       database:
         builtIn:
           postgresql:
             enabled: true
-      mailer:
-        enabled: true
-        host: smtp.holthome.net
-        from: git@holthome.net
-        mailer_type: smtp
     postgresql:
       persistence:
         storageClass: "longhorn"
