@@ -1,21 +1,21 @@
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: auth
-  namespace: kube-system
-  annotations:
-    external-dns.alpha.kubernetes.io/target: 10.45.10.20
-spec:
-  hosts:
-    - 'auth.holthome.net'
-  gateways:
-    - istio-system/istio-system-ingress-gateway
-  http:
-    - match:
-        - port: 443
-      route:
-        - destination:
-            port:
-              number: 80
-            host: oauth2-proxy.kube-system.svc.cluster.local
+# ---
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: auth
+#   namespace: kube-system
+#   annotations:
+#     external-dns.alpha.kubernetes.io/target: 10.45.10.20
+# spec:
+#   hosts:
+#     - 'auth.holthome.net'
+#   gateways:
+#     - istio-system/istio-system-ingress-gateway
+#   http:
+#     - match:
+#         - port: 443
+#       route:
+#         - destination:
+#             port:
+#               number: 80
+#             host: oauth2-proxy.kube-system.svc.cluster.local

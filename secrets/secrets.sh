@@ -97,7 +97,7 @@ kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-k8s-authenticator-helm-values.txt"
 # # kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 # # kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
-# kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
+kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/version-checker/version-checker-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/actions-runner-system/actions-runner-controller/dex-helm-values.txt"
 

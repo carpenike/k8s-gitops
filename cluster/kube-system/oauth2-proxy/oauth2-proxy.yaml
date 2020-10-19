@@ -22,6 +22,11 @@ spec:
     #   - key: "arm"
     #     operator: "Exists"
     ingress:
+      hosts:
+      - auth.holthome.net
+      tls:
+      - hosts:
+        - auth.holthome.net
       enabled: false
       path: /oauth2
   valueFileSecrets:
