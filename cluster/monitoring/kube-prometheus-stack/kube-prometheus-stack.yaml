@@ -53,7 +53,7 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
           nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=https://$host$request_uri$is_args$args"
         hosts:
         - prom-alert.holthome.net
         tls:
@@ -268,7 +268,7 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
           nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=https://$host$request_uri$is_args$args"
         hosts:
         - prom-server.holthome.net
         tls:
