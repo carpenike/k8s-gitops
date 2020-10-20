@@ -6,8 +6,8 @@ metadata:
   namespace: default
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: 'regexp:^(5\.[0-9][0-9]\.[0-9]+)$'
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: 'regexp:^(6\.[0-9][0-9]\.[0-9]+)$'
 spec:
   releaseName: unifi
   rollback:
@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 5.13.32
+      tag: 6.0.22
     persistence:
       enabled: true
       accessMode: ReadWriteOnce
