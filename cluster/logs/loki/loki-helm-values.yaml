@@ -1,14 +1,13 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+---
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
 metadata:
-  creationTimestamp: null
   name: loki-helm-values
   namespace: logs
 spec:
-  encryptedData:
-    values.yaml: AgBQ/ov4w9CFRQoC58mS8Ft5yAkdet7+86Tf8cRnutQBUr+4rcZsTqWE58SxL9mAVvezXZF+zZIqZLmfZtX8sXnEL+Knnw9vRosoE4utfV25voK5oblWqiYejpS7yQ5ySWg8v/H3tt+oPpJBiQm3kpjFMnmwpT4wdi71khBDv1kQmOzjmTO+yJgsnHqC6C2Uf8/tYdi1Zr0do4Sh3CJEDu2hKOTXwTjBKdR4xNs9PInTgVy0E1jNEDAAfCr5NPt2loLNorSN/OnOX2cqsscd2sqY4Z5WVwNgnIocg0EK4YWdNgkWZwyxhZV8yky2K+bfrdDPXQQLqRDUaroDgwOXdZIhvRlKblvd2DNl0evWOmHONgaVkaeSs3/UkJYg48+kS8DncIW29eNsfLp/JuHLejpV5Zlwq93bWfgQ54EM72m+lNEGk25uiZUQMM8iXYpAPcJA/q94sLEDKZZVUGTVcjsUsaqsXy4KEPQN1oShiDycv/7q3xNZZI7PXcwwGKAOAHOXEIU9lcmDl5n7qs/Jl2MG8EHQ8qWd63XuIxzt/9rIH0JCiyJZ2EK4SEc0erok3d2xJN4oeOVTu1V8WBv2BfP6JBlTvkSyHCo/9nc8dUgSf1W3V11d7K2ieatjmn82No6X9MRwB/LiTOOf01z6SZG8gmtkHmRP39OdFBmrSGBF3/d4+ilr9VLFe3Hha3ZiOttJTqEDK191vsUHNJoBTcwc3kSpZjmpW1bejmqF4wFGOrRn6/EnmJNt9leOQjSwCqXMDCkkyDYe7zm4Yw7SvqnQvHtXAyHBM7MutlkqrYMwPQXIzB/M1iy3xqng6xRg367/g6X3x0/0b2KF02Ov7+gHQforoNYNc3kLcnyoShnbkr6S19Bbf6BZ2mfBUwxFLDCo
-  template:
-    metadata:
-      creationTimestamp: null
-      name: loki-helm-values
-      namespace: logs
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: loki-helm-values
+      name: values.yaml
+      property: value
