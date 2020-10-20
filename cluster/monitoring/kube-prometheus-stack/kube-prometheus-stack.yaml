@@ -175,7 +175,7 @@ spec:
             url: https://grafana.com/api/dashboards/10475/revisions/1/download
             datasource: Prometheus
           1-node-exporter:
-            url: https://grafana.com/api/dashboards/11074/revisions/4/download
+            url: https://grafana.com/api/dashboards/11074/revisions/9/download
             datasource: Prometheus
           speedtest:
             url: https://raw.githubusercontent.com/billimek/prometheus-speedtest-exporter/master/speedtest-exporter.json
