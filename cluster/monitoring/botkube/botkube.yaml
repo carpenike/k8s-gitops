@@ -13,15 +13,15 @@ spec:
   chart:
     repository: https://infracloudio.github.io/charts
     name: botkube
-    version: v0.10.0
+    version: v0.11.0
   values:
     image:
     #   repository: infracloudio/botkube
     #   tag: v0.10.0
     # Needed for Discord support until merge
     # https://github.com/infracloudio/botkube/pull/268
-      repository: quay.io/unixfox/botkube
-      tag: b5b3a25
+      repository: infracloudio/botkube
+      tag: v0.11.0
       pullPolicy: IfNotPresent
     serviceMonitor:
       enabled: true
