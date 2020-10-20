@@ -159,6 +159,10 @@ kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.tx
 # kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/cluster/actions-runner-system/actions-runner-controller/actions-system-runner-gh-creds.yaml
 
+az keyvault secret set --name "actions-runner-gh-app-id" --vault-name holthome --value $ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_ID
+az keyvault secret set --name "actions-runner-gh-app-installation-id" --vault-name holthome --value $ACTIONS_RUNNER_CONTROLLER_GITHUB_APP_INSTALLATION_ID
+az keyvault secret set --name "actions-runner-gh-app-private-key" --vault-name holthome --value $ACTIONS_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
+
 # # Alertmanager-Bot - monitoring namespace
 # kubectl create secret generic alertmanager-bot  \
 #  --from-literal=admin=$TELEGRAM_USER_ID \
