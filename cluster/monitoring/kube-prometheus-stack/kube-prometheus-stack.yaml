@@ -52,8 +52,8 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
-          nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
+          # nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+          # nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
         hosts:
         - prom-alert.holthome.net
         tls:
@@ -267,8 +267,8 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
-          nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
+          # nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+          # nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
         hosts:
         - prom-server.holthome.net
         tls:
