@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: adguard/adguardhome
-      tag: edge
+      tag: v0.104.0-beta3
     persistence:
       config:
         enabled: false
