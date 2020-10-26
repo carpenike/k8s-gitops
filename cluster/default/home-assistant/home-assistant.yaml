@@ -53,7 +53,7 @@ spec:
       enabled: true
       image:
         repository: esphome/esphome
-        tag: 'adb51cf'
+        tag: '59cdc32'
       hostNetwork: true
       ingress:
         enabled: true
