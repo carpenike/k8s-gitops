@@ -25,5 +25,7 @@ spec:
     ingress:
       enabled: true
       host: longhorn.holthome.net
+      tls: true
       annotations:
         kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: true
