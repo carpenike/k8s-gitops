@@ -53,7 +53,7 @@ spec:
       enabled: true
       image:
         repository: esphome/esphome
-        tag: 'f034472'
+        tag: 'd97a9bf'
       hostNetwork: true
       ingress:
         enabled: true
