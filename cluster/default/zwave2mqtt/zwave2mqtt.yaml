@@ -35,6 +35,7 @@ spec:
             - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
     persistence:
       enabled: true
-      storageClass: "longhorn"
-      accessMode: ReadWriteOnce
-      size: 1Gi
+      existingClaim: zwave2mqtt
+      # storageClass: "longhorn"
+      # accessMode: ReadWriteOnce
+      # size: 1Gi
