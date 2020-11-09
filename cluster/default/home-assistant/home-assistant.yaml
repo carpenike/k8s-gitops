@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: homeassistant/home-assistant
-      tag: 0.117.2
+      tag: 0.117.5
     extraEnv:
       TZ: "America/New_York"
     persistence:
@@ -53,7 +53,7 @@ spec:
       enabled: true
       image:
         repository: esphome/esphome
-        tag: '1a27037'
+        tag: '2ab3534'
       hostNetwork: true
       ingress:
         enabled: true
