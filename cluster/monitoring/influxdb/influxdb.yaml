@@ -46,6 +46,16 @@ spec:
     config:
       opentsdb:
         enabled: true
+      graphite:
+        enabled: true
+        database: graphitedb
+        retention-policy: ""
+        bind-address: ":2003"
+        protocol: tcp
+        consistency-lvel: one
+        templates: |
+          "*.app env.service.resource.measurement",
+          "servers.* .host.resource.measurement.field*",
     tolerations:
     - key: "arm"
       operator: "Exists"
