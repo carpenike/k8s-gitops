@@ -28,9 +28,10 @@ spec:
         kubernetes.io/tls-acme: "true"
     persistence:
       enabled: true
-      storageClass: longhorn
-      accessMode: ReadWriteOnce
-      size: 5Gi
+      # storageClass: longhorn
+      # accessMode: ReadWriteOnce
+      # size: 5Gi
+      existingClaim: bitwarden
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
   valueFileSecrets:
