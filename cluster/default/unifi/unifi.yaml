@@ -22,9 +22,10 @@ spec:
       tag: 6.0.22
     persistence:
       enabled: true
-      accessMode: ReadWriteOnce
-      size: 20Gi
-      storageClass: longhorn
+      existingClaim: unifi
+      # accessMode: ReadWriteOnce
+      # size: 20Gi
+      # storageClass: longhorn
     timezone: "America/New_York"
     runAsRoot: false
     ingress:
