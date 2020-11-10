@@ -31,5 +31,7 @@ spec:
       storageClass: longhorn
       accessMode: ReadWriteOnce
       size: 5Gi
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
   valueFileSecrets:
     - name: "bitwarden-helm-values"
