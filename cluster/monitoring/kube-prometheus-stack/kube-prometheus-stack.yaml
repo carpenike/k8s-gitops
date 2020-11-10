@@ -150,6 +150,7 @@ spec:
       - natel-discrete-panel
       - pr0ps-trackmap-panel
       - grafana-piechart-panel
+      - grafana-clock-panel
       - https://github.com/panodata/grafana-map-panel/releases/download/0.9.0/grafana-map-panel-0.9.0.zip;grafana-worldmap-panel-ng
       dashboardProviders:
         dashboardproviders.yaml:
@@ -186,6 +187,9 @@ spec:
           version-checker:
             url: https://grafana.com/api/dashboards/12833/revisions/1/download
             datasource: Prometheus
+          TrueNAS:
+            url: https://raw.githubusercontent.com/cucac/truenas-influxdb-grafana/master/TrueNAS-Grafana.json
+            datasource: TrueNAS
           # home-assistant:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/home_assistant.json
           #   datasource: influxdb
@@ -232,6 +236,11 @@ spec:
         access: proxy
         url: http://influxdb:8086
         database: uptimerobot
+      - name: TrueNAS
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: graphitedb
       grafana.ini:
         paths:
           data: /var/lib/grafana/data
