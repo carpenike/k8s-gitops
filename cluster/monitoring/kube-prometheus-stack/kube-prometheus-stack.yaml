@@ -257,11 +257,11 @@ spec:
     kubeEtcd:
       enabled: false
     kubeControllerManager:
-      enabled: true
+      enabled: false
       endpoints:
       - 10.20.10.16
     kubeScheduler:
-      enabled: true
+      enabled: false
       endpoints:
       - 10.20.10.16
     kubeProxy:

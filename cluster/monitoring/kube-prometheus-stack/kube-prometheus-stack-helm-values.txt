@@ -1,10 +1,16 @@
 prometheus:
   prometheusSpec:
     additionalScrapeConfigs:
-    - job_name: 'node'
+    - job_name: 'netdata-scrape'
+      metrics_path: "/api/v1/allmetrics"
+      params:
+        format: [prometheus_all_hosts]
+      honor_labels: true
       static_configs:
       - targets:
-        - vyos.$DOMAIN:9100
+        - fw.$DOMAIN:19999
+        - nas-0.$DOMAIN:19999
+        - nas-1.$DOMAIN:19999
     - job_name: 'home-assistant'
       scrape_interval: 60s
       metrics_path: '/api/prometheus'
