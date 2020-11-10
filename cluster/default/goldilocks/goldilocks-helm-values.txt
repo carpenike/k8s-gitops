@@ -1,8 +1,0 @@
-dashboard:
-  ingress:
-    hosts:
-      - host: goldilocks.$DOMAIN
-        paths: ["/"]
-    tls:
-    - hosts:
-      - goldilocks.$DOMAIN

@@ -23,6 +23,12 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
+        hosts:
+          - host: goldilocks.holthome.net
+            paths: ["/"]
+        tls:
+          - hosts:
+              - goldilocks.holthome.net
     resources:
       limits:
         cpu: 25m
@@ -30,5 +36,3 @@ spec:
       requests:
         cpu: 25m
         memory: 250Mi
-  valueFileSecrets:
-  - name: "goldilocks-helm-values"
