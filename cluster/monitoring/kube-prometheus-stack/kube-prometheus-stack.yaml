@@ -189,7 +189,7 @@ spec:
             url: https://grafana.com/api/dashboards/12833/revisions/1/download
             datasource: Prometheus
           TrueNAS:
-            url: https://raw.githubusercontent.com/cucac/truenas-influxdb-grafana/master/TrueNAS-Grafana.json
+            url: https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/monitoring/kube-prometheus-stack/grafana-dashboards/truenas.json
             datasource: TrueNAS
           # home-assistant:
           #   url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/prometheus-operator/grafana-dashboards/home_assistant.json
