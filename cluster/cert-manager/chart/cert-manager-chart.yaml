@@ -14,8 +14,9 @@ spec:
   chart:
     repository: https://charts.jetstack.io/
     name: cert-manager
-    version: v0.13.1
+    version: v1.0.3
   values:
+    installCRDs: true
     webhook:
       enabled: true
       tolerations:
@@ -28,6 +29,7 @@ spec:
       - key: "arm"
         operator: "Exists"
     cainjector:
+      replicaCount: 1
       tolerations:
         - key: "arm"
           operator: "Exists"
@@ -35,4 +37,4 @@ spec:
       enabled: true
       servicemonitor:
         enabled: true
-        namespace: cert-manager
+        prometheusInstance: monitoring
