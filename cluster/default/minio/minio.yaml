@@ -13,30 +13,42 @@ spec:
   chart:
     repository: https://helm.min.io/
     name: minio
-    version: 6.0.4
+    version: 8.0.3
   values:
     image:
       repository: minio/minio
-      tag: RELEASE.2020-08-26T00-00-49Z
+      tag: RELEASE.2020-11-10T21-02-24Z
     mcImage:
-      repository: jessestuart/mc
-      tag: RELEASE.2020-08-08T02-33-58Z
+      repository: minio/mc
+      tag: RELEASE.2020-10-03T02-54-56Z
     helmKubectlJqImage:
-      repository: drnic/kubectl
-      tag: 1.16
+      repository: bskim45/helm-kubectl-jq
+      tag: 3.3.4
+    mode: distributed
     persistence:
-      existingClaim: "nfs-tmp-pvc"
-      subPath: "minio"
+      # existingClaim: "nfs-tmp-pvc"
+      # subPath: "minio"
+      storageClass: longhorn
+      size: 500Gi
     existingSecret: minio-secret
     ingress:
-      enabled: false
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: "true"
+        kubernetes.io/ingress.allow-http: "false"
+      hosts:
+        - minio.holthome.net
+      tls:
+        - hosts:
+            - minio.holthome.net
     metrics:
       serviceMonitor:
         enabled: true
-    nasgateway:
-      enabled: true
-      # Number of parallel instances
-      replicas: 3
+    # nasgateway:
+    #   enabled: true
+    #   # Number of parallel instances
+    #   replicas: 3
     securityContext:
       enabled: false
     resources:
@@ -45,4 +57,3 @@ spec:
         cpu: 49m
       limits:
         memory: 500Mi
-        cpu: 49m
