@@ -25,7 +25,7 @@ spec:
       repository: bskim45/helm-kubectl-jq
       tag: 3.3.4
     mode: distributed
-    replicas: 3
+    replicas: 4
     persistence:
       # existingClaim: "nfs-tmp-pvc"
       # subPath: "minio"
