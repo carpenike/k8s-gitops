@@ -64,9 +64,9 @@ spec:
         - name: TZ
           value: "America/New_York"
         - name: PUID
-          value: "1000"
+          value: "1001"
         - name: PGID
-          value: "1000"
+          value: "1001"
         ports:
         - containerPort: 8889
           name: http-stefanie
