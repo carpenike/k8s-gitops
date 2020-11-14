@@ -121,7 +121,7 @@ spec:
   storageClassName: nfs
   nfs:
     server: nas-1.holthome.net
-    path: "/mnt/backup/media/pictures"
+    path: "/mnt/backup/share/media/pictures"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
