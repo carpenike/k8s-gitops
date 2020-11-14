@@ -50,8 +50,8 @@ spec:
           subPath: sync.conf
         - name: home-ryan
           mountPath: /sync/home/ryan
-        # - name: photo
-        #   mountPath: /sync/photo
+        - name: pictures
+          mountPath: /sync/pictures
         # - name: backup
         #   mountPath: /sync/backup
         # - name: music
@@ -80,6 +80,8 @@ spec:
           subPath: sync.conf
         - name: home-stefanie
           mountPath: /sync/home
+        - name: pictures
+          mountPath: /sync/pictures
         # - name: backup
         #   mountPath: /sync/backup
       volumes:
@@ -101,9 +103,9 @@ spec:
       - name: home-stefanie
         persistentVolumeClaim:
           claimName: nfs-home-stefanie-pvc
-      # - name: photo
-      #   persistentVolumeClaim:
-      #     claimName: nfs-photo-pvc
+      - name: pictures
+        persistentVolumeClaim:
+          claimName: nfs-media-pictures-pvc
       # - name: backup
       #   persistentVolumeClaim:
       #     claimName: nfs-backups-pvc
