@@ -103,3 +103,34 @@ spec:
   resources:
     requests:
       storage: 1Mi
+
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-media-pictures-pv
+spec:
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: default
+    name: nfs-media-pictures-pvc
+  storageClassName: nfs
+  nfs:
+    server: nas-1.holthome.net
+    path: "/mnt/tank/media/pictures"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-media-pictures-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs
+  resources:
+    requests:
+      storage: 1Mi
