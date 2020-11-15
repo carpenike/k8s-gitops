@@ -16,7 +16,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: plex
-    version: 2.0.0
+    version: 2.0.4
   values:
     image:
       repository: plexinc/pms-docker
@@ -26,12 +26,12 @@ spec:
       - 10.42.0.0/16
     advertiseIp: "http://10.45.100.100:32400"
     serviceTCP:
-      type: NodePort
+      type: LoadBalancer
       externalIPs:
         - 10.45.100.100
       externalTrafficPolicy: Local
     serviceUDP:
-      type: NodePort
+      type: LoadBalancer
       externalIPs:
         - 10.45.100.100
       externalTrafficPolicy: Local
@@ -43,11 +43,12 @@ spec:
         size: 30Gi
       data:
         enabled: true
-        claimName: nfs-tank-share-pvc
+        claimName: nfs-backup-share-pvc
       config:
-        storageClass: longhorn
-        size: 300Gi
-        accessMode: "ReadWriteOnce"
+        claimName: plex-config-pvc
+        # storageClass: longhorn
+        # size: 300Gi
+        # accessMode: "ReadWriteOnce"
     # nodeSelector:
     #   app: "nvidia-gpu-plugin"
     resources:
@@ -55,7 +56,6 @@ spec:
         # gpu.intel.com/i915: 1
         # nvidia.com/gpu: 1
         memory: 5009Mi
-        cpu: 763m
       requests:
         cpu: 763m
         memory: 5009Mi
