@@ -43,8 +43,7 @@ spec:
       type: S3
       config:
         bucket: "thanos"
-        # endpoint: "minio.default.svc:9000"
-        endpoint: "10.9.18.176:9000"
+        endpoint: "minio.default.svc:9000"
         region: ""
         insecure: true
         signature_version2: false
