@@ -6,35 +6,42 @@ metadata:
   namespace: default
   annotations:
     release: "tautulli"
-    #fluxcd.io/automated: "true"
-    #fluxcd.io/tag.chart-image: "glob:latest"
+    # fluxcd.io/automated: "true"
+    # fluxcd.io/tag.chart-image: "glob:latest"
 spec:
   releaseName: tautulli
   chart:
     repository: https://k8s-at-home.com/charts
     name: tautulli
-    version: 3.0.1
+    version: 5.4.0
   values:
     image:
-      repository: linuxserver/tautulli
-      tag: v2.5.4-ls11
+      repository: k8sathome/tautulli
+      tag: v2.6.1
+    env:
+      TZ: "America/New_York"
+      PUID: 1000
+      PGID: 1000
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-    timezone: "America/New_York"
-    puid: 1000
-    pgid: 1000
+      hosts: [tautulli.holthome.net]
+      paths:
+        - path: /
+          pathType: Prefix
+      tls:
+        - hosts:
+            - tautulli.holthome.net
     persistence:
       config:
         enabled: true
-        storageClass: longhorn
-        size: 5Gi
+        existingClaim: tautulli-pvc
+        # storageClass: longhorn
+        # size: 5Gi
     resources:
       requests:
         memory: 350Mi
-        cpu: 25m
+        cpu: 500m
       limits:
-        memory: 1000Mi
-  valueFileSecrets:
-    - name: "tautulli-helm-values"
+        memory: 1500Mi
