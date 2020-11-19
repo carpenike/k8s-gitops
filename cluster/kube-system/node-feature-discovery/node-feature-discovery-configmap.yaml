@@ -47,3 +47,9 @@ data:
                 class: ["ff"]
                 vendor: ["0bda"]
                 device: ["2832"]
+        - name: "zigbee"
+          matchOn:
+            - usbId:
+                class: ["ff"]
+                vendor: ["10c4"]
+                device: ["ea60"]
