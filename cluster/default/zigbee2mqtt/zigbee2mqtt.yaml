@@ -1,0 +1,88 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: "semver:~1"
+spec:
+  releaseName: zigbee2mqtt
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: zigbee2mqtt
+    version: 3.0.0
+  values:
+    image:
+      repository: koenkk/zigbee2mqtt
+      tag: 1.16.1
+    env:
+      TZ: "America/New_York"
+      ZIGBEE2MQTT_DATA: /data
+    probes:
+      startup:
+        enabled: true
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - host: zigbee2mqtt.holthome.net
+          paths:
+            - path: /
+      tls:
+        - hosts:
+            - zigbee2mqtt.holthome.net
+    config:
+      mqtt:
+        base_topic: zigbee2mqtt
+        server: "mqtt://vernemq"
+        user: nouserneeded
+        password: nopasswordneeded
+      homeassistant: true
+      device_options:
+        retain: true
+      permit_join: false
+      serial:
+        port: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
+      advanced:
+        network_key:
+          - 11
+          - 127
+          - 42
+          - 255
+          - 77
+          - 200
+          - 49
+          - 13
+          - 96
+          - 72
+          - 97
+          - 215
+          - 182
+          - 97
+          - 13
+          - 55
+        pan_id: 6111
+      frontend:
+        port: 8080
+      expirimental:
+        new_api: true
+    persistence:
+      data:
+        enabled: true
+        existingClaim: zigbee2mqtt-pvc
+    additionalVolumeMounts:
+      - name: usb
+        mountPath: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
+    additionalVolumes:
+      - name: usb
+        hostPath:
+          path: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - {key: "feature.node.kubernetes.io/custom-zigbee", operator: In, values: ["true"]}
