@@ -1,111 +1,101 @@
----
-# From: https://github.com/kubernetes-sigs/node-feature-discovery/blob/master/nfd-daemonset-combined.yaml.template
-# This template contains an example of running nfd-master and nfd-worker in the
-# same pod.
-#
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
 metadata:
-  name: nfd-master
+  name: node-feature-discovery
   namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: nfd-master
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  verbs:
-  - get
-  - patch
-  - update
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: nfd-master
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nfd-master
-subjects:
-- kind: ServiceAccount
-  name: nfd-master
-  namespace: kube-system
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  labels:
-    app: nfd
-  name: nfd
-  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/chart-image: semver:~v0
 spec:
-  selector:
-    matchLabels:
-      app: nfd
-  template:
-    metadata:
-      labels:
-        app: nfd
-    spec:
-      serviceAccount: nfd-master
-      containers:
-      - env:
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        image: quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0
-        name: nfd-master
-        command:
-        - "nfd-master"
-      - env:
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        image: quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0
-        name: nfd-worker
-        command:
-        - "nfd-worker"
-        args:
-        - "--sleep-interval=60s"
-        - "--sources=custom,usb,pci"
-        volumeMounts:
-        - name: host-boot
-          mountPath: "/host-boot"
-          readOnly: true
-        - name: host-os-release
-          mountPath: "/host-etc/os-release"
-          readOnly: true
-        - name: host-sys
-          mountPath: "/host-sys"
-        - name: source-d
-          mountPath: "/etc/kubernetes/node-feature-discovery/source.d/"
-        - name: features-d
-          mountPath: "/etc/kubernetes/node-feature-discovery/features.d/"
-        - name: nfd-worker-config
-          mountPath: "/etc/kubernetes/node-feature-discovery/"
-      volumes:
-      - name: host-boot
-        hostPath:
-          path: "/boot"
-      - name: host-os-release
-        hostPath:
-          path: "/etc/os-release"
-      - name: host-sys
-        hostPath:
-          path: "/sys"
-      - name: source-d
-        hostPath:
-          path: "/etc/kubernetes/node-feature-discovery/source.d/"
-      - name: features-d
-        hostPath:
-          path: "/etc/kubernetes/node-feature-discovery/features.d/"
-      - name: nfd-worker-config
-        configMap:
-          name: nfd-worker-config
+  releaseName: node-feature-discovery
+  helmVersion: v3
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: node-feature-discovery
+    version: 2.0.0
+  values:
+    image:
+      repository: raspbernetes/node-feature-discovery
+      tag: "v0.6.0"
+    sources:
+      # - cpu
+      - custom
+      # - iommu
+      # - kernel
+      # - local
+      # - memory
+      # - network
+      - pci
+      # - storage
+      # - system
+      - usb
+
+    # node-feature-discovery configuration - see https://github.com/kubernetes-sigs/node-feature-discovery/blob/master/nfd-worker.conf.example for example
+    config: |
+      sources:
+        usb:
+          deviceClassWhitelist:
+            - "02"
+            - "0e"
+            - "ef"
+            - "fe"
+            - "ff"
+          deviceLabelFields:
+            - "class"
+            - "vendor"
+            - "device"
+        custom:
+          - name: "alarmdecoder"
+            matchOn:
+              - usbId:
+                  class: ["ff"]
+                  vendor: ["0403"]
+                  device: ["6015"]
+          - name: "zwave"
+            matchOn:
+              - usbId:
+                  class: ["02"]
+                  vendor: ["0658"]
+                  device: ["0200"]
+          - name: "coral-tpu"
+            matchOn:
+              - usbId:
+                  vendor: ["1a6e", "18d1"]
+          - name: "intel-gpu"
+            matchOn:
+              - pciId:
+                  class: ["0300"]
+                  vendor: ["8086"]
+          - name: "wyze-sense"
+            matchOn:
+              - usbId:
+                  class: ["03"]
+                  vendor: ["1a86"]
+                  device: ["e024"]
+          - name: "flight-aware"
+            matchOn:
+              - usbId:
+                  class: ["ff"]
+                  vendor: ["0bda"]
+                  device: ["2832"]
+          - name: "zigbee"
+            matchOn:
+              - usbId:
+                  class: ["ff"]
+                  vendor: ["10c4"]
+                  device: ["ea60"]
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "node-feature-discovery"
+    master:
+      replicaCount: 1
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Equal"
+          value: ""
+          effect: "NoSchedule"
+        - key: arm
+          operator: Exists
+    worker:
+      tolerations:
+        - key: arm
+          operator: Exists
