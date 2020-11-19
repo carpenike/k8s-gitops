@@ -76,9 +76,9 @@ spec:
       image:
         repository: billimek/custom-error-pages
         tag: 0.4.4
-      resources:
-        requests:
-          memory: 250Mi
-          cpu: 25m
-        limits:
-          memory: 250Mi
+      # resources:
+      #   requests:
+      #     memory: 250Mi
+      #     cpu: 25m
+      #   limits:
+      #     memory: 250Mi
