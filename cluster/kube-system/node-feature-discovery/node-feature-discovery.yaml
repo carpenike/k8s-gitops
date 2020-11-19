@@ -81,9 +81,10 @@ spec:
           - name: "zigbee"
             matchOn:
               - usbId:
-                  class: ["ff"]
-                  vendor: ["10c4"]
-                  device: ["ea60"]
+                  class: ["02"]
+                  vendor: ["0451"]
+                  device: ["16a8"]
+
     podAnnotations:
       configmap.reloader.stakater.com/reload: "node-feature-discovery"
     master:
