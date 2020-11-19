@@ -132,6 +132,11 @@ kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.tx
 # kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/cluster/longhorn-system/longhorn/longhorn-backup-secret.yaml
 
+az keyvault secret set --name "minio-accesskey" --vault-name holthome --value $MINIO_ACCESS_KEY
+az keyvault secret set --name "minio-secretkey" --vault-name holthome --value $MINIO_SECRET_KEY
+az keyvault secret set --name "minio-endpoint" --vault-name holthome --value http://10.20.10.15:9000
+
+
 # # Authelia Secrets - kube-system namespace
 # kubectl create secret generic authelia-secrets \
 #  --from-literal=jwt=$AUTHELIA_JWT \
@@ -174,6 +179,12 @@ az keyvault secret set --name "actions-runner-gh-app-private-key" --vault-name h
 
 az keyvault secret set --name "alertmanager-bot-admin" --vault-name holthome --value $TELEGRAM_USER_ID
 az keyvault secret set --name "alertmanager-bot-token" --vault-name holthome --value $TELEGRAM_AM_BOT_TOKEN
+
+
+## Dockerhub
+az keyvault secret set --name "dockerhub-username" --vault-name holthome --value $DOCKER_USERNAME
+az keyvault secret set --name "dockerhub-password" --vault-name holthome --value $DOCKER_TOKEN
+az keyvault secret set --name "dockerhub-email" --vault-name holthome --value $EMAIL
 
 # # Restic Password for Stash - default namespace
 # # kubectl create secret generic restic-backup-credentials  \
