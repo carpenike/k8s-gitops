@@ -65,12 +65,12 @@ spec:
         default-ssl-certificate: "kube-system/acme-crt-secret"
         enable-ssl-passthrough: ""
         #default-ssl-certificate: "kube-system/digicert-ingress-tls"
-      resources:
-        requests:
-          memory: 825Mi
-          cpu: 93m
-        limits:
-          memory: 825Mi
+      # resources:
+      #   requests:
+      #     memory: 825Mi
+      #     cpu: 93m
+      #   limits:
+      #     memory: 825Mi
     defaultBackend:
       enabled: true
       image:
