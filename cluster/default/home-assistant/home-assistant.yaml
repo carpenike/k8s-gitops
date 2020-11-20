@@ -79,6 +79,7 @@ spec:
                 operator: In
                 values:
                 - "home-assistant"
+            topologyKey: "kubernetes.io/hostname"
     vscode:
       enabled: true
       image:
