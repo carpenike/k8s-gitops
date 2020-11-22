@@ -1,5 +1,0 @@
-ingress:
-  hosts: [qb.$DOMAIN]
-  tls:
-  - hosts:
-    - qb.$DOMAIN

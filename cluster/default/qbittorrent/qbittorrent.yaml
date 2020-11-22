@@ -15,43 +15,58 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: qbittorrent
-    version: 4.0.1
+    version: 6.4.0
   values:
     image:
-      repository: linuxserver/qbittorrent
-      tag: 4.3.0202007231034-7027-2a638d1ubuntu18.04.1-ls66
-    timezone: America/New_York
-    puid: 1000
-    pgid: 1000
-    umask: "022"
-    guiService:
-      type: ClusterIP
-    btService:
-      type: LoadBalancer
-      port: 50413
-      loadBalancerIP: 10.20.50.157
+      repository: k8sathome/qbittorrent
+      tag: v4.2.5
+    env:
+      TZ: "America/New_York"
+      PUID: 1000
+      PGID: 1000
+    service:
+      additionalServices:
+      - enabled: true
+        nameSuffix: bittorrent
+        type: LoadBalancer
+        externalIPs:
+        - 10.20.50.157
+        port:
+          port: 50413
+          name: bittorrent
+          protocol: TCP
+          targetPort: 6881
+        externalTrafficPolicy: Local
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+      hosts:
+      - host: qb.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "qb.holthome.net"
     persistence:
       config:
         enabled: true
-        size: 1Gi
-        storageClass: longhorn
-      downloads:
-        enabled: false
-      extraMounts:
-        - name: media
-          claimName: nfs-tank-share-pvc
-    tolerations:
-      - key: "arm"
-        operator: "Exists"
+        existingClaim: qb-pvc
+    additionalVolumeMounts:
+    - name: media-nas
+      mountPath: "/media"
+    additionalVolumes:
+    - name: media-nas
+      persistentVolumeClaim:
+        claimName: nfs-tank-share-pvc
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
     resources:
       requests:
         memory: 250Mi
-        cpu: 25m
+        cpu: 500m
       limits:
-        memory: 3000Mi
-  valueFileSecrets:
-    - name: "qbittorrent-helm-values"
+        memory: 6000Mi
