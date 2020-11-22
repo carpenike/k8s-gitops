@@ -9,31 +9,63 @@ metadata:
     fluxcd.io/tag.chart-image: "glob:3.*.*.*-ls*"
 spec:
   releaseName: sonarr
-  rollback:
-    enable: true
+  # rollback:
+  #   enable: true
   chart:
     repository: https://k8s-at-home.com/charts
     name: sonarr
-    version: 5.0.1
+    version: 7.4.0
   values:
     image:
-      repository: linuxserver/sonarr
-      tag: 3.0.3.906-ls36
+      repository: k8sathome/sonarr
+      tag: v3.0.4.1011
       # pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+      PUID: 1000
+      PGID: 1000
     ingress:
-      enabled: false
+      enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-    timezone: "America/New_York"
+      hosts:
+      - host: sonarr.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - sonarr.holthome.net
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "api"
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts:
+        - host: sonarr.holthome.net
+          paths:
+          - path: /api
+            pathType: Prefix
+        tls:
+        - hosts:
+          - sonarr.holthome.net
     persistence:
       config:
         enabled: true
-        storageClass: longhorn
-        size: 10Gi
-      media:
-        enabled: true
-        existingClaim: nfs-tank-share-pvc
-        skipuninstall: true
+        # storageClass: longhorn
+        # size: 10Gi
+        existingClaim: sonarr-pvc
+    additionalVolumeMounts:
+    - name: media-nas
+      mountPath: "/media"
+    additionalVolumes:
+    - name: media-nas
+      persistentVolumeClaim:
+        claimName: nfs-tank-share-pvc
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
     resources:
       requests:
         memory: 350Mi
