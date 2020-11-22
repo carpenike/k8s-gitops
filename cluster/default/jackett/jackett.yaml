@@ -17,26 +17,38 @@ spec:
     version: 3.0.1
   values:
     image:
-      repository: linuxserver/jackett
-      tag: v0.16.962-ls13
-    timezone: "America/New_York"
-    puid: 1000
-    pgid: 1000
+      repository: k8sathome/jackett
+      tag: v0.16.2215
+    env:
+      TZ: "America/New_York"
+      PUID: 1000
+      PGID: 1000
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+      hosts:
+      - host: jackett.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "jackett.holthome.net"
     persistence:
       config:
         enabled: true
-        storageClass: longhorn
-        accessMode: ReadWriteOnce
-        size: 200Mi
+        existingClaim: jackett-pvc
+        # storageClass: longhorn
+        # accessMode: ReadWriteOnce
+        # size: 200Mi
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
     resources:
       requests:
         memory: 350Mi
         cpu: 25m
       limits:
         memory: 500Mi
-  valueFileSecrets:
-  - name: "jackett-helm-values"
