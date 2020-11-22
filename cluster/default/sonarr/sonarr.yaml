@@ -76,5 +76,3 @@ spec:
       use-metadata.version-checker.io/sonarr: "true"
     puid: 1000
     pgid: 1000
-  valueFileSecrets:
-  - name: "sonarr-helm-values"
