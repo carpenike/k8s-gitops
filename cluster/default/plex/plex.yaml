@@ -43,7 +43,7 @@ spec:
         size: 30Gi
       data:
         enabled: true
-        claimName: nfs-backup-share-pvc
+        claimName: nfs-tank-share-pvc
       config:
         claimName: plex-config-pvc
         # storageClass: longhorn
