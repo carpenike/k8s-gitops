@@ -135,7 +135,7 @@ kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.tx
 
 az keyvault secret set --name "minio-accesskey" --vault-name holthome --value $MINIO_ACCESS_KEY
 az keyvault secret set --name "minio-secretkey" --vault-name holthome --value $MINIO_SECRET_KEY
-az keyvault secret set --name "minio-endpoint" --vault-name holthome --value http://10.20.10.15:9000
+az keyvault secret set --name "minio-endpoint" --vault-name holthome --value https://nas.holthome.net:9000
 
 
 # # Authelia Secrets - kube-system namespace
