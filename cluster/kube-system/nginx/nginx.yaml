@@ -20,10 +20,10 @@ spec:
     controller:
       replicaCount: 2
       config:
-        ssl-protocols: "TLSv1.3 TLSv1.2"
-        custom-http-errors: "404,403,500,503"
-        enable-modsecurity: "true"
-        enable-owasp-modsecurity-crs: "true"
+        # ssl-protocols: "TLSv1.3 TLSv1.2"
+        custom-http-errors: 404,401,403,500,503
+        # enable-modsecurity: "true"
+        # enable-owasp-modsecurity-crs: "true"
         # use-proxy-protocol: "false"
         # proxy-body-size: "50m"
       use-forwarded-headers: "true"
@@ -62,7 +62,7 @@ spec:
               description: Too many 4XXs
               summary: More than 5% of the all requests did return 4XX, this require your attention
       extraArgs:
-        default-ssl-certificate: "kube-system/acme-crt-secret"
+        default-ssl-certificate: "cert-manager/acme-crt-secret"
         enable-ssl-passthrough: ""
         #default-ssl-certificate: "kube-system/digicert-ingress-tls"
       # resources:
