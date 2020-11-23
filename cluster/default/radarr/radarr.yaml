@@ -14,39 +14,54 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: radarr
-    version: 4.0.1
+    version: 7.4.0
   values:
     image:
-      repository: linuxserver/radarr
-      tag: 3.0.0.3406-ls19
+      repository: k8sathome/radarr
+      tag: v3.0.0.4107
+    env:
+      TZ: "America/New_York"
     ingress:
-      enabled: false
+      enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
         #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
         #nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
-    timezone: "America/New_York"
-    exportarr:
-      enabled: false
-      serviceMonitor:
-        enabled: true
-        namespace: default
+      hosts:
+      - host: radarr.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - radarr.holthome.net
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "api"
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts:
+        - host: radarr.holthome.net
+          paths:
+          - path: /api
+            pathType: Prefix
+        tls:
+        - hosts:
+          - radarr.holthome.net
     persistence:
       config:
         enabled: true
-        storageClass: longhorn
-        size: 5Gi
-      media:
-        enabled: true
-        existingClaim: nfs-tank-share-pvc
-        skipuninstall: true
+        existingClaim: radarr-pvc
+    additionalVolumeMounts:
+    - name: media-nas
+      mountPath: "/media"
+    additionalVolumes:
+    - name: media-nas
+      persistentVolumeClaim:
+        claimName: nfs-tank-share-pvc
     resources:
       requests:
         memory: 350Mi
-        cpu: 25m
+        cpu: 500m
       limits:
-        memory: 500Mi
-    puid: 1000
-    pgid: 1000
-  valueFileSecrets:
-    - name: "radarr-helm-values"
+        memory: 1500Mi
