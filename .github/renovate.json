@@ -1,0 +1,28 @@
+{
+  "enabled": true,
+  "timezone": "America/New_York",
+  "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>",
+  "commitMessageSuffix": "[ci-skip]",
+  "commitBody": "Signed-off-by: Ryan Holt <carpenike@users.noreply.github.com>",
+  "labels": ["kind/enhancement"],
+  "helm-values": {
+    "fileMatch": ["cluster/.+\\.yaml$"]
+  },
+  "packageRules": [
+    {
+      "packageNames": ["k8sathome/qbittorrent"],
+      "allowedVersions": "<4.3.0"
+    },
+    {
+      "datasources": ["docker"],
+      "packageNames": [
+        "k8sathome/radarr",
+        "k8sathome/sonarr",
+        "k8sathome/lidarr",
+        "k8sathome/bazarr"
+      ],
+      "versioning": "nuget"
+    }
+  ],
+  "schedule": ["before 8pm"]
+}
