@@ -39,11 +39,11 @@ spec:
     additionalVolumeMounts:
     - name: media-nas
       mountPath: "/downloads"
+      subPath: nzbget/downloads
     additionalVolumes:
     - name: media-nas
       persistentVolumeClaim:
         claimName: nfs-tank-share-pvc
-      subPath: nzbget/downloads
     resources:
       requests:
         memory: 300Mi
