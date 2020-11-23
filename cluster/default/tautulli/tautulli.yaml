@@ -6,8 +6,7 @@ metadata:
   namespace: default
   annotations:
     release: "tautulli"
-    # fluxcd.io/automated: "true"
-    # fluxcd.io/tag.chart-image: "glob:latest"
+    fluxcd.io/automated: "false"
 spec:
   releaseName: tautulli
   chart:

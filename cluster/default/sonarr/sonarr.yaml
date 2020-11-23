@@ -6,11 +6,8 @@ metadata:
   namespace: default
   annotations:
     fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: "glob:3.*.*.*-ls*"
 spec:
   releaseName: sonarr
-  # rollback:
-  #   enable: true
   chart:
     repository: https://k8s-at-home.com/charts
     name: sonarr
@@ -19,7 +16,6 @@ spec:
     image:
       repository: k8sathome/sonarr
       tag: v3.0.4.1021
-      # pullPolicy: Always
     env:
       TZ: "America/New_York"
     ingress:
@@ -50,8 +46,6 @@ spec:
     persistence:
       config:
         enabled: true
-        # storageClass: longhorn
-        # size: 10Gi
         existingClaim: sonarr-pvc
     additionalVolumeMounts:
     - name: media-nas
@@ -60,10 +54,6 @@ spec:
     - name: media-nas
       persistentVolumeClaim:
         claimName: nfs-tank-share-pvc
-    # podSecurityContext:
-    #   runAsUser: 1000
-    #   runAsGroup: 1000
-    #   fsGroup: 1000
     resources:
       requests:
         memory: 350Mi
