@@ -18,6 +18,9 @@ spec:
       tag: v3.5.1
     env:
       TZ: "America/New_York"
+    probes:
+      startup:
+        enabled: true
     ingress:
       enabled: true
       annotations:
