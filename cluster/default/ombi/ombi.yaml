@@ -5,46 +5,38 @@ metadata:
   name: ombi
   namespace: default
   annotations:
-    fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
 spec:
   releaseName: ombi
-  rollback:
-    enable: false
   chart:
     repository: https://k8s-at-home.com/charts
     name: ombi
-    version: 3.0.1
+    version: 5.4.0
   values:
     image:
-      repository: linuxserver/ombi
-      tag: 3.0.5083-ls6
+      repository: k8sathome/ombi
+      tag: v4.0.720
+    env:
+      TZ: "America/New_York"
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
       hosts:
-        - requests.holthome.net
+      - host: requests.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
-        - hosts:
-            - requests.holthome.net
-    timezone: "America/New_York"
-    puid: 1000
-    pgid: 1000
+      - hosts:
+        - requests.holthome.net
     persistence:
       config:
         enabled: true
-        storageClass: longhorn
-        accessMode: ReadWriteOnce
-        size: 200Mi
-    # resources:
-    #   requests:
-    #     memory: 155Mi
-    #     cpu: 12m
-    #   limits:
-    #     memory: 155Mi
-    #     cpu: 12m
-    # podAnnotations:
-    #   sidecar.istio.io/inject: "true"
+        existingClaim: ombi-pvc
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
