@@ -22,8 +22,6 @@ spec:
       tag: v4.2.5
     env:
       TZ: "America/New_York"
-      PUID: 1000
-      PGID: 1000
     service:
       additionalServices:
       - enabled: true
@@ -60,10 +58,6 @@ spec:
     - name: media-nas
       persistentVolumeClaim:
         claimName: nfs-tank-share-pvc
-    podSecurityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
     resources:
       requests:
         memory: 250Mi
