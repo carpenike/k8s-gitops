@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: pomerium/pomerium
-      tag: v0.10.1
+      tag: v0.10.6
     ingress:
       secretName: acme-crt-secret
       annotations:
