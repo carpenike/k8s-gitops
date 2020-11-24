@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: quay.io/jetstack/version-checker
-      tag: v0.2.0
+      tag: v0.2.1
     serviceMonitor:
       enabled: true
   valueFileSecrets:
