@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Lint yaml
-      uses: ibiqlik/action-yamllint@v1
+      uses: ibiqlik/action-yamllint@v3
   lint-shell:
     runs-on:
     - ubuntu-latest
