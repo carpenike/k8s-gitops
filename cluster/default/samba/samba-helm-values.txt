@@ -1,4 +1,0 @@
-samba:
-  users:
-  - username: ryan
-    password: $SAMBA_RYAN_PASSWORD
