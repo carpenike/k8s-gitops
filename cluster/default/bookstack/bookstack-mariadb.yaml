@@ -18,7 +18,7 @@ spec:
   values:
     image:
       repository: bitnami/mariadb
-      tag: 10.4.13
+      tag: 10.5.8
     # deploymentAnnotations:
     #   stash.appscode.com/backup-blueprint: default-workload-blueprint
     #   stash.appscode.com/target-paths: "/config"
