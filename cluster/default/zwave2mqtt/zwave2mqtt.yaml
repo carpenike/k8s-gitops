@@ -15,7 +15,7 @@ spec:
   values:
     image:
       repository: robertslando/zwave2mqtt
-      tag: 4.0.5
+      tag: 4.0.6
     ingress:
       enabled: true
       annotations:
