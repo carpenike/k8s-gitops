@@ -190,6 +190,9 @@ az keyvault secret set --name "alertmanager-bot-token" --vault-name holthome --v
 #az keyvault secret set --name "registry-creds-secret" --vault-name holthome --file "${REPO_ROOT}/cluster/kube-system/registry-creds/dockerhub-secret.txt" > /dev/null
 kubectl -n kube-system create secret docker-registry registry-creds-secret --namespace kube-system --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_TOKEN --docker-email=$EMAIL
 
+## ip-masq-agent
+kubectl create configmap ip-masq-agent --from-file="${REPO_ROOT}/cluster/kube-system/ip-masq-agent/config" --namespace=kube-system
+
 # # Restic Password for Stash - default namespace
 # # kubectl create secret generic restic-backup-credentials  \
 # #  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
