@@ -95,7 +95,7 @@ kseal "${REPO_ROOT}/cluster/logs/loki/loki-helm-values.txt"
 # kseal "${REPO_ROOT}/cluster/kube-system/azure-keyvault-injector/azure-keyvault-controller-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/dex/dex-k8s-authenticator-helm-values.txt"
-kseal "${REPO_ROOT}/cluster/kube-system/registry-creds/dockerhub-secret.txt"
+# kseal "${REPO_ROOT}/cluster/kube-system/registry-creds/dockerhub-secret.txt"
 # # kseal "${REPO_ROOT}/cluster/kube-system/keycloak/keycloak-helm-values.txt"
 # # kseal "${REPO_ROOT}/cluster/kube-system/external-dns/external-dns-helm-values.txt"
 kseal "${REPO_ROOT}/cluster/kube-system/oauth2-proxy/oauth2-proxy-helm-values.txt"
@@ -183,9 +183,12 @@ az keyvault secret set --name "alertmanager-bot-token" --vault-name holthome --v
 
 
 ## Dockerhub
-az keyvault secret set --name "dockerhub-username" --vault-name holthome --value $DOCKER_USERNAME
-az keyvault secret set --name "dockerhub-password" --vault-name holthome --value $DOCKER_TOKEN
-az keyvault secret set --name "dockerhub-email" --vault-name holthome --value $EMAIL
+# az keyvault secret set --name "dockerhub-username" --vault-name holthome --value $DOCKER_USERNAME
+# az keyvault secret set --name "dockerhub-password" --vault-name holthome --value $DOCKER_TOKEN
+# az keyvault secret set --name "dockerhub-email" --vault-name holthome --value $EMAIL
+
+#az keyvault secret set --name "registry-creds-secret" --vault-name holthome --file "${REPO_ROOT}/cluster/kube-system/registry-creds/dockerhub-secret.txt" > /dev/null
+kubectl -n kube-system create secret docker-registry registry-creds-secret --namespace kube-system --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_TOKEN --docker-email=$EMAIL
 
 # # Restic Password for Stash - default namespace
 # # kubectl create secret generic restic-backup-credentials  \
