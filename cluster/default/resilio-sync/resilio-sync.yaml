@@ -105,7 +105,7 @@ spec:
           claimName: nfs-home-stefanie-pvc
       - name: pictures
         persistentVolumeClaim:
-          claimName: nfs-media-pictures-pvc
+          claimName: nfs-pictures-pvc
       # - name: backup
       #   persistentVolumeClaim:
       #     claimName: nfs-backups-pvc

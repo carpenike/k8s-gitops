@@ -134,7 +134,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-media-pictures-pv
+  name: nfs-pictures-pv
 spec:
   capacity:
     storage: 1Mi
@@ -142,16 +142,16 @@ spec:
     - ReadWriteMany
   claimRef:
     namespace: default
-    name: nfs-media-pictures-pvc
+    name: nfs-pictures-pvc
   storageClassName: nfs
   nfs:
     server: nas.holthome.net
-    path: "/mnt/tank/share/media/pictures"
+    path: "/mnt/tank/share/pictures"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-media-pictures-pvc
+  name: nfs-pictures-pvc
 spec:
   accessModes:
     - ReadWriteMany
