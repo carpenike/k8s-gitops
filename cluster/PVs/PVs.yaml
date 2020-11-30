@@ -87,8 +87,8 @@ spec:
     name: nfs-home-ryan-pvc
   storageClassName: nfs
   nfs:
-    server: nas-1.holthome.net
-    path: "/mnt/backup/home/ryan"
+    server: nas.holthome.net
+    path: "/mnt/tank/home/ryan"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -116,8 +116,8 @@ spec:
     name: nfs-home-stefanie-pvc
   storageClassName: nfs
   nfs:
-    server: nas-1.holthome.net
-    path: "/mnt/backup/home/stefanie"
+    server: nas.holthome.net
+    path: "/mnt/tank/home/stefanie"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -145,8 +145,8 @@ spec:
     name: nfs-media-pictures-pvc
   storageClassName: nfs
   nfs:
-    server: nas-1.holthome.net
-    path: "/mnt/backup/share/media/pictures"
+    server: nas.holthome.net
+    path: "/mnt/tank/share/media/pictures"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
