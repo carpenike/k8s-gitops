@@ -49,7 +49,7 @@ spec:
           mountPath: /config/sync.conf
           subPath: sync.conf
         - name: home-ryan
-          mountPath: /sync/home/ryan
+          mountPath: /sync/home
         - name: pictures
           mountPath: /sync/pictures
         # - name: backup
