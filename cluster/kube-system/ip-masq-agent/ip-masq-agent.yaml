@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -21,15 +22,15 @@ spec:
           capabilities:
             add: ["NET_ADMIN", "NET_RAW"]
         volumeMounts:
-          - name: config
-            mountPath: /etc/config
-      volumes:
         - name: config
-          configMap:
-            # Note this ConfigMap must be created in the same namespace as the daemon pods - this spec uses kube-system
-            name: ip-masq-agent
-            optional: true
-            items:
-              # The daemon looks for its config in a YAML file at /etc/config/ip-masq-agent
-              - key: config
-                path: ip-masq-agent
+          mountPath: /etc/config
+      volumes:
+      - name: config
+        configMap:
+          # Note this ConfigMap must be created in the same namespace as the daemon pods - this spec uses kube-system
+          name: ip-masq-agent
+          optional: true
+          items:
+            # The daemon looks for its config in a YAML file at /etc/config/ip-masq-agent
+          - key: config
+            path: ip-masq-agent

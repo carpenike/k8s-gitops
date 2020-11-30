@@ -187,6 +187,9 @@ az keyvault secret set --name "dockerhub-username" --vault-name holthome --value
 az keyvault secret set --name "dockerhub-password" --vault-name holthome --value $DOCKER_TOKEN
 az keyvault secret set --name "dockerhub-email" --vault-name holthome --value $EMAIL
 
+## ip-masq-agent
+kubectl create configmap ip-masq-agent --from-file="${REPO_ROOT}/cluster/kube-system/ip-masq-agent/config" --namespace=kube-system
+
 # # Restic Password for Stash - default namespace
 # # kubectl create secret generic restic-backup-credentials  \
 # #  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
