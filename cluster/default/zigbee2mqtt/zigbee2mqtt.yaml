@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: koenkk/zigbee2mqtt
-      tag: 1.16.1
+      tag: 1.16.2
     env:
       TZ: "America/New_York"
       ZIGBEE2MQTT_DATA: /data
@@ -30,13 +30,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - host: zigbee.holthome.net
-          paths:
-            - path: /
+      - host: zigbee.holthome.net
+        paths:
+        - path: /
       tls:
-        - hosts:
-            - zigbee.holthome.net
-          secretName: zigbee-cert
+      - hosts:
+        - zigbee.holthome.net
+        secretName: zigbee-cert
     config:
       mqtt:
         base_topic: zigbee2mqtt
@@ -51,22 +51,22 @@ spec:
         port: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
       advanced:
         network_key:
-          - 11
-          - 127
-          - 42
-          - 255
-          - 77
-          - 200
-          - 49
-          - 13
-          - 96
-          - 72
-          - 97
-          - 215
-          - 182
-          - 97
-          - 13
-          - 55
+        - 11
+        - 127
+        - 42
+        - 255
+        - 77
+        - 200
+        - 49
+        - 13
+        - 96
+        - 72
+        - 97
+        - 215
+        - 182
+        - 97
+        - 13
+        - 55
         pan_id: 6111
       frontend:
         port: 8080
@@ -77,15 +77,16 @@ spec:
         enabled: true
         existingClaim: zigbee2mqtt-pvc
     additionalVolumeMounts:
-      - name: usb
-        mountPath: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
+    - name: usb
+      mountPath: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
     additionalVolumes:
-      - name: usb
-        hostPath:
-          path: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
+    - name: usb
+      hostPath:
+        path: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-            - matchExpressions:
-                - {key: "feature.node.kubernetes.io/custom-zigbee", operator: In, values: ["true"]}
+          - matchExpressions:
+            - {key: "feature.node.kubernetes.io/custom-zigbee", operator: In, values: [
+                "true"]}
