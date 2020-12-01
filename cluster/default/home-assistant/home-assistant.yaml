@@ -6,80 +6,57 @@ metadata:
   namespace: default
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.chart-image: semver:~0.
-    filter.fluxcd.io/vscode: "regex:^3.[0-9]+-.*$"
+    fluxcd.io/automated: "false"
 spec:
   releaseName: home-assistant
   chart:
     repository: https://k8s-at-home.com/charts
     name: home-assistant
-    version: 2.7.0
+    version: 3.1.0
   values:
     image:
       repository: homeassistant/home-assistant
       tag: 0.118.4
-    extraEnv:
-      TZ: "America/New_York"
     persistence:
       enabled: true
       size: 10Gi
       storageClass: "longhorn"
+    extraEnv:
+      TZ: "America/New_York"
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-production
+      hosts:
+      - ha.holthome.net
+      tls:
+      - secretName: home-assistant-cert
+        hosts:
+        - ha.holthome.net
     service:
       type: LoadBalancer
       externalIPs:
       - 10.45.10.14
       externalTrafficPolicy: Local
+      additionalPorts:
+      - name: sonos
+        port: 1400
+        targetPort: 1400
     hostNetwork: true
-    tolerations:
-    - key: "arm"
-      operator: "Exists"
+
     probes:
       liveness:
         enabled: false
       readiness:
         enabled: false
+      startup:
+        enabled: false
     mariadb:
       enabled: false
     postgresql:
       enabled: true
-    esphome:
-      enabled: true
-      image:
-        repository: esphome/esphome
-        tag: '7ff3f75'
-      hostNetwork: true
-      ingress:
-        enabled: true
-        annotations:
-          kubernetes.io/ingress.class: "nginx"
-          # nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
-          # nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
-        hosts:
-        - esphome.holthome.net
-        tls:
-        - hosts:
-          - esphome.holthome.net
-      persistence:
-        enabled: true
-        existingClaim: home-assistant-esphome
-        # storageClass: longhorn
-        # accessMode: ReadWriteOnce
-        # size: 1Gi
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - "home-assistant"
-            topologyKey: "kubernetes.io/hostname"
+
     vscode:
       enabled: true
       image:
@@ -91,13 +68,13 @@ spec:
           kubernetes.io/ingress.class: "nginx"
           #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
           #nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
-    resources:
-      limits:
-        memory: 2500Mi
-      requests:
-        cpu: 35m
-        memory: 2000Mi
-    monitoring:
-      enabled: false
-  valueFileSecrets:
-  - name: "home-assistant-helm-values"
+          nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        hosts:
+        - ha-vscode.holthome.net
+        tls:
+        - secretName: ha-vscode-cert
+          hosts:
+          - ha-vscode.holthome.net
+
+    podAnnotations:
+      secret.reloader.stakater.com/reload: home-assistant-secrets
