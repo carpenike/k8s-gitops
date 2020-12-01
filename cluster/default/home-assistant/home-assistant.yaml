@@ -51,6 +51,7 @@ spec:
         enabled: false
       startup:
         enabled: false
+
     mariadb:
       enabled: false
     postgresql:
