@@ -12,14 +12,10 @@ spec:
   helmVersion: v3
   rollback:
     enable: false
-  # chart:
-  #   repository: https://kubernetes-charts.storage.googleapis.com/
-  #   name: coredns
-  #   version: 1.13.3
   chart:
-    git: https://github.com/onedr0p/charts
-    ref: master
-    path: stable/coredns
+    repository: https://charts.helm.sh/stable
+    name: coredns
+    version: 1.13.8
   values:
     rbac:
       create: true
@@ -30,6 +26,7 @@ spec:
       externalIPs:
       - 10.45.10.53
       externalTrafficPolicy: Local
+      clusterIP: 10.43.10.53
     servers:
     - zones:
       - zone: holthome.net.
