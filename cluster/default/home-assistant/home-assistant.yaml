@@ -19,8 +19,7 @@ spec:
       tag: 0.118.4
     persistence:
       enabled: true
-      size: 10Gi
-      storageClass: "longhorn"
+      existingClaim: home-assistant-pvc
     extraEnv:
       TZ: "America/New_York"
     ingress:
