@@ -40,7 +40,7 @@ spec:
         server: "mqtt://vernemq"
         user: nouserneeded
         password: nopasswordneeded
-      homeassistant: true
+      homeassistant: false
       device_options:
         retain: true
       permit_join: false
