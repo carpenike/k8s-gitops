@@ -54,8 +54,12 @@ spec:
 
     mariadb:
       enabled: false
+
     postgresql:
-      enabled: false
+      enabled: true
+      persistence:
+        enabled: true
+        existingClaim: home-assistant-postgresql-pvc
 
     vscode:
       enabled: true
