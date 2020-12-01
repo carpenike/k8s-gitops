@@ -26,14 +26,17 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: nginx
+        kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - host: zigbee2mqtt.holthome.net
+        - host: zigbee.holthome.net
           paths:
             - path: /
       tls:
         - hosts:
-            - zigbee2mqtt.holthome.net
+            - zigbee.holthome.net
+          secretName: zigbee-cert
     config:
       mqtt:
         base_topic: zigbee2mqtt
