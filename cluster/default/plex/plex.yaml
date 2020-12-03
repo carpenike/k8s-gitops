@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: plexinc/pms-docker
-      tag: plexpass
+      tag: 1.21.0.3616-d87012962
     timezone: "America/New_York"
     allowedNetworks:
       - 10.42.0.0/16
@@ -46,9 +46,6 @@ spec:
         claimName: nfs-tank-share-pvc
       config:
         claimName: plex-config-pvc
-        # storageClass: longhorn
-        # size: 300Gi
-        # accessMode: "ReadWriteOnce"
     # nodeSelector:
     #   app: "nvidia-gpu-plugin"
     resources:
