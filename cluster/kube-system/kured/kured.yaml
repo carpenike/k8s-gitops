@@ -1,26 +1,26 @@
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  name: kured
-  namespace: kube-system
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-    filter.fluxcd.io/chart-image: semver:~1
-spec:
-  releaseName: kured
-  chart:
-    repository: https://weaveworks.github.io/kured
-    name: kured
-    version: 2.2.0
-  values:
-    image:
-      repository: weaveworks/kured
-      tag: 1.5.1
-    configuration:
-      startTime: "8:00"
-      endTime: "14:00"
-      timeZone: "America/New_York"
-    metrics:
-      create: true
+# ---
+# apiVersion: helm.fluxcd.io/v1
+# kind: HelmRelease
+# metadata:
+#   name: kured
+#   namespace: kube-system
+#   annotations:
+#     fluxcd.io/ignore: "false"
+#     fluxcd.io/automated: "true"
+#     filter.fluxcd.io/chart-image: semver:~1
+# spec:
+#   releaseName: kured
+#   chart:
+#     repository: https://weaveworks.github.io/kured
+#     name: kured
+#     version: 2.2.0
+#   values:
+#     image:
+#       repository: weaveworks/kured
+#       tag: 1.5.1
+#     configuration:
+#       startTime: "8:00"
+#       endTime: "14:00"
+#       timeZone: "America/New_York"
+#     metrics:
+#       create: true
