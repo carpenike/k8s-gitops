@@ -1,0 +1,52 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: monica
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: monica
+  chart:
+    repository: https://k8s-at-home.com/charts
+    name: monica
+    version: 1.0.0
+  values:
+    image:
+      repository: monica
+      tag: 2.19.1-apache
+    env:
+      APP_URL: https://crm.holthome.net
+      MAIL_HOST: smtp.holthome.net
+      MAIL_FROM_ADDRESS: crm@holthome.net
+      MAIL_FROM_NAME: "Home CRM"
+      APP_EMAIL_NEW_USERS: ryan@ryanholt.net
+      DEFAULT_MAX_STORAGE_SIZE: 4096
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      hosts:
+      - host: crm.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - crm.holthome.net
+        secretName: monica-cert
+    persistence:
+      config:
+        enabled: true
+        # existingClaim: photoprism-pvc
+        storageClass: longhorn
+        size: 5Gi
+    mariadb:
+      persistence:
+        primary:
+          persistence:
+            enabled: true
+            existingClaim: monica-mariadb-0-pvc
