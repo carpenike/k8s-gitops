@@ -18,6 +18,8 @@ spec:
       tag: 2.19.1-apache
     env:
       APP_URL: https://crm.holthome.net
+      APP_ENV: production
+      DB_HOST: monica-mariadb
       MAIL_HOST: smtp.holthome.net
       MAIL_FROM_ADDRESS: crm@holthome.net
       MAIL_FROM_NAME: "Home CRM"
@@ -45,8 +47,11 @@ spec:
         storageClass: longhorn
         size: 5Gi
     mariadb:
+      enabled: true
       persistence:
         primary:
           persistence:
             enabled: true
             existingClaim: monica-mariadb-0-pvc
+  valueFileSecrets:
+  - name: "monica-helm-values"

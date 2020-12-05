@@ -1,0 +1,13 @@
+---
+apiVersion: kubernetes-client.io/v1
+kind: ExternalSecret
+metadata:
+  name: monica-helm-values
+  namespace: default
+spec:
+  backendType: azureKeyVault
+  keyVaultName: holthome
+  data:
+    - key: monica-helm-values
+      name: values.yaml
+      property: value
