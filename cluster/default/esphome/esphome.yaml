@@ -15,8 +15,9 @@ spec:
   values:
     image:
       repository: esphome/esphome
-      tag: c12c9e9
+      tag: 1.15.3
     env:
+      TZ: "America/New_York"
       ESPHOME_DASHBOARD_USE_PING: true
     hostNetwork: true
     ingress:
