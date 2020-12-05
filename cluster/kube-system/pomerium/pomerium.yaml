@@ -30,6 +30,8 @@ spec:
       tls:
         hosts:
           - authenticate.holthome.net
+    forwardAuth:
+      enabled: true
     operator:
       enabled: false
       replicaCount: 1
