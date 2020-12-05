@@ -11,7 +11,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: esphome
-    version: 2.3.0
+    version: 3.0.0
   values:
     image:
       repository: esphome/esphome
@@ -24,11 +24,15 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-      - esphome.holthome.net
+      - host: esphome.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
       - hosts:
         - esphome.holthome.net
         secretName: esphome-cert
     persistence:
-      enabled: true
-      existingClaim: esphome-pvc
+      config:
+        enabled: true
+        existingClaim: esphome-pvc
