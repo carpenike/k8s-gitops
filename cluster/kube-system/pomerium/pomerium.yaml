@@ -15,7 +15,7 @@ spec:
   values:
     image:
       repository: pomerium/pomerium
-      tag: v0.11.0-rc2
+      tag: v0.10.6
     ingress:
       enabled: true
       secretName: pomerium-cert
