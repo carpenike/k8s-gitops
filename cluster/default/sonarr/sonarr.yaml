@@ -21,7 +21,7 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/ingress.class: "pomerium"
       hosts:
       - host: sonarr.holthome.net
         paths:
@@ -34,7 +34,7 @@ spec:
       - enabled: true
         nameSuffix: "api"
         annotations:
-          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/ingress.class: "pomerium"
         hosts:
         - host: sonarr.holthome.net
           paths:
