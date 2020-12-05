@@ -33,7 +33,7 @@ spec:
     forwardAuth:
       enabled: true
     operator:
-      enabled: false
+      enabled: true
       replicaCount: 1
       image:
         repository: pomerium/pomerium-operator
