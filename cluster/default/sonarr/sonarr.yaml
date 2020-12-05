@@ -21,7 +21,9 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "pomerium"
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/auth-url: https://forwardauth.holthome.net/verify?uri=$scheme://$host$request_uri
+        nginx.ingress.kubernetes.io/auth-signin: "https://forwardauth.holthome.net/?uri=$scheme://$host$request_uri"
       hosts:
       - host: sonarr.holthome.net
         paths:
@@ -34,7 +36,7 @@ spec:
       - enabled: true
         nameSuffix: "api"
         annotations:
-          kubernetes.io/ingress.class: "pomerium"
+          kubernetes.io/ingress.class: "nginx"
         hosts:
         - host: sonarr.holthome.net
           paths:
