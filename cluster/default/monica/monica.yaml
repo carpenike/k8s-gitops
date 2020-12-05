@@ -48,10 +48,9 @@ spec:
         size: 5Gi
     mariadb:
       enabled: true
-      persistence:
-        primary:
-          persistence:
-            enabled: true
-            existingClaim: monica-mariadb-0-pvc
+      primary:
+        persistence:
+          enabled: true
+          existingClaim: monica-mariadb-0-pvc
   valueFileSecrets:
   - name: "monica-helm-values"
