@@ -43,7 +43,7 @@ spec:
         serviceClass: pomerium
     config:
       rootDomain: holthome.net
-      administrators: ryan@ryanholt.net
+      administrators: "ryan@ryanholt.net"
       policy:
         - from: https://httpbin.holthome.net
           to: http://httpbin.default.svc.cluster.local:8000
