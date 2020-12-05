@@ -18,7 +18,7 @@ spec:
       tag: v0.11.0-rc2
     ingress:
       enabled: true
-      secretName: acme-crt-secret
+      secretName: pomerium-cert
       authenticate:
         name: authenticate
       annotations:
@@ -26,8 +26,8 @@ spec:
       hosts:
         - authenticate.holthome.net
       tls:
-        - hosts:
-            authenticate.holthome.net
+        hosts:
+          - authenticate.holthome.net
     operator:
       enabled: true
       replicaCount: 1
