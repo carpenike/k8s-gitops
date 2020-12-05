@@ -27,7 +27,7 @@ spec:
         - authenticate.holthome.net
       tls:
         - hosts:
-            - authenticate.holthome.net
+            - host: authenticate.holthome.net
     operator:
       enabled: true
       replicaCount: 1
