@@ -16,6 +16,8 @@ spec:
     image:
       repository: esphome/esphome
       tag: c12c9e9
+    env:
+      ESPHOME_DASHBOARD_USE_PING: true
     hostNetwork: true
     ingress:
       enabled: true
