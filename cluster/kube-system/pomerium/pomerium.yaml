@@ -31,7 +31,7 @@ spec:
         hosts:
           - authenticate.holthome.net
     operator:
-      enabled: true
+      enabled: false
       replicaCount: 1
       image:
         repository: pomerium/pomerium-operator
