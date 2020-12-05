@@ -23,6 +23,8 @@ spec:
         name: authenticate
       annotations:
         nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
         - authenticate.holthome.net
       tls:
