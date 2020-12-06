@@ -16,7 +16,7 @@ spec:
   values:
     image:
       repository: k8sathome/tautulli
-      tag: v2.6.1
+      tag: v2.6.2
     env:
       TZ: "America/New_York"
       PUID: 1000
