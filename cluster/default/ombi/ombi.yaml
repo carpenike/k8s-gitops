@@ -15,7 +15,7 @@ spec:
   values:
     image:
       repository: k8sathome/ombi
-      tag: v4.0.739
+      tag: v4.0.748
     env:
       TZ: "America/New_York"
     ingress:
