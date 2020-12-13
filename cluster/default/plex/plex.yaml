@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: plexinc/pms-docker
-      tag: 1.21.0.3616-d87012962
+      tag: plexpass
     timezone: "America/New_York"
     allowedNetworks:
       - 10.42.0.0/16
