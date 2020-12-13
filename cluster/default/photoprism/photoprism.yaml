@@ -46,7 +46,7 @@ spec:
         existingClaim: photoprism-pvc
       originals:
         enabled: true
-        existingCLaim: nfs-pictures-pvc
+        existingClaim: nfs-pictures-pvc
         readOnly: true
 
     # additionalVolumeMounts:
