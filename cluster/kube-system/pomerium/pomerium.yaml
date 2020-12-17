@@ -25,11 +25,11 @@ spec:
         nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      # hosts:
-      #   - authenticate.holthome.net
-      # tls:
-      #   hosts:
-      #     - authenticate.holthome.net
+      hosts:
+        - sonarr.holthome.net
+      tls:
+        hosts:
+          - sonarr.holthome.net
     forwardAuth:
       enabled: true
     operator:
@@ -50,11 +50,11 @@ spec:
           allowed_groups:
             - k8s-admins
         # Sonarr
-        # - from: https://sonarr.holthome.net
-        #   to: http://sonarr.default.svc.cluster.local:8989
-        #   prefix: /api/
-        #   allow_public_unauthenticated_access: true
-        #   allow_websockets: true
+        - from: https://sonarr.holthome.net
+          to: http://sonarr.default.svc.cluster.local:8989
+          prefix: /api/
+          allow_public_unauthenticated_access: true
+          allow_websockets: true
         - from: https://sonarr.holthome.net
           to: http://sonarr.default.svc.cluster.local:8989
           allowed_groups:
