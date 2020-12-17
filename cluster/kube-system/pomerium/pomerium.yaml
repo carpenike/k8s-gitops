@@ -73,10 +73,10 @@ spec:
           to: http://radarr.default.svc.cluster.local:7878
           allowed_groups:
             - k8s-admins
-        # HASS
+        # ESPHome
         - from: https://esphome.holthome.net
           to: http://esphome.default.svc.cluster.local:6052
-          allow_websockets: true
+          allow_websockets: false
           allow_public_unauthenticated_access: false
           allowed_groups:
             - k8s-admins
