@@ -28,10 +28,12 @@ spec:
       hosts:
         - sonarr.holthome.net
         - radarr.holthome.net
+        - esphome.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
           - radarr.holthome.net
+          - esphome.holthome.net
     forwardAuth:
       enabled: true
     operator:
