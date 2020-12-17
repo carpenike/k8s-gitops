@@ -45,10 +45,10 @@ spec:
       rootDomain: holthome.net
       #administrators: "ryan@ryanholt.net"
       policy:
-      #   - from: https://httpbin.holthome.net
-      #     to: http://httpbin.default.svc.cluster.local:8000
-      #     allowed_groups:
-      #       - k8s-admins
+        - from: https://httpbin.holthome.net
+          to: http://httpbin.default.svc.cluster.local:8000
+          allowed_groups:
+            - k8s-admins
         # Sonarr
         # - from: https://sonarr.holthome.net
         #   to: http://sonarr.default.svc.cluster.local:8989
