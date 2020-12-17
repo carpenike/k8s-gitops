@@ -15,7 +15,7 @@ spec:
   chart:
     repository: https://kubernetes.github.io/ingress-nginx
     name: ingress-nginx
-    version: 3.4.1
+    version: 3.15.2
   values:
     controller:
       replicaCount: 2
@@ -73,9 +73,6 @@ spec:
       #     memory: 825Mi
     defaultBackend:
       enabled: true
-      image:
-        repository: billimek/custom-error-pages
-        tag: 0.4.4
       # resources:
       #   requests:
       #     memory: 250Mi
