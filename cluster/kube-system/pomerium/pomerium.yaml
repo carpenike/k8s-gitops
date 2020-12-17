@@ -77,7 +77,7 @@ spec:
         - from: https://esphome.holthome.net
           to: http://esphome.default.svc.cluster.local:6052
           allow_websockets: true
-          allow_public_unauthenticated_access: true
+          allow_public_unauthenticated_access: false
           allowed_groups:
             - k8s-admins
       #   - from: https://ha-vscode.holthome.net
