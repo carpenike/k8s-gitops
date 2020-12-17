@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: smallstep/step-ca
-      tag: 0.15.5
+      tag: 0.15.6
     ca:
       name: Holthome CA
       db:
@@ -33,9 +33,9 @@ spec:
         nginx.ingress.kubernetes.io/ssl-passthrough: "true"
         nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       hosts:
-        - host: pki.holthome.net
-          paths:
-            - /
+      - host: pki.holthome.net
+        paths:
+        - /
       tls:
-        - hosts:
-            - pki.holthome.net
+      - hosts:
+        - pki.holthome.net
