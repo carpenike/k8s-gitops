@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: jackett
-    version: 5.4.0
+    version: 6.2.0
   values:
     image:
       repository: k8sathome/jackett
