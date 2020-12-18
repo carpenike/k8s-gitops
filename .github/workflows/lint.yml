@@ -1,8 +1,10 @@
 name: lint
+
 on:
   push:
     branches:
-      - master
+    - main
+
 jobs:
   lint-yaml:
     runs-on:
@@ -10,16 +12,26 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
     - uses: actions/checkout@v2
-    - name: Lint yaml
+      with:
+        fetch-depth: 1
+
+    - name: Lint YAML
       uses: ibiqlik/action-yamllint@v3
+      with:
+        file_or_dir: "./cluster"
+        config_file: "./.github/yamllint.config.yaml"
+
   lint-shell:
     runs-on:
     - ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
     - uses: actions/checkout@v2
-    - name: Lint scripts
-      uses: azohra/shell-linter@latest
       with:
-        path: "hack"
-        severity: "error"
+        fetch-depth: 1
+
+    - name: Lint shell scripts
+      uses: reviewdog/action-shellcheck@v1
+      with:
+        path: "./hack"
+        level: "error"
