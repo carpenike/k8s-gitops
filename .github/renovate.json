@@ -1,28 +1,87 @@
 {
   "enabled": true,
   "timezone": "America/New_York",
-  "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dashboard",
   "commitMessageSuffix": "[ci-skip]",
   "commitBody": "Signed-off-by: Ryan Holt <carpenike@users.noreply.github.com>",
-  "labels": ["kind/enhancement"],
+  // Do not notify on closed unmerged PRs
+  "suppressNotifications": ["prIgnoreNotification"],
+  // Do not rebase PRs
+  "rebaseWhen": "conflicted",
+  "assignees": ["@onedr0p"],
   "helm-values": {
     "fileMatch": ["cluster/.+\\.yaml$"]
   },
-  "packageRules": [
+  "regexManagers": [
     {
-      "packageNames": ["k8sathome/qbittorrent"],
-      "allowedVersions": "<4.3.0"
+      "fileMatch": ["cluster/.+\\.yaml$"],
+      "matchStrings": [
+        "registryUrl=(?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
+      ],
+      "datasourceTemplate": "helm"
+    }
+  ],
+  "packageRules": [
+    // Setup datasources
+    {
+      "datasources": ["helm"],
+      "commitMessageTopic": "Helm chart {{depName}}",
+      "separateMinorPatch": true
+    },
+    // Add labels according to package and update types
+    {
+      "datasources": ["docker"],
+      "updateTypes": ["major"],
+      "labels": ["renovate/image-release", "dependency/major"]
     },
     {
       "datasources": ["docker"],
+      "updateTypes": ["minor"],
+      "labels": ["renovate/image-release", "dependency/minor"]
+    },
+    {
+      "datasources": ["docker"],
+      "updateTypes": ["patch"],
+      "labels": ["renovate/image-release", "dependency/patch"]
+    },
+    {
+      "datasources": ["helm"],
+      "updateTypes": ["major"],
+      "labels": ["renovate/helm-release", "dependency/major"]
+    },
+    {
+      "datasources": ["helm"],
+      "updateTypes": ["minor"],
+      "labels": ["renovate/helm-release", "dependency/minor"]
+    },
+    {
+      "datasources": ["helm"],
+      "updateTypes": ["patch"],
+      "labels": ["renovate/helm-release", "dependency/patch"]
+    },
+    // Pin package versions
+    {
+      "datasources": ["docker"],
+      "allowedVersions": "<4.3.0",
+      "packageNames": ["k8sathome/qbittorrent"]
+    },
+    // Version strategies
+    {
+      "datasources": ["docker"],
+      "versioning": "loose",
+      "packageNames": ["plexinc/pms-docker"]
+    },
+    // Enable auto-merge
+    {
+      "datasources": ["docker"],
+      "automerge": true,
+      "requiredStatusChecks": null,
+      "updateTypes": ["minor", "patch"],
       "packageNames": [
-        "k8sathome/radarr",
-        "k8sathome/sonarr",
-        "k8sathome/lidarr",
-        "k8sathome/bazarr"
-      ],
-      "versioning": "nuget"
+        "k8sathome/ombi",
+        "k8sathome/jackett"
+      ]
     }
-  ],
-  "schedule": ["before 8pm"]
+  ]
 }
