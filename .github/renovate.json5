@@ -18,7 +18,7 @@
       "fileMatch": ["cluster/.+\\.yaml$"],
       "matchStrings": [
         //"registryUrl=(?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
-        "registryUrl=(?<repository>.*?)\n *chart: (?<name>.*?)\n *version: (?<version>.*)\n"
+        "repository: (?<registryUrl>.*?)\n *name: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
       ],
       "datasourceTemplate": "helm"
     }
