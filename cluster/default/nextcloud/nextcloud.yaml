@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://nextcloud.github.io/helm/
     name: nextcloud
-    version: 2.1.0
+    version: 2.3.2
     # git: https://github.com/carpenike/helm
     # ref: master
     # path: charts/nextcloud
