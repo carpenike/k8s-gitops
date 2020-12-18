@@ -11,7 +11,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: sonarr
-    version: 7.4.0
+    version: 7.7.0
   values:
     image:
       repository: k8sathome/sonarr
