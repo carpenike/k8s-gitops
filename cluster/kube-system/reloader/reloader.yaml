@@ -12,4 +12,4 @@ spec:
   chart:
     repository: https://stakater.github.io/stakater-charts
     name: reloader
-    version: v0.0.74
+    version: v0.0.75
