@@ -30,9 +30,9 @@ jobs:
         delete-branch: true
         title: "Update HelmRelease annotations for Renovate [ci-skip]"
         signoff: true
-        committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
-        author: "Devin Buhl <onedr0p@users.noreply.github.com>"
-        assignees: "onedr0p"
+        committer: "Ryan Holt <carpenike@users.noreply.github.com>"
+        author: "Ryan Holt <carpenike@users.noreply.github.com>"
+        assignees: "carpenike"
         commit-message: "Update HelmRelease annotations for Renovate [ci-skip]"
         body: |
           Add comment annotations to HelmReleases inorder for Renovate to pick up new versions of Helm charts
