@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: home-assistant
-    version: 3.1.0
+    version: 3.4.0
   values:
     image:
       repository: homeassistant/home-assistant
