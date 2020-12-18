@@ -16,7 +16,7 @@ spec:
   chart:
     repository: https://smallstep.github.io/helm-charts/
     name: step-certificates
-    version: 1.15.5
+    version: 1.15.6
   values:
     image:
       repository: smallstep/step-ca

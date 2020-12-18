@@ -13,7 +13,7 @@ spec:
   chart:
     repository: https://charts.bitnami.com/bitnami
     name: external-dns
-    version: 3.3.0
+    version: 4.5.0
   values:
     image:
       repository: bitnami/external-dns
