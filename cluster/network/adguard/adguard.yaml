@@ -16,7 +16,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts/
     name: adguard-home
-    version: 2.1.1
+    version: 2.2.0
   values:
     image:
       repository: adguard/adguardhome
