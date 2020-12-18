@@ -1,0 +1,39 @@
+name: renovate-helmrelease-schedule
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "0 * * * *"
+
+jobs:
+  renovate-helmrelease:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Install yq
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/bin"
+        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+        curl -sL -o "${GITHUB_WORKSPACE}/bin/yq" https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
+        chmod +x "${GITHUB_WORKSPACE}/bin/yq"
+    - name: Create HelmRelease annotations
+      run: ./hack/create-helmrelease-annotations.sh
+
+    - name: Create pull request for HelmRelease annotations
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: helm-release-annotations
+        delete-branch: true
+        title: "Update HelmRelease annotations for Renovate [ci-skip]"
+        signoff: true
+        committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
+        author: "Devin Buhl <onedr0p@users.noreply.github.com>"
+        assignees: "onedr0p"
+        commit-message: "Update HelmRelease annotations for Renovate [ci-skip]"
+        body: |
+          Add comment annotations to HelmReleases inorder for Renovate to pick up new versions of Helm charts
+        labels: renovate/helm-release-annotations
