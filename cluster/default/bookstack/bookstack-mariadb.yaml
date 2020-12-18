@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://charts.bitnami.com/bitnami
     name: mariadb
-    version: 7.6.1
+    version: 7.10.4
   values:
     image:
       repository: bitnami/mariadb
