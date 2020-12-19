@@ -11,7 +11,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: ombi
-    version: 6.2.0
+    version: 6.2.1
   values:
     image:
       repository: k8sathome/ombi
