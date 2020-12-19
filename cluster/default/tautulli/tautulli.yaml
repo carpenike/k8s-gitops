@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: tautulli
-    version: 6.1.0
+    version: 6.1.1
   values:
     image:
       repository: k8sathome/tautulli
