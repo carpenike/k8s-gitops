@@ -28,7 +28,7 @@ spec:
         app.kubernetes.io/name: resilio-sync
     spec:
       containers:
-      - image: linuxserver/resilio-sync:2.7.2.1375-ls74
+      - image: linuxserver/resilio-sync:2.7.2.1375-ls75
         name: resilio-sync-ryan
         env:
         - name: TZ
@@ -58,7 +58,7 @@ spec:
         #   mountPath: /sync/music
         # - name: video
         #   mountPath: /sync/video
-      - image: linuxserver/resilio-sync:2.7.2.1375-ls74
+      - image: linuxserver/resilio-sync:2.7.2.1375-ls75
         name: resilio-sync-stefanie
         env:
         - name: TZ
