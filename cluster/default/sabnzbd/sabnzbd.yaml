@@ -28,6 +28,7 @@ spec:
     additionalVolumeMounts:
     - name: data
       mountPath: /data
+      subPath: sabnzbd
     additionalVolumes:
     - name: data
       persistentVolumeClaim:
