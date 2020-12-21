@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: bazarr
-    version: 5.2.0
+    version: 5.2.1
   values:
     image:
       repository: linuxserver/bazarr

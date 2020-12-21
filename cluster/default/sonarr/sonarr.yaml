@@ -11,11 +11,11 @@ spec:
   chart:
     repository: https://k8s-at-home.com/charts
     name: sonarr
-    version: 8.1.0
+    version: 8.1.1
   values:
     image:
       repository: k8sathome/sonarr
-      tag: v3.0.4.1026
+      tag: v3.0.4.1033
     env:
       TZ: "America/New_York"
     ingress:

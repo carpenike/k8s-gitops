@@ -1,3 +1,4 @@
+---
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
@@ -16,19 +17,19 @@ spec:
   values:
     image:
       repository: raspbernetes/node-feature-discovery
-      tag: "v0.6.0"
+      tag: "v0.7.0"
     sources:
       # - cpu
-      - custom
+    - custom
       # - iommu
       # - kernel
       # - local
       # - memory
       # - network
-      - pci
+    - pci
       # - storage
       # - system
-      - usb
+    - usb
 
     # node-feature-discovery configuration - see https://github.com/kubernetes-sigs/node-feature-discovery/blob/master/nfd-worker.conf.example for example
     config: |
@@ -90,13 +91,13 @@ spec:
     master:
       replicaCount: 1
       tolerations:
-        - key: "node-role.kubernetes.io/master"
-          operator: "Equal"
-          value: ""
-          effect: "NoSchedule"
-        - key: arm
-          operator: Exists
+      - key: "node-role.kubernetes.io/master"
+        operator: "Equal"
+        value: ""
+        effect: "NoSchedule"
+      - key: arm
+        operator: Exists
     worker:
       tolerations:
-        - key: arm
-          operator: Exists
+      - key: arm
+        operator: Exists
