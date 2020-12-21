@@ -9,46 +9,31 @@ metadata:
     fluxcd.io/automated: "false"
 spec:
   releaseName: sabnzbd
-  helmVersion: v3
-  rollback:
-    enable: false
   chart:
     repository: https://k8s-at-home.com/charts
     name: sabnzbd
-    version: 4.1.0
+    version: 4.1.1
   values:
     image:
-      repository: linuxserver/sabnzbd
-      tag: 2.3.9-0ubuntu1jcfp218.04-ls67
+      repository: k8sathome/sabnzbd
+      tag: v3.1.1
+    env:
+      TZ: "America/New_York"
     ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-        # nginx.ingress.kubernetes.io/auth-url: "https://auth.devbu.io/oauth2/auth"
-        # nginx.ingress.kubernetes.io/auth-signin: "https://auth.devbu.io/oauth2/start"
-      hosts:
-      - "sabnzbd.holthome.net"
-      tls:
-      - hosts:
-        - "sabnzbd.holthome.net"
-    timezone: "America/New_York"
-    puid: 1000
-    pgid: 1000
+      enabled: false
     persistence:
       config:
         enabled: true
-        storageClass: "longhorn"
-        accessMode: ReadWriteOnce
-        size: 1Gi
-      downloads:
-        enabled: false
-      extraMounts:
+        existingClaim: sabnzbd-pvc
+      additionalVolumeMounts:
+      - name: data
+        mountPath: /data
+      additionalVolumes:
       - name: data
         claimName: nfs-tank-share-pvc
     resources:
       requests:
         memory: 250Mi
-        cpu: 25m
+        cpu: 500m
       limits:
-        memory: 250Mi
-        cpu: 25m
+        memory: 7500Mi
