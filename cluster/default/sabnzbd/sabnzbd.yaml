@@ -30,7 +30,8 @@ spec:
       mountPath: /data
     additionalVolumes:
     - name: data
-      claimName: nfs-tank-share-pvc
+      persistentVolumeClaim:
+        claimName: nfs-tank-share-pvc
     resources:
       requests:
         memory: 250Mi
