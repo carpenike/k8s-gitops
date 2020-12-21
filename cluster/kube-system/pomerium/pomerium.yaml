@@ -29,11 +29,13 @@ spec:
         - sonarr.holthome.net
         - radarr.holthome.net
         - esphome.holthome.net
+        - sabnzbd.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
           - radarr.holthome.net
           - esphome.holthome.net
+          - sabnzbd.holthome.net
     forwardAuth:
       enabled: true
     operator:
@@ -71,6 +73,16 @@ spec:
           allow_websockets: true
         - from: https://radarr.holthome.net
           to: http://radarr.default.svc.cluster.local:7878
+          allowed_groups:
+            - k8s-admins
+        # Sabnzbd
+        - from: https://sabnzbd.holthome.net
+          to: http://sabnzbd.default.svc.cluster.local:7878
+          prefix: /api/
+          allow_public_unauthenticated_access: true
+          allow_websockets: true
+        - from: https://sabnzbd.holthome.net
+          to: http://sabnzbd.default.svc.cluster.local:7878
           allowed_groups:
             - k8s-admins
         # ESPHome
