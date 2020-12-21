@@ -77,12 +77,12 @@ spec:
             - k8s-admins
         # Sabnzbd
         - from: https://sabnzbd.holthome.net
-          to: http://sabnzbd.default.svc.cluster.local:7878
+          to: http://sabnzbd.default.svc.cluster.local:8080
           prefix: /api/
           allow_public_unauthenticated_access: true
           allow_websockets: true
         - from: https://sabnzbd.holthome.net
-          to: http://sabnzbd.default.svc.cluster.local:7878
+          to: http://sabnzbd.default.svc.cluster.local:8080
           allowed_groups:
             - k8s-admins
         # ESPHome
