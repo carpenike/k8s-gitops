@@ -25,12 +25,12 @@ spec:
       config:
         enabled: true
         existingClaim: sabnzbd-pvc
-      additionalVolumeMounts:
-      - name: data
-        mountPath: /data
-      additionalVolumes:
-      - name: data
-        claimName: nfs-tank-share-pvc
+    additionalVolumeMounts:
+    - name: data
+      mountPath: /data
+    additionalVolumes:
+    - name: data
+      claimName: nfs-tank-share-pvc
     resources:
       requests:
         memory: 250Mi
