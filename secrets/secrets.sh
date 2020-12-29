@@ -181,7 +181,7 @@ az keyvault secret set --name "actions-runner-gh-app-private-key" --vault-name h
 
 az keyvault secret set --name "alertmanager-bot-admin" --vault-name holthome --value $TELEGRAM_USER_ID
 az keyvault secret set --name "alertmanager-bot-token" --vault-name holthome --value $TELEGRAM_AM_BOT_TOKEN
-
+az keyvault secret set --name "flux-discord-address" --vault-name holthome --value $FLUX_DISCORD_ADDRESS
 
 ## Dockerhub
 # az keyvault secret set --name "dockerhub-username" --vault-name holthome --value $DOCKER_USERNAME
@@ -198,7 +198,7 @@ kubectl -n kube-system create secret docker-registry registry-creds-secret --nam
 # #  --from-literal=AWS_ACCESS_KEY_ID=$MINIO_ACCESS_KEY \
 # #  --from-literal=AWS_SECRET_ACCESS_KEY=$MINIO_SECRET_KEY \
 # #  --namespace default --dry-run=true -o json \
-# #  | \
+# #  | \j
 # # kubeseal --format=yaml --cert="$PUB_CERT" \
 # #    > "$REPO_ROOT"/cluster/stash/stash/restic-backup-credentials.yaml
 
