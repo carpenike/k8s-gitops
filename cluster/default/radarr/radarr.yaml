@@ -8,13 +8,17 @@ metadata:
     fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: "glob:amd64-v0.*.*.*"
 spec:
-  releaseName: radarr
-  rollback:
-    enable: true
+  interval: 5m
   chart:
-    repository: https://k8s-at-home.com/charts
-    name: radarr
-    version: 8.2.1
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: radarr
+      version: 8.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: k8sathome/radarr
