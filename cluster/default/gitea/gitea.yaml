@@ -15,7 +15,7 @@ spec:
   chart:
     repository: https://dl.gitea.io/charts/
     name: gitea
-    version: 1.5.5
+    version: 2.1.4
   values:
     image:
       repository: gitea/gitea
