@@ -1,14 +1,14 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
-metadata:
-  creationTimestamp: null
-  name: authelia-users
-  namespace: kube-system
-spec:
-  encryptedData:
-    users.yaml: AgBXrzDX+iGqYhXSVftHMr/2vEmAccPTrlkEPqkfG0YL72/p1kNfLafacOKP0Se8gereq7vb5Ro1HbEcyPhaHumbXhUJ+sfnyM3M8BLaG4WF/nkK+pZlf6KgXe6cU2IdTVOScWHOLxlI/kcecgHN0Ue1DKCsw5oNTI/yZc9NKFuqnopJ6ck9xSdW0migtvXwYL0kSvrcDG2y7zmjeNDP32tZSdzeRd5AhmsTIz6/zZH9iF13Xt0I/L18qzh5XEXjch9YocB3mIAhDM+Ws2aa1QfzsEWr6dJlcryFNJREtyIO/YHy3LfmOTQugc/T/ivkGMdcRRioNkoHCp1U1IwCATZlmhka4FDgWP9Fne4f5HNLQmuk8363ehMAIwhox2vZ3wB+KU846Nq0lBS61EMMWG6rHrLXNBsUSM2MKkFSaFlKbCiM/eRhPp0Hs3Pf0QXopmMcTckW3DUnGS7CT3upcfnBDbJ10JjoSXkqS72xSGyiOL3A7pHX4sdmAzpzHAX6IPLB4ctnsW+W2T1p0wbkXxQgy8Pl9WoblufKN9KwzA2PxDnhbSOZR+zsJBNuH+Bshn/GVtyhxN4R7sFWQgaix6Iq7PPoIkymrlteRJEYkcVNqCtAB3iarBgovpcAZVZZtZmlzsMXb96C99Lr092GF+G02YD+yi+V3NnNxEgVdqWgT7Se2CsaXLOyjiML7QUMa57vGeIba1JMREFlCJyF6REPsuRPqqZcCz2oCCuFpzGkiQv8YTiLaWgzFOh4hBP6A81AH8Zf5NXHoDITU7Ah5pwsCSyL98CBUcadeUbLXQpPLoEdwFMNJsu4ArcRauoY0stx2MgJTP+lvkM8uAH+xIC9WRQBa2obxBOpHIoH+SQeIo1NAmsbSECo1BBWYNpOV4uEkMU6mScDekbzDaxOow4jPfdoCe4A/SPAPgxL2taH+0uXzBK2Jzefi/GrZcSTXENyPG7vC2jwODi6XI42E/x7kOEwaXEFpQ==
-  template:
-    metadata:
-      creationTimestamp: null
-      name: authelia-users
-      namespace: kube-system
+# apiVersion: bitnami.com/v1alpha1
+# kind: SealedSecret
+# metadata:
+#   creationTimestamp: null
+#   name: authelia-users
+#   namespace: kube-system
+# spec:
+#   encryptedData:
+#     users.yaml: AgBXrzDX+iGqYhXSVftHMr/2vEmAccPTrlkEPqkfG0YL72/p1kNfLafacOKP0Se8gereq7vb5Ro1HbEcyPhaHumbXhUJ+sfnyM3M8BLaG4WF/nkK+pZlf6KgXe6cU2IdTVOScWHOLxlI/kcecgHN0Ue1DKCsw5oNTI/yZc9NKFuqnopJ6ck9xSdW0migtvXwYL0kSvrcDG2y7zmjeNDP32tZSdzeRd5AhmsTIz6/zZH9iF13Xt0I/L18qzh5XEXjch9YocB3mIAhDM+Ws2aa1QfzsEWr6dJlcryFNJREtyIO/YHy3LfmOTQugc/T/ivkGMdcRRioNkoHCp1U1IwCATZlmhka4FDgWP9Fne4f5HNLQmuk8363ehMAIwhox2vZ3wB+KU846Nq0lBS61EMMWG6rHrLXNBsUSM2MKkFSaFlKbCiM/eRhPp0Hs3Pf0QXopmMcTckW3DUnGS7CT3upcfnBDbJ10JjoSXkqS72xSGyiOL3A7pHX4sdmAzpzHAX6IPLB4ctnsW+W2T1p0wbkXxQgy8Pl9WoblufKN9KwzA2PxDnhbSOZR+zsJBNuH+Bshn/GVtyhxN4R7sFWQgaix6Iq7PPoIkymrlteRJEYkcVNqCtAB3iarBgovpcAZVZZtZmlzsMXb96C99Lr092GF+G02YD+yi+V3NnNxEgVdqWgT7Se2CsaXLOyjiML7QUMa57vGeIba1JMREFlCJyF6REPsuRPqqZcCz2oCCuFpzGkiQv8YTiLaWgzFOh4hBP6A81AH8Zf5NXHoDITU7Ah5pwsCSyL98CBUcadeUbLXQpPLoEdwFMNJsu4ArcRauoY0stx2MgJTP+lvkM8uAH+xIC9WRQBa2obxBOpHIoH+SQeIo1NAmsbSECo1BBWYNpOV4uEkMU6mScDekbzDaxOow4jPfdoCe4A/SPAPgxL2taH+0uXzBK2Jzefi/GrZcSTXENyPG7vC2jwODi6XI42E/x7kOEwaXEFpQ==
+#   template:
+#     metadata:
+#       creationTimestamp: null
+#       name: authelia-users
+#       namespace: kube-system

@@ -1,14 +1,14 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
-metadata:
-  creationTimestamp: null
-  name: version-checker-helm-values
-  namespace: kube-system
-spec:
-  encryptedData:
-    values.yaml: AgA8c/rVmMKBICLzxkuIfL84S9o4mEhCuTFXiFHXeyKTDyjtLUArk5Z+QefhwPY8aN3GmTgWrvdshY4kjQI5T/wtr5m0tQtru7uelf1tqZoa1ksEEVAToawkL9XgyAkCDiAQJPcKm/uImoB6zjHtV/OzhnybILF4nj2T1did0j+cUV8eYopkAc1wS8v6pLi7D101LPHeMuJRInq6lp4tX5HhRHvOX10sDWwt2gjv6yo4ijIjyA/8uPu+7JZXeNMgQrzOx1iXNt/iE7GkWutnQnyot4gJyIda5q/jQlUuO16qPzwEVlljeK0S7tSu/YWtS1ruj3OkHHaDX7ePLRJQOeoSvSSgnGc6tmALQkTg1TFwMaHvy1LHKbYRNyOcN5NWsm2LjpS/7z1eEd0kD0UWd5SMBBLZ6cDrM1ichBPPC3ohD9oee7w73bmC4AXNo6mBI+qWk0DiAi1LI+QKfYrm264nhzD5jMZOIhgu+Mv5/48VzO7/UjVp5fKUiDOFIhOxiIFdaeDytlaq+TIWZ1z2Ws+/RAUPFw+SczDQ+g3InW9H+VSlOGO9+zThkLG5o1Uspfgya02kntDtkWpzAeS8A0Fj4gkPksT3IlXl9hByX8lvPZil68SYbI1P98poHyKoYPjZta+0m/kEJY/5CZMCJrh6rxANheZgnKBvyVnhM3Kaf2y25D/kl+mVlwu6nVkJwXPPqygy+pPZxMI2JOm+RlUHShctxSvpHPnGgb//YOjTB1vBq5VH5/eUqScoYQHBgc6UOhjDJOc=
-  template:
-    metadata:
-      creationTimestamp: null
-      name: version-checker-helm-values
-      namespace: kube-system
+# apiVersion: bitnami.com/v1alpha1
+# kind: SealedSecret
+# metadata:
+#   creationTimestamp: null
+#   name: version-checker-helm-values
+#   namespace: kube-system
+# spec:
+#   encryptedData:
+#     values.yaml: AgA8c/rVmMKBICLzxkuIfL84S9o4mEhCuTFXiFHXeyKTDyjtLUArk5Z+QefhwPY8aN3GmTgWrvdshY4kjQI5T/wtr5m0tQtru7uelf1tqZoa1ksEEVAToawkL9XgyAkCDiAQJPcKm/uImoB6zjHtV/OzhnybILF4nj2T1did0j+cUV8eYopkAc1wS8v6pLi7D101LPHeMuJRInq6lp4tX5HhRHvOX10sDWwt2gjv6yo4ijIjyA/8uPu+7JZXeNMgQrzOx1iXNt/iE7GkWutnQnyot4gJyIda5q/jQlUuO16qPzwEVlljeK0S7tSu/YWtS1ruj3OkHHaDX7ePLRJQOeoSvSSgnGc6tmALQkTg1TFwMaHvy1LHKbYRNyOcN5NWsm2LjpS/7z1eEd0kD0UWd5SMBBLZ6cDrM1ichBPPC3ohD9oee7w73bmC4AXNo6mBI+qWk0DiAi1LI+QKfYrm264nhzD5jMZOIhgu+Mv5/48VzO7/UjVp5fKUiDOFIhOxiIFdaeDytlaq+TIWZ1z2Ws+/RAUPFw+SczDQ+g3InW9H+VSlOGO9+zThkLG5o1Uspfgya02kntDtkWpzAeS8A0Fj4gkPksT3IlXl9hByX8lvPZil68SYbI1P98poHyKoYPjZta+0m/kEJY/5CZMCJrh6rxANheZgnKBvyVnhM3Kaf2y25D/kl+mVlwu6nVkJwXPPqygy+pPZxMI2JOm+RlUHShctxSvpHPnGgb//YOjTB1vBq5VH5/eUqScoYQHBgc6UOhjDJOc=
+#   template:
+#     metadata:
+#       creationTimestamp: null
+#       name: version-checker-helm-values
+#       namespace: kube-system

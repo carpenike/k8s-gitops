@@ -1,14 +1,14 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
-metadata:
-  creationTimestamp: null
-  name: uptimerobot-helm-values
-  namespace: monitoring
-spec:
-  encryptedData:
-    values.yaml: AgA/UM2V3HynU6nmGlqxpU7L4TDV/fTcNpmhMvGG1smbmTbFWwbL4iTNxFAEoZnAPuscdWVo6jnma/KFp1ID327BpPbC+OIjmy158DHx8Qm+753hNQTD2tIRnlX6wjwEDadMgKN4k0+sjec6GFSbCUwlJ6k/QOp8rSUMl+WsHxP/gpqWm/XScCyHSaHcSuP07ADIwTQCgvPgwQU+5H5Jf8RlEHlIVLRWyWcJ3d51t7riKMeLDdfHp0FUUY8zrgDLq58/+NCwM00kTWyV80HpO1BUbhGopY5UxzPyo4QcDlHSKbuijL4ja0ADtsMBTytwtq0eU4m1B/KTeTLYaCtiEUBdCJau6gcrQFP5z4qi+nbPnLrSHU52VDv02AbHjgntgUNboCeohXbj0ZoZqoEx2Xu8At+c/Wi1G48hl3ju/brL+mVsBI3ic2Jc3V+iKlPPWS+xM9zmX1O+Hk1kiKGYPN3q50dffcuVpV9JRhF5S5o3scBIMDthuaiJNJ0lpAP0JKYWoY4XgA9OeOfMKoffcxggB4ymdfD+8wWoPn+3e7xW1QZWXeuD3PdUeTYF2hgtJgrf38DnuG6myuMryPK62Jz7L8YETgSUvoqQ67f1ttPsyOH3BLBDmMIdicrjKFGea09lw67pRoMaNHlJo0FHENkwMnqhgaZjOwJIRl+Exa6LWDHHS1DiO9FszDRBkS1NQUXOm4M3J/vqXSzEOeFupfdE5hLTKdm/ulrbEVzztBwMhVZaUKAaBeitfTNWR1MGRfam3td7+SZ3DtCkSW2cEaKIKHeqFIMu
-  template:
-    metadata:
-      creationTimestamp: null
-      name: uptimerobot-helm-values
-      namespace: monitoring
+# apiVersion: bitnami.com/v1alpha1
+# kind: SealedSecret
+# metadata:
+#   creationTimestamp: null
+#   name: uptimerobot-helm-values
+#   namespace: monitoring
+# spec:
+#   encryptedData:
+#     values.yaml: AgA/UM2V3HynU6nmGlqxpU7L4TDV/fTcNpmhMvGG1smbmTbFWwbL4iTNxFAEoZnAPuscdWVo6jnma/KFp1ID327BpPbC+OIjmy158DHx8Qm+753hNQTD2tIRnlX6wjwEDadMgKN4k0+sjec6GFSbCUwlJ6k/QOp8rSUMl+WsHxP/gpqWm/XScCyHSaHcSuP07ADIwTQCgvPgwQU+5H5Jf8RlEHlIVLRWyWcJ3d51t7riKMeLDdfHp0FUUY8zrgDLq58/+NCwM00kTWyV80HpO1BUbhGopY5UxzPyo4QcDlHSKbuijL4ja0ADtsMBTytwtq0eU4m1B/KTeTLYaCtiEUBdCJau6gcrQFP5z4qi+nbPnLrSHU52VDv02AbHjgntgUNboCeohXbj0ZoZqoEx2Xu8At+c/Wi1G48hl3ju/brL+mVsBI3ic2Jc3V+iKlPPWS+xM9zmX1O+Hk1kiKGYPN3q50dffcuVpV9JRhF5S5o3scBIMDthuaiJNJ0lpAP0JKYWoY4XgA9OeOfMKoffcxggB4ymdfD+8wWoPn+3e7xW1QZWXeuD3PdUeTYF2hgtJgrf38DnuG6myuMryPK62Jz7L8YETgSUvoqQ67f1ttPsyOH3BLBDmMIdicrjKFGea09lw67pRoMaNHlJo0FHENkwMnqhgaZjOwJIRl+Exa6LWDHHS1DiO9FszDRBkS1NQUXOm4M3J/vqXSzEOeFupfdE5hLTKdm/ulrbEVzztBwMhVZaUKAaBeitfTNWR1MGRfam3td7+SZ3DtCkSW2cEaKIKHeqFIMu
+#   template:
+#     metadata:
+#       creationTimestamp: null
+#       name: uptimerobot-helm-values
+#       namespace: monitoring
