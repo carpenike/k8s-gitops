@@ -9,4 +9,4 @@ spec:
   username: tom-servo
   channel: cluster
   secretRef:
-    name: discord-webhook
+    name: flux-discord-address
