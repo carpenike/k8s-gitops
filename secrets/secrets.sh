@@ -21,7 +21,7 @@ else
 fi
 
 # Login to Azure
-az login --service-principal --username "$AZURE_KEVYAULT_CLIENT_ID" --password "$AZURE_KEVYAULT_CLIENT_SECRET" --tenant "$AZURE_KEVYAULT_TENANT_ID"
+az login --service-principal --username "$AZURE_KEYVAULT_CLIENT_ID" --password "$AZURE_KEYVAULT_CLIENT_SECRET" --tenant "$AZURE_KEYVAULT_TENANT_ID"
 
 # Helper function to generate secrets
 kseal() {
