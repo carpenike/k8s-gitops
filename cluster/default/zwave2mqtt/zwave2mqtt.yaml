@@ -38,8 +38,9 @@ spec:
           - matchExpressions:
             - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
     persistence:
-      enabled: true
-      existingClaim: zwave2mqtt
+      config:
+        enabled: true
+        existingClaim: zwave2mqtt
       # storageClass: "longhorn"
       # accessMode: ReadWriteOnce
       # size: 1Gi
