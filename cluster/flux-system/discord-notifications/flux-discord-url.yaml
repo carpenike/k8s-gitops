@@ -2,7 +2,7 @@ apiVersion: kubernetes-client.io/v1
 kind: ExternalSecret
 metadata:
   name: flux-discord-address
-  namespace: default
+  namespace: flux-system
 spec:
   backendType: azureKeyVault
   keyVaultName: holthome
