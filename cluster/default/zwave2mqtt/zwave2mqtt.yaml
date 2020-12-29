@@ -52,6 +52,4 @@ spec:
       config:
         enabled: true
         existingClaim: zwave2mqtt
-      # storageClass: "longhorn"
-      # accessMode: ReadWriteOnce
-      # size: 1Gi
+        mountPath: /usr/src/app/store
