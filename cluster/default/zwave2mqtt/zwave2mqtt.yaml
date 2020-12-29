@@ -28,6 +28,7 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: nginx
+        meta.helm.sh/release-name: zwave2mqtt
       hosts:
       - host: zwave.holthome.net
         paths:
