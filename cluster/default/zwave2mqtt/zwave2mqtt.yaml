@@ -5,6 +5,7 @@ metadata:
   name: zwave2mqtt
   namespace: default
 spec:
+  releaseName: zwave2mqtt
   interval: 5m
   chart:
     spec:
