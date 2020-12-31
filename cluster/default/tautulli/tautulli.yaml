@@ -8,19 +8,24 @@ metadata:
     release: "tautulli"
     fluxcd.io/automated: "false"
 spec:
+  interval: 5m
   releaseName: tautulli
   chart:
-    repository: https://k8s-at-home.com/charts
-    name: tautulli
-    version: 6.1.1
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: tautulli
+      version: 6.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: k8sathome/tautulli
       tag: v2.6.4
     env:
       TZ: "America/New_York"
-      PUID: 1000
-      PGID: 1000
     ingress:
       enabled: true
       annotations:
@@ -37,8 +42,6 @@ spec:
       config:
         enabled: true
         existingClaim: tautulli-pvc
-        # storageClass: longhorn
-        # size: 5Gi
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
