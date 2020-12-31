@@ -25,7 +25,7 @@ spec:
       enabled: true
       existingClaim: unifi
     timezone: "America/New_York"
-    runAsRoot: false
+    runAsRoot: true
     ingress:
       enabled: true
       annotations:
