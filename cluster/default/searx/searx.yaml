@@ -41,7 +41,7 @@ spec:
       - hosts:
         - searx.holthome.net
     searx:
-      baseUrl: searx.holthome.net
+      baseUrl: /
   valuesFrom:
   - kind: Secret
     name: "searx-helm-values"
