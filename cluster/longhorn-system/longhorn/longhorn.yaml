@@ -25,6 +25,7 @@ spec:
       createDefaultDiskLabeledNodes: true
       backupTarget: s3://longhorn@minio/backups
       backupTargetCredentialSecret: longhorn-backup-secret
+      storageMinimalAvailablePercentage: "10"
     ingress:
       enabled: true
       host: longhorn.holthome.net
