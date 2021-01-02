@@ -5,11 +5,13 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: $EMAIL
+    email: ryan@ryanholt.net
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - selector: {}
+    - selector:
+        dnsZones:
+        - "holthome.net"
       dns01:
         azuredns:
           clientID: $AZURE_CERTBOT_CLIENT_ID
@@ -18,9 +20,23 @@ spec:
             key: client-secret
           subscriptionID: $AZURE_CERTBOT_SUBSCRIPTION_ID
           tenantID: $AZURE_CERTBOT_TENANT_ID
-          resourceGroupName: $AZURE_CERTBOT_RESOURCE_GROUP_NAME
-          hostedZoneName: $AZURE_CERTBOT_HOSTED_ZONE_NAME
-          environment: $AZURE_CERTBOT_ENVIRONMENT
+          resourceGroupName: dns-services
+          hostedZoneName: holthome.net
+          environment: AzurePublicCloud
+    - selector:
+        dnsZones:
+        - "ryanholt.net"
+      dns01:
+        azuredns:
+          clientID: $AZURE_CERTBOT_CLIENT_ID
+          clientSecretSecretRef:
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: $AZURE_CERTBOT_SUBSCRIPTION_ID
+          tenantID: $AZURE_CERTBOT_TENANT_ID
+          resourceGroupName: dns-services
+          hostedZoneName: ryanholt.net
+          environment: AzurePublicCloud
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
@@ -33,7 +49,9 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - selector: {}
+    - selector:
+        dnsZones:
+        - "holthome.net"
       dns01:
         azuredns:
           clientID: $AZURE_CERTBOT_CLIENT_ID
@@ -42,9 +60,23 @@ spec:
             key: client-secret
           subscriptionID: $AZURE_CERTBOT_SUBSCRIPTION_ID
           tenantID: $AZURE_CERTBOT_TENANT_ID
-          resourceGroupName: $AZURE_CERTBOT_RESOURCE_GROUP_NAME
-          hostedZoneName: $AZURE_CERTBOT_HOSTED_ZONE_NAME
-          environment: $AZURE_CERTBOT_ENVIRONMENT
+          resourceGroupName: dns-services
+          hostedZoneName: holthome.net
+          environment: AzurePublicCloud
+    - selector:
+        dnsZones:
+        - "ryanholt.net"
+      dns01:
+        azuredns:
+          clientID: $AZURE_CERTBOT_CLIENT_ID
+          clientSecretSecretRef:
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: $AZURE_CERTBOT_SUBSCRIPTION_ID
+          tenantID: $AZURE_CERTBOT_TENANT_ID
+          resourceGroupName: dns-services
+          hostedZoneName: ryanholt.net
+          environment: AzurePublicCloud
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
@@ -53,48 +85,21 @@ metadata:
   namespace: kube-system
 spec:
   secretName: acme-crt-secret
-  commonName: "*.$DOMAIN"
+  commonName: "*.holthome.net"
   dnsNames:
-  - $DOMAIN
-  - '*.$DOMAIN'
-  - '*.k.$DOMAIN'
-  - '*.nd.$DOMAIN'
+  - 'holthome.net'
+  - '*.holthome.net'
+  - 'ryanholt.net'
+  - '*.ryanholt.net'
   acme:
     config:
     - dns01:
         provider: azuredns
       domains:
-      - $DOMAIN
-      - '*.$DOMAIN'
-      - '*.k.$DOMAIN'
-      - '*.nd.$DOMAIN'
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
-
----
-apiVersion: cert-manager.io/v1alpha2
-kind: Certificate
-metadata:
-  name: acme-crt
-  namespace: istio-system
-spec:
-  secretName: acme-crt-secret
-  commonName: "*.$DOMAIN"
-  dnsNames:
-  - $DOMAIN
-  - '*.$DOMAIN'
-  - '*.k.$DOMAIN'
-  - '*.nd.$DOMAIN'
-  acme:
-    config:
-    - dns01:
-        provider: azuredns
-      domains:
-      - $DOMAIN
-      - '*.$DOMAIN'
-      - '*.k.$DOMAIN'
-      - '*.nd.$DOMAIN'
+      - 'holthome.net'
+      - '*.holthome.net'
+      - 'ryanholt.net'
+      - '*.ryanholt.net'
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
