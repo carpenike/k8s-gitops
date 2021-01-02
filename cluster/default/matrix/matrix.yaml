@@ -1,0 +1,59 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: matrix
+  namespace: default
+spec:
+  interval: 5m
+  releaseName: matrix
+  chart:
+    spec:
+      # renovate: registryUrl=https://dacruz21.github.io/helm-charts
+      chart: matrix
+      version: 2.8.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    matrix:
+      serverName: ryanholt.net
+      encryptByDefault: all
+      adminEmail: "ryan@ryanholt.net"
+    volumes:
+      media:
+        storageClass: longhorn
+      signingKey:
+        storageClass: longhorn
+    ingress:
+      enabled: true
+      hosts:
+        synapse: matrix.ryanholt.net
+        riot: element.ryanholt.net
+        federation: matrix-fed.ryanholt.net
+    synapse:
+      image:
+        repository: "matrixdotorg/synapse"
+        tag: v1.22.1
+    riot:
+      image:
+        repository: "vectorim/riot-web"
+        tag: v1.7.12
+    coturn:
+      image:
+        repository: "instrumentisto/coturn"
+        tag: "4.5.1.3"
+    mail:
+      enabled: true
+      from: "Matrix <matrix@ryanholt.net>"
+      relay:
+        enabled: false
+      external:
+        host: smtp.holthome.net
+        port: 25
+  valuesFrom:
+  - kind: Secret
+    name: "matrix-helm-values"
+    optional: false
