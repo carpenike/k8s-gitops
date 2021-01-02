@@ -72,6 +72,8 @@ spec:
       external:
         host: smtp.holthome.net
         port: 25
+    networkPolicies:
+      enabled: false
   valuesFrom:
   - kind: Secret
     name: "matrix-helm-values"
