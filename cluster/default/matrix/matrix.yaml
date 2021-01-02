@@ -33,6 +33,7 @@ spec:
       persistence:
         enabled: true
         storageClass: longhorn
+        size: 8Gi
     ingress:
       enabled: true
       hosts:
