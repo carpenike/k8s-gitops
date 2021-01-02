@@ -6,7 +6,6 @@ metadata:
   namespace: default
 spec:
   interval: 5m
-  releaseName: matrix
   chart:
     spec:
       # renovate: registryUrl=https://dacruz21.github.io/helm-charts
