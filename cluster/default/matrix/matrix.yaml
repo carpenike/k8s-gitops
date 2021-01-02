@@ -11,9 +11,9 @@ spec:
     spec:
       # renovate: registryUrl=https://dacruz21.github.io/helm-charts
       chart: matrix
-      version: 2.8.0
+      version: 2.7.0
       sourceRef:
-        kind: GitRepository
+        kind: HelmRepository
         name: dacruz21-charts-git
         namespace: flux-system
       interval: 5m
