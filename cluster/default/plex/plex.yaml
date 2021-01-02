@@ -37,10 +37,7 @@ spec:
       externalTrafficPolicy: Local
     persistence:
       transcode:
-        enabled: true
-        storageClass: longhorn
-        accessMode: ReadWriteOnce
-        size: 30Gi
+        enabled: false
       data:
         enabled: true
         claimName: nfs-tank-share-pvc
