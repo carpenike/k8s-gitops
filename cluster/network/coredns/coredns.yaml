@@ -58,14 +58,7 @@ spec:
       - name: reload
       - name: loadbalance
       - name: etcd
-        parameters: holthome.net
-        configBlock: |-
-          stubzones
-          path /skydns
-          endpoint https://k8s.holthome.net:2379
-          tls /etc/coredns/coredns-etcd-secret/cert.pem /etc/coredns/coredns-etcd-secret/key.pem /etc/coredns/coredns-etcd-secret/ca.crt
-      - name: etcd
-        parameters: ryanholt.net
+        parameters: holthome.net ryanholt.net
         configBlock: |-
           stubzones
           path /skydns
