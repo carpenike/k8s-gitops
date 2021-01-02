@@ -1,2 +1,5 @@
+matrix:
+  registration:
+    sharedSecret: $MATRIX_REGISTRATION_SECRET
 postgresql:
   password: $MATRIX_POSTGRESQL_PASSWORD
