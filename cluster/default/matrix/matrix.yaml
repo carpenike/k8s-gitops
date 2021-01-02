@@ -21,6 +21,8 @@ spec:
       serverName: ryanholt.net
       encryptByDefault: all
       adminEmail: "ryan@ryanholt.net"
+      registration:
+        enabled: true
     volumes:
       media:
         storageClass: longhorn
