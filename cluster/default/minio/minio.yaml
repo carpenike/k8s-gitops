@@ -1,19 +1,21 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: minio
   namespace: default
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: glob:RELEASE.*
 spec:
-  releaseName: minio
+  interval: 5m
   chart:
-    repository: https://helm.min.io/
-    name: minio
-    version: 8.0.8
+    spec:
+      # renovate: registryUrl=https://helm.min.io/
+      chart: minio
+      version: 8.0.9
+      sourceRef:
+        kind: HelmRepository
+        name: minio-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: minio/minio
@@ -27,8 +29,6 @@ spec:
     mode: distributed
     replicas: 4
     persistence:
-      # existingClaim: "nfs-tmp-pvc"
-      # subPath: "minio"
       storageClass: longhorn
       size: 500Gi
     existingSecret: minio-secret
@@ -43,6 +43,7 @@ spec:
       tls:
         - hosts:
             - minio.holthome.net
+          secretName: minio-cert
     metrics:
       serviceMonitor:
         enabled: true
