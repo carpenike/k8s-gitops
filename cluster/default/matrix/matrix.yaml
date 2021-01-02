@@ -40,6 +40,12 @@ spec:
         synapse: matrix.ryanholt.net
         riot: element.ryanholt.net
         federation: matrix-fed.ryanholt.net
+      tls:
+      - hosts:
+        - matrix.ryanholt.net
+        - element.ryanholt.net
+        - matrix-fed.ryanholt.net
+        secretName: matrix-cert
     synapse:
       image:
         repository: "matrixdotorg/synapse"
