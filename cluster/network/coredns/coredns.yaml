@@ -32,6 +32,8 @@ spec:
       - zone: holthome.net.
         scheme: dns://
         # use_tcp: true
+      - zone: ryanholt.net.
+        scheme: dns://
       port: 53
       plugins:
       - name: errors
