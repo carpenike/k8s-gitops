@@ -1,22 +1,22 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: adguard-home
   namespace: network
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-#    fluxcd.io/tag.chart-image: 'regexp:^(5\.[0-9][0-9]\.[0-9]+)$'
 spec:
   releaseName: adguard-home
-  helmVersion: v3
-  rollback:
-    enable: false
+  interval: 5m
   chart:
-    repository: https://k8s-at-home.com/charts/
-    name: adguard-home
-    version: 2.2.0
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: adguard-home
+      version: 2.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: adguard/adguardhome
@@ -44,7 +44,7 @@ spec:
       tls:
       - hosts:
         - adguard.holthome.net
-        secretName: zigbee-cert
+        secretName: adguard-cert
     service:
       type: LoadBalancer
       externalTrafficPolicy: Local
@@ -107,6 +107,7 @@ spec:
           refuse_any: true
           upstream_dns:
           - '[/holthome.net/]10.43.10.53'
+          - '[/ryanholt.net/]10.43.10.53'
           # - '[/bergandbeans.com/]10.1.1.2'
           # - '[/network.elcarpenter.com/]10.1.1.2'
           # - '[/vpn.elcarpenter.com/]1.1.1.1'
