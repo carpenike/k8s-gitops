@@ -24,8 +24,7 @@ spec:
       pullPolicy: IfNotPresent
     persistence:
       enabled: true
-      size: 10Gi
-      storageClass: "longhorn"
+      existingClaim: gitea-pvc
     ingress:
       enabled: true
       annotations:
@@ -70,7 +69,8 @@ spec:
             enabled: true
     postgresql:
       persistence:
-        storageClass: "longhorn"
+        # storageClass: "longhorn"
+        existingClaim: gitea-postgresql-pvc
       metrics:
         enabled: true
         serviceMonitor:
