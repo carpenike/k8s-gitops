@@ -18,8 +18,8 @@ spec:
       interval: 5m
   values:
     image:
-      repository: quay.io/coreos/dex
-      tag: v2.10.0
+      repository: dexidp/dex
+      tag: v2.27.0
     ingress:
       enabled: true
       annotations:
