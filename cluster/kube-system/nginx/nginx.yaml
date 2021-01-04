@@ -1,27 +1,29 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: ingress-nginx
   namespace: kube-system
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: semver:~0.
 spec:
   releaseName: ingress-nginx
-  rollback:
-    enable: true
+  interval: 5m
   chart:
-    repository: https://kubernetes.github.io/ingress-nginx
-    name: ingress-nginx
-    version: 3.17.0
+    spec:
+      # renovate: registryUrl=https://kubernetes.github.io/ingress-nginx
+      chart: ingress-nginx
+      version: 3.19.0
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx-charts
+        namespace: flux-system
+      interval: 5m
   values:
     controller:
       replicaCount: 2
       config:
         # ssl-protocols: "TLSv1.3 TLSv1.2"
         custom-http-errors: 404,401,403,500,503
+        hsts-max-age: "31449600"
         # enable-modsecurity: "true"
         # enable-owasp-modsecurity-crs: "true"
         # use-proxy-protocol: "false"
