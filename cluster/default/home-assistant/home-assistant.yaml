@@ -1,5 +1,5 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: home-assistant
@@ -9,10 +9,17 @@ metadata:
     fluxcd.io/automated: "false"
 spec:
   releaseName: home-assistant
+  interval: 5m
   chart:
-    repository: https://k8s-at-home.com/charts
-    name: home-assistant
-    version: 3.4.0
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: home-assistant
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: homeassistant/home-assistant
