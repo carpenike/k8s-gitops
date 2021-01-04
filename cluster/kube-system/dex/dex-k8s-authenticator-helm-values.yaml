@@ -9,4 +9,3 @@ spec:
   data:
     - key: dex-k8s-authenticator-helm-values
       name: values.yaml
-      property: value

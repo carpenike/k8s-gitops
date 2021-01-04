@@ -10,10 +10,7 @@ spec:
   data:
     - key: actions-runner-gh-app-id
       name: github_app_id
-      property: value
     - key: actions-runner-gh-app-installation-id
       name: github_app_installation_id
-      property: value
     - key: actions-runner-gh-app-private-key
       name: github_app_private_key
-      property: value

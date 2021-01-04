@@ -9,4 +9,3 @@ spec:
   data:
     - key: kube-prometheus-stack-helm-values
       name: values.yaml
-      property: value

@@ -9,4 +9,3 @@ spec:
   data:
     - key: oauth2-proxy-helm-values
       name: values.yaml
-      property: value

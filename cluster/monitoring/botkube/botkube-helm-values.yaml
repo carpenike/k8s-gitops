@@ -10,4 +10,3 @@ spec:
   data:
     - key: botkube-helm-values
       name: values.yaml
-      property: value

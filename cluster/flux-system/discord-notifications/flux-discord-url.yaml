@@ -9,4 +9,3 @@ spec:
   data:
     - key: flux-discord-address
       name: address
-      property: value

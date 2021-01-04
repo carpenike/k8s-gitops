@@ -9,4 +9,3 @@ spec:
   data:
     - key: matrix-helm-values
       name: values.yaml
-      property: value

@@ -10,7 +10,5 @@ spec:
   data:
     - key: alertmanager-bot-admin
       name: admin
-      property: value
     - key: alertmanager-bot-token
       name: token
-      property: value

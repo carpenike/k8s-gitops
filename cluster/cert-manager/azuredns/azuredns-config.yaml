@@ -9,4 +9,3 @@ spec:
   data:
     - key: certbot-client-secret
       name: client-secret
-      property: value

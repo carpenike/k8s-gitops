@@ -10,4 +10,3 @@ spec:
   data:
     - key: thanos-helm-values
       name: values.yaml
-      property: value

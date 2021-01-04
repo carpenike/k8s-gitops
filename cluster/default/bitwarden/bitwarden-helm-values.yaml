@@ -9,4 +9,3 @@ spec:
   data:
     - key: bitwarden-helm-values
       name: values.yaml
-      property: value

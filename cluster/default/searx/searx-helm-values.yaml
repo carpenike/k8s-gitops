@@ -9,4 +9,3 @@ spec:
   data:
     - key: searx-helm-values
       name: values.yaml
-      property: value

@@ -9,4 +9,4 @@ spec:
   data:
     - key: gitea-helm-values
       name: values.yaml
-      property: value
+      

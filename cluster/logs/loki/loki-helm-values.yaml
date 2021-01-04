@@ -10,4 +10,3 @@ spec:
   data:
     - key: loki-helm-values
       name: values.yaml
-      property: value
