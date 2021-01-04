@@ -86,7 +86,7 @@ spec:
     promtail:
       image:
         repository: grafana/promtail
-        tag: 2.0.0
+        tag: 2.1.0
       serviceMonitor:
         enabled: true
       extraScrapeConfigs:
