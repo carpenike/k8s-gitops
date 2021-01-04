@@ -9,7 +9,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: dex
+      chart: ./charts/dex
       version: 1.4.0
       sourceRef:
         kind: GitRepository
