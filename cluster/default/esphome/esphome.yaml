@@ -4,8 +4,6 @@ kind: HelmRelease
 metadata:
   name: esphome
   namespace: default
-  annotations:
-    fluxcd.io/automated: "false"
 spec:
   releaseName: esphome
   interval: 5m
