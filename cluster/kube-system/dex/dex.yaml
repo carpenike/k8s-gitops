@@ -24,18 +24,20 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - dex.holthome.net
+      - dex.holthome.net
       tls:
-        - hosts:
-            - dex.holthome.net
+      - hosts:
+        - dex.holthome.net
+        secretName: dex-cert
     resources:
       requests:
         memory: 250Mi
         cpu: 25m
       limits:
         memory: 250Mi
-        cpu: 25m
   valuesFrom:
   - kind: Secret
     name: "dex-helm-values"
