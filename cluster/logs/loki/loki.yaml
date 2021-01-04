@@ -1,25 +1,27 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: loki
   namespace: logs
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.loki: semver:~v1.
-    fluxcd.io/tag.promtail: semver:~v1.
 spec:
   releaseName: loki
+  interval: 5m
   chart:
-    repository: https://grafana.github.io/loki/charts
-    name: loki-stack
-    version: 2.1.2
+    spec:
+      # renovate: registryUrl=https://grafana.github.io/helm-charts
+      chart: loki-stack
+      version: 2.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-charts
+        namespace: flux-system
+      interval: 5m
   values:
     loki:
-      # image:
-      #   repository: grafana/loki
-      #   tag: 1.5.0
+      image:
+        repository: grafana/loki
+        tag: 2.0.0
       replicas: 3
       persistence:
         enabled: false
@@ -81,23 +83,17 @@ spec:
       podAnnotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "http-metrics"
-        # backup.velero.io/backup-volumes: storage
-      tolerations:
-      - key: "arm"
-        operator: "Exists"
     promtail:
-      # image:
-      #   repository: grafana/promtail
-      #   tag: 1.5.0
+      image:
+        repository: grafana/promtail
+        tag: 2.0.0
       serviceMonitor:
         enabled: true
-      tolerations:
-      - key: "arm"
-        operator: "Exists"
       extraScrapeConfigs:
       - job_name: syslog
         syslog:
           listen_address: 0.0.0.0:1514
+          idle_timeout: 60s
           label_structured_data: yes
           labels:
             job: "syslog"
@@ -119,5 +115,5 @@ spec:
         externalIPs:
         - 10.45.10.16
   valuesFrom:
-  - secretKeyRef:
-      name: loki-helm-values
+  - kind: Secret
+    name: "loki-helm-values"
