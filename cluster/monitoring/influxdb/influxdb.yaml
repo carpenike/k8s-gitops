@@ -1,30 +1,28 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: influxdb
   namespace: monitoring
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+)$'
 spec:
   releaseName: influxdb
-  rollback:
-    enable: true
+  interval: 5m
   chart:
-    repository: https://helm.influxdata.com/
-    name: influxdb
-    version: 4.8.10
+    spec:
+      # renovate: registryUrl=https://helm.influxdata.com/
+      chart: influxdb
+      version: 4.8.10
+      sourceRef:
+        kind: HelmRepository
+        name: influxdata-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: "influxdb"
       tag: "1.8.3"
     service:
       type: LoadBalancer
-      externalIPs:
-      - 10.45.10.15
-      externalTrafficPolicy: Local
     persistence:
       enabled: true
       size: 50Gi
@@ -41,8 +39,8 @@ spec:
       timeoutSeconds: 10
     startupProbe:
       enabled: true
-      failureThreshold: 6
-      periodSeconds: 5
+      failureThreshold: 10
+      periodSeconds: 10
     config:
       opentsdb:
         enabled: true
@@ -56,6 +54,3 @@ spec:
         templates:
         - "*.app env.service.resource.measurement"
         - "servers.* .host.resource.measurement.field*"
-    tolerations:
-    - key: "arm"
-      operator: "Exists"
