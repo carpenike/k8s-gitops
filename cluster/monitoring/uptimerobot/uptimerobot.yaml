@@ -1,30 +1,30 @@
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  name: uptimerobot
-  namespace: monitoring
-  annotations:
-    fluxcd.io/ignore: "false"
-spec:
-  releaseName: uptimerobot
-  helmVersion: v3
-  rollback:
-    enable: true
-  chart:
-    repository: https://k8s-at-home.com/charts
-    name: uptimerobot
-    version: 3.0.0
-  values:
-    image:
-      repository: billimek/node-influx-uptimerobot
-      tag: latest
-    debug: true
-    config:
-      delay: 3600
-      influxdb:
-        host: influxdb
-        port: 8086
-        database: uptimerobot
-  valueFileSecrets:
-  - name: "uptimerobot-helm-values"
+# ---
+# apiVersion: helm.fluxcd.io/v1
+# kind: HelmRelease
+# metadata:
+#   name: uptimerobot
+#   namespace: monitoring
+#   annotations:
+#     fluxcd.io/ignore: "false"
+# spec:
+#   releaseName: uptimerobot
+#   helmVersion: v3
+#   rollback:
+#     enable: true
+#   chart:
+#     repository: https://k8s-at-home.com/charts
+#     name: uptimerobot
+#     version: 3.0.0
+#   values:
+#     image:
+#       repository: billimek/node-influx-uptimerobot
+#       tag: latest
+#     debug: true
+#     config:
+#       delay: 3600
+#       influxdb:
+#         host: influxdb
+#         port: 8086
+#         database: uptimerobot
+#   valueFileSecrets:
+#   - name: "uptimerobot-helm-values"
