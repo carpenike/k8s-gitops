@@ -13,7 +13,7 @@ spec:
       version: 1.4.0
       sourceRef:
         kind: GitRepository
-        name: mitel-dex-charts-git
+        name: mintel-dex-charts-git
         namespace: flux-system
       interval: 5m
   values:
