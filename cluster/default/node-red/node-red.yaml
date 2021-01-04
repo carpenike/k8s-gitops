@@ -29,8 +29,7 @@ spec:
       data:
         enabled: true
         mountPath: /data
-        storageClass: longhorn
-        size: 5Gi
+        existingClaim: node-red-pvc
     ingress:
       enabled: true
       annotations:
