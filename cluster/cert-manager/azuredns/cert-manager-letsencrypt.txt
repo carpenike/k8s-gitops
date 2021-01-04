@@ -91,15 +91,6 @@ spec:
   - '*.holthome.net'
   - 'ryanholt.net'
   - '*.ryanholt.net'
-  acme:
-    config:
-    - dns01:
-        provider: azuredns
-      domains:
-      - 'holthome.net'
-      - '*.holthome.net'
-      - 'ryanholt.net'
-      - '*.ryanholt.net'
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
