@@ -4,15 +4,13 @@ kind: HelmRelease
 metadata:
   name: nzbhydra2
   namespace: default
-  annotations:
-    fluxcd.io/automated: "false"
 spec:
   releaseName: nzbhydra2
   interval: 5m
   chart:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: nzhydra2
+      chart: nzbhydra2
       version: 5.1.1
       sourceRef:
         kind: HelmRepository
