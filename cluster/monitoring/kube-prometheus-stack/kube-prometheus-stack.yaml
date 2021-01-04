@@ -31,11 +31,11 @@ spec:
     prometheusOperator:
       createCustomResource: true
       prometheusConfigReloaderImage:
-        repository: quay.io/coreos/prometheus-config-reloader
-        tag: v0.39.0
+        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        tag: v0.44.0
       configmapReloadImage:
-        repository: jimmidyson/configmap-reload
-        tag: v0.3.0
+        repository: docker.io/jimmidyson/configmap-reload
+        tag: v0.4.0
     alertmanager:
       alertmanagerSpec:
         storage:
@@ -319,8 +319,8 @@ spec:
                 requests:
                   storage: 10Gi
         thanos:
-          image: quay.io/thanos/thanos:v0.15.0
-          version: v0.15.0
+          image: quay.io/thanos/thanos:v0.17.2
+          version: v0.17.2
           objectStorageConfig:
             name: thanos
             key: object-store.yaml
