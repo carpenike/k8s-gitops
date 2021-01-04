@@ -38,8 +38,7 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: longhorn
-        size: 5Gi
+        existingClaim: bazarr-pvc
     additionalVolumeMounts:
     - name: media-nas
       mountPath: "/media"
