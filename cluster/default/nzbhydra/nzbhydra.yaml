@@ -1,5 +1,5 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: nzbhydra2
@@ -8,10 +8,17 @@ metadata:
     fluxcd.io/automated: "false"
 spec:
   releaseName: nzbhydra2
+  interval: 5m
   chart:
-    repository: https://k8s-at-home.com/charts
-    name: nzbhydra2
-    version: 5.1.1
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: nzhydra2
+      version: 5.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: k8sathome/nzbhydra2
