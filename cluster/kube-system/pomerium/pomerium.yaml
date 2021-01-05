@@ -35,14 +35,12 @@ spec:
         - radarr.holthome.net
         - esphome.holthome.net
         - sabnzbd.holthome.net
-        - forwardauth.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
           - radarr.holthome.net
           - esphome.holthome.net
           - sabnzbd.holthome.net
-          - forwardauth.holthome.net
     forwardAuth:
       enabled: true
     operator:
