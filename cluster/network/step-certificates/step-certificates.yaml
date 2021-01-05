@@ -4,19 +4,19 @@ kind: HelmRelease
 metadata:
   name: step-certificates
   namespace: network
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-#    fluxcd.io/tag.chart-image: 'regexp:^(5\.[0-9][0-9]\.[0-9]+)$'
 spec:
   releaseName: step-certificates
-  helmVersion: v3
-  rollback:
-    enable: false
+  interval: 5m
   chart:
-    repository: https://smallstep.github.io/helm-charts/
-    name: step-certificates
-    version: 1.15.6
+    spec:
+      # renovate: registryUrl=https://smallstep.github.io/helm-charts/
+      chart: step-certificates
+      version: 1.15.6
+      sourceRef:
+        kind: HelmRepository
+        name: smallstep-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: smallstep/step-ca
@@ -27,7 +27,7 @@ spec:
         storageClass: longhorn
       url: https://pki.holthome.net
     ingress:
-      enabled: true
+      enabled: false
       annotations:
         kubernetes.io/ingress.class: "nginx"
         nginx.ingress.kubernetes.io/ssl-passthrough: "true"
