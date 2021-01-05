@@ -29,8 +29,10 @@ spec:
         kubernetes.io/ingress.class: "nginx"
         cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
-        nginx.ingress.kubernetes.io/auth-url: https://forwardauth.holthome.net/verify?uri=$scheme://$host$request_uri
-        nginx.ingress.kubernetes.io/auth-signin: "https://forwardauth.holthome.net/?uri=$scheme://$host$request_uri"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+        # nginx.ingress.kubernetes.io/auth-url: "https://forwardauth.holthome.net/verify?uri=$scheme://$host$request_uri"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://forwardauth.holthome.net/?uri=$scheme://$host$request_uri"
       hosts:
       - host: gaps.holthome.net
         paths:
