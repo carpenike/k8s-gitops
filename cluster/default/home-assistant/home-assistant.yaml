@@ -55,7 +55,7 @@ spec:
         port: 1400
         targetPort: 1400
     hostNetwork: true
-
+    dnsPolicy: ClusterFirstWithHostNet
     probes:
       liveness:
         enabled: false
@@ -63,16 +63,13 @@ spec:
         enabled: false
       startup:
         enabled: false
-
     mariadb:
       enabled: false
-
     postgresql:
       enabled: true
       persistence:
         enabled: true
         existingClaim: home-assistant-postgresql-pvc
-
     vscode:
       enabled: true
       image:
@@ -91,6 +88,5 @@ spec:
         - secretName: ha-vscode-cert
           hosts:
           - ha-vscode.holthome.net
-
     podAnnotations:
       secret.reloader.stakater.com/reload: home-assistant-secrets
