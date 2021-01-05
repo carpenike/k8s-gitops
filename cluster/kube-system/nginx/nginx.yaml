@@ -65,7 +65,6 @@ spec:
               summary: More than 5% of the all requests did return 4XX, this require your attention
       extraArgs:
         default-ssl-certificate: "kube-system/acme-crt-secret"
-        enable-ssl-passthrough: ""
         #default-ssl-certificate: "kube-system/digicert-ingress-tls"
       # resources:
       #   requests:
