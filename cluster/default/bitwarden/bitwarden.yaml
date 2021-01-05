@@ -32,13 +32,13 @@ spec:
       hosts:
         - bitwarden.holthome.net
       tls:
-      - hosts:
-        - bitwarden.holthome.net
-        secretName: bitwarden-cert
+        - hosts:
+            - bitwarden.holthome.net
+          secretName: bitwarden-cert
     persistence:
       enabled: true
       existingClaim: bitwarden
   valuesFrom:
-  - kind: Secret
-    name: "bitwarden-helm-values"
-    optional: false
+    - kind: Secret
+      name: "bitwarden-helm-values"
+      optional: false

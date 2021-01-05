@@ -19,10 +19,10 @@ spec:
       interval: 5m
   values:
     image:
-    #   repository: infracloudio/botkube
-    #   tag: v0.10.0
-    # Needed for Discord support until merge
-    # https://github.com/infracloudio/botkube/pull/268
+      #   repository: infracloudio/botkube
+      #   tag: v0.10.0
+      # Needed for Discord support until merge
+      # https://github.com/infracloudio/botkube/pull/268
       repository: infracloudio/botkube
       tag: latest
       pullPolicy: Always
@@ -37,7 +37,7 @@ spec:
             include:
               - all
             ignore:                 # List of namespaces to be ignored (omitempty), used only with include: all
-              - rook-ceph                    # example : include [all], ignore [x,y,z] 
+              - rook-ceph                    # example : include [all], ignore [x,y,z]
               - kube-system
           events:                   # List of lifecycle events you want to receive, e.g create, update, delete, error OR all
             - create
@@ -196,6 +196,6 @@ spec:
             - delete
             - error
   valuesFrom:
-  - kind: Secret
-    name: "botkube-helm-values"
-    optional: false
+    - kind: Secret
+      name: "botkube-helm-values"
+      optional: false
