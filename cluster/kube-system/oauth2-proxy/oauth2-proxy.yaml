@@ -1,18 +1,20 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: oauth2-proxy
   namespace: kube-system
-  annotations:
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.chart-image: semver:~v6
 spec:
-  releaseName: oauth2-proxy
+  interval: 5m
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: oauth2-proxy
-    version: 3.2.5
+    spec:
+      chart: oauth2-proxy
+      version: 3.2.3
+      sourceRef:
+        kind: HelmRepository
+        name: kubernetes-stable-charts
+        namespace: flux-system
+      interval: 5m
   values:
     image:
       repository: "quay.io/pusher/oauth2_proxy"
@@ -26,7 +28,9 @@ spec:
       tls:
       - hosts:
         - auth.holthome.net
+        secretName: oauth2-proxy-cert
       enabled: true
       path: /oauth2
-  valueFileSecrets:
-  - name: "oauth2-proxy-helm-values"
+  valuesFrom:
+  - kind: Secret
+    name: "oauth2-proxy-helm-values"
