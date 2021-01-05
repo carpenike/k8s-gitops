@@ -121,4 +121,4 @@ spec:
     #     memory: 500Mi
   valuesFrom:
   - kind: Secret
-    name: "pomerium-proxy-helm-values"
+    name: "pomerium-helm-values"
