@@ -25,6 +25,7 @@ spec:
       TZ: "America/New_York"
       ESPHOME_DASHBOARD_USE_PING: true
     hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
     ingress:
       enabled: false
       annotations:
