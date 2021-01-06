@@ -1,56 +1,56 @@
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: metallb
-  namespace: kube-system
-spec:
-  interval: 5m
-  chart:
-    spec:
-      # renovate: registryUrl=https://charts.bitnami.com/bitnami
-      chart: metallb
-      version: 1.1.0
-      sourceRef:
-        kind: HelmRepository
-        name: bitnami-charts
-        namespace: flux-system
-      interval: 5m
-  values:
-    configInline:
-      peers:
-      - peer-address: 10.20.0.1
-        peer-asn: 64512
-        my-asn: 64513
-      address-pools:
-      - name: bgp
-        protocol: bgp
-        addresses:
-        - 10.45.0.0/16
-        avoid-buggy-ips: true
-    prometheusRule:
-      enabled: true
-    prometheus:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-      prometheusRule:
-        enabled: true
-    controller:
-      image:
-        registry: docker.io
-        repository: metallb/controller
-        tag: v0.9.5
-      tolerations:
-      - key: "arm"
-        operator: "Exists"
-    speaker:
-      image:
-        registry: docker.io
-        repository: metallb/speaker
-        tag: v0.9.5
-      tolerations:
-      - key: "arm"
-        operator: "Exists"
-      - key: "armhf"
-        operator: "Exists"
+# ---
+# apiVersion: helm.toolkit.fluxcd.io/v2beta1
+# kind: HelmRelease
+# metadata:
+#   name: metallb
+#   namespace: kube-system
+# spec:
+#   interval: 5m
+#   chart:
+#     spec:
+#       # renovate: registryUrl=https://charts.bitnami.com/bitnami
+#       chart: metallb
+#       version: 1.1.0
+#       sourceRef:
+#         kind: HelmRepository
+#         name: bitnami-charts
+#         namespace: flux-system
+#       interval: 5m
+#   values:
+#     configInline:
+#       peers:
+#       - peer-address: 10.20.0.1
+#         peer-asn: 64512
+#         my-asn: 64513
+#       address-pools:
+#       - name: bgp
+#         protocol: bgp
+#         addresses:
+#         - 10.45.0.0/16
+#         avoid-buggy-ips: true
+#     prometheusRule:
+#       enabled: true
+#     prometheus:
+#       enabled: true
+#       serviceMonitor:
+#         enabled: true
+#       prometheusRule:
+#         enabled: true
+#     controller:
+#       image:
+#         registry: docker.io
+#         repository: metallb/controller
+#         tag: v0.9.5
+#       tolerations:
+#       - key: "arm"
+#         operator: "Exists"
+#     speaker:
+#       image:
+#         registry: docker.io
+#         repository: metallb/speaker
+#         tag: v0.9.5
+#       tolerations:
+#       - key: "arm"
+#         operator: "Exists"
+#       - key: "armhf"
+#         operator: "Exists"
