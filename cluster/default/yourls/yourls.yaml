@@ -56,4 +56,4 @@ spec:
       enabled: true
       image:
         repository: lusotycoon/apache-exporter
-        tag: v0.5.0
+        tag: v0.8.0
