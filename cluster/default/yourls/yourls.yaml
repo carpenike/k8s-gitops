@@ -48,7 +48,7 @@ spec:
           enabled: true
           existingClaim: yourls-mariadb-0-pvc
       metrics:
-        enabled: true
+        enabled: false
         image:
           repository: bitnami/mysqld-exporter
           tag: 0.12.1
