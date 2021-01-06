@@ -39,6 +39,11 @@ spec:
     persistence:
       enabled: true
       existingClaim: yourls-pvc
+    mariadb:
+      primary:
+        persistence:
+          enabled: true
+          existingClaim: yourls-mariadb-0-pvc
     metrics:
       enabled: true
       image:
