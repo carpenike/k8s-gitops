@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   type: discord
-  username: tom-servo
-  channel: cluster
+  username: flux-bot
+  channel: flux
   secretRef:
     name: flux-discord-address
