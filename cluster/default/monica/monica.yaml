@@ -48,9 +48,7 @@ spec:
     persistence:
       config:
         enabled: true
-        # existingClaim: photoprism-pvc
-        storageClass: longhorn
-        size: 5Gi
+        existingClaim: monica-pvc
     mariadb:
       enabled: true
       primary:
