@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: yourls
-      tag: 1.7.4
+      tag: 1.7.9
     yourlsUsername: ryan
     yourlsSite: https://yourls.holthome.net
     service:
@@ -42,7 +42,7 @@ spec:
     mariadb:
       image:
         repository: bitnami/mariadb
-        tag: 10.3.22-debian-10-r60
+        tag: 10.4.13-debian-10-r60
       master:
         persistence:
           enabled: true
@@ -56,4 +56,4 @@ spec:
       enabled: true
       image:
         repository: lusotycoon/apache-exporter
-        tag: v0.5.0
+        tag: v0.8.0
