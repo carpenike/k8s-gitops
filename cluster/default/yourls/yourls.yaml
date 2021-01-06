@@ -19,8 +19,8 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    nameOverride: bitwarden
-    fullnameOverride: bitwarden
+    nameOverride: yourls
+    fullnameOverride: yourls
     image:
       repository: yourls
       tag: 1.7.9
