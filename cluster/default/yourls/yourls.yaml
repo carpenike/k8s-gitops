@@ -42,9 +42,9 @@ spec:
       enabled: true
       existingClaim: yourls-pvc
     mariadb:
-      image:
-        repository: bitnami/mariadb
-        tag: 10.3.22-debian-10-r60
+      # image:
+      #   repository: bitnami/mariadb
+      #   tag: 10.3.22-debian-10-r60
       master:
         persistence:
           enabled: true
