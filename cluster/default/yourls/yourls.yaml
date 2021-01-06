@@ -40,7 +40,7 @@ spec:
       enabled: true
       existingClaim: yourls-pvc
     mariadb:
-      primary:
+      master:
         persistence:
           enabled: true
           existingClaim: yourls-mariadb-0-pvc
