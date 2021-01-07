@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: photoprism/photoprism
-      tag: "20201122"
+      tag: "20210104"
     env:
       PHOTOPRISM_SITE_URL: "https://photos.holthome.net"
       PHOTOPRISM_SITE_TITLE: "Home Pictures"
