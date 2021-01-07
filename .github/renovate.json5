@@ -33,7 +33,8 @@
     {
       "datasources": ["docker"],
       "updateTypes": ["major"],
-      "labels": ["renovate/image-release", "dependency/major"]
+      "labels": ["renovate/image-release", "dependency/major"],
+      "enabled": true
     },
     {
       "datasources": ["docker"],
