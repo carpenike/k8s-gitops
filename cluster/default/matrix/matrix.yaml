@@ -51,6 +51,7 @@ spec:
         - matrix.ryanholt.net
         - element.ryanholt.net
         - matrix-fed.ryanholt.net
+        - ryanholt.net
         secretName: matrix-cert
     synapse:
       image:
