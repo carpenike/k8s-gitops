@@ -73,6 +73,12 @@ spec:
       external:
         host: smtp.holthome.net
         port: 25
+    bridges:
+      discord:
+        enabled: true
+        image:
+          repository: halfshot/matrix-appservice-discord
+          tag: latest
     networkPolicies:
       enabled: false
   valuesFrom:

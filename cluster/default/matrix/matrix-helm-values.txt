@@ -3,3 +3,8 @@ matrix:
     sharedSecret: $MATRIX_REGISTRATION_SECRET
 postgresql:
   password: $MATRIX_POSTGRESQL_PASSWORD
+bridges:
+  discord:
+    auth:
+     clientID: $MATRIX_DISCORD_BOT_CLIENTID
+     botToken: $MATRIX_DISCORD_BOT_TOKEN
