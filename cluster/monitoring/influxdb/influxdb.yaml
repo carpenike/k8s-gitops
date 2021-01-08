@@ -24,7 +24,8 @@ spec:
     service:
       type: LoadBalancer
       externalIPs:
-      - 10.45.10.19
+      - 10.45.10.15
+      externalTrafficPolicy: Local
     persistence:
       enabled: true
       existingClaim: influxdb-pvc
