@@ -1,11 +1,9 @@
 config:
   sharedSecret: $POMERIUM_SHARED_SECRET
   cookieSecret: $POMERIUM_COOKIE_SECRET
-extraEnv:
-  IDP_SCOPES: "openid profile email offline_access groups"
 authenticate:
   idp:
-    provider: oidc
-    url: "https://dex.holthome.net"
-    clientID: pomerium
-    clientSecret: $DEX_POMERIUM_CLIENT_SECRET
+    provider: github
+    clientID: $POMERIUM_GITHUB_CLIENT_ID
+    clientSecret: $POMERIUM_GITHUB_CLIENT_SECRET
+    serviceAccount: $POMERIUM_GITHUB_SERVICE_ACCOUNT
