@@ -33,13 +33,13 @@ spec:
       hosts:
         - sonarr.holthome.net
         - radarr.holthome.net
-        - esphome.holthome.net
+        # - esphome.holthome.net
         - sabnzbd.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
           - radarr.holthome.net
-          - esphome.holthome.net
+          # - esphome.holthome.net
           - sabnzbd.holthome.net
     forwardAuth:
       enabled: true
@@ -94,7 +94,6 @@ spec:
         # ESPHome
         - from: https://esphome.holthome.net
           to: http://esphome.default.svc.cluster.local:6052
-          allow_websockets: false
           allow_public_unauthenticated_access: false
           allowed_groups:
             - k8s-admins
