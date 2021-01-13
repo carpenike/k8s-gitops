@@ -53,7 +53,7 @@ config: |-
       bindPW: $DEX_FREEIPA_BIND_PASSWORD
       userSearch:
         # Would translate to the query "(&(objectClass=posixAccount)(uid=<username>))".
-        baseDN: dc=holthome,dc=net
+        baseDN: cn=users,cn=accounts,dc=holthome,dc=net
         filter: "(objectClass=posixAccount)"
         username: uid
         idAttr: uid
@@ -62,7 +62,7 @@ config: |-
         # Entity attribute to map to display name of users.
       groupSearch:
         # Would translate to the query "(&(objectClass=group)(member=<user uid>))".
-        baseDN: dc=holthome,dc=net
+        baseDN: cn=groups,cn=accounts,dc=holthome,dc=net
         filter: "(objectClass=group)"
         userMatchers:
         - userAttr: uid
@@ -121,4 +121,4 @@ config: |-
     name: pomerium
     secret: $DEX_POMERIUM_CLIENT_SECRET
     redirectURIs:
-      - https://authenticate.holthome.net
+      - https://authenticate.holthome.net/oauth2/callback
