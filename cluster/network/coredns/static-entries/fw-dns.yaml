@@ -1,11 +1,12 @@
 ---
-apiVersion: v1
-kind: Service
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
 metadata:
   name: fw-dns
-  namespace: network
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: fw.holthome.net.
 spec:
-  type: ExternalName
-  externalName: 10.20.0.1
+  endpoints:
+  - dnsName: fw.holthome.net
+    recordTTL: 180
+    recordType: A
+    targets:
+    - 10.20.0.1
