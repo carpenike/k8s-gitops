@@ -28,9 +28,9 @@ spec:
         enabled: true
         secretName: coredns-etcd-secret
     policy: sync
-    # sources:
-    #   - service
-    #   - ingress
+    sources:
+      - service
+      - ingress
       # - istio-gateway
       # - istio-virtualservice
     domainFilters:
