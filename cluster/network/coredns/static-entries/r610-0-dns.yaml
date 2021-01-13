@@ -1,11 +1,13 @@
 ---
-apiVersion: v1
-kind: Service
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
 metadata:
   name: r610-0-dns
   namespace: network
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: r610-0.holthome.net.
 spec:
-  type: ExternalName
-  externalName: 10.20.10.10
+  endpoints:
+  - dnsName: r610-0.holthome.net
+    recordTTL: 180
+    recordType: A
+    targets:
+    - 10.20.10.10
