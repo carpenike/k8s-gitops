@@ -39,6 +39,7 @@ spec:
     createSecret: true
     crd:
       create: true
+      kind: DNSEndpoint
     metrics:
       enabled: true
       serviceMonitor:
