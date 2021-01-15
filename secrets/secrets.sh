@@ -190,10 +190,6 @@ az keyvault secret set --name "flux-discord-address" --vault-name holthome --val
 # az keyvault secret set --name "dockerhub-password" --vault-name holthome --value $DOCKER_TOKEN
 # az keyvault secret set --name "dockerhub-email" --vault-name holthome --value $EMAIL
 
-#az keyvault secret set --name "registry-creds-secret" --vault-name holthome --file "${REPO_ROOT}/cluster/kube-system/registry-creds/dockerhub-secret.txt" > /dev/null
-kubectl delete -n kube-system secret registry-creds-secret
-kubectl -n kube-system create secret docker-registry registry-creds-secret --namespace kube-system --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_TOKEN --docker-email=$EMAIL
-
 # # Restic Password for Stash - default namespace
 # # kubectl create secret generic restic-backup-credentials  \
 # #  --from-literal=RESTIC_PASSWORD=$RESTIC_PASSWORD \
@@ -289,3 +285,13 @@ kubectl -n kube-system create secret docker-registry registry-creds-secret --nam
 # #  --namespace monitoring --dry-run=client -o json \
 # #  | kubeseal --format=yaml --cert="$PUB_CERT" \
 # #    > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
+
+
+# KUBE Secrets
+## Registry Creds
+kubectl delete -n kube-system secret registry-creds-secret
+kubectl create -n kube-system secret docker-registry registry-creds-secret --namespace kube-system --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_TOKEN --docker-email=$EMAIL
+
+# Flux Github Webhook
+kubectl delete -n flux-system secret webhook-token
+kubectl create -n flux-system secret generic webhook-token --from-literal=token=$FLUX_GITHUB_WEBHOOK_TOKEN
