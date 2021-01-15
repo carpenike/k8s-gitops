@@ -16,8 +16,6 @@ We've got a vibrant community of folks all running various K8S workloads at home
 
 ## Thanks
 
-A lot of inspiration for this repo came from the following people:
-- [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops)
-- [onedr0p/k3s-gitops](https://github.com/onedr0p/k3s-gitops)
-- [dcplaya/k8s-gitops](https://github.com/dcplaya/k8s-gitops)
-- [xUnholy/k8s-gitops](https://github.com/raspbernetes/k8s-gitops/)
+A lot of inspiration for this repo came from some great members of the community, many of them have added their page to this list:
+
+https://github.com/k8s-at-home/awesome-home-kubernetes
