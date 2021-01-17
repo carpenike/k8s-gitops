@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: k8sathome/jackett
-      tag: v0.17.284
+      tag: v0.17.294
     env:
       TZ: "America/New_York"
       PUID: 1000
