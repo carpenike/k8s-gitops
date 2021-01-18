@@ -1,0 +1,13 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: dc0-dns
+  namespace: network
+spec:
+  endpoints:
+  - dnsName: dc0.holthome.net
+    recordTTL: 180
+    recordType: A
+    targets:
+    - 10.20.0.20
