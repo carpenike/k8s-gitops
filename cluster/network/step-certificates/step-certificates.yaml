@@ -9,12 +9,11 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://smallstep.github.io/helm-charts/
       chart: step-certificates
-      version: 1.15.6
+      version: 1.16.0
       sourceRef:
         kind: HelmRepository
-        name: smallstep-charts
+        name: carpenike-stepca-charts-git
         namespace: flux-system
       interval: 5m
   values:
