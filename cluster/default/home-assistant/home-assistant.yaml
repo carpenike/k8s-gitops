@@ -50,10 +50,6 @@ spec:
       externalIPs:
       - 10.45.10.14
       externalTrafficPolicy: Local
-      additionalPorts:
-      - name: sonos
-        port: 1400
-        targetPort: 1400
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     probes:
@@ -70,23 +66,43 @@ spec:
       persistence:
         enabled: true
         existingClaim: home-assistant-postgresql-pvc
-    vscode:
-      enabled: true
-      image:
-        repository: codercom/code-server
-        tag: 3.8.0
-      ingress:
+    addons:
+      codeserver:
         enabled: true
-        annotations:
-          kubernetes.io/ingress.class: "nginx"
-          #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
-          #nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
-          nginx.ingress.kubernetes.io/proxy-body-size: "0"
-        hosts:
-        - ha-vscode.holthome.net
-        tls:
-        - secretName: ha-vscode-cert
+        image:
+          repository: codercom/code-server
+          tag: 3.8.0
+        workingDir: "/config"
+        args:
+        - --auth
+        - "none"
+        - --user-data-dir
+        - "/config/.vscode"
+        - --extensions-dir
+        - "/config/.vscode"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
+            #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
+            #nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
+            nginx.ingress.kubernetes.io/proxy-body-size: "0"
+            kubernetes.io/tls-acme: "true"
+            cert-manager.io/cluster-issuer: letsencrypt-prod
           hosts:
           - ha-vscode.holthome.net
+          tls:
+          - secretName: ha-vscode-cert
+            hosts:
+            - ha-vscode.holthome.net
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: deploykey
+          mountPath: /root/.ssh/id_rsa
+          subPath: id_rsa
     podAnnotations:
-      secret.reloader.stakater.com/reload: home-assistant-secrets
+      secret.reloader.stakater.com/reload: home-assistant-helm-values
+  valuesFrom:
+  - kind: Secret
+    name: "home-assistant-helm-values"
