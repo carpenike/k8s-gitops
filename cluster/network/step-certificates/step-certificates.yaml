@@ -25,7 +25,7 @@ spec:
       db:
         storageClass: longhorn
       url: "https://pki.holthome.net"
-      dns: "https://pki.holthome.net"
+      dns: pki.holthome.net
     service:
       type: LoadBalancer
       annotations:
