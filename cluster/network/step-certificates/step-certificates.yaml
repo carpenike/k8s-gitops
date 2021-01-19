@@ -25,6 +25,11 @@ spec:
       db:
         storageClass: longhorn
       url: https://pki.holthome.net
+    service:
+      type: LoadBalancer
+      externalIPs:
+      - 10.45.10.19
+      externalTrafficPolicy: Local
     ingress:
       enabled: false
       annotations:
@@ -38,3 +43,4 @@ spec:
       tls:
       - hosts:
         - pki.holthome.net
+        secretName: stepca-cert
