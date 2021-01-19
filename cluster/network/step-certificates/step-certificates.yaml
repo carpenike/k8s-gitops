@@ -25,6 +25,7 @@ spec:
       db:
         persistent: true
         existingClaim: stepca-pvc
+        storageClassName: "-"
       url: "https://pki.holthome.net"
       dns: pki.holthome.net
     service:
