@@ -12,7 +12,7 @@ spec:
       chart: step-certificates
       version: 1.16.0
       sourceRef:
-        kind: HelmRepository
+        kind: GitRepository
         name: carpenike-stepca-charts-git
         namespace: flux-system
       interval: 5m
