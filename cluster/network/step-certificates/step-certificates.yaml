@@ -23,9 +23,8 @@ spec:
     ca:
       name: Holthome CA
       db:
-        persistence:
-          enabled: true
-          existingClaim: stepca-pvc
+        persistent: true
+        existingClaim: stepca-pvc
       url: "https://pki.holthome.net"
       dns: pki.holthome.net
     service:
