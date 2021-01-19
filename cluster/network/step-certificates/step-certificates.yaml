@@ -23,7 +23,7 @@ spec:
     ca:
       name: Holthome CA
       db:
-        storageClass: longhorn
+        existingClaim: stepca-pvc
       url: "https://pki.holthome.net"
       dns: pki.holthome.net
     service:
