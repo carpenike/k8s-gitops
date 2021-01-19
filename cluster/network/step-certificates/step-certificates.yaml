@@ -24,7 +24,7 @@ spec:
       name: Holthome CA
       db:
         storageClass: longhorn
-      url: https://pki.holthome.net
+      url: "https://pki.holthome.net:443"
     service:
       type: LoadBalancer
       annotations:
