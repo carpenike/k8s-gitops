@@ -90,7 +90,10 @@ spec:
             kubernetes.io/tls-acme: "true"
             cert-manager.io/cluster-issuer: letsencrypt-prod
           hosts:
-          - ha-vscode.holthome.net
+          - host: ha-vscode.holthome.net
+            paths:
+            - path: /
+              pathType: Prefix
           tls:
           - secretName: ha-vscode-cert
             hosts:
