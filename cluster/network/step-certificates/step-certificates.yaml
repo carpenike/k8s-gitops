@@ -27,6 +27,8 @@ spec:
       url: https://pki.holthome.net
     service:
       type: LoadBalancer
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: "pki.holthome.net"
       externalIPs:
       - 10.45.10.19
       externalTrafficPolicy: Local
