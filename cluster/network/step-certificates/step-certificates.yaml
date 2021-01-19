@@ -24,7 +24,8 @@ spec:
       name: Holthome CA
       db:
         storageClass: longhorn
-      url: "https://pki.holthome.net:443"
+      url: "https://pki.holthome.net"
+      dns: "https://pki.holthome.net"
     service:
       type: LoadBalancer
       annotations:
@@ -32,17 +33,3 @@ spec:
       externalIPs:
       - 10.45.10.19
       externalTrafficPolicy: Local
-    ingress:
-      enabled: false
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      hosts:
-      - host: pki.holthome.net
-        paths:
-        - /
-      tls:
-      - hosts:
-        - pki.holthome.net
-        secretName: stepca-cert
