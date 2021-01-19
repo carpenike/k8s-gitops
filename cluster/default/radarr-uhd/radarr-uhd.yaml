@@ -1,0 +1,74 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: radarr-uhd
+  namespace: default
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: radarr
+      version: 8.3.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: k8sathome/radarr
+      tag: v3.0.2.4369
+    env:
+      TZ: "America/New_York"
+    ingress:
+      enabled: false
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
+        #nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
+      hosts:
+      - host: radarr-uhd.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - radarr-uhd.holthome.net
+        secretName: radarr-uhd-cert
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "api"
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        hosts:
+        - host: radarr-uhd.holthome.net
+          paths:
+          - path: /api
+            pathType: Prefix
+        tls:
+        - hosts:
+          - radarr-uhd.holthome.net
+          secretName: radarr-uhd-cert
+    persistence:
+      config:
+        enabled: true
+        existingClaim: radarr-uhd-pvc
+    additionalVolumeMounts:
+    - name: media-nas
+      mountPath: "/media"
+    additionalVolumes:
+    - name: media-nas
+      persistentVolumeClaim:
+        claimName: nfs-tank-share-pvc
+    resources:
+      requests:
+        memory: 350Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
