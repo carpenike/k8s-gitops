@@ -24,8 +24,7 @@ spec:
       name: Holthome CA
       db:
         persistent: true
-        existingClaim: stepca-pvc
-        storageClassName: "-"
+        storageClassName: "longhorn"
       url: "https://pki.holthome.net"
       dns: pki.holthome.net
     service:
