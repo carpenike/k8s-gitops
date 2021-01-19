@@ -81,6 +81,16 @@ spec:
           to: http://radarr.default.svc.cluster.local:7878
           allowed_groups:
             - k8s-admins
+        # Radarr-uhd
+        - from: https://radarr-uhd.holthome.net
+          to: http://radarr-uhd.default.svc.cluster.local:7878
+          prefix: /api/
+          allow_public_unauthenticated_access: true
+          allow_websockets: true
+        - from: https://radarr-uhd.holthome.net
+          to: http://radarr-uhd.default.svc.cluster.local:7878
+          allowed_groups:
+            - k8s-admins
         # Sabnzbd
         - from: https://sabnzbd.holthome.net
           to: http://sabnzbd.default.svc.cluster.local:8080
