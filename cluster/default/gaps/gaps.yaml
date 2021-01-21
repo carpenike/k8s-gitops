@@ -29,7 +29,7 @@ spec:
         kubernetes.io/ingress.class: "nginx"
         cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
-        ingress.pomerium.io/allowed_domains: '["ryanholt.net"]'
+        ingress.pomerium.io/allowed_groups: '["k8s-admins"]'
         nginx.ingress.kubernetes.io/auth-url: "https://pomerium-proxy.kube-system/verify?uri=$scheme://$host$request_uri"
         nginx.ingress.kubernetes.io/auth-signin: "https://pomerium-proxy.kube-system/?uri=$scheme://$host$request_uri"
       hosts:
