@@ -109,7 +109,7 @@ spec:
             - k8s-admins
         # GAPS
         - from: https://gaps.holthome.net
-          to: http://gaps.default.svc.cluster.local:8484
+          to: https://gaps.holthome.net
           allowed_groups:
             - k8s-admins
       #   - from: https://ha-vscode.holthome.net
