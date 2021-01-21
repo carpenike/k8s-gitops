@@ -168,9 +168,6 @@ spec:
           zfs:
             url: https://grafana.com/api/dashboards/11337/revisions/1/download
             datasource: Prometheus
-          version-checker:
-            url: https://grafana.com/api/dashboards/12833/revisions/1/download
-            datasource: Prometheus
           TrueNAS:
             url: https://grafana.com/api/dashboards/12921/revisions/1/download
             datasource: TrueNAS
