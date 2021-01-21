@@ -1,3 +1,11 @@
+alertmanager:
+  config:
+    receivers:
+    - name: 'pagerduty'
+    pagerduty_configs:
+      - routing_key: $PAGER_DUTY_API_KEY
+        description: |-
+          {{ template "pagerduty.custom.description" . }}
 prometheus:
   prometheusSpec:
     additionalScrapeConfigs:
