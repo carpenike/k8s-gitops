@@ -24,6 +24,7 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
+      APP_NAME: Files
       URL: https:\/\/files.holthome.net
     ingress:
       enabled: true
