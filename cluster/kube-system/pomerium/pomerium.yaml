@@ -44,7 +44,7 @@ spec:
           - sabnzbd.holthome.net
     forwardAuth:
       enabled: true
-      internal: true
+      internal: false
     operator:
       enabled: true
       replicaCount: 1
