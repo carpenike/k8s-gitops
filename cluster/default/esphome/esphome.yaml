@@ -30,8 +30,11 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        ingress.pomerium.io/allowed_groups: '["k8s-admins"]'
+        nginx.ingress.kubernetes.io/auth-url: "https://pomerium-proxy.kube-system.svc.cluster.local/verify?uri=$scheme://$host$request_uri"
+        nginx.ingress.kubernetes.io/auth-signin: "https://pomerium-proxy.kube-system.svc.cluster.local/?uri=$scheme://$host$request_uri"
       hosts:
       - host: esphome.holthome.net
         paths:
