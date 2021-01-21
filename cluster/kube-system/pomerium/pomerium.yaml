@@ -51,6 +51,8 @@ spec:
       image:
         repository: pomerium/pomerium-operator
         tag: "20210118224248"
+      config:
+        ingressClass: nginx
     config:
       rootDomain: holthome.net
       #administrators: "ryan@ryanholt.net"
