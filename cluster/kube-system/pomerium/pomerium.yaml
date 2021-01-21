@@ -43,7 +43,7 @@ spec:
           # - esphome.holthome.net
           - sabnzbd.holthome.net
     forwardAuth:
-      nameOverride: forwardauth.kube-system.svc.cluster.local
+      nameOverride: pomerium-proxy.kube-system.svc.cluster.local
       enabled: true
       internal: true
     operator:
