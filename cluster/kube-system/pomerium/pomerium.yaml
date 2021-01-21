@@ -109,7 +109,7 @@ spec:
           allowed_groups:
             - k8s-admins
         # GAPS
-        - from: https://gaps.holthome.net:443
+        - from: https://gaps.holthome.net
           to: https://gaps.holthome.net:443
           allowed_groups:
             - k8s-admins
