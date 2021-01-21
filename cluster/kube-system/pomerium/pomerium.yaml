@@ -49,7 +49,7 @@ spec:
       replicaCount: 1
       image:
         repository: pomerium/pomerium-operator
-        tag: "20210118224248"
+        tag: "20210121153013"
       config:
         ingressClass: pomerium
         serviceClass: pomerium
