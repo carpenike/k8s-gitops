@@ -24,7 +24,7 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
-      url: "https://files.holthome.net"
+      url: "https:\/\/files.holthome.net"
     ingress:
       enabled: true
       annotations:
