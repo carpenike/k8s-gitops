@@ -102,11 +102,11 @@ spec:
           allowed_groups:
             - k8s-admins
         # ESPHome
-        - from: https://esphome.holthome.net
-          to: http://esphome.default.svc.cluster.local:6052
-          allow_public_unauthenticated_access: false
-          allowed_groups:
-            - k8s-admins
+        # - from: https://esphome.holthome.net
+        #   to: http://esphome.default.svc.cluster.local:6052
+        #   allow_public_unauthenticated_access: false
+        #   allowed_groups:
+        #     - k8s-admins
         # GAPS
         # - from: https://gaps.holthome.net
         #   to: https://gaps.default.svc.cluster.local
