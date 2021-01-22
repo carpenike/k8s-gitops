@@ -27,7 +27,7 @@ spec:
       backupTargetCredentialSecret: longhorn-backup-secret
       storageMinimalAvailablePercentage: "10"
     ingress:
-      enabled: true
+      enabled: false
       host: longhorn.holthome.net
       tlsSecret: longhorn-cert
       tls: true

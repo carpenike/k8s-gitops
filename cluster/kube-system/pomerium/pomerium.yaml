@@ -37,6 +37,7 @@ spec:
         # - esphome.holthome.net
         - sabnzbd.holthome.net
         - requests.holthome.net
+        - longhorn.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
@@ -44,6 +45,7 @@ spec:
           # - esphome.holthome.net
           - sabnzbd.holthome.net
           - requests.holthome.net
+          - longhorn.holthome.net
     forwardAuth:
       nameOverride: pomerium-proxy.kube-system.svc.cluster.local
       enabled: true
@@ -124,14 +126,11 @@ spec:
       #     allow_websockets: true
       #     allowed_groups:
       #       - k8s-admins
-      #   Longhorn
-      #   - from: https://longhorn.holthome.net
-      #     to: http://longhorn-frontend.longhorn-system.svc.cluster.local:80
-      #     allow_websockets: true
-      #     allowed_groups:
-      #       - k8s-admins
-    # proxy:
-    #   authenticateServiceUrl: https://authenticate.holthome.net
+        # Longhorn
+        - from: https://longhorn.holthome.net
+          to: http://longhorn-frontend.longhorn-system.svc.cluster.local:80
+          allowed_groups:
+            - k8s-admins
     metrics:
       enabled: true
     serviceMonitor:
