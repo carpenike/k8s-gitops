@@ -26,7 +26,7 @@ spec:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
     ingress:
-      enabled: true
+      enabled: false
       annotations:
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
