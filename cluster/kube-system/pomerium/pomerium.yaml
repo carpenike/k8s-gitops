@@ -107,9 +107,7 @@ spec:
         # Overseerr
         - from: https://requests.holthome.net
           to: http://overseerr.default.svc.cluster.local:5055
-          prefix: /api/
           allow_public_unauthenticated_access: true
-          allow_websockets: true
         # ESPHome
         # - from: https://esphome.holthome.net
         #   to: http://esphome.default.svc.cluster.local:6052
