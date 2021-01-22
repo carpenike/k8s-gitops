@@ -40,6 +40,8 @@ spec:
       - hosts:
         - "overseerr.holthome.net"
         secretName: overseerr-cert
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
     persistence:
       config:
         enabled: true
