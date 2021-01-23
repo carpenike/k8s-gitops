@@ -45,20 +45,17 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: nfs-tank-share-pvc
-        subPath: paperless/data
+        existingClaim: paperless-data-pvc
       media:
         enabled: true
-        existingClaim: nfs-tank-share-pvc
-        subPath: paperless/media
+        existingClaim: paperless-media-pvc
       consume:
         enabled: true
         existingClaim: nfs-tank-share-pvc
         subPath: paperless/consume
       export:
         enabled: true
-        existingClaim: nfs-tank-share-pvc
-        subPath: paperless/export
+        existingClaim: paperless-export-pvc
     # requests:
     #   memory: 250Mi
     #   cpu: 500m
