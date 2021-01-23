@@ -1,160 +1,66 @@
-# ---
-# apiVersion: apps/v1
-# kind: StatefulSet
-# metadata:
-#   name: paperless
-#   namespace: default
-#   labels:
-#     app.kubernetes.io/instance: paperless
-#     app.kubernetes.io/name: paperless
-#   annotations:
-#     fluxcd.io/automated: "false"
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app.kubernetes.io/instance: paperless
-#       app.kubernetes.io/name: paperless
-#   updateStrategy:
-#     type: RollingUpdate
-#   serviceName: paperless
-#   strategy:
-#   template:
-#     metadata:
-#       labels:
-#         app.kubernetes.io/instance: paperless
-#         app.kubernetes.io/name: paperless
-#     spec:
-#       containers:
-#       - image: pitkley/paperless
-#         name: paperless-webserver
-#         imagePullPolicy: Always
-#         command: ["/sbin/docker-entrypoint.sh"]
-#         args: ["gunicorn", "-b", "0.0.0.0:8000"]
-#         env:
-#         - name: PAPERLESS_OCR_LANGUAGES
-#           value: "en"
-#         - name: USERMAP_UID
-#           value: "1000"
-#         - name: USERMAP_GID
-#           value: "1000"
-#         ports:
-#         - containerPort: 8000
-#           name: http
-#         volumeMounts:
-#         - name: config
-#           mountPath: /usr/src/paperless/data
-#         - name: media
-#           mountPath: /usr/src/paperless/media
-#       - image: pitkley/paperless
-#         imagePullPolicy: Always
-#         name: paperless-consumer
-#         command: ["/sbin/docker-entrypoint.sh"]
-#         args: ["document_consumer"]
-#         env:
-#         - name: USERMAP_UID
-#           value: "1000"
-#         - name: USERMAP_GID
-#           value: "1000"
-#         - name: PAPERLESS_CONSUMPTION_DIR
-#           value: "/mnt/storage/data/consume"
-#         - name: PAPERLESS_TIME_ZONE
-#           value: "America/New_York"
-#         - name: PAPERLESS_OCR_LANGUAGES
-#           value: "en"
-#         ports:
-#         volumeMounts:
-#         - name: config
-#           mountPath: /usr/src/paperless/data
-#         - name: media
-#           mountPath: /usr/src/paperless/media
-#         - name: consume
-#           mountPath: /mnt/storage/data/consume
-#           subPath: paperless
-#         livenessProbe:
-#           exec:
-#             command:
-#             - ls
-#             - /mnt/storage/data/consume
-#       volumes:
-#       - name: consume
-#         persistentVolumeClaim:
-#           claimName: nfs-tank-share-pvc
-#       - name: media
-#         persistentVolumeClaim:
-#           claimName: paperless-media
-#       - name: config
-#         persistentVolumeClaim:
-#           claimName: paperless-config
-#       dnsConfig:
-#         options:
-#         - name: ndots
-#           value: "1"
-# ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: paperless-config
-#   namespace: default
-# spec:
-#   accessModes:
-#   - ReadWriteOnce
-#   storageClassName: longhorn
-#   resources:
-#     requests:
-#       storage: 1Gi
-# ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: paperless-media
-#   namespace: default
-# spec:
-#   accessModes:
-#   - ReadWriteOnce
-#   storageClassName: longhorn
-#   resources:
-#     requests:
-#       storage: 10Gi
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   labels:
-#     app.kubernetes.io/instance: paperless
-#     app.kubernetes.io/name: paperless
-#   name: paperless
-#   namespace: default
-# spec:
-#   ports:
-#   - name: http
-#     port: 8000
-#     protocol: TCP
-#     targetPort: http
-#   selector:
-#     app.kubernetes.io/instance: paperless
-#     app.kubernetes.io/name: paperless
-#   type: ClusterIP
-# ---
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   annotations:
-#     kubernetes.io/ingress.class: nginx
-#   labels:
-#     app.kubernetes.io/instance: paperless
-#     app.kubernetes.io/name: paperless
-#   name: paperless
-#   namespace: default
-# spec:
-#   rules:
-#   - host: paperless.holthome.net
-#     http:
-#       paths:
-#       - backend:
-#           serviceName: paperless
-#           servicePort: http
-#         path: /
-#   tls:
-#   - hosts:
-#     - paperless.holthome.net
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: paperless
+  namespace: default
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: paperless
+      version: 2.3.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controllerType: deployment
+    image:
+      repository: thepaperlessproject/paperless
+      tag: latest
+      pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+      LOG_LEVEL: "info"
+    ingress:
+      enabled: false
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+      - host: paperless.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "paperless.holthome.net"
+        secretName: paperless-cert
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: config
+    persistence:
+      data:
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        subPath: paperless/data
+      media:
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        subPath: paperless/media
+      consume:
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        subPath: paperless/consume
+      export:
+        enabled: true
+        existingClaim: nfs-tank-share-pvc
+        subPath: paperless/export
+    # requests:
+    #   memory: 250Mi
+    #   cpu: 500m
+    # limits:
+    #   memory: 1500Mi
