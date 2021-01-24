@@ -34,6 +34,7 @@ spec:
       hosts:
         - sonarr.holthome.net
         - radarr.holthome.net
+        - radarr-uhd.holthome.net
         # - esphome.holthome.net
         - sabnzbd.holthome.net
         - requests.holthome.net
@@ -42,6 +43,7 @@ spec:
         hosts:
           - sonarr.holthome.net
           - radarr.holthome.net
+          - radarr-uhd.holthome.net
           # - esphome.holthome.net
           - sabnzbd.holthome.net
           - requests.holthome.net
