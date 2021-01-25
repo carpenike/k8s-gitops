@@ -36,6 +36,7 @@ spec:
         - radarr.holthome.net
         - radarr-uhd.holthome.net
         # - esphome.holthome.net
+        - node-red.holthome.net
         - sabnzbd.holthome.net
         - requests.holthome.net
         - longhorn.holthome.net
@@ -45,6 +46,7 @@ spec:
           - radarr.holthome.net
           - radarr-uhd.holthome.net
           # - esphome.holthome.net
+          - node-red.holthome.net
           - sabnzbd.holthome.net
           - requests.holthome.net
           - longhorn.holthome.net
@@ -112,6 +114,11 @@ spec:
         - from: https://requests.holthome.net
           to: http://overseerr.default.svc.cluster.local:5055
           allow_public_unauthenticated_access: true
+        # Node-REd
+        - from: https://node-red.holthome.net
+          to: http://node-red.default.svc.cluster.local:1880
+          allowed_groups:
+            - k8s-admins
         # ESPHome
         # - from: https://esphome.holthome.net
         #   to: http://esphome.default.svc.cluster.local:6052
