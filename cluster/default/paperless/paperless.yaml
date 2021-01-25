@@ -51,8 +51,7 @@ spec:
         existingClaim: paperless-media-pvc
       consume:
         enabled: true
-        existingClaim: nfs-tank-share-pvc
-        subPath: paperless/consume
+        existingClaim: paperless-consume-pvc
       export:
         enabled: true
         existingClaim: paperless-export-pvc
