@@ -21,6 +21,8 @@ spec:
     image:
       repository: plexinc/pms-docker
       tag: plexpass
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
     timezone: "America/New_York"
     allowedNetworks:
       - 10.42.0.0/16
