@@ -20,7 +20,7 @@ jobs:
         curl -sL -o "${GITHUB_WORKSPACE}/bin/yq" https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
         chmod +x "${GITHUB_WORKSPACE}/bin/yq"
     - name: Create HelmRelease annotations
-      run: ./hack/create-helmrelease-annotations.sh
+      run: ./.github/scripts/create-helmrelease-annotations.sh
 
     - name: Create pull request for HelmRelease annotations
       uses: peter-evans/create-pull-request@v3
@@ -35,5 +35,5 @@ jobs:
         assignees: "carpenike"
         commit-message: "Update HelmRelease annotations for Renovate [ci-skip]"
         body: |
-          Add comment annotations to HelmReleases inorder for Renovate to pick up new versions of Helm charts
+          Add comment annotations to HelmReleases in order for Renovate to pick up new versions of Helm charts
         labels: renovate/helm-release-annotations
