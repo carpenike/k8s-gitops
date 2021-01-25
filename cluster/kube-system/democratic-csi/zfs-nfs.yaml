@@ -1,0 +1,105 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: zfs-nfs
+  namespace: kube-system
+spec:
+  releaseName: zfs-nfs
+  interval: 5m
+  chart:
+    spec:
+      chart: democratic-csi
+      version: 0.6.3
+      sourceRef:
+        kind: HelmRepository
+        name: democratic-csi-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controller:
+      externalProvisioner:
+        enabled: true
+        image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.4
+      externalResizer:
+        enabled: true
+        image: k8s.gcr.io/sig-storage/csi-resizer:v1.0.1
+      externalSnapshotter:
+        enabled: true
+        image: k8s.gcr.io/sig-storage/csi-snapshotter:v3.0.2
+      driver:
+        enabled: true
+        image: democraticcsi/democratic-csi:latest
+        imagePullPolicy: Always
+    node:
+      driver:
+        enabled: true
+        image: democraticcsi/democratic-csi:latest
+        imagePullPolicy: Always
+      driverRegistrar:
+        enabled: true
+        image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
+    csiDriver:
+      # should be globally unique for a given cluster
+      name: "org.democratic-csi.nfs"
+
+    storageClasses:
+    - name: freenas-nfs-csi
+      defaultClass: false
+      reclaimPolicy: Delete
+      volumeBindingMode: Immediate
+      allowVolumeExpansion: true
+      parameters:
+        fsType: nfs
+
+      mountOptions:
+      - noatime
+      - nfsvers=4
+      secrets:
+        provisioner-secret:
+        controller-publish-secret:
+        node-stage-secret:
+        node-publish-secret:
+        controller-expand-secret:
+
+    driver:
+      config:
+        driver: freenas-nfs
+        instance_id:
+        httpConnection:
+          protocol: https
+          host: nas.holthome.net
+          port: 443
+          # use only 1 of apiKey or username/password
+          # if both are present, apiKey is preferred
+          # apiKey is only available starting in TrueNAS-12
+          # apiKey: <In Secret>
+          # username: root
+          # password: ************
+          allowInsecure: false
+          apiVersion: 2
+        sshConnection:
+          host: nas.holthome.net
+          port: 22
+          username: root
+        zfs:
+          datasetParentName: tank/k8s/nfs/v
+          detachedSnapshotsDatasetParentName: tank/k8s/nfs/s
+          datasetEnableQuotas: true
+          datasetEnableReservation: false
+          datasetPermissionsMode: "0777"
+          datasetPermissionsUser: root
+          datasetPermissionsGroup: wheel
+        nfs:
+          shareHost: 10.20.0.10
+          shareAlldirs: false
+          shareAllowedHosts: []
+          shareAllowedNetworks: []
+          shareMaprootUser: root
+          shareMaprootGroup: wheel
+          shareMapallUser: ""
+          shareMapallGroup: ""
+  valuesFrom:
+  - kind: Secret
+    name: "democratic-csi-helm-values"
+    optional: false
