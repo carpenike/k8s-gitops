@@ -23,7 +23,6 @@ spec:
       tag: 1.2.7-12-minimal
     env:
       TZ: "America/New_York"
-      FLOWS: "flows.json"
       NODE_RED_ENABLE_PROJECTS: "true"
       NODE_RED_ENABLE_SAFE_MODE: "false"
     persistence:
