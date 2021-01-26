@@ -41,6 +41,7 @@ spec:
         - requests.holthome.net
         - longhorn.holthome.net
         - paperless.holthome.net
+        - papermerge.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
@@ -52,6 +53,7 @@ spec:
           - requests.holthome.net
           - longhorn.holthome.net
           - paperless.holthome.net
+          - papermerge.holthome.net
     forwardAuth:
       nameOverride: pomerium-proxy.kube-system.svc.cluster.local
       enabled: true
@@ -124,6 +126,11 @@ spec:
         # Paperless
         - from: https://paperless.holthome.net
           to: http://paperless.default.svc.cluster.local:8000
+          allowed_groups:
+            - k8s-admins
+        # Papermerge
+        - from: https://papermerge.holthome.net
+          to: http://papermerge.default.svc.cluster.local:8000
           allowed_groups:
             - k8s-admins
         # ESPHome
