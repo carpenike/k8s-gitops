@@ -25,6 +25,8 @@ spec:
     env:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
+      PAPERLESS_CONSUMPTION_DIR: /consume/scans
+      PAPERLESS_EXPORT_DIR: /consume/export
     # podAnnotations:
     #   backup.velero.io/backup-volumes: config
     persistence:
