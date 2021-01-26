@@ -1,0 +1,13 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: vault-dns
+  namespace: network
+spec:
+  endpoints:
+  - dnsName: vault.holthome.net
+    recordTTL: 180
+    recordType: A
+    targets:
+    - 10.20.29.1
