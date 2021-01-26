@@ -138,7 +138,7 @@ spec:
           # 512, 1K, 2K, 4K, 8K, 16K, 64K, 128K default is 16K
           zvolBlocksize:
         iscsi:
-          targetPortal: "10.20.0.10:3261"
+          targetPortal: "10.20.0.10:3260"
           targetPortals: []
           # leave empty to omit usage of -I with iscsiadm
           interface:
