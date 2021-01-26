@@ -34,15 +34,15 @@ spec:
         enabled: true
         existingClaim: nfs-tank-share-pvc
         subPath: paperless
-      media:
-        enabled: false
-        existingClaim: paperless-media-pvc
-      consume:
-        enabled: false
-        existingClaim: nfs-tank-share-pvc
-      export:
-        enabled: false
-        existingClaim: paperless-export-pvc
+      # media:
+      #   enabled: false
+      #   existingClaim: paperless-media-pvc
+      # consume:
+      #   enabled: false
+      #   existingClaim: nfs-tank-share-pvc
+      # export:
+      #   enabled: false
+      #   existingClaim: paperless-export-pvc
 
     # additionalVolumeMounts:
     # - name: share-nas
