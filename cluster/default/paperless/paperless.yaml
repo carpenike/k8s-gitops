@@ -32,9 +32,10 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: paperless-data-pvc
+        existingClaim: nfs-tank-share-pvc
+        subPath: paperless
       media:
-        enabled: true
+        enabled: false
         existingClaim: paperless-media-pvc
       consume:
         enabled: false
@@ -42,13 +43,14 @@ spec:
       export:
         enabled: false
         existingClaim: paperless-export-pvc
-    additionalVolumeMounts:
-    - name: share-nas
-      mountPath: "/data"
-    additionalVolumes:
-    - name: share-nas
-      persistentVolumeClaim:
-        claimName: nfs-tank-share-pvc
+
+    # additionalVolumeMounts:
+    # - name: share-nas
+    #   mountPath: "/data"
+    # additionalVolumes:
+    # - name: share-nas
+    #   persistentVolumeClaim:
+    #     claimName: nfs-tank-share-pvc
 
     # requests:
     #   memory: 250Mi
