@@ -25,6 +25,8 @@ spec:
       TZ: "America/New_York"
     # podAnnotations:
     #   backup.velero.io/backup-volumes: config
+    ingress:
+      enabled: false
     persistence:
       config:
         enabled: true
