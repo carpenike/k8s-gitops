@@ -61,7 +61,7 @@ spec:
       replicaCount: 1
       image:
         repository: pomerium/pomerium-operator
-        tag: "20210121153013"
+        tag: "20210125233128"
       config:
         ingressClass: nginx
     config:
