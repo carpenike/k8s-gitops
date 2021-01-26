@@ -40,6 +40,7 @@ spec:
         - sabnzbd.holthome.net
         - requests.holthome.net
         - longhorn.holthome.net
+        - paperless.holthome.net
       tls:
         hosts:
           - sonarr.holthome.net
@@ -50,6 +51,7 @@ spec:
           - sabnzbd.holthome.net
           - requests.holthome.net
           - longhorn.holthome.net
+          - paperless.holthome.net
     forwardAuth:
       nameOverride: pomerium-proxy.kube-system.svc.cluster.local
       enabled: true
@@ -114,9 +116,14 @@ spec:
         - from: https://requests.holthome.net
           to: http://overseerr.default.svc.cluster.local:5055
           allow_public_unauthenticated_access: true
-        # Node-REd
+        # Node-Red
         - from: https://node-red.holthome.net
           to: http://node-red.default.svc.cluster.local:1880
+          allowed_groups:
+            - k8s-admins
+        # Paperless
+        - from: https://paperless.holthome.net
+          to: http://paperless.default.svc.cluster.local:8000
           allowed_groups:
             - k8s-admins
         # ESPHome
