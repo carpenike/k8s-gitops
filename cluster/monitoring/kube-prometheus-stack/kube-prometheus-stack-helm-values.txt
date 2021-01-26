@@ -18,7 +18,7 @@ prometheus:
       - targets:
         - nas-0.holthome.net:19999
         - nas-1.holthome.net:19999
-    - job_name: 'node'
+    - job_name: 'node-exporter'
       static_configs:
       - targets:
         - fw.holthome.net:9100
