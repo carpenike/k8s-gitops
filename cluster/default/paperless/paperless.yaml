@@ -25,8 +25,8 @@ spec:
     env:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
-      PAPERLESS_CONSUMPTION_DIR: /consume/scans
-      PAPERLESS_EXPORT_DIR: /consume/export
+      PAPERLESS_CONSUMPTION_DIR: /data/scans/import
+      PAPERLESS_EXPORT_DIR: /data/scans/export
     # podAnnotations:
     #   backup.velero.io/backup-volumes: config
     persistence:
@@ -37,11 +37,19 @@ spec:
         enabled: true
         existingClaim: paperless-media-pvc
       consume:
-        enabled: true
-        existingClaim: paperless-consume-pvc
+        enabled: false
+        existingClaim: nfs-tank-share-pvc
       export:
-        enabled: true
+        enabled: false
         existingClaim: paperless-export-pvc
+    additionalVolumeMounts:
+    - name: share-nas
+      mountPath: "/data"
+    additionalVolumes:
+    - name: share-nas
+      persistentVolumeClaim:
+        claimName: nfs-tank-share-pvc
+
     # requests:
     #   memory: 250Mi
     #   cpu: 500m
