@@ -1,0 +1,62 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: teedy
+  namespace: default
+spec:
+  interval: 5m
+  releaseName: teedy
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: teedy
+      version: 1.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: sismics/docs
+      tag: v1.9
+    env:
+      TZ: "America/New_York"
+      DOCS_DEFAULT_LANGUAGE: eng
+      DOCS_BASE_URL: "https://docs.holthome.net"
+      DOCS_ADMIN_EMAIL_INIT: "ryan@ryanholt.net"
+      DATABASE_URL: 'jdbc:postgresql://teedy-postgresql:5432/teedydb'
+      DOCS_SMTP_HOSTNAME: smtp.holthome.net
+      DOCS_SMTP_PORT: 25
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+      hosts:
+      - host: docs.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - docs.holthome.net
+    persistence:
+      data:
+        enabled: true
+        existingClaim: teedy-pvc
+    postgresql:
+      enabled: true
+      persistence:
+        enabled: true
+        stroageClass: freenas-iscsi-csi
+    # podSecurityContext:
+    #   runAsUser: 1000
+    #   runAsGroup: 1000
+    #   fsGroup: 1000
+    # resources:
+    #   requests:
+    #     memory: 350Mi
+    #     cpu: 500m
+    #   limits:
+    #     memory: 1500Mi
