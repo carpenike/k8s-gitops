@@ -51,7 +51,7 @@ spec:
         volumeMounts:
           - mountPath: /usr/src/paperless/data
             name: data
-            subPath: scans
+            subPath: paperless
 
     # additionalVolumeMounts:
     # - name: share-nas
