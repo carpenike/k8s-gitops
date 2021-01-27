@@ -43,6 +43,14 @@ spec:
       # export:
       #   enabled: false
       #   existingClaim: paperless-export-pvc
+    additionalContainers:
+      - name: consumer
+        image: thepaperlessproject/paperless:latest
+        imagePullPolicy: IfNotPresent
+        args: ['document_consumer']
+        volumeMounts:
+          - mountPath: /usr/src/paperless/data
+            name: data
 
     # additionalVolumeMounts:
     # - name: share-nas
