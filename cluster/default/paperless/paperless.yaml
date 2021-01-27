@@ -54,6 +54,7 @@ spec:
             subPath: paperless
           - mountPath: /usr/src/paperless/media
             name: media
+            subPath: paperless
     # requests:
     #   memory: 250Mi
     #   cpu: 500m
