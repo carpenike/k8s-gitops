@@ -61,3 +61,6 @@ spec:
     #     cpu: 500m
     #   limits:
     #     memory: 1500Mi
+  valuesFrom:
+  - kind: Secret
+    name: "teedy-helm-values"
