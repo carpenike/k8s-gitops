@@ -64,15 +64,15 @@ spec:
       - name: TEEDY_TAG
         value: "9fdc3144-7fdf-46a9-819e-363ef2f4032f"
       - name: TEEDY_ADDTAGS
-        value: false
+        value: "false"
       - name: TEEDY_LANG
-        value: eng
+        value: "eng"
       - name: TEEDY_URL
         value: "http://teedy:8080"
       - name: TEEDY_USERNAME
-        value: importer
+        value: "importer"
       - name: TEEDY_PASSWORD
-        value: importerpass
+        value: "importerpass"
       volumeMounts:
       - mountPath: /import
         name: media
