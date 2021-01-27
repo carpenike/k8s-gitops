@@ -50,7 +50,7 @@ spec:
       enabled: true
       persistence:
         enabled: true
-        stroageClass: freenas-iscsi-csi
+        storageClass: freenas-iscsi-csi
     # podSecurityContext:
     #   runAsUser: 1000
     #   runAsGroup: 1000
