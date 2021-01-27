@@ -25,18 +25,18 @@ spec:
     env:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
-      PAPERLESS_CONSUMPTION_DIR: /usr/src/paperless/data/import
-      PAPERLESS_EXPORT_DIR: /usr/src/paperless/data/export
+      PAPERLESS_CONSUMPTION_DIR: /usr/src/paperless/media/import
+      PAPERLESS_EXPORT_DIR: /usr/src/paperless/media/export
     # podAnnotations:
     #   backup.velero.io/backup-volumes: config
     persistence:
       data:
         enabled: true
+        existingClaim: paperless-data-pvc
+      media:
+        enabled: true
         existingClaim: nfs-tank-share-pvc
         subPath: paperless
-      # media:
-      #   enabled: false
-      #   existingClaim: paperless-media-pvc
       # consume:
       #   enabled: false
       #   existingClaim: nfs-tank-share-pvc
