@@ -28,7 +28,7 @@ spec:
       PAPERLESS_CONSUMPTION_DIR: /usr/src/paperless/media/import
       PAPERLESS_EXPORT_DIR: /usr/src/paperless/media/export
     # podAnnotations:
-    #   backup.velero.io/backup-volumes: config
+    #   backup.velero.io/backup-volumes: data
     persistence:
       data:
         enabled: true
@@ -52,15 +52,6 @@ spec:
           - mountPath: /usr/src/paperless/data
             name: data
             subPath: paperless
-
-    # additionalVolumeMounts:
-    # - name: share-nas
-    #   mountPath: "/data"
-    # additionalVolumes:
-    # - name: share-nas
-    #   persistentVolumeClaim:
-    #     claimName: nfs-tank-share-pvc
-
     # requests:
     #   memory: 250Mi
     #   cpu: 500m
