@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 data:
   password: ENC[AES256_GCM,data:KPsSj730GYq6cXvc,iv:asUaaqo8zyAEo830jscS0XHPtCq8M4aPF2q06dJK6j0=,tag:frhY4WuU5Tc9j7WMyPSSOA==,type:str]
