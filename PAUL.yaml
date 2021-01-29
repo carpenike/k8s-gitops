@@ -9,7 +9,7 @@ labels: true
 # Settings for branch destroyer
 # branch destroyer will not delete your default branch
 branch_destroyer:
-  enabled: true
+  enabled: false
   # set other "protected" branches here
   protected_branches:
   - master
