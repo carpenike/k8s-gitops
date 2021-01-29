@@ -9,7 +9,7 @@
   "suppressNotifications": ["prIgnoreNotification"],
   // Do not rebase PRs
   "rebaseWhen": "conflicted",
-  "assignees": ["@onedr0p"],
+  "assignees": ["@carpenike"],
   "helm-values": {
     "fileMatch": ["cluster/.+\\.yaml$"]
   },
