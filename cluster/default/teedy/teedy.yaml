@@ -60,6 +60,9 @@ spec:
       persistence:
         enabled: true
         storageClass: freenas-iscsi-csi
+      primary:
+        podAnnotations:
+          backup.velero.io/backup-volumes: data
     additionalContainers:
     - name: docs-importer
       image: sismics/docs-importer:latest
