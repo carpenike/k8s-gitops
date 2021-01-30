@@ -5,6 +5,7 @@ ignore: |
   integrations/
   ignore/
   *-crds.yaml
+  *.asc.*.yaml
 extends: default
 rules:
   truthy:
