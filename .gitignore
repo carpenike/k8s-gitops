@@ -10,3 +10,4 @@ helm_repos
 generated
 IGNORE_ME.yaml
 ansible/kubeadm/playbooks/output/k8s-config.yaml
+.decrypted~*
