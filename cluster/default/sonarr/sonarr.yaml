@@ -23,6 +23,10 @@ spec:
       tag: v3.0.4.1095
     env:
       TZ: "America/New_York"
+    controllerAnnotations:
+      stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
+      stash.appscode.com/target-paths: "/config"
+      stash.appscode.com/volume-mounts: "config:/config"
     ingress:
       enabled: false
       annotations:
