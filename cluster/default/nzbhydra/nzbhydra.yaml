@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: k8sathome/nzbhydra2
-      tag: v3.10.1
+      tag: v3.11.3
     env:
       TZ: "America/New_York"
     probes:
