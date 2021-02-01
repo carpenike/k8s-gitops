@@ -30,7 +30,7 @@ spec:
       DATABASE_USER: "teedyuser"
       DOCS_SMTP_HOSTNAME: smtp.holthome.net
       DOCS_SMTP_PORT: 25
-    controllerAnnotations:
+    podAnnotations:
       stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
       stash.appscode.com/target-paths: "/data"
       stash.appscode.com/volume-mounts: "data:/data"
