@@ -61,8 +61,10 @@ spec:
         enabled: true
         storageClass: freenas-iscsi-csi
       primary:
-        podAnnotations:
-          backup.velero.io/backup-volumes: data
+        annotations:
+          stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
+          stash.appscode.com/target-paths: "/bitnami/postgresql"
+          stash.appscode.com/volume-mounts: "data:/bitnami/postgresql"
     additionalContainers:
     - name: docs-importer
       image: sismics/docs-importer:latest
