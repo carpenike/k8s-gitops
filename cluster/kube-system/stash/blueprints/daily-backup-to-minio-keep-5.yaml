@@ -1,0 +1,18 @@
+apiVersion: stash.appscode.com/v1beta1
+kind: BackupBlueprint
+metadata:
+  name: daily-backup-to-minio-keep-5
+spec:
+  # ============== Blueprint for Repository ==========================
+  backend:
+    s3:
+      endpoint: nas.holthome.net:9000
+      bucket: stash
+      prefix: stash-backup/${TARGET_NAMESPACE}/${TARGET_KIND}/${TARGET_NAME}
+    storageSecretName: stash-s3-creds
+  # ============== Blueprint for BackupConfiguration =================
+  schedule: "*/5 * * * *"
+  retentionPolicy:
+    name: 'keep-last-5'
+    keepLast: 5
+    prune: true
