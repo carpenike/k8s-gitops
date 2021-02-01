@@ -6,7 +6,7 @@ spec:
   # ============== Blueprint for Repository ==========================
   backend:
     s3:
-      endpoint: nas.holthome.net:9000
+      endpoint: "https://nas.holthome.net:9000"
       bucket: stash
       prefix: stash-backup/${TARGET_NAMESPACE}/${TARGET_KIND}/${TARGET_NAME}
     storageSecretName: stash-s3-creds
