@@ -1,0 +1,38 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: stash
+  namespace: kube-system
+spec:
+  releaseName: stash
+  interval: 5m
+  chart:
+    spec:
+      chart: stash
+      version: 0.11.9
+      sourceRef:
+        kind: HelmRepository
+        name: appscode-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    nameOverride: stash
+    fullnameOverride: stash
+    operator:
+      registry: appscode
+      repository: stash
+      tag: v0.11.9
+    pushgateway:
+      registry: appscode
+      repository: pushgateway
+      tag: v0.5.2
+    cleaner:
+      registry: appscode
+      repository: kubectl
+      tag: v1.16
+    enableAnalytics: false
+    monitoring:
+      agent: "prometheus.io/builtin"
+      backup: true
+      operator: true
