@@ -21,6 +21,6 @@ rules:
     max-spaces-inside: 0
   indentation:
     spaces: 4
-    indent-sequences: consistent
+    indent-sequences: whatever
   hyphens:
     max-spaces-after: 3
