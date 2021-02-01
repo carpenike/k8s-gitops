@@ -24,7 +24,7 @@ spec:
       repository: stash
       tag: v0.11.9
     pushgateway:
-      registry: appscode
+      registry: prom
       repository: pushgateway
       tag: v0.5.2
     cleaner:
