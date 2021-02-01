@@ -22,3 +22,5 @@ rules:
   indentation:
     spaces: 4
     indent-sequences: consistent
+  hyphens:
+    max-spaces-after: 3
