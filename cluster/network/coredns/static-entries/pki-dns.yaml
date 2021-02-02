@@ -1,0 +1,13 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: pki-dns
+  namespace: network
+spec:
+  endpoints:
+  - dnsName: pki.holthome.net
+    recordTTL: 180
+    recordType: A
+    targets:
+    - 10.20.0.15
