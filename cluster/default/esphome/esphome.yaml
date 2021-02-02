@@ -35,7 +35,7 @@ spec:
         nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
         nginx.ingress.kubernetes.io/auth-tls-secret: "kube-system/bigcerts-ca-cert"
         nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-        nginx.ingress.kubernetes.io/auth-tls-error-page: "http://www.mysite.com/error-cert.html"
+        # nginx.ingress.kubernetes.io/auth-tls-error-page: "http://www.mysite.com/error-cert.html"
         nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
         # ingress.pomerium.io/allowed_groups: '["k8s-admins"]'
         # nginx.ingress.kubernetes.io/auth-url: "https://pomerium-proxy.kube-system.svc.cluster.local/verify?uri=$scheme://$host$request_uri"
