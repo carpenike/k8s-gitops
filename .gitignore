@@ -11,3 +11,15 @@ generated
 IGNORE_ME.yaml
 ansible/kubeadm/playbooks/output/k8s-config.yaml
 .decrypted~*
+
+# Saved backups
+ignore/
+rebuild/
+logs/
+.vscode/
+# Trash
+.DS_Store
+Thumbs.db
+bin/
+flux
+*.iso
