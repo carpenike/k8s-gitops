@@ -38,7 +38,6 @@ spec:
         # - esphome.holthome.net
         - node-red.holthome.net
         - sabnzbd.holthome.net
-        - requests.holthome.net
         - paperless.holthome.net
         - papermerge.holthome.net
       tls:
@@ -49,7 +48,6 @@ spec:
           # - esphome.holthome.net
           - node-red.holthome.net
           - sabnzbd.holthome.net
-          - requests.holthome.net
           - paperless.holthome.net
           - papermerge.holthome.net
     forwardAuth:
