@@ -33,6 +33,7 @@ spec:
       tls:
       - hosts:
         - portal.holthome.net
+        secretName: dashmachine-cert
     persistence:
       config:
         enabled: true

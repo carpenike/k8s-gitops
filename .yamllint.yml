@@ -20,7 +20,7 @@ rules:
     min-spaces-inside: 0
     max-spaces-inside: 0
   indentation:
-    spaces: 4
-    indent-sequences: whatever
+    spaces: 2
+    indent-sequences: consistent
   hyphens:
-    max-spaces-after: 3
+    max-spaces-after: 1
