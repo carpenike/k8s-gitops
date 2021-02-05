@@ -36,17 +36,9 @@ spec:
         nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
         nginx.ingress.kubernetes.io/auth-tls-secret: "kube-system/bigcerts-ca-cert"
         nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-        nginx.ingress.kubernetes.io/location-snippet: |
-          if ($location ^~ api) {
-            set $ban_info = "location";
-          }
-
-          if ($ssl_client_s_dn ~ "CN=ok_client") {
-            set $ban_info = "${ban_info}+no_client";
-          }
-
-          if ($ban_info = "location+no_client") {
-            return 403;
+        nginx.ingress.kubernetes.io/auth-snippet: |
+          if ( $request_uri = "/api" ) {
+              return 200;
           }
       hosts:
       - host: sonarr.holthome.net
