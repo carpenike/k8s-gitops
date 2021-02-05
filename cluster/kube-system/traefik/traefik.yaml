@@ -38,10 +38,18 @@ spec:
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.web.http.redirections.entryPoint.to=:443"
       - "--api.dashboard=true"
+      - "--providers.file.filename=/config/dyn.yaml"
       - "--metrics.prometheus=true"
     ports:
       web:
         redirectTo: websecure
+    volumes:
+      - name: acme-crt-secret
+        mountPath: '/certs'
+        type: secret
+      - name: traefik-config
+        mountPath: '/config'
+        type: configMap
     service:
       externalIPs:
         - 10.45.10.20
