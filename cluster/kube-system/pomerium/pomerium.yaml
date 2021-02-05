@@ -32,9 +32,9 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - sonarr.holthome.net
-        - radarr.holthome.net
-        - radarr-uhd.holthome.net
+        # - sonarr.holthome.net
+        # - radarr.holthome.net
+        # - radarr-uhd.holthome.net
         # - esphome.holthome.net
         - node-red.holthome.net
         - sabnzbd.holthome.net
@@ -42,9 +42,9 @@ spec:
         - papermerge.holthome.net
       tls:
         hosts:
-          - sonarr.holthome.net
-          - radarr.holthome.net
-          - radarr-uhd.holthome.net
+          # - sonarr.holthome.net
+          # - radarr.holthome.net
+          # - radarr-uhd.holthome.net
           # - esphome.holthome.net
           - node-red.holthome.net
           - sabnzbd.holthome.net
