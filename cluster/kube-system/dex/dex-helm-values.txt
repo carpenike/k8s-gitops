@@ -41,33 +41,33 @@ config: |-
   connectors:
 
   # Configuration https://dexidp.io/docs/connectors/ldap/
-  - type: ldap
-    id: ldap
-    name: LDAP
-    config:
-      # host and port of the LDAP server in form "host:port".
-      host: ipa-0.holthome.net:636
-      # freeIPA server's CA
-      rootCAData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVqakNDQXZhZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREEzTVJVd0V3WURWUVFLREF4SVQweFUKU0U5TlJTNU9SVlF4SGpBY0JnTlZCQU1NRlVObGNuUnBabWxqWVhSbElFRjFkR2h2Y21sMGVUQWVGdzB5TVRBeApNVEV5TXpBeE5EQmFGdzAwTVRBeE1URXlNekF4TkRCYU1EY3hGVEFUQmdOVkJBb01ERWhQVEZSSVQwMUZMazVGClZERWVNQndHQTFVRUF3d1ZRMlZ5ZEdsbWFXTmhkR1VnUVhWMGFHOXlhWFI1TUlJQm9qQU5CZ2txaGtpRzl3MEIKQVFFRkFBT0NBWThBTUlJQmlnS0NBWUVBekFpZFB1LzVDTmwwZHRjek0rWTQzVFYzV1VTZzBHeGVONlY5VmYxQQphTGlXREx0NndxZmpWNEZPeEVsRHhtVExyeldWalp3U3IyVDkvUm4vcHR3UThSSnMxdnZwZ0VhbWxkOVc0K1VICnZ1b2t3NCtxbDQrRFg1YkRqa0NRcGd4N3VOYkh4YWlJaTYydndRMEpmRDNudzlLWXU4dHljK2Zwa1BROUpjZVIKQWxzMU1QdkgrbXh2R1RYREdKZy8ydVB6MGxoYjdjdENDWXJiRkFXWklWSnhBSzZIVkRnRzV5NGJmdU02N216ZQpNUDArWko4VVVNZ0N6ZWYxeEFOZTRxQ3NWUGREd2h2RlJnV1YwUWp5SFVWY1VFOW45UkZIYU9vL3lmQSttM09aCjNkMlZzNEdFWU8rWTFHTjVMRmNvaWpqNVpvd3VhaVZrN2RPTUppcTVqbWhZWWl1WkNDdUxSNjF5VUJQRnpNMGQKZjJEZlVrdVpWcjBPV0pESWsvblVBNjR6bEJ1aVpuN3ZQUzVNSUdBOEhMRU81d1Z5dlR2NXkvbitLelNDMFZOWAo2U2N6anBhNlpGQXA5bGZUOGltQ2VPZHFEdkZOOUREWHZYQnhnMjQ0UG9va09CK3FXTWh0MjAxcmJwREVZUjU2CkZFa0tDRHg4QUlxMFM0UlFyZlFZYXM4ZkFnTUJBQUdqZ2FRd2dhRXdId1lEVlIwakJCZ3dGb0FVZDJ0bDNNRXIKS2lPenhQUHljYWVlQlB4Lzg5Z3dEd1lEVlIwVEFRSC9CQVV3QXdFQi96QU9CZ05WSFE4QkFmOEVCQU1DQWNZdwpIUVlEVlIwT0JCWUVGSGRyWmR6Qkt5b2pzOFR6OG5Hbm5nVDhmL1BZTUQ0R0NDc0dBUVVGQndFQkJESXdNREF1CkJnZ3JCZ0VGQlFjd0FZWWlhSFIwY0RvdkwybHdZUzFqWVM1b2IyeDBhRzl0WlM1dVpYUXZZMkV2YjJOemNEQU4KQmdrcWhraUc5dzBCQVFzRkFBT0NBWUVBWjE4TWJYbUlEWHUzV3ZkWG9xcVZJK1N6UEo0WFBWTVJjVzNVcGNHRgp6bEtJaFZ4UG1PNVhOL0liRnV0YnhVMnlVd284N2U4MUhsZlhCaG9zd2lsaU1kL0NVY2JVN2F5dGNvQzN6SXg0Ck5qTFd3aHM4WEwvNXlOVGRSSllWYng3cWs5V2syUURBUnp3M3Yzd1N3MVVWK3l3WlZsaE9BOW8xRHpqc21SMDkKeWZvZit0K1dvdHp2VXQ5WnJrZ0M1NzQxWTJhRzFTcFllcnZHcVBrWnJHODhUR1RMY3hCT1NGNzdvWERpNXFjTQpycU11VnNUc1crRVBRR0Fmd1JWMk5tQlY0ZE9wUWRMekN6K0J3RTNqSkxXKzN2S29zbFF3elV5WmtmY1IwU2cyCjVLK2pEZmNxL1FtU0EvUFpkTHd6QmJleU80RjBPSUxBUElQc3JBT0ZsUnM2aUdNSFVYRmNqdmhTNG15TkN4NXEKSjUrcGFBNVU3RW9NcWZQWGRQTEZaZHVvZDN6ZW9yU2c0Zi9GaTNrb1JkR0hzWFI1RUIyU3AzeTdWNmFrblZCago0eE5ETXV2eUg3ckVqcllhbHhHTU5FbHlxQ2xINUNqU2Y5MGRsOFMxZlBFUUY5ekdOZWdrUjV1VFJNWHZYOHJBCmlLUFlHOW52cUc1U05oYXExOHY2ekVZVwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
-      bindDN: uid=dex,cn=sysaccounts,cn=etc,dc=holthome,dc=net
-      bindPW: $DEX_FREEIPA_BIND_PASSWORD
-      userSearch:
-        # Would translate to the query "(&(objectClass=posixAccount)(uid=<username>))".
-        baseDN: cn=users,cn=accounts,dc=holthome,dc=net
-        filter: "(objectClass=posixAccount)"
-        username: uid
-        idAttr: uid
-        # Required. Attribute to map to Email.
-        emailAttr: mail
-        # Entity attribute to map to display name of users.
-      groupSearch:
-        # Would translate to the query "(&(objectClass=group)(member=<user uid>))".
-        baseDN: cn=groups,cn=accounts,dc=holthome,dc=net
-        filter: "(objectClass=group)"
-        userMatchers:
-        - userAttr: uid
-          groupAttr: member
-        nameAttr: name
+  #- type: ldap
+  #  id: ldap
+  #  name: LDAP
+  #  config:
+  #    # host and port of the LDAP server in form "host:port".
+  #    host: ipa-0.holthome.net:636
+  #    # freeIPA server's CA
+  #    rootCAData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVqakNDQXZhZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREEzTVJVd0V3WURWUVFLREF4SVQweFUKU0U5TlJTNU9SVlF4SGpBY0JnTlZCQU1NRlVObGNuUnBabWxqWVhSbElFRjFkR2h2Y21sMGVUQWVGdzB5TVRBeApNVEV5TXpBeE5EQmFGdzAwTVRBeE1URXlNekF4TkRCYU1EY3hGVEFUQmdOVkJBb01ERWhQVEZSSVQwMUZMazVGClZERWVNQndHQTFVRUF3d1ZRMlZ5ZEdsbWFXTmhkR1VnUVhWMGFHOXlhWFI1TUlJQm9qQU5CZ2txaGtpRzl3MEIKQVFFRkFBT0NBWThBTUlJQmlnS0NBWUVBekFpZFB1LzVDTmwwZHRjek0rWTQzVFYzV1VTZzBHeGVONlY5VmYxQQphTGlXREx0NndxZmpWNEZPeEVsRHhtVExyeldWalp3U3IyVDkvUm4vcHR3UThSSnMxdnZwZ0VhbWxkOVc0K1VICnZ1b2t3NCtxbDQrRFg1YkRqa0NRcGd4N3VOYkh4YWlJaTYydndRMEpmRDNudzlLWXU4dHljK2Zwa1BROUpjZVIKQWxzMU1QdkgrbXh2R1RYREdKZy8ydVB6MGxoYjdjdENDWXJiRkFXWklWSnhBSzZIVkRnRzV5NGJmdU02N216ZQpNUDArWko4VVVNZ0N6ZWYxeEFOZTRxQ3NWUGREd2h2RlJnV1YwUWp5SFVWY1VFOW45UkZIYU9vL3lmQSttM09aCjNkMlZzNEdFWU8rWTFHTjVMRmNvaWpqNVpvd3VhaVZrN2RPTUppcTVqbWhZWWl1WkNDdUxSNjF5VUJQRnpNMGQKZjJEZlVrdVpWcjBPV0pESWsvblVBNjR6bEJ1aVpuN3ZQUzVNSUdBOEhMRU81d1Z5dlR2NXkvbitLelNDMFZOWAo2U2N6anBhNlpGQXA5bGZUOGltQ2VPZHFEdkZOOUREWHZYQnhnMjQ0UG9va09CK3FXTWh0MjAxcmJwREVZUjU2CkZFa0tDRHg4QUlxMFM0UlFyZlFZYXM4ZkFnTUJBQUdqZ2FRd2dhRXdId1lEVlIwakJCZ3dGb0FVZDJ0bDNNRXIKS2lPenhQUHljYWVlQlB4Lzg5Z3dEd1lEVlIwVEFRSC9CQVV3QXdFQi96QU9CZ05WSFE4QkFmOEVCQU1DQWNZdwpIUVlEVlIwT0JCWUVGSGRyWmR6Qkt5b2pzOFR6OG5Hbm5nVDhmL1BZTUQ0R0NDc0dBUVVGQndFQkJESXdNREF1CkJnZ3JCZ0VGQlFjd0FZWWlhSFIwY0RvdkwybHdZUzFqWVM1b2IyeDBhRzl0WlM1dVpYUXZZMkV2YjJOemNEQU4KQmdrcWhraUc5dzBCQVFzRkFBT0NBWUVBWjE4TWJYbUlEWHUzV3ZkWG9xcVZJK1N6UEo0WFBWTVJjVzNVcGNHRgp6bEtJaFZ4UG1PNVhOL0liRnV0YnhVMnlVd284N2U4MUhsZlhCaG9zd2lsaU1kL0NVY2JVN2F5dGNvQzN6SXg0Ck5qTFd3aHM4WEwvNXlOVGRSSllWYng3cWs5V2syUURBUnp3M3Yzd1N3MVVWK3l3WlZsaE9BOW8xRHpqc21SMDkKeWZvZit0K1dvdHp2VXQ5WnJrZ0M1NzQxWTJhRzFTcFllcnZHcVBrWnJHODhUR1RMY3hCT1NGNzdvWERpNXFjTQpycU11VnNUc1crRVBRR0Fmd1JWMk5tQlY0ZE9wUWRMekN6K0J3RTNqSkxXKzN2S29zbFF3elV5WmtmY1IwU2cyCjVLK2pEZmNxL1FtU0EvUFpkTHd6QmJleU80RjBPSUxBUElQc3JBT0ZsUnM2aUdNSFVYRmNqdmhTNG15TkN4NXEKSjUrcGFBNVU3RW9NcWZQWGRQTEZaZHVvZDN6ZW9yU2c0Zi9GaTNrb1JkR0hzWFI1RUIyU3AzeTdWNmFrblZCago0eE5ETXV2eUg3ckVqcllhbHhHTU5FbHlxQ2xINUNqU2Y5MGRsOFMxZlBFUUY5ekdOZWdrUjV1VFJNWHZYOHJBCmlLUFlHOW52cUc1U05oYXExOHY2ekVZVwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  #    bindDN: uid=dex,cn=sysaccounts,cn=etc,dc=holthome,dc=net
+  #    bindPW: $DEX_FREEIPA_BIND_PASSWORD
+  #    userSearch:
+  #      # Would translate to the query "(&(objectClass=posixAccount)(uid=<username>))".
+  #      baseDN: cn=users,cn=accounts,dc=holthome,dc=net
+  #      filter: "(objectClass=posixAccount)"
+  #      username: uid
+  #      idAttr: uid
+  #      # Required. Attribute to map to Email.
+  #      emailAttr: mail
+  #      # Entity attribute to map to display name of users.
+  #    groupSearch:
+  #      # Would translate to the query "(&(objectClass=group)(member=<user uid>))".
+  #      baseDN: cn=groups,cn=accounts,dc=holthome,dc=net
+  #      filter: "(objectClass=group)"
+  #      userMatchers:
+  #      - userAttr: uid
+  #        groupAttr: member
+  #      nameAttr: name
 
   # GitHub configure 'OAuth Apps' -> 'New OAuth App', add callback URL
   # https://github.com/settings/developers
@@ -122,3 +122,9 @@ config: |-
     secret: $DEX_POMERIUM_CLIENT_SECRET
     redirectURIs:
       - https://authenticate.holthome.net/oauth2/callback
+
+  - id: step
+    name: step
+    secret: $DEX_STEP_CLIENT_SECRET
+    redirectURIs:
+      - http://127.0.0.1:10000
