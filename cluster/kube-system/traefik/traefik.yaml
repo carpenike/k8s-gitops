@@ -22,7 +22,7 @@ spec:
       kind: DaemonSet
     logs:
       general:
-        level: DEBUG
+        level: INFO
     image:
       name: traefik
       tag: v2.4.2
