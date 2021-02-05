@@ -5,16 +5,14 @@ metadata:
   name: traefik-dashboard
   namespace: kube-system
 spec:
-  entryPoints:
-  - web
   routes:
   - match: Host(`traefik.holthome.net`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
     kind: Rule
     services:
     - name: api@internal
       kind: TraefikService
-    middlewares:
-    - name: internal
+    # middlewares:
+    # - name: internal
     # - name: traefik-forward-auth@kubernetescrd
-  tls:
-    secretName: acme-crt-secret
+  # tls:
+  #   secretName: acme-crt-secret
