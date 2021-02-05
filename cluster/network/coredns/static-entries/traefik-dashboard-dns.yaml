@@ -1,0 +1,12 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: traefik-dashboard-dns
+  namespace: network
+spec:
+  endpoints:
+  - dnsName: traefik.holthome.net
+    recordType: CNAME
+    targets:
+    - fwlb.holthome.net
