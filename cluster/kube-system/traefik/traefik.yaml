@@ -40,6 +40,7 @@ spec:
       - "--api.dashboard=true"
       - "--providers.file.filename=/config/dyn.yaml"
       - "--metrics.prometheus=true"
+      - "--providers.kubernetesingress.ingressendpoint.hostname=fwlb.holthome.net"
     ports:
       web:
         redirectTo: websecure
