@@ -23,11 +23,11 @@ repos:
   - id: remove-crlf
   - id: forbid-tabs
 
-- repo: https://github.com/jumanjihouse/pre-commit-hooks
-  rev: 2.1.4
-  hooks:
-  - id: shellcheck
-    # args: [--severity=error]
+    #- repo: https://github.com/jumanjihouse/pre-commit-hooks
+    #  rev: 2.1.4
+    #  hooks:
+    #  - id: shellcheck
+    #    # args: [--severity=error]
 
 - repo: https://git.iamthefij.com/iamthefij/ansible-pre-commit
   rev: v0.1.2
