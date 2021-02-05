@@ -23,11 +23,14 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: false
+      enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
-        #nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/api/verify
-        #nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/?rd=https://$host$escaped_request_uri"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+        nginx.ingress.kubernetes.io/auth-tls-secret: "kube-system/bigcerts-ca-cert"
+        nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
       hosts:
       - host: radarr.holthome.net
         paths:
@@ -36,11 +39,14 @@ spec:
       tls:
       - hosts:
         - radarr.holthome.net
+        secretName: radarr-cert
       additionalIngresses:
       - enabled: true
         nameSuffix: "api"
         annotations:
           kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
         hosts:
         - host: radarr.holthome.net
           paths:
@@ -49,6 +55,7 @@ spec:
         tls:
         - hosts:
           - radarr.holthome.net
+          secretName: radarr-cert
     persistence:
       config:
         enabled: true
