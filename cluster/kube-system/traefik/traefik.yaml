@@ -28,7 +28,7 @@ spec:
       tag: v2.4.2
     ingressClass:
       enabled: true
-      isDefaultClass: false
+      isDefaultClass: true
     ingressRoute:
       dashboard:
         enabled: true
@@ -40,6 +40,7 @@ spec:
       - "--api.dashboard=true"
       - "--providers.file.filename=/config/dyn.yaml"
       - "--metrics.prometheus=true"
+      - "--entryPoints.websecure.proxyProtocol.trustedIPs=10.9.18.0/24"
       - "--providers.kubernetesingress.ingressendpoint.hostname=fwlb.holthome.net"
     ports:
       web:
