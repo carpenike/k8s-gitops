@@ -32,7 +32,7 @@ spec:
     ingressRoute:
       dashboard:
         enabled: true
-    additionalArguments:
+    # additionalArguments:
     #   - "--ping"
     #   - "--entrypoints.websecure.http.tls"
     #   - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
@@ -40,7 +40,7 @@ spec:
     #   - "--api.dashboard=true"
       # - "--providers.file.filename=/config/dyn.yaml"
     #   - "--metrics.prometheus=true"
-      - "--entryPoints.websecure.proxyProtocol.trustedIPs=10.20.0.2/32"
+      # - "--entryPoints.websecure.proxyProtocol.trustedIPs=10.20.0.2/32"
     #   - "--providers.kubernetesingress.ingressendpoint.hostname=fwlb.holthome.net"
     # ports:
     #   web:
