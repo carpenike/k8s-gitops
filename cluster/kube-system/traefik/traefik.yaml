@@ -1,0 +1,52 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  releaseName: traefik
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://helm.traefik.io/traefik
+      chart: traefik
+      version: 9.14.2
+      sourceRef:
+        kind: HelmRepository
+        name: traefik-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    deployment:
+      kind: DaemonSet
+    logs:
+      general:
+        level: DEBUG
+    image:
+      name: traefik
+      tag: v2.4.2
+    ingressClass:
+      enabled: true
+      isDefaultClass: false
+    ingressRoute:
+      dashboard:
+        enabled: true
+    additionalArguments:
+      - "--ping"
+      - "--entrypoints.websecure.http.tls"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.to=:443"
+      - "--api.dashboard=true"
+      - "--metrics.prometheus=true"
+    ports:
+      web:
+        redirectTo: websecure
+    service:
+      externalIPs:
+        - 10.45.10.20
+        - 10.45.10.21
+        - 10.45.10.22
+        - 10.45.10.23
+      spec:
+        externalTrafficPolicy: Local
