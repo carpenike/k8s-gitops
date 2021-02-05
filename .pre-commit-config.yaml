@@ -27,7 +27,7 @@ repos:
   rev: 2.1.4
   hooks:
   - id: shellcheck
-    args: [--severity=error]
+    # args: [--severity=error]
 
 - repo: https://git.iamthefij.com/iamthefij/ansible-pre-commit
   rev: v0.1.2
