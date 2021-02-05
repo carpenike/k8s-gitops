@@ -38,7 +38,7 @@ spec:
     #   - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
     #   - "--entrypoints.web.http.redirections.entryPoint.to=:443"
     #   - "--api.dashboard=true"
-    #   - "--providers.file.filename=/config/dyn.yaml"
+      - "--providers.file.filename=/config/dyn.yaml"
     #   - "--metrics.prometheus=true"
       - "--entryPoints.websecure.proxyProtocol.trustedIPs=10.20.0.2/32"
     #   - "--providers.kubernetesingress.ingressendpoint.hostname=fwlb.holthome.net"
