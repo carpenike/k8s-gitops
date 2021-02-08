@@ -33,7 +33,7 @@ spec:
       port: 53
       zone: holthome.net
     extraArgs:
-      - rfc2136-insecure
+      rfc2136-insecure: true
     policy: sync
     sources:
       - service
