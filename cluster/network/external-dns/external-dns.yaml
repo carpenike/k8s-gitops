@@ -32,6 +32,8 @@ spec:
       host: 10.20.0.20
       port: 53
       zone: holthome.net
+      tsigKeyname:
+      tsigSecretAlg:
     extraArgs:
       rfc2136-insecure:
     policy: sync
