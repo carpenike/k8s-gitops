@@ -21,12 +21,6 @@ spec:
     image:
       repository: bitnami/external-dns
       tag: 0.7.6-debian-10-r11
-    # provider: coredns
-    # coredns:
-    #   etcdEndpoints: https://k8s.holthome.net:2379
-    #   etcdTLS:
-    #     enabled: true
-    #     secretName: coredns-etcd-secret
     provider: rfc2136
     rfc2136:
       host: 10.20.0.20
