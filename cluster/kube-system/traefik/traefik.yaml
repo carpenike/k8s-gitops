@@ -55,8 +55,8 @@ spec:
     service:
       externalIPs:
         - 10.45.10.20
-        # - 10.45.10.21
-        # - 10.45.10.22
-        # - 10.45.10.23
+        - 10.45.10.21
+        - 10.45.10.22
+        - 10.45.10.23
       spec:
         externalTrafficPolicy: Local
