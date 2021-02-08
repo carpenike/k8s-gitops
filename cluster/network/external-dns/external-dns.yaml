@@ -34,8 +34,8 @@ spec:
       zone: holthome.net
       tsigKeyname:
       tsigSecretAlg:
-    # extraArgs:
-    #   rfc2136-insecure:
+    extraArgs:
+      rfc2136-tsig-axfr:
     policy: sync
     sources:
       - service
