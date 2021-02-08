@@ -106,8 +106,8 @@ spec:
           ratelimit_whitelist: []
           refuse_any: true
           upstream_dns:
-          - '[/holthome.net/]10.43.10.53'
-          - '[/ryanholt.net/]10.43.10.53'
+          - '[/holthome.net/]10.20.0.20'
+          - '[/ryanholt.net/]10.20.0.20'
           # - '[/bergandbeans.com/]10.1.1.2'
           # - '[/network.elcarpenter.com/]10.1.1.2'
           # - '[/vpn.elcarpenter.com/]1.1.1.1'
