@@ -45,7 +45,6 @@ spec:
       # - istio-virtualservice
     domainFilters:
       - holthome.net
-      - ryanholt.net
     createSecret: true
     crd:
       create: true
