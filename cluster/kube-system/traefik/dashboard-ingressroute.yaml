@@ -5,6 +5,8 @@ metadata:
   name: traefik-dashboard
   namespace: kube-system
 spec:
+  entryPoints:
+  - websecure
   routes:
   - match: Host(`traefik.holthome.net`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
     kind: Rule
