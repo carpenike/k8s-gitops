@@ -14,5 +14,5 @@ spec:
     # middlewares:
     # - name: internal
     # - name: traefik-forward-auth@kubernetescrd
-  # tls:
-  #   secretName: acme-crt-secret
+  tls:
+    secretName: acme-crt-secret
