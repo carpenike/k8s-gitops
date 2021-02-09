@@ -15,7 +15,6 @@ ansible/kubeadm/playbooks/output/k8s-config.yaml
 # Saved backups
 ignore/
 rebuild/
-logs/
 .vscode/
 # Trash
 .DS_Store
