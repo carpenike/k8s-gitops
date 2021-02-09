@@ -34,6 +34,7 @@ spec:
         rawConfig: |
           endpoint = "http://loki.logs.svc.cluster.local:3100"
           encoding.codec = "json"
+          request.concurrency = 1
           [sinks.loki.labels]
             k8s_pod_name = "{{ kubernetes.pod_name }}"
             k8s_pod_uid = "{{ kubernetes.pod_uid }}"
