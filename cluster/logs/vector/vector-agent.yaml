@@ -31,8 +31,8 @@ spec:
       loki:
         type: "loki"
         inputs: ["kubernetes_logs"]
-        endpoint: "http://loki.logs.svc.cluster.local:3100"
         rawConfig: |
+          endpoint = "http://loki.logs.svc.cluster.local:3100"
           encoding.codec = "json"
           labels.forwarder = "vector"
           labels.event = "{{ event_field }}"
