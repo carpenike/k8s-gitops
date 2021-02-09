@@ -25,8 +25,9 @@ spec:
       syslog:
         type: "syslog"
         address: "0.0.0.0:1514"
-        max_length: 102400
-        mode: "tcp"
+        rawConfig: |
+          max_length = 102400
+          mode = "tcp"
     # transforms:
     #   fix3057:
     #     type: "coercer"
