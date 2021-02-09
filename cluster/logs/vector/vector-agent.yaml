@@ -34,7 +34,7 @@ spec:
         rawConfig: |
           endpoint = "http://loki.logs.svc.cluster.local:3100"
           encoding.codec = "json"
-          [sinks.out.labels]
+          [sinks.loki.labels]
           forwarder = "vector"
           event = "{{ event_field }}"
           key = "value"
