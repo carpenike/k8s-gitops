@@ -24,8 +24,8 @@ spec:
     sources:
       syslog:
         type: "syslog"
-        address: "0.0.0.0:1514"
         rawConfig: |
+          address = "0.0.0.0:1514"
           max_length = 102400
           mode = "tcp"
     # transforms:
