@@ -35,6 +35,5 @@ spec:
           endpoint = "http://loki.logs.svc.cluster.local:3100"
           encoding.codec = "json"
           [sinks.loki.labels]
-          forwarder = "vector"
-          event = "{{ event_field }}"
-          key = "value"
+            k8s_pod_name = "{{ kubernetes.pod_name }}"
+            k8s_pod_uid = "{{ kubernetes.pod_uid }}"
