@@ -83,7 +83,8 @@ spec:
       podAnnotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "http-metrics"
-    # promtail:
+    promtail:
+      enabled: false
     #   image:
     #     repository: grafana/promtail
     #     tag: 2.1.0
