@@ -21,16 +21,16 @@ spec:
     image:
       repository: timberio/vector
       tag: 0.11.1-alpine
-    sinks:
-      stdout:
-        type: "console"
+    transforms:
+      fix3057:
+        type: "coercer"
         inputs: ["kubernetes_logs"]
-        target: "stdout"
         rawConfig: |
-          encoding.codec = "json"
+          types.timestamp = "timestamp|%F"
+    sinks:
       loki:
         type: "loki"
-        inputs: ["kubernetes_logs"]
+        inputs: ["fix3057"]
         rawConfig: |
           endpoint = "http://loki.logs.svc.cluster.local:3100"
           encoding.codec = "json"
