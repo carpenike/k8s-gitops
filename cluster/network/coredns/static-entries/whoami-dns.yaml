@@ -1,12 +1,12 @@
-# ---
-# apiVersion: externaldns.k8s.io/v1alpha1
-# kind: DNSEndpoint
-# metadata:
-#   name: whoami-dns
-#   namespace: network
-# spec:
-#   endpoints:
-#   - dnsName: whoami.holthome.net
-#     recordType: CNAME
-#     targets:
-#     - fwlb.holthome.net
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: whoami-dns
+  namespace: network
+spec:
+  endpoints:
+  - dnsName: whoami.holthome.net
+    recordType: CNAME
+    targets:
+    - fwlb.holthome.net
