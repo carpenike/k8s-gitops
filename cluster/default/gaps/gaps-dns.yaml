@@ -1,0 +1,12 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: gaps-dns
+  namespace: defalt
+spec:
+  endpoints:
+  - dnsName: gaps.holthome.net
+    recordType: CNAME
+    targets:
+    - fwlb.holthome.net
