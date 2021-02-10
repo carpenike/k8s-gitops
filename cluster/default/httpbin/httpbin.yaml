@@ -39,28 +39,3 @@ spec:
           name: httpbin
           ports:
             - containerPort: 80
-
-# ---
-# apiVersion: "cilium.io/v2"
-# kind: CiliumNetworkPolicy
-# metadata:
-#   name: "allow-all-to-httpbin"
-# spec:
-#   endpointSelector:
-#     matchLabels:
-#       app: httpbin
-#   ingress:
-#     - fromEndpoints:
-#         - {}
-# ---
-# apiVersion: "cilium.io/v2"
-# kind: CiliumNetworkPolicy
-# metadata:
-#   name: "allow-all-from-httpbin"
-# spec:
-#   endpointSelector:
-#     matchLabels:
-#       app: httpbin
-#   egress:
-#     - toEndpoints:
-#         - {}
