@@ -3,7 +3,7 @@ apiVersion: certmanager.step.sm/v1beta1
 kind: StepIssuer
 metadata:
   name: step-issuer
-  namespace: default
+  namespace: cert-manager
 spec:
   # The CA URL.
   url: https://pki.holthome.net
