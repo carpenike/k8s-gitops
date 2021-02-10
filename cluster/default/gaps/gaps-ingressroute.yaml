@@ -3,7 +3,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: gaps
-  namespace: kube-system
+  namespace: default
 spec:
   entryPoints:
   - web
