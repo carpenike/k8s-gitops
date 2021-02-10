@@ -19,4 +19,4 @@ spec:
   issuerRef:
     group: certmanager.step.sm
     kind: CertificateRequest
-    name: step-issuer
+    name: cert-manager/step-issuer
