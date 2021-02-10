@@ -7,6 +7,6 @@ metadata:
 spec:
   endpoints:
   - dnsName: gaps.holthome.net
-    recordType: CNAME
+    recordType: A
     targets:
-    - fwlb.holthome.net
+    - 10.20.0.2
