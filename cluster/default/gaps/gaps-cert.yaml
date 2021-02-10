@@ -20,4 +20,3 @@ spec:
     group: certmanager.step.sm
     kind: CertificateRequest
     name: step-issuer
-    namespace: cert-manager
