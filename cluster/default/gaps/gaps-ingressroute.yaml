@@ -1,0 +1,21 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gaps
+  namespace: kube-system
+spec:
+  entryPoints:
+  - web
+  - websecure
+  routes:
+  - match: Host(`gaps.holthome.net`)
+    kind: Rule
+    services:
+    - name: gaps
+      port: 8484
+    # middlewares:
+    # - name: internal
+    # - name: traefik-forward-auth@kubernetescrd
+  tls:
+    secretName: gaps-cert
