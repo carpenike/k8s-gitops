@@ -1,7 +1,7 @@
 apiVersion: stash.appscode.com/v1beta1
 kind: BackupBlueprint
 metadata:
-  name: daily-backup-to-minio-keep-5
+  name: default-backup
 spec:
   # ============== Blueprint for Repository ==========================
   backend:
