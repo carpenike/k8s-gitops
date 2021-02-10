@@ -14,5 +14,5 @@ spec:
     name: ryan@ryanholt.net
     kid: 235wsrfrpjb46VDPmuQgnyz3exxAoGRQ3tHrdxdHmUY
     passwordRef:
-      name: step-certificates-provisioner-password
+      name: step-provisioner-password
       key: password
