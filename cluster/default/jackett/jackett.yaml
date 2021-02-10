@@ -19,8 +19,8 @@ spec:
       interval: 5m
   values:
     image:
-      repository: k8sathome/jackett
-      tag: v0.17.474
+      repository: ghcr.io/k8s-at-home/jackett
+      tag: v0.17.484
     env:
       TZ: "America/New_York"
       PUID: 1000

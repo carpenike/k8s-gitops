@@ -65,7 +65,7 @@
     {
       "datasources": ["docker"],
       "allowedVersions": "<4.3.0",
-      "packageNames": ["k8sathome/qbittorrent"]
+      "packageNames": ["ghcr.io/k8s-at-home/qbittorrent"]
     },
     // Version strategies
     {
@@ -80,8 +80,8 @@
       "requiredStatusChecks": null,
       "updateTypes": ["minor", "patch"],
       "packageNames": [
-        "k8sathome/ombi",
-        "k8sathome/jackett"
+        "ghcr.io/k8s-at-home/ombi",
+        "ghcr.io/k8s-at-home/jackett"
       ]
     }
   ]
