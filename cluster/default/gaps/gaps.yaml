@@ -24,7 +24,7 @@ spec:
     env:
       TZ: "America/New_York"
     controllerAnnotations:
-      stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
+      stash.appscode.com/backup-blueprint: default-backup
       stash.appscode.com/target-paths: "/usr/data"
       stash.appscode.com/volume-mounts: "data:/usr/data"
     ingress:
