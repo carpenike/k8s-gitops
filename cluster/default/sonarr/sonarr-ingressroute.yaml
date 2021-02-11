@@ -11,6 +11,7 @@ spec:
   routes:
   - match: Host(`sonarr.holthome.net`) && (PathPrefix(`/api/`)
     kind: Rule
+    priority: 1
     services:
     - name: sonarr
       port: 8989
@@ -32,6 +33,7 @@ spec:
   routes:
   - match: Host(`sonarr.holthome.net`)
     kind: Rule
+    priority: 2
     services:
     - name: sonarr
       port: 8989
