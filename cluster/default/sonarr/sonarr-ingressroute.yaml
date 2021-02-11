@@ -15,9 +15,9 @@ spec:
     services:
     - name: sonarr
       port: 8989
-    # middlewares:
+    middlewares:
     # - name: internal
-    # - name: traefik-forward-auth@kubernetescrd
+    - name: kube-system-forward-auth@kubernetescrd
   tls:
     secretName: sonarr-cert
     options:
