@@ -133,4 +133,4 @@ config: |-
     name: forward-auth
     secret: $DEX_FORWARD_AUTH_CLIENT_SECRET
     redirectURIs:
-      - https://auth.holthome.net/_oauth
+      - https://localhost
