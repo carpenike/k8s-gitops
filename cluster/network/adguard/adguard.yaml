@@ -183,8 +183,8 @@ spec:
         - '@@||analytics.archive.org^         # Internet Archive because they need the stats'
         - '@@||chase.com^                     # Credit card company'
         - '@@||chasecdn.com^                  # Chases content delivery network'
-        - '@@||login.microsoftonline.us^      # Microsoft Login'
-        - '@@||login.microsoftonline.com^     # Microsoft Login'
+        - '@@||microsoftonline.us^            # Microsoft Login'
+        - '@@||microsoftonline.com^           # Microsoft Login'
         dhcp:
           enabled: false
           interface_name: ""
