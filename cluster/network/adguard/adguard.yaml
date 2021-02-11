@@ -176,7 +176,9 @@ spec:
           url: https://dbl.oisd.nl/
           name: Domain Blocklists
           id: 1585613910
-        whitelist_filters: []
+        whitelist_filters:
+        - '@@||microsoftonline.us^            # Microsoft Login'
+        - '@@||microsoftonline.com^           # Microsoft Login'
         user_rules:
         - '@@||md.us^                         # Maryland Schools'
         - '@@||r20.rs6.net^'
