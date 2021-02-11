@@ -12,7 +12,7 @@ spec:
   - match: Host(`auth.holthome.net`)
     kind: Rule
     services:
-    - name: forward-auth
+    - name: traefik-forward-auth
       port: 4181
     # middlewares:
     # - name: internal
