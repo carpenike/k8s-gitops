@@ -11,7 +11,6 @@ spec:
   routes:
   - match: Host(`sonarr.holthome.net`) && (PathPrefix(`/api`)
     kind: Rule
-    priority: 1
     services:
     - name: sonarr
       port: 8989
