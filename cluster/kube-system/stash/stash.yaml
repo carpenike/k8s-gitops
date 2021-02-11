@@ -53,9 +53,8 @@ spec:
       repository: kubectl
       tag: v1.16
     podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
+      runAsUser: 1000
+      runAsGroup: 1000
     enableAnalytics: false
     monitoring:
       agent: "prometheus.io/builtin"
