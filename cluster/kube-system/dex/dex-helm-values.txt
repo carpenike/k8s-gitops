@@ -128,9 +128,3 @@ config: |-
     secret: $DEX_STEP_CLIENT_SECRET
     redirectURIs:
       - http://127.0.0.1:10000
-
-  - id: forward-auth
-    name: forward-auth
-    secret: $DEX_FORWARD_AUTH_CLIENT_SECRET
-    redirectURIs:
-      - https://localhost
