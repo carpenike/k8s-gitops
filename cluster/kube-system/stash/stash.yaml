@@ -52,6 +52,10 @@ spec:
       registry: appscode
       repository: kubectl
       tag: v1.16
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
     enableAnalytics: false
     monitoring:
       agent: "prometheus.io/builtin"
