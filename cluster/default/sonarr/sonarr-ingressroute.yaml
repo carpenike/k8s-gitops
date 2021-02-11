@@ -9,7 +9,7 @@ spec:
   - web
   - websecure
   routes:
-  - match: Host(`sonarr.holthome.net`) && (PathPrefix(`/api`)
+  - match: Host(`sonarr.holthome.net`) && (PathPrefix(`/api/`)
     kind: Rule
     services:
     - name: sonarr
