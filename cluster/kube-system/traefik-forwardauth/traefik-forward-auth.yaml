@@ -1,4 +1,3 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -6,10 +5,10 @@ metadata:
     namespace: kube-system
 spec:
     interval: 5m
-    # renovate: registryUrl=https://k8s-at-home.com/charts/
     chart:
         spec:
-            chart: traefik-forwardauth
+            # renovate: registryUrl=https://k8s-at-home.com/charts/
+            chart: traefik-forward-auth
             version: 1.0.5
             sourceRef:
                 kind: HelmRepository
@@ -50,8 +49,8 @@ sops:
     gcp_kms: []
     azure_kv: []
     hc_vault: []
-    lastmodified: '2021-02-11T20:37:42Z'
-    mac: ENC[AES256_GCM,data:LBCGDEw83viyufZ7HxzoDMmKDjXEUetsm/ZQu/arL4tZYNx50APCzSml/HFliVmAx4O0DW281Mt9CYHXqDdN9gjRc8jBlj0kLOggIBjI9Oc/i7BgHQ0Hk7O0WAhZXCdpAwL37t9C2LmiqvBj4IzQ+oS1xub8kwwZzFUvF+pF/HE=,iv:05VIB4xwde4tKqnh2vQIcoE1K4Op7aEiIEjvLwwt984=,tag:JdB7iVd1ugeNU2nS5EJ9UQ==,type:str]
+    lastmodified: '2021-02-11T20:50:52Z'
+    mac: ENC[AES256_GCM,data:eZAxOOTwAOjN90EACp41zwhUU7Aahr9L6OpUuVZMbdRp0N3Y7Io5mS2SSOcscliMYSllsO7PpjVwC9X5VuPGEINLs7KdK5Fk5hpcspOEfZ3WmiqsFHRoD8+BUhLq8RDOj0fsB+wbMQ1EzOVrLl3pSaTZtCx0wfNijY/3ljLTkJE=,iv:U/fCz83Zra3GpCpWFiBYgfpJBrWirwm8xN/4EjhYlyk=,tag:4OJRIMVVjXO21fyNFbQ/hA==,type:str]
     pgp:
     -   created_at: '2021-02-11T20:34:10Z'
         enc: |
