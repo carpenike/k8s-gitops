@@ -178,14 +178,13 @@ spec:
           id: 1585613910
         whitelist_filters: []
         user_rules:
-        - '@@||md.us^                                # Maryland Schools'
-        - '@@||ccbsroncos.org^                 # Albuquerque Schools '
+        - '@@||md.us^                         # Maryland Schools'
         - '@@||r20.rs6.net^'
-        - '@@||analytics.archive.org^         # Internet Archive because they need
-          the stats'
-        - '@@||schwab.com^                    # My Bank'
+        - '@@||analytics.archive.org^         # Internet Archive because they need the stats'
         - '@@||chase.com^                     # Credit card company'
         - '@@||chasecdn.com^                  # Chases content delivery network'
+        - '@@||login.microsoftonline.us^      # Microsoft Login'
+        - '@@||login.microsoftonline.com^     # Microsoft Login'
         dhcp:
           enabled: false
           interface_name: ""
