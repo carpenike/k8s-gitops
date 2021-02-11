@@ -30,7 +30,7 @@ spec:
   - web
   - websecure
   routes:
-  - match: Host(`sonarr.holthome.net`)
+  - match: Host(`sonarr.holthome.net`) && PathPrefix(`/`)
     kind: Rule
     services:
     - name: sonarr
