@@ -35,7 +35,7 @@ spec:
       clientID: oauth2-proxy
     extraArgs:
       provider: oidc
-      oidc-issuer-url: https://dex.holthome.net/
+      oidc-issuer-url: https://dex.holthome.net
       skip-provider-button:
       pass-authorization-header:
       email-domain: "*"
