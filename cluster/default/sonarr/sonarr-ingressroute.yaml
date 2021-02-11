@@ -20,6 +20,6 @@ spec:
     - name: kube-system-forward-auth@kubernetescrd
   tls:
     secretName: sonarr-cert
-    options:
-      name: sonarr-tlsoption
-      namespace: default
+    # options:
+    #   name: sonarr-tlsoption
+    #   namespace: default
