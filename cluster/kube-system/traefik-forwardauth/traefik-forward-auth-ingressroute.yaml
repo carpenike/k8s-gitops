@@ -1,0 +1,21 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-forward-auth
+  namespace: kube-system
+spec:
+  entryPoints:
+  - web
+  - websecure
+  routes:
+  - match: Host(`auth.holthome.net`)
+    kind: Rule
+    services:
+    - name: forward-auth
+      port: 4181
+    # middlewares:
+    # - name: internal
+    # - name: traefik-forward-auth@kubernetescrd
+  tls:
+    secretName: traefik-forward-auth-cert
