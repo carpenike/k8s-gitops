@@ -1,24 +1,24 @@
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: sonarr-api
-  namespace: default
-spec:
-  entryPoints:
-  - web
-  - websecure
-  routes:
-  - match: Host(`sonarr.holthome.net`) && PathPrefix(`/api`)
-    kind: Rule
-    services:
-    - name: sonarr
-      port: 8989
-    # middlewares:
-    # - name: internal
-    # - name: traefik-forward-auth@kubernetescrd
-  tls:
-    secretName: sonarr-cert
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: sonarr-api
+#   namespace: default
+# spec:
+#   entryPoints:
+#   - web
+#   - websecure
+#   routes:
+#   - match: Host(`sonarr.holthome.net`) && PathPrefix(`/api`)
+#     kind: Rule
+#     services:
+#     - name: sonarr
+#       port: 8989
+#     # middlewares:
+#     # - name: internal
+#     # - name: traefik-forward-auth@kubernetescrd
+#   tls:
+#     secretName: sonarr-cert
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
