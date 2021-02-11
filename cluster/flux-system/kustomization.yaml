@@ -6,3 +6,5 @@ resources:
 - ./gotk-kustomization.yaml
 - ./gotk-webhook-receiver.yaml
 - ./gotk-custom-kustomization.yaml
+patchesStrategicMerge:
+- ./gotk-patches.yaml
