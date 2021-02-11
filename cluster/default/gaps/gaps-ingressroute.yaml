@@ -19,3 +19,6 @@ spec:
     # - name: traefik-forward-auth@kubernetescrd
   tls:
     secretName: gaps-cert
+    options:
+      name: gaps-tlsoption
+      namespace: default
