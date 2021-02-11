@@ -31,6 +31,8 @@ spec:
       tls:
       - hosts:
         - auth.holthome.net
+    config:
+      clientID: oauth2-proxy
     extraArgs:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net/
@@ -39,7 +41,6 @@ spec:
       email-domain: "*"
       cookie-domain: .holthome.net
       whitelist-domain: .holthome.net
-      clientID: oauth2-proxy
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
