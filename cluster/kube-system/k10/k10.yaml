@@ -29,6 +29,7 @@ spec:
       oidcAuth:
         enabled: true
         providerURL: https://dex.holthome.net
+        redirectURL: https://k10.holthome.net/k10
         scopes: "profile email"
         clientID: k10
     clusterName: k8s
