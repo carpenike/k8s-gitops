@@ -58,7 +58,7 @@ spec:
           - "sonarr.holthome.net"
           secretName: sonarr-cert
     controllerAnnotations:
-      kasten-backup: true
+      kasten-backup: "true"
     persistence:
       config:
         enabled: true
