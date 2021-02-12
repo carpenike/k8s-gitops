@@ -37,12 +37,13 @@ spec:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net
       skip-provider-button:
-      pass-authorization-header:
+      pass-authorization-header: true
       email-domain: "*"
       cookie-domain: ".holthome.net"
       whitelist-domain: ".holthome.net"
       set-authorization-header: true
-      cookie_secure: "false"
+      cookie-secure: false
+      cookie-name: "_oauth2_proxy"
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
