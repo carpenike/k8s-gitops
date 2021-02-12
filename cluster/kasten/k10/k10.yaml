@@ -30,7 +30,7 @@ spec:
         enabled: true
         providerURL: https://dex.holthome.net
         redirectURL: https://k10.holthome.net
-        scopes: "profile email"
+        scopes: "sub email"
         clientID: k10
     clusterName: k8s
     ingress:
