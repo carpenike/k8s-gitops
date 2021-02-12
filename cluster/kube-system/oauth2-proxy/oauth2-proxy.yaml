@@ -37,7 +37,7 @@ spec:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net
       skip-provider-button:
-      pass-authorization-header: true
+      pass-authorization-header: false
       pass-access-token: true
       email-domain: "*"
       cookie-domain: ".holthome.net"
