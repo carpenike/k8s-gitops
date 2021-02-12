@@ -1,0 +1,3 @@
+auth:
+  oidcAuth:
+    clientSecret: $DEX_K10_CLIENT_SECRET

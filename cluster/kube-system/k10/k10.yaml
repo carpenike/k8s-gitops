@@ -25,6 +25,12 @@ spec:
     global:
       persistence:
         storageClass: longhorn
+    auth:
+      oidcAuth:
+        enabled: true
+        providerURL: https://dex.holthome.net
+        scopes: "profile email"
+        clientID: k10
     clusterName: k8s
     ingress:
       create: true
@@ -45,7 +51,7 @@ spec:
   #       cpu: 25m
   #     limits:
   #       memory: 250Mi
-  # valuesFrom:
-  # - kind: Secret
-  #   name: "dex-helm-values"
-  #   optional: false
+  valuesFrom:
+  - kind: Secret
+    name: "k10-helm-values"
+    optional: false

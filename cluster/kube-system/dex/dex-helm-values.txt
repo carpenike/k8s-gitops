@@ -128,3 +128,9 @@ config: |-
     secret: $DEX_STEP_CLIENT_SECRET
     redirectURIs:
       - http://127.0.0.1:10000
+
+  - id: k10
+    name: k10
+    secret: $DEX_K10_CLIENT_SECRET
+    redirectURIs:
+      -
