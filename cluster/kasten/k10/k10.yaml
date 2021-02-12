@@ -26,13 +26,13 @@ spec:
       persistence:
         storageClass: longhorn
     auth:
-      k10AdminUsers: "ryan@ryanholt.net"
+      k10AdminUsers: "ryan"
       oidcAuth:
         enabled: true
         providerURL: https://dex.holthome.net
         redirectURL: https://k10.holthome.net
         scopes: "profile email"
-        usernameClaim: "email"
+        usernameClaim: "name"
         clientID: k10
     clusterName: k8s
     ingress:
