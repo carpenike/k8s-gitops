@@ -109,7 +109,6 @@ config: |-
     redirectURIs:
       - https://auth.holthome.net/oauth2/callback
       - https://requests.holthome.net/oauth2/callback
-      - http://auth.holthome.net/oauth2/callback
 
   - id: gitea
     name: gitea
