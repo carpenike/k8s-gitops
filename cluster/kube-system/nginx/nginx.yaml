@@ -37,6 +37,7 @@ spec:
         type: LoadBalancer
         externalIPs:
         - 10.45.10.10
+        - 10.45.20.10
         externalTrafficPolicy: Local
       metrics:
         enabled: true
