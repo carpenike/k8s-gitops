@@ -39,9 +39,8 @@ spec:
       skip-provider-button:
       pass-authorization-header:
       email-domain: "*"
-      cookie-domain: .holthome.net
-      whitelist-domain: .holthome.net
-      cookie_secure: false
+      cookie-domain: ".oauth2-proxy.holthome.net"
+      whitelist-domain: ".oauth2-proxy.holthome.net"
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
