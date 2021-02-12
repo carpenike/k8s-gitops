@@ -43,6 +43,7 @@ spec:
     ingress:
       enabled: true
       annotations:
+        external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
       hosts:
       - host: qb.holthome.net

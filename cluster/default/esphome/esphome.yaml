@@ -29,6 +29,7 @@ spec:
     ingress:
       enabled: true
       annotations:
+        external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
         cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
