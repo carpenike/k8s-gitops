@@ -33,7 +33,7 @@ spec:
         providerURL: https://dex.holthome.net
         redirectURL: https://k10.holthome.net
         scopes: "profile email"
-        usernameClaim: "name"
+        usernameClaim: "email"
         clientID: k10
     clusterName: k8s
     ingress:
