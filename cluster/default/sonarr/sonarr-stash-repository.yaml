@@ -1,13 +1,13 @@
----
-apiVersion: stash.appscode.com/v1alpha1
-kind: Repository
-metadata:
-  name: sonarr-stash-repository
-  namespace: default
-spec:
-  backend:
-    s3:
-      endpoint: https://nas.holthome.net:9000
-      bucket: stash
-      prefix: backup/default/deployment/sonarr
-    storageSecretName: stash-s3-creds
+# ---
+# apiVersion: stash.appscode.com/v1alpha1
+# kind: Repository
+# metadata:
+#   name: sonarr-stash-repository
+#   namespace: default
+# spec:
+#   backend:
+#     s3:
+#       endpoint: https://nas.holthome.net:9000
+#       bucket: stash
+#       prefix: backup/default/deployment/sonarr
+#     storageSecretName: stash-s3-creds
