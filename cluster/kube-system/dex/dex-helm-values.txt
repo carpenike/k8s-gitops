@@ -133,4 +133,4 @@ config: |-
     name: k10
     secret: $DEX_K10_CLIENT_SECRET
     redirectURIs:
-      -
+      - https://k10.holthome.net/k10/auth-svc/v0/oidc/redirect
