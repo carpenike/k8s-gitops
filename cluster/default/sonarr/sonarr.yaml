@@ -30,7 +30,7 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
         nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=https%3A%2F%2F$host$request_uri"
         nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User,X-Auth-Request-Email
         # nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
         # nginx.ingress.kubernetes.io/auth-tls-secret: "kube-system/bigcerts-ca-cert"
