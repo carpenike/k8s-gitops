@@ -2,7 +2,7 @@ apiVersion: kubernetes-client.io/v1
 kind: ExternalSecret
 metadata:
   name: k10-helm-values
-  namespace: kube-system
+  namespace: kasten
 spec:
   backendType: azureKeyVault
   keyVaultName: holthome
