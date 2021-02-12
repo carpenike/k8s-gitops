@@ -39,8 +39,8 @@ spec:
       skip-provider-button:
       pass-authorization-header:
       email-domain: "*"
-      cookie-domain: ".oauth2_proxy"
-      whitelist-domain: ".oauth2-proxy"
+      cookie-domain: "_oauth2_proxy"
+      whitelist-domain: "_oauth2_proxy"
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
