@@ -7,4 +7,4 @@ metadata:
     snapshot.storage.kubernetes.io/is-default-class: "true"
     k10.kasten.io/is-snapshot-class: "true"
 driver: driver.longhorn.io
-deletionPolicy: Delete
+deletionPolicy: Retain
