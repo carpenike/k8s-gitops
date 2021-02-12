@@ -38,6 +38,10 @@ spec:
       oidc-issuer-url: https://dex.holthome.net
       skip-provider-button:
       pass-authorization-header: true
+      pass-access-token: true
+      pass-basic-auth: true
+      pass-host-header: true
+      pass-user-headers: true
       email-domain: "*"
       cookie-domain: ".holthome.net"
       whitelist-domain: ".holthome.net"
