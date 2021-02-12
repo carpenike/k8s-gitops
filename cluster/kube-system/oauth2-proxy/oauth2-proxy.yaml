@@ -45,6 +45,7 @@ spec:
       cookie-secure: false
       cookie-name: "_oauth2_proxy"
       cookie-httponly: true
+      exclude-logging-paths: "/ping"
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
