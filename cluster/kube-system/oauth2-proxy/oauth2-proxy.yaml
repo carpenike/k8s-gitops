@@ -42,6 +42,7 @@ spec:
       cookie-domain: ".holthome.net"
       whitelist-domain: ".holthome.net"
       set-authorization-header: true
+      cookie_secure: "false"
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
