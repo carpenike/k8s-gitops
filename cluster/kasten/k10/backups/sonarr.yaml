@@ -28,7 +28,7 @@ spec:
           name: minio-nas
     - action: export
       exportParameters:
-        frequency: "@daily"
+        frequency: "@hourly"
         migrationToken:
           name: ""
           namespace: ""
