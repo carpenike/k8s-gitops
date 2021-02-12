@@ -41,6 +41,7 @@ spec:
       email-domain: "*"
       cookie-domain: .holthome.net
       whitelist-domain: .holthome.net
+      cookie_secure: false
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
