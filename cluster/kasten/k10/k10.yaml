@@ -38,7 +38,6 @@ spec:
     clusterName: k8s
     ingress:
       create: true
-      urlPath: "/"
       class: "nginx"
       host: k10.holthome.net
       annotations:
