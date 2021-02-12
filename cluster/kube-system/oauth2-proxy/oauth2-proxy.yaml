@@ -43,7 +43,7 @@ spec:
       email-domain: "*"
       cookie-domain: ".holthome.net"
       whitelist-domain: ".holthome.net"
-      cookie-secure: "false"
+      cookie-secure: "true"
       reverse-proxy: true
       exclude-logging-path: "/ping"
   valuesFrom:
