@@ -44,6 +44,7 @@ spec:
       set-authorization-header: true
       cookie-secure: false
       cookie-name: "_oauth2_proxy"
+      reverse-proxy: true
       cookie-httponly: true
       exclude-logging-path: "/ping"
   valuesFrom:
