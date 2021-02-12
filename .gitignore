@@ -11,6 +11,7 @@ generated
 IGNORE_ME.yaml
 ansible/kubeadm/playbooks/output/k8s-config.yaml
 .decrypted~*
+values.yaml
 
 # Saved backups
 ignore/
