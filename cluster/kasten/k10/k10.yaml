@@ -26,7 +26,7 @@ spec:
       persistence:
         storageClass: longhorn
     auth:
-      k10AdminUsers: ryan
+      k10AdminUsers: ryan@ryanholt.net
       oidcAuth:
         enabled: true
         providerURL: https://dex.holthome.net
