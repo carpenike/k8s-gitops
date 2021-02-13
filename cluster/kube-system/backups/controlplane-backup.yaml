@@ -1,42 +1,42 @@
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: controlplane-backup
-  namespace: kube-system
-spec:
-  # activeDeadlineSeconds: 100
-  schedule: "*/3 * * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-          - name: backup
-            # Same image as in /etc/kubernetes/manifests/etcd.yaml
-            image: k8s.gcr.io/etcd:3.4.13-0
-            env:
-            - name: ETCDCTL_API
-              value: "3"
-            command: ["/bin/sh"]
-            args: ["-c", "etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/apiserver-kubelet-client.crt --key=/etc/kubernetes/pki/etcd/apiserver-kubelet-client.key snapshot save /backup/etcd-snapshot-$(date +%Y-%m-%d_%H:%M:%S_%Z).db"]
-            volumeMounts:
-            - mountPath: /etc/kubernetes/pki/etcd
-              name: etcd-certs
-              readOnly: true
-            - mountPath: /backup
-              name: backup
-          restartPolicy: OnFailure
-          nodeSelector:
-            kubernetes.io/hostname: h2-0
-          tolerations:
-          - effect: NoSchedule
-            operator: Exists
-          hostNetwork: true
-          volumes:
-          - name: etcd-certs
-            hostPath:
-              path: /etc/kubernetes/pki/etcd
-              type: DirectoryOrCreate
-          - name: backup
-            persistentVolumeClaim:
-              claimName: nfs-backup-pvc
+# apiVersion: batch/v1beta1
+# kind: CronJob
+# metadata:
+#   name: controlplane-backup
+#   namespace: kube-system
+# spec:
+#   # activeDeadlineSeconds: 100
+#   schedule: "*/3 * * * *"
+#   jobTemplate:
+#     spec:
+#       template:
+#         spec:
+#           containers:
+#           - name: backup
+#             # Same image as in /etc/kubernetes/manifests/etcd.yaml
+#             image: k8s.gcr.io/etcd:3.4.13-0
+#             env:
+#             - name: ETCDCTL_API
+#               value: "3"
+#             command: ["/bin/sh"]
+#             args: ["-c", "etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/apiserver-kubelet-client.crt --key=/etc/kubernetes/pki/etcd/apiserver-kubelet-client.key snapshot save /backup/etcd-snapshot-$(date +%Y-%m-%d_%H:%M:%S_%Z).db"]
+#             volumeMounts:
+#             - mountPath: /etc/kubernetes/pki/etcd
+#               name: etcd-certs
+#               readOnly: true
+#             - mountPath: /backup
+#               name: backup
+#           restartPolicy: OnFailure
+#           nodeSelector:
+#             kubernetes.io/hostname: h2-0
+#           tolerations:
+#           - effect: NoSchedule
+#             operator: Exists
+#           hostNetwork: true
+#           volumes:
+#           - name: etcd-certs
+#             hostPath:
+#               path: /etc/kubernetes/pki/etcd
+#               type: DirectoryOrCreate
+#           - name: backup
+#             persistentVolumeClaim:
+#               claimName: nfs-backup-pvc
