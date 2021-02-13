@@ -47,6 +47,7 @@ spec:
       cookie-secure: "true"
       reverse-proxy: true
       exclude-logging-path: "/ping"
+      set-xauthrequest: true
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
