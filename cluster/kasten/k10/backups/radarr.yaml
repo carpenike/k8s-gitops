@@ -17,6 +17,11 @@ spec:
               resource: persistentvolumeclaims
               name: radarr-pvc
               label: []
+            - group: ""
+              version: ""
+              resource: persistentvolumeclaims
+              name: matrix-media-store
+              label: []
           excludeResources:
             - group: ""
               version: ""
