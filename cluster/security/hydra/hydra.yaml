@@ -31,9 +31,9 @@ spec:
         hosts:
         - host: hydra-public.holthome.net
           paths: ["/"]
-        # tls:
-        #   hosts:
-        #   - hydra-public.holthome.net
+        tls:
+        - hosts:
+          - hydra-public.holthome.net
       admin:
         enabled: true
         annotations:
@@ -43,6 +43,6 @@ spec:
         hosts:
         - host: hydra-admin.holthome.net
           paths: ["/"]
-        # tls:
-        #   hosts:
-        #   - hydra-admin.holthome.net
+        tls:
+        - hosts:
+          - hydra-admin.holthome.net
