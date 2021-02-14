@@ -1,0 +1,50 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: hydra
+  namespace: security
+spec:
+  releaseName: hydra
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s.ory.sh/helm/charts
+      chart: hydra
+      version: 0.5.3
+      sourceRef:
+        kind: HelmRepository
+        name: ory-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: oryd/hydra
+      tag: v1.8.5
+    ingress:
+      public:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        hosts:
+        - host: hydra-public.holthome.net
+          paths:
+          - "/"
+        tls:
+          hosts:
+          - hydra-public.holthome.net
+      admin:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        hosts:
+        - host: hydra-admin.holthome.net
+          paths:
+          - "/"
+        tls:
+          hosts:
+          - hydra-admin.holthome.net
