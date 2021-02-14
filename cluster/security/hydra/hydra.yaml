@@ -29,8 +29,8 @@ spec:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
         hosts:
-        - host: hydra-public.holthome.net
-          paths: ["/"]
+          - host: hydra-public.holthome.net
+            paths: ["/"]
         # tls:
         #   hosts:
         #   - hydra-public.holthome.net
@@ -41,8 +41,8 @@ spec:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
         hosts:
-        - host: hydra-admin.holthome.net
-          paths: ["/"]
+          - host: hydra-admin.holthome.net
+            paths: ["/"]
         # tls:
         #   hosts:
         #   - hydra-admin.holthome.net
