@@ -37,9 +37,8 @@ spec:
       clientID: y5S3iA6kHSC5R04DVW9wfXhKas96Quzz
     extraArgs:
       provider: oidc
-      #oidc-issuer-url: https://dex.holthome.net
-      oidc-issuer-url: https://holthome.auth0.com/
-      #redirect-url: https://auth.holthome.net/oauth2/callback
+      oidc-issuer-url: https://dex.holthome.net
+      redirect-url: https://auth.holthome.net/oauth2/callback
       skip-provider-button:
       pass-authorization-header:
       pass-access-token: true
