@@ -30,7 +30,7 @@ spec:
           cert-manager.io/cluster-issuer: letsencrypt-prod
         hosts:
         - host: hydra-public.holthome.net
-          #paths: ["/"]
+          paths: ["/"]
         # tls:
         #   hosts:
         #   - hydra-public.holthome.net
