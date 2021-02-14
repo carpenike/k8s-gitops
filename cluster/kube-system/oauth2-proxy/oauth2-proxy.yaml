@@ -38,7 +38,7 @@ spec:
     extraArgs:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net
-      redirect-url: https://auth.holthome.net/oauth2/callback
+      #redirect-url: https://auth.holthome.net/oauth2/callback
       skip-provider-button:
       pass-authorization-header:
       pass-access-token: true
