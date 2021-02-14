@@ -33,8 +33,7 @@ spec:
       - hosts:
         - auth.holthome.net
     config:
-      #clientID: oauth2-proxy
-      clientID: y5S3iA6kHSC5R04DVW9wfXhKas96Quzz
+      clientID: oauth2-proxy
     extraArgs:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net
