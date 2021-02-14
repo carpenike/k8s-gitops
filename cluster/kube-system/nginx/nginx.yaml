@@ -45,28 +45,9 @@ spec:
           enabled: true
           namespace: kube-system
         prometheusRule:
-          enabled: true
-          namespace: kube-system
-          rules:
-          - alert: TooMany500s
-            expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"5.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
-            for: 1m
-            labels:
-              severity: critical
-            annotations:
-              description: Too many 5XXs
-              summary: More than 5% of the all requests did return 5XX, this require your attention
-          - alert: TooMany400s
-            expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"4.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
-            for: 1m
-            labels:
-              severity: critical
-            annotations:
-              description: Too many 4XXs
-              summary: More than 5% of the all requests did return 4XX, this require your attention
+          enabled: false
       extraArgs:
         default-ssl-certificate: "kube-system/acme-crt-secret"
-        #default-ssl-certificate: "kube-system/digicert-ingress-tls"
       # resources:
       #   requests:
       #     memory: 825Mi
@@ -75,9 +56,12 @@ spec:
       #     memory: 825Mi
     defaultBackend:
       enabled: true
-      # resources:
-      #   requests:
-      #     memory: 250Mi
-      #     cpu: 25m
-      #   limits:
-      #     memory: 250Mi
+      image:
+        repository: billimek/custom-error-pages
+        tag: 0.4.4
+      resources:
+        requests:
+          memory: 250Mi
+          cpu: 25m
+        limits:
+          memory: 350Mi
