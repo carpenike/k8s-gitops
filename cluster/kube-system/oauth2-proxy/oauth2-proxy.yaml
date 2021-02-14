@@ -37,17 +37,13 @@ spec:
     extraArgs:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net
-      #redirect-url: https://auth.holthome.net/oauth2/callback
       skip-provider-button:
       pass-authorization-header:
       pass-access-token: true
       email-domain: "*"
       cookie-domain: ".holthome.net"
       whitelist-domain: ".holthome.net"
-      #cookie-secure: "true"
-      #reverse-proxy: true
       exclude-logging-path: "/ping"
-      #set-xauthrequest: true
   valuesFrom:
   - kind: Secret
     name: "oauth2-proxy-helm-values"
