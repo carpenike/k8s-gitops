@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: oryd/hydra
-      tag: v1.8.5
+      tag: v1.9.2
     ingress:
       public:
         enabled: true
