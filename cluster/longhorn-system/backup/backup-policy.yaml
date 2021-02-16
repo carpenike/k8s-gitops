@@ -1,0 +1,45 @@
+apiVersion: config.kio.kasten.io/v1alpha1
+kind: Policy
+metadata:
+  name: media-backups
+  namespace: kasten
+spec:
+  comment: ""
+  frequency: "@daily"
+  actions:
+    - action: backup
+      backupParameters:
+        profile:
+          namespace: kasten
+          name: minio-nas
+    - action: export
+      exportParameters:
+        frequency: "@daily"
+        migrationToken:
+          name: ""
+          namespace: ""
+        profile:
+          name: minio-nas
+          namespace: kasten
+        receiveString: ""
+        exportData:
+          enabled: true
+          overrides:
+            - storageClassName: nfs
+              enabled: false
+      retention:
+        daily: 0
+        weekly: 0
+        monthly: 0
+        yearly: 0
+  retention:
+    daily: 7
+    weekly: 4
+    monthly: 12
+    yearly: 7
+  selector:
+    matchExpressions:
+      - key: k10.kasten.io/appNamespace
+        operator: In
+        values:
+          - media
