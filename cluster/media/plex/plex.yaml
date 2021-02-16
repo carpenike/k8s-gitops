@@ -42,7 +42,7 @@ spec:
         enabled: false
       data:
         enabled: true
-        claimName: nfs-tank-share-pvc
+        claimName: media-nfs-tank-share-pvc
       config:
         claimName: plex-config-pvc
     # nodeSelector:
