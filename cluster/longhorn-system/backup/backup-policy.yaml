@@ -9,6 +9,14 @@ spec:
   actions:
     - action: backup
       backupParameters:
+        filters:
+          includeResources: []
+          excludeResources:
+            - group: ""
+              version: ""
+              resource: persistentvolumeclaims
+              name: media-nfs-tank-share-pvc
+              label: []
         profile:
           namespace: kasten
           name: minio-nas
