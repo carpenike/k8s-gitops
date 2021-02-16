@@ -3,10 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: tautulli
-  namespace: default
-  annotations:
-    release: "tautulli"
-    fluxcd.io/automated: "false"
+  namespace: media
 spec:
   interval: 5m
   releaseName: tautulli
