@@ -129,6 +129,7 @@ kseal "${REPO_ROOT}/cluster/kasten/k10/k10-helm-values.txt"
 #  | \
 # kubeseal --format=yaml --cert="$PUB_CERT" \
 #    > "$REPO_ROOT"/cluster/cert-manager/azuredns/azuredns-config.yaml
+az keyvault secret set --name "certbot-client-secret" --vault-name holthome --value $AZURE_CERTBOT_CLIENT_SECRET
 
 # # Longhorn Backup - longhorn-system namespace
 # kubectl create secret generic longhorn-backup-secret  \
