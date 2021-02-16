@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-tank-share-pv-media
+  name: media-nfs-tank-share-pv
 spec:
   capacity:
     storage: 1Mi
   accessModes:
     - ReadWriteMany
   claimRef:
-    name: nfs-tank-share-pvc
+    name: media-nfs-tank-share-pvc
     namespace: media
   storageClassName: nfs
   nfs:
@@ -19,7 +19,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-tank-share-pvc
+  name: media-nfs-tank-share-pvc
 spec:
   accessModes:
     - ReadWriteMany
