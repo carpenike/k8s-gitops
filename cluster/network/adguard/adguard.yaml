@@ -185,6 +185,8 @@ spec:
         - '@@||chasecdn.com^                  # Chases content delivery network'
         - '@@||microsoftonline.us^            # Microsoft Login'
         - '@@||microsoftonline.com^           # Microsoft Login'
+        - '@@||umgc.edu^                      # College'
+        - '@@||umuc.edu^                      # College'
         dhcp:
           enabled: false
           interface_name: ""
