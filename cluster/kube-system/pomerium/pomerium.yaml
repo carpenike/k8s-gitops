@@ -37,7 +37,7 @@ spec:
         # - radarr-uhd.holthome.net
         # - esphome.holthome.net
         - node-red.holthome.net
-        - sabnzbd.holthome.net
+        # - sabnzbd.holthome.net
         - paperless.holthome.net
         - papermerge.holthome.net
       tls:
@@ -47,7 +47,7 @@ spec:
           # - radarr-uhd.holthome.net
           # - esphome.holthome.net
           - node-red.holthome.net
-          - sabnzbd.holthome.net
+          # - sabnzbd.holthome.net
           - paperless.holthome.net
           - papermerge.holthome.net
     forwardAuth:
