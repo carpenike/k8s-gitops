@@ -3,11 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: qbittorrent
-  namespace: default
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: 'regexp:^([0-9]+\.[0-9]+\.[0-9]+\..*-ls.*)$'
+  namespace: media
 spec:
   releaseName: qbittorrent
   interval: 5m
@@ -63,7 +59,7 @@ spec:
     additionalVolumes:
     - name: media-nas
       persistentVolumeClaim:
-        claimName: nfs-tank-share-pvc
+        claimName: media-nfs-tank-share-pvc
     resources:
       requests:
         memory: 250Mi
