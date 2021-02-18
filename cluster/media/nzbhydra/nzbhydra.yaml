@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: nzbhydra2
-  namespace: default
+  namespace: media
 spec:
   releaseName: nzbhydra2
   interval: 5m
