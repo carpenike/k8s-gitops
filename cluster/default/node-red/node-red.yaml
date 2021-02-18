@@ -33,7 +33,7 @@ spec:
     podAnnotations:
       backup.velero.io/backup-volumes: data
     ingress:
-      enabled: false
+      enabled: true
       annotations:
         external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"

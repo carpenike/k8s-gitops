@@ -36,7 +36,7 @@ spec:
         # - radarr.holthome.net
         # - radarr-uhd.holthome.net
         # - esphome.holthome.net
-        - node-red.holthome.net
+        # - node-red.holthome.net
         # - sabnzbd.holthome.net
         - paperless.holthome.net
         - papermerge.holthome.net
@@ -46,7 +46,7 @@ spec:
           # - radarr.holthome.net
           # - radarr-uhd.holthome.net
           # - esphome.holthome.net
-          - node-red.holthome.net
+          # - node-red.holthome.net
           # - sabnzbd.holthome.net
           - paperless.holthome.net
           - papermerge.holthome.net
