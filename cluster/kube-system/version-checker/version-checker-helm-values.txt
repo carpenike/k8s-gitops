@@ -1,2 +1,0 @@
-docker:
-  token: $VERSION_CHECKER_DOCKER_TOKEN
