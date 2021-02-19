@@ -21,6 +21,13 @@ spec:
     image:
       repository: oryd/hydra
       tag: v1.9.2
+    hydra:
+      config:
+        dsn: memory
+        urls:
+          self:
+            issuer: https://hydra-public.holthome.net/
+          login: https://dex.holthome.net/oauth2/start
     ingress:
       public:
         enabled: true
@@ -46,3 +53,7 @@ spec:
         tls:
         - hosts:
           - hydra-admin.holthome.net
+  valuesFrom:
+  - kind: Secret
+    name: "hydra-helm-values"
+    optional: false

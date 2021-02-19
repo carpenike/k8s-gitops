@@ -1,0 +1,4 @@
+hydra:
+  config:
+    secrets:
+      system: $HYDRA_SYSTEM_SECRET
