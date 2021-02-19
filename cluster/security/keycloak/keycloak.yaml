@@ -22,6 +22,9 @@ spec:
     image:
       repository: jboss/keycloak
       tag: 12.0.3
+    extraEnvFrom: |
+      - secretRef:
+        name: 'keycloak-env-secret'
     ingress:
       enabled: true
       annotations:
