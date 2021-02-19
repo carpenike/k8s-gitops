@@ -24,7 +24,7 @@ spec:
       tag: 12.0.3
     extraEnvFrom: |
       - secretRef:
-        name: 'keycloak-env-secret'
+          name: 'keycloak-env-values'
     ingress:
       enabled: true
       annotations:
