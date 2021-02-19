@@ -1,0 +1,44 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: keycloak
+  namespace: security
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://codecentric.github.io/helm-charts
+      chart: keycloak
+      version: 9.9.3
+      sourceRef:
+        kind: HelmRepository
+        name: codecentric-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    fullnameOverride: keycloak
+    nameOverride: keycloak
+    image:
+      repository: jboss/keycloak
+      tag: 12.0.3
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      rules:
+      - host: keycloak.holthome.net
+        paths:
+        - /
+      tls:
+      - hosts:
+        - keycloak.holthome.net
+        secretName: keycloak-cert
+    postgresql:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
