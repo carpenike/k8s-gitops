@@ -33,11 +33,8 @@ spec:
         kubernetes.io/ingress.class: "nginx"
         cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
-        nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-        nginx.ingress.kubernetes.io/auth-tls-secret: "kube-system/bigcerts-ca-cert"
-        nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-        # nginx.ingress.kubernetes.io/auth-tls-error-page: "http://www.mysite.com/error-cert.html"
-        nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start"
       hosts:
       - host: esphome.holthome.net
         paths:
