@@ -29,7 +29,7 @@ spec:
         limits:
           memory: 2000Mi
     prometheusOperator:
-      createCustomResource: true
+      createCustomResource: false
       prometheusConfigReloaderImage:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
         tag: v0.44.0
