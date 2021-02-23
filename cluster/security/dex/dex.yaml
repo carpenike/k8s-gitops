@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: dex-k8s-authenticator
-  namespace: kube-system
+  name: dex
+  namespace: security
 spec:
-  releaseName: dex-k8s-authenticator
+  releaseName: dex
   interval: 5m
   chart:
     spec:
-      chart: ./charts/dex-k8s-authenticator
+      chart: ./charts/dex
       version: 1.4.0
       sourceRef:
         kind: GitRepository
@@ -17,11 +17,9 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    global:
-      deployEnv: prod
     image:
-      repository: mintel/dex-k8s-authenticator
-      tag: 1.4.0
+      repository: dexidp/dex
+      tag: v2.27.0
     ingress:
       enabled: true
       annotations:
@@ -29,18 +27,18 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - login.holthome.net
+      - dex.holthome.net
       tls:
       - hosts:
-        - login.holthome.net
-        secretName: dex-k8s-authenticator-cert
-    # resources:
-    #   requests:
-    #     memory: 350Mi
-    #     cpu: 25m
-    #   limits:
-    #     memory: 500Mi
+        - dex.holthome.net
+        secretName: dex-cert
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 250Mi
   valuesFrom:
   - kind: Secret
-    name: "dex-k8s-authenticator-helm-values"
+    name: "dex-helm-values"
     optional: false

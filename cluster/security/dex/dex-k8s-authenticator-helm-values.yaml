@@ -1,11 +1,12 @@
+---
 apiVersion: kubernetes-client.io/v1
 kind: ExternalSecret
 metadata:
-  name: dex-helm-values
-  namespace: kube-system
+  name: dex-k8s-authenticator-helm-values
+  namespace: security
 spec:
   backendType: azureKeyVault
   keyVaultName: holthome
   data:
-    - key: dex-helm-values
+    - key: dex-k8s-authenticator-helm-values
       name: values.yaml
