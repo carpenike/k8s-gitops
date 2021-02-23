@@ -9,15 +9,6 @@ config: |-
   web:
     http: 0.0.0.0:5556
 
-    # If enabled, be sure to configure tls settings above, or use a tool
-    # such as let-encrypt to manage the certs.
-    # Currently this chart does not support both http and https, and the port
-    # is fixed to 5556
-    #
-    # https: 0.0.0.0:5556
-    # tlsCert: /etc/dex/tls/tls.crt
-    # tlsKey: /etc/dex/tls/tls.key
-
   frontend:
     theme: "coreos"
     issuer: "holthome"
@@ -36,8 +27,6 @@ config: |-
     responseTypes: ["code", "token", "id_token"]
     skipApprovalScreen: true
 
-  # Remember you can have multiple connectors of the same 'type' (with different 'id's)
-  # If you need e.g. logins with groups for two different Microsoft 'tenants'
   connectors:
 
   # GitHub configure 'OAuth Apps' -> 'New OAuth App', add callback URL
