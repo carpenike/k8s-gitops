@@ -25,20 +25,28 @@ spec:
     extraEnvFrom: |
       - secretRef:
           name: 'keycloak-env-values'
+    extraEnvVars:
+      - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
+        value: "true"
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: nginx
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.org/server-snippets: |
+          location / {
+            proxy_set_header X-Forwarded-For $host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          }
       rules:
-      - host: keycloak.holthome.net
-        paths:
-        - /
+        - host: keycloak.holthome.net
+          paths:
+            - /
       tls:
-      - hosts:
-        - keycloak.holthome.net
-        secretName: keycloak-cert
+        - hosts:
+            - keycloak.holthome.net
+          secretName: keycloak-cert
     postgresql:
       enabled: true
     serviceMonitor:
