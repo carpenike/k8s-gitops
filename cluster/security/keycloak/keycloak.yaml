@@ -22,14 +22,13 @@ spec:
     image:
       repository: jboss/keycloak
       tag: 12.0.3
+    replicas: 3
     extraEnvFrom: |
       - secretRef:
           name: 'keycloak-env-values'
     extraEnvVars:
       - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
         value: "true"
-      - name: jboss.https.port
-        value: "443"
     ingress:
       enabled: true
       annotations:
