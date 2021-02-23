@@ -44,9 +44,6 @@ spec:
       - hosts:
         - searx.holthome.net
         secretName: searx-cert
-    # searx:
-    #   baseUrl: https://searx.holthome.net
-  # valuesFrom:
-  # - kind: Secret
-  #   name: "searx-helm-values"
-  #   optional: false
+    searx:
+      existingSecret:
+        enabled: true
