@@ -2,9 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ./gotk-components.yaml
-- ./gotk-gitrepo.yaml
-- ./gotk-kustomization.yaml
+- ./gotk-sync.yaml
+- ./gotk-sources.yaml
+- ./gotk-monitoring.yaml
 - ./gotk-webhook-receiver.yaml
-- ./gotk-custom-kustomization.yaml
 patchesStrategicMerge:
 - ./gotk-patches.yaml
