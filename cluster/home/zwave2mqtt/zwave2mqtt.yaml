@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: zwave2mqtt
-  namespace: default
+  namespace: home
 spec:
   releaseName: zwave2mqtt
   interval: 5m
