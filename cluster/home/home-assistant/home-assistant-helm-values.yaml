@@ -2,7 +2,7 @@ apiVersion: kubernetes-client.io/v1
 kind: ExternalSecret
 metadata:
   name: home-assistant-helm-values
-  namespace: default
+  namespace: home
 spec:
   backendType: azureKeyVault
   keyVaultName: holthome
