@@ -28,6 +28,8 @@ spec:
     extraEnvVars:
       - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
         value: "true"
+      - name: jboss.https.port
+        value: "443"
     ingress:
       enabled: true
       annotations:
