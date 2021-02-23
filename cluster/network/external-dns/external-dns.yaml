@@ -41,6 +41,7 @@ spec:
       - holthome.net
     createSecret: true
     crd:
+      # disabled --pulled from source repo
       create: false
       apiversion: externaldns.k8s.io/v1alpha1
       kind: DNSEndpoint
