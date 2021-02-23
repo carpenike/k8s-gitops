@@ -7,7 +7,6 @@ metadata:
 spec:
   releaseName: k10
   interval: 5m
-  skipCRDs: true
   chart:
     spec:
       # renovate: registryUrl=https://charts.kasten.io
