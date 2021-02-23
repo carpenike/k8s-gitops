@@ -37,20 +37,20 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-# ---
-# apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
-# kind: Kustomization
-# metadata:
-#   name: sops-secrets
-#   namespace: flux-system
-# spec:
-#   interval: 10m0s
-#   sourceRef:
-#     kind: GitRepository
-#     name: flux-system
-#   path: ./cluster
-#   prune: true
-#   decryption:
-#     provider: sops
-#     secretRef:
-#       name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: sops-secrets
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./cluster
+  prune: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
