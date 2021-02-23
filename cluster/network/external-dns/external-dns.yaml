@@ -41,7 +41,7 @@ spec:
       - holthome.net
     createSecret: true
     crd:
-      # disabled --pulled from source repo
+      # disabled --pulled from source repo https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/docs/contributing/crd-source/crd-manifest.yaml
       create: false
       apiversion: externaldns.k8s.io/v1alpha1
       kind: DNSEndpoint
