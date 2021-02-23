@@ -31,7 +31,7 @@ spec:
       hosts:
         - host: dex.holthome.net
           paths:
-            - path: /
+            - /
       tls:
         - hosts:
             - dex.holthome.net
