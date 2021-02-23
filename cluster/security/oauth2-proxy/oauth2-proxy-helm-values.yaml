@@ -2,7 +2,7 @@ apiVersion: kubernetes-client.io/v1
 kind: ExternalSecret
 metadata:
   name: oauth2-proxy-helm-values
-  namespace: kube-system
+  namespace: security
 spec:
   backendType: azureKeyVault
   keyVaultName: holthome
