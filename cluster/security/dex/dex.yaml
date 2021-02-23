@@ -17,8 +17,10 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    nameOverride: dex
+    fullnameOverride: dex
     image:
-      repository: dexidp/dex
+      repository: ghcr.io/dexidp/dex
       tag: v2.27.0
     ingress:
       enabled: true
@@ -27,18 +29,20 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-      - dex.holthome.net
+        - host: dex.holthome.net
+          paths:
+            - path: /
       tls:
-      - hosts:
-        - dex.holthome.net
-        secretName: dex-cert
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 25m
-      limits:
-        memory: 250Mi
+        - hosts:
+            - dex.holthome.net
+          secretName: dex-cert
+    # resources:
+    #   requests:
+    #     memory: 250Mi
+    #     cpu: 25m
+    #   limits:
+    #     memory: 250Mi
   valuesFrom:
-  - kind: Secret
-    name: "dex-helm-values"
-    optional: false
+    - kind: Secret
+      name: "dex-helm-values"
+      optional: false
