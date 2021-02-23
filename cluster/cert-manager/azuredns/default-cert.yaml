@@ -1,0 +1,17 @@
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: kube-system
+spec:
+  secretName: acme-crt-secret
+  commonName: "*.holthome.net"
+  dnsNames:
+  - 'holthome.net'
+  - '*.holthome.net'
+  - 'ryanholt.net'
+  - '*.ryanholt.net'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
