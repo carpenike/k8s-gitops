@@ -22,7 +22,7 @@ spec:
     fullnameOverride: dex
     image:
       repository: ghcr.io/dexidp/dex
-      tag: v2.27.0
+      tag: master
     ingress:
       enabled: true
       annotations:
