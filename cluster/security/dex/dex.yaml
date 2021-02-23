@@ -9,20 +9,17 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://charts.dexidp.io
-      chart: dex
-      version: 0.0.3
+      chart: ./charts/dex
+      version: 1.4.0
       sourceRef:
-        kind: HelmRepository
-        name: dexidp-charts
+        kind: GitRepository
+        name: mintel-dex-charts-git
         namespace: flux-system
       interval: 5m
   values:
-    nameOverride: dex
-    fullnameOverride: dex
     image:
-      repository: ghcr.io/dexidp/dex
-      tag: master
+      repository: dexidp/dex
+      tag: v2.27.0
     ingress:
       enabled: true
       annotations:
@@ -30,19 +27,17 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - host: dex.holthome.net
-          paths:
-            - path: /
+        - dex.holthome.net
       tls:
         - hosts:
             - dex.holthome.net
           secretName: dex-cert
-    # resources:
-    #   requests:
-    #     memory: 250Mi
-    #     cpu: 25m
-    #   limits:
-    #     memory: 250Mi
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 250Mi
   valuesFrom:
     - kind: Secret
       name: "dex-helm-values"

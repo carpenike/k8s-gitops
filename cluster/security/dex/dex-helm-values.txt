@@ -1,10 +1,12 @@
-config:
+config: |-
   issuer: https://dex.holthome.net
 
   storage:
     type: kubernetes
     config:
       inCluster: true
+  web:
+    http: 0.0.0.0:5556
 
   frontend:
     theme: "coreos"
