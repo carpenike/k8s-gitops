@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: radarr-uhd
-  namespace: default
+  namespace: media
 spec:
   interval: 5m
   chart:
@@ -28,10 +28,6 @@ spec:
         external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-        nginx.ingress.kubernetes.io/auth-tls-secret: "kube-system/bigcerts-ca-cert"
-        nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
       hosts:
       - host: radarr-uhd.holthome.net
         paths:
