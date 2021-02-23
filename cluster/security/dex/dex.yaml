@@ -9,11 +9,12 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: ./charts/dex
-      version: 1.4.0
+      # renovate: registryUrl=https://charts.dexidp.io
+      chart: dex
+      version: 0.0.3
       sourceRef:
-        kind: GitRepository
-        name: mintel-dex-charts-git
+        kind: HelmRepository
+        name: dexidp-charts
         namespace: flux-system
       interval: 5m
   values:
@@ -31,7 +32,7 @@ spec:
       hosts:
         - host: dex.holthome.net
           paths:
-            - /
+            - path: /
       tls:
         - hosts:
             - dex.holthome.net
