@@ -37,7 +37,7 @@ spec:
         nginx.org/server-snippets: |
           location / {
             proxy_set_header X-Forwarded-For $host;
-            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Proto https;
           }
       rules:
         - host: keycloak.holthome.net
