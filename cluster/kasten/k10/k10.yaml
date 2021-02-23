@@ -30,11 +30,12 @@ spec:
       - ryan@ryanholt.net
       oidcAuth:
         enabled: true
-        providerURL: https://dex.holthome.net
-        redirectURL: https://k10.holthome.net
-        scopes: "profile email"
-        usernameClaim: "email"
-        clientID: k10
+        secretName: kasten-secret
+        # providerURL: https://dex.holthome.net
+        # redirectURL: https://k10.holthome.net
+        # scopes: "profile email"
+        # usernameClaim: "email"
+        # clientID: k10
     clusterName: k8s
     ingress:
       create: true
@@ -55,7 +56,7 @@ spec:
   #       cpu: 25m
   #     limits:
   #       memory: 250Mi
-  valuesFrom:
-  - kind: Secret
-    name: "k10-helm-values"
-    optional: false
+  # valuesFrom:
+  # - kind: Secret
+  #   name: "k10-helm-values"
+  #   optional: false
