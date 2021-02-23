@@ -1,4 +1,4 @@
-config: |-
+config:
   issuer: https://dex.holthome.net
 
   storage:
