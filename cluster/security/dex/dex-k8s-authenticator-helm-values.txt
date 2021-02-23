@@ -2,7 +2,7 @@ dexK8sAuthenticator:
   clusters:
   - name: k8s
     short_description: "Holthome k8s cluster"
-    description: "My home k8s cluster for local media purposes"
+    description: "My home k8s cluster"
     client_secret: $DEX_K8S_AUTHENTICATOR_CLIENT_SECRET
     issuer: https://dex.holthome.net
     k8s_master_uri: https://k8s.holthome.net:6443
@@ -10,20 +10,12 @@ dexK8sAuthenticator:
     redirect_uri: https://login.holthome.net/callback/
     k8s_ca_pem: |
       -----BEGIN CERTIFICATE-----
-      MIIC5zCCAc+gAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl
-      cm5ldGVzMB4XDTIxMDEwNjA2MzYyN1oXDTMxMDEwNDA2MzYyN1owFTETMBEGA1UE
-      AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMDi
-      4C4ChoPhci2Z19xwpb6Ir6eY1C8Dedxt/v+Dn1vfdnZwoHW2AGC7GPBToc3KCRTP
-      /Lbd1epGyrDZWiuGOvUsE7EDlEEZBVvr6t3UexskWvteR6E75TADwmqMCEIhLfeR
-      +FrSVpq1K866jt6NRbohZgtSN2VkA1ZK4TctFC2HPKi3+9UlsJZ2IsWJRbsh5beZ
-      zXGn03QdsBpN7XmOiP1Subi33hZGxkZ5N/YNXop3A6+mb51eU7xyt/qhM6vHdR5e
-      HnDNCVGwf3qUhcIonHH706ii3uSwsGa3CXQorYeD111kxE7KJLnxt4G+vAXpC3cZ
-      r4ohSov2HYKehuxqNIECAwEAAaNCMEAwDgYDVR0PAQH/BAQDAgKkMA8GA1UdEwEB
-      /wQFMAMBAf8wHQYDVR0OBBYEFPdRawm4nfOAJ/UdAmgXUz2cz4J0MA0GCSqGSIb3
-      DQEBCwUAA4IBAQBwXaRd8CQzeEu6u/mwk66AYsME5qCj/WqmI1tbV+33zE3i/Yw5
-      IKfb3xNCZNr0n8y2GwrNAZmTqgK8gzRljMxjkltgngD8/1zbyhuvr17uXK5YWKuy
-      YUvieS/foi/OMhr2aQjFug5sVVUA1TQ0vD7DGI0d3fPuFvabxm3k/avPnbhLob6V
-      LKbOC3+Mhohs2igU6rwRydXsOCUDv0e8lp/yuTE7rALA/8nafbG6qR4ZcfQuxRTl
-      Vuu70yGOD01yCKbSmU8b9Kbw40f5dHeXA5UhXNlkNtJ1P1lz6xmSR4fwrqmzDnXZ
-      8LzicMSWMrgj7yh2Q0kXqxJjuxgP206pQL9y
+      MIIBeTCCAR+gAwIBAgIQat1vBRZhd/l5H4JOSSeT0jAKBggqhkjOPQQDAjAbMRkw
+      FwYDVQQDExBCaWdDZXJ0cyBSb290IENBMB4XDTIxMDIwMjE0NTk0NloXDTMxMDIw
+      MjE0NTk0NlowGzEZMBcGA1UEAxMQQmlnQ2VydHMgUm9vdCBDQTBZMBMGByqGSM49
+      AgEGCCqGSM49AwEHA0IABLHdCk+1KWkHMqTGuE+HCPz7f2+bGru0ETFLuHr4v/Fj
+      etgcxH06cpXSzLZb0boGxKIwHsvTgoxTtpLIon+gKHmjRTBDMA4GA1UdDwEB/wQE
+      AwIBBjASBgNVHRMBAf8ECDAGAQH/AgEBMB0GA1UdDgQWBBTZLZqmmX+2O3VXlVHY
+      coFPwFJf+TAKBggqhkjOPQQDAgNIADBFAiAICloM0aNyCgGdApOGG0jaPVbtkueh
+      mwu/sxSPs36s2gIhAILQP+29Z+WT5qmwzHwlnWzGr9RPH1ktMmjNfFT1dP0d
       -----END CERTIFICATE-----
