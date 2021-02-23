@@ -26,9 +26,6 @@ spec:
     extraEnvFrom: |
       - secretRef:
           name: 'keycloak-env-values'
-    extraEnvVars:
-      - name: PROXY_ADDRESS_FORWARDING
-        value: "true"
     ingress:
       enabled: true
       annotations:
