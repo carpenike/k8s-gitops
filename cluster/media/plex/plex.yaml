@@ -52,7 +52,7 @@ spec:
       runAsGroup: 1000
       fsGroup: 1000
       fsGroupPolicy: None
-      fsGroupChangePOlicy: OnRootMismatch
+      fsGroupChangePolicy: OnRootMismatch
     resources:
       limits:
         # gpu.intel.com/i915: 1
