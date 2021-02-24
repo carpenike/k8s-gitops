@@ -47,6 +47,11 @@ spec:
         claimName: plex-config-pvc
     # nodeSelector:
     #   app: "nvidia-gpu-plugin"
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      fsGroupChangePOlicy: OnRootMismatch
     resources:
       limits:
         # gpu.intel.com/i915: 1
