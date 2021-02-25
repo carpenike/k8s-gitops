@@ -50,6 +50,8 @@ spec:
       tls:
         enabled: true
         secretName: k10-cert
+    cacertconfigmap:
+      name: custom-ca-bundle-store
   #   resources:
   #     requests:
   #       memory: 250Mi
