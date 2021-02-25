@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 data:
   address: ENC[AES256_GCM,data:hFviBZKPH6BnKL0zKkuIUKfbN28nC4Ap/GGoOmPn5FWfEPD8DstUeQnwr7pn+wXHNpwOU9tf1fPENSRAcVuZnMbAcxbmRoZAA0R97102mCc8fwnkchLIav6Li8UKS6jM53S99kOFTSsl0azGcd1Yd1XeI6CfGLBrGKj9FULAMx28MMcIWikYi2GXqIA4kRsHJ0bG6s+kZSj9Wrju+S6DbA==,iv:btVJGPpqhQIa6MF2cshCuPF4KvjyphIkbioAr5pobLM=,tag:MSvyZoaQ6uvmlstDfC6IKA==,type:str]
