@@ -33,7 +33,7 @@ spec:
       - hosts:
         - auth.holthome.net
     config:
-      clientID: oauth2-proxy
+      existingSecret: oauth2-proxy-oidc-creds
     extraArgs:
       provider: oidc
       oidc-issuer-url: https://dex.holthome.net
@@ -44,7 +44,3 @@ spec:
       cookie-domain: ".holthome.net"
       whitelist-domain: ".holthome.net"
       exclude-logging-path: "/ping"
-  valuesFrom:
-  - kind: Secret
-    name: "oauth2-proxy-helm-values"
-    optional: false
