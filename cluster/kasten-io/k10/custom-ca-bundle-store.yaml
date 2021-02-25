@@ -26,4 +26,4 @@ kind: ConfigMap
 metadata:
   creationTimestamp: null
   name: custom-ca-bundle-store
-  namespace: kasten
+  namespace: kasten-io
