@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
-      version: 13.10.0
+      version: 13.13.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -32,10 +32,10 @@ spec:
       createCustomResource: false
       prometheusConfigReloaderImage:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
-        tag: v0.44.0
+        tag: v0.46.0
       configmapReloadImage:
         repository: docker.io/jimmidyson/configmap-reload
-        tag: v0.4.0
+        tag: v0.5.0
     alertmanager:
       alertmanagerSpec:
         storage:
