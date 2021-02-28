@@ -27,6 +27,9 @@ spec:
         existingClaim: home-assistant-pvc
     extraEnv:
       TZ: "America/New_York"
+    envFrom:
+    - secretRef:
+        name: home-assistant-secrets
     ingress:
       enabled: true
       annotations:
