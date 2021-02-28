@@ -1,4 +1,2 @@
 git:
   deployKeyBase64: "${HASS_DEPLOY_KEY_B64}"
-postgresql:
-  postgresqlPassword: "${HASS_DB_PASSWORD}"
