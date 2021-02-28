@@ -106,7 +106,7 @@ spec:
           mountPath: /root/.ssh/id_rsa
           subPath: id_rsa
     podAnnotations:
-      secret.reloader.stakater.com/reload: home-assistant-helm-values
+      secret.reloader.stakater.com/reload: home-assistant-secrets
   valuesFrom:
   - kind: Secret
     name: "home-assistant-helm-values"
