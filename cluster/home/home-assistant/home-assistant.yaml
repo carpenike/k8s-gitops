@@ -63,6 +63,7 @@ spec:
     mariadb:
       enabled: false
     postgresql:
+      existingSecret: home-assistant-postgresql-secret
       enabled: true
       persistence:
         enabled: true
