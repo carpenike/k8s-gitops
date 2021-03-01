@@ -60,7 +60,7 @@ spec:
     riot:
       image:
         repository: "vectorim/riot-web"
-        tag: v1.7.21
+        tag: v1.7.22
     coturn:
       image:
         repository: "instrumentisto/coturn"
