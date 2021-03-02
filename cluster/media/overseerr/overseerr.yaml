@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: overseerr
-      version: 2.0.1
+      version: 2.1.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,7 +20,7 @@ spec:
     controllerType: deployment
     image:
       repository: sctx/overseerr
-      tag: 1.20.0
+      tag: 1.20.1
       pullPolicy: Always
     env:
       TZ: "America/New_York"
