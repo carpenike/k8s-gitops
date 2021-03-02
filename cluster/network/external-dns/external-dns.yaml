@@ -21,15 +21,12 @@ spec:
     image:
       repository: bitnami/external-dns
       tag: 0.7.6-debian-10-r11
-    provider: rfc2136
-    rfc2136:
-      host: 10.20.0.20
-      port: 53
-      zone: holthome.net
-      tsigKeyname:
-      tsigSecretAlg:
-    extraArgs:
-      rfc2136-tsig-axfr:
+      provider: coredns
+      coredns:
+        etcdEndpoints: https://k8s.holthome.net:2379
+        etcdTLS:
+          enabled: true
+          secretName: coredns-etcd-secret
     policy: sync
     sources:
       - service
