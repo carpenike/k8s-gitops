@@ -63,7 +63,7 @@ spec:
     additionalVolumes:
     - name: media-nas
       persistentVolumeClaim:
-        claimName: nfs-tank-share-pvc
+        claimName: media-nfs-tank-share-pvc
     resources:
       requests:
         memory: 350Mi
