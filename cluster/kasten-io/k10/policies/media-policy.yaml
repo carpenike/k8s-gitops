@@ -3,7 +3,7 @@ apiVersion: config.kio.kasten.io/v1alpha1
 kind: Policy
 metadata:
   name: media-backups
-  namespace: kasten
+  namespace: kasten-io
 spec:
   comment: ""
   frequency: "@daily"
