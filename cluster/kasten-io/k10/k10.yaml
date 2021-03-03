@@ -36,6 +36,7 @@ spec:
         # scopes: "profile email"
         # usernameClaim: "email"
         # clientID: k10
+        # clientSecret: rPxrH43tdLht8YAQ3xD4TJQhBDypegjeXXYPdr5dD4
     clusterName: k8s
     ingress:
       create: true
