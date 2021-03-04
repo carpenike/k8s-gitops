@@ -1,9 +1,0 @@
-config:
-  sharedSecret: $POMERIUM_SHARED_SECRET
-  cookieSecret: $POMERIUM_COOKIE_SECRET
-authenticate:
-  idp:
-    provider: github
-    clientID: $POMERIUM_GITHUB_CLIENT_ID
-    clientSecret: $POMERIUM_GITHUB_CLIENT_SECRET
-    serviceAccount: $POMERIUM_GITHUB_SERVICE_ACCOUNT
