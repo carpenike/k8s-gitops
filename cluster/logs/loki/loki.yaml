@@ -84,37 +84,37 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "http-metrics"
     promtail:
-      enabled: false
-    #   image:
-    #     repository: grafana/promtail
-    #     tag: 2.1.0
-    #   serviceMonitor:
-    #     enabled: true
-    #   extraScrapeConfigs:
-    #   - job_name: syslog
-    #     syslog:
-    #       listen_address: 0.0.0.0:1514
-    #       idle_timeout: 60s
-    #       label_structured_data: true
-    #       labels:
-    #         job: "syslog"
-    #     relabel_configs:
-    #     - source_labels: ['__syslog_connection_ip_address']
-    #       target_label: 'ip_address'
-    #     - source_labels: ['__syslog_message_severity']
-    #       target_label: 'severity'
-    #     - source_labels: ['__syslog_message_facility']
-    #       target_label: 'facility'
-    #     - source_labels: ['__syslog_message_hostname']
-    #       target_label: 'host'
-    #     - source_labels: ['__syslog_message_app_name']
-    #       target_label: 'app'
-    #   syslogService:
-    #     enabled: true
-    #     type: LoadBalancer
-    #     port: 1514
-    #     externalIPs:
-    #     - 10.45.10.16
+      enabled: true
+      image:
+        repository: grafana/promtail
+        tag: 2.1.0
+      serviceMonitor:
+        enabled: true
+      extraScrapeConfigs:
+      - job_name: syslog
+        syslog:
+          listen_address: 0.0.0.0:1514
+          idle_timeout: 60s
+          label_structured_data: true
+          labels:
+            job: "syslog"
+        relabel_configs:
+        - source_labels: ['__syslog_connection_ip_address']
+          target_label: 'ip_address'
+        - source_labels: ['__syslog_message_severity']
+          target_label: 'severity'
+        - source_labels: ['__syslog_message_facility']
+          target_label: 'facility'
+        - source_labels: ['__syslog_message_hostname']
+          target_label: 'host'
+        - source_labels: ['__syslog_message_app_name']
+          target_label: 'app'
+      syslogService:
+        enabled: true
+        type: LoadBalancer
+        port: 1514
+        externalIPs:
+        - 10.45.10.16
   valuesFrom:
   - kind: Secret
     name: "loki-helm-values"
