@@ -128,7 +128,7 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "internal"
+        kubernetes.io/ingress.class: "nginx"
       hosts:
       - "grafana.holthome.net"
       tls:
