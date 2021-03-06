@@ -67,6 +67,8 @@ spec:
     - name: data
       persistentVolumeClaim:
         claimName: media-nfs-tank-share-pvc
+    podAnnotations:
+      cni.projectcalico.org/ipAddrs: [\"10.42.45.10\"]
     resources:
       requests:
         memory: 250Mi
