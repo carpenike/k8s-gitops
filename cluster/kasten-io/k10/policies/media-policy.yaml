@@ -1,54 +1,54 @@
-# ---
-# apiVersion: config.kio.kasten.io/v1alpha1
-# kind: Policy
-# metadata:
-#   name: media-backups
-#   namespace: kasten-io
-# spec:
-#   comment: ""
-#   frequency: "@daily"
-#   actions:
-#     - action: backup
-#       backupParameters:
-#         filters:
-#           includeResources: []
-#           excludeResources:
-#             - group: ""
-#               version: ""
-#               resource: persistentvolumeclaims
-#               name: media-nfs-tank-share-pvc
-#               label: []
-#         profile:
-#           namespace: kasten
-#           name: minio
-#     - action: export
-#       exportParameters:
-#         frequency: "@daily"
-#         migrationToken:
-#           name: ""
-#           namespace: ""
-#         profile:
-#           name: minio
-#           namespace: kasten
-#         receiveString: ""
-#         exportData:
-#           enabled: true
-#           overrides:
-#             - storageClassName: nfs
-#               enabled: false
-#       retention:
-#         daily: 0
-#         weekly: 0
-#         monthly: 0
-#         yearly: 0
-#   retention:
-#     daily: 7
-#     weekly: 4
-#     monthly: 12
-#     yearly: 7
-#   selector:
-#     matchExpressions:
-#       - key: k10.kasten.io/appNamespace
-#         operator: In
-#         values:
-#           - media
+---
+apiVersion: config.kio.kasten.io/v1alpha1
+kind: Policy
+metadata:
+  name: media-backups
+  namespace: kasten-io
+spec:
+  comment: ""
+  frequency: "@daily"
+  actions:
+    - action: backup
+      backupParameters:
+        filters:
+          includeResources: []
+          excludeResources:
+            - group: ""
+              version: ""
+              resource: persistentvolumeclaims
+              name: media-nfs-tank-share-pvc
+              label: []
+        profile:
+          namespace: kasten
+          name: minio
+    - action: export
+      exportParameters:
+        frequency: "@daily"
+        migrationToken:
+          name: ""
+          namespace: ""
+        profile:
+          name: minio
+          namespace: kasten
+        receiveString: ""
+        exportData:
+          enabled: true
+          overrides:
+            - storageClassName: nfs
+              enabled: false
+      retention:
+        daily: 0
+        weekly: 0
+        monthly: 0
+        yearly: 0
+  retention:
+    daily: 7
+    weekly: 4
+    monthly: 12
+    yearly: 7
+  selector:
+    matchExpressions:
+      - key: k10.kasten.io/appNamespace
+        operator: In
+        values:
+          - media
