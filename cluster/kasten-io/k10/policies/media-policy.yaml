@@ -18,6 +18,11 @@ spec:
               resource: persistentvolumeclaims
               name: media-nfs-tank-share-pvc
               label: []
+            - group: ""
+              version: ""
+              resource: persistentvolumeclaims
+              name: media-nfs-pictures-pvc
+              label: []
         profile:
           namespace: kasten
           name: minio
