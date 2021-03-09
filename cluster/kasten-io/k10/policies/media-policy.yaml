@@ -24,7 +24,7 @@ spec:
               name: media-nfs-pictures-pvc
               label: []
         profile:
-          namespace: kasten
+          namespace: kasten-io
           name: minio
     - action: export
       exportParameters:
@@ -34,7 +34,7 @@ spec:
           namespace: ""
         profile:
           name: minio
-          namespace: kasten
+          namespace: kasten-io
         receiveString: ""
         exportData:
           enabled: true
