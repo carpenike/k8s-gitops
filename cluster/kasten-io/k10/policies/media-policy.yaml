@@ -36,6 +36,7 @@ spec:
           name: minio
           namespace: kasten-io
         receiveString: ""
+        ignoreExceptions: true
         exportData:
           enabled: true
           overrides:
