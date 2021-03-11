@@ -23,6 +23,11 @@ spec:
               resource: persistentvolumeclaims
               name: media-nfs-pictures-pvc
               label: []
+            - group: ""
+              version: ""
+              resource: persistentvolumeclaims
+              name: plex-config-pvc
+              label: []
         profile:
           namespace: kasten-io
           name: minio
