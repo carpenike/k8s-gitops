@@ -60,9 +60,11 @@ spec:
       metadataDevice:
       osdsPerDevice: "1"
     nodes:
-    # - name: "node-0"
-    #   devices:
-    #   - name: "nvme0n1"
+    - name: "node-0"
+      devices:
+      - name: "sdb"
+      - name: "sdc"
+      - name: "sdd"
     - name: "node-1"
       devices:
       - name: "sdc"
