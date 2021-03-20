@@ -47,3 +47,7 @@ spec:
       - name: media-nas
         persistentVolumeClaim:
           claimName: media-nfs-tank-share-pvc
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
