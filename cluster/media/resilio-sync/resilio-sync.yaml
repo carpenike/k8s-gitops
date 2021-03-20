@@ -111,7 +111,6 @@ spec:
       - name: media
         persistentVolumeClaim:
           claimName: media-nfs-tank-share-pvc
-        readOnly: true
       # - name: backup
       #   persistentVolumeClaim:
       #     claimName: nfs-backups-pvc
