@@ -39,7 +39,7 @@ spec:
   accessModes:
     - ReadWriteMany
   claimRef:
-    namespace: default
+    namespace: media
     name: media-nfs-pictures-pvc
   storageClassName: nfs
   nfs:
