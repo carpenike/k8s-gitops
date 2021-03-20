@@ -23,6 +23,8 @@ spec:
       tag: version-2.7.2.1375
     env:
       TZ: "America/New_York"
+      PUID: "1000"
+      PGID: "1000"
     ingress:
       enabled: true
       annotations:
