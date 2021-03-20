@@ -54,7 +54,6 @@ spec:
           mountPath: /sync/pictures
         - name: media
           mountPath: /sync/media
-          readOnly: true
         # - name: backup
         #   mountPath: /sync/backup
         # - name: music
@@ -112,6 +111,7 @@ spec:
       - name: media
         persistentVolumeClaim:
           claimName: media-nfs-tank-share-pvc
+        readOnly: true
       # - name: backup
       #   persistentVolumeClaim:
       #     claimName: nfs-backups-pvc
