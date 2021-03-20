@@ -102,13 +102,13 @@ spec:
           claimName: resilio-sync-config-stefanie
       - name: home-ryan
         persistentVolumeClaim:
-          claimName: nfs-home-ryan-pvc
+          claimName: media-nfs-home-ryan-pvc
       - name: home-stefanie
         persistentVolumeClaim:
-          claimName: nfs-home-stefanie-pvc
+          claimName: media-nfs-home-stefanie-pvc
       - name: pictures
         persistentVolumeClaim:
-          claimName: nfs-pictures-pvc
+          claimName: media-nfs-pictures-pvc
       - name: media
         persistentVolumeClaim:
           claimName: media-nfs-tank-share-pvc
