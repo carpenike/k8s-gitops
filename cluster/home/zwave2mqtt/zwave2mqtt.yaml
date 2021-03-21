@@ -24,6 +24,8 @@ spec:
     env:
       TZ: "America/New_York"
       OZW_AUTO_UPDATE_CONFIG: true
+    securityContext:
+      privileged: true
     ingress:
       enabled: true
       annotations:
