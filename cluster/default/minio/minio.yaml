@@ -29,7 +29,7 @@ spec:
     mode: distributed
     replicas: 4
     persistence:
-      storageClass: longhorn
+      storageClass: rook-ceph-block
       size: 500Gi
     existingSecret: minio-secret
     ingress:
