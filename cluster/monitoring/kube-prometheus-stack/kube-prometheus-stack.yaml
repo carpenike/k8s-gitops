@@ -17,6 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    fullnameOverride: x
     # defaultRules:
     #   rules:
     #     kubeApiserverAvailability: false
