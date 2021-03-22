@@ -24,10 +24,3 @@ spec:
       pluginTolerations:
       - key: "node-role.kubernetes.io/master"
         operator: "Exists"
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 1000m
-        memory: 256Mi
