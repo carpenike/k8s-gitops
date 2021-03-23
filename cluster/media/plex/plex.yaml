@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: plex
-      version: 2.3.3
+      version: 3.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -19,32 +19,45 @@ spec:
       interval: 5m
   values:
     image:
-      repository: plexinc/pms-docker
-      tag: plexpass
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-    timezone: "America/New_York"
-    allowedNetworks:
-      - 10.42.0.0/16
-    advertiseIp: "http://10.45.100.100:32400"
-    serviceTCP:
+      repository: ghcr.io/k8s-at-home/plex
+      tag: v1.22.0.4163-d8c4875dd
+    env:
+      TZ: "America/New_York"
+    podSecurityContext:
+      supplementalGroups:
+      - 44
+      - 109
+    service:
+      enabled: true
       type: LoadBalancer
       externalIPs:
-        - 10.45.100.100
+      - 10.45.100.100
       externalTrafficPolicy: Local
-    serviceUDP:
-      type: LoadBalancer
-      externalIPs:
-        - 10.45.100.100
-      externalTrafficPolicy: Local
+      port:
+        port: 32400
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+      hosts:
+      - host: plex.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "plex.holthome.net"
     persistence:
-      transcode:
-        enabled: false
-      data:
-        enabled: true
-        claimName: media-nfs-tank-share-pvc
       config:
-        claimName: plex-config-pvc
+        enabled: true
+        existingClaim: plex-config-pvc
+    additionalVolumeMounts:
+    - name: media-nas
+      mountPath: "/media"
+    additionalVolumes:
+    - name: media-nas
+      persistentVolumeClaim:
+        claimName: media-nfs-tank-share-pvc
     # nodeSelector:
     #   app: "nvidia-gpu-plugin"
     resources:
