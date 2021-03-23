@@ -53,7 +53,7 @@ spec:
         existingClaim: plex-config-pvc
     additionalVolumeMounts:
     - name: media-nas
-      mountPath: "/media"
+      mountPath: "/data"
     additionalVolumes:
     - name: media-nas
       persistentVolumeClaim:
