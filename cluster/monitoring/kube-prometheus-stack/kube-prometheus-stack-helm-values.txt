@@ -30,16 +30,3 @@ prometheus:
       static_configs:
       - targets:
         - home-assistant.home.svc:8123
-    - job_name: k10
-      scrape_interval: 15s
-      honor_labels: true
-      scheme: http
-      metrics_path: '/k10/prometheus/federate'
-      params:
-        'match[]':
-          - '{__name__=~"jobs.*"}'
-      static_configs:
-        - targets:
-          - 'prometheus-server.kasten-io.svc.cluster.local'
-          labels:
-            app: "k10"
