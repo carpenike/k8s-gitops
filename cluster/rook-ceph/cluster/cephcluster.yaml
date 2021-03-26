@@ -67,7 +67,9 @@ spec:
       - name: "sdd"
     - name: "node-1"
       devices:
+      - name: "sdb"
       - name: "sdc"
+      - name: "sdd"
     - name: "node-2"
       devices:
       - name: "sdd"
