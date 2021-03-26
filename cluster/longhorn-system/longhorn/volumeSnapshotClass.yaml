@@ -1,9 +1,9 @@
----
-kind: VolumeSnapshotClass
-apiVersion: snapshot.storage.k8s.io/v1beta1
-metadata:
-  name: longhorn
-  annotations:
-    k10.kasten.io/is-snapshot-class: "true"
-driver: driver.longhorn.io
-deletionPolicy: Retain
+# ---
+# kind: VolumeSnapshotClass
+# apiVersion: snapshot.storage.k8s.io/v1beta1
+# metadata:
+#   name: longhorn
+#   annotations:
+#     k10.kasten.io/is-snapshot-class: "true"
+# driver: driver.longhorn.io
+# deletionPolicy: Retain
