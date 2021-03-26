@@ -64,6 +64,8 @@ spec:
           - prom-alert.holthome.net
           secretName: alertmanager-cert
       config:
+        global:
+          resolve_timeout: 5m
         route:
           # group_by: ['alertname', 'job']
           # group_wait: 30s
@@ -74,12 +76,22 @@ spec:
           #   - match:
           #       alertname: Watchdog
           #     receiver: 'null'
-        receivers:
-        - name: 'null'
-        - name: 'alertmanager-bot'
-          webhook_configs:
-          - send_resolved: true
-            url: http://alertmanager-bot:8080
+          routes:
+            - match:
+                alertname: Watchdog
+              receiver: 'null'
+            - receiver: 'pagerduty'
+              match:
+                severity: critical
+              continue: true
+        inhibit_rules:
+        - source_match:
+            severity: 'critical'
+          target_match:
+            severity: 'warning'
+          # Apply inhibition if the alertname is the same.
+          equal: ['alertname', 'namespace']
+        templates: ["*.tmpl"]
       templateFiles:
         pagerduty-custom.tmpl: |-
           {{- define "pagerduty.custom.description" -}}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}{{- end -}}
