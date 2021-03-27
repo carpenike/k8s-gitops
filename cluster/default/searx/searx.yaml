@@ -22,7 +22,7 @@ spec:
       type: Recreate
     image:
       repository: searx/searx
-      tag: 0.18.0
+      tag: 1.0.0
       pullPolicy: IfNotPresent
     service:
       annotations:
