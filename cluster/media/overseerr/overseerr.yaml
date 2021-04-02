@@ -20,7 +20,7 @@ spec:
     controllerType: deployment
     image:
       repository: sctx/overseerr
-      tag: 1.21.1
+      tag: 1.22.0
       pullPolicy: Always
     env:
       TZ: "America/New_York"
