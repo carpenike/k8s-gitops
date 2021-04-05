@@ -20,7 +20,7 @@ spec:
     controllerType: deployment
     image:
       repository: flaresolverr/flaresolverr
-      tag: v1.2.3
+      tag: v1.2.5
       pullPolicy: Always
     env:
       TZ: "America/New_York"
