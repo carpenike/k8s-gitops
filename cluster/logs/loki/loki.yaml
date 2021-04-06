@@ -21,7 +21,7 @@ spec:
     loki:
       image:
         repository: grafana/loki
-        tag: 2.2.0
+        tag: 2.2.1
       replicas: 3
       persistence:
         enabled: false
