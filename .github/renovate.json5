@@ -75,15 +75,20 @@
         "ghcr.io/k8s-at-home/plex"
       ]
     },
-    // Enable auto-merge
+    // enable auto-merge
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "automerge": true,
+      "automergeType": "branch",
       "requiredStatusChecks": null,
-      "updateTypes": ["minor", "patch"],
-      "packageNames": [
-        "ghcr.io/k8s-at-home/ombi",
-        "ghcr.io/k8s-at-home/jackett"
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchPackageNames": [
+        "flaresolverr/flaresolverr",
+        "ghcr.io/k8s-at-home/jackett",
+        "ghcr.io/k8s-at-home/plex",
+        "ghcr.io/k8s-at-home/prowlarr",
+        "ghcr.io/k8s-at-home/radarr",
+        "ghcr.io/k8s-at-home/sonarr"
       ]
     }
   ]
