@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: gitea/gitea
-      tag: 1.13.6
+      tag: 1.13.7
       pullPolicy: IfNotPresent
     persistence:
       enabled: true
