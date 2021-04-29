@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: "influxdb"
-      tag: "2.0.4"
+      tag: "2.0.6"
     service:
       type: LoadBalancer
       externalIPs:
