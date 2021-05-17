@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: bitnami/external-dns
-      tag: 0.7.6-debian-10-r11
+      tag: 0.8.0-debian-10-r11
     provider: coredns
     coredns:
       etcdEndpoints: https://k8s.holthome.net:2379
