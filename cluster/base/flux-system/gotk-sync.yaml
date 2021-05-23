@@ -8,9 +8,7 @@ spec:
   interval: 1m0s
   ref:
     branch: master
-  secretRef:
-    name: flux-system
-  url: ssh://git@github.com/carpenike/k8s-gitops
+  url: https://github.com/carpenike/k8s-gitops
   ignore: |
     # exclude all
     /*
