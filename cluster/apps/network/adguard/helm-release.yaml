@@ -38,11 +38,17 @@ spec:
     ingress:
       enabled: true
       annotations:
+        external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
+        # nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start"
       hosts:
-      - adguard.holthome.net
+      - host: adguard.holthome.net
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
       - hosts:
         - adguard.holthome.net
@@ -77,210 +83,210 @@ spec:
       limits:
         memory: 750Mi
     ################ Adguard Home Config ###########################################
-    configAsCode:
-      enabled: true
-      config:
-        bind_host: 0.0.0.0
-        bind_port: 3000
-        users: []
-        http_proxy: ""
-        language: ""
-        rlimit_nofile: 0
-        debug_pprof: false
-        web_session_ttl: 720
-        dns:
-          bind_host: 0.0.0.0
-          port: 53
-          statistics_interval: 7
-          querylog_enabled: true
-          querylog_file_enabled: true
-          querylog_interval: 7
-          querylog_size_memory: 1000
-          anonymize_client_ip: false
-          protection_enabled: true
-          blocking_mode: default
-          blocking_ipv4: ""
-          blocking_ipv6: ""
-          blocked_response_ttl: 10
-          parental_block_host: family-block.dns.adguard.com
-          safebrowsing_block_host: standard-block.dns.adguard.com
-          ratelimit: 0
-          ratelimit_whitelist: []
-          refuse_any: true
-          upstream_dns:
-          - '[/holthome.net/]10.45.10.53'
-          - '[/ryanholt.net/]10.45.10.53'
-          # - '[/bergandbeans.com/]10.1.1.2'
-          # - '[/network.elcarpenter.com/]10.1.1.2'
-          # - '[/vpn.elcarpenter.com/]1.1.1.1'
-          # - '[/device.elcarpenter.com/]1.1.1.1'
-          # - '[/cluster.elcarpenter.com/]10.1.1.2'
-          # - '[/news-us.newsgroup.ninja/]8.8.8.8'
-          - https://1.1.1.1/dns-query
-          - https://1.0.0.1/dns-query
-          bootstrap_dns:
-          - 1.1.1.1:53
-          - 1.0.0.1:53
-          all_servers: false
-          fastest_addr: true
-          allowed_clients: []
-          disallowed_clients: []
-          blocked_hosts: []
-          cache_size: 4194304
-          cache_ttl_min: 0
-          cache_ttl_max: 0
-          bogus_nxdomain: []
-          aaaa_disabled: false
-          enable_dnssec: false
-          edns_client_subnet: true
-          filtering_enabled: true
-          filters_update_interval: 1
-          parental_enabled: false
-          safesearch_enabled: false
-          safebrowsing_enabled: true
-          safebrowsing_cache_size: 1048576
-          safesearch_cache_size: 1048576
-          parental_cache_size: 1048576
-          cache_time: 30
-          rewrites: []
-          blocked_services:
-          - tiktok
-        tls:
-          enabled: false
-          server_name: ""
-          force_https: false
-          port_https: 443
-          port_dns_over_tls: 853
-          allow_unencrypted_doh: false
-          strict_sni_check: false
-          certificate_chain: ""
-          private_key: ""
-          certificate_path: ""
-          private_key_path: ""
-        filters:
-        - enabled: true
-          url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
-          name: AdGuard Simplified Domain Names filter
-          id: 1
-        - enabled: true
-          url: https://adaway.org/hosts.txt
-          name: AdAway
-          id: 2
-        - enabled: true
-          url: https://hosts-file.net/ad_servers.txt
-          name: hpHosts - Ad and Tracking servers only
-          id: 3
-        - enabled: true
-          url: https://www.malwaredomainlist.com/hostslist/hosts.txt
-          name: MalwareDomainList.com Hosts List
-          id: 4
-        - enabled: true
-          url: https://dbl.oisd.nl/
-          name: Domain Blocklists
-          id: 1585613910
-        whitelist_filters: []
-        user_rules:
-        - '@@||md.us^                         # Maryland Schools'
-        - '@@||r20.rs6.net^'
-        - '@@||analytics.archive.org^         # Internet Archive because they need the stats'
-        - '@@||chase.com^                     # Credit card company'
-        - '@@||chasecdn.com^                  # Chases content delivery network'
-        - '@@||microsoftonline.us^            # Microsoft Login'
-        - '@@||microsoftonline.com^           # Microsoft Login'
-        - '@@||umgc.edu^                      # College'
-        - '@@||umuc.edu^                      # College'
-        dhcp:
-          enabled: false
-          interface_name: ""
-          gateway_ip: ""
-          subnet_mask: ""
-          range_start: ""
-          range_end: ""
-          lease_duration: 86400
-          icmp_timeout_msec: 1000
-        clients:
-        # available tags: https://github.com/AdguardTeam/AdGuardHome/wiki/Hosts-Blocklists#ctag
-        - name: google-home-kitchendisplay
-          tags:
-          - os_android
-          - device_tablet
-          - user_child
-          ids:
-          - 10.30.50.114
-          use_global_settings: false
-          filtering_enabled: true
-          parental_enabled: true
-          safesearch_enabled: true
-          safebrowsing_enabled: true
-          use_global_blocked_services: true
-        # - name: PCAmberWork
-        #   tags:
-        #   - device_laptop
-        #   - os_windows
-        #   - user_regular
-        #   ids:
-        #   - 10.17.1.81
-        #   use_global_settings: true
-        #   filtering_enabled: false
-        #   parental_enabled: false
-        #   safesearch_enabled: false
-        #   safebrowsing_enabled: false
-        #   use_global_blocked_services: true
-        #   blocked_services: []
-        #   upstreams:
-        #   - '[/google-analytics.com/]1.1.1.1'
-        #   - 1.1.1.1
-        #   - 8.8.8.8
-        #   - 1.0.0.1
-        #   - 8.8.4.4
-        # - name: CellAmber
-        #   tags:
-        #   - device_phone
-        #   - os_android
-        #   - user_regular
-        #   ids:
-        #   - 10.17.1.80
-        #   use_global_settings: true
-        #   filtering_enabled: false
-        #   parental_enabled: false
-        #   safesearch_enabled: false
-        #   safebrowsing_enabled: false
-        #   use_global_blocked_services: true
-        #   blocked_services: []
-        #   upstreams: []
-        # - name: PCDrewDesktop
-        #   tags:
-        #   - device_pc
-        #   - os_windows
-        #   - user_admin
-        #   ids:
-        #   - 10.10.1.108
-        #   use_global_settings: true
-        #   filtering_enabled: false
-        #   parental_enabled: false
-        #   safesearch_enabled: false
-        #   safebrowsing_enabled: false
-        #   use_global_blocked_services: true
-        #   blocked_services: []
-        #   upstreams: []
-        # - name: Media Server
-        #   tags: []
-        #   ids:
-        #   - 10.10.1.60
-        #   use_global_settings: true
-        #   filtering_enabled: false
-        #   parental_enabled: false
-        #   safesearch_enabled: false
-        #   safebrowsing_enabled: false
-        #   use_global_blocked_services: true
-        #   blocked_services: []
-        #   upstreams: []
-        log_compress: false
-        log_localtime: false
-        log_max_backups: 0
-        log_max_size: 100
-        log_max_age: 3
-        log_file: ""
-        verbose: false
-        schema_version: 6
-    ##################### End Config ###############################################
+    # configAsCode:
+    #   enabled: true
+    #   config:
+    #     bind_host: 0.0.0.0
+    #     bind_port: 3000
+    #     users: []
+    #     http_proxy: ""
+    #     language: ""
+    #     rlimit_nofile: 0
+    #     debug_pprof: false
+    #     web_session_ttl: 720
+    #     dns:
+    #       bind_host: 0.0.0.0
+    #       port: 53
+    #       statistics_interval: 7
+    #       querylog_enabled: true
+    #       querylog_file_enabled: true
+    #       querylog_interval: 7
+    #       querylog_size_memory: 1000
+    #       anonymize_client_ip: false
+    #       protection_enabled: true
+    #       blocking_mode: default
+    #       blocking_ipv4: ""
+    #       blocking_ipv6: ""
+    #       blocked_response_ttl: 10
+    #       parental_block_host: family-block.dns.adguard.com
+    #       safebrowsing_block_host: standard-block.dns.adguard.com
+    #       ratelimit: 0
+    #       ratelimit_whitelist: []
+    #       refuse_any: true
+    #       upstream_dns:
+    #       - '[/holthome.net/]10.45.10.53'
+    #       - '[/ryanholt.net/]10.45.10.53'
+    #       # - '[/bergandbeans.com/]10.1.1.2'
+    #       # - '[/network.elcarpenter.com/]10.1.1.2'
+    #       # - '[/vpn.elcarpenter.com/]1.1.1.1'
+    #       # - '[/device.elcarpenter.com/]1.1.1.1'
+    #       # - '[/cluster.elcarpenter.com/]10.1.1.2'
+    #       # - '[/news-us.newsgroup.ninja/]8.8.8.8'
+    #       - https://1.1.1.1/dns-query
+    #       - https://1.0.0.1/dns-query
+    #       bootstrap_dns:
+    #       - 1.1.1.1:53
+    #       - 1.0.0.1:53
+    #       all_servers: false
+    #       fastest_addr: true
+    #       allowed_clients: []
+    #       disallowed_clients: []
+    #       blocked_hosts: []
+    #       cache_size: 4194304
+    #       cache_ttl_min: 0
+    #       cache_ttl_max: 0
+    #       bogus_nxdomain: []
+    #       aaaa_disabled: false
+    #       enable_dnssec: false
+    #       edns_client_subnet: true
+    #       filtering_enabled: true
+    #       filters_update_interval: 1
+    #       parental_enabled: false
+    #       safesearch_enabled: false
+    #       safebrowsing_enabled: true
+    #       safebrowsing_cache_size: 1048576
+    #       safesearch_cache_size: 1048576
+    #       parental_cache_size: 1048576
+    #       cache_time: 30
+    #       rewrites: []
+    #       blocked_services:
+    #       - tiktok
+    #     tls:
+    #       enabled: false
+    #       server_name: ""
+    #       force_https: false
+    #       port_https: 443
+    #       port_dns_over_tls: 853
+    #       allow_unencrypted_doh: false
+    #       strict_sni_check: false
+    #       certificate_chain: ""
+    #       private_key: ""
+    #       certificate_path: ""
+    #       private_key_path: ""
+    #     filters:
+    #     - enabled: true
+    #       url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+    #       name: AdGuard Simplified Domain Names filter
+    #       id: 1
+    #     - enabled: true
+    #       url: https://adaway.org/hosts.txt
+    #       name: AdAway
+    #       id: 2
+    #     - enabled: true
+    #       url: https://hosts-file.net/ad_servers.txt
+    #       name: hpHosts - Ad and Tracking servers only
+    #       id: 3
+    #     - enabled: true
+    #       url: https://www.malwaredomainlist.com/hostslist/hosts.txt
+    #       name: MalwareDomainList.com Hosts List
+    #       id: 4
+    #     - enabled: true
+    #       url: https://dbl.oisd.nl/
+    #       name: Domain Blocklists
+    #       id: 1585613910
+    #     whitelist_filters: []
+    #     user_rules:
+    #     - '@@||md.us^                         # Maryland Schools'
+    #     - '@@||r20.rs6.net^'
+    #     - '@@||analytics.archive.org^         # Internet Archive because they need the stats'
+    #     - '@@||chase.com^                     # Credit card company'
+    #     - '@@||chasecdn.com^                  # Chases content delivery network'
+    #     - '@@||microsoftonline.us^            # Microsoft Login'
+    #     - '@@||microsoftonline.com^           # Microsoft Login'
+    #     - '@@||umgc.edu^                      # College'
+    #     - '@@||umuc.edu^                      # College'
+    #     dhcp:
+    #       enabled: false
+    #       interface_name: ""
+    #       gateway_ip: ""
+    #       subnet_mask: ""
+    #       range_start: ""
+    #       range_end: ""
+    #       lease_duration: 86400
+    #       icmp_timeout_msec: 1000
+    #     clients:
+    #     # available tags: https://github.com/AdguardTeam/AdGuardHome/wiki/Hosts-Blocklists#ctag
+    #     - name: google-home-kitchendisplay
+    #       tags:
+    #       - os_android
+    #       - device_tablet
+    #       - user_child
+    #       ids:
+    #       - 10.30.50.114
+    #       use_global_settings: false
+    #       filtering_enabled: true
+    #       parental_enabled: true
+    #       safesearch_enabled: true
+    #       safebrowsing_enabled: true
+    #       use_global_blocked_services: true
+    #     # - name: PCAmberWork
+    #     #   tags:
+    #     #   - device_laptop
+    #     #   - os_windows
+    #     #   - user_regular
+    #     #   ids:
+    #     #   - 10.17.1.81
+    #     #   use_global_settings: true
+    #     #   filtering_enabled: false
+    #     #   parental_enabled: false
+    #     #   safesearch_enabled: false
+    #     #   safebrowsing_enabled: false
+    #     #   use_global_blocked_services: true
+    #     #   blocked_services: []
+    #     #   upstreams:
+    #     #   - '[/google-analytics.com/]1.1.1.1'
+    #     #   - 1.1.1.1
+    #     #   - 8.8.8.8
+    #     #   - 1.0.0.1
+    #     #   - 8.8.4.4
+    #     # - name: CellAmber
+    #     #   tags:
+    #     #   - device_phone
+    #     #   - os_android
+    #     #   - user_regular
+    #     #   ids:
+    #     #   - 10.17.1.80
+    #     #   use_global_settings: true
+    #     #   filtering_enabled: false
+    #     #   parental_enabled: false
+    #     #   safesearch_enabled: false
+    #     #   safebrowsing_enabled: false
+    #     #   use_global_blocked_services: true
+    #     #   blocked_services: []
+    #     #   upstreams: []
+    #     # - name: PCDrewDesktop
+    #     #   tags:
+    #     #   - device_pc
+    #     #   - os_windows
+    #     #   - user_admin
+    #     #   ids:
+    #     #   - 10.10.1.108
+    #     #   use_global_settings: true
+    #     #   filtering_enabled: false
+    #     #   parental_enabled: false
+    #     #   safesearch_enabled: false
+    #     #   safebrowsing_enabled: false
+    #     #   use_global_blocked_services: true
+    #     #   blocked_services: []
+    #     #   upstreams: []
+    #     # - name: Media Server
+    #     #   tags: []
+    #     #   ids:
+    #     #   - 10.10.1.60
+    #     #   use_global_settings: true
+    #     #   filtering_enabled: false
+    #     #   parental_enabled: false
+    #     #   safesearch_enabled: false
+    #     #   safebrowsing_enabled: false
+    #     #   use_global_blocked_services: true
+    #     #   blocked_services: []
+    #     #   upstreams: []
+    #     log_compress: false
+    #     log_localtime: false
+    #     log_max_backups: 0
+    #     log_max_size: 100
+    #     log_max_age: 3
+    #     log_file: ""
+    #     verbose: false
+    #     schema_version: 6
+    # ##################### End Config ###############################################
