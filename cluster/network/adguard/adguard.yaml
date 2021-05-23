@@ -25,12 +25,14 @@ spec:
       config:
         enabled: false
         size: 10Mi
-        storageClass: longhorn
+        storageClass: rook-ceph
+        accessMode: ReadWriteOnce
       work:
         enabled: true
         size: 50Gi
         skipUninstall: true
-        storageClass: longhorn
+        storageClass: rook-ceph
+        accessMode: ReadWriteOnce
     timezone: "America/New_York"
     replicas: 1
     ingress:
