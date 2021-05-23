@@ -11,5 +11,5 @@ resources:
 - logs
 - media
 - monitoring
-- networking
-- system-upgrade
+- network
+# - system-upgrade
