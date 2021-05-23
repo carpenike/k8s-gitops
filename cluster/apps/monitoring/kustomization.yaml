@@ -1,0 +1,12 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- alertmanager-bot
+- botkube
+- grafana
+- influxdb
+- kube-prometheus-stack
+- snmp-exporter
+- speedtest-prometheus
+- thanos

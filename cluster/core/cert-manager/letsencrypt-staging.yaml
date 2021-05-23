@@ -1,0 +1,39 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: ryan@ryanholt.net
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector:
+        dnsZones:
+        - "holthome.net"
+      dns01:
+        azuredns:
+          clientID: 3d34c319-a275-4253-beb9-2af0c4f4a845
+          clientSecretSecretRef:
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: 78c9dcb6-b6af-4d0b-b416-6859e93af9ff
+          tenantID: ff2dff15-a00a-4491-a57e-48a7b696b0a8
+          resourceGroupName: dns-services
+          hostedZoneName: holthome.net
+          environment: AzurePublicCloud
+    - selector:
+        dnsZones:
+        - "ryanholt.net"
+      dns01:
+        azuredns:
+          clientID: 3d34c319-a275-4253-beb9-2af0c4f4a845
+          clientSecretSecretRef:
+            name: azuredns-config
+            key: client-secret
+          subscriptionID: 78c9dcb6-b6af-4d0b-b416-6859e93af9ff
+          tenantID: ff2dff15-a00a-4491-a57e-48a7b696b0a8
+          resourceGroupName: dns-services
+          hostedZoneName: ryanholt.net
+          environment: AzurePublicCloud
