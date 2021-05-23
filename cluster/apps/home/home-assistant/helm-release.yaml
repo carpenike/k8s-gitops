@@ -36,7 +36,7 @@ spec:
         external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
       - host: ha.holthome.net
         paths:
@@ -90,7 +90,7 @@ spec:
             nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
             nginx.ingress.kubernetes.io/proxy-body-size: "0"
             kubernetes.io/tls-acme: "true"
-            cert-manager.io/cluster-issuer: letsencrypt-prod
+            cert-manager.io/cluster-issuer: letsencrypt-production
           hosts:
           - host: ha-vscode.holthome.net
             paths:

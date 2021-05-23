@@ -42,7 +42,7 @@
 #         external-dns.alpha.kubernetes.io/target: 10.20.0.2
 #         kubernetes.io/ingress.class: "nginx"
 #         kubernetes.io/tls-acme: "true"
-#         cert-manager.io/cluster-issuer: "letsencrypt-prod"
+#         cert-manager.io/cluster-issuer: "letsencrypt-production"
 #       hosts:
 #         synapse: matrix.ryanholt.net
 #         riot: element.ryanholt.net

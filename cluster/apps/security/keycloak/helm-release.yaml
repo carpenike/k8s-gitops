@@ -31,7 +31,7 @@ spec:
       annotations:
         kubernetes.io/ingress.class: nginx
         kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/cluster-issuer: letsencrypt-production
       rules:
         - host: keycloak.holthome.net
           paths:

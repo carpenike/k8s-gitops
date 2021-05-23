@@ -13,5 +13,5 @@ spec:
   - 'ryanholt.net'
   - '*.ryanholt.net'
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt-production
     kind: ClusterIssuer
