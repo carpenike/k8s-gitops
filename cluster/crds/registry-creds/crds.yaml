@@ -1,0 +1,32 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: registry-creds-source
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://github.com/alexellis/registry-creds/tree/master/config/crd
+  ref:
+    tag: v0.2.7
+  ignore: |
+    # exclude all
+    /*
+    # include deploy crds dir
+    !/config/crd/bases/ops.alexellis.io_clusterpullsecrets.yaml
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: registry-creds-crds
+  namespace: flux-system
+spec:
+  interval: 15m
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: registry-creds-source
+  healthChecks:
+  - apiVersion: apiextensions.k8s.io/v1beta1
+    kind: CustomResourceDefinition
+    name: clusterpullsecrets.ops.alexellis.io
