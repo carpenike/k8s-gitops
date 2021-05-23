@@ -12,4 +12,5 @@ resources:
 - media
 - monitoring
 - network
+- security
 # - system-upgrade
