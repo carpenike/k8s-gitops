@@ -11,6 +11,6 @@ resources:
 - monica
 # - nextcloud
 - searx
-- step-issuer
+# - step-issuer
 - tautulli
 - teedy
