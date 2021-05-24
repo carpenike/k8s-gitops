@@ -27,6 +27,7 @@ spec:
       supplementalGroups:
       - 44
       - 109
+      - 100
     service:
       enabled: true
       type: LoadBalancer
@@ -68,3 +69,21 @@ spec:
       requests:
         cpu: 763m
         memory: 5009Mi
+    addons:
+      promtail:
+        enabled: true
+        image:
+          repository: grafana/promtail
+          tag: 2.2.1
+        loki: http://loki.logs.svc.cluster.local:3100/loki/api/v1/push
+        logs:
+        - name: promtail/plex
+          path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
+        - name: promtail/plex/plugins
+          path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        securityContext:
+          runAsUser: 0
