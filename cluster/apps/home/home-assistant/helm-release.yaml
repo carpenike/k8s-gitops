@@ -103,9 +103,6 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
-        - name: deploykey
-          mountPath: /root/.ssh/id_rsa
-          subPath: id_rsa
     podAnnotations:
       secret.reloader.stakater.com/reload: home-assistant-secrets
   valuesFrom:
