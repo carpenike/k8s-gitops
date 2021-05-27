@@ -10,13 +10,14 @@ spec:
     spec:
       # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
-      version: 16.1.0
+      version: 16.0.1
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
         namespace: flux-system
       interval: 5m
   values:
+    fullnameOverride: x
     # defaultRules:
     #   rules:
     #     kubeApiserverAvailability: false
