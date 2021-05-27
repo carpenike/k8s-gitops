@@ -23,7 +23,7 @@ spec:
         image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.4
       externalResizer:
         enabled: true
-        image: k8s.gcr.io/sig-storage/csi-resizer:v1.0.1
+        image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
       externalSnapshotter:
         enabled: true
         image: k8s.gcr.io/sig-storage/csi-snapshotter:v4.1.1
