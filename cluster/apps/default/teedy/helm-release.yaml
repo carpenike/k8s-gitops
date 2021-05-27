@@ -65,27 +65,27 @@ spec:
       persistence:
         enabled: true
         storageClass: rook-ceph
-    additionalContainers:
-    - name: docs-importer
-      image: sismics/docs-importer:latest
-      imagePullPolicy: Always
-      env:
-      - name: TEEDY_TAG
-        value: "9fdc3144-7fdf-46a9-819e-363ef2f4032f"
-      - name: TEEDY_ADDTAGS
-        value: "false"
-      - name: TEEDY_LANG
-        value: "eng"
-      - name: TEEDY_URL
-        value: "http://teedy:8080"
-      - name: TEEDY_USERNAME
-        value: "importer"
-      - name: TEEDY_PASSWORD
-        value: "importerpass"
-      volumeMounts:
-      - mountPath: /import
-        name: media
-        subPath: scans/import
+    # additionalContainers:
+    # - name: docs-importer
+    #   image: sismics/docs-importer:latest
+    #   imagePullPolicy: Always
+    #   env:
+    #   - name: TEEDY_TAG
+    #     value: "9fdc3144-7fdf-46a9-819e-363ef2f4032f"
+    #   - name: TEEDY_ADDTAGS
+    #     value: "false"
+    #   - name: TEEDY_LANG
+    #     value: "eng"
+    #   - name: TEEDY_URL
+    #     value: "http://teedy:8080"
+    #   - name: TEEDY_USERNAME
+    #     value: "importer"
+    #   - name: TEEDY_PASSWORD
+    #     value: "importerpass"
+    #   volumeMounts:
+    #   - mountPath: /import
+    #     name: media
+    #     subPath: scans/import
 
     # podSecurityContext:
     #   runAsUser: 1000
