@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
   name: s3-sync
 spec:
-  schedule: "0 */12 * * *"
+  schedule: "0 */1 * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
