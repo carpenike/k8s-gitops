@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: minio/minio
-      tag: RELEASE.2020-11-10T21-02-24Z
+      tag: RELEASE.2020-12-29T23-29-29Z
     mcImage:
       repository: minio/mc
       tag: RELEASE.2020-10-03T02-54-56Z
