@@ -1,37 +1,45 @@
-name: lint
+---
 
-on:
+name: Lint
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
   push:
     branches:
-    - main
+    - master
+  pull_request:
 
 jobs:
-  lint-yaml:
-    runs-on:
-    - ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+  yaml:
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
-
     - name: Lint YAML
       uses: ibiqlik/action-yamllint@v3
       with:
         file_or_dir: "./cluster"
         config_file: "./.github/yamllint.config.yaml"
 
-  lint-shell:
-    runs-on:
-    - ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+  bash:
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
-
-    - name: Lint shell scripts
+    - name: Lint Hack Scripts
       uses: reviewdog/action-shellcheck@v1
       with:
         path: "./hack"
         level: "error"
+
+  # ansible:
+  #   runs-on:
+  #   - ubuntu-20.04
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       fetch-depth: 1
+  #   - name: Lint Ansible Playbooks
+  #     uses: ansible/ansible-lint-action@master

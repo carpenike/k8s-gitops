@@ -1,39 +1,38 @@
-name: renovate-helmrelease-schedule
+---
 
-on:
+name: Schedule - Renovate Helm Releases
+
+on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
-  - cron: "0 * * * *"
+  - cron: '0 */12 * * *'
 
 jobs:
-  renovate-helmrelease:
-    runs-on: ubuntu-latest
+  renovate-helm-releases:
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 1
 
-    - name: Install yq
-      run: |
-        mkdir -p "${GITHUB_WORKSPACE}/bin"
-        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
-        curl -sL -o "${GITHUB_WORKSPACE}/bin/yq" https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
-        chmod +x "${GITHUB_WORKSPACE}/bin/yq"
-    - name: Create HelmRelease annotations
-      run: ./.github/scripts/create-helmrelease-annotations.sh
+    - name: Renovate Helm Releases
+      uses: k8s-at-home/renovate-helm-releases@v1
+      with:
+        cluster-path: "./cluster"
 
-    - name: Create pull request for HelmRelease annotations
+    - name: Create pull request for renovatebot helm-release annotations
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        branch: helm-release-annotations
+        branch: renovate-annotations
         delete-branch: true
-        title: "Update HelmRelease annotations for Renovate [ci-skip]"
+        title: "chore(deps): update renovate annotations"
         signoff: true
         committer: "Ryan Holt <carpenike@users.noreply.github.com>"
         author: "Ryan Holt <carpenike@users.noreply.github.com>"
         assignees: "carpenike"
-        commit-message: "Update HelmRelease annotations for Renovate [ci-skip]"
+        commit-message: "chore(deps): update renovate annotations"
         body: |
-          Add comment annotations to HelmReleases in order for Renovate to pick up new versions of Helm charts
-        labels: renovate/helm-release-annotations
+          Update HelmReleases inorder for Renovate to pick up new versions of Helm charts
+        labels: renovate/annotations
