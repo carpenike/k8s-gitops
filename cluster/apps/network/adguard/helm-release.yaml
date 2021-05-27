@@ -89,7 +89,7 @@ spec:
         # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       hosts:
       # - host: "dns01.network.${SECRET_DOMAIN}"
-      - host: adguard.holthome.net  
+      - host: adguard.holthome.net
         paths:
         - path: /
           pathType: Prefix

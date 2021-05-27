@@ -11,4 +11,3 @@ resources:
 - speedtest-prometheus
 - thanos
 - s3-sync
-

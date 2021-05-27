@@ -61,5 +61,5 @@ spec:
           enable: false
         part_size: 0
   valuesFrom:
-  - kind: Secret
-    name: "thanos-helm-values"
+    - kind: Secret
+      name: "thanos-helm-values"
