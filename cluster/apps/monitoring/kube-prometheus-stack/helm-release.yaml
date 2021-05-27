@@ -317,7 +317,7 @@ spec:
                 requests:
                   storage: 10Gi
         thanos:
-          image: quay.io/thanos/thanos:v0.17.2
+          image: quay.io/thanos/thanos:v0.20.2
           version: v0.17.2
           objectStorageConfig:
             name: thanos
