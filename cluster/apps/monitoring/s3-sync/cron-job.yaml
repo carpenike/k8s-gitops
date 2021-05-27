@@ -13,7 +13,7 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: rclone
+          - name: rclone-thanos
             image: rclone/rclone:1.55
             env:
             - name: TZ
@@ -39,7 +39,7 @@ spec:
             volumeMounts:
             - name: rclone-config
               mountPath: "/config"
-          - name: rclone
+          - name: rclone-loki
             image: rclone/rclone:1.55
             env:
             - name: TZ
