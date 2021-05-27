@@ -39,7 +39,6 @@ spec:
             volumeMounts:
             - name: rclone-config
               mountPath: "/config"
-          containers:
           - name: rclone
             image: rclone/rclone:1.55
             env:
