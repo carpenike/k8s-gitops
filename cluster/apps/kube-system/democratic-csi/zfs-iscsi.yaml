@@ -20,13 +20,13 @@ spec:
     controller:
       externalProvisioner:
         enabled: true
-        image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.4
+        image: k8s.gcr.io/sig-storage/csi-provisioner:v2.2.1
       externalResizer:
         enabled: true
-        image: k8s.gcr.io/sig-storage/csi-resizer:v1.0.1
+        image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
       externalSnapshotter:
         enabled: true
-        image: k8s.gcr.io/sig-storage/csi-snapshotter:v3.0.2
+        image: k8s.gcr.io/sig-storage/csi-snapshotter:v4.1.1
       driver:
         enabled: true
         image: democraticcsi/democratic-csi:latest
@@ -38,7 +38,7 @@ spec:
         imagePullPolicy: Always
       driverRegistrar:
         enabled: true
-        image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
+        image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0
     csiDriver:
       # should be globally unique for a given cluster
       name: "org.democratic-csi.iscsi"
