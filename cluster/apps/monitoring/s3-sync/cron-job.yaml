@@ -32,8 +32,6 @@ spec:
             - "24"
             - "--checkers"
             - "24"
-            - "--bwlimit"
-            - "25M"
             - "minio:thanos"
             - "nas:thanos/"
             volumeMounts:
@@ -58,8 +56,6 @@ spec:
             - "24"
             - "--checkers"
             - "24"
-            - "--bwlimit"
-            - "25M"
             - "minio:loki"
             - "nas:loki/"
             volumeMounts:
