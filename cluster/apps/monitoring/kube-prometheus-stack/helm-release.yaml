@@ -33,7 +33,7 @@ spec:
       createCustomResource: false
       prometheusConfigReloaderImage:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
-        tag: v0.47.1
+        tag: v0.48.0
       configmapReloadImage:
         repository: docker.io/jimmidyson/configmap-reload
         tag: v0.5.0
