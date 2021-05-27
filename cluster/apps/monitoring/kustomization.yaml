@@ -10,3 +10,5 @@ resources:
 - snmp-exporter
 - speedtest-prometheus
 - thanos
+- s3-sync
+
