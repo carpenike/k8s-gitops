@@ -3,7 +3,6 @@ data:
   rclone.conf: ENC[AES256_GCM,data:eAANTzR/TkkjYXoXNstJP6t83noN1lcuN+dabjM1oiRJtmMXzvaLns4sbeyAWyeTF3M+0Krk2gYeFqxWG49xkyS3dEWOxfTeikNvuyzTrqHlYZTpUUz+D6ql+LI9gQLbwRsoZOgYBgLnVjYOSHgi86SOBL0sQuWQmWBDDfcynl/XMeO235yX5G08Ni/nnslVwSgPLK2Dr7Kh8GuRhPS4xZgxipS2hqZ21QKIEQZ1dwif2P+3SFaK6UvTij0vsG0pjg4L2xjFDyuUAuTQxSpkyWayFEBq2ZsPR7kk0ZssQ+yGOGxUKQkSm9flDXKXcWVCPtMS/6R3tFTw/hpPTec+T+e1uhQ3YCya/6B/VqTGD6XnB2uKWp39KZqFYkJ6fno3fO4129MrUTGZOYvob5EYyUhTtBFY56sXf7c1nHFFGSK8Uw2YM8/sFP4Z+J1O4PPcHesD0fffPUXMa5ehJt04hMQKMfucWJoK3xYjPXPJxeXyFat9eYPkwaGMRmKCoicjNlJjikdr+06PweIii4xnUXDsXnmq1r+4ry4PLZcdvkAWP+5BwTXnDSTiRFOyKS0mwm0EPod+b5z2Ttc8O3Yst9qjiu3skuaLKaGO4g==,iv:re69E+YadvJzd0bbDdzSYMHRGS3XGKVJ0EnSryzYpFY=,tag:kMS+TybHCP4lzilrqBVTLg==,type:str]
 kind: Secret
 metadata:
-  creationTimestamp: null
   name: rclone-config-secret
   namespace: monitoring
 sops:
