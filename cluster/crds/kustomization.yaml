@@ -10,4 +10,3 @@ resources:
 - registry-creds
 - rook-ceph
 - traefik
-
