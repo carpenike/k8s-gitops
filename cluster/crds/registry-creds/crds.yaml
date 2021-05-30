@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
-  url: https://github.com/alexellis/registry-creds/tree/master/config/crd
+  url: https://github.com/alexellis/registry-creds.git
   ref:
     tag: v0.2.7
   ignore: |
