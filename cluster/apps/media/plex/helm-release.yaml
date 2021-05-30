@@ -61,14 +61,14 @@ spec:
         claimName: media-nfs-tank-share-pvc
     # nodeSelector:
     #   app: "nvidia-gpu-plugin"
-    resources:
-      limits:
-        # gpu.intel.com/i915: 1
-        # nvidia.com/gpu: 1
-        memory: 5009Mi
-      requests:
-        cpu: 763m
-        memory: 5009Mi
+    # resources:
+    #   limits:
+    #     # gpu.intel.com/i915: 1
+    #     # nvidia.com/gpu: 1
+    #     memory: 5009Mi
+    #   requests:
+    #     cpu: 763m
+    #     memory: 5009Mi
     addons:
       promtail:
         enabled: true
