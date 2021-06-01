@@ -75,6 +75,8 @@ spec:
           repository: codercom/code-server
           tag: 3.10.2
         workingDir: "/config"
+        git:
+          deployKeySecret: home-assistant-code-server-secret
         args:
         - --auth
         - "none"
@@ -105,6 +107,3 @@ spec:
           mountPath: /config
     podAnnotations:
       secret.reloader.stakater.com/reload: home-assistant-secrets
-  valuesFrom:
-  - kind: Secret
-    name: "home-assistant-helm-values"
