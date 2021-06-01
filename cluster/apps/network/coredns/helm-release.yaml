@@ -25,9 +25,9 @@ spec:
     serviceType: LoadBalancer
     service:
       externalIPs:
-      - 10.45.10.53
+      - "${SVC_COREDNS_ADDRESS_EXTERNAL}"
       externalTrafficPolicy: Local
-      clusterIP: 10.43.10.53
+      clusterIP: "${SVC_COREDNS_ADDRESS_INTERNAL}"
     servers:
     - zones:
       - zone: holthome.net.
