@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/name: rook-ceph-mgr-dashboard
 spec:
   rules:
-  - host: rook.${SECRET_DOMAIN}
+  - host: "rook.${SECRET_DOMAIN}"
     http:
       paths:
       - path: /
@@ -24,5 +24,5 @@ spec:
               name: http-dashboard
   tls:
   - hosts:
-    - rook.${SECRET_DOMAIN}
+    - "rook.${SECRET_DOMAIN}"
     secretName: rook-cert
