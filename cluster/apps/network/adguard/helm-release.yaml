@@ -60,9 +60,8 @@ spec:
       - enabled: true
         nameSuffix: dns-tcp
         type: LoadBalancer
-        # loadBalancerIP: "${LB_ADGUARD_IP}"
         externalIPs:
-        - 10.45.10.13
+        - "${SVC_ADGUARD_ADDRESS}"
         port:
           port: 53
           name: dns-tcp
@@ -72,10 +71,8 @@ spec:
       - enabled: true
         nameSuffix: dns-udp
         type: LoadBalancer
-        # externalIPs:
-        # - "${CLUSTER_LB_ADGUARD_HOME}"
         externalIPs:
-        - 10.45.10.13
+        - "${SVC_ADGUARD_ADDRESS}"
         port:
           port: 53
           name: dns-udp
