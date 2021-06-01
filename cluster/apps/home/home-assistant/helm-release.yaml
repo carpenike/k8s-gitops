@@ -46,11 +46,6 @@ spec:
       - secretName: home-assistant-cert
         hosts:
         - ha.holthome.net
-    # service:
-    #   type: LoadBalancer
-    #   externalIPs:
-    #   - 10.45.10.14
-    #   externalTrafficPolicy: Local
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     probes:
