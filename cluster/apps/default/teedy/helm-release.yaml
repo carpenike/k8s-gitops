@@ -28,7 +28,7 @@ spec:
       DOCS_ADMIN_EMAIL_INIT: "ryan@ryanholt.net"
       DATABASE_URL: "jdbc:postgresql://teedy-postgresql:5432/teedydb"
       DATABASE_USER: "teedyuser"
-      DOCS_SMTP_HOSTNAME: smtp.${SECRET_DOMAIN}
+      DOCS_SMTP_HOSTNAME: "smtp.${SECRET_DOMAIN}"
       DOCS_SMTP_PORT: 25
     controllerAnnotations:
       stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
@@ -43,13 +43,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: docs.${SECRET_DOMAIN}
+      - host: "docs.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - docs.${SECRET_DOMAIN}
+        - "docs.${SECRET_DOMAIN}"
         secretName: teedy-cert
     persistence:
       data:

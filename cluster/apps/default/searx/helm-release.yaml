@@ -36,13 +36,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: searx.${SECRET_DOMAIN}
+      - host: "searx.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - searx.${SECRET_DOMAIN}
+        - "searx.${SECRET_DOMAIN}"
         secretName: searx-cert
     searx:
       existingSecret:

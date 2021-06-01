@@ -50,12 +50,12 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-        - host: bitwarden.${SECRET_DOMAIN}
+        - host: "bitwarden.${SECRET_DOMAIN}"
           paths:
             - /
       tls:
         - hosts:
-            - bitwarden.${SECRET_DOMAIN}
+            - "bitwarden.${SECRET_DOMAIN}"
           secretName: bitwarden-cert
     persistence:
       enabled: true
