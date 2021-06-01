@@ -71,7 +71,7 @@
 #       relay:
 #         enabled: false
 #       external:
-#         host: smtp.${SECRET_DOMAIN}
+#         host: "smtp.${SECRET_DOMAIN}"
 #         port: 25
 #     # bridges:
 #     #   discord:

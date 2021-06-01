@@ -216,14 +216,14 @@ metadata:
   namespace: media
 spec:
   rules:
-  - host: resilio-sync-ryan.${SECRET_DOMAIN}
+  - host: "resilio-sync-ryan.${SECRET_DOMAIN}"
     http:
       paths:
       - backend:
           serviceName: resilio-sync
           servicePort: 8888
         path: /
-  - host: resilio-sync-stefanie.${SECRET_DOMAIN}
+  - host: "resilio-sync-stefanie.${SECRET_DOMAIN}"
     http:
       paths:
       - backend:
@@ -232,5 +232,5 @@ spec:
         path: /
   tls:
   - hosts:
-    - resilio-sync-ryan.${SECRET_DOMAIN}
-    - resilio-sync-stefanie.${SECRET_DOMAIN}
+    - "resilio-sync-ryan.${SECRET_DOMAIN}"
+    - "resilio-sync-stefanie.${SECRET_DOMAIN}"

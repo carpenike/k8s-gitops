@@ -27,7 +27,7 @@ spec:
     service:
       type: LoadBalancer
       externalIPs:
-      - 10.45.10.11
+      - "${SVC_VERNEMQ_ADDRESS}"
       ws:
         enabled: true
         nodePort: 32080

@@ -59,10 +59,10 @@ spec:
           nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
           nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start?rd=$escaped_request_uri"
         hosts:
-        - prom-alert.${SECRET_DOMAIN}
+        - "prom-alert.${SECRET_DOMAIN}"
         tls:
         - hosts:
-          - prom-alert.${SECRET_DOMAIN}
+          - "prom-alert.${SECRET_DOMAIN}"
           secretName: alertmanager-cert
       config:
         global:
@@ -145,10 +145,10 @@ spec:
           nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
           nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start?rd=$escaped_request_uri"
         hosts:
-        - prom-server.${SECRET_DOMAIN}
+        - "prom-server.${SECRET_DOMAIN}"
         tls:
         - hosts:
-          - prom-server.${SECRET_DOMAIN}
+          - "prom-server.${SECRET_DOMAIN}"
           secretName: prom-cert
       prometheusSpec:
         # image:

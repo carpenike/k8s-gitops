@@ -14,7 +14,7 @@ spec:
     name: nfs-backup-pvc
   storageClassName: nfs
   nfs:
-    server: nas.${SECRET_DOMAIN}
+    server: "nas.${SECRET_DOMAIN}"
     path: "/mnt/tank/share/backups"
 ---
 apiVersion: v1

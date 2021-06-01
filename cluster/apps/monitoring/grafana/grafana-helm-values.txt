@@ -1,7 +1,7 @@
 adminPassword: "$GRAFANA_PASSWORD"
 grafana.ini:
   server:
-    root_url: https://grafana.${SECRET_DOMAIN}
+    root_url: "https://grafana.${SECRET_DOMAIN}"
   auth.basic:
     disable_login_form: true
   auth.generic_oauth:

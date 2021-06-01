@@ -33,7 +33,7 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: requests.${SECRET_DOMAIN}
+      - host: "requests.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix

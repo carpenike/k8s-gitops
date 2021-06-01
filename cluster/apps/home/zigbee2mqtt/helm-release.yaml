@@ -35,14 +35,14 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
         nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
       hosts:
-      - host: zigbee.${SECRET_DOMAIN}
+      - host: "zigbee.${SECRET_DOMAIN}"
         paths:
         - path: /
       tls:
       - hosts:
-        - zigbee.${SECRET_DOMAIN}
+        - "zigbee.${SECRET_DOMAIN}"
         secretName: zigbee-cert
     config:
       mqtt:

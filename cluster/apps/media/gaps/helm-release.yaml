@@ -28,7 +28,7 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "nginx"
       hosts:
-      - host: gaps.${SECRET_DOMAIN}
+      - host: "gaps.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix

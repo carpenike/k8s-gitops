@@ -52,7 +52,7 @@
 #           }
 #       tls:
 #         - hosts:
-#             - nextcloud.${SECRET_DOMAIN}
+#             - "nextcloud.${SECRET_DOMAIN}"
 #     persistence:
 #       enabled: true
 #       storageClass: longhorn
@@ -75,7 +75,7 @@
 #       #     cpu: 11m
 #       #     memory: 83Mi
 #     nextcloud:
-#       host: nextcloud.${SECRET_DOMAIN}
+#       host: "nextcloud.${SECRET_DOMAIN}"
 #       username: admin
 #     internalDatabase:
 #       enabled: false

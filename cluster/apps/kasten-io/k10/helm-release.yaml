@@ -41,13 +41,13 @@ spec:
     ingress:
       create: true
       class: "nginx"
-      host: k10.${SECRET_DOMAIN}
+      host: "k10.${SECRET_DOMAIN}"
       annotations:
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-      - k10.${SECRET_DOMAIN}
+      - "k10.${SECRET_DOMAIN}"
       tls:
         enabled: true
         secretName: k10-cert

@@ -13,7 +13,7 @@ spec:
     name: media-nfs-home-ryan-pvc
   storageClassName: nfs
   nfs:
-    server: nas.${SECRET_DOMAIN}
+    server: "nas.${SECRET_DOMAIN}"
     path: "/mnt/tank/home/ryan"
 ---
 apiVersion: v1

@@ -28,10 +28,10 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-        - dex.${SECRET_DOMAIN}
+        - "dex.${SECRET_DOMAIN}"
       tls:
         - hosts:
-            - dex.${SECRET_DOMAIN}
+            - "dex.${SECRET_DOMAIN}"
           secretName: dex-cert
     resources:
       requests:

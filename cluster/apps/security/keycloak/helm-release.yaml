@@ -33,12 +33,12 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       rules:
-        - host: keycloak.${SECRET_DOMAIN}
+        - host: "keycloak.${SECRET_DOMAIN}"
           paths:
             - /
       tls:
         - hosts:
-            - keycloak.${SECRET_DOMAIN}
+            - "keycloak.${SECRET_DOMAIN}"
           secretName: keycloak-cert
     postgresql:
       enabled: true

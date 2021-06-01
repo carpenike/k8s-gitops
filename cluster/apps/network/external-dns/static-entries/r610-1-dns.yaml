@@ -6,7 +6,7 @@ metadata:
   namespace: network
 spec:
   endpoints:
-  - dnsName: r610-1.${SECRET_DOMAIN}
+  - dnsName: "r610-1.${SECRET_DOMAIN}"
     recordTTL: 180
     recordType: A
     targets:

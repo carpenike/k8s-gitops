@@ -41,7 +41,7 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "nginx"
       hosts:
-      - host: plex.${SECRET_DOMAIN}
+      - host: "plex.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix

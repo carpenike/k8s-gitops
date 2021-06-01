@@ -36,10 +36,10 @@ spec:
             kubernetes.io/tls-acme: "true"
             cert-manager.io/cluster-issuer: letsencrypt-production
           hosts:
-            - thanos.${SECRET_DOMAIN}
+            - "thanos.${SECRET_DOMAIN}"
           tls:
             - hosts:
-                - thanos.${SECRET_DOMAIN}
+                - "thanos.${SECRET_DOMAIN}"
               secretName: thanos-cert
     compact:
       retentionResolution1h: 5y

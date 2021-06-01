@@ -6,7 +6,7 @@
 #   namespace: network
 # spec:
 #   endpoints:
-#   - dnsName: whoami.${SECRET_DOMAIN}
+#   - dnsName: "whoami.${SECRET_DOMAIN}"
 #     recordType: CNAME
 #     targets:
-#     - fwlb.${SECRET_DOMAIN}
+#     - "fwlb.${SECRET_DOMAIN}"

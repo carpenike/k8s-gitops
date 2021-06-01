@@ -35,7 +35,7 @@ spec:
       # - istio-gateway
       # - istio-virtualservice
     domainFilters:
-      - ${SECRET_DOMAIN}
+      - "${SECRET_DOMAIN}"
     createSecret: true
     crd:
       # disabled --pulled from source repo https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/docs/contributing/crd-source/crd-manifest.yaml

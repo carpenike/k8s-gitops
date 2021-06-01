@@ -30,7 +30,7 @@ spec:
       clusterIP: "${SVC_COREDNS_ADDRESS_INTERNAL}"
     servers:
     - zones:
-      - zone: ${SECRET_DOMAIN}.
+      - zone: "${SECRET_DOMAIN}."
         scheme: dns://
         # use_tcp: true
       - zone: ryanholt.net.
@@ -62,7 +62,7 @@ spec:
         configBlock: |-
           stubzones
           path /skydns
-          endpoint https://k8s.${SECRET_DOMAIN}:2379
+          endpoint "https://k8s.${SECRET_DOMAIN}:2379"
           tls /etc/coredns/coredns-etcd-secret/cert.pem /etc/coredns/coredns-etcd-secret/key.pem /etc/coredns/coredns-etcd-secret/ca.crt
     prometheus:
       service:

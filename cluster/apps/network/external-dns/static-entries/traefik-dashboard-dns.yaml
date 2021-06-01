@@ -6,7 +6,7 @@ metadata:
   namespace: network
 spec:
   endpoints:
-  - dnsName: traefik.${SECRET_DOMAIN}
+  - dnsName: "traefik.${SECRET_DOMAIN}"
     recordType: A
     targets:
     - 10.20.0.2

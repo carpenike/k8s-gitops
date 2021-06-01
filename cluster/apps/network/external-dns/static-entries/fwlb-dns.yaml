@@ -6,7 +6,7 @@
 #   namespace: network
 # spec:
 #   endpoints:
-#     - dnsName: fwlb.${SECRET_DOMAIN}
+#     - dnsName: "fwlb.${SECRET_DOMAIN}"
 #       recordType: A
 #       targets:
 #         - 10.20.0.2

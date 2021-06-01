@@ -8,7 +8,7 @@
 #   locationSpec:
 #     type: ObjectStore
 #     objectStore:
-#       endpoint: https://nas.${SECRET_DOMAIN}:9000
+#       endpoint: "https://nas.${SECRET_DOMAIN}:9000"
 #       name: backups
 #       objectStoreType: S3
 #       path: k10/39b3ab59-3e5f-447b-88d0-d5ee4b7fff9a/migration

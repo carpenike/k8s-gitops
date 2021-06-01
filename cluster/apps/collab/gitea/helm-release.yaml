@@ -47,7 +47,7 @@ spec:
         username: "ryan"
       config:
         server:
-          root_url: https://git.${SECRET_DOMAIN}
+          root_url: "https://git.${SECRET_DOMAIN}"
         APP_NAME: "Home Gitea"
         respository:
           DEFAULT_PRIVATE: true
@@ -61,8 +61,8 @@ spec:
           REQUIRE_SIGNIN_VIEW: true
         mailer:
           enabled: true
-          host: smtp.${SECRET_DOMAIN}:25
-          from: git@${SECRET_DOMAIN}
+          host: "smtp.${SECRET_DOMAIN}:25"
+          from: "git@${SECRET_DOMAIN}"
           mailer_type: smtp
       database:
         builtIn:

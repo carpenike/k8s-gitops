@@ -86,13 +86,13 @@ spec:
         # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       hosts:
       # - host: "dns01.network.${SECRET_DOMAIN}"
-      - host: adguard.${SECRET_DOMAIN}
+      - host: "adguard.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - adguard.${SECRET_DOMAIN}
+        - "adguard.${SECRET_DOMAIN}"
         # - "dns01.network.${SECRET_DOMAIN}"
     resources:
       requests:

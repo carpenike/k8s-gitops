@@ -36,13 +36,13 @@ spec:
         nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
         nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
       hosts:
-      - host: esphome.${SECRET_DOMAIN}
+      - host: "esphome.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - esphome.${SECRET_DOMAIN}
+        - "esphome.${SECRET_DOMAIN}"
         secretName: esphome-cert
     persistence:
       config:

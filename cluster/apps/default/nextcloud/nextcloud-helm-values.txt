@@ -37,7 +37,7 @@ nextcloud:
         'lost_password_link' => 'disabled',
 
         // URL of provider. All other URLs are auto-discovered from .well-known
-        'oidc_login_provider_url' => 'https://dex.${SECRET_DOMAIN}',
+        'oidc_login_provider_url' => 'https://dex.holthome.net',
 
         // Client ID and secret registered with the provider
         'oidc_login_client_id' => 'nextcloud',
