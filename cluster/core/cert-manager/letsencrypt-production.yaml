@@ -11,7 +11,7 @@ spec:
     solvers:
     - selector:
         dnsZones:
-        - "holthome.net"
+        - "${SECRET_DOMAIN}"
       dns01:
         azuredns:
           clientID: 3d34c319-a275-4253-beb9-2af0c4f4a845
@@ -21,7 +21,7 @@ spec:
           subscriptionID: 78c9dcb6-b6af-4d0b-b416-6859e93af9ff
           tenantID: ff2dff15-a00a-4491-a57e-48a7b696b0a8
           resourceGroupName: dns-services
-          hostedZoneName: holthome.net
+          hostedZoneName: ${SECRET_DOMAIN}
           environment: AzurePublicCloud
     - selector:
         dnsZones:

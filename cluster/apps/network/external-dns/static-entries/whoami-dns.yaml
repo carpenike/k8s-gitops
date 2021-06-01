@@ -6,7 +6,7 @@
 #   namespace: network
 # spec:
 #   endpoints:
-#   - dnsName: whoami.holthome.net
+#   - dnsName: whoami.${SECRET_DOMAIN}
 #     recordType: CNAME
 #     targets:
-#     - fwlb.holthome.net
+#     - fwlb.${SECRET_DOMAIN}

@@ -13,7 +13,7 @@ spec:
     namespace: media
   storageClassName: nfs
   nfs:
-    server: nas.holthome.net
+    server: nas.${SECRET_DOMAIN}
     path: "/mnt/tank/share"
 ---
 apiVersion: v1

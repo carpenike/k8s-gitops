@@ -28,19 +28,19 @@ spec:
         external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
       hosts:
-      - auth.holthome.net
+      - auth.${SECRET_DOMAIN}
       tls:
       - hosts:
-        - auth.holthome.net
+        - auth.${SECRET_DOMAIN}
     config:
       existingSecret: oauth2-proxy-oidc-creds
     extraArgs:
       provider: oidc
-      oidc-issuer-url: https://dex.holthome.net
+      oidc-issuer-url: https://dex.${SECRET_DOMAIN}
       skip-provider-button:
       pass-authorization-header:
       pass-access-token: true
       email-domain: "*"
-      cookie-domain: ".holthome.net"
-      whitelist-domain: ".holthome.net"
+      cookie-domain: ".${SECRET_DOMAIN}"
+      whitelist-domain: ".${SECRET_DOMAIN}"
       exclude-logging-path: "/ping"

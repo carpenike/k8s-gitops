@@ -33,16 +33,16 @@ spec:
         kubernetes.io/ingress.class: "nginx"
         cert-manager.io/cluster-issuer: letsencrypt-production
         kubernetes.io/tls-acme: "true"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
       hosts:
-      - host: esphome.holthome.net
+      - host: esphome.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - esphome.holthome.net
+        - esphome.${SECRET_DOMAIN}
         secretName: esphome-cert
     persistence:
       config:

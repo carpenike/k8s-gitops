@@ -6,7 +6,7 @@ metadata:
   namespace: network
 spec:
   endpoints:
-  - dnsName: nas-1.holthome.net
+  - dnsName: nas-1.${SECRET_DOMAIN}
     recordTTL: 180
     recordType: A
     targets:

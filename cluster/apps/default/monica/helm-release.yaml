@@ -22,11 +22,11 @@ spec:
       repository: monica
       tag: 3.0.1-apache
     env:
-      APP_URL: https://crm.holthome.net
+      APP_URL: https://crm.${SECRET_DOMAIN}
       APP_ENV: production
       DB_HOST: monica-mariadb
-      MAIL_HOST: smtp.holthome.net
-      MAIL_FROM_ADDRESS: crm@holthome.net
+      MAIL_HOST: smtp.${SECRET_DOMAIN}
+      MAIL_FROM_ADDRESS: crm@${SECRET_DOMAIN}
       MAIL_FROM_NAME: "Home CRM"
       APP_EMAIL_NEW_USERS: ryan@ryanholt.net
       DEFAULT_MAX_STORAGE_SIZE: 4096
@@ -38,13 +38,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-production"
       hosts:
-      - host: crm.holthome.net
+      - host: crm.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - crm.holthome.net
+        - crm.${SECRET_DOMAIN}
         secretName: monica-cert
     persistence:
       config:

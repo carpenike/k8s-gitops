@@ -6,7 +6,7 @@ metadata:
   namespace: network
 spec:
   endpoints:
-  - dnsName: vault.holthome.net
+  - dnsName: vault.${SECRET_DOMAIN}
     recordTTL: 180
     recordType: A
     targets:

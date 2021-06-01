@@ -30,13 +30,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: radarr-uhd.holthome.net
+      - host: radarr-uhd.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - radarr-uhd.holthome.net
+        - radarr-uhd.${SECRET_DOMAIN}
         secretName: radarr-uhd-cert
       additionalIngresses:
       - enabled: true
@@ -47,13 +47,13 @@ spec:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
-        - host: radarr-uhd.holthome.net
+        - host: radarr-uhd.${SECRET_DOMAIN}
           paths:
           - path: /api
             pathType: Prefix
         tls:
         - hosts:
-          - radarr-uhd.holthome.net
+          - radarr-uhd.${SECRET_DOMAIN}
           secretName: radarr-uhd-cert
     persistence:
       config:

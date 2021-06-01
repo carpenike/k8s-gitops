@@ -24,11 +24,11 @@ spec:
     env:
       TZ: "America/New_York"
       DOCS_DEFAULT_LANGUAGE: eng
-      DOCS_BASE_URL: "https://docs.holthome.net"
+      DOCS_BASE_URL: "https://docs.${SECRET_DOMAIN}"
       DOCS_ADMIN_EMAIL_INIT: "ryan@ryanholt.net"
       DATABASE_URL: "jdbc:postgresql://teedy-postgresql:5432/teedydb"
       DATABASE_USER: "teedyuser"
-      DOCS_SMTP_HOSTNAME: smtp.holthome.net
+      DOCS_SMTP_HOSTNAME: smtp.${SECRET_DOMAIN}
       DOCS_SMTP_PORT: 25
     controllerAnnotations:
       stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
@@ -43,13 +43,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: docs.holthome.net
+      - host: docs.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - docs.holthome.net
+        - docs.${SECRET_DOMAIN}
         secretName: teedy-cert
     persistence:
       data:

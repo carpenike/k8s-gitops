@@ -4,10 +4,10 @@ dexK8sAuthenticator:
     short_description: "Holthome k8s cluster"
     description: "My home k8s cluster"
     client_secret: $DEX_K8S_AUTHENTICATOR_CLIENT_SECRET
-    issuer: https://dex.holthome.net
-    k8s_master_uri: https://k8s.holthome.net:6443
+    issuer: https://dex.${SECRET_DOMAIN}
+    k8s_master_uri: https://k8s.${SECRET_DOMAIN}:6443
     client_id: dex-k8s-authenticator
-    redirect_uri: https://login.holthome.net/callback/
+    redirect_uri: https://login.${SECRET_DOMAIN}/callback/
     k8s_ca_pem: |
       -----BEGIN CERTIFICATE-----
       MIIC5zCCAc+gAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl

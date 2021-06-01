@@ -6,7 +6,7 @@ metadata:
   namespace: network
 spec:
   endpoints:
-  - dnsName: node-2-ipmi.holthome.net
+  - dnsName: node-2-ipmi.${SECRET_DOMAIN}
     recordTTL: 180
     recordType: A
     targets:

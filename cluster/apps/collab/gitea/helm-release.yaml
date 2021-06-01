@@ -33,10 +33,10 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-production"
       hosts:
-      - "git.holthome.net"
+      - "git.${SECRET_DOMAIN}"
       tls:
       - hosts:
-        - "git.holthome.net"
+        - "git.${SECRET_DOMAIN}"
         secretName: gitea-cert
     service:
       ssh:
@@ -47,7 +47,7 @@ spec:
         username: "ryan"
       config:
         server:
-          root_url: https://git.holthome.net
+          root_url: https://git.${SECRET_DOMAIN}
         APP_NAME: "Home Gitea"
         respository:
           DEFAULT_PRIVATE: true
@@ -61,8 +61,8 @@ spec:
           REQUIRE_SIGNIN_VIEW: true
         mailer:
           enabled: true
-          host: smtp.holthome.net:25
-          from: git@holthome.net
+          host: smtp.${SECRET_DOMAIN}:25
+          from: git@${SECRET_DOMAIN}
           mailer_type: smtp
       database:
         builtIn:

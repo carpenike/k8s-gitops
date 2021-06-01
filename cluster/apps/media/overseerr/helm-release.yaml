@@ -33,13 +33,13 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: requests.holthome.net
+      - host: requests.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "requests.holthome.net"
+        - "requests.${SECRET_DOMAIN}"
         secretName: overseerr-cert
     podAnnotations:
       backup.velero.io/backup-volumes: config

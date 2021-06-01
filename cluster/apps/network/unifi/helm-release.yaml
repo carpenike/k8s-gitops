@@ -35,10 +35,10 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-        - unifi.holthome.net
+        - unifi.${SECRET_DOMAIN}
       tls:
         - hosts:
-            - unifi.holthome.net
+            - unifi.${SECRET_DOMAIN}
           secretName: unifi-cert
     guiService:
       type: LoadBalancer

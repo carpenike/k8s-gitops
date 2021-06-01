@@ -41,10 +41,10 @@ spec:
         kubernetes.io/ingress.allow-http: "false"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - minio.holthome.net
+      - minio.${SECRET_DOMAIN}
       tls:
       - hosts:
-        - minio.holthome.net
+        - minio.${SECRET_DOMAIN}
         secretName: minio-cert
     metrics:
       serviceMonitor:

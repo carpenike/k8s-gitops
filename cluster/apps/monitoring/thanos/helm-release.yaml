@@ -31,15 +31,15 @@ spec:
           annotations:
             kubernetes.io/ingress.class: "nginx"
             nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
-            # nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-            # nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+            # nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+            # nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start
             kubernetes.io/tls-acme: "true"
             cert-manager.io/cluster-issuer: letsencrypt-production
           hosts:
-            - thanos.holthome.net
+            - thanos.${SECRET_DOMAIN}
           tls:
             - hosts:
-                - thanos.holthome.net
+                - thanos.${SECRET_DOMAIN}
               secretName: thanos-cert
     compact:
       retentionResolution1h: 5y

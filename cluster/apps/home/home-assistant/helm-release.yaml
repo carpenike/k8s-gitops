@@ -38,14 +38,14 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-      - host: ha.holthome.net
+      - host: ha.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - secretName: home-assistant-cert
         hosts:
-        - ha.holthome.net
+        - ha.${SECRET_DOMAIN}
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     probes:
@@ -83,20 +83,20 @@ spec:
           enabled: true
           annotations:
             kubernetes.io/ingress.class: "nginx"
-            nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-            nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+            nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+            nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start
             nginx.ingress.kubernetes.io/proxy-body-size: "0"
             kubernetes.io/tls-acme: "true"
             cert-manager.io/cluster-issuer: letsencrypt-production
           hosts:
-          - host: ha-vscode.holthome.net
+          - host: ha-vscode.${SECRET_DOMAIN}
             paths:
             - path: /
               pathType: Prefix
           tls:
           - secretName: ha-vscode-cert
             hosts:
-            - ha-vscode.holthome.net
+            - ha-vscode.${SECRET_DOMAIN}
         volumeMounts:
         - name: config
           mountPath: /config

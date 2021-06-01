@@ -23,7 +23,7 @@ spec:
       repository: bitwardenrs/server
       tag: 1.21.0-alpine
     bitwardenrs:
-      domain: https://bitwarden.holthome.net
+      domain: https://bitwarden.${SECRET_DOMAIN}
       admin:
         existingSecret:
           enabled: true
@@ -31,8 +31,8 @@ spec:
           tokenKey: adminToken
       smtp:
         enabled: true
-        host: "smtp.holthome.net"
-        from: "bitwarden@holthome.net"
+        host: "smtp.${SECRET_DOMAIN}"
+        from: "bitwarden@${SECRET_DOMAIN}"
         fromName: "Bitwarden"
         ssl: false
         port: 25
@@ -50,12 +50,12 @@ spec:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-        - host: bitwarden.holthome.net
+        - host: bitwarden.${SECRET_DOMAIN}
           paths:
             - /
       tls:
         - hosts:
-            - bitwarden.holthome.net
+            - bitwarden.${SECRET_DOMAIN}
           secretName: bitwarden-cert
     persistence:
       enabled: true

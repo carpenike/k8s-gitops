@@ -23,7 +23,7 @@ spec:
       tag: 0.8.0-debian-10-r11
     provider: coredns
     coredns:
-      etcdEndpoints: https://k8s.holthome.net:2379
+      etcdEndpoints: https://k8s.${SECRET_DOMAIN}:2379
       etcdTLS:
         enabled: true
         secretName: coredns-etcd-secret
@@ -35,7 +35,7 @@ spec:
       # - istio-gateway
       # - istio-virtualservice
     domainFilters:
-      - holthome.net
+      - ${SECRET_DOMAIN}
     createSecret: true
     crd:
       # disabled --pulled from source repo https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/docs/contributing/crd-source/crd-manifest.yaml

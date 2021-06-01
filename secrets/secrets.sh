@@ -144,7 +144,7 @@ az keyvault secret set --name "certbot-client-secret" --vault-name holthome --va
 
 az keyvault secret set --name "minio-accesskey" --vault-name holthome --value $MINIO_ACCESS_KEY
 az keyvault secret set --name "minio-secretkey" --vault-name holthome --value $MINIO_SECRET_KEY
-az keyvault secret set --name "minio-endpoint" --vault-name holthome --value https://nas.holthome.net:9000
+az keyvault secret set --name "minio-endpoint" --vault-name holthome --value https://nas.${SECRET_DOMAIN}:9000
 
 
 # # Authelia Secrets - kube-system namespace

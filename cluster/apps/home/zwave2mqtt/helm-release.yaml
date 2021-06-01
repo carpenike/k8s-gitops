@@ -33,16 +33,16 @@ spec:
         kubernetes.io/ingress.class: nginx
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start
       hosts:
-      - host: zwave.holthome.net
+      - host: zwave.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - zwave.holthome.net
+        - zwave.${SECRET_DOMAIN}
         secretName: zwave-cert
     additionalVolumeMounts:
     - name: usb

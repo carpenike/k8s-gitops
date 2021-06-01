@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - host: "flux-receiver.holthome.net"
+  - host: "flux-receiver.${SECRET_DOMAIN}"
     http:
       paths:
       - path: /
@@ -20,4 +20,4 @@ spec:
               number: 80
   tls:
   - hosts:
-    - "flux-receiver.holthome.net"
+    - "flux-receiver.${SECRET_DOMAIN}"

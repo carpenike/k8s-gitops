@@ -31,8 +31,8 @@ spec:
       oidcAuth:
         enabled: true
         secretName: kasten-secret
-        # providerURL: https://dex.holthome.net
-        # redirectURL: https://k10.holthome.net
+        # providerURL: https://dex.${SECRET_DOMAIN}
+        # redirectURL: https://k10.${SECRET_DOMAIN}
         # scopes: "profile email"
         # usernameClaim: "email"
         # clientID: k10
@@ -41,13 +41,13 @@ spec:
     ingress:
       create: true
       class: "nginx"
-      host: k10.holthome.net
+      host: k10.${SECRET_DOMAIN}
       annotations:
         kubernetes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-      - k10.holthome.net
+      - k10.${SECRET_DOMAIN}
       tls:
         enabled: true
         secretName: k10-cert

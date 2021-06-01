@@ -29,13 +29,13 @@ spec:
         external-dns.alpha.kubernetes.io/target: 10.20.0.2
         kubernetes.io/ingress.class: "nginx"
       hosts:
-      - host: tautulli.holthome.net
+      - host: tautulli.${SECRET_DOMAIN}
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - tautulli.holthome.net
+        - tautulli.${SECRET_DOMAIN}
     persistence:
       config:
         enabled: true

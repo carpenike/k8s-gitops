@@ -6,10 +6,10 @@ metadata:
   namespace: kube-system
 spec:
   secretName: acme-crt-secret
-  commonName: "*.holthome.net"
+  commonName: "*.${SECRET_DOMAIN}"
   dnsNames:
-  - 'holthome.net'
-  - '*.holthome.net'
+  - '${SECRET_DOMAIN}'
+  - '*.${SECRET_DOMAIN}'
   - 'ryanholt.net'
   - '*.ryanholt.net'
   issuerRef:

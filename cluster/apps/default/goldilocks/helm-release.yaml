@@ -24,11 +24,11 @@
 #         annotations:
 #           kubernetes.io/ingress.class: "nginx"
 #         hosts:
-#           - host: goldilocks.holthome.net
+#           - host: goldilocks.${SECRET_DOMAIN}
 #             paths: ["/"]
 #         tls:
 #           - hosts:
-#               - goldilocks.holthome.net
+#               - goldilocks.${SECRET_DOMAIN}
 #     resources:
 #       limits:
 #         cpu: 25m
