@@ -1,11 +1,11 @@
-apiVersion: kubernetes-client.io/v1
-kind: ExternalSecret
-metadata:
-  name: matrix-helm-values
-  namespace: default
-spec:
-  backendType: azureKeyVault
-  keyVaultName: holthome
-  data:
-    - key: matrix-helm-values
-      name: values.yaml
+# apiVersion: kubernetes-client.io/v1
+# kind: ExternalSecret
+# metadata:
+#   name: matrix-helm-values
+#   namespace: default
+# spec:
+#   backendType: azureKeyVault
+#   keyVaultName: holthome
+#   data:
+#     - key: matrix-helm-values
+#       name: values.yaml
