@@ -21,7 +21,7 @@ spec:
           subscriptionID: 78c9dcb6-b6af-4d0b-b416-6859e93af9ff
           tenantID: ff2dff15-a00a-4491-a57e-48a7b696b0a8
           resourceGroupName: dns-services
-          hostedZoneName: ${SECRET_DOMAIN}
+          hostedZoneName: "${SECRET_DOMAIN}"
           environment: AzurePublicCloud
     - selector:
         dnsZones:
