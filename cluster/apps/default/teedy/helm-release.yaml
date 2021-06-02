@@ -64,7 +64,7 @@ spec:
       enabled: true
       persistence:
         enabled: true
-        storageClass: rook-ceph-block
+        storageClass: rook-ceph
     # additionalContainers:
     # - name: docs-importer
     #   image: sismics/docs-importer:latest
