@@ -27,7 +27,8 @@ spec:
       externalIPs:
       - "${SVC_COREDNS_ADDRESS_EXTERNAL}"
       externalTrafficPolicy: Local
-      clusterIP: "${SVC_COREDNS_ADDRESS_INTERNAL}"
+      clusterIP:
+      - "${SVC_COREDNS_ADDRESS_INTERNAL}"
     servers:
     - zones:
       - zone: "${SECRET_DOMAIN}."
