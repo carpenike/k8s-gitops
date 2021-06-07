@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
 - thanos-helm-values.enc.yaml
 - helm-release.yaml
+- thanos-ceph-object-bucket.yaml
