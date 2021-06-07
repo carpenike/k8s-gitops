@@ -38,8 +38,8 @@ spec:
         repository: docker.io/jimmidyson/configmap-reload
         tag: v0.5.0
     alertmanager:
-      alertmanagerSpec: "prom-alert.${SECRET_DOMAIN}"
-        externalUrl: 
+      alertmanagerSpec: 
+        externalUrl: "prom-alert.${SECRET_DOMAIN}"
         storage:
           volumeClaimTemplate:
             spec:
