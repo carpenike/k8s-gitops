@@ -38,7 +38,7 @@ spec:
         repository: docker.io/jimmidyson/configmap-reload
         tag: v0.5.0
     alertmanager:
-      alertmanagerSpec: 
+      alertmanagerSpec:
         externalUrl: "prom-alert.${SECRET_DOMAIN}"
         storage:
           volumeClaimTemplate:
@@ -194,7 +194,7 @@ spec:
           objectStorageConfig:
             name: thanos-objstore-secret
             key: objstore.yml
-      thanosService: 
+      thanosService:
         enabled: true
     kube-state-metrics:
       fullnameOverride: kube-state-metrics

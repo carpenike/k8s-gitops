@@ -2,7 +2,7 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-   name: rook-ceph-bucket
+  name: rook-ceph-bucket
 provisioner: rook-ceph.ceph.rook.io/bucket
 reclaimPolicy: Delete
 parameters:
