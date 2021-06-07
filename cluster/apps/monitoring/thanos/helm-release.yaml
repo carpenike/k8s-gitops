@@ -30,8 +30,8 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
           nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
-          # nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-          # nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
@@ -58,7 +58,7 @@ spec:
       type: s3
       config:
         bucket: thanos
-        endpoint: minio.default.svc:9000
-        access_key: "${MINIO_ACCESS_KEY}"
-        secret_key: "${MINIO_SECRET_KEY}"
+        endpoint: rook-ceph-rgw-object-store.rook-ceph.svc:80
+        access_key: "${SECRET_THANOS_S3_ACCESS_KEY}"
+        secret_key: "${SECRET_THANOS_S3_SECRET_KEY}"
         insecure: true
