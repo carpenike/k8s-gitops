@@ -38,6 +38,9 @@ spec:
         hosts:
         - authentik.${SECRET_DOMAIN}
 
+    geoip:
+      enabled: true
+
     authentik:
       email:
         host: smtp.${SECRET_DOMAIN}
