@@ -23,6 +23,7 @@ spec:
       GF_EXPLORE_ENABLED: true
       GF_PANELS_DISABLE_SANITIZE_HTML: true
       GF_LOG_FILTERS: rendering:debug
+    adminPassword: "${SECRET_GRAFANA_PASSWORD}"
     grafana.ini:
       server:
         root_url: "https://grafana.${SECRET_DOMAIN}"
@@ -39,6 +40,21 @@ spec:
         url: https://grafana.net
       auth.basic:
         disable_login_form: true
+      server:
+        root_url: "https://grafana.${SECRET_DOMAIN}"
+      auth.generic_oauth:
+        enabled: true
+        allow_sign_up: true
+        name: Dex
+        client_id: grafana
+        client_secret: ${SECRET_DEX_GRAFANA_CLIENT_SECRET}
+        scopes: openid profile email groups
+        auth_url: https://dex.${SECRET_DOMAIN}/auth
+        token_url: https://dex.${SECRET_DOMAIN}/token
+        api_url: https://dex.${SECRET_DOMAIN}/userinfo
+      auth.generic_oauth.group_mapping:
+        role_attribute_path: "contains(groups[*], 'holthome:k8s-admins') && 'Admin' || 'Viewer'"
+        org_id: 1
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -153,6 +169,3 @@ spec:
       existingClaim: grafana-pvc
     podAnnotations:
       configmap.reloader.stakater.com/reload: "grafana"
-  valuesFrom:
-  - kind: Secret
-    name: "grafana-helm-values"
