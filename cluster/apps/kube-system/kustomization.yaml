@@ -11,3 +11,4 @@ resources:
 - rbac
 - registry-creds
 - reloader
+- kured
