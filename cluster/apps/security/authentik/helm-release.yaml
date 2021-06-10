@@ -39,6 +39,9 @@ spec:
         - authentik.${SECRET_DOMAIN}
 
     authentik:
+      email:
+        host: smtp.${SECRET_DOMAIN}
+        from: authentik@${SECRET_DOMAIN}
       secret_key: ${SECRET_AUTHENTIK_SECRET_KEY}
       log_level: debug
 
