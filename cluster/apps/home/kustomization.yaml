@@ -7,4 +7,4 @@ resources:
 - node-red
 - vernemq
 - zigbee2mqtt
-- zwave2mqtt
+- zwavejs2mqtt

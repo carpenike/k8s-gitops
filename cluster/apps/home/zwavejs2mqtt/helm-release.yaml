@@ -2,16 +2,15 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: zwave2mqtt
-  namespace: home
+  name: zwavejs2mqtt
+  namespace: default
 spec:
-  releaseName: zwave2mqtt
   interval: 5m
   chart:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: zwave2mqtt
-      version: 8.4.0
+      chart: zwavejs2mqtt
+      version: 3.5.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -19,13 +18,16 @@ spec:
       interval: 5m
   values:
     image:
-      repository: robertslando/zwave2mqtt
-      tag: 4.1.1
+      repository: zwavejs/zwavejs2mqtt
+      tag: 5.0.0
     env:
       TZ: "America/New_York"
-      OZW_AUTO_UPDATE_CONFIG: true
     securityContext:
       privileged: true
+    service:
+      additionalPorts:
+      - name: websocket
+        port: 3000
     ingress:
       enabled: true
       annotations:
@@ -44,6 +46,11 @@ spec:
       - hosts:
         - "zwave.${SECRET_DOMAIN}"
         secretName: zwave-cert
+    persistence:
+      config:
+        enabled: true
+        existingClaim: zwavejs2mqtt-pvc
+        mountPath: /usr/src/app/store
     additionalVolumeMounts:
     - name: usb
       mountPath: /dev/serial/by-id/usb-0658_0200-if00
@@ -57,8 +64,6 @@ spec:
           nodeSelectorTerms:
           - matchExpressions:
             - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
-    persistence:
-      config:
-        enabled: true
-        existingClaim: zwave2mqtt
-        mountPath: /usr/src/app/store
+    tolerations:
+    - key: "arm"
+      operator: "Exists"
