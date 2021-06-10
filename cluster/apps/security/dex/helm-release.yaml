@@ -33,13 +33,112 @@ spec:
         - hosts:
             - "dex.${SECRET_DOMAIN}"
           secretName: dex-cert
+
+    config: |-
+      issuer: https://dex.${SECRET_DOMAIN}
+    
+      storage:
+        type: kubernetes
+        config:
+          inCluster: true
+      web:
+        http: 0.0.0.0:5556
+    
+      frontend:
+        theme: "coreos"
+        issuer: "holthome"
+        issuerUrl: "https://${SECRET_DOMAIN}"
+        logoUrl: http://icons.iconarchive.com/icons/icons-land/metro-halloween/512/Cool-icon.png
+    
+      expiry:
+        signingKeys: "6h"
+        idTokens: "24h"
+    
+      logger:
+        level: debug
+        format: json
+    
+      oauth2:
+        responseTypes: ["code", "token", "id_token"]
+        skipApprovalScreen: true
+    
+      connectors:
+    
+      # GitHub configure 'OAuth Apps' -> 'New OAuth App', add callback URL
+      # https://github.com/settings/developers
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: ${SECRET_DEX_GITHUB_CLIENT_ID}
+          clientSecret: ${SECRET_DEX_GITHUB_CLIENT_SECRET}
+          redirectURI: https://dex.${SECRET_DOMAIN}/callback
+          # 'orgs' can be used to map groups from Github
+          # https://github.com/coreos/dex/blob/master/Documentation/connectors/github.md
+          orgs:
+          - name: holthome
+    
+      staticClients:
+      - id: dex-k8s-authenticator
+        name: dex-k8s-authenticator
+        secret: ${SECRET_DEX_K8S_AUTHENTICATOR_CLIENT_SECRET}
+        redirectURIs:
+          - https://login.${SECRET_DOMAIN}/callback/
+    
+      - id: grafana
+        name: grafana
+        secret: ${SECRET_DEX_GRAFANA_CLIENT_SECRET}
+        redirectURIs:
+          - https://grafana.${SECRET_DOMAIN}/login/generic_oauth
+    
+      - id: nextcloud
+        name: nextcloud
+        secret: ${SECRET_DEX_NEXTCLOUD_CLIENT_SECRET}
+        redirectURIs:
+          - https://nextcloud.${SECRET_DOMAIN}/apps/user_oidc/code
+          - https://nextcloud.${SECRET_DOMAIN}/apps/oidc_login/oidc
+    
+      - id: oauth2-proxy
+        name: oauth2-proxy
+        secret: ${SECRET_DEX_OAUTH2_PROXY_CLIENT_SECRET}
+        redirectURIs:
+          - https://auth.${SECRET_DOMAIN}/oauth2/callback
+          - https://requests.${SECRET_DOMAIN}/oauth2/callback
+    
+      - id: gitea
+        name: gitea
+        secret: ${SECRET_DEX_GITEA_CLIENT_SECRET}
+        redirectURIs:
+          - https://git.${SECRET_DOMAIN}/oauth2/dex/callback
+          - https://git.${SECRET_DOMAIN}/user/oauth2/dex/callback
+    
+      - id: pomerium
+        name: pomerium
+        secret: ${SECRET_DEX_POMERIUM_CLIENT_SECRET}
+        redirectURIs:
+          - https://authenticate.${SECRET_DOMAIN}/oauth2/callback
+    
+      - id: step
+        name: step
+        secret: ${SECRET_DEX_STEP_CLIENT_SECRET}
+        redirectURIs:
+          - http://127.0.0.1:10000
+    
+      - id: k10
+        name: k10
+        secret: ${SECRET_DEX_K10_CLIENT_SECRET}
+        redirectURIs:
+          - https://k10.${SECRET_DOMAIN}/k10/auth-svc/v0/oidc/redirect
+    
+      - id: authentik
+        name: authentik
+        secret: ${SECRET_DEX_AUTHENTIK_CLIENT_SECRET}
+        redirectURIs:
+          - https://authentik.${SECRET_DOMAIN}/source/oauth/callback/dex/
+
     resources:
       requests:
         memory: 250Mi
         cpu: 25m
       limits:
         memory: 250Mi
-  valuesFrom:
-    - kind: Secret
-      name: "dex-helm-values"
-      optional: false
