@@ -33,4 +33,4 @@ spec:
     metrics:
       create: true
     extraArgs:	
-      slack-hook-url: "${SECRET_DISCORD_KURED_WEBHOOK_URL}"
+      notify-url: "${SECRET_DISCORD_KURED_WEBHOOK_URL}"
