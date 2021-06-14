@@ -41,18 +41,19 @@ spec:
             targetPort: 50413
         externalTrafficPolicy: Local
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: "nginx"
-      hosts:
-      - host: "qb.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "qb.${SECRET_DOMAIN}"
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+        hosts:
+        - host: "qb.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "qb.${SECRET_DOMAIN}"
     podSecurityContext:
       supplementalGroups:
       - 100
