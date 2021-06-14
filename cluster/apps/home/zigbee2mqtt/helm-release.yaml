@@ -24,26 +24,29 @@ spec:
     env:
       TZ: "America/New_York"
       ZIGBEE2MQTT_DATA: /data
-    probes:
-      startup:
-        enabled: true
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: "nginx"
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
-      hosts:
-      - host: "zigbee.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-      tls:
-      - hosts:
-        - "zigbee.${SECRET_DOMAIN}"
-        secretName: zigbee-cert
+      main: 
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+        hosts:
+        - host: "zigbee.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+        tls:
+        - hosts:
+          - "zigbee.${SECRET_DOMAIN}"
+          secretName: zigbee-cert
+    persistence:
+      config:
+        enabled: true
+        existingClaim: zigbee2mqtt-pvc
+        mountPath: /data
     config:
       mqtt:
         base_topic: zigbee2mqtt
@@ -79,11 +82,6 @@ spec:
         port: 8080
       expirimental:
         new_api: true
-    persistence:
-      data:
-        enabled: true
-        existingClaim: zigbee2mqtt-pvc
-        mountPath: /data
     securityContext:
       privileged: true
     additionalVolumeMounts:
