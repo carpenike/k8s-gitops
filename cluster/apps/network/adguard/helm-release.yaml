@@ -54,7 +54,7 @@ spec:
       PUID: "1000"
       PGID: "1000"
     service:
-      main: 
+      main:
         port:
           port: 3000
       dns-tcp:
@@ -81,7 +81,7 @@ spec:
           name: dns-udp
           protocol: UDP
           targetPort: 53
-        
+
     ingress:
       main:
         enabled: true
