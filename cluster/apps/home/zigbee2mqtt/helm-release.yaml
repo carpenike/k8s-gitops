@@ -25,7 +25,7 @@ spec:
       TZ: "America/New_York"
       ZIGBEE2MQTT_DATA: /data
     ingress:
-      main: 
+      main:
         enabled: true
         ingressClassName: "nginx"
         annotations:
