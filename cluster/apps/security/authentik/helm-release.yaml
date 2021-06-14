@@ -40,7 +40,7 @@ spec:
 
     geoip:
       enabled: true
-
+      accountId: ${SECRET_AUTHENTIK_MAXMIND_ACCOUNT_ID}
     authentik:
       email:
         host: smtp.${SECRET_DOMAIN}
