@@ -24,17 +24,21 @@ spec:
     env:
       TZ: "America/New_York"
     service:
-      additionalServices:
-      - enabled: true
-        nameSuffix: bittorrent
+      main:
+        ports:
+          http:
+            port: 8080
+      bittorrent:
+        enabled: true
         type: LoadBalancer
         externalIPs:
         - "${SVC_QBITTORRENT_ADDRESS}"
-        port:
-          port: 50413
-          name: bittorrent
-          protocol: TCP
-          targetPort: 6881
+        ports:
+          bittorrent:
+            enabled: true
+            port: 50413
+            protocol: TCP
+            targetPort: 50413
         externalTrafficPolicy: Local
     ingress:
       enabled: true
@@ -49,17 +53,17 @@ spec:
       tls:
       - hosts:
         - "qb.${SECRET_DOMAIN}"
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     persistence:
       config:
         enabled: true
         existingClaim: qb-pvc
-    additionalVolumeMounts:
-    - name: media-nas
-      mountPath: "/media"
-    additionalVolumes:
-    - name: media-nas
-      persistentVolumeClaim:
-        claimName: media-nfs-tank-share-pvc
+      media-nas:
+        enabled: true
+        existingClaim: media-nfs-tank-share-pvc
+        mountPath: /media
     resources:
       requests:
         memory: 250Mi
