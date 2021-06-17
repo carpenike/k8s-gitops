@@ -24,6 +24,7 @@ spec:
     env:
       TZ: "America/New_York"
       DEFAULT_EMAIL: ryan@ryanholt.net
+      BASE_URL: https://mealie.${SECRET_DOMAIN}
     ingress:
       main:
         enabled: true
