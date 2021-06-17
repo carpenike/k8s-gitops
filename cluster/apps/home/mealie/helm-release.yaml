@@ -24,7 +24,7 @@ spec:
     env:
       TZ: "America/New_York"
       DEFAULT_EMAIL: ryan@ryanholt.net
-      BASE_URL: https://mealie.${SECRET_DOMAIN}
+      BASE_URL: https://meals.${SECRET_DOMAIN}
     ingress:
       main:
         enabled: true
@@ -33,16 +33,16 @@ spec:
           kubernetes.io/ingress.class: "nginx"
           cert-manager.io/cluster-issuer: letsencrypt-production
           kubernetes.io/tls-acme: "true"
-          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+          # nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          # nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
         hosts:
-        - host: "mealie.${SECRET_DOMAIN}"
+        - host: "meals.${SECRET_DOMAIN}"
           paths:
           - path: /
             pathType: Prefix
         tls:
         - hosts:
-          - "mealie.${SECRET_DOMAIN}"
+          - "meals.${SECRET_DOMAIN}"
           secretName: mealie-cert
     persistence:
       config:
