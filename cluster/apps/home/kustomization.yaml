@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - esphome
 - home-assistant
+- mealie
 - node-red
 - vernemq
 - zigbee2mqtt

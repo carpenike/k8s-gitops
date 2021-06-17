@@ -1,0 +1,48 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mealie
+  namespace: home
+spec:
+  releaseName: mealie
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: mealie
+      version: 2.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: hkotel/mealie
+      tag: v0.5.1
+    env:
+      TZ: "America/New_York"
+    ingress:
+      main:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          kubernetes.io/tls-acme: "true"
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+        hosts:
+        - host: "mealie.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "mealie.${SECRET_DOMAIN}"
+          secretName: mealie-cert
+    persistence:
+      config:
+        enabled: true
+        existingClaim: mealie-pvc
