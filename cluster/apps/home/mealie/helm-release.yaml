@@ -23,6 +23,7 @@ spec:
       tag: v0.5.1
     env:
       TZ: "America/New_York"
+      DEFAULT_EMAIL: ryan@ryanholt.net
     ingress:
       main:
         enabled: true
