@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 6.2.25
+      tag: v6.2.26
     persistence:
       enabled: true
       existingClaim: unifi-pvc
