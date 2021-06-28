@@ -23,30 +23,29 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: "nginx"
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
-      hosts:
-      - host: "radarr.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "radarr.${SECRET_DOMAIN}"
-        secretName: radarr-cert
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "api"
+      main:
+        enabled: true
         annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
           kubernetes.io/ingress.class: "nginx"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+        hosts:
+        - host: "radarr.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "radarr.${SECRET_DOMAIN}"
+          secretName: radarr-cert
+      api:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
         hosts:
         - host: "radarr.${SECRET_DOMAIN}"
           paths:
@@ -60,13 +59,10 @@ spec:
       config:
         enabled: true
         existingClaim: radarr-pvc
-    additionalVolumeMounts:
-    - name: media-nas
-      mountPath: "/media"
-    additionalVolumes:
-    - name: media-nas
-      persistentVolumeClaim:
-        claimName: media-nfs-tank-share-pvc
+      media:
+        enabled: true
+        existingClaim: media-nfs-tank-share-pvc
+        mountPath: /media
     resources:
       requests:
         memory: 350Mi
