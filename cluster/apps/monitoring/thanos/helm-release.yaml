@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://charts.bitnami.com/bitnami
       chart: thanos
-      version: 3.18.0
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
         name: bitnami-charts
@@ -42,8 +42,14 @@ spec:
       enabled: true
     compactor:
       enabled: true
+      persistence:
+        enabled: false
     storegateway:
       enabled: true
+      persistence:
+        enabled: true
+        size: 20Gi
+        storageClass: rook-ceph-block
     ruler:
       enabled: false
     metrics:
