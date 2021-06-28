@@ -44,8 +44,6 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          external-dns.alpha.kubernetes.io/target: 10.20.0.2
         hosts:
         - host: "qb.${SECRET_DOMAIN}"
           paths:

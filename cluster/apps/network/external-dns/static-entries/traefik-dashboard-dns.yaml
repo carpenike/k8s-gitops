@@ -9,4 +9,4 @@ spec:
   - dnsName: "traefik.${SECRET_DOMAIN}"
     recordType: A
     targets:
-    - 10.20.0.2
+    - 10.45.20.20
