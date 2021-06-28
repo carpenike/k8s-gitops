@@ -177,7 +177,7 @@ spec:
         - job_name: 'home-assistant'
           scrape_interval: 60s
           metrics_path: '/api/prometheus'
-          bearer_token: '$HASS_PROMETHEUS_TOKEN'
+          bearer_token: '${SECRET_HASS_PROMETHEUS_TOKEN}'
           scheme: http
           static_configs:
           - targets:
