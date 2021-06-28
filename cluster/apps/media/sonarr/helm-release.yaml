@@ -24,26 +24,27 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: "nginx"
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
-      hosts:
-      - host: "sonarr.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "sonarr.${SECRET_DOMAIN}"
-        secretName: sonarr-cert
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "api"
+      main:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+        hosts:
+        - host: "sonarr.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "sonarr.${SECRET_DOMAIN}"
+          secretName: sonarr-cert
+      api:
+        enabled: true
+        ingressClassName: "traefik"
         annotations:
           kubernetes.io/ingress.class: "nginx"
         hosts:
@@ -61,18 +62,15 @@ spec:
       config:
         enabled: true
         existingClaim: sonarr-pvc
+      media:
+        enabled: true
+        existingClaim: media-nfs-tank-share-pvc
+        mountPath: /media
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
-    additionalVolumeMounts:
-    - name: media-nas
-      mountPath: "/media"
-    additionalVolumes:
-    - name: media-nas
-      persistentVolumeClaim:
-        claimName: media-nfs-tank-share-pvc
     resources:
       requests:
         memory: 350Mi
