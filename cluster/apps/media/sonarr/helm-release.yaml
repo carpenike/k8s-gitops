@@ -44,7 +44,7 @@ spec:
           secretName: sonarr-cert
       api:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: "nginx"
         annotations:
           kubernetes.io/ingress.class: "nginx"
         hosts:
