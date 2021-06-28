@@ -5,5 +5,5 @@ resources:
 - authentik
 - dex
 - dex-k8s-authenticator
-- keycloak
+# - keycloak
 - oauth2-proxy
