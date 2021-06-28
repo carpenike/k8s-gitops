@@ -76,6 +76,7 @@ spec:
         tls:
         - hosts:
           - "alert-manager.${SECRET_DOMAIN}"
+          secretName: alert-manager-cert
       alertmanagerSpec:
         storage:
           volumeClaimTemplate:
@@ -128,6 +129,7 @@ spec:
         tls:
         - hosts:
           - "prom-server.${SECRET_DOMAIN}"
+          secretName: prom-server-cert
       prometheusSpec:
         externalUrl: "prom-server.${SECRET_DOMAIN}"
         # image:
