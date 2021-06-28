@@ -25,45 +25,41 @@ spec:
     securityContext:
       privileged: true
     service:
-      additionalPorts:
-      - name: websocket
-        port: 3000
+      main:
+        annotations:
+          prometheus.io/probe: "true"
+          prometheus.io/protocol: http
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: nginx
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: "letsencrypt-prod"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
-      hosts:
-      - host: "zwave.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "zwave.${SECRET_DOMAIN}"
-        secretName: zwave-cert
+      main:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+          kubernetes.io/ingress.class: nginx
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: "letsencrypt-prod"
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+        hosts:
+        - host: "zwave.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "zwave.${SECRET_DOMAIN}"
+          secretName: zwave-cert
     persistence:
       config:
         enabled: true
         existingClaim: zwavejs2mqtt-pvc
         mountPath: /usr/src/app/store
-    additionalVolumeMounts:
-    - name: usb
-      mountPath: /dev/serial/by-id/usb-0658_0200-if00
-    additionalVolumes:
-    - name: usb
-      hostPath:
-        path: /dev/serial/by-id/usb-0658_0200-if00
+      usb:
+        enabled: true
+        hostPath: /dev/serial/by-id/usb-0658_0200-if00
+        mountPath: /dev/serial/by-id/usb-0658_0200-if00
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
             - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
-    tolerations:
-    - key: "arm"
-      operator: "Exists"
