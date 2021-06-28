@@ -131,7 +131,7 @@ spec:
           - "prom-server.${SECRET_DOMAIN}"
           secretName: prom-server-cert
       prometheusSpec:
-        externalUrl: "prom-server.${SECRET_DOMAIN}"
+        # externalUrl: "prom-server.${SECRET_DOMAIN}"
         # image:
         #   repository: quay.io/prometheus/prometheus
         #   tag: v2.20.0
