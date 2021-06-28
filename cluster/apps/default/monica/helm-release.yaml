@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: monica
-      version: 4.4.1
+      version: 5.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -31,21 +31,22 @@ spec:
       APP_EMAIL_NEW_USERS: ryan@ryanholt.net
       DEFAULT_MAX_STORAGE_SIZE: 4096
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: "nginx"
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: "letsencrypt-production"
-      hosts:
-      - host: "crm.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "crm.${SECRET_DOMAIN}"
-        secretName: monica-cert
+      main:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+        hosts:
+        - host: "crm.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "crm.${SECRET_DOMAIN}"
+          secretName: monica-cert
     persistence:
       config:
         enabled: true
