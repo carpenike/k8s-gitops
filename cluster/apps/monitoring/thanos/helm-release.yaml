@@ -49,7 +49,7 @@ spec:
       persistence:
         enabled: true
         size: 20Gi
-        storageClass: rook-ceph-block
+        storageClassName: rook-ceph-block
     ruler:
       enabled: false
     metrics:
