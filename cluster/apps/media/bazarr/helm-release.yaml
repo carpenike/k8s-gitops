@@ -24,26 +24,24 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: 10.20.0.2
-        kubernetes.io/ingress.class: "nginx"
-      hosts:
-      - host: "bazarr.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "bazarr.${SECRET_DOMAIN}"
+      main:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: 10.20.0.2
+          kubernetes.io/ingress.class: "nginx"
+        hosts:
+        - host: "bazarr.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "bazarr.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
         existingClaim: bazarr-pvc
-    additionalVolumeMounts:
-    - name: media-nas
-      mountPath: "/media"
-    additionalVolumes:
-    - name: media-nas
-      persistentVolumeClaim:
-        claimName: media-nfs-tank-share-pvc
+      media:
+        enabled: true
+        existingClaim: media-nfs-tank-share-pvc
+        mountPath: /media
