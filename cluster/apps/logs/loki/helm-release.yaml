@@ -19,9 +19,6 @@ spec:
       interval: 5m
   values:
     loki:
-      image:
-        repository: grafana/loki
-        tag: 2.2.1
       replicas: 3
       persistence:
         enabled: false
