@@ -86,18 +86,28 @@ spec:
       podAnnotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "http-metrics"
+      livenessProbe:
+        initialDelaySeconds: 60
+      readinessProbe:
+        initialDelaySeconds: 60
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - loki
+            topologyKey: "kubernetes.io/hostname"
     promtail:
       enabled: true
-      image:
-        repository: grafana/promtail
-        tag: 2.2.1
       serviceMonitor:
         enabled: true
       extraScrapeConfigs:
       - job_name: syslog
         syslog:
           listen_address: 0.0.0.0:1514
-          idle_timeout: 60s
           label_structured_data: true
           labels:
             job: "syslog"
