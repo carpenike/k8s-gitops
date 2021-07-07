@@ -24,11 +24,11 @@ spec:
                 - -c
                 - /scripts/dns-update.sh
               volumeMounts:
-                - name: dns-update
+                - name: dns-update.sh
                   mountPath: "/scripts/dns-update.sh"
                   subPath: dns-update.sh
           volumes:
-            - name: dns-update
+            - name: dns-update.sh
               secret:
                 secretName: dns-update-secret
                 defaultMode: 0777
