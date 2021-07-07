@@ -22,7 +22,7 @@ spec:
               value: "America/New_York"
             envFrom:
             - secretRef:
-              name: thanos-ceph-bucket
+                name: thanos-ceph-bucket
             command:
             - "rclone"
             args:
