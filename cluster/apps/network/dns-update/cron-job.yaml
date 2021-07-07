@@ -30,3 +30,4 @@ spec:
             - name: dns-update
               secret:
                 secretName: dns-update-secret
+              defaultMode: 0777
