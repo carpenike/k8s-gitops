@@ -1,0 +1,32 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  namespace: network
+  name: dns-update
+spec:
+  schedule: "0 */1 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: dns-update
+            image: bash
+            env:
+            - name: TZ
+              value: "America/New_York"
+            command:
+            - "/bin/sh"
+            args:
+            - -c
+            - /config/dns-update.sh
+            volumeMounts:
+            - name: dns-update
+              mountPath: "/config"
+          volumes:
+          - name: dns-update
+            secret:
+              secretName: dns-update-secret
