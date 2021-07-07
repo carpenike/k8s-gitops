@@ -21,7 +21,6 @@ spec:
               command:
                 - "/bin/sh"
               args:
-                - -c
                 - "/scripts/dns-update.sh"
               volumeMounts:
                 - name: dns-update
