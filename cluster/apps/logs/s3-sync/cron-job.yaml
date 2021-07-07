@@ -2,7 +2,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  namespace: monitoring
+  namespace: logs
   name: s3-sync
 spec:
   schedule: "0 */1 * * *"
@@ -15,14 +15,14 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: rclone-thanos
+          - name: rclone-loki
             image: rclone/rclone:1.55
             env:
             - name: TZ
               value: "America/New_York"
             envFrom:
             - secretRef:
-                name: thanos-ceph-bucket
+                name: loki-ceph-bucket
             command:
             - "rclone"
             args:
@@ -36,8 +36,8 @@ spec:
             - "24"
             - "--checkers"
             - "24"
-            - "ceph:thanos"
-            - "nas:thanos/"
+            - "ceph:loki"
+            - "nas:loki/"
             volumeMounts:
             - name: rclone-config
               mountPath: "/config"
