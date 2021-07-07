@@ -24,19 +24,22 @@ spec:
 
     ingress:
       enabled: true
-      ingressClassName: "nginx"
+      ingressClassName: "traefik"
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-production
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         kubernetes.io/tls-acme: "true"
+        external-dns/is-public: "true"
+        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       hosts:
-      - host: authentik.${SECRET_DOMAIN}
+      - host: id.${SECRET_DOMAIN}
         paths:
         - path: /
 
       tls:
       - secretName: tls.authentik
         hosts:
-        - authentik.${SECRET_DOMAIN}
+        - id.${SECRET_DOMAIN}
 
     geoip:
       enabled: false
