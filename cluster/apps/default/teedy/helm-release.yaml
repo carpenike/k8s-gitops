@@ -35,21 +35,22 @@ spec:
       stash.appscode.com/target-paths: "/data"
       stash.appscode.com/volume-mounts: "data:/data"
     ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-        nginx.ingress.kubernetes.io/proxy-body-size: 128m
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-      hosts:
-      - host: "docs.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "docs.${SECRET_DOMAIN}"
-        secretName: teedy-cert
+      main:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          nginx.ingress.kubernetes.io/proxy-body-size: 128m
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+        hosts:
+        - host: "docs.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "docs.${SECRET_DOMAIN}"
+          secretName: teedy-cert
     persistence:
       data:
         enabled: true
