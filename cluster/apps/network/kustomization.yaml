@@ -5,6 +5,6 @@ resources:
 - adguard
 - certificates
 # - coredns
-# - external-dns
+- external-dns
 - unifi
 - dns-update

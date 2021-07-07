@@ -6,7 +6,6 @@ metadata:
   namespace: network
 spec:
   interval: 5m
-  releaseName: external-dns
   chart:
     spec:
       # renovate: registryUrl=https://charts.bitnami.com/bitnami
@@ -18,38 +17,31 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    image:
-      repository: bitnami/external-dns
-      tag: 0.8.0-debian-10-r11
-    provider: coredns
-    coredns:
-      etcdEndpoints: https://k8s.${SECRET_DOMAIN}:2379
-      etcdTLS:
-        enabled: true
-        secretName: coredns-etcd-secret
-    policy: sync
+    nameOverride: external-dns
+    interval: "5m"
+    # logLevel: debug
     sources:
-      - service
-      - ingress
-      - crd
-      # - istio-gateway
-      # - istio-virtualservice
+    - ingress
+    provider: azure
+    azure:
+      cloud: AzureCloud
+      resourceGroup: ${SECRET_AZURE_DNS_RESOURCE_GROUP}
+      tenantId: ${SECRET_AZURE_DNS_TENANT_ID}
+      subscriptionId: ${SECRET_AZURE_DNS_SUBSCRIPTION_ID}
+      aadClientId: ${SECRET_AZURE_DNS_CLIENT_ID}
+      aadClientSecret: ${SECRET_AZURE_DNS_CLIENT_SECRET}
+    policy: sync
+    txtPrefix: "k8s."
     domainFilters:
-      - "${SECRET_DOMAIN}"
-    createSecret: true
+    - "${SECRET_DOMAIN}"
     crd:
-      # disabled --pulled from source repo https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/docs/contributing/crd-source/crd-manifest.yaml
       create: false
       apiversion: externaldns.k8s.io/v1alpha1
       kind: DNSEndpoint
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-    logLevel: debug
+    annotationFilter: "external-dns/is-public in (true)"
     resources:
       requests:
-        memory: 250Mi
+        memory: 100Mi
         cpu: 25m
       limits:
         memory: 250Mi
