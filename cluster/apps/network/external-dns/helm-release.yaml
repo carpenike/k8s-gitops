@@ -24,7 +24,6 @@ spec:
     - ingress
     provider: azure
     azure:
-      cloud: AzureCloud
       resourceGroup: ${SECRET_AZURE_DNS_RESOURCE_GROUP}
       tenantId: ${SECRET_AZURE_DNS_TENANT_ID}
       subscriptionId: ${SECRET_AZURE_DNS_SUBSCRIPTION_ID}
