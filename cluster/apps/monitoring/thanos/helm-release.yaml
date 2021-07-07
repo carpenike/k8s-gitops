@@ -30,7 +30,7 @@ spec:
         ingress:
           enabled: true
           hosts:
-          - "thanos.${SECRET_DOMAIN}"
+            - "thanos.${SECRET_DOMAIN}"
           annotations:
             kubernetes.io/ingress.class: nginx
             nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
@@ -39,7 +39,7 @@ spec:
             kubernetes.io/tls-acme: "true"
             cert-manager.io/cluster-issuer: letsencrypt-production
           tls:
-          - secretName: thanos-cert
+            - secretName: thanos-cert
     queryFrontend:
       enabled: false
     bucket:
@@ -70,23 +70,23 @@ spec:
           enable: false
         part_size: 0
   valuesFrom:
-  - kind: ConfigMap
-    name: thanos-ceph-bucket
-    valuesKey: BUCKET_NAME
-    targetPath: objstore.config.bucket
-  - kind: ConfigMap
-    name: thanos-ceph-bucket
-    valuesKey: BUCKET_HOST
-    targetPath: objstore.config.endpoint
-  - kind: ConfigMap
-    name: thanos-ceph-bucket
-    valuesKey: BUCKET_REGION
-    targetPath: objstore.config.region
-  - kind: Secret
-    name: thanos-ceph-bucket
-    valuesKey: AWS_ACCESS_KEY_ID
-    targetPath: objstore.config.access_key
-  - kind: Secret
-    name: thanos-ceph-bucket
-    valuesKey: AWS_SECRET_ACCESS_KEY
-    targetPath: objstore.config.secret_key
+    - kind: ConfigMap
+      name: thanos-ceph-bucket
+      valuesKey: BUCKET_NAME
+      targetPath: objstore.config.bucket
+    - kind: ConfigMap
+      name: thanos-ceph-bucket
+      valuesKey: BUCKET_HOST
+      targetPath: objstore.config.endpoint
+    - kind: ConfigMap
+      name: thanos-ceph-bucket
+      valuesKey: BUCKET_REGION
+      targetPath: objstore.config.region
+    - kind: Secret
+      name: thanos-ceph-bucket
+      valuesKey: AWS_ACCESS_KEY_ID
+      targetPath: objstore.config.access_key
+    - kind: Secret
+      name: thanos-ceph-bucket
+      valuesKey: AWS_SECRET_ACCESS_KEY
+      targetPath: objstore.config.secret_key
