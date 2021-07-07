@@ -3,7 +3,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: redirect-regex
-  namespace: networking
+  namespace: network
 spec:
   redirectRegex:
     regex: "^(https?://[^/]+/[a-z0-9_]+)$"
@@ -14,7 +14,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: strip-prefix-regex
-  namespace: networking
+  namespace: network
 spec:
   stripPrefixRegex:
     regex:
@@ -24,7 +24,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: redirect-path
-  namespace: networking
+  namespace: network
 spec:
   chain:
     middlewares:

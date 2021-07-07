@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: traefik
-  namespace: networking
+  namespace: network
   labels:
     app.kubernetes.io/name: traefik
 spec:
@@ -13,7 +13,7 @@ spec:
   jobLabel: traefik
   namespaceSelector:
     matchNames:
-      - networking
+      - network
   selector:
     matchLabels:
       app.kubernetes.io/name: traefik
