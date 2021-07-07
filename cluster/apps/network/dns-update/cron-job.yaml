@@ -22,7 +22,7 @@ spec:
                 - "/bin/sh"
               args:
                 - -c
-                - /scripts/dns-update.sh
+                - ls -lh /scripts
               volumeMounts:
                 - name: dns-update.sh
                   mountPath: "/scripts/dns-update.sh"
