@@ -14,7 +14,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: dns-update
-              image: bash
+              image: curlimages/curl
               env:
                 - name: TZ
                   value: "America/New_York"
@@ -22,7 +22,7 @@ spec:
                 - "/bin/sh"
               args:
                 - -c
-                - ls -lh /scripts
+                - "/scripts/dns-update.sh"
               volumeMounts:
                 - name: dns-update.sh
                   mountPath: "/scripts/dns-update.sh"
