@@ -22,10 +22,11 @@ spec:
                 - "/bin/sh"
               args:
                 - -c
-                - /config/dns-update.sh
+                - /scripts/dns-update.sh
               volumeMounts:
                 - name: dns-update
-                  mountPath: "/config"
+                  mountPath: "/scripts/dns-update.sh"
+                  subPath: dns-update.sh
           volumes:
             - name: dns-update
               secret:
