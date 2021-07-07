@@ -10,6 +10,6 @@ resources:
 - minio
 - monica
 # - nextcloud
-- searx
+# - searx
 # - step-issuer
 - teedy
