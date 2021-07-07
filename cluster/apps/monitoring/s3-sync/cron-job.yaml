@@ -18,6 +18,9 @@ spec:
             env:
             - name: TZ
               value: "America/New_York"
+            envFrom:
+            - secretRef: 
+              name: thanos-ceph-bucket
             command:
             - "rclone"
             args:
@@ -31,7 +34,7 @@ spec:
             - "24"
             - "--checkers"
             - "24"
-            - "minio:thanos"
+            - "ceph:thanos"
             - "nas:thanos/"
             volumeMounts:
             - name: rclone-config
