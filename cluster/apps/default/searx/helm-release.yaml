@@ -25,24 +25,26 @@ spec:
       tag: 1.0.0
       pullPolicy: IfNotPresent
     service:
-      annotations:
-        prometheus.io/probe: "true"
-        prometheus.io/protocol: http
+      main:
+        annotations:
+          prometheus.io/probe: "true"
+          prometheus.io/protocol: http
     ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-      hosts:
-      - host: "searx.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "searx.${SECRET_DOMAIN}"
-        secretName: searx-cert
+      main:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+        hosts:
+        - host: "searx.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "searx.${SECRET_DOMAIN}"
+          secretName: searx-cert
     searx:
       existingSecret:
         enabled: true
