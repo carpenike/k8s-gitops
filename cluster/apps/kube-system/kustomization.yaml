@@ -5,6 +5,7 @@ resources:
 - _pvc
 # - democratic-csi
 - external-secrets
+- kube-cleanup-operator
 - metrics-server
 - nginx
 - node-feature-discovery
