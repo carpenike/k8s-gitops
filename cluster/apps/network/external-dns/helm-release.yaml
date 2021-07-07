@@ -19,7 +19,7 @@ spec:
   values:
     nameOverride: external-dns
     interval: "5m"
-    # logLevel: debug
+    logLevel: debug
     sources:
     - ingress
     provider: azure
