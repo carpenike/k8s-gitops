@@ -2,9 +2,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- adguard
-- certificates
-# - coredns
-- external-dns
-- unifi
-- dns-update
+  - adguard
+  - certificates
+  # - coredns
+  - external-dns
+  - traefik
+  - unifi
+  - dns-update
