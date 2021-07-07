@@ -1,6 +1,6 @@
 apiVersion: v1
 data:
-  dns-update.sh: ENC[AES256_GCM,data:X4Ymk1vTYjVNalFAgzm+aX0puLR5VN5ZWiAEnFCfX3zw0/j2TvGTmTddxbDOMVCOgzNIMvDCyMdjSHxBI07mg1potvIodtMARkukR0NQn8n9BBhiGy6PLoHH3GpfXlDogrz/NNrbWWSBoGf+oj1KjsPKZXDM/m4GKxuKXynbSbv+uxja+Q6/4+ZehAHRxxxnjj2zYz7lQIEaZf7IAru/pm4p/z4MamrcEdRL+ls710S0U6pICMNWyTRblIWDaJtGYISXnXwPdl2ygOQ+SziagsfnAdvUmBnMM0edVRBZKBjiOQPUe4C/M5owlflUp4DgtATXOFecks5AT0sgkvQsZqYLYYe/ZZc2CFOQdc5ljpmK1m/m7S2Pt0Px6RQbJLBpWlhX75L5M98oqfL/fNSveoK+keNsghBTN7RfPq96m/7zKkjUBqba4E9LW51yNUdWq+1FMq8h2l/oPSxBJvklRWtoh8rwtJ69RxB+GHelTpM810+TMlY6CJn4xJcqye5I,iv:Oz3lh0kD4cIb8P41MG9TN0fzK0vWfSHMJz6oK0fkpBc=,tag:G4sk+hx8wH0bdx1B8BBeew==,type:str]
+  dns-update.sh: ENC[AES256_GCM,data:kjZbqTYUoTS+bcESAdWA1PjMGJJckGrtujgsJAiIc6/sEdkCWx0iLMqxer2xkfyLITxKWEFbnNIx85VBqS6441Ver9HJH8c56knf8VZtcVr6rGpd85cwq/HXR1Q4y/ngd9fIEeCZYbxVicZvLFUMTvr9wJClxFNrPs1Id6P3V6DhGKodlIzonJCi27VmU61FMNn8V99y7NhgAlY3FZloN0WeGgPvbijPP/bGTOxmKMTijsCYoqaJWBr6foLQBRM/e9WtWEjIWtslFcLtD3c6QwfE5HF742/QoMawlQmrT6pdiqiL39A36KJvganNPHWYmif4eBrKUnNw0VOw50nBZXjRdlIoyzEyGZBmjDyNuQua34e6NNKqjsj81MTBqQucKQzsZ5ofWU6hQa63i+C/j7eAIT1n4SFbqXFsgYteik2X1t2BngCHP3Got5WY+f0AuqRzsPR65rPsa947EeEBsZtgB3V/y1i/,iv:kHsgIJsA0UuLFA1ZAS4HJJ0u8dgpTrs7MBrXPcjC7j4=,tag:D4QbQuf0fPVkOjtKnq8s3g==,type:str]
 kind: Secret
 metadata:
   name: dns-update-secret
@@ -11,8 +11,8 @@ sops:
   azure_kv: []
   hc_vault: []
   age: []
-  lastmodified: "2021-07-07T14:04:03Z"
-  mac: ENC[AES256_GCM,data:FY4Y+6ya69GfLtucoEPJwjNyujwom3D0DQ8DSREzXopFyAIcfIHa+2Bm0y7NOSKch5dovoNZxiRljZ2lrQuMwALav+EshmyX00XjbRRsdlRj+irJ2MPtqGOSr/JGyud4otNm67+GCDT8w9piQmAx9Dxjeu9d+Cdi+4eh3qfdxWc=,iv:KGAlIyWpkEyCEjfhk1MXVFxf/LW1JQfvFzBVT7vPAls=,tag:AkP5Sd7uLXe4BAh57ohu6Q==,type:str]
+  lastmodified: "2021-07-07T18:09:07Z"
+  mac: ENC[AES256_GCM,data:IlfPl0bTcYgT+fxRbsfEVKjGsMLqklQhopj4f+QfH28jx+6CNIq8+eX1UNLgwfW0y2I830RiBzDKOGze8lPJTjyia3FCusG+FZxKe9pIJN1i77oCIV+1+CYwQZmjYcHw18LNY+W5aeNK285WnrZymeoVjUlnsTE6t9KjpzHE7uM=,iv:H4eihZ1mBlvgKftW555W+MfpFGsSr1k3OfDx/MlvbAM=,tag:GbxKGdz4JwBef/GB4fD/1A==,type:str]
   pgp:
     - created_at: "2021-05-27T18:53:50Z"
       enc: |
