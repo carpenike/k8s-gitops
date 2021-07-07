@@ -58,6 +58,8 @@ spec:
         enabled: true
         existingClaim: media-nfs-tank-share-pvc
         mountPath: /media
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "plex-promtail"
     addons:
       promtail:
         enabled: true
