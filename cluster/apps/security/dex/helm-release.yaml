@@ -9,17 +9,20 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: ./charts/dex
-      version: 1.4.0
+      # renovate: registryUrl=https://charts.dexidp.io
+      chart: dex
+      version: 0.5.0
       sourceRef:
-        kind: GitRepository
-        name: mintel-dex-charts-git
+        kind: HelmRepository
+        name: dex-charts
         namespace: flux-system
       interval: 5m
   values:
     image:
-      repository: dexidp/dex
+      repository: ghcr.io/dexidp/dex
       tag: v2.29.0
+    env:
+      KUBERNETES_POD_NAMESPACE: security
     ingress:
       enabled: true
       annotations:
@@ -35,18 +38,19 @@ spec:
             - "dex.${SECRET_DOMAIN}"
           secretName: dex-cert
 
-    config: |-
+    config:
       issuer: https://dex.${SECRET_DOMAIN}
 
       storage:
         type: kubernetes
         config:
           inCluster: true
+
       web:
         http: 0.0.0.0:5556
 
       frontend:
-        theme: "coreos"
+        theme: "tectonic"
         issuer: "holthome"
         issuerUrl: "https://${SECRET_DOMAIN}"
         logoUrl: http://icons.iconarchive.com/icons/icons-land/metro-halloween/512/Cool-icon.png
@@ -62,6 +66,9 @@ spec:
       oauth2:
         responseTypes: ["code", "token", "id_token"]
         skipApprovalScreen: true
+        alwaysShowLoginScreen: false
+
+      enablePasswordDB: false
 
       connectors:
 
