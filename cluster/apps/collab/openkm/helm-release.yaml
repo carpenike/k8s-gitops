@@ -24,7 +24,7 @@ spec:
       pullPolicy: IfNotPresent
     persistence:
       data:
-        enabled: true
+        enabled: false
         # existingClaim: openkm-pvc
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
