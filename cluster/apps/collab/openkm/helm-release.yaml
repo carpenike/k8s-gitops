@@ -43,6 +43,7 @@ spec:
           secretName: openkm-tls
     postgresql:
       enabled: true
+      postgresqlDatabase: openkm
       persistence:
         storageClass: "rook-ceph-block"
         # existingClaim: openkm-postgresql-pvc
