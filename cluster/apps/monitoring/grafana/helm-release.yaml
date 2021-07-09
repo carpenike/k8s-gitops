@@ -53,6 +53,12 @@ spec:
       auth.generic_oauth.group_mapping:
         role_attribute_path: "contains(groups[*], 'holthome:k8s-admins') && 'Admin' || 'Viewer'"
         org_id: 1
+      auth.anonymous:
+        enabled: true
+        org_id: 1
+        org_role: Viewer
+      security:
+        allow_embedding: true
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
