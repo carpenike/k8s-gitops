@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: openkm/openkm-ce
-      tag: 6.3.9
+      tag: 6.3.11
       pullPolicy: IfNotPresent
     persistence:
       data:
