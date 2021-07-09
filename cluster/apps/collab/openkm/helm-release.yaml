@@ -27,6 +27,7 @@ spec:
         enabled: true
         # existingClaim: openkm-pvc
         storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
     ingress:
       enabled: true
       annotations:
