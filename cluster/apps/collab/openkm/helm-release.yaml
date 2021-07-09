@@ -28,6 +28,7 @@ spec:
         # existingClaim: openkm-pvc
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
+        size: 10Gi
     ingress:
       enabled: true
       annotations:
