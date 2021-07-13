@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: homeassistant/home-assistant
-      tag: 2021.7.1
+      tag: 2021.7.2
     persistence:
       config:
         enabled: true
