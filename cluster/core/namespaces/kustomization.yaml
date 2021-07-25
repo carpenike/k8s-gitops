@@ -6,6 +6,7 @@ resources:
   - cert-manager.yaml
   - collab.yaml
   - default.yaml
+  - ext-gateway.yaml
   - flux-system.yaml
   - home.yaml
   - kasten-io.yaml
@@ -17,4 +18,3 @@ resources:
   - network.yaml
   - rook-ceph.yaml
   - security.yaml
-  - vpn.yaml
