@@ -29,6 +29,7 @@ resources:
   - kubernetes-sigs-descheduler-charts.yaml
   - kubernetes-stable-charts.yaml
   - lwolf-charts.yaml
+  - mailu-charts.yaml
   - minio-charts.yaml
   - nicholaswilde-charts.yaml
   - oauth2-proxy-charts.yaml
@@ -38,7 +39,6 @@ resources:
   - rook-ceph-charts.yaml
   - stakater-charts.yaml
   - timberio-charts.yaml
-  - toboshii-charts.yaml
   - traefik-charts.yaml
   - vernemq-charts.yaml
   - vmware-tanzu-charts.yaml
