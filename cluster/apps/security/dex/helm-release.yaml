@@ -146,6 +146,12 @@ spec:
           redirectURIs:
             - https://authentik.${SECRET_DOMAIN}/source/oauth/callback/dex/
 
+        - id: vultr
+          name: vultr
+          secret: ${SECRET_DEX_VULTR_CLIENT_SECRET}
+          redirectURIs:
+            - https://my.vultr.com/openid/
+
     resources:
       requests:
         memory: 250Mi
