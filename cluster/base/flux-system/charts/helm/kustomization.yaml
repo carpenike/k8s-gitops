@@ -38,6 +38,7 @@ resources:
   - rook-ceph-charts.yaml
   - stakater-charts.yaml
   - timberio-charts.yaml
+  - toboshii-charts.yaml
   - traefik-charts.yaml
   - vernemq-charts.yaml
   - vmware-tanzu-charts.yaml
