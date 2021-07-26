@@ -21,7 +21,7 @@ spec:
     fullnameOverride: bitwarden
     image:
       repository: bitwardenrs/server
-      tag: 1.22.1-alpine
+      tag: 1.22.2-alpine
     bitwardenrs:
       domain: "https://bitwarden.${SECRET_DOMAIN}"
       admin:
