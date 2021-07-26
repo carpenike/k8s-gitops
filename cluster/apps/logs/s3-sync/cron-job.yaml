@@ -16,7 +16,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: rclone-loki
-            image: rclone/rclone:1.55
+            image: rclone/rclone:1.56
             env:
             - name: TZ
               value: "America/New_York"
