@@ -17,10 +17,10 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    image:
-      name: ghcr.io/goauthentik/server
-      tag: 2021.5.2
-      pullPolicy: IfNotPresent
+    # image:
+    #   name: ghcr.io/goauthentik/server
+    #   tag: 2021.5.2
+    #   pullPolicy: IfNotPresent
 
     ingress:
       enabled: true
