@@ -144,7 +144,7 @@ spec:
           name: authentik
           secret: ${SECRET_DEX_AUTHENTIK_CLIENT_SECRET}
           redirectURIs:
-            - https://authentik.${SECRET_DOMAIN}/source/oauth/callback/dex/
+            - https://id.${SECRET_DOMAIN}/source/oauth/callback/dex/
 
         - id: vultr
           name: vultr
