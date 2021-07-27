@@ -1,2 +1,0 @@
-git:
-  deployKeyBase64: "${HASS_DEPLOY_KEY_B64}"
