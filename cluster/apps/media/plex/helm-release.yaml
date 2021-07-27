@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: plex
-      version: 5.2.0
+      version: 5.3.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/plex
-      tag: v1.23.3.4707-ebb5fe9f3
+      tag: v1.23.5.4862-0f739d462
     env:
       TZ: "America/New_York"
     podSecurityContext:
