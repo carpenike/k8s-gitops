@@ -25,12 +25,12 @@ spec:
     ingress:
       main:
         enabled: true
+        ingressClassName: "traefik"
         annotations:
-          kubernetes.io/ingress.class: "nginx"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
-          nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
         - host: "radarr-uhd.${SECRET_DOMAIN}"
           paths:
@@ -42,9 +42,9 @@ spec:
           secretName: radarr-uhd-cert
       api:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: "traefik"
         annotations:
-          kubernetes.io/ingress.class: "nginx"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
         - host: "radarr-uhd.${SECRET_DOMAIN}"
           paths:

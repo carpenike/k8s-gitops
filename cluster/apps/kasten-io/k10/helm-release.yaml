@@ -40,7 +40,7 @@ spec:
     clusterName: k8s
     ingress:
       create: true
-      class: "nginx"
+      class: "traefik"
       host: "k10.${SECRET_DOMAIN}"
       annotations:
         kubernetes.io/tls-acme: "true"
