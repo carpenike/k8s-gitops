@@ -1,7 +1,0 @@
-driver:
-  config:
-    httpConnection:
-      apiKey: $TRUENAS_NAS0_API_KEY
-    sshConnection:
-      privateKey: |
-        $TRUENAS_NAS0_SSH_KEY

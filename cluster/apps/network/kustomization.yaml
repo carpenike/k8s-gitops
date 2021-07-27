@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - adguard
   - certificates
-  # - coredns
   - external-dns
   - traefik
   - unifi

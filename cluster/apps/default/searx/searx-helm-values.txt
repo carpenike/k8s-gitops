@@ -1,2 +1,0 @@
-searx:
-  mortyKey: $SEARX_MORTY_KEY

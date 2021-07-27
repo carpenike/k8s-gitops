@@ -6,10 +6,6 @@ resources:
 - bitwarden
 # - bookstack
 # - goldilocks
-# - matrix
-# - minio
 - monica
 # - nextcloud
-# - searx
-# - step-issuer
 - teedy
