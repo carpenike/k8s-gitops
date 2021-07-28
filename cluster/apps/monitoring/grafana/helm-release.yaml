@@ -38,20 +38,24 @@ spec:
         mode: console
       grafana_net:
         url: https://grafana.net
+      auth:
+        signout_redirect_url: https://id.${SECRET_DOMAIN}/application/o/grafana/end-session/
+        # Optionally enable auto-login
+        oauth_auto_login: true
       auth.basic:
         disable_login_form: true
       auth.generic_oauth:
         enabled: true
         allow_sign_up: true
-        name: Dex
+        name: Authentik
         client_id: grafana
         client_secret: ${SECRET_DEX_GRAFANA_CLIENT_SECRET}
-        scopes: openid profile email groups
-        auth_url: https://dex.${SECRET_DOMAIN}/auth
-        token_url: https://dex.${SECRET_DOMAIN}/token
-        api_url: https://dex.${SECRET_DOMAIN}/userinfo
+        scopes: openid profile email
+        auth_url: https://id.${SECRET_DOMAIN}/application/o/authorize/
+        token_url: https://id.${SECRET_DOMAIN}/application/o/token/
+        api_url: https://id.${SECRET_DOMAIN}/application/o/userinfo/
       auth.generic_oauth.group_mapping:
-        role_attribute_path: "contains(groups[*], 'holthome:k8s-admins') && 'Admin' || 'Viewer'"
+        role_attribute_path: "contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'"
         org_id: 1
       auth.anonymous:
         enabled: true
