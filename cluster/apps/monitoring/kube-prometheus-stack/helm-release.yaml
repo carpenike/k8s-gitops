@@ -23,44 +23,44 @@ spec:
           slack_api_url: "${SECRET_ALERT_MANAGER_DISCORD_WEBHOOK}"
           resolve_timeout: 5m
         receivers:
-        - name: 'null'
-        - name: 'discord'
-          slack_configs:
-          - channel: '#prometheus'
-            icon_url: https://avatars3.githubusercontent.com/u/3380462
-            username: 'Prometheus'
-            send_resolved: true
-            title: |-
-              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
-            text: >-
-              {{ range .Alerts -}}
-                *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
-              {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
-              *Details:*
-                {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
-                {{ end }}
-              {{ end }}
+          - name: "null"
+          - name: "discord"
+            slack_configs:
+              - channel: "#prometheus"
+                icon_url: https://avatars3.githubusercontent.com/u/3380462
+                username: "Prometheus"
+                send_resolved: true
+                title: |-
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
+                text: >-
+                  {{ range .Alerts -}}
+                    *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+                  {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
+                  *Details:*
+                    {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                    {{ end }}
+                  {{ end }}
         route:
-          group_by: ['alertname', 'job']
+          group_by: ["alertname", "job"]
           group_wait: 30s
           group_interval: 5m
           repeat_interval: 6h
-          receiver: 'discord'
+          receiver: "discord"
           routes:
-          - receiver: 'null'
-            match:
-              alertname: Watchdog
-          - receiver: 'discord'
-            match_re:
-              # severity: critical|warning
-              severity: critical
-            continue: true
+            - receiver: "null"
+              match:
+                alertname: Watchdog
+            - receiver: "discord"
+              match_re:
+                # severity: critical|warning
+                severity: critical
+              continue: true
         inhibit_rules:
-        - source_match:
-            severity: 'critical'
-          target_match:
-            severity: 'warning'
-          equal: ['alertname', 'namespace']
+          - source_match:
+              severity: "critical"
+            target_match:
+              severity: "warning"
+            equal: ["alertname", "namespace"]
       ingress:
         enabled: true
         pathType: Prefix
@@ -71,11 +71,11 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - "alert-manager.${SECRET_DOMAIN}"
-        tls:
-        - hosts:
           - "alert-manager.${SECRET_DOMAIN}"
-          secretName: alert-manager-cert
+        tls:
+          - hosts:
+              - "alert-manager.${SECRET_DOMAIN}"
+            secretName: alert-manager-cert
       alertmanagerSpec:
         storage:
           volumeClaimTemplate:
@@ -87,22 +87,22 @@ spec:
     nodeExporter:
       serviceMonitor:
         relabelings:
-        - action: replace
-          regex: (.*)
-          replacement: $1
-          sourceLabels:
-          - __meta_kubernetes_pod_node_name
-          targetLabel: kubernetes_node
+          - action: replace
+            regex: (.*)
+            replacement: $1
+            sourceLabels:
+              - __meta_kubernetes_pod_node_name
+            targetLabel: kubernetes_node
     grafana:
       enabled: false
     kubelet:
       enabled: true
       serviceMonitor:
         metricRelabelings:
-        - action: replace
-          sourceLabels:
-          - node
-          targetLabel: instance
+          - action: replace
+            sourceLabels:
+              - node
+            targetLabel: instance
     kubeApiServer:
       enabled: true
     kubeControllerManager:
@@ -124,11 +124,11 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - "prom-server.${SECRET_DOMAIN}"
-        tls:
-        - hosts:
           - "prom-server.${SECRET_DOMAIN}"
-          secretName: prom-server-cert
+        tls:
+          - hosts:
+              - "prom-server.${SECRET_DOMAIN}"
+            secretName: prom-server-cert
       prometheusSpec:
         # externalUrl: "prom-server.${SECRET_DOMAIN}"
         # image:
@@ -162,27 +162,27 @@ spec:
             name: thanos-objstore-secret
             key: objstore.yml
         additionalScrapeConfigs:
-        - job_name: 'netdata-scrape'
-          metrics_path: "/api/v1/allmetrics"
-          params:
-            format: [prometheus_all_hosts]
-          honor_labels: true
-          static_configs:
-          - targets:
-            - nas-0.${SECRET_DOMAIN}:19999
-            - nas-1.${SECRET_DOMAIN}:19999
-        - job_name: 'node-exporter'
-          static_configs:
-          - targets:
-            - fw.${SECRET_DOMAIN}:9100
-        - job_name: 'home-assistant'
-          scrape_interval: 60s
-          metrics_path: '/api/prometheus'
-          bearer_token: '${SECRET_HASS_PROMETHEUS_TOKEN}'
-          scheme: http
-          static_configs:
-          - targets:
-            - home-assistant.home.svc:8123
+          - job_name: "netdata-scrape"
+            metrics_path: "/api/v1/allmetrics"
+            params:
+              format: [prometheus_all_hosts]
+            honor_labels: true
+            static_configs:
+              - targets:
+                  - nas-0.${SECRET_DOMAIN}:19999
+                  - nas-1.${SECRET_DOMAIN}:19999
+          - job_name: "node-exporter"
+            static_configs:
+              - targets:
+                  - fw.${SECRET_DOMAIN}:9100
+          - job_name: "home-assistant"
+            scrape_interval: 60s
+            metrics_path: "/api/prometheus"
+            bearer_token: "${SECRET_HASS_PROMETHEUS_TOKEN}"
+            scheme: http
+            static_configs:
+              - targets:
+                  - home-assistant.home.svc:8123
 
       thanosService:
         enabled: true
