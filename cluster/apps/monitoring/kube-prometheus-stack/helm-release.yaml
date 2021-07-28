@@ -17,6 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    fullnameOverride: prometheus
     alertmanager:
       config:
         global:
@@ -31,12 +32,12 @@ spec:
                 username: "Prometheus"
                 send_resolved: true
                 title: |-
-                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }}{{ else }}{{ .CommonLabels.alertname }}{{ end }}
                 text: >-
                   {{ range .Alerts -}}
-                    *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
-                  {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
-                  *Details:*
+                    **Alert:** {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+                  **Description:** {{ if ne .Annotations.description ""}}{{ .Annotations.description }}{{else}}N/A{{ end }}
+                  **Details:**
                     {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
                     {{ end }}
                   {{ end }}
@@ -68,6 +69,7 @@ spec:
         annotations:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
@@ -93,8 +95,13 @@ spec:
             sourceLabels:
               - __meta_kubernetes_pod_node_name
             targetLabel: kubernetes_node
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
     grafana:
       enabled: false
+      forceDeployDashboards: true
     kubelet:
       enabled: true
       serviceMonitor:
@@ -106,13 +113,28 @@ spec:
     kubeApiServer:
       enabled: true
     kubeControllerManager:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 10.20.10.16
     kubeScheduler:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 10.20.10.16
     kubeProxy:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 10.20.10.16
     kubeEtcd:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 10.20.10.16
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
+    # Setting this option to 0 disabled CPU limits
+    prometheusOperator:
+      configReloaderCpu: 0
     prometheus:
       ingress:
         enabled: true
@@ -121,6 +143,7 @@ spec:
         annotations:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
@@ -129,22 +152,19 @@ spec:
           - hosts:
               - "prom-server.${SECRET_DOMAIN}"
             secretName: prom-server-cert
+      thanosService:
+        enabled: true
       prometheusSpec:
         # externalUrl: "prom-server.${SECRET_DOMAIN}"
         # image:
         #   repository: quay.io/prometheus/prometheus
         #   tag: v2.20.0
-        replicas: 2
+        replicas: 1
         replicaExternalLabelName: "replica"
-        ruleSelector: {}
-        ruleNamespaceSelector: {}
         ruleSelectorNilUsesHelmValues: false
-        serviceMonitorSelector: {}
-        serviceMonitorNamespaceSelector: {}
         serviceMonitorSelectorNilUsesHelmValues: false
-        podMonitorSelector: {}
-        podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
         retention: 6h
         enableAdminAPI: true
         walCompression: true
@@ -157,7 +177,7 @@ spec:
                   storage: 10Gi
         thanos:
           image: quay.io/thanos/thanos:v0.22.0
-          version: v0.21.1
+          version: v0.22.0
           objectStorageConfig:
             name: thanos-objstore-secret
             key: objstore.yml
@@ -183,8 +203,3 @@ spec:
             static_configs:
               - targets:
                   - home-assistant.home.svc:8123
-
-      thanosService:
-        enabled: true
-    kube-state-metrics:
-      fullnameOverride: kube-state-metrics
