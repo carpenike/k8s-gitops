@@ -22,17 +22,17 @@ jobs:
         file_or_dir: "./cluster"
         config_file: "./.github/yamllint.config.yaml"
 
-  bash:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-    - name: Lint Hack Scripts
-      uses: reviewdog/action-shellcheck@v1
-      with:
-        path: "./hack"
-        level: "error"
+  # bash:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       fetch-depth: 1
+  #   - name: Lint Hack Scripts
+  #     uses: reviewdog/action-shellcheck@v1
+  #     with:
+  #       path: "./hack"
+  #       level: "error"
 
   # ansible:
   #   runs-on:
