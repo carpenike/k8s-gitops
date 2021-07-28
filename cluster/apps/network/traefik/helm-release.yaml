@@ -18,8 +18,8 @@ spec:
       interval: 5m
   values:
     deployment:
-      kind: Deployment
-      replicas: 3
+      kind: Daemonset
+      # replicas: 3
     service:
       enabled: true
       type: LoadBalancer
