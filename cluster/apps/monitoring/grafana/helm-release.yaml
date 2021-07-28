@@ -84,7 +84,7 @@ spec:
           access: proxy
           url: http://thanos-query-http:10902/
           isDefault: true
-        - name: loki
+        - name: Loki
           type: loki
           access: proxy
           url: http://loki.logs.svc.cluster.local:3100
