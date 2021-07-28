@@ -49,7 +49,7 @@ spec:
         allow_sign_up: true
         name: Authentik
         client_id: grafana
-        client_secret: ${SECRET_DEX_GRAFANA_CLIENT_SECRET}
+        client_secret: ${SECRET_AUTHENTIK_GRAFANA_CLIENT_SECRET}
         scopes: openid profile email
         auth_url: https://id.${SECRET_DOMAIN}/application/o/authorize/
         token_url: https://id.${SECRET_DOMAIN}/application/o/token/
