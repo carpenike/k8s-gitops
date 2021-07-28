@@ -18,7 +18,8 @@ spec:
       interval: 5m
   values:
     deployment:
-      kind: Daemonset
+      enabled: true
+      kind: DaemonSet
       # replicas: 3
     service:
       enabled: true
