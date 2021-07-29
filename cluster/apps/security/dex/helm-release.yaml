@@ -96,12 +96,6 @@ spec:
           redirectURIs:
             - https://login.${SECRET_DOMAIN}/callback/
 
-        - id: grafana
-          name: grafana
-          secret: ${SECRET_DEX_GRAFANA_CLIENT_SECRET}
-          redirectURIs:
-            - https://grafana.${SECRET_DOMAIN}/login/generic_oauth
-
         - id: nextcloud
           name: nextcloud
           secret: ${SECRET_DEX_NEXTCLOUD_CLIENT_SECRET}
