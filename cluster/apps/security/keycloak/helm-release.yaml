@@ -21,7 +21,7 @@ spec:
     nameOverride: keycloak
     image:
       repository: jboss/keycloak
-      tag: 14.0.0
+      tag: 15.0.0
     replicas: 1
     extraEnvFrom: |
       - secretRef:
