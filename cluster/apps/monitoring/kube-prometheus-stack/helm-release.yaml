@@ -177,10 +177,10 @@ spec:
                   storage: 10Gi
         thanos:
           image: quay.io/thanos/thanos:v0.22.0
-          version: v0.22.0
+          version: v0.21.1
           objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
+            name: thanos
+            key: object-store.yaml
         additionalScrapeConfigs:
           - job_name: "netdata-scrape"
             metrics_path: "/api/v1/allmetrics"
