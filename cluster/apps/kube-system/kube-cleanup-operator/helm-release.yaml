@@ -22,8 +22,8 @@ spec:
       global: true
     args:
     - --delete-failed-after=60m
-    - --delete-successful-after=0
-    - --delete-pending-pods-after=0
-    - --delete-evicted-pods-after=0
-    - --delete-orphaned-pods-after=0
+    - --delete-successful-after=60m
+    - --delete-pending-pods-after=60m
+    - --delete-evicted-pods-after=60m
+    - --delete-orphaned-pods-after=60m
     - --legacy-mode=false
