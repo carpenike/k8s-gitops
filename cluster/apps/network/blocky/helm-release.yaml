@@ -38,7 +38,7 @@ spec:
         externalIPs:
           - "${SVC_BLOCKY_ADDRESS}"
         ports:
-          tcp:
+          dns-tcp:
             enabled: true
             port: 53
             protocol: TCP
@@ -49,7 +49,7 @@ spec:
         externalIPs:
           - "${SVC_BLOCKY_ADDRESS}"
         ports:
-          udp:
+          dns-udp:
             enabled: true
             port: 53
             protocol: UDP
