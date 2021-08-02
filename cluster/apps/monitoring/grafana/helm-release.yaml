@@ -23,6 +23,7 @@ spec:
       GF_EXPLORE_ENABLED: true
       GF_PANELS_DISABLE_SANITIZE_HTML: true
       GF_LOG_FILTERS: rendering:debug
+      VAR_BLOCKY_URL: "http://blocky.network.svc.cluster.local:4000"
     adminPassword: "${SECRET_GRAFANA_PASSWORD}"
     grafana.ini:
       server:
@@ -144,9 +145,9 @@ spec:
         flux-control-plane:
           url: https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/control-plane.json
           datasource: Prometheus
-        TrueNAS:
-          url: https://grafana.com/api/dashboards/12921/revisions/1/download
-          datasource: TrueNAS
+        blocky:
+          url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
+          datasource: Prometheus
     sidecar:
       dashboards:
         enabled: true
