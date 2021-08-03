@@ -6,7 +6,7 @@ resources:
   - external-dns
   - external-secrets
   - external-snapshotter
-  - forecastle
+  # - forecastle
   - kube-prometheus-stack
   # - registry-creds
   - rook-ceph
