@@ -10,6 +10,6 @@ resources:
   - nginx
   - node-feature-discovery
   - rbac
-  - registry-creds
+  # - registry-creds
   - reloader
   - kured
