@@ -1,0 +1,99 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vikunja
+  namespace: data
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: vikunja
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: caddy
+      tag: 2.4.3-alpine
+      pullPolicy: IfNotPresent
+
+    controllerType: deployment
+
+    strategy:
+      type: Recreate
+
+    service:
+      main:
+        port:
+          port: 8080
+        annotations:
+          prometheus.io/probe: "true"
+          prometheus.io/protocol: http
+
+    additionalContainers:
+      - name: api
+        image: vikunja/api:0.17.1
+        env:
+          - name: VIKUNJA_DATABASE_TYPE
+            value: "postgres"
+          # - name: VIKUNJA_SERVICE_JWTSECRET
+          #   value: ${SECRET_VIKUNJA_JWT_SECRET}
+          - name: VIKUNJA_DATABASE_HOST
+            value: vikunja-postgresql.collab.svc.cluster.local.
+          - name: VIKUNJA_DATABASE_DATABASE
+            value: vikunja
+          - name: VIKUNJA_DATABASE_USER
+            value: vikunja
+          - name: VIKUNJA_DATABASE_PASSWORD
+            value: ${SECRET_VIKUNJA_POSTGRES_PASSWORD}
+        volumeMounts:
+          - name: files
+            mountPath: /app/vikunja/files
+      - name: frontend
+        image: vikunja/frontend:0.17.0
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          # traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+          # kubernetes.io/ingress.class: "traefik"
+          # forecastle.stakater.com/expose: "true"
+          # forecastle.stakater.com/appName: "Vikunja"
+          # forecastle.stakater.com/icon: "https://vikunja.io/docs/images/vikunja-logo-white.svg"
+          # forecastle.stakater.com/network-restricted: "true"
+        hosts:
+          - host: tasks.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "tasks.${SECRET_DOMAIN}"
+
+    persistence:
+      files:
+        enabled: true
+        existingClaim: vikunja-files-pvc
+        mountpath: /app/vikunja/files
+
+    postgresql:
+      postgresqlPostgresPassword: ${SECRET_VIKUNJA_POSTGRES_ADMIN_PASSWORD}
+      postgresqlUsername: vikunja
+      postgresqlPassword: ${SECRET_VIKUNJA_POSTGRES_PASSWORD}
+      postgresqlDatabase: vikunja
+      enabled: true
+      persistence:
+        enabled: true
+        existingClaim: vikunja-postgresql-pvc
