@@ -45,9 +45,11 @@ spec:
     authentik:
       email:
         host: smtp.mailgun.com
-        port: 587
+        port: 465
+        username: ${SECRET_MAILGUN_USERNAME}
         password: ${SECRET_MAILGUN_PASSWORD}
-        from: authentik@${SECRET_DOMAIN}
+        use_ssl: true
+        from: id@${SECRET_DOMAIN}
       secret_key: ${SECRET_AUTHENTIK_SECRET_KEY}
       log_level: debug
 
