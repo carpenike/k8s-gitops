@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - collab
   - default
+  - ext-gateway
   - flux-system
   - home
   - kasten-io
