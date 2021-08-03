@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
   # - forecastle
   - gitea
-  - openkm
+  # - openkm
   - joplin
   - vikunja
