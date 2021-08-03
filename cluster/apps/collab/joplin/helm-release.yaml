@@ -67,8 +67,10 @@ spec:
               - "joplin.${SECRET_DOMAIN}"
 
     postgresql:
-      existingSecret: joplin-postgresql-secret
+      # existingSecret: joplin-postgresql-secret
+      postgresqlPostgresPassword: ${SECRET_JOPLIN_POSTGRES_ADMIN_PASSWORD}
       postgresqlUsername: joplin
+      postgresqlPassword: ${SECRET_JOPLIN_POSTGRES_PASSWORD}
       postgresqlDatabase: joplin
       enabled: true
       persistence:
