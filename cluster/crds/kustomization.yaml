@@ -7,6 +7,6 @@ resources:
 - external-secrets
 - external-snapshotter
 - kube-prometheus-stack
-- registry-creds
+# - registry-creds
 - rook-ceph
 - traefik
