@@ -17,6 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    nameOverride: joplin
     image:
       repository: joplin/server
       tag: 2.2.10
