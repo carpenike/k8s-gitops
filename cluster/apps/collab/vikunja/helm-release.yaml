@@ -41,8 +41,8 @@ spec:
         env:
           - name: VIKUNJA_DATABASE_TYPE
             value: "postgres"
-          # - name: VIKUNJA_SERVICE_JWTSECRET
-          #   value: ${SECRET_VIKUNJA_JWT_SECRET}
+          - name: VIKUNJA_SERVICE_JWTSECRET
+            value: ${SECRET_VIKUNJA_JWT_SECRET}
           - name: VIKUNJA_DATABASE_HOST
             value: vikunja-postgresql.collab.svc.cluster.local.
           - name: VIKUNJA_DATABASE_DATABASE
