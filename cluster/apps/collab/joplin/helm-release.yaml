@@ -67,6 +67,8 @@ spec:
 
     postgresql:
       existingSecret: joplin-postgresql-secret
+      postgresqlUsername: joplin
+      postgresqlDatabase: joplin
       enabled: true
       persistence:
         enabled: true
