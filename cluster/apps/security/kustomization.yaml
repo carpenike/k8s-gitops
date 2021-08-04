@@ -6,4 +6,4 @@ resources:
 - dex
 - dex-k8s-authenticator
 # - keycloak
-- oauth2-proxy
+# - oauth2-proxy
