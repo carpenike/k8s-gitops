@@ -56,7 +56,7 @@ spec:
         repository: ghcr.io/k8s-at-home/gateway-admision-controller
         tag: v3.3.2
 
-      gatewayDefault: false
+      gatewayDefault: true
       gatewayLabel: setGateway
       gatewayAnnotation: setGateway
 
