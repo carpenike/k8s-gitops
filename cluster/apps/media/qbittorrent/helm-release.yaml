@@ -36,9 +36,9 @@ spec:
         ports:
           bittorrent:
             enabled: true
-            port: 50413
+            port: 55110
             protocol: TCP
-            targetPort: 50413
+            targetPort: 55110
         externalTrafficPolicy: Local
     ingress:
       main:
