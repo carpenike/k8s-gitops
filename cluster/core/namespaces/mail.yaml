@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: mail
   labels:
-    istio-injection: disabled
+    routed-gateway: "true"
