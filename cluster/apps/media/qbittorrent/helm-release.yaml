@@ -23,6 +23,7 @@ spec:
       tag: v4.3.7
     podAnnotations:
       setGateway: "true"
+    hostname: qbittorrent
     env:
       TZ: "America/New_York"
     service:
