@@ -20,8 +20,11 @@ spec:
     installCRDs: false
     webhook:
       enabled: true
+      tolerations:
+      - key: "arm"
+        operator: "Exists"
     extraArgs:
-    - --dns01-recursive-nameservers=10.20.0.1:53
+    - --dns01-recursive-nameservers=1.1.1.1:53
     - --dns01-recursive-nameservers-only
     tolerations:
     - key: "arm"
