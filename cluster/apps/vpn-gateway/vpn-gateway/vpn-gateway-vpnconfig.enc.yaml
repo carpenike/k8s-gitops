@@ -4,15 +4,15 @@ metadata:
   name: vpn-gateway-vpnconfig
   namespace: vpn-gateway
 stringData:
-  vpnConfigfile: ENC[AES256_GCM,data:YBgdWXWq0fLGvGxqOpPI8iaYCSUDQrdrYaNJLH4b2h9GTjgMQpSZ+3usFvltHLiBcABvtrtlhH7iVt3z8fGpZIax/fwcHXO/CwqSjoIaoqtvNS6T/bxeEpx8ENDQLnajsxZsyQOEWWNKaDINQ1d9JK4iryQphkSsLM0VnNn38ksyK14s4Q3tzSMG1p8In1pqRGsCIxSgyT8XERlH/5aOAnNIXr5b7bu0M6oXVfv3fWiP4yIBDWVgFR807jhREkpeDPTK8DS0HRpR3NnBVVyfpZj9LhkrnnRSlnKH4txvqy7zMO9PQQTZx2LfxehiJjwejC7e+UIu75LoifCXBb7lXATnfOmokfG4b2HKgIHbZ64=,iv:ySKhqyWni8JR4Opp7h1BM8MWNHoaMxI6my3jd1WNveU=,tag:B7FzbflWM0foQ1LFiKn3kg==,type:str]
+  vpnConfigfile: ENC[AES256_GCM,data:0ISG7usX7hyDsnIpoohSHvi1lGXA9pzQimG6wRBa4QkKJ1FBWz5aOyxaNEiwbnam36EjP0947exa1oj8vdgmsU1CXKxKivWGKYYHJF7pe6Pdkoie5YGJFwOIE4Yms4KpzgaQrPwYDbBtWxBjWV3+ezm6a3sJBNP6nDktDre2wgvvgWX8fe5wBH7C3Sz+w+MyJ6JrwIcHbEft2tvLkZUwvXCLOCRNhD136lI+srfijV9n7ruXIqL6vWfgMouxgleUBaB4H29QkNYrMHvktC6cVxAtdDFbgfknqDmYhSKrcJtpRGEWuHCHk+GXMeYQcZj0pIMGfqWGrPCa0WO2OzedpRR5RASh5jM9Fg8SEmgE38LEvw==,iv:rK8ZVYyky1zI1UNNjzkfIcqq010XmYppMblV0YwSNn0=,tag:pEz0q/DzFkV/ba4aCSnN4w==,type:str]
 sops:
   kms: []
   gcp_kms: []
   azure_kv: []
   hc_vault: []
   age: []
-  lastmodified: "2021-08-04T21:40:25Z"
-  mac: ENC[AES256_GCM,data:IFSWRI24MU6qfDUrFa1lPrwAW35D3o2FZZeqaZ35oiLFj4TheCLSHZvw4xP/97d/QXvJeltTgmZ+lqhiQyYp8h6EIGbBrmy85+fCP5hLwGIYbAebSQyIHelX/4zdOjVZ6X3N1qJjqG75psXF74wKV8OHYTG/m2j1R5LZ86OthvY=,iv:YCjN+HiLrmXjSSDZXETG0/u2a+4h5b2bzCiw+owSckc=,tag:Cri/awPkqXNtwlx1VYnZKA==,type:str]
+  lastmodified: "2021-08-04T21:44:15Z"
+  mac: ENC[AES256_GCM,data:OuLGJha0VDvzzghhsR/WtlLqa/0s7jHksB6yQmE2mr8Ic3CJumE7fjIbjzVQqJXMab62WVuXnnsS8d2KbrxYR5gDPMis3Ifs/kpfWnz5SX+Mfs7wM1LYfaQdxzLKrY42OusG3SzScWwz8Fe2ojraiAq2GZO+qsnfLkoNfWN87Zc=,iv:TCLcTelPP9xKhcDM8e2RzeTf34lbF+tolWGAf/8ouM4=,tag:936l9pEk6RG2rAVSDc7bFA==,type:str]
   pgp:
     - created_at: "2021-08-04T21:36:04Z"
       enc: |
