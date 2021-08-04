@@ -44,12 +44,12 @@ spec:
       host: "k10.${SECRET_DOMAIN}"
       annotations:
         kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        cert-manager.io/cluster-issuer: "letsencrypt-production"
       hosts:
       - "k10.${SECRET_DOMAIN}"
       tls:
         enabled: true
-        # secretName: k10-cert
+        secretName: k10-cert
   #   resources:
   #     requests:
   #       memory: 250Mi
