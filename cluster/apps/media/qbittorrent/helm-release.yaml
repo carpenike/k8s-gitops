@@ -21,6 +21,8 @@ spec:
     image:
       repository: ghcr.io/k8s-at-home/qbittorrent
       tag: v4.3.7
+    podAnnotations:
+      setGateway: "true"
     env:
       TZ: "America/New_York"
     service:

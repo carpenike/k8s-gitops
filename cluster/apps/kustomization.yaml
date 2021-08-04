@@ -16,3 +16,4 @@ resources:
   - network
   - security
 # - system-upgrade
+  - vpn-gateway
