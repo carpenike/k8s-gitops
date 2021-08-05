@@ -8,5 +8,6 @@ resources:
   - kube-prometheus-stack
   - snmp-exporter
   - speedtest-prometheus
-  - thanos
   - s3-sync
+  - thanos
+  - unifi-poller
