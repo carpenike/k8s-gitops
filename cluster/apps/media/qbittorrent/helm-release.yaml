@@ -101,3 +101,9 @@ spec:
         ports:
           - name: metrics
             containerPort: 9022
+      - name: qbt-tracker-hound
+        image: jakewharton/qbt-tracker-hound:1
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: QBT_HOST
+            value: "http://localhost:8080"
