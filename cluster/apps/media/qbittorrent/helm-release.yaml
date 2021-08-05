@@ -35,7 +35,7 @@ spec:
         enabled: true
         type: LoadBalancer
         externalIPs:
-        - "${SVC_QBITTORRENT_ADDRESS}"
+          - "${SVC_QBITTORRENT_ADDRESS}"
         ports:
           bittorrent:
             enabled: true
@@ -50,16 +50,16 @@ spec:
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - host: "qb.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "qb.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "qb.${SECRET_DOMAIN}"
+          - hosts:
+              - "qb.${SECRET_DOMAIN}"
     podSecurityContext:
       supplementalGroups:
-      - 100
+        - 100
     persistence:
       config:
         enabled: true
@@ -74,3 +74,25 @@ spec:
         cpu: 500m
       limits:
         memory: 6000Mi
+    additionalContainers:
+      - name: exporter
+        image: esanchezm/prometheus-qbittorrent-exporter:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: QBITTORRENT_HOST
+            value: "http://localhost"
+          - name: QBITTORRENT_PORT
+            value: "8080"
+          - name: QBITTORRENT_USER
+            value: "${SECRET_QB_USER}"
+          - name: QBITTORRENT_PASS
+            value: "${SECRET_QB_PASSWORD}"
+          - name: EXPORTER_PORT
+            value: "9022"
+          - name: EXPORTER_LOG_LEVEL
+            value: "INFO"
+          - name: METRICS_PREFIX
+            value: "qbittorrent"
+        ports:
+          - name: metrics
+            containerPort: 9022
