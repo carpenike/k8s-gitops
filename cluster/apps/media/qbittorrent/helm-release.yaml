@@ -83,10 +83,10 @@ spec:
             value: "http://localhost"
           - name: QBITTORRENT_PORT
             value: "8080"
-          - name: QBITTORRENT_USER
-            value: "${SECRET_QB_USER}"
-          - name: QBITTORRENT_PASS
-            value: "${SECRET_QB_PASSWORD}"
+          # - name: QBITTORRENT_USER
+          #   value: "${SECRET_QB_USER}"
+          # - name: QBITTORRENT_PASS
+          #   value: "${SECRET_QB_PASSWORD}"
           - name: EXPORTER_PORT
             value: "9022"
           - name: EXPORTER_LOG_LEVEL
