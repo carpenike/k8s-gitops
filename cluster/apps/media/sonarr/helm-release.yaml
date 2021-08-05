@@ -78,6 +78,11 @@ spec:
         cpu: 25m
       limits:
         memory: 5000Mi
+    prometheus:
+      podMonitor:
+        enabled: true
+        interval: 10m
+        scrapeTimeout: 2m
     additionalContainers:
       - name: exportarr
         image: ghcr.io/onedr0p/exportarr:v0.6.1
