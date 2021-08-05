@@ -35,28 +35,28 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "sonarr.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "sonarr.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "sonarr.${SECRET_DOMAIN}"
-          secretName: sonarr-cert
+          - hosts:
+              - "sonarr.${SECRET_DOMAIN}"
+            secretName: sonarr-cert
       api:
         enabled: true
         ingressClassName: "traefik"
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - host: "sonarr.${SECRET_DOMAIN}"
-          paths:
-          - path: /api
-            pathType: Prefix
+          - host: "sonarr.${SECRET_DOMAIN}"
+            paths:
+              - path: /api
+                pathType: Prefix
         tls:
-        - hosts:
-          - "sonarr.${SECRET_DOMAIN}"
-          secretName: sonarr-cert
+          - hosts:
+              - "sonarr.${SECRET_DOMAIN}"
+            secretName: sonarr-cert
     controllerLabels:
       kasten-backup: "true"
     persistence:
@@ -78,3 +78,26 @@ spec:
         cpu: 25m
       limits:
         memory: 5000Mi
+    additionalContainers:
+      - name: exportarr
+        image: ghcr.io/onedr0p/exportarr:v0.6.1
+        imagePullPolicy: IfNotPresent
+        args: ["exportarr", "sonarr"]
+        env:
+          - name: PORT
+            value: "32123"
+          - name: URL
+            value: "http://localhost"
+          - name: CONFIG
+            value: "/config/config.xml"
+          - name: ENABLE_UNKNOWN_QUEUE_ITEMS
+            value: "true"
+          - name: ENABLE_ADDITIONAL_METRICS
+            value: "true"
+        ports:
+          - name: exportarr
+            containerPort: 32123
+        volumeMounts:
+          - name: config
+            mountPath: /config
+            readOnly: true
