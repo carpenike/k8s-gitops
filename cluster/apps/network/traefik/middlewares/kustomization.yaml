@@ -6,5 +6,6 @@ resources:
   - rfc1918.yaml
   - redirect-path.yaml
   - internal-auth.yaml
+  - external-auth.yaml
   # - secret.enc.yaml
   # - basic-auth.yaml
