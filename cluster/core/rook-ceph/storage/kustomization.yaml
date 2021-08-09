@@ -11,3 +11,5 @@ resources:
   - ceph-object-store.yaml
   - ceph-bucket-storage-class.yaml
   - ceph-object-bucket.yaml
+  - loki-ceph-object-bucket.yaml
+  - thanos-ceph-object-bucket.yaml
