@@ -9,6 +9,5 @@ resources:
   # - nginx
   - node-feature-discovery
   - rbac
-  # - registry-creds
   - reloader
   - kured
