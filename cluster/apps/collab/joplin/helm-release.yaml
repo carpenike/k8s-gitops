@@ -73,6 +73,7 @@ spec:
         tls:
           - hosts:
               - "joplin.${SECRET_DOMAIN}"
+            secretName: joplin-cert
 
     postgresql:
       # existingSecret: joplin-postgresql-secret

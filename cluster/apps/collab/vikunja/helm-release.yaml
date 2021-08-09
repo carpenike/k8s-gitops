@@ -81,6 +81,7 @@ spec:
         tls:
           - hosts:
               - "tasks.${SECRET_DOMAIN}"
+            secretName: vikunja-cert
 
     persistence:
       files:
