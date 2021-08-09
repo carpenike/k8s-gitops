@@ -2,8 +2,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- namespaces
-- cert-manager
-- monitoring
-- network
-- rook-ceph
+  - namespaces
+  - cert-manager
+  - monitoring
+  - kube-system
+  - network
+  - rook-ceph
