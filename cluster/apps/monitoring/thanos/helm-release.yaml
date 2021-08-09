@@ -38,7 +38,9 @@ spec:
             kubernetes.io/tls-acme: "true"
             cert-manager.io/cluster-issuer: letsencrypt-production
           tls:
-            - secretName: thanos-cert
+            - hosts:
+                - "zigbee.${SECRET_DOMAIN}"
+              secretName: thanos-cert
     queryFrontend:
       enabled: false
     bucket:
