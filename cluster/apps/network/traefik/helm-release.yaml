@@ -74,6 +74,8 @@ spec:
     experimental:
       plugins:
         enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     # affinity:
     #   podAntiAffinity:
     #     requiredDuringSchedulingIgnoredDuringExecution:
