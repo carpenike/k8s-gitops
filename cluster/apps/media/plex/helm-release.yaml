@@ -62,6 +62,8 @@ spec:
         mountPath: /data
     podAnnotations:
       configmap.reloader.stakater.com/reload: "plex-promtail"
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     addons:
       promtail:
         enabled: true
