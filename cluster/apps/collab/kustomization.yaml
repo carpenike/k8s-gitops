@@ -5,5 +5,5 @@ resources:
   # - forecastle
   - gitea
   # - openkm
-  - joplin
+  # - joplin
   - vikunja
