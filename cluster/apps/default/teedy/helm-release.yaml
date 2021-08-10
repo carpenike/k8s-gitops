@@ -30,6 +30,8 @@ spec:
       DATABASE_USER: "teedyuser"
       DOCS_SMTP_HOSTNAME: "smtp.${SECRET_DOMAIN}"
       DOCS_SMTP_PORT: 25
+      DATABASE_PASSWORD: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
+      DOCS_ADMIN_PASSWORD_INIT: ${SECRET_TEEDY_ADMIN_PASSWORD_INIT_BCRYPT}
     controllerAnnotations:
       stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
       stash.appscode.com/target-paths: "/data"
@@ -63,6 +65,7 @@ spec:
         mountPath: /media
     postgresql:
       enabled: true
+      postgresqlPassword: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
       persistence:
         enabled: true
         storageClass: rook-ceph
@@ -98,6 +101,6 @@ spec:
     #     cpu: 500m
     #   limits:
     #     memory: 1500Mi
-  valuesFrom:
-  - kind: Secret
-    name: "teedy-helm-values"
+  # valuesFrom:
+  # - kind: Secret
+  #   name: "teedy-helm-values"
