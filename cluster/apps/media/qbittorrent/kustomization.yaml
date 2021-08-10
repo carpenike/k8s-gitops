@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - pod-monitor.yaml
-  - tag-tracker-errors
+  # - tag-tracker-errors
