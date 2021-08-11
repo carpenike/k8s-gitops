@@ -18,7 +18,7 @@ spec:
       interval: 5m
   values:
     image:
-      repository: zwavejs/zwavejs2mqtt
+      repository: ghcr.io/zwave-js/zwavejs2mqtt
       tag: 5.4.5
     env:
       TZ: "America/New_York"
