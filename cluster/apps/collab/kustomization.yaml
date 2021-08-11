@@ -7,7 +7,7 @@ resources:
   # - forecastle
   - gitea
   # - openkm
-  # - joplin
+  - joplin
   - monica
   - teedy
   - vikunja
