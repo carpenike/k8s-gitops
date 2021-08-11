@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-pictures-pv
+  name: collab-nfs-backup-share-pv
 spec:
   capacity:
     storage: 1Mi
@@ -10,16 +10,16 @@ spec:
     - ReadWriteMany
   claimRef:
     namespace: collab
-    name: nfs-pictures-pvc
+    name: collab-nfs-backup-share-pvc
   storageClassName: nfs
   nfs:
-    server: "nas.${SECRET_DOMAIN}"
-    path: "/mnt/tank/share/pictures"
+    server: "nas-1.${SECRET_DOMAIN}"
+    path: "/mnt/backup/share"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-pictures-pvc
+  name: collab-nfs-backup-share-pvc
   namespace: collab
 spec:
   accessModes:

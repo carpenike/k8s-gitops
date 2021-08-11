@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-home-stefanie-pv
+  name: collab-nfs-home-ryan-pv
 spec:
   capacity:
     storage: 1Mi
@@ -10,16 +10,16 @@ spec:
     - ReadWriteMany
   claimRef:
     namespace: collab
-    name: nfs-home-stefanie-pvc
+    name: collab-nfs-home-ryan-pvc
   storageClassName: nfs
   nfs:
     server: "nas.${SECRET_DOMAIN}"
-    path: "/mnt/tank/home/stefanie"
+    path: "/mnt/tank/home/ryan"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-home-stefanie-pvc
+  name: collab-nfs-home-ryan-pvc
   namespace: collab
 spec:
   accessModes:

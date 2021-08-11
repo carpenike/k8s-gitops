@@ -60,7 +60,7 @@ spec:
         existingClaim: teedy-pvc
       media:
         enabled: true
-        existingClaim: nfs-tank-share-pvc
+        existingClaim: collab-nfs-tank-share-pvc
         subPath: scans/import
         mountPath: /media
     postgresql:
