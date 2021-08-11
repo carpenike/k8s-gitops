@@ -21,9 +21,9 @@ spec:
       issuerName: letsencrypt-production
     domain: "${SECRET_DOMAIN}"
     hostnames:
+      - "mail.${SECRET_DOMAIN}"
       - "smtp.${SECRET_DOMAIN}"
       - "imap.${SECRET_DOMAIN}"
-      - "mail.${SECRET_DOMAIN}"
     initialAccount:
       domain: "${SECRET_DOMAIN}"
       username: postmaster
@@ -33,7 +33,7 @@ spec:
     logLevel: INFO
     ingress:
       annotations:
-        external-dns/is-public: "true"
+        external-dns/is-public: "false"
         external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       hosts:
         - "mail.${SECRET_DOMAIN}"
