@@ -19,7 +19,7 @@ spec:
   values:
     controllerType: deployment
     image:
-      repository: sctx/overseerr
+      repository: ghcr.io/sct/overseerr
       tag: 1.25.0
       pullPolicy: Always
     env:
