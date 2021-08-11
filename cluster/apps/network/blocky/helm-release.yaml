@@ -101,6 +101,8 @@ spec:
                     values:
                       - blocky
               topologyKey: kubernetes.io/hostname
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     resources:
       requests:
         memory: 100Mi

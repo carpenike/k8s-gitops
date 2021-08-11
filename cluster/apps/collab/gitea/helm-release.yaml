@@ -97,3 +97,5 @@ spec:
         serviceMonitor:
           enabled: true
           namespace: default
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"

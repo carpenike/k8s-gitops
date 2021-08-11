@@ -136,6 +136,8 @@ spec:
         port: 1514
         externalIPs:
         - 10.45.10.16
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
   valuesFrom:
   - kind: ConfigMap
     name: loki-ceph-bucket

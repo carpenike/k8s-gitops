@@ -56,3 +56,5 @@ spec:
         templates:
         - "*.app env.service.resource.measurement"
         - "servers.* .host.resource.measurement.field*"
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"

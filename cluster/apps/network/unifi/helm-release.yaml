@@ -60,6 +60,8 @@ spec:
       externalTrafficPolicy: Local
       externalIPs:
         - 10.45.10.17
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     resources:
       requests:
         memory: 500Mi

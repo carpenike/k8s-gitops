@@ -99,6 +99,8 @@ spec:
         - hosts:
           - "adguard.${SECRET_DOMAIN}"
           # - "dns01.network.${SECRET_DOMAIN}"
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     resources:
       requests:
         memory: 1000Mi

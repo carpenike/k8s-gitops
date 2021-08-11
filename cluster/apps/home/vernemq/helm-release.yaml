@@ -27,7 +27,7 @@ spec:
     service:
       type: LoadBalancer
       externalIPs:
-      - "${SVC_VERNEMQ_ADDRESS}"
+        - "${SVC_VERNEMQ_ADDRESS}"
       ws:
         enabled: true
         nodePort: 32080
@@ -39,8 +39,10 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8888"
     additionalEnv:
-    - name: DOCKER_VERNEMQ_ACCEPT_EULA
-      value: "yes"
-    - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
-      value: "on"
+      - name: DOCKER_VERNEMQ_ACCEPT_EULA
+        value: "yes"
+      - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+        value: "on"
     podAntiAffinity: hard
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
