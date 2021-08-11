@@ -48,3 +48,8 @@ spec:
           cpu: 200m
         limits:
           cpu: 1000m
+    rspamd:
+      resources:
+        requests:
+          cpu: 200m
+          memory: 100Mi
