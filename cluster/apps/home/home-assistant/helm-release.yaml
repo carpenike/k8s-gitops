@@ -66,44 +66,44 @@ spec:
       persistence:
         enabled: true
         existingClaim: home-assistant-postgresql-pvc
-    addons:
-      codeserver:
-        enabled: true
-        image:
-          repository: codercom/code-server
-          tag: 3.11.1
-        workingDir: "/config"
-        git:
-          deployKeySecret: home-assistant-code-server-secret
-        args:
-        - --auth
-        - "none"
-        - --user-data-dir
-        - "/config/.vscode"
-        - --extensions-dir
-        - "/config/.vscode"
-        ingress:
-          enabled: true
-          ingressClassName: "traefik"
-          annotations:
-            nginx.ingress.kubernetes.io/proxy-body-size: "0"
-            kubernetes.io/tls-acme: "true"
-            cert-manager.io/cluster-issuer: letsencrypt-production
-            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-            traefik.ingress.kubernetes.io/router.middlewares: "network-external-auth@kubernetescrd"
-            external-dns/is-public: "true"
-            external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-          hosts:
-          - host: "ha-vscode.${SECRET_DOMAIN}"
-            paths:
-            - path: /
-              pathType: Prefix
-          tls:
-          - secretName: ha-vscode-cert
-            hosts:
-            - "ha-vscode.${SECRET_DOMAIN}"
-        volumeMounts:
-        - name: config
-          mountPath: /config
+    # addons:
+    #   codeserver:
+    #     enabled: true
+    #     image:
+    #       repository: codercom/code-server
+    #       tag: 3.11.1
+    #     workingDir: "/config"
+    #     git:
+    #       deployKeySecret: home-assistant-code-server-secret
+    #     args:
+    #     - --auth
+    #     - "none"
+    #     - --user-data-dir
+    #     - "/config/.vscode"
+    #     - --extensions-dir
+    #     - "/config/.vscode"
+    #     ingress:
+    #       enabled: true
+    #       ingressClassName: "traefik"
+    #       annotations:
+    #         nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    #         kubernetes.io/tls-acme: "true"
+    #         cert-manager.io/cluster-issuer: letsencrypt-production
+    #         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    #         traefik.ingress.kubernetes.io/router.middlewares: "network-external-auth@kubernetescrd"
+    #         external-dns/is-public: "true"
+    #         external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+    #       hosts:
+    #       - host: "ha-vscode.${SECRET_DOMAIN}"
+    #         paths:
+    #         - path: /
+    #           pathType: Prefix
+    #       tls:
+    #       - secretName: ha-vscode-cert
+    #         hosts:
+    #         - "ha-vscode.${SECRET_DOMAIN}"
+    #     volumeMounts:
+    #     - name: config
+    #       mountPath: /config
     podAnnotations:
       secret.reloader.stakater.com/reload: home-assistant-secrets
