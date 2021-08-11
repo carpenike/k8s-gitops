@@ -8,6 +8,6 @@ resources:
   - gitea
   # - openkm
   - joplin
-  - monica
-  - teedy
+  # - monica
+  # - teedy
   - vikunja
