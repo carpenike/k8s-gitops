@@ -105,5 +105,7 @@ spec:
     #     volumeMounts:
     #     - name: config
     #       mountPath: /config
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     podAnnotations:
       secret.reloader.stakater.com/reload: home-assistant-secrets
