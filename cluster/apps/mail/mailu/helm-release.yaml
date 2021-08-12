@@ -57,6 +57,8 @@ spec:
         limits:
           cpu: 2000m
           memory: 1500Mi
+    fetchmail:
+      enabled: true
   postRenderers:
     - kustomize:
         patchesJson6902:
