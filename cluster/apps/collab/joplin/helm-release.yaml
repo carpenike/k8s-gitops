@@ -48,7 +48,7 @@ spec:
       MAILER_ENABLED: 1
       MAILER_HOST: mailu-front.mail.svc.cluster.local
       MAILER_PORT: 25
-      MAILER_SECURE: 1
+      MAILER_SECURE: 0
       # MAILER_AUTH_USER: ${SECRET_MAILGUN_USERNAME}
       # MAILER_AUTH_PASSWORD: ${SECRET_MAILGUN_PASSWORD}
       MAILER_NOREPLY_NAME: Joplin
