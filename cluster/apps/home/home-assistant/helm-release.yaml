@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/home-assistant/home-assistant
-      tag: 2021.8.3
+      tag: 2021.8.6
     persistence:
       config:
         enabled: true
