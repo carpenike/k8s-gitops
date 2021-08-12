@@ -21,9 +21,10 @@ spec:
       issuerName: letsencrypt-production
     domain: "${SECRET_DOMAIN}"
     hostnames:
-      - "mail.${SECRET_DOMAIN}"
+      - "rn-00.${SECRET_DOMAIN}"
       - "smtp.${SECRET_DOMAIN}"
       - "imap.${SECRET_DOMAIN}"
+      - "mail.${SECRET_DOMAIN}"
     initialAccount:
       domain: "${SECRET_DOMAIN}"
       username: postmaster
