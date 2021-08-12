@@ -31,7 +31,7 @@ spec:
       password: "${SECRET_MAILU_POSTMASTER_PASSWORD}"
     secretKey: "${SECRET_MAILU_SECRET_KEY}"
     subnet: "${NETWORK_K8S_CLUSTER_CIDR}"
-    logLevel: DEBUG
+    # logLevel: DEBUG
     ingress:
       annotations:
         external-dns/is-public: "true"
