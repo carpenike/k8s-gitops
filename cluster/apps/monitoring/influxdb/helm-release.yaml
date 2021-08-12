@@ -24,7 +24,7 @@ spec:
     service:
       type: LoadBalancer
       externalIPs:
-      - 10.45.10.15
+        - 10.45.10.15
       externalTrafficPolicy: Local
     persistence:
       enabled: true
@@ -54,7 +54,7 @@ spec:
         protocol: tcp
         consistency-lvel: one
         templates:
-        - "*.app env.service.resource.measurement"
-        - "servers.* .host.resource.measurement.field*"
+          - "*.app env.service.resource.measurement"
+          - "servers.* .host.resource.measurement.field*"
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
