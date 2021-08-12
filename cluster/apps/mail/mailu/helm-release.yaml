@@ -34,7 +34,7 @@ spec:
     logLevel: INFO
     ingress:
       annotations:
-        external-dns/is-public: "false"
+        external-dns/is-public: "true"
         external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       hosts:
         - "mail.${SECRET_DOMAIN}"
