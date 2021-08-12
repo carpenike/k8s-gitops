@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - network
   - security
+  - calico-system
   - collab
   - default
   - ext-gateway
