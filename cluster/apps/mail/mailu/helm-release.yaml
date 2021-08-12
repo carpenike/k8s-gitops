@@ -59,6 +59,7 @@ spec:
           memory: 1500Mi
     fetchmail:
       enabled: true
+      logLevel: WARNING
   postRenderers:
     - kustomize:
         patchesJson6902:
