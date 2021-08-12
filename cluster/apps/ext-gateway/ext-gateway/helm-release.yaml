@@ -28,8 +28,8 @@ spec:
       - hostname: mailu-front
         IP: 2
         ports:
-          # - type: tcp
-          #   port: 25
+          - type: tcp
+            port: 25
           - type: tcp
             port: 465
           - type: tcp
