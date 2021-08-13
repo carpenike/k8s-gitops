@@ -36,11 +36,15 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-          - "unifi.${SECRET_DOMAIN}"
+          - host: "unifi.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - "unifi.${SECRET_DOMAIN}"
             secretName: unifi-cert
+
     service:
       main:
         type: LoadBalancer
