@@ -4,13 +4,13 @@ kind: Kustomization
 resources:
   - network
   - security
+  - kasten-io
   - calico-system
   - collab
   - default
   - ext-gateway
   - flux-system
   - home
-  - kasten-io
   - kube-system
   - logs
   - mail
