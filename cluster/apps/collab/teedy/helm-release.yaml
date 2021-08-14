@@ -68,7 +68,7 @@ spec:
       postgresqlPassword: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
       persistence:
         enabled: true
-        storageClass: rook-ceph
+        existingClaim: rook-data-teedy-postgresql-0
     # additionalContainers:
     # - name: docs-importer
     #   image: sismics/docs-importer:latest
