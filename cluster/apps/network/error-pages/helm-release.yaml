@@ -16,7 +16,7 @@ spec:
       interval: 5m
   dependsOn:
     - name: traefik
-      namespace: networking
+      namespace: network
   values:
     image:
       repository: ghcr.io/tarampampam/error-pages
