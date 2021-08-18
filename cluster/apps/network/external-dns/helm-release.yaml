@@ -21,18 +21,16 @@ spec:
     interval: "5m"
     logLevel: debug
     sources:
-    - ingress
-    provider: azure
-    azure:
-      resourceGroup: ${SECRET_AZURE_DNS_RESOURCE_GROUP}
-      tenantId: ${SECRET_AZURE_DNS_TENANT_ID}
-      subscriptionId: ${SECRET_AZURE_DNS_SUBSCRIPTION_ID}
-      aadClientId: ${SECRET_AZURE_DNS_CLIENT_ID}
-      aadClientSecret: ${SECRET_AZURE_DNS_CLIENT_SECRET}
+      - ingress
+    provider: cloudflare
+    cloudflare:
+      secretName: cloudflare-api-key
+      email: "${SECRET_EMAIL}"
+      proxied: true
     policy: sync
     txtPrefix: "k8s."
     domainFilters:
-    - "${SECRET_DOMAIN}"
+      - "${SECRET_DOMAIN}"
     crd:
       create: false
       apiversion: externaldns.k8s.io/v1alpha1
