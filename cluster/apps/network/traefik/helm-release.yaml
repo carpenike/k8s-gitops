@@ -16,6 +16,9 @@ spec:
         name: traefik-charts
         namespace: flux-system
       interval: 5m
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
   values:
     deployment:
       enabled: true
@@ -69,8 +72,8 @@ spec:
         maxVersion: VersionTLS13
         sniStrict: true
     pilot:
-      enabled: true
-      token: "722c9e7d-0103-42a8-82fd-9bb46868c5c4"
+      enabled: false
+      # token: "722c9e7d-0103-42a8-82fd-9bb46868c5c4"
     experimental:
       plugins:
         enabled: true
