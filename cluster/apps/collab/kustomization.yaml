@@ -8,5 +8,6 @@ resources:
   - gitea
   # - openkm
   # - joplin
+  - littlelink
   - teedy
   - vikunja
