@@ -16,5 +16,5 @@ resources:
   - mail
   - media
   - monitoring
-  # - system-upgrade
+  - system-upgrade
   - vpn-gateway

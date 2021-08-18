@@ -8,3 +8,4 @@ resources:
   - kube-system
   - network
   - rook-ceph
+  - system-upgrade
