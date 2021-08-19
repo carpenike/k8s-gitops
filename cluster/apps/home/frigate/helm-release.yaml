@@ -101,7 +101,7 @@ spec:
               - clips
               - record
               - rtmp
-          height: 380
+          height: 360
           width: 640
           fps: 10
           objects:
