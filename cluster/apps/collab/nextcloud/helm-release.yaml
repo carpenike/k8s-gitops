@@ -68,7 +68,7 @@ spec:
       type: postgresql
       host: nextcloud-postgresql.collab
       user: nextcloud
-      password: ${SSECRET_NEXTCLOUD_POSTGRES_PASSWORD}
+      password: ${SECRET_NEXTCLOUD_POSTGRES_PASSWORD}
       database: nextcloud
 
     cronjob:
