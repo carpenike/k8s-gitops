@@ -9,5 +9,6 @@ resources:
   # - openkm
   # - joplin
   - littlelink
+  - nextcloud
   - teedy
   - vikunja
