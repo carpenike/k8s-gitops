@@ -1,0 +1,9 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+# - nfs-backup-share.yaml
+- collab-nfs-home-ryan.yaml
+- collab-nfs-home-stefanie.yaml
+- collab-nfs-pictures.yaml
+- collab-nfs-tank-share.yaml
