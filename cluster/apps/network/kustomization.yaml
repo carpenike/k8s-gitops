@@ -9,5 +9,5 @@ resources:
   - external-dns
   - traefik
   - unifi
-  - dns-update
+  # - dns-update
   - wildcard-certificate
