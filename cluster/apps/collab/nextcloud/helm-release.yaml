@@ -23,6 +23,7 @@ spec:
 
     env:
       PHP_MEMORY_LIMIT: 256M
+      NEXTCLOUD_DOMAIN_NAME: cloud.${SECRET_DOMAIN}
 
     persistence:
       enabled: true
