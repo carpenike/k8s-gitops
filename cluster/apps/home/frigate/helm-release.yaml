@@ -93,17 +93,17 @@ spec:
         backyard-patio-door:
           ffmpeg:
             inputs:
-            - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.0.100:554/Streaming/Channels/1
+            - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.0.100:554/Streaming/Channels/2
               roles:
               - detect
-            - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.0.100:554/Streaming/Channels/1
+            - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.0.100:554/Streaming/Channels/2
               roles:
               - clips
               - record
               - rtmp
-          height: 720
-          width: 960
-          fps: 5
+          height: 480
+          width: 640
+          fps: 10
           objects:
             filters:
               person:
