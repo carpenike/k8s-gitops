@@ -72,11 +72,6 @@ spec:
       password: ${SECRET_NEXTCLOUD_POSTGRES_PASSWORD}
       database: nextcloud
 
-    livenessProbe:
-      enabled: false
-    readinessProbe:
-      enabled: false
-
     cronjob:
       enabled: true
 
