@@ -121,6 +121,9 @@ spec:
             timestamp: False
             retain:
               default: 14
+          zones:
+            backyard:
+              coordinates: 640,360,640,174,393,106,0,78,0,360
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate-config"
