@@ -43,13 +43,13 @@ spec:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
           external-dns/is-public: "true"
-          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_SHORT_DOMAIN}"
         hosts:
-        - host: "me.${SECRET_DOMAIN}"
+        - host: "me.${SECRET_SHORT_DOMAIN}"
           paths:
           - path: /
             pathType: Prefix
         tls:
         - hosts:
-          - "me.${SECRET_DOMAIN}"
+          - "me.${SECRET_SHORT_DOMAIN}"
           secretName: littlelink-cert
