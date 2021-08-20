@@ -123,7 +123,7 @@ spec:
               default: 14
           zones:
             backyard:
-              coordinates: 0,360,0,0,396,0,394,111,640,170,640,360
+              coordinates: 640,0,640,360,0,360,0,0
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate-config"
