@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - _pvc
   - bazarr
+  - calibre-web
   - flaresolverr
   - gaps
   - jackett
