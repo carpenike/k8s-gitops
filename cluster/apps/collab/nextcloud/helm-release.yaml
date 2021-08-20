@@ -38,6 +38,7 @@ spec:
         external-dns.alpha.kubernetes.io/target: ipv4.${SECRET_DOMAIN}
         external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: collab-nextcloud-dav-redirect@kubernetescrd,collab-hsts@kubernetescrd
       tls:
         - secretName: tls.nextcloud
           hosts:
