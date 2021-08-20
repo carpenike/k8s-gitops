@@ -35,6 +35,7 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-rfc1918-ips@kubernetescrd"
           kubernetes.io/tls-acme: "true"
+          hajimari.io/enable: "true"
         hosts:
         - host: "esphome.${SECRET_DOMAIN}"
           paths:
