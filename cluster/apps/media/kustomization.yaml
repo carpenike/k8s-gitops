@@ -10,6 +10,7 @@ resources:
   - nzbhydra
   - overseerr
   - plex
+  - lidarr
   - qbittorrent
   - radarr
   - radarr-uhd
