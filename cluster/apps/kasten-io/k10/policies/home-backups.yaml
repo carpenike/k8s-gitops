@@ -45,7 +45,7 @@ spec:
     - action: export
       exportParameters:
         frequency: "@daily"
-        receiveString: receiveString: bIzAPpoanmEV0zEqjRV+vuUlTU4edhil5z+OoUcFb4FlNe50vD3hMsWAO9Seu9MfOVTOzKuNGU+u7zELhTr9uDM36lgkNeTXJZ/0766++piFiJ9m/31fGTaXubD5V7JPEs8W/HEa0PQA7LOQ7NzV2EjwL9Pa+mEY41DKZAOv8PSMkI8rBlnJkW2+mD6OYUl+pqNhbaqGvzli00o3MTiL9929XXSzHSjrpihH94zbaJdioYyeZS3AdosHtK2Qh965Mo7HaaGIcsFhEjSyvFl47CrX7eOZZ+TJkwqHFT0uGzUjFDyFtWQ/8Tbh8t3D9sJ41F1iZJhHg3wPld4ZjjGMHdRX5rEDMV8wudVoyoOoqq+121zN2IiY4HsqmFP50Cd0+pimOdQHmPurXD15mdTkPRK8x7kQF+aGpFT/hYdJNzlSh+tAL56EeipyWVDOnuDuNhfc+/M8b+z7BkxW4xJ4CXXpnZJj7Ixmbn3/Izl6pZMBuAYPkAHGClYNOXdHCsq329uEeBPImRJoo8BJwBLw3DtIqP0yWPHMJXRm07rb8tW9Zu/MsEMrPwK7PA
+        receiveString: bIzAPpoanmEV0zEqjRV+vuUlTU4edhil5z+OoUcFb4FlNe50vD3hMsWAO9Seu9MfOVTOzKuNGU+u7zELhTr9uDM36lgkNeTXJZ/0766++piFiJ9m/31fGTaXubD5V7JPEs8W/HEa0PQA7LOQ7NzV2EjwL9Pa+mEY41DKZAOv8PSMkI8rBlnJkW2+mD6OYUl+pqNhbaqGvzli00o3MTiL9929XXSzHSjrpihH94zbaJdioYyeZS3AdosHtK2Qh965Mo7HaaGIcsFhEjSyvFl47CrX7eOZZ+TJkwqHFT0uGzUjFDyFtWQ/8Tbh8t3D9sJ41F1iZJhHg3wPld4ZjjGMHdRX5rEDMV8wudVoyoOoqq+121zN2IiY4HsqmFP50Cd0+pimOdQHmPurXD15mdTkPRK8x7kQF+aGpFT/hYdJNzlSh+tAL56EeipyWVDOnuDuNhfc+/M8b+z7BkxW4xJ4CXXpnZJj7Ixmbn3/Izl6pZMBuAYPkAHGClYNOXdHCsq329uEeBPImRJoo8BJwBLw3DtIqP0yWPHMJXRm07rb8tW9Zu/MsEMrPwK7PA
         profile:
           name: minio
           namespace: kasten-io
