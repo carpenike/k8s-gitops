@@ -77,7 +77,7 @@ spec:
         fromAddress: cloud
         domain: ${SECRET_DOMAIN}
         smtp:
-          host: smtp.mailgun.com
+          host: smtp.mailgun.org
           secure: ssl
           port: 465
           name: ${SECRET_MAILGUN_USERNAME}
