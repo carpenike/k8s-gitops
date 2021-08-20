@@ -61,6 +61,17 @@ spec:
           $CONFIG = array (
             'trusted_proxies' => array('${NETWORK_K8S_CLUSTER_CIDR}')
           );
+      mail:
+        enabled: true
+        fromAddress: cloud
+        domain: ${SECRET_DOMAIN}
+        smtp:
+          host: smtp.mailgun.com
+          secure: ssl
+          port: 465
+          name: ${SECRET_MAILGUN_USERNAME}
+          password: ${SECRET_MAILGUN_PASSWORD}
+
     internalDatabase:
       enabled: false
 
