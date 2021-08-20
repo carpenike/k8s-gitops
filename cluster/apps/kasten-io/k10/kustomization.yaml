@@ -4,6 +4,7 @@ resources:
   - policies
   - profiles
   - prometheus-rules
+  - pod-spec-override.yaml
   - service-monitors
   - helm-release.yaml
   - k10-secrets.enc.yaml
