@@ -5,6 +5,7 @@ resources:
   - _pvc
   - esphome
   - frigate
+  - hajimari
   - home-assistant
   - mealie
   - node-red
