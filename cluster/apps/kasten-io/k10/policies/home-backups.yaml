@@ -39,9 +39,9 @@ spec:
                   values:
                     - enabled
         ignoreExceptions: true
-        # profile:
-        #   name: minio
-        #   namespace: kasten-io
+        profile:
+          name: minio
+          namespace: kasten-io
     - action: export
       exportParameters:
         frequency: "@daily"
