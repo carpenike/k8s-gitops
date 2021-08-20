@@ -1,0 +1,60 @@
+kind: Policy
+apiVersion: config.kio.kasten.io/v1alpha1
+metadata:
+  name: home-backups
+  namespace: kasten-io
+spec:
+  frequency: "@daily"
+  subFrequency:
+    minutes:
+      - 0
+    hours:
+      - 11
+      - 23
+    weekdays:
+      - 0
+    days:
+      - 1
+    months:
+      - 1
+  retention:
+    daily: 7
+    weekly: 4
+    monthly: 12
+    yearly: 7
+  selector:
+    matchExpressions:
+      - key: k10.kasten.io/appNamespace
+        operator: In
+        values:
+          - home
+  actions:
+    - action: backup
+      backupParameters:
+        filters:
+          includeResources:
+            - matchExpressions:
+                - key: kasten.io/backup-volume
+                  operator: In
+                  values:
+                    - enabled
+        ignoreExceptions: true
+        # profile:
+        #   name: minio
+        #   namespace: kasten-io
+    - action: export
+      exportParameters:
+        frequency: "@daily"
+        receiveString: bIzAPpoanmEA6S9erSk3hfZCHnEsHmTG70+I5FsoeL4aGeMX1Gnmfb2QScOAgfAKHCDwzKuNGU+u7zELhTr9pB46ows4L7qiXZGe+8G16Z6Zhvlm7EJoGDG5wYXGVONnYI8C4X8V6swckbOQ7NzA4laED++TwXJ/sG/4DH/M+ISK1ZMGEWa2vWDd8GqJLjFu1LR/V4mTmk1c00o3MTiL9929XXSzHSjrpihH94zbaJdioYyeZS3AdosHtK2Qh965Mo7HaaGIcsFhEjSyvFl47CrX7eOZZ+TJkwqHFT0uGzUjFDyFtWQ/8Tbh8t3D9sJ41F1iZJhHg3wPld4ZjjGMHdRX5rEDMV8wudVoyoOoqq+121zN2IiY4HsqmFP50Cd0+pimOdQHmPurXD15mdTkPRK8x7kQF+aGpFT/hYdJNzlSh+tAL56EeipyWVDOnuDuNhfc+/M8b+z7BkxW4xJ4CXXpnZJj7Ixmbn3/Izl6pZMBuAYPkAHGClYNOXdHCsq329uEeBPImRJoo8BJwBLw3DtIqP0yWPHMJXRmi4ifMvHl26avH/rSYbj89w
+        profile:
+          name: minio
+          namespace: kasten-io
+        migrationToken:
+          name: home-backups-migration-token-xx5rh
+          namespace: kasten-io
+        exportData:
+          enabled: true
+          overrides:
+            - storageClassName: nfs
+              enabled: false
+      retention: {}
