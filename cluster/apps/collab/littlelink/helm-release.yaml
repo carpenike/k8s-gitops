@@ -32,9 +32,11 @@ spec:
       AVATAR_2X_URL: https://avatars.githubusercontent.com/u/1302442?v=4
       AVATAR_ALT: Ryan Holt
       NAME: Ryan Holt
-      BIO: Hey! Just a place where you can connect with me!
+      BIO: Hey! Feel free to reach out to me on any of the below.
       GITHUB: https://github.com/carpenike
-
+      LINKED_IN: https://linkedin.com/in/ryanholt
+      TWITTER: https://twitter.com/ryanholt
+      EMAIL: ryan@ryanholt.net
     ingress:
       main:
         enabled: true
