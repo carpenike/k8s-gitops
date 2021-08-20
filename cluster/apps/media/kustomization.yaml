@@ -15,6 +15,7 @@ resources:
   - radarr
   - radarr-uhd
   - resilio-sync
+  - readarr
   - sabnzbd
   - sonarr
   - tautulli
