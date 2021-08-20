@@ -67,6 +67,11 @@ spec:
           $CONFIG = array (
             'overwriteprotocol' => 'https'
           );
+        phone_region.config.php: |-
+          <?php
+          $CONFIG = array (
+            'default_phone_region' => 'US'
+          );
       mail:
         enabled: true
         fromAddress: cloud
