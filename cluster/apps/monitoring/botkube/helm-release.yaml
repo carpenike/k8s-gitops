@@ -23,7 +23,7 @@ spec:
       #   tag: v0.10.0
       # Needed for Discord support until merge
       # https://github.com/infracloudio/botkube/pull/268
-      repository: infracloudio/botkube
+      repository: ghcr.io/infracloudio/botkube
       tag: v0.12.1
       pullPolicy: Always
     serviceMonitor:
