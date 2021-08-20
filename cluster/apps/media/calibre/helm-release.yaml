@@ -34,7 +34,6 @@ spec:
         existingClaim: media-nfs-tank-share-pvc
         mountPath: /media
 
-
     service:
       webserver:
         enabled: true
