@@ -29,10 +29,10 @@ spec:
           - media
           - monitoring
           - collab
-      customApps:
-        - name: Mail
-          url: "https://mail.${SECRET_DOMAIN}"
-          icon: email
+      # customApps:
+      #   - name: Mail
+      #     url: "https://mail.${SECRET_DOMAIN}"
+      #     icon: email
       groups:
         - name: Communicate
           links:
