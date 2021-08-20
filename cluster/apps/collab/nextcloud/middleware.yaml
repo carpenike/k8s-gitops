@@ -1,0 +1,20 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-dav-redirect
+  namespace: collab
+spec:
+  redirectRegex:
+    regex: https://(.*)/.well-known/(card|cal)dav
+    replacement: https://${1}/remote.php/dav/
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: hsts
+  namespace: collab
+spec:
+  headers:
+    forceSTSHeader: true
+    stsIncludeSubdomains: true
+    stsSeconds: 15552000
