@@ -28,7 +28,7 @@ spec:
       password: ${SECRET_YOURLS_ADMIN_PASSWORD}
 
     db:
-      # host: localhost
+      host: yourls-mysql
       port: 3306
       user: yourls
       password: ${SECRET_YOURLS_MYSQL_PASSWORD}
