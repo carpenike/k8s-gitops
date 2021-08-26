@@ -33,7 +33,7 @@ spec:
             storageId: 1
             module: file
             configuration:
-              path: /backup-nas
+              path: /backup-nas/k8s-backups
         ios:
           - module: rbdaio
             name: replicapool
