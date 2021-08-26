@@ -122,9 +122,8 @@ spec:
               name: benji-maint
             patch:
               - op: add
-                path: /spec/template/spec
+                path: /spec/template/spec/initContainers
                 value: |
-                  initContainers:
                   - name: generate-ceph-files
                     image: curlimages/curl:7.78.0
                     imagePullPolicy: Always
