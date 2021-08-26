@@ -115,7 +115,7 @@ spec:
                     args:
                       [
                         "-c",
-                        "curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | /usr/local/bin/bash",
+                        "apk add --no-cache curl && curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | /usr/local/bin/bash",
                       ]
                     volumeMounts:
                       - name: mon-endpoint-volume
