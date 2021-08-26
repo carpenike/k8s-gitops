@@ -127,7 +127,7 @@ spec:
                   - name: generate-ceph-files
                     image: rook/ceph:v1.7.1
                     imagePullPolicy: Always
-                    command: ["/bin/bash"]
+                    command: ["/usr/bin/bash"]
                     args: ["-c", "curl -s https://raw.githubusercontent.com/rook/rook/master/images/ceph/toolbox.sh | bash"]
                     volumeMounts:
                       - name: mon-endpoint-volume
