@@ -128,7 +128,7 @@ spec:
                     image: rook/ceph:v1.7.1
                     imagePullPolicy: Always
                     command: ["/tini"]
-                    args: ["-c", "curl -s https://raw.githubusercontent.com/rook/rook/master/images/ceph/toolbox.sh | bash"]
+                    args: ["curl -s https://raw.githubusercontent.com/rook/rook/master/images/ceph/toolbox.sh | bash"]
                     volumeMounts:
                       - name: mon-endpoint-volume
                         mountPath: /etc/rook
