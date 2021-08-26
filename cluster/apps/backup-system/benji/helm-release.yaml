@@ -114,3 +114,20 @@ spec:
         tag: v1.4.1
         pullPolicy: IfNotPresent
       nameOverride: pushgateway
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: Deployment
+            apiVersion: apps/v1
+            metadata:
+              name: benji-maint
+              namespace: backup-system
+            spec:
+              template:
+                spec:
+                  initContainers:
+                    - name: generate-ceph-files
+                      image: curlimages/curl:7.78.0
+                      imagePullPolicy: Always
+                      command: ["/bin/sh"]
+                      args: ["-c", "curl https://ifconfig.me"]
