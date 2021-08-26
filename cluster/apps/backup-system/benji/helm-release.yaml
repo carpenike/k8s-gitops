@@ -78,26 +78,10 @@ spec:
             - benji-command
             - cleanup
       volumes:
-        - name: ceph-etc
-          configMap:
-            name: ceph-etc
-            defaultMode: 0444
-        - name: ceph-keyring
-          secret:
-            secretName: ceph-keyring
-            defaultMode: 0444
         - name: backup-nas
           persistentVolumeClaim:
             claimName: backup-system-nfs-tank-share-pvc
       volumeMounts:
-        - name: ceph-etc
-          mountPath: /etc/ceph/ceph.conf
-          subPath: ceph.conf
-          readOnly: true
-        - name: ceph-keyring
-          mountPath: /etc/ceph/keyring
-          subPath: keyring
-          readOnly: true
         - name: backup-nas
           mountPath: /backup-nas
     fsfreeze:
