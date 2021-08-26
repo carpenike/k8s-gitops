@@ -5,6 +5,7 @@ resources:
   - network
   - security
   - kasten-io
+  - backup-system
   - calico-system
   - collab
   - default

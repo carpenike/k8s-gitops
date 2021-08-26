@@ -2,7 +2,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- carpenike-stepca-charts-git.yaml
-- dacruz21-charts-git.yaml
-- mintel-dex-charts.yaml
-- version-checker.yaml
+  - benji-charts.yaml
+  - carpenike-stepca-charts-git.yaml
+  - dacruz21-charts-git.yaml
+  - mintel-dex-charts.yaml
+  - version-checker.yaml
