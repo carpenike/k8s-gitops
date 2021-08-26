@@ -123,10 +123,10 @@ spec:
               namespace: backup-system
             patch:
               - op: add
-                path: /spec/template/spec/initContainers
+                path: "/spec/template/spec/initContainers/-"
                 value:
-                  - name: generate-ceph-files
-                    image: curlimages/curl:7.78.0
-                    imagePullPolicy: Always
-                    command: ["/bin/sh"]
-                    args: ["-c", "curl https://ifconfig.me"]
+                  name: generate-ceph-files
+                  image: curlimages/curl:7.78.0
+                  imagePullPolicy: Always
+                  command: ["/bin/sh"]
+                  args: ["-c", "curl https://ifconfig.me"]
