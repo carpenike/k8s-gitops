@@ -111,11 +111,11 @@ spec:
                   - name: generate-ceph-files
                     image: bash:5.1.8-alpine3.14
                     imagePullPolicy: Always
-                    command: ["/bin/bash"]
+                    command: ["/usr/local/bin/bash"]
                     args:
                       [
                         "-c",
-                        "curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | bash",
+                        "curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | /usr/local/bin/bash",
                       ]
                     volumeMounts:
                       - name: mon-endpoint-volume
