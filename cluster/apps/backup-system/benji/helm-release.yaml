@@ -116,7 +116,7 @@ spec:
       nameOverride: pushgateway
   postRenderers:
     - kustomize:
-        patches:
+        patchesJson6902:
           - target:
               kind: Deployment
               name: benji-maint
