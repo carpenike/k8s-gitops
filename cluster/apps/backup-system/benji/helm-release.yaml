@@ -135,9 +135,9 @@ spec:
               - op: add
                 path: "/spec/template/spec/volumes/-"
                 value:
-                  - name: mon-endpoint-volume
-                    configMap:
-                      name: rook-ceph-mon-endpoints
-                      items:
-                        - key: data
-                          path: mon-endpoints
+                  name: mon-endpoint-volume
+                  configMap:
+                    name: rook-ceph-mon-endpoints
+                    items:
+                      - key: data
+                        path: mon-endpoints
