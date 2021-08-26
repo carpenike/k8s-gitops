@@ -17,7 +17,7 @@ spec:
               args:
                 [
                   "-c",
-                  'echo "secret" > /root/.pgpass && chmod 600 /root/.pgpass && pg_dump -U benji -h benji-postgresql-headless benji > /var/backups/benji/backup-$(date +"%m-%d-%Y-%H-%M").sql',
+                  'echo "secret" > ~/.pgpass && chmod 600 ~/.pgpass && pg_dump -U benji -h benji-postgresql-headless benji > /var/backups/benji/backup-$(date +"%m-%d-%Y-%H-%M").sql',
                 ]
               # env:
               #   - name: PGPASS
