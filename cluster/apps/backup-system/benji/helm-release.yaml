@@ -120,6 +120,7 @@ spec:
           - target:
               kind: Deployment
               name: benji-maint
+              namespace: backup-system
             patch:
               - op: add
                 path: /spec/template/spec/initContainers/-
