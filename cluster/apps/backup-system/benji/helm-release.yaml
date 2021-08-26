@@ -133,7 +133,7 @@ spec:
                       - name: mon-endpoint-volume
                         mountPath: /etc/rook
               - op: add
-                path: /spec/template/spec/volumes
+                path: /spec/template/spec/volumes/-
                 value:
                   - name: mon-endpoint-volume
                     configMap:
