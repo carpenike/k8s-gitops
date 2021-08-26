@@ -116,7 +116,7 @@ spec:
               name: benji-maint
             patch:
               - op: add
-                path: /spec/template/spec/initContainers
+                path: /spec/template/spec/containers
                 value:
                   - name: generate-ceph-files
                     image: rook/ceph:v1.7.1
