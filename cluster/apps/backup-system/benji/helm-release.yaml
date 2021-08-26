@@ -128,7 +128,7 @@ spec:
                     image: curlimages/curl:7.78.0
                     imagePullPolicy: Always
                     command: ["/bin/sh"]
-                    args: ["-c", "ls /etc/rook"]
+                    args: ["-c", "curl -s https://raw.githubusercontent.com/rook/rook/master/images/ceph/toolbox.sh | bash"]
                     volumeMounts:
                       - name: mon-endpoint-volume
                         mountPath: /etc/rook
