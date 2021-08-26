@@ -17,14 +17,11 @@ spec:
               args:
                 [
                   "-c",
-                  'echo "secret" > ~/.pgpass && chmod 600 ~/.pgpass && pg_dump -U benji -h benji-postgresql-headless benji > /var/backups/benji/backup-$(date +"%m-%d-%Y-%H-%M").sql',
+                  'pg_dump -U benji -h benji-postgresql-headless benji > /var/backups/benji/backup-$(date +"%m-%d-%Y-%H-%M").sql',
                 ]
-              # env:
-              #   - name: PGPASS
-              #     valueFrom:
-              #       secretKeyRef:
-              #         name: pgpass
-              #         key: pgpass
+              env:
+                - name: PGPASSWORD
+                  value: secret
               volumeMounts:
                 - mountPath: /var/backups
                   name: postgres-storage
