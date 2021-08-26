@@ -128,4 +128,16 @@ spec:
                     image: curlimages/curl:7.78.0
                     imagePullPolicy: Always
                     command: ["/bin/sh"]
-                    args: ["-c", "curl https://ifconfig.me"]
+                    args: ["-c", "ls /etc/rook"]
+                    volumeMounts:
+                      - name: mon-endpoint-volume
+                        mountPath: /etc/rook
+              - op: add
+                path: /sec/template/spec/volumes
+                value:
+                  - name: mon-endpoint-volume
+                    configMap:
+                      name: rook-ceph-mon-endpoints
+                      items:
+                        - key: data
+                          path: mon-endpoints
