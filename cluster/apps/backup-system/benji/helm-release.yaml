@@ -109,13 +109,13 @@ spec:
                 path: /spec/template/spec/initContainers
                 value:
                   - name: generate-ceph-files
-                    image: bash:5.1.8-alpine3.14
+                    image: rook/ceph:v1.7.1
                     imagePullPolicy: Always
-                    command: ["/usr/local/bin/bash"]
+                    command: ["/usr/bin/bash"]
                     args:
                       [
                         "-c",
-                        "apk add --no-cache curl && curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | /usr/local/bin/bash",
+                        "curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | bash",
                       ]
                     volumeMounts:
                       - name: mon-endpoint-volume
