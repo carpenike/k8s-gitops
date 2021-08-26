@@ -145,6 +145,7 @@ spec:
                             key: ceph-secret
           - target:
               kind: CronJob
+              apiVersion: batch/v1
               name: benji-maint
             patch:
               - op: add
