@@ -7,6 +7,6 @@ metadata:
 data:
   ceph.conf: |
     [global]
-    mon_host = 10.43.136.86:6789,10.43.215.189:6789,10.43.12.93:6789
+    mon_host = 10.43.136.86 10.43.215.189 10.43.12.93
     [client.admin]
     keyring = /etc/ceph/keyring
