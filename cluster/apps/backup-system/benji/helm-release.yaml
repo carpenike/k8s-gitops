@@ -109,7 +109,7 @@ spec:
                 path: /spec/template/spec/initContainers
                 value:
                   - name: generate-ceph-files
-                    image: rook/ceph:v1.7.1
+                    image: bash:5.1.8-alpine3.14
                     imagePullPolicy: Always
                     command: ["/usr/bin/bash"]
                     args:
