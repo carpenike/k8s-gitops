@@ -39,24 +39,6 @@ keyring = ${KEYRING_FILE}
 EOF
 }
 
-# watch the endpoints config file and update if the mon endpoints ever change
-watch_endpoints() {
-  # get the timestamp for the target of the soft link
-  real_path=$(realpath ${MON_CONFIG})
-  initial_time=$(stat -c %Z "${real_path}")
-  while true; do
-    real_path=$(realpath ${MON_CONFIG})
-    latest_time=$(stat -c %Z "${real_path}")
-    
-    if [[ "${latest_time}" != "${initial_time}" ]]; then
-      write_endpoints
-      initial_time=${latest_time}
-    fi
-    
-    sleep 10
-  done
-}
-
 # create the keyring file
 cat <<EOF > ${KEYRING_FILE}
 [${ROOK_CEPH_USERNAME}]
