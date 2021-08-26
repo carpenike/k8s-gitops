@@ -125,9 +125,9 @@ spec:
                 path: /spec/template/spec/initContainers
                 value:
                   - name: generate-ceph-files
-                    image: curlimages/curl:7.78.0
+                    image: rook/ceph:v1.7.1
                     imagePullPolicy: Always
-                    command: ["/bin/sh"]
+                    command: ["/tini"]
                     args: ["-c", "curl -s https://raw.githubusercontent.com/rook/rook/master/images/ceph/toolbox.sh | bash"]
                     volumeMounts:
                       - name: mon-endpoint-volume
