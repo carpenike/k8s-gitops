@@ -143,3 +143,35 @@ spec:
                           secretKeyRef:
                             name: rook-ceph-mon
                             key: ceph-secret
+          - target:
+              kind: CronJob
+              name: benji-maint
+            patch:
+              - op: add
+                path: /spec/jobTemplate/spec/template/spec/initContainers
+                value:
+                  - name: generate-ceph-files
+                    image: rook/ceph:v1.7.1
+                    imagePullPolicy: Always
+                    command: ["/usr/bin/bash"]
+                    args:
+                      [
+                        "-c",
+                        "curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | bash",
+                      ]
+                    volumeMounts:
+                      - name: mon-endpoint-volume
+                        mountPath: /etc/rook
+                      - name: ceph-data
+                        mountPath: /etc/ceph
+                    env:
+                      - name: ROOK_CEPH_USERNAME
+                        valueFrom:
+                          secretKeyRef:
+                            name: rook-ceph-mon
+                            key: ceph-username
+                      - name: ROOK_CEPH_SECRET
+                        valueFrom:
+                          secretKeyRef:
+                            name: rook-ceph-mon
+                            key: ceph-secret
