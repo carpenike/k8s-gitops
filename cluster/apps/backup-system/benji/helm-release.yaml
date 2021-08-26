@@ -81,9 +81,19 @@ spec:
         - name: backup-nas
           persistentVolumeClaim:
             claimName: backup-system-nfs-tank-share-pvc
+        - name: mon-endpoint-volume
+          configMap:
+            name: rook-ceph-mon-endpoints
+            items:
+              - key: data
+                path: mon-endpoints
+        - name: ceph-data
+          emptyDir: {}
       volumeMounts:
         - name: backup-nas
           mountPath: /backup-nas
+        - name: ceph-data
+          mountPath: /etc/ceph
     fsfreeze:
       enabled: true
     postgresql:
@@ -120,6 +130,8 @@ spec:
                     volumeMounts:
                       - name: mon-endpoint-volume
                         mountPath: /etc/rook
+                      - name: ceph-data
+                        mountPath: /etc/ceph
                     env:
                       - name: ROOK_CEPH_USERNAME
                         valueFrom:
@@ -131,12 +143,3 @@ spec:
                           secretKeyRef:
                             name: rook-ceph-mon
                             key: ceph-secret
-              - op: add
-                path: "/spec/template/spec/volumes/-"
-                value:
-                  name: mon-endpoint-volume
-                  configMap:
-                    name: rook-ceph-mon-endpoints
-                    items:
-                      - key: data
-                        path: mon-endpoints
