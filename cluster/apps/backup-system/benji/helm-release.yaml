@@ -146,7 +146,6 @@ spec:
           - target:
               kind: CronJob
               apiVersion: batch/v1
-              name: benji-maint
             patch:
               - op: add
                 path: /spec/jobTemplate/spec/template/spec/initContainers
