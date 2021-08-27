@@ -49,6 +49,33 @@ spec:
                 - RBD_FEATURE_OBJECT_MAP
                 - RBD_FEATURE_FAST_DIFF
                 - RBD_FEATURE_DEEP_FLATTEN
+        initContainers:
+          - name: generate-ceph-files
+            image: rook/ceph:v1.7.2
+            imagePullPolicy: Always
+            command: ["/usr/bin/bash"]
+            args:
+              [
+                "-c",
+                "curl -s https://raw.githubusercontent.com/carpenike/k8s-gitops/master/cluster/apps/backup-system/benji/generate-ceph.sh | bash",
+              ]
+            volumeMounts:
+              - name: mon-endpoint-volume
+                mountPath: /etc/rook
+              - name: ceph-data
+                mountPath: /etc/ceph
+            env:
+              - name: ROOK_CEPH_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: rook-ceph-mon
+                    key: ceph-username
+              - name: ROOK_CEPH_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: rook-ceph-mon
+                    key: ceph-secret
+
       cronJob:
         activeDeadlineSeconds: null
         startingDeadlineSeconds: null
