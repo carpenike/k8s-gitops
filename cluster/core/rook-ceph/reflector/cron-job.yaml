@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: secret-reflector
+  name: reflector
   namespace: rook-ceph
 spec:
   schedule: "0 */12 * * *"
