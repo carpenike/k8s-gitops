@@ -13,6 +13,7 @@ resources:
   - overseerr
   - plex
   - lidarr
+  - mylar
   - qbittorrent
   - radarr
   - radarr-uhd

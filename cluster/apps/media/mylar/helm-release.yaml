@@ -1,0 +1,50 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mylar
+  namespace: media
+spec:
+  releaseName: mylar
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: mylar
+      version: 10.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: ghcr.io/linuxserver/mylar3
+      tag: version-v0.5.7 
+    env:
+      TZ: "America/New_York"
+      UID: "1000"
+      GID: "1000"
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
+        hosts:
+        - host: "mylar.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "mylar.${SECRET_DOMAIN}"
+    persistence:
+      config:
+        enabled: true
+        existingClaim: bazarr-pvc
+      data:
+        enabled: true
+        existingClaim: media-nfs-tank-share-pvc
+        mountPath: /data
