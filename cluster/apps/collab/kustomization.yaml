@@ -12,4 +12,4 @@ resources:
   - nextcloud
   - teedy
   - vikunja
-  - yourls
+  # - yourls
