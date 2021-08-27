@@ -58,6 +58,7 @@ spec:
         - name: v1/pods
           namespaces:
             include:
+              - backup-system
               - default
               - collab
               - home
@@ -202,6 +203,7 @@ spec:
         - name: batch/v1/jobs
           namespaces:
             include:
+              - backup-system
               - default
               - collab
               - home
