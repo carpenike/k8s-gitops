@@ -54,7 +54,7 @@ spec:
         startingDeadlineSeconds: null
       crontab:
         - name: backup-security
-          schedule: "00 03 * * *"
+          schedule: "00 02 * * *"
           command:
             - benji-backup-pvc
             - --namespace
@@ -78,14 +78,14 @@ spec:
             - --namespace
             - home
         - name: enforce
-          schedule: "00 04 * * *"
+          schedule: "00 06 * * *"
           command:
             - benji-command
             - enforce
             - days14
             - 'labels["benji-backup.me/instance"] == "benji-k8s"'
         - name: cleanup
-          schedule: "00 05 * * *"
+          schedule: "00 07 * * *"
           command:
             - benji-command
             - cleanup
