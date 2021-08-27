@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/linuxserver/mylar3
-      tag: version-v0.5.7 
+      tag: version-v0.5.7
     env:
       TZ: "America/New_York"
       UID: "1000"
@@ -33,13 +33,13 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
-        - host: "mylar.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "mylar.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "mylar.${SECRET_DOMAIN}"
+          - hosts:
+              - "mylar.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
