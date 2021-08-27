@@ -7,8 +7,6 @@ metadata:
 spec:
   interval: 10m
   url: https://github.com/carpenike/benji
-  ref:
-    tag: master
   ignore: |
     # exclude all
     /*
