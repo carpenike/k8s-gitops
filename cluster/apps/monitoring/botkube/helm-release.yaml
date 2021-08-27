@@ -25,6 +25,7 @@ spec:
         token: "${SECRET_BOTKUBE_DISCORD_TOKEN}"
         botid: "${SECRET_BOTKUBE_DISCORD_BOT_ID}"
         channel: "${SECRET_BOTKUBE_DISCORD_CHANNEL_ID}"
+        notiftype: short
     serviceMonitor:
       enabled: true
     config:
