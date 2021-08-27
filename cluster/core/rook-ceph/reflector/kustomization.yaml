@@ -5,7 +5,7 @@ resources:
   - rbac.yaml
 namespace: rook-ceph
 configMapGenerator:
-  - name: secrets-reflector
+  - name: secret-reflector
     files:
       - secret-reflector.sh
   - name: configmap-reflector
