@@ -43,7 +43,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: bazarr-pvc
+        existingClaim: mylar-config-pvc
       data:
         enabled: true
         existingClaim: media-nfs-tank-share-pvc
