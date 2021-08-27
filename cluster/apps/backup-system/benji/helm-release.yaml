@@ -145,7 +145,7 @@ spec:
                             key: ceph-secret
           - target:
               kind: CronJob
-              name: "benji-*"
+              name: "benji*"
             patch:
               - op: add
                 path: /spec/jobTemplate/spec/template/spec/initContainers
