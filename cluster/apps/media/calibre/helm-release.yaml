@@ -29,10 +29,10 @@ spec:
       config:
         enabled: true
         existingClaim: calibre-config-pvc
-      media:
+      data:
         enabled: true
         existingClaim: media-nfs-tank-share-pvc
-        mountPath: /media
+        mountPath: /data
 
     service:
       webserver:
