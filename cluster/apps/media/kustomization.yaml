@@ -18,7 +18,8 @@ resources:
   - radarr
   - radarr-uhd
   - resilio-sync
-  - readarr
+  - readarr-audio
+  - readarr-ebooks
   - sabnzbd
   - sonarr
   - tautulli
