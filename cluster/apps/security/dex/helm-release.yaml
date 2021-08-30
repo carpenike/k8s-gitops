@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://charts.dexidp.io
       chart: dex
-      version: 0.6.0
+      version: 0.6.1
       sourceRef:
         kind: HelmRepository
         name: dex-charts
