@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: readarr-audio-config-pvc
   namespace: media
+  annotations:
+    benji-backup.me/fsfreeze: "yes"
 spec:
   accessModes:
     - ReadWriteOnce
