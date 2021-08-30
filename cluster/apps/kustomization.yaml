@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - network
   - security
-  - kasten-io
+  # - kasten-io
   - backup-system
   - calico-system
   - collab
