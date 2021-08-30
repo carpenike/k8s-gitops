@@ -113,6 +113,8 @@ spec:
       postgresqlUsername: benji
       postgresqlDatabase: benji
       postgresqlPassword: secret
+      persistence:
+        existingClaim: benji-postgresql-pvc
     pushgateway:
       image:
         registry: docker.io
