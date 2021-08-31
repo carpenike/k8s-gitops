@@ -104,6 +104,9 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
+      logLevel: debug
+      snippets:
+        addScrapeJobLabel: true
       extraScrapeConfigs:
       - job_name: syslog
         syslog:
