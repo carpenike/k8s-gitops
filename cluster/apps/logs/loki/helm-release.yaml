@@ -122,13 +122,13 @@ spec:
           target_label: 'host'
         - source_labels: ['__syslog_message_app_name']
           target_label: 'app'
-        - source_labels: ['__syslog_message_SRC']
+        - source_labels: ['__syslog_message_src']
           target_label: 'source_ip'
-        - source_labels: ['__syslog_message_SPT']
+        - source_labels: ['__syslog_message_spt']
           target_label: 'source_port'
-        - source_labels: ['__syslog_message_DPT']
+        - source_labels: ['__syslog_message_dpt']
           target_label: 'destination_port'
-        - source_labels: ['__syslog_message_DST']
+        - source_labels: ['__syslog_message_dst']
           target_label: 'destination_ip'
       syslogService:
         enabled: true
