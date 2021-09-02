@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mta-sts
+  namespace: mail
+data:
+  mta-sts: |
+    version: STSv1
+    mode: enforce
+    mx: rn-00.holthome.net
+    max_age: 604800
