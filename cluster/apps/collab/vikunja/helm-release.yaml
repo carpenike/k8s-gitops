@@ -55,7 +55,7 @@ spec:
           - name: files
             mountPath: /app/vikunja/files
       - name: frontend
-        image: vikunja/frontend:0.17.0
+        image: vikunja/frontend:0.18.0
 
     ingress:
       main:
