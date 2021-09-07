@@ -125,6 +125,40 @@ spec:
             backyard:
               coordinates: 640,0,640,360,0,360,0,0
 
+        doorbell:
+          ffmpeg:
+            inputs:
+              - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.30.100.184:554/cam/realmonitor?channel=1&subtype=01&authbasic=64
+                roles:
+                  - clips
+                  - rtmp
+              - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.30.100.184:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
+                roles:
+                  - detect
+          # Required: width of the frame for the input with the detect role
+          width: 720
+          # Required: height of the frame for the input with the detect role
+          height: 576
+          fps: 15
+          clips:
+            enabled: True
+            objects:
+              - person
+            retain:
+              # Required: Default retention days (default: shown below)
+              default: 14
+          snapshots:
+            enabled: True
+            timestamp: True
+            retain:
+              # Required: Default retention days (default: shown below)
+              default: 14
+          rtmp:
+            enabled: True
+          objects:
+            track:
+              - person
+
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate-config"
     affinity:
