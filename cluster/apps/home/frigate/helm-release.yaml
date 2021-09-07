@@ -131,6 +131,7 @@ spec:
               - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.30.100.184:554/cam/realmonitor?channel=1&subtype=1&authbasic=64
                 roles:
                   - clips
+                  - record
                   - rtmp
               - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.30.100.184:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
                 roles:
