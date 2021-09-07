@@ -92,7 +92,7 @@ spec:
         enabled: true
         type: custom
         readOnly: true
-        mountPath: /app/vikunja/config.yml
+        mountPath: /app/vikunja
         volumeSpec:
           configMap:
             name: vikunja-config-yml
