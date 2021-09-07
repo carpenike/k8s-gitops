@@ -25,7 +25,7 @@ data:
         enabled: true
         # The url to redirect clients to. Defaults to the configured frontend url. If you're using Vikunja with the official
         # frontend, you don't need to change this value.
-        redirecturl: https://tasks.holthome.net
+        redirecturl: https://tasks.holthome.net/auth/openid/
         # A list of enabled providers    
         providers:
           # The name of the provider as it will appear in the frontend.      
