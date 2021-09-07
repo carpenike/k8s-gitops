@@ -138,7 +138,7 @@ spec:
           # Required: width of the frame for the input with the detect role
           width: 720
           # Required: height of the frame for the input with the detect role
-          height: 578
+          height: 576
           fps: 15
           clips:
             enabled: True
