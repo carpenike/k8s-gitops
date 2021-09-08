@@ -53,10 +53,12 @@ spec:
             value: ${SECRET_VIKUNJA_POSTGRES_PASSWORD}
           - name: VIKUNJA_MAILER_FROMEMAIL
             value: tasks@${SECRET_DOMAIN}
+          - name: VIKUNJA_MAILER_ENABLED
+            value: "true"
           - name: VIKUNJA_MAILER_HOST
             value: mailu-postfix.mail.svc.cluster.local
           - name: VIKUNJA_MAILER_PORT
-            value: "25"
+            value: "587"
         volumeMounts:
           - name: files
             mountPath: /app/vikunja/files
