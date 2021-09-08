@@ -51,6 +51,12 @@ spec:
             value: vikunja
           - name: VIKUNJA_DATABASE_PASSWORD
             value: ${SECRET_VIKUNJA_POSTGRES_PASSWORD}
+          - name: VIKUNJA_MAILER_FROMEMAIL
+            value: tasks@${SECRET_DOMAIN}
+          - name: VIKUNJA_MAILER_HOST
+            value: mailu-postfix.mail.svc.cluster.local
+          - name: VIKUNJA_MAILER_PORT
+            value: 587
         volumeMounts:
           - name: files
             mountPath: /app/vikunja/files
@@ -69,10 +75,8 @@ spec:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          # traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-          # kubernetes.io/ingress.class: "traefik"
           # forecastle.stakater.com/expose: "true"
           # forecastle.stakater.com/appName: "Vikunja"
           # forecastle.stakater.com/icon: "https://vikunja.io/docs/images/vikunja-logo-white.svg"
