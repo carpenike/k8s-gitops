@@ -37,7 +37,7 @@ spec:
 
     additionalContainers:
       - name: api
-        image: vikunja/api:0.17.1
+        image: vikunja/api:latest
         env:
           - name: VIKUNJA_DATABASE_TYPE
             value: "postgres"
@@ -59,7 +59,7 @@ spec:
             subPath: config.yml
             readOnly: true
       - name: frontend
-        image: vikunja/frontend:0.17.0
+        image: vikunja/frontend:latest
 
     ingress:
       main:
