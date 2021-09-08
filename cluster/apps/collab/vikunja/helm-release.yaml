@@ -51,6 +51,8 @@ spec:
             value: vikunja
           - name: VIKUNJA_DATABASE_PASSWORD
             value: ${SECRET_VIKUNJA_POSTGRES_PASSWORD}
+          - name: VIKUNJA_SERVICE_FRONTENDURL
+            value: https://tasks.${SECRET_DOMAIN}
           - name: VIKUNJA_MAILER_FROMEMAIL
             value: tasks@${SECRET_DOMAIN}
           - name: VIKUNJA_MAILER_ENABLED
