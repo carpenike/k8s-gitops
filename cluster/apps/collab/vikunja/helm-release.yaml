@@ -58,7 +58,7 @@ spec:
           - name: VIKUNJA_MAILER_HOST
             value: mailu-postfix.mail.svc.cluster.local
           - name: VIKUNJA_MAILER_PORT
-            value: "587"
+            value: "25"
         volumeMounts:
           - name: files
             mountPath: /app/vikunja/files
