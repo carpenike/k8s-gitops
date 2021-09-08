@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - config-map.yaml
   - vikunja-postgresql-pvc.yaml
+  - vikunja-files-pvc.yaml
   - helm-release.yaml
