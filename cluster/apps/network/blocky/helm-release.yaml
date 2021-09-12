@@ -64,7 +64,7 @@ spec:
       conditional:
         mapping:
           ${SECRET_DOMAIN}: udp:${GATEWAY_IP}
-          unifi: 10.45.10.17
+          unifi: udp:${GATEWAY_IP}
       blocking:
         blackLists:
           ads:
