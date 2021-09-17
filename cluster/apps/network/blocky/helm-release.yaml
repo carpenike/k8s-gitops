@@ -60,7 +60,7 @@ spec:
         externalResolvers:
         #- tcp-tls:${SECRET_NEXTDNS_ID}.dns1.nextdns.io:853
         #- tcp-tls:${SECRET_NEXTDNS_ID}.dns2.nextdns.io:853
-        - tcp:${GATEWAY_IP}
+        - tcp+udp:${GATEWAY_IP}
       conditional:
         mapping:
           ${SECRET_DOMAIN}: udp:${GATEWAY_IP}
