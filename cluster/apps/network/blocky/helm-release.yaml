@@ -56,7 +56,7 @@ spec:
             targetPort: 53
         externalTrafficPolicy: Local
     persistence:
-      whitelist:
+      ads:
         enabled: true
         mountPath: /app/whitelists
         type: custom
@@ -77,9 +77,9 @@ spec:
           ads:
           # https://oisd.nl/
           - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
-        #whiteLists:
-          #ads:
-          #- https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+        whiteLists:
+          ads:
+          - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
         clientGroupsBlock:
           default:
           - ads

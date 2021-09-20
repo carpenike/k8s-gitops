@@ -7,7 +7,7 @@ namespace: network
 configMapGenerator:
   - name: blocky-whitelist
     files:
-      - whitelist.txt
+      - ads.txt
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
