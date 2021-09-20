@@ -46,11 +46,7 @@ spec:
         enabled: true
         existingClaim: zigbee2mqtt-pvc
         mountPath: /data
-      usb:
-        enabled: true
-        type: hostPath
-        hostPath: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
-        hostPathType: CharDevice
+
     config:
       mqtt:
         base_topic: zigbee2mqtt
@@ -63,7 +59,6 @@ spec:
       permit_join: false
       serial:
         port: "tcp://10.40.50.185:6638"
-
       advanced:
         network_key:
           - 11
@@ -87,15 +82,3 @@ spec:
         port: 8080
       expirimental:
         new_api: true
-    securityContext:
-      privileged: true
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - {
-                    key: "feature.node.kubernetes.io/custom-zigbee",
-                    operator: In,
-                    values: ["true"],
-                  }
