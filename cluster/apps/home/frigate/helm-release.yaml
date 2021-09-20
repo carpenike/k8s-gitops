@@ -57,10 +57,10 @@ spec:
         mountPath: /dev/shm
     config: |
       mqtt:
-        host: vernemq
+        host: mosquitto
         topic_prefix: frigate
-        user: nouser
-        password: nopassword
+        user: admin
+        password: ${SECRET_MOSQUITTO_ADMIN_PASSWORD}
       database:
         path: /data/frigate.db
       detectors:
