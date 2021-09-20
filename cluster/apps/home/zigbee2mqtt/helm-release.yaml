@@ -54,9 +54,9 @@ spec:
     config:
       mqtt:
         base_topic: zigbee2mqtt
-        server: "mqtt://vernemq"
-        user: nouserneeded
-        password: nopasswordneeded
+        server: "mqtt://mosquitto.home"
+        user: admin
+        password: ${SECRET_MOSQUITTO_ADMIN_PASSWORD}
       homeassistant: false
       device_options:
         retain: true
