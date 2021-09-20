@@ -125,7 +125,7 @@ spec:
             backyard:
               coordinates: 640,0,640,360,0,360,0,0
 
-        doorbell:
+        front-doorbell:
           ffmpeg:
             inputs:
               - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.50.50.101:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
