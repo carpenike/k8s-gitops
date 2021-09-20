@@ -55,6 +55,14 @@ spec:
             protocol: UDP
             targetPort: 53
         externalTrafficPolicy: Local
+    persistence:
+      whitelist:
+        enabled: true
+        mountPath: /app/whitelists/default
+        type: custom
+        volumeSpec:
+          configMap:
+            name: blocky-whitelist
     config: |
       upstream:
         externalResolvers:
