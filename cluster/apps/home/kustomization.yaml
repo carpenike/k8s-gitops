@@ -10,6 +10,6 @@ resources:
   - home-assistant
   - mealie
   - node-red
-  - vernemq
+  # - vernemq
   - zigbee2mqtt
   - zwavejs2mqtt
