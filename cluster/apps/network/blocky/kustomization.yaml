@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - prometheus-rule.yaml
+  - whitelist.txt
 configMapGenerator:
   - name: blocky-whitelist
     files:
