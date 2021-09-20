@@ -58,7 +58,7 @@ spec:
     persistence:
       whitelist:
         enabled: true
-        mountPath: /app/whitelists/default
+        mountPath: /app/whitelists
         type: custom
         volumeSpec:
           configMap:
