@@ -6,7 +6,7 @@ metadata:
   namespace: home
 spec:
   dependsOn:
-    - name: vernemq
+    - name: mosquitto
       namespace: home
   interval: 5m
   chart:
@@ -29,7 +29,7 @@ spec:
       AMCREST_HOST: ${SECRET_AMCREST2MQTT_AMCREST_HOST}
       AMCREST_USERNAME: ${SECRET_AMCREST2MQTT_AMCREST_USERNAME}
       AMCREST_PASSWORD: ${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}
-      MQTT_HOST: mosquitto.home.svc.cluster.local
+      MQTT_HOST: mosquitto
       MQTT_PORT: 1883
       MQTT_USERNAME: admin
       MQTT_PASSWORD: ${SECRET_MOSQUITTO_ADMIN_PASSWORD}
