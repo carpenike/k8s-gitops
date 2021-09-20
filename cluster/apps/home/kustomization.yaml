@@ -9,6 +9,7 @@ resources:
   - hajimari
   - home-assistant
   - mealie
+  - mosquitto
   - node-red
   # - vernemq
   - zigbee2mqtt
