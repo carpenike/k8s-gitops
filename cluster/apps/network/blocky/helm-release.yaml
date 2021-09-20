@@ -87,7 +87,7 @@ spec:
           default:
           - ads
       clientLookup:
-        upstream: udp:${GATEWAY_IP}
+        upstream: tcp+udp:${GATEWAY_IP}
       prometheus:
         enable: true
         path: /metrics
