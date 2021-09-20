@@ -34,13 +34,13 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
-        - host: "zigbee.${SECRET_DOMAIN}"
-          paths:
-          - path: /
+          - host: "zigbee.${SECRET_DOMAIN}"
+            paths:
+              - path: /
         tls:
-        - hosts:
-          - "zigbee.${SECRET_DOMAIN}"
-          secretName: zigbee-cert
+          - hosts:
+              - "zigbee.${SECRET_DOMAIN}"
+            secretName: zigbee-cert
     persistence:
       config:
         enabled: true
@@ -62,26 +62,27 @@ spec:
         retain: true
       permit_join: false
       serial:
-        port: /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0014D9E1BE-if00
+        port: "tcp://10.40.50.185:6638"
+
       advanced:
         network_key:
-        - 11
-        - 127
-        - 42
-        - 255
-        - 77
-        - 200
-        - 49
-        - 13
-        - 96
-        - 72
-        - 97
-        - 215
-        - 182
-        - 97
-        - 13
-        - 55
-        pan_id: 6111
+          - 11
+          - 127
+          - 42
+          - 255
+          - 77
+          - 200
+          - 49
+          - 13
+          - 96
+          - 72
+          - 97
+          - 215
+          - 182
+          - 97
+          - 13
+          - 55
+        pan_id: 6112
       frontend:
         port: 8080
       expirimental:
@@ -92,5 +93,9 @@ spec:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - {key: "feature.node.kubernetes.io/custom-zigbee", operator: In, values: ["true"]}
+            - matchExpressions:
+                - {
+                    key: "feature.node.kubernetes.io/custom-zigbee",
+                    operator: In,
+                    values: ["true"],
+                  }
