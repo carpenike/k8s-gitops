@@ -71,7 +71,7 @@ spec:
         - tcp+udp:${GATEWAY_IP}
       conditional:
         mapping:
-          ${SECRET_DOMAIN}: udp:${GATEWAY_IP}
+          ${SECRET_DOMAIN}: tcp+udp:${GATEWAY_IP}
       blocking:
         blackLists:
           ads:
@@ -82,6 +82,7 @@ spec:
           - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
           - |
             www.umgc.edu
+            umgc.edu
         clientGroupsBlock:
           default:
           - ads
