@@ -50,7 +50,7 @@ spec:
         type: LoadBalancer
         annotations:
           coredns.io/hostname: unifi
-          traefik.ingress.kubernetes.io/service.serversscheme: https
+          # traefik.ingress.kubernetes.io/service.serversscheme: https
         externalIPs:
           - 10.45.10.17
         externalTrafficPolicy: Local
