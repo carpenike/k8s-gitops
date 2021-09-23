@@ -7,9 +7,10 @@ resources:
   # - forecastle
   - gitea
   # - openkm
-  # - joplin
+  - joplin
   - littlelink
   - nextcloud
+  - rxresume
   - teedy
   - vikunja
   # - yourls
