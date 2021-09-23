@@ -3,12 +3,3 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - prometheus-rule.yaml
-namespace: network
-configMapGenerator:
-  - name: blocky-whitelist
-    files:
-      - ads.txt
-generatorOptions:
-  disableNameSuffixHash: true
-  annotations:
-    kustomize.toolkit.fluxcd.io/substitute: disabled
