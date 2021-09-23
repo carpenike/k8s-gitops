@@ -20,7 +20,7 @@ spec:
       tag: latest
 
     nameOverride: rxresume
-    env:    
+    env:
       FIREBASE_APIKEY: ${SECRET_RXRESUME_FIREBASE_APIKEY}
       FIREBASE_APPID: ${SECRET_RXRESUME_FIREBASE_APP_ID}
       FIREBASE_AUTHDOMAIN: ${SECRET_RXRESUME_FIREBASE_AUTHDOMAIN}
