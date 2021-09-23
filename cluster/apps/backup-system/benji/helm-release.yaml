@@ -77,15 +77,21 @@ spec:
             - benji-backup-pvc
             - --namespace
             - home
-        - name: enforce
+        - name: backup-mail
           schedule: "00 06 * * *"
+          command:
+            - benji-backup-pvc
+            - --namespace
+            - mail
+        - name: enforce
+          schedule: "00 07 * * *"
           command:
             - benji-command
             - enforce
             - latest14,days14
             - 'labels["benji-backup.me/instance"] == "benji-k8s"'
         - name: cleanup
-          schedule: "00 07 * * *"
+          schedule: "00 08 * * *"
           command:
             - benji-command
             - cleanup
