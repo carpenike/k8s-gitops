@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
             - name: postgres-backup
-              image: postgres:12
+              image: postgres:13
               command: ["/bin/sh"]
               args:
                 [
