@@ -5,6 +5,7 @@ resources:
   # - adguard
   - blocky
   - certificates
+  - echo-server
   - error-pages
   - external-dns
   - traefik
