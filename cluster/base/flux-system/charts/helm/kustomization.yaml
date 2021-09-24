@@ -13,6 +13,7 @@ resources:
   - democratic-csi-charts.yaml
   - dex-charts.yaml
   - dexidp-charts.yaml
+  - ealenn-charts.yaml
   - fairwinds-charts.yaml
   - falco-security-charts.yaml
   - gatekeeper-charts.yaml
