@@ -39,4 +39,4 @@ spec:
       tls:
         - secretName: tls.echo-server
           hosts:
-            - "{{ (index .Values.ingress.main.hosts 0).host }}"
+            - "{{ (index .Values.ingress.hosts 0).host }}"
