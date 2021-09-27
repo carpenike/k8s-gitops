@@ -5,6 +5,7 @@ resources:
   # - adguard
   - blocky
   - certificates
+  - cloudflare-ddns
   - echo-server
   - error-pages
   - external-dns
