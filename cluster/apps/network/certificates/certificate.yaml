@@ -8,10 +8,10 @@ spec:
   secretName: acme-crt-secret
   commonName: "*.${SECRET_DOMAIN}"
   dnsNames:
-  - '${SECRET_DOMAIN}'
-  - '*.${SECRET_DOMAIN}'
-  - 'ryanholt.net'
-  - '*.ryanholt.net'
+    - "${SECRET_DOMAIN}"
+    - "*.${SECRET_DOMAIN}"
+    - "SECRET_PUBLIC_DOMAIN"
+    - "*.SECRET_PUBLIC_DOMAIN"
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
