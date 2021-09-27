@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - _pvc
   - descheduler
+  - goldilocks
   - kube-cleanup-operator
   - metrics-server
   # - nginx
