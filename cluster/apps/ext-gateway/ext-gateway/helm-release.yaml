@@ -21,8 +21,8 @@ spec:
       repository: ghcr.io/k8s-at-home/pod-gateway
       tag: v1.4.0
 
-    routed_namespaces:
-      - mail
+    # routed_namespaces:
+    #   - mail
 
     publicPorts:
       - hostname: mailu-front
