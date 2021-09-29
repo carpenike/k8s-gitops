@@ -90,7 +90,7 @@ spec:
       #   - yuv420p
       cameras:
         # --
-        backyard-patio-door:
+        patio:
           ffmpeg:
             inputs:
             - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.50.100:554/Streaming/Channels/2
