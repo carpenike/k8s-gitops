@@ -52,4 +52,4 @@ spec:
             - name: mailbackup
               nfs:
                 server: "nas.${SECRET_DOMAIN}"
-                path: /mnt/tank/backups/email/ryan
+                path: /mnt/tank/share/backups/email/ryan
