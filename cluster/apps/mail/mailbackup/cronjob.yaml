@@ -14,6 +14,7 @@ spec:
       template:
         spec:
           securityContext:
+            runAsUser: 1000
             supplementalGroups:
               - 1000
           containers:
