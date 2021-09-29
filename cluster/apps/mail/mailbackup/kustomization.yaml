@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: mail
 resources:
   - secret.sops.yaml
-  - cronjob.yaml
+  # - cronjob.yaml
 configMapGenerator:
   - name: mailbackup
     files:
