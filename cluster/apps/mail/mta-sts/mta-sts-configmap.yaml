@@ -8,7 +8,7 @@ data:
   mta-sts.txt: |
     version: STSv1
     mode: enforce
-    mx: rn-00.holthome.net
-    mx: *.holthome.net
+    mx: rn-00.${SECRET_DOMAIN}
+    mx: *.${SECRET_DOMAIN}
     max_age: 10368000
-    
+
