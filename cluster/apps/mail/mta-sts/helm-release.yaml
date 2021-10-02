@@ -55,8 +55,7 @@ spec:
       config:
         enabled: true
         type: custom
-        mountPath: /public/.well-known/mta-sts.txt
-        subPath: mta-sts.txt
+        mountPath: /public/.well-known
         volumeSpec:
           configMap:
             name: mta-sts
