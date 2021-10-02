@@ -5,7 +5,7 @@ metadata:
   name: mta-sts
   namespace: mail
 data:
-  mta-sts: |
+  mta-sts.txt: |
     version: STSv1
     mode: enforce
     mx: rn-00.holthome.net
