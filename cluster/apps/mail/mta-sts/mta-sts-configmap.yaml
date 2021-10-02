@@ -9,4 +9,5 @@ data:
     version: STSv1
     mode: enforce
     mx: rn-00.holthome.net
-    max_age: 604800
+    mx: *.holthome.net
+    max_age: 10368000
