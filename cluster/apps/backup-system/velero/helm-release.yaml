@@ -71,17 +71,13 @@ spec:
         limits:
           memory: 3000Mi
     schedules:
-    #   daily-backup:
-    #     schedule: "0 6 * * *"
-    #     template:
-    #       ttl: "120h"
+      #   daily-backup:
+      #     schedule: "0 6 * * *"
+      #     template:
+      #       ttl: "120h"
       mailu-hourly:
         schedule: "0 */6 * * *"
         template:
-          default-volumes-to-restic: true
-          labelSelector:
-            matchLabels:
-              velero-backup: "true"
           ttl: "120h"
           includedNamespaces:
             - mail
@@ -103,4 +99,3 @@ spec:
     #       ttl: "120h"
     #       includedNamespaces:
     #         - default
-
