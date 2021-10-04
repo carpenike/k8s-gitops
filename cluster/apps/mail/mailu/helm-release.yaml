@@ -17,6 +17,9 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    admin:
+      podAnnotations:
+        velero-backup: "true"
     certmanager:
       issuerName: letsencrypt-production
     domain: "${SECRET_DOMAIN}"
