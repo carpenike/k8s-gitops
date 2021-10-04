@@ -20,6 +20,7 @@ spec:
     admin:
       podAnnotations:
         backup-volumes: "data"
+        velero-backup: "true"
     certmanager:
       issuerName: letsencrypt-production
     domain: "${SECRET_DOMAIN}"
