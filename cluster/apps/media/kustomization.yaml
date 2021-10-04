@@ -9,6 +9,7 @@ resources:
   - doplarr
   - flaresolverr
   - gaps
+  - invidious
   - jackett
   - nzbhydra
   - overseerr

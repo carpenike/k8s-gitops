@@ -2,44 +2,22 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: gaps
+  name: invidious
   namespace: media
 spec:
-  releaseName: gaps
+  releaseName: invidious
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: gaps
-      version: 5.0.1
+      chart: /kubernetes
+      version: 1.1.0
       sourceRef:
-        kind: HelmRepository
-        name: k8s-at-home-charts
+        kind: GitRepository
+        name: invidious-charts-git
         namespace: flux-system
       interval: 5m
   values:
     image:
-      repository: housewrecker/gaps
+      repository: quay.io/invidious/invidious
       tag: latest
-    env:
-      TZ: "America/New_York"
-    ingress:
-      main:
-        enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
-        hosts:
-        - host: "gaps.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
-        tls:
-        - hosts:
-          - "gaps.${SECRET_DOMAIN}"
-          secretName: gaps-cert
-    persistence:
-      data:
-        enabled: true
-        existingClaim: gaps-pvc
+      pullPolicy: Always
