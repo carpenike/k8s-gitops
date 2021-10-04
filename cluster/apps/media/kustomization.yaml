@@ -11,7 +11,7 @@ resources:
   - gaps
   - invidious
   - jackett
-  - nzbhydra
+  # - nzbhydra
   - overseerr
   - plex
   - prowlarr
