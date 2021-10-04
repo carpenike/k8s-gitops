@@ -70,20 +70,20 @@ spec:
           cpu: 15m
         limits:
           memory: 3000Mi
-    # schedules:
+    schedules:
     #   daily-backup:
     #     schedule: "0 6 * * *"
     #     template:
     #       ttl: "120h"
-    #   mcbr-minecraft-bedrock-hourly:
-    #     schedule: "0 */6 * * *"
-    #     template:
-    #       labelSelector:
-    #         matchLabels:
-    #           app: mcbr-minecraft-bedrock
-    #       ttl: "120h"
-    #       includedNamespaces:
-    #         - default
+      mailu-hourly:
+        schedule: "0 */6 * * *"
+        template:
+          labelSelector:
+            matchLabels:
+              velero-backup: "true"
+          ttl: "120h"
+          includedNamespaces:
+            - mail
     #   mcsv-minecraft-hourly:
     #     schedule: "0 * * * *"
     #     template:
