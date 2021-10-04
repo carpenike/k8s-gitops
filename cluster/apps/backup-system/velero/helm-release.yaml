@@ -78,6 +78,7 @@ spec:
       mailu-hourly:
         schedule: "0 */6 * * *"
         template:
+          default-volumes-to-restic: true
           labelSelector:
             matchLabels:
               velero-backup: "true"
