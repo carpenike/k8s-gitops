@@ -9,3 +9,4 @@ resources:
   - kube-prometheus-stack
   - rook-ceph
   - traefik
+  - velero
