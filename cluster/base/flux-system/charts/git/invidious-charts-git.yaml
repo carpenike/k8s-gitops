@@ -1,0 +1,16 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: invidious-charts-git
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://github.com/iv-org/invidious
+  ref:
+    tag: master
+  ignore: |
+    # exclude all
+    /*
+    # include kubernetes directory
+    !/kubenetes/

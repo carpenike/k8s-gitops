@@ -5,5 +5,6 @@ resources:
   - benji-charts.yaml
   - carpenike-stepca-charts-git.yaml
   - dacruz21-charts-git.yaml
+  - invidious-charts-git.yaml
   - mintel-dex-charts.yaml
   - version-checker.yaml
