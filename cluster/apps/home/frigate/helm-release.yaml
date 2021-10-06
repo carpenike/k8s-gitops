@@ -155,9 +155,9 @@ spec:
             events:
               objects:
                 - person
-            retain:
-              # Required: Default retention days (default: shown below)
-              default: 14
+              retain:
+                # Required: Default retention days (default: shown below)
+                default: 14
           snapshots:
             enabled: True
             timestamp: True
