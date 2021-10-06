@@ -122,9 +122,10 @@ spec:
           record:
             enabled: True
             retain_days: 14
-            objects:
-            - person
-            - dog
+            events:
+              objects:
+                - person
+                - dog
           snapshots:
             enabled: True
             timestamp: False
@@ -151,8 +152,9 @@ spec:
           record:
             enabled: True
             retain_days: 14
-            objects:
-              - person
+            events:
+              objects:
+                - person
             retain:
               # Required: Default retention days (default: shown below)
               default: 14
