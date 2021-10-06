@@ -20,8 +20,11 @@ spec:
   values:
     image:
       repository: ghcr.io/tarampampam/error-pages
-      tag: 2.0.0
+      tag: 1.8.0
     controller:
+      enabled: true
+      type: deployment
+      strategy: RollingUpdate
       replicas: 3
     nameOverride: error-pages
     env:
@@ -31,6 +34,18 @@ spec:
         ports:
           http:
             port: 8080
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - error-pages
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         memory: 100Mi
