@@ -109,9 +109,10 @@ spec:
               - clips
               - record
               - rtmp
-          height: 360
-          width: 640
-          fps: 10
+          detect:
+            height: 360
+            width: 640
+            fps: 10
           objects:
             filters:
               person:
@@ -144,11 +145,10 @@ spec:
               - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.50.50.101:554/cam/realmonitor?channel=1&subtype=1&authbasic=64
                 roles:
                   - detect
-          # Required: width of the frame for the input with the detect role
-          width: 720
-          # Required: height of the frame for the input with the detect role
-          height: 576
-          fps: 15
+          detect:
+            width: 720
+            height: 576
+            fps: 15
           clips:
             enabled: True
             objects:
