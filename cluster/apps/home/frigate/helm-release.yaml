@@ -119,8 +119,9 @@ spec:
                 max_area: 100000
                 threshold: 0.75
                 min_score: 0.60
-          clips:
+          record:
             enabled: True
+            retain_days: 14
             objects:
             - person
             - dog
@@ -147,8 +148,9 @@ spec:
             width: 720
             height: 576
             fps: 15
-          clips:
+          record:
             enabled: True
+            retain_days: 14
             objects:
               - person
             retain:
