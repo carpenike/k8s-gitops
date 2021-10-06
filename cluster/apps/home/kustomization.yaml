@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - _pvc
   - amcrest2mqtt
+  - deepstack
   - double-take
   - esphome
   - frigate
