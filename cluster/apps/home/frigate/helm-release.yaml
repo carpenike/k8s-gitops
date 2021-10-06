@@ -106,7 +106,6 @@ spec:
               - detect
             - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.50.100:554/Streaming/Channels/1
               roles:
-              - clips
               - record
               - rtmp
           detect:
@@ -139,7 +138,6 @@ spec:
             inputs:
               - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.50.50.101:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
                 roles:
-                  - clips
                   - record
                   - rtmp
               - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.50.50.101:554/cam/realmonitor?channel=1&subtype=1&authbasic=64
