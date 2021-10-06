@@ -18,6 +18,7 @@ spec:
     image:
       repository: jakowenko/double-take
       tag: 1.3.0
+    nameOverride: double-take
     env:
       TZ: "America/New_York"
     service:
