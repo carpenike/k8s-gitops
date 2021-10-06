@@ -38,13 +38,13 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-          - host: dt.${SECRET_SHORT_DOMAIN}
+          - host: dt.${SECRET_DOMAIN}
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "dt.${SECRET_SHORT_DOMAIN}"
+              - "dt.${SECRET_DOMAIN}"
             secretName: dt-cert
     persistence:
       config:
