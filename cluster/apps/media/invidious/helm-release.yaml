@@ -1,5 +1,5 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: gaps
@@ -9,12 +9,11 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: gaps
-      version: 5.0.1
+      chart: ./kubernetes
+      version: 1.1.0
       sourceRef:
-        kind: HelmRepository
-        name: k8s-at-home-charts
+        kind: GitRepository
+        name: invidious-charts-git
         namespace: flux-system
       interval: 5m
   values:
