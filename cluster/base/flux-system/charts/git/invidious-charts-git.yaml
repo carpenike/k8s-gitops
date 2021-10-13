@@ -6,7 +6,8 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  url: https://github.com/iv-org/invidious
+  #url: https://github.com/iv-org/invidious
+  url: https://github.com/carpenike/invidious
   ref:
     branch: master
   ignore: |
