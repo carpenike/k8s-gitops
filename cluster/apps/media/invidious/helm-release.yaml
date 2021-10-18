@@ -23,7 +23,7 @@ spec:
       pullPolicy: Always
 
     envFrom:
-      - secretRef:
+      - configMapKeyRef:
           name: invidious-config
           key: INVIDIOUS_CONFIG
     service:
