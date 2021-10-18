@@ -9,16 +9,32 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: /kubernetes
-      version: 1.2.0
+      chart: /charts/kah-common/
       sourceRef:
         kind: GitRepository
-        name: invidious-charts-git
+        name: flux-system
         namespace: flux-system
       interval: 5m
   values:
+    nameOverride: invidious
     image:
       repository: quay.io/invidious/invidious
       tag: latest
       pullPolicy: Always
-    nameOverride: invidious
+
+    envFrom:
+      - secretRef:
+          name: invidious-config
+
+    service:
+      type: ClusterIP
+      port: 3000
+
+    postgresql:
+      enabled: true
+      postgresqlUsername: kemal
+      postgresqlPassword: kemal
+      postgresqlDatabase: invidious
+      initdbUser: kemal
+      initdbPass: kemal
+      initdbScriptsConfigMap: invidious-postgresql-init
