@@ -27,8 +27,10 @@ spec:
           name: invidious-config
 
     service:
-      type: ClusterIP
-      port: 3000
+      main:
+        ports:
+          http:
+            port: 3000
 
     postgresql:
       enabled: true
