@@ -21,3 +21,4 @@ spec:
       repository: quay.io/invidious/invidious
       tag: latest
       pullPolicy: Always
+    nameOverride: invidious
