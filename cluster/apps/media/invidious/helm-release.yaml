@@ -41,12 +41,17 @@ spec:
       initdbPass: kemal
       initdbScriptsConfigMap: invidious-postgresql-init
 
-    readinessProbe:
-      httpGet:
-        port: 3000
-        path: /
-    livenessProbe:
-      httpGet:
-        port: 3000
-        path: /
-      initialDelaySeconds: 15
+    probes:
+      readiness:
+        enabled: true
+        httpGet:
+          port: 3000
+          path: /
+      liveness:
+        enabled: true
+        httpGet:
+          port: 3000
+          path: /
+        initialDelaySeconds: 15
+      startup:
+        enabled: false
