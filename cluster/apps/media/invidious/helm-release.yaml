@@ -22,9 +22,13 @@ spec:
       tag: latest
       pullPolicy: Always
 
-    envFrom:
-      - configMapRef:
+    env:
+    - name: INVIDIOUS_CONFIG
+      valueFrom:
+        configMapKeyRef:
+          key: INVIDIOUS_CONFIG
           name: invidious-config
+
     service:
       main:
         ports:
