@@ -23,11 +23,19 @@ spec:
       pullPolicy: Always
 
     env:
-      INVIDIOUS_CONFIG:
-        valueFrom:
-          configMapKeyRef:
-            key: INVIDIOUS_CONFIG
-            name: invidious-config
+      INVIDIOUS_CONFIG: |
+        channel_threads: 1
+        db:
+          dbname: invidious
+          host: invidious-postgresql
+          password: kemal
+          port: 5432
+          user: kemal
+        domain: iv.${SECRET_DOMAIN}
+        feed_threads: 1
+        full_refresh: false
+        https_only: false
+        port: 3000
 
     service:
       main:
