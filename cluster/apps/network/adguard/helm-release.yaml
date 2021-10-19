@@ -47,6 +47,7 @@ spec:
     persistence:
       config:
         enabled: true
+        existingClaim: adguard-0-config-pvc
       # data:
       #   enabled: true
       #   existingClaim: database-adguard-home
@@ -61,10 +62,10 @@ spec:
 
       dns-tcp:
         enabled: true
-        type: ClusterIP
-        # externalIPs:
-        # - "${SVC_ADGUARD_ADDRESS}"
-        # externalTrafficPolicy: Local
+        type: LoadBalancerIP
+        externalIPs:
+        - "${SVC_ADGUARD_ADDRESS}"
+        externalTrafficPolicy: Local
         port:
           port: 53
           name: dns-tcp
@@ -74,10 +75,10 @@ spec:
       dns-udp:
         enabled: true
         nameSuffix: dns-udp
-        type: ClusterIP
-        # externalIPs:
-        # - "${SVC_ADGUARD_ADDRESS}"
-        # externalTrafficPolicy: Local
+        type: LoadBalancerIP
+        externalIPs:
+        - "${SVC_ADGUARD_ADDRESS}"
+        externalTrafficPolicy: Local
         port:
           port: 53
           name: dns-udp
@@ -137,6 +138,7 @@ spec:
     persistence:
       config:
         enabled: true
+        existingClaim: adguard-0-config-pvc
       # data:
       #   enabled: true
       #   existingClaim: database-adguard-home
@@ -151,10 +153,10 @@ spec:
 
       dns-tcp:
         enabled: true
-        type: ClusterIP
-        # externalIPs:
-        # - "${SVC_ADGUARD_ADDRESS}"
-        # externalTrafficPolicy: Local
+        type: LoadBalancerIP
+        externalIPs:
+        - "${SVC_ADGUARD_ADDRESS}"
+        externalTrafficPolicy: Local
         port:
           port: 53
           name: dns-tcp
@@ -164,10 +166,10 @@ spec:
       dns-udp:
         enabled: true
         nameSuffix: dns-udp
-        type: ClusterIP
-        # externalIPs:
-        # - "${SVC_ADGUARD_ADDRESS}"
-        # externalTrafficPolicy: Local
+        type: LoadBalancerIP
+        externalIPs:
+        - "${SVC_ADGUARD_ADDRESS}"
+        externalTrafficPolicy: Local
         port:
           port: 53
           name: dns-udp
