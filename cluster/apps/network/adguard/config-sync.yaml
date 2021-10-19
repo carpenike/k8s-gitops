@@ -1,15 +1,21 @@
-apiVersion: batch/v1
-kind: CronJob
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: adguard-config-sync
   namespace: network
 spec:
-  # Backup the database every day at 2AM
-  schedule: "*/10 * * * *"
-  jobTemplate:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adguard-config-sync
+  template:
+    metadata:
+      labels:
+        app: adguard-config-sync
     spec:
       template:
         spec:
+          dnsPolicy: ClusterFirstWithHostNet
           containers:
             - name: adguard-sync-to-secondary
               image: quay.io/bakito/adguardhome-sync
@@ -29,5 +35,7 @@ spec:
                 # - name: REPLICA_PASSWORD
                 #   value:
                 - name: RUNONSTART
-                  value: "false"
-          restartPolicy: Never
+                  value: "true"
+                - name: CRON
+                  value: "*/10 * * * *"
+          # restartPolicy: Never
