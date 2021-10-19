@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: adguard-home
+  name: adguard-home-0
   namespace: network
 spec:
   interval: 5m
@@ -43,9 +43,7 @@ spec:
       repository: adguard/adguardhome
       tag: v0.106.3
       pullPolicy: Always
-    controller:
-      type: statefulset
-      replicas: 2
+
     persistence:
       config:
         enabled: true
@@ -101,6 +99,84 @@ spec:
         tls:
         - hosts:
           - "adguard.${SECRET_DOMAIN}"
+
+    # nodeSelector:
+    #   node-role.kubernetes.io/worker: "true"
+    resources:
+      requests:
+        memory: 1000Mi
+        cpu: 200m
+      limits:
+        memory: 2000Mi
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: adguard-home-1
+  namespace: network
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: adguard-home
+      version: 5.0.3
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+
+    image:
+      repository: adguard/adguardhome
+      tag: v0.106.3
+      pullPolicy: Always
+
+    persistence:
+      config:
+        enabled: true
+      # data:
+      #   enabled: true
+      #   existingClaim: database-adguard-home
+
+    env:
+      TZ: "America/New_York"
+
+    service:
+      main:
+        port:
+          port: 3000
+
+      dns-tcp:
+        enabled: true
+        type: ClusterIP
+        # externalIPs:
+        # - "${SVC_ADGUARD_ADDRESS}"
+        # externalTrafficPolicy: Local
+        port:
+          port: 53
+          name: dns-tcp
+          protocol: TCP
+          targetPort: 53
+
+      dns-udp:
+        enabled: true
+        nameSuffix: dns-udp
+        type: ClusterIP
+        # externalIPs:
+        # - "${SVC_ADGUARD_ADDRESS}"
+        # externalTrafficPolicy: Local
+        port:
+          port: 53
+          name: dns-udp
+          protocol: UDP
+          targetPort: 53
+
+    ingress:
+      main:
+        enabled: false
 
     # nodeSelector:
     #   node-role.kubernetes.io/worker: "true"
