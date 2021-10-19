@@ -23,7 +23,7 @@ spec:
       pullPolicy: Always
 
     env:
-      - name: INVIDIOUS_CONFIG
+      INVIDIOUS_CONFIG:
         valueFrom:
           configMapKeyRef:
             key: INVIDIOUS_CONFIG
