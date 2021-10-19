@@ -153,7 +153,7 @@ spec:
 
       dns-tcp:
         enabled: true
-        type: LoadBalancerIP
+        type: LoadBalancer
         externalIPs:
         - "${SVC_ADGUARD_ADDRESS}"
         externalTrafficPolicy: Local
@@ -166,7 +166,7 @@ spec:
       dns-udp:
         enabled: true
         nameSuffix: dns-udp
-        type: LoadBalancerIP
+        type: LoadBalancer
         externalIPs:
         - "${SVC_ADGUARD_ADDRESS}"
         externalTrafficPolicy: Local
