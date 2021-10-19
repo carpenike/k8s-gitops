@@ -138,7 +138,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: adguard-0-config-pvc
+        existingClaim: adguard-1-config-pvc
       # data:
       #   enabled: true
       #   existingClaim: database-adguard-home
