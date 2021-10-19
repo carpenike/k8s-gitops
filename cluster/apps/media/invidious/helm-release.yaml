@@ -42,12 +42,12 @@ spec:
 
     probes:
       readiness:
-        enabled: true
+        enabled: false
         httpGet:
           port: 3000
           path: /
       liveness:
-        enabled: true
+        enabled: false
         httpGet:
           port: 3000
           path: /
