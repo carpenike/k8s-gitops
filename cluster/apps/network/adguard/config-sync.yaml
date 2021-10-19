@@ -13,8 +13,8 @@ spec:
           containers:
             - name: adguard-sync-to-secondary
               image: quay.io/bakito/adguardhome-sync
-              # command: ["run"]
-
+              command: ["/opt/go/adguardhome-sync"]
+              args: ["run"]
               env:
                 - name: ORIGIN_URL
                   value: http://adguard-home-0:3000
