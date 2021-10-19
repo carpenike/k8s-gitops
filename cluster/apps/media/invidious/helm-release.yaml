@@ -43,6 +43,12 @@ spec:
           http:
             port: 3000
 
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+
     postgresql:
       enabled: true
       postgresqlUsername: kemal
