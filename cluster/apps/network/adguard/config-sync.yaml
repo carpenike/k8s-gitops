@@ -29,5 +29,5 @@ spec:
                 # - name: REPLICA_PASSWORD
                 #   value:
                 - name: RUNONSTART
-                  value: "true"
+                  value: "false"
           restartPolicy: Never
