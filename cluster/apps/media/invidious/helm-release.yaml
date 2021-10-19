@@ -25,7 +25,6 @@ spec:
     envFrom:
       - configMapRef:
           name: invidious-config
-          key: INVIDIOUS_CONFIG
     service:
       main:
         ports:
