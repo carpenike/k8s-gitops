@@ -5,4 +5,4 @@ resources:
   # - mailu
   # - mailbackup
   - mta-sts
-  # - protonmail-bridge
+  - protonmail-bridge
