@@ -1,0 +1,33 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: adguard-config-sync
+  namespace: network
+spec:
+  # Backup the database every day at 2AM
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: adguard-sync-to-secondary
+              image: quay.io/bakito/adguardhome-sync
+              command: ["run"]
+
+              env:
+                - name: ORIGIN_URL
+                  value: http://adguard-home-0:3000
+                # - name: ORIGIN_USERNAME
+                #   value:
+                # - name: ORIGIN_PASSWORD
+                #   value:
+                - name: REPLICA_URL
+                  value: http://adguard-home-1:3000
+                # - name: REPLICA_USERNAME
+                #   value:
+                # - name: REPLICA_PASSWORD
+                #   value:
+                - name: RUNONSTART
+                  value: "true"
+          restartPolicy: Never
