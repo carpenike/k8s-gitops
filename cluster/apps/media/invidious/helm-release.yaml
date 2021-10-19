@@ -23,11 +23,11 @@ spec:
       pullPolicy: Always
 
     env:
-    - name: INVIDIOUS_CONFIG
-      valueFrom:
-        configMapKeyRef:
-          key: INVIDIOUS_CONFIG
-          name: invidious-config
+      - name: INVIDIOUS_CONFIG
+        valueFrom:
+          configMapKeyRef:
+            key: INVIDIOUS_CONFIG
+            name: invidious-config
 
     service:
       main:
