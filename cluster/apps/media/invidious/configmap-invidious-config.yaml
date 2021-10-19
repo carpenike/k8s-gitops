@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: invidious-config
   namespace: media
-stringData:
+data:
   INVIDIOUS_CONFIG: |
     channel_threads: 1
     db:
