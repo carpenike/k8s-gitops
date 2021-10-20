@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       # renovate: registryUrl=http://charts.charliehaley.dev
-      chart: unifi
+      chart: omada-exporter
       version: 4.2.3
       sourceRef:
         kind: HelmRepository
