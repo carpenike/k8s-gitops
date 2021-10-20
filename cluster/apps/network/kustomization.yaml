@@ -10,6 +10,7 @@ resources:
   - error-pages
   - external-dns
   - omada
+  - omada-exporter
   - traefik
   - unifi
   # - dns-update
