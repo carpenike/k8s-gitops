@@ -52,11 +52,11 @@ spec:
             secretName: omada-cert
 
     service:
-      main:
-        enabled: true
-        ports:
-          http:
-            port: 8088
+      # main:
+      #   enabled: true
+      #   ports:
+      #     http:
+      #       port: 8088
       controller:
         enabled: true
         type: LoadBalancer
