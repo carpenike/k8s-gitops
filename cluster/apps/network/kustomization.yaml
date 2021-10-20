@@ -9,6 +9,7 @@ resources:
   - echo-server
   - error-pages
   - external-dns
+  - omada
   - traefik
   - unifi
   # - dns-update
