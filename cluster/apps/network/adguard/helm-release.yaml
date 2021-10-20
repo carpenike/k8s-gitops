@@ -60,46 +60,38 @@ spec:
         port:
           port: 3000
 
-      dns-tcp:
+      dns:
         enabled: true
         type: LoadBalancer
         externalIPs:
-        - "${SVC_ADGUARD_ADDRESS}"
+          - "${SVC_ADGUARD_ADDRESS}"
         externalTrafficPolicy: Local
-        port:
-          port: 53
-          name: dns-tcp
-          protocol: TCP
-          targetPort: 53
-
-      dns-udp:
-        enabled: true
-        nameSuffix: dns-udp
-        type: LoadBalancer
-        externalIPs:
-        - "${SVC_ADGUARD_ADDRESS}"
-        externalTrafficPolicy: Local
-        port:
-          port: 53
-          name: dns-udp
-          protocol: UDP
-          targetPort: 53
+        ports:
+          tcp:
+            enabled: true
+            port: 53
+            protocol: TCP
+            targetPort: 53
+          udp:
+            enabled: true
+            port: 53
+            protocol: UDP
+            targetPort: 53
 
     ingress:
       main:
         enabled: true
         ingressClassName: "traefik"
         # annotations:
-        #   kubernetes.io/ingress.class: "nginx"
-        #   # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        #   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         hosts:
-        - host: "adguard.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "adguard.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "adguard.${SECRET_DOMAIN}"
+          - hosts:
+              - "adguard.${SECRET_DOMAIN}"
 
     # nodeSelector:
     #   node-role.kubernetes.io/worker: "true"
@@ -129,7 +121,6 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-
     image:
       repository: adguard/adguardhome
       tag: v0.106.3
@@ -151,30 +142,23 @@ spec:
         port:
           port: 3000
 
-      dns-tcp:
+      dns:
         enabled: true
         type: LoadBalancer
         externalIPs:
-        - "${SVC_ADGUARD_ADDRESS}"
+          - "${SVC_ADGUARD_ADDRESS}"
         externalTrafficPolicy: Local
-        port:
-          port: 53
-          name: dns-tcp
-          protocol: TCP
-          targetPort: 53
-
-      dns-udp:
-        enabled: true
-        nameSuffix: dns-udp
-        type: LoadBalancer
-        externalIPs:
-        - "${SVC_ADGUARD_ADDRESS}"
-        externalTrafficPolicy: Local
-        port:
-          port: 53
-          name: dns-udp
-          protocol: UDP
-          targetPort: 53
+        ports:
+          tcp:
+            enabled: true
+            port: 53
+            protocol: TCP
+            targetPort: 53
+          udp:
+            enabled: true
+            port: 53
+            protocol: UDP
+            targetPort: 53
 
     ingress:
       main:
