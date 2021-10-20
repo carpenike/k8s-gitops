@@ -22,7 +22,7 @@ spec:
       enabled: true
       type: deployment
       strategy: RollingUpdate
-      replicas: 3
+      replicas: 1
     nameOverride: vycontrol
     # env:
     #   TEMPLATE_NAME: hacker-terminal
@@ -31,6 +31,8 @@ spec:
         ports:
           http:
             port: 8000
+    postgresql:
+      enabled: false
     resources:
       requests:
         memory: 100Mi
