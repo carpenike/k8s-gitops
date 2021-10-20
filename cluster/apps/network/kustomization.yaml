@@ -12,5 +12,5 @@ resources:
   - traefik
   - unifi
   # - dns-update
-  - vycontrol
+  # - vycontrol
   - wildcard-certificate
