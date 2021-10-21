@@ -1,0 +1,12 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: omada-headers
+  namespace: network
+spec:
+  headers:
+    customRequestHeaders:
+      Host: "omada.${DOMAIN}:8043"
+    customResponseHeaders:
+      Host: "omada.${DOMAIN}"
