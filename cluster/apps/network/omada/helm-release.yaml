@@ -38,7 +38,6 @@ spec:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/service.serversscheme: https
           traefik.ingress.kubernetes.io/router.middlewares: "network-omada-redirect@kubernetescrd,network-omada-headers@kubernetescrd"
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
@@ -55,9 +54,8 @@ spec:
     service:
       main:
         enabled: true
-        ports:
-          https:
-            port: 8043
+        annotations:
+          traefik.ingress.kubernetes.io/service.serversscheme: https
       controller:
         enabled: true
         type: LoadBalancer
