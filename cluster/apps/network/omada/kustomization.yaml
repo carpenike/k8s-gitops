@@ -1,8 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - middleware-headers.yaml
-  - middleware-redirect.yaml
+  - middleware.yaml
   - data-pvc.yaml
   - logs-pvc.yaml
   - work-pvc.yaml
