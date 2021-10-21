@@ -12,7 +12,7 @@ resources:
   - home-assistant
   - mealie
   - mosquitto
-  - node-red
+  # - node-red
   # - vernemq
   - zigbee2mqtt
   - zwavejs2mqtt
