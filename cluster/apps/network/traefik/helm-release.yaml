@@ -20,6 +20,8 @@ spec:
     - name: cert-manager
       namespace: cert-manager
   values:
+    image:
+      name: ghcr.io/k8s-at-home/traefik
     deployment:
       enabled: true
       kind: DaemonSet
@@ -48,6 +50,7 @@ spec:
       dashboard:
         enabled: false
     globalArguments:
+      - "--api.insecure=true"
       - "--serversTransport.insecureSkipVerify=true"
       - "--providers.kubernetesingress.ingressclass=traefik"
       - "--metrics.prometheus=true"
