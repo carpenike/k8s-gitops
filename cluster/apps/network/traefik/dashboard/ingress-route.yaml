@@ -1,20 +1,27 @@
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: dashboard
+  name: traefik-dashboard
   namespace: network
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    hajimari.io/enable: "true"
+    hajimari.io/icon: "web"
+    hajimari.io/appName: "traefik"
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`traefik.${SECRET_DOMAIN}`)
-      kind: Rule
-      priority: 10
-      services:
-        - name: api@internal
-          kind: TraefikService
-      middlewares:
-        - name: rfc1918
   tls:
-    secretName: "${SECRET_DOMAIN/./-}-tls"
+    - hosts:
+        - "traefik.${SECRET_DOMAIN}"
+      secretName: "${SECRET_DOMAIN/./-}-tls"
+  rules:
+    - host: "traefik.${SECRET_DOMAIN}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik
+                port:
+                  number: 9000
