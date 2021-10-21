@@ -49,7 +49,6 @@ spec:
         tls:
           - hosts:
               - "omada.${SECRET_DOMAIN}"
-              - "omada-controller"
             secretName: omada-cert
 
     service:
