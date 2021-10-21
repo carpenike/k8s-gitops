@@ -7,8 +7,8 @@ metadata:
     kustomize.toolkit.fluxcd.io/substitute: disabled
 spec:
   redirectRegex:
-    regex: "https://([/]+)/?$" 
-    replacement: "https://$1/login" 
+    regex: "https://([^/]+)/?$"
+    replacement: "https://$1/login"
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
