@@ -29,7 +29,7 @@ spec:
       host: "https://omada-controller:8043"
       username: "exporter"
       password: "exporter"
-      site: "Sandra Lee"
+      site: "Default"
       insecure: true
 
     resources:
