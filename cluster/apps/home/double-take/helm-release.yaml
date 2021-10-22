@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: jakowenko/double-take
-      tag: 1.5.1
+      tag: 1.5.2
     nameOverride: double-take
     env:
       TZ: "America/New_York"
