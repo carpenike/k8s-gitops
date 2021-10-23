@@ -51,6 +51,10 @@ spec:
       enabled: true
       password: ${SECRET_MATRIX_REDIS_PASSWORD}
 
+    signingkey:
+      job:
+        enabled: true
+
     persistence:
       enabled: true
       existingClaim: matrix-media-pvc
