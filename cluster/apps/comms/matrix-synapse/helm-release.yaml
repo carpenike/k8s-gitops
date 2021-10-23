@@ -53,7 +53,7 @@ spec:
 
     signingkey:
       job:
-        enabled: true
+        enabled: false
 
     persistence:
       enabled: true
