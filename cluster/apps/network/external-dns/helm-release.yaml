@@ -26,7 +26,7 @@ spec:
     cloudflare:
       secretName: cloudflare-api-key
       email: "${SECRET_EMAIL}"
-      proxied: true
+      proxied: false
     policy: sync
     txtPrefix: "k8s."
     domainFilters:
