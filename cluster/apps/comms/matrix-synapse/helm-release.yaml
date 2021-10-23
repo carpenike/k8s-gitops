@@ -23,7 +23,7 @@ spec:
     serverName: ${SECRET_PUBLIC_DOMAIN}
     publicServerName: matrix.${SECRET_DOMAIN}
     wellknown:
-      enabled: true
+      enabled: false
 
     ingress:
       enabled: true
