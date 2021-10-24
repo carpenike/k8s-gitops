@@ -23,8 +23,7 @@ spec:
       tag: latest
 
     command:
-      - ls /data
-      #- python3 -m mautrix_facebook -c /data/config.yaml
+      - /bin/sh -c python3 -m mautrix_facebook -c /data/config.yaml
 
     nameOverride: mautrix-facebook
 
