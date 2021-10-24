@@ -42,6 +42,9 @@ spec:
       account_threepid_delegates:
         msisdn: https://vector.im
 
+      app_service_config_files:
+        - /data/mautrix-facebook/registration.yaml
+
     ingress:
       enabled: true
       traefikPaths: true
@@ -77,9 +80,6 @@ spec:
     persistence:
       enabled: true
       existingClaim: matrix-media-pvc
-
-    app_service_config_files:
-      - /data/mautrix-facebook/registration.yaml
 
     synapse:
       extraVolumes:
