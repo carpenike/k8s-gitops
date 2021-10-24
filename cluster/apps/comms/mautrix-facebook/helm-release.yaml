@@ -38,6 +38,24 @@ spec:
           http:
             port: 29319
 
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: traefik
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        external-dns/is-public: "true"
+        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+      hosts:
+        - host: "mau-fb.${SECRET_DOMAIN}"
+          paths:
+            - /public
+      tls:
+        - hosts:
+            - "mau-fb.${SECRET_DOMAIN}"
+          secretName: mau-fb-cert
+
     persistence:
       data:
         enabled: true
