@@ -39,6 +39,8 @@ spec:
           pattern: ".*"
         - medium: msisdn
           pattern: '\+1'
+      account_threepid_delegates:
+        msisdn: https://vector.im
 
     ingress:
       enabled: true
