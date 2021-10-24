@@ -25,6 +25,21 @@ spec:
     wellknown:
       enabled: true
 
+    extraConfig:
+      email:
+        smtp_host: smtp.mailgun.org
+        smtp_port: 587
+        smtp_user: ${SECRET_MAILGUN_USERNAME}
+        smtp_pass: ${SECRET_MAILGUN_PASSWORD}
+        notif_from: "Your Friendly %(app)s homeserver <noreply@${SECRET_DOMAIN}>"
+
+      enable_3pid_lookup: true
+      allowed_local_3pids:
+        - medium: email
+          pattern: ".*"
+        - medium: msisdn
+          pattern: '\+1'
+
     ingress:
       enabled: true
       traefikPaths: true
