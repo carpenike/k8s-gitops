@@ -1,0 +1,43 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mautrix-facebook
+  namespace: comms
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: /charts/kah-common/
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 5m
+  dependsOn:
+    - name: matrix-synapse
+      namespace: comms
+  values:
+    image:
+      repository: dock.mau.dev/mautrix/facebook
+      tag: latest
+
+    nameOverride: mautrix-facebook
+
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+
+    persistence:
+      data:
+        enabled: true
+        existingClaim: mautrix-facebook-data-pvc
+
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
