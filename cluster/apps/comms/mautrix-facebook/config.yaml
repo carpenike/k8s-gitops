@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: mautrix-facebook-config
   namespace: comms
-stringData:
+data:
   config.yaml: |
     # Homeserver details
     homeserver:
