@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: mbentley/omada-controller
-      tag: '4.4'
+      tag: "4.4"
 
     env:
       TZ: "America/New_York"
@@ -145,7 +145,7 @@ spec:
 
     resources:
       requests:
-        memory: 100Mi
-        cpu: 100m
+        memory: 1200M
+        cpu: 1200m
       limits:
-        memory: 750Mi
+        memory: 1200M
