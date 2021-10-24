@@ -78,6 +78,9 @@ spec:
       enabled: true
       existingClaim: matrix-media-pvc
 
+    app_service_config_files:
+      - /data/mautrix-facebook/registration.yaml
+
     synapse:
       extraVolumes:
         - name: mautrix-facebook
@@ -86,7 +89,6 @@ spec:
             items:
               - key: registration.yaml
                 path: registration.yaml
-
       extraVolumeMounts:
         - name: mautrix-facebook
           mountPath: /data/mautrix-facebook
