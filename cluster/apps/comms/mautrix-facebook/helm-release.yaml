@@ -35,6 +35,9 @@ spec:
         enabled: true
         existingClaim: mautrix-facebook-data-pvc
 
+    postgresql:
+      enabled: false
+
     resources:
       requests:
         memory: 100Mi
