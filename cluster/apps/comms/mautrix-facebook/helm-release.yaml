@@ -41,8 +41,8 @@ spec:
     ingress:
       main:
         enabled: true
+        ingressClassName: "traefik"
         annotations:
-          kubernetes.io/ingress.class: traefik
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
@@ -51,11 +51,12 @@ spec:
         hosts:
           - host: "mau-fb.${SECRET_DOMAIN}"
             paths:
-              - /public
+              - path: /public
+                pathType: Prefix
         tls:
-          - hosts:
+          - secretName: mau-fb-cert
+            hosts:
               - "mau-fb.${SECRET_DOMAIN}"
-            secretName: mau-fb-cert
 
     persistence:
       data:
