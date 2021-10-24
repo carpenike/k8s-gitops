@@ -77,3 +77,16 @@ spec:
     persistence:
       enabled: true
       existingClaim: matrix-media-pvc
+
+    synapse:
+      extraVolumes:
+        - name: mautrix-facebook
+          configMap:
+            name: mautrix-facebook-config
+            items:
+              - key: registration.yaml
+                path: registration.yaml
+
+      extraVolumeMounts:
+        - name: mautrix-facebook
+          mountPath: /data/mautrix-facebook
