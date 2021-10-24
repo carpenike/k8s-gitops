@@ -39,7 +39,13 @@ spec:
             name: mautrix-facebook-config
 
     postgresql:
-      enabled: false
+      enabled: true
+      postgresqlUsername: mautrixuser
+      postgresqlPassword: mautrixpass
+      postgresqlDatabase: mautrix-facebook
+      persistence:
+        enabled: true
+        existingClaim: mautrix-facebook-postgresql-pvc
 
     resources:
       requests:

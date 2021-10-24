@@ -39,7 +39,7 @@ data:
       max_body_size: 1
 
       # The full URI to the database. Only Postgres is currently supported.
-      database: postgres://username:password@hostname/db
+      database: postgres://mautrixuser:mautrixpass@hostname/mautrix-facebook
       # Additional arguments for asyncpg.create_pool()
       # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.pool.create_pool
       database_opts:
