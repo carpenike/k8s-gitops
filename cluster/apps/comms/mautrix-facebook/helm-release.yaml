@@ -22,6 +22,9 @@ spec:
       repository: dock.mau.dev/mautrix/facebook
       tag: latest
 
+    command:
+      - exec python3 -m mautrix_facebook -c /data/config.yaml
+
     nameOverride: mautrix-facebook
 
     service:
