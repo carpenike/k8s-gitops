@@ -4,6 +4,22 @@ metadata:
   name: mautrix-facebook-config
   namespace: comms
 data:
+  registration.yaml: |
+    id: facebook
+    as_token: ${SECRET_MAUTRIX_FACEBOOK_AS_TOKEN} 9oLx51p4-2tYGzY5p4enK_nhUcEL8WdsaPOpT4isuHuSZcLGvrcc1Op478xcvls2
+    hs_token: ${SECRET_MAUTRIX_FACEBOOK_HS_TOKEN} GGw0Q4KX-o1uOdw_9Hd07RMhYuKxxBb6OJJYdE0-DlY1gtgke_6XTii4E_9QsuEM
+    namespaces:
+        users:
+        - exclusive: true
+          regex: '@facebook_.*:ryanholt\.net'
+          group_id: +facebook:ryanholt.net
+        - exclusive: true
+          regex: '@facebookbot:ryanholt\.net'
+        aliases: []
+    url: http://mautrix-facebook:29319
+    sender_localpart: ${SECRET_MAUTRIX_FACEBOOK_SENDER_LOCALPART}
+    rate_limited: false
+
   config.yaml: |
     # Homeserver details
     homeserver:
