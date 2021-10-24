@@ -28,12 +28,15 @@ spec:
       main:
         ports:
           http:
-            port: 8080
+            port: 29319
 
     persistence:
       data:
         enabled: true
-        existingClaim: mautrix-facebook-data-pvc
+        type: custom
+        volumeSpec:
+          configMap:
+            name: mautrix-facebook-config
 
     postgresql:
       enabled: false
