@@ -27,7 +27,7 @@ spec:
 
     workers:
       media_repository:
-        enabled: true
+        enabled: false
       default:
         volumes:
           - name: mautrix-facebook
