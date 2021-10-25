@@ -79,8 +79,7 @@ spec:
         enabled: false
 
     persistence:
-      enabled: true
-      existingClaim: matrix-media-pvc
+      enabled: false
 
     synapse:
       extraVolumes:
