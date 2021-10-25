@@ -36,7 +36,7 @@ spec:
       main:
         ports:
           http:
-            port: 5958
+            port: 9898
 
     ingress:
       main:
@@ -57,7 +57,7 @@ spec:
               - "ma-slack.${SECRET_DOMAIN}"
 
     persistence:
-      data:
+      config:
         enabled: true
         type: custom
         volumeSpec:
