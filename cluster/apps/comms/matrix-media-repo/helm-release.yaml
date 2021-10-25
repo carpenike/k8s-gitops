@@ -29,6 +29,10 @@ spec:
           opts:
             tempPath: ""
             ssl: false
+            bucketName: 
+            endpoint: 
+            accessKeyId: 
+            accessSecret: 
     admins:
       - "@ryan:${SECRET_PUBLIC_DOMAIN}"
 
