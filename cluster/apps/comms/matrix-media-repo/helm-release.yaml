@@ -46,7 +46,7 @@ spec:
           enabled: false
 
     ingress:
-      enabled: true
+      enabled: false
       className: traefik
       annotations:
         external-dns/is-public: "true"
