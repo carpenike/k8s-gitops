@@ -25,6 +25,10 @@ spec:
     wellknown:
       enabled: true
 
+    workers:
+      media_repository:
+        enabled: true
+
     extraConfig:
       email:
         smtp_host: smtp.mailgun.org
