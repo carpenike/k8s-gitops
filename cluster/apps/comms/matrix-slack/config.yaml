@@ -38,7 +38,7 @@ data:
       # Optional. Used to specify the port of the appservice in the config, rather than the command line.
       # This will be overriden by any ports given in the process arguments.
       #
-      appservice_port: 9898
+      #appservice_port: 9898
     
       # Optional. Used to specify the host to listen on for the appservice.
       appservice_host: 0.0.0.0
