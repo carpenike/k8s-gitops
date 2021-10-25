@@ -45,20 +45,19 @@ spec:
         identicons:
           enabled: false
 
-    ingress:
-      enabled: false
-      className: traefik
-      annotations:
-        external-dns/is-public: "true"
-        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-      hosts:
-        - host: matrix.${SECRET_DOMAIN}
-          paths:
-            - "/_matrix/media"
-      tls:
-        - secretName: matrix-cert
-          hosts:
-            - matrix.${SECRET_DOMAIN}
+    # ingress:
+    #   className: traefik
+    #   annotations:
+    #     external-dns/is-public: "true"
+    #     external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+    #   hosts:
+    #     - host: matrix.${SECRET_DOMAIN}
+    #       paths:
+    #         - "/_matrix/media"
+    #   tls:
+    #     - secretName: matrix-cert
+    #       hosts:
+    #         - matrix.${SECRET_DOMAIN}
 
     postgresql:
       enabled: true
