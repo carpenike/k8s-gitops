@@ -41,7 +41,7 @@ spec:
       - "@ryan:${SECRET_PUBLIC_DOMAIN}"
 
     homeservers:
-      "matrix.${SECRET_PUBLIC_DOMAIN}":
+      "matrix.${SECRET_DOMAIN}":
         csApi: 'http://matrix-synapse:8008'
         backoffAt: 10
         adminApiKind: 'matrix'
