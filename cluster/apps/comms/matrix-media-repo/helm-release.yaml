@@ -72,16 +72,16 @@ spec:
     - kind: ConfigMap
       name: matrix-media-ceph-bucket
       valuesKey: BUCKET_NAME
-      targetPath: config.datastores.opts.bucketName
+      targetPath: config.datastores[1].opts.bucketName
     - kind: ConfigMap
       name: matrix-media-ceph-bucket
       valuesKey: BUCKET_HOST
-      targetPath: config.datastores.opts.endpoint
+      targetPath: config.datastores[1].opts.endpoint
     - kind: Secret
       name: matrix-media-ceph-bucket
       valuesKey: AWS_ACCESS_KEY_ID
-      targetPath: config.datastores.opts.accessKeyId
+      targetPath: config.datastores[1].opts.accessKeyId
     - kind: Secret
       name: matrix-media-ceph-bucket
       valuesKey: AWS_SECRET_ACCESS_KEY
-      targetPath: config.datastores.opts.accessSecret
+      targetPath: config.datastores[1].opts.accessSecret
