@@ -4,7 +4,7 @@ metadata:
   name: matrix-slack-config
   namespace: comms
 data:
-  registration.yaml: |
+  slack-registration.yaml: |
     id: 7db0c75fbdc211d572ff78722ddd4313bac61c1d8e10af515399cfe917afe233
     hs_token: ${SECRET_MATRIX_SLACK_HS_TOKEN}
     as_token: ${SECRET_MATRIX_SLACK_AS_TOKEN}
