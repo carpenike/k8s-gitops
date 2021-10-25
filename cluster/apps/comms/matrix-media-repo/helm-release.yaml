@@ -29,7 +29,9 @@ spec:
           opts:
             tempPath: ""
             ssl: false
-    
+    admins:
+      - "@ryan:${SECRET_PUBLIC_DOMAIN}"
+
     homeservers:
       "${SECRET_PUBLIC_DOMAIN}":
         csApi: 'http://matrix-synapse:8008'
@@ -54,6 +56,7 @@ spec:
 
     postgresql:
       enabled: true
+      sslMode: disable
       postgresqlPassword: ${SECRET_MATRIX_POSTGRESQL_PASSWORD}
       postgresqlUsername: synapse
       postgresqlDatabase: synapse
