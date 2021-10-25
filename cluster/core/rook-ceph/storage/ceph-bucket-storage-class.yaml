@@ -8,4 +8,4 @@ reclaimPolicy: Delete
 parameters:
   objectStoreName: object-store
   objectStoreNamespace: rook-ceph
-  region: default
+  region: east-us-1
