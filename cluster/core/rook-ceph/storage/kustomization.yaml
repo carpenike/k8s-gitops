@@ -13,3 +13,4 @@ resources:
   # - ceph-object-bucket.yaml
   - loki-ceph-object-bucket.yaml
   - thanos-ceph-object-bucket.yaml
+  - matrix-media-ceph-object-bucket.yaml

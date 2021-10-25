@@ -1,0 +1,9 @@
+---
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: matrix-media-ceph-bucket
+  namespace: comms
+spec:
+  bucketName: matrix-media
+  storageClassName: rook-ceph-bucket
