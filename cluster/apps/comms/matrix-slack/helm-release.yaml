@@ -22,13 +22,13 @@ spec:
       repository: matrixdotorg/matrix-appservice-slack
       tag: latest
 
-    command:
-      - "python3"
-    args:
-      - "-m"
-      - "mautrix_slack"
-      - "-c"
-      - "/data/config.yaml"
+    # command:
+    #   - "python3"
+    # args:
+    #   - "-m"
+    #   - "mautrix_slack"
+    #   - "-c"
+    #   - "/data/config.yaml"
 
     nameOverride: matrix-slack
 
