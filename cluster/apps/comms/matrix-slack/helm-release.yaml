@@ -80,37 +80,37 @@ spec:
       limits:
         memory: 500Mi
 
-    probes:
-      liveness:
-        custom: true
-        spec:
-          failureThreshold: 5
-          httpGet:
-            path: /_matrix/mau/live
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-      startup:
-        custom: true
-        spec:
-          failureThreshold: 5
-          httpGet:
-            path: /_matrix/mau/live
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-      readiness:
-        custom: true
-        spec:
-          failureThreshold: 5
-          httpGet:
-            path: /_matrix/mau/live
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
+    # probes:
+    #   liveness:
+    #     custom: true
+    #     spec:
+    #       failureThreshold: 5
+    #       httpGet:
+    #         path: /_matrix/mau/live
+    #         port: http
+    #         scheme: HTTP
+    #       periodSeconds: 10
+    #       successThreshold: 1
+    #       timeoutSeconds: 1
+    #   startup:
+    #     custom: true
+    #     spec:
+    #       failureThreshold: 5
+    #       httpGet:
+    #         path: /_matrix/mau/live
+    #         port: http
+    #         scheme: HTTP
+    #       periodSeconds: 10
+    #       successThreshold: 1
+    #       timeoutSeconds: 1
+    #   readiness:
+    #     custom: true
+    #     spec:
+    #       failureThreshold: 5
+    #       httpGet:
+    #         path: /_matrix/mau/live
+    #         port: http
+    #         scheme: HTTP
+    #       periodSeconds: 10
+    #       successThreshold: 1
+    #       timeoutSeconds: 1
