@@ -6,3 +6,4 @@ resources:
   - matrix-synapse
   - matrix-slack
   - mautrix-facebook
+  - matrix-synapse-admin
