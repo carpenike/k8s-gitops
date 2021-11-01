@@ -73,7 +73,7 @@ spec:
         - idp_id: authentik
           idp_name: authentik
           discover: true
-          issuer: "https://id.holthome.net/application/o/matrix/"
+          issuer: "https://id.${SECRET_DOMAIN}/application/o/matrix/"
           client_id: "matrix"
           client_secret: ${SECRET_AUTHENTIK_MATRIX_CLIENT_SECRET}
           scopes:
