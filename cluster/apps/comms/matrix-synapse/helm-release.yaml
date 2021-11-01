@@ -82,8 +82,8 @@ spec:
             - "email"
           user_mapping_provider:
             config:
-              localpart_template: '{{ "{{ user.name }}" }}'
-              display_name_template: '{{ "{{ user.name|capitalize }}" }}'
+              localpart_template: "{{ \u0027{{ user.name }}\u0027 }}"
+              display_name_template: "{{ \u0027{{ user.name|capitalize }}\u0027 }}"
 
     ingress:
       enabled: true
