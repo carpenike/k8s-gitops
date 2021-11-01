@@ -16,7 +16,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: rclone-thanos
-            image: rclone/rclone:1.56
+            image: rclone/rclone:1.57
             env:
             - name: TZ
               value: "America/New_York"
