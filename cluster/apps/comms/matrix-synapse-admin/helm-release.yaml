@@ -46,6 +46,9 @@ spec:
             hosts:
               - "matrix-admin.${SECRET_DOMAIN}"
 
+    postgresql:
+      enabled: false
+
     probes:
       liveness:
         enabled: false
