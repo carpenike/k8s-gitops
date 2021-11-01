@@ -28,9 +28,9 @@ spec:
       datastores:
         - type: s3
           enabled: true
-          forKinds: ["thumbnails", "remote_media", "local_media", "archives"]
+          forKinds: ["all"]
           opts:
-            tempPath: ""
+            tempPath: "/tmp/mediarepo_s3_upload"
             ssl: false
             bucketName: matrix-media
             endpoint: rook-ceph-rgw-object-store.rook-ceph.svc
