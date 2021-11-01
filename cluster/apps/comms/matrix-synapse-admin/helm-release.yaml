@@ -21,7 +21,7 @@ spec:
     image:
       repository: awesometechnologies/synapse-admin
       tag: latest
-
+    nameOverride: matrix-synapse-admin
     service:
       main:
         ports:
