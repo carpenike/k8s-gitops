@@ -21,7 +21,7 @@ spec:
       deployEnv: prod
     image:
       repository: raspbernetes/dex-k8s-authenticator
-      tag: 1.4.0
+      tag: v1.4.0
     ingress:
       enabled: true
       annotations:
