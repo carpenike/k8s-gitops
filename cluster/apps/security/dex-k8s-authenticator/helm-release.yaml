@@ -20,7 +20,7 @@ spec:
     global:
       deployEnv: prod
     image:
-      repository: mintel/dex-k8s-authenticator
+      repository: raspbernetes/dex-k8s-authenticator
       tag: 1.4.0
     ingress:
       enabled: true
