@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: caddy
-      tag: 2.4.5-alpine
+      tag: 2.4.6-alpine
       pullPolicy: IfNotPresent
 
     controllerType: deployment
