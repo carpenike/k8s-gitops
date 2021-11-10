@@ -14,7 +14,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: dns-update
-              image: curlimages/curl:7.79.1
+              image: curlimages/curl:7.80.0
               env:
                 - name: TZ
                   value: "America/New_York"
