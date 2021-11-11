@@ -24,38 +24,33 @@ spec:
       pullPolicy: IfNotPresent
     persistence:
       data:
-        enabled: false
-        # existingClaim: openkm-pvc
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: 10Gi
+        enabled: true
+        existingClaim: openkm-data-pvc
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: "traefik"
         annotations:
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
-          # nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_DOMAIN}/oauth2/auth"
-          # nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_DOMAIN}/oauth2/start"
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "openkm.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "km.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "openkm.${SECRET_DOMAIN}"
-          secretName: openkm-cert
+          - hosts:
+              - "km.${SECRET_DOMAIN}"
+            secretName: openkm-cert
 
     postgresql:
       enabled: true
       postgresqlDatabase: openkm
       persistence:
-        storageClass: "rook-ceph-block"
-        # existingClaim: openkm-postgresql-pvc
+        # storageClass: "rook-ceph-block"
+        existingClaim: openkm-postgresql-pvc
       metrics:
         enabled: true
         serviceMonitor:

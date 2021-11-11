@@ -6,7 +6,7 @@ resources:
   # - bitwarden
   # - forecastle
   - gitea
-  # - openkm
+  - openkm
   - joplin
   - littlelink
   - nextcloud
