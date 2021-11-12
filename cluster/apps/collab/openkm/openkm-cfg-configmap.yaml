@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openkm-cfg
+  namespace: collab
+data:
+  OpenKM.cfg: |
+    # OpenKM Hibernate configuration values
+    hibernate.dialect=org.hibernate.dialect.H2Dialect
+    #hibernate.dialect=org.hibernate.dialect.HSQLDialect
+    #hibernate.dialect=org.hibernate.dialect.Oracle10gDialect
+    #hibernate.dialect=org.hibernate.dialect.SQLServerDialect
+    #hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+    #hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate.hbm2ddl=none
+    
+    # Logback configuration file
+    logback.config=logback.xml

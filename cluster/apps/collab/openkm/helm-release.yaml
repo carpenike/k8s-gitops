@@ -26,6 +26,14 @@ spec:
       data:
         enabled: true
         existingClaim: openkm-data-pvc
+      OpenKM:
+        enabled: true
+        mountPath: /opt/tomcat/OpenKM.cfg
+        type: custom
+        volumeSpec:
+          configMap:
+            name: openkm-cfg
+
     ingress:
       main:
         enabled: true
