@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   name: server-xml
   namespace: collab
+  annotations:
+     kustomize.toolkit.fluxcd.io/substitute: disabled
 data:
   server.xml: |
     <?xml version='1.0' encoding='utf-8'?>
