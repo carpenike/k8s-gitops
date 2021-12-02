@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: velero/velero
-      tag: v1.7.0
+      tag: v1.7.1
     credentials:
       secretContents:
         cloud: |
