@@ -66,6 +66,10 @@ spec:
       persistence:
         enabled: true
         existingClaim: home-assistant-postgresql-pvc
+      image:
+        registry: docker.io
+        repository: bitnami/postgresql
+        tag: 14.1.0-debian-10-r23
     addons:
       codeserver:
         enabled: true
