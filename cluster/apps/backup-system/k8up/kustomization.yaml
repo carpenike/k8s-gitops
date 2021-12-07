@@ -5,3 +5,4 @@ resources:
   - helm-release.yaml
   - minio-secret.enc.yaml
   - backup-repo.enc.yaml
+  - backup-test.yaml
