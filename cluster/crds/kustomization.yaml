@@ -6,6 +6,7 @@ resources:
   - external-dns
   - external-snapshotter
   # - forecastle
+  - k8up
   - kube-prometheus-stack
   - rook-ceph
   - traefik
