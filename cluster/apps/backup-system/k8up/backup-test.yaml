@@ -1,0 +1,22 @@
+apiVersion: k8up.io/v1
+kind: Backup
+metadata:
+  name: backup-test
+  namespace: collab
+spec:
+  failedJobsHistoryLimit: 2
+  successfulJobsHistoryLimit: 2
+  promURL: https://nas.${SECRET_DOMAIN}:9000
+  backend:
+    repoPasswordSecretRef:
+      name: backup-repo
+      key: password
+    s3:
+      endpoint: https://nas.${SECRET_DOMAIN}:9000
+      bucket: k8up-backups
+      accessKeyIDSecretRef:
+        name: minio-credentials
+        key: username
+      secretAccessKeySecretRef:
+        name: minio-credentials
+        key: password
