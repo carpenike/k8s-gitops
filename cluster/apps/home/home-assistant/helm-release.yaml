@@ -30,6 +30,7 @@ spec:
     envFrom:
       - secretRef:
           name: home-assistant-secrets
+
     ingress:
       main:
         enabled: true
@@ -49,8 +50,10 @@ spec:
           - secretName: home-assistant-cert
             hosts:
               - "ha.${SECRET_DOMAIN}"
+
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
+
     probes:
       liveness:
         enabled: false
@@ -58,20 +61,21 @@ spec:
         enabled: false
       startup:
         enabled: false
+
     mariadb:
       enabled: false
+
     postgresql:
-      diagnosticMode:
-        enabled: true
+      image:
+        registry: docker.io
+        repository: bitnami/postgresql
+        tag: 14.1.0-debian-10-r23
       existingSecret: home-assistant-postgresql-secret
       enabled: true
       persistence:
         enabled: true
         existingClaim: home-assistant-postgresql-pvc
-      image:
-        registry: docker.io
-        repository: bitnami/postgresql
-        tag: 14.1.0-debian-10-r23
+
     addons:
       codeserver:
         enabled: true
@@ -111,7 +115,9 @@ spec:
         volumeMounts:
           - name: config
             mountPath: /config
+
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
+
     podAnnotations:
       secret.reloader.stakater.com/reload: home-assistant-secrets
