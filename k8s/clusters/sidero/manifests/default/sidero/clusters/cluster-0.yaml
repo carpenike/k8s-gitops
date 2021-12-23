@@ -1,4 +1,3 @@
----
 apiVersion: cluster.x-k8s.io/v1alpha4
 kind: Cluster
 metadata:
@@ -12,20 +11,14 @@ spec:
     services:
       cidrBlocks:
         - 10.96.0.0/12
-  controlPlaneEndpoint:
-    host: cluster-0.${HARDWARE_DOMAIN}
-    port: 6443
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha3
     kind: TalosControlPlane
     name: cluster-0-cp
-    namespace: default
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
     kind: MetalCluster
     name: cluster-0
-    namespace: default
-
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
 kind: MetalCluster
@@ -34,7 +27,7 @@ metadata:
   namespace: default
 spec:
   controlPlaneEndpoint:
-    host: k8s.${HARDWARE_DOMAIN}
+    host: 10.45.10.11
     port: 6443
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
@@ -58,20 +51,31 @@ metadata:
 spec:
   controlPlaneConfig:
     controlplane:
+      configPatches:
+        - op: add
+          path: /machine/network
+          value:
+            interfaces:
+              - vip:
+                  ip: 10.45.10.11
       generateType: controlplane
-      # renovate: datasource=github-releases depName=talos-systems/talos
       talosVersion: v0.14.0
     init:
+      configPatches:
+        - op: add
+          path: /machine/network
+          value:
+            interfaces:
+              - vip:
+                  ip: 10.45.10.11
       generateType: init
-      # renovate: datasource=github-releases depName=talos-systems/talos
       talosVersion: v0.14.0
   infrastructureTemplate:
     apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
     kind: MetalMachineTemplate
     name: cluster-0-cp
-  replicas: 3
-  # renovate: datasource=docker depName=ghcr.io/talos-systems/kubelet
-  version: v1.22.5
+  replicas: 1
+  version: v1.22.2
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
 kind: TalosConfigTemplate
@@ -82,7 +86,6 @@ spec:
   template:
     spec:
       generateType: join
-      # renovate: datasource=github-releases depName=talos-systems/talos
       talosVersion: v0.14.0
 ---
 apiVersion: cluster.x-k8s.io/v1alpha4
@@ -92,7 +95,9 @@ metadata:
   namespace: default
 spec:
   clusterName: cluster-0
-  replicas: 4
+  replicas: 0
+  selector:
+    matchLabels: null
   template:
     spec:
       bootstrap:
@@ -105,8 +110,7 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
         kind: MetalMachineTemplate
         name: cluster-0-workers
-      # renovate: datasource=docker depName=ghcr.io/talos-systems/kubelet
-      version: v1.22.5
+      version: v1.22.2
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
 kind: MetalMachineTemplate

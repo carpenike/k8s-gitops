@@ -45,10 +45,11 @@ spec:
           - 10.20.0.1
 
     - op: add
-      path: /machine/network/interfaces
+      path: /machine/network
       value:
-        - interface: eth0
-          dhcp: true
+        interfaces:
+          - interface: eth0
+            dhcp: true
 
     - op: replace
       path: /cluster/proxy/disabled
@@ -62,7 +63,7 @@ spec:
     - op: add
       path: /machine/certSANs
       value:
-        - cluster-0.${HARDWARE_DOMAIN}
+        - k8s.holthome.net
 
     - op: replace
       path: /cluster/network/cni
