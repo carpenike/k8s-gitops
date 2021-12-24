@@ -19,7 +19,7 @@ spec:
   decryption:
     provider: sops
     secretRef:
-      name: sops-age
+      name: sops-gpg
   postBuild:
     substitute: {}
     substituteFrom:
@@ -42,7 +42,7 @@ spec:
           decryption:
             provider: sops
             secretRef:
-              name: sops-age
+              name: sops-gpg
           postBuild:
             substitute: {}
             substituteFrom:

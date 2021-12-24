@@ -13,8 +13,8 @@ spec:
   wait: true
   sourceRef:
     kind: GitRepository
-    name: home-ops
+    name: k8s-gitops
   decryption:
     provider: sops
     secretRef:
-      name: sops-age
+      name: sops-gpg
