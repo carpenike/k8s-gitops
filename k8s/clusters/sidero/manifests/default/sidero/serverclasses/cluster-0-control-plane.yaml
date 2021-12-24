@@ -44,9 +44,9 @@ spec:
         servers:
           - 10.20.0.1
 
-    # - op: replace
-    #   path: /cluster/proxy/disabled
-    #   value: true
+    - op: replace
+      path: /cluster/proxy/disabled
+      value: true
 
     - op: add
       path: /cluster/apiServer/extraArgs
@@ -56,14 +56,14 @@ spec:
     - op: add
       path: /machine/certSANs
       value:
-        - k8s.holthome.net
+        - cluster-0.holthome.net
 
-    # - op: replace
-    #   path: /cluster/network/cni
-    #   value:
-    #     name: "custom"
-    #     urls:
-    #       - "https://raw.githubusercontent.com/carpenike/k8s-gitops/master/k8s/clusters/cluster-0/integrations/cilium-quick-install/quick-install.yaml"
+    - op: replace
+      path: /cluster/network/cni
+      value:
+        name: "custom"
+        urls:
+          - "https://raw.githubusercontent.com/carpenike/k8s-gitops/master/k8s/clusters/cluster-0/integrations/cilium-quick-install/quick-install.yaml"
 
     - op: replace
       path: /cluster/extraManifests
