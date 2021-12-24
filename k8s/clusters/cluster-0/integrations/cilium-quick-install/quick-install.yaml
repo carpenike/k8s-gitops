@@ -105,10 +105,10 @@ data:
   sidecar-istio-proxy-image: "cilium/istio_proxy"
 
   # Name of the cluster. Only relevant when building a mesh of clusters.
-  cluster-name: default
+  cluster-name: cluster-0
   # Unique ID of the cluster. Must be unique across all conneted clusters and
   # in the range of 1 and 255. Only relevant when building a mesh of clusters.
-  cluster-id: ""
+  cluster-id: "1"
 
   # Encapsulation mode for communication between nodes
   # Possible values:
@@ -128,10 +128,11 @@ data:
 
   auto-direct-node-routes: "true"
   enable-bandwidth-manager: "false"
-  enable-local-redirect-policy: "false"
+  enable-local-redirect-policy: "true"
+  ipv4-native-routing-cidr: 10.244.0.0/16
 
   kube-proxy-replacement:  "strict"
-  kube-proxy-replacement-healthz-bind-address: ""
+  kube-proxy-replacement-healthz-bind-address: "0.0.0.0:10256"
   enable-health-check-nodeport: "true"
   node-port-bind-protection: "true"
   enable-auto-protect-node-port-range: "true"
@@ -139,15 +140,15 @@ data:
   bpf-lb-algorithm: "maglev"
   enable-session-affinity: "true"
   enable-l2-neigh-discovery: "true"
+  enable-endpoint-routes: "true"
   enable-endpoint-health-checking: "true"
   enable-health-checking: "true"
   enable-well-known-identities: "false"
   enable-remote-node-identity: "true"
   operator-api-serve-addr: "127.0.0.1:9234"
-  ipam: "cluster-pool"
-  cluster-pool-ipv4-cidr: "10.244.0.0/16"
-  cluster-pool-ipv4-mask-size: "24"
+  ipam: "kubernetes"
   disable-cnp-status-updates: "true"
+  bgp-announce-lb-ip: "true"
   cgroup-root: "/run/cilium/cgroupv2"
   enable-k8s-terminating-endpoint: "true"
 ---
@@ -399,6 +400,8 @@ spec:
   template:
     metadata:
       annotations:
+        # ensure pods roll when configmap updates
+        cilium.io/cilium-configmap-checksum: "335d6aff27d2256127d0a38a9bf75a7e38ed08083237c1cbb2532b91a0a090ed"
         # This annotation plus the CriticalAddonsOnly toleration makes
         # cilium to be a critical pod in the cluster, which ensures cilium
         # gets priority scheduling.
@@ -540,6 +543,9 @@ spec:
           readOnly: true
         - name: xtables-lock
           mountPath: /run/xtables.lock
+        - name: bgp-config-path
+          mountPath: /var/lib/cilium/bgp
+          readOnly: true
       hostNetwork: true
       initContainers:
       # Required to mount cgroup2 filesystem on the underlying Kubernetes node.
@@ -666,6 +672,9 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
+      - name: bgp-config-path
+        configMap:
+          name: bgp-config
 ---
 # Source: cilium/templates/cilium-operator/deployment.yaml
 apiVersion: apps/v1
@@ -692,6 +701,8 @@ spec:
   template:
     metadata:
       annotations:
+        # ensure pods roll when configmap updates
+        cilium.io/cilium-configmap-checksum: "335d6aff27d2256127d0a38a9bf75a7e38ed08083237c1cbb2532b91a0a090ed"
       labels:
         io.cilium/app: operator
         name: cilium-operator
@@ -751,6 +762,9 @@ spec:
         - name: cilium-config-path
           mountPath: /tmp/cilium/config-map
           readOnly: true
+        - name: bgp-config-path
+          mountPath: /var/lib/cilium/bgp
+          readOnly: true
       hostNetwork: true
       restartPolicy: Always
       priorityClassName: system-cluster-critical
@@ -763,3 +777,6 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
+      - name: bgp-config-path
+        configMap:
+          name: bgp-config
