@@ -34,7 +34,7 @@ spec:
     - op: add
       path: /machine/kubelet/extraArgs
       value:
-        rotate-server-certificates: true
+        # rotate-server-certificates: true
         feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
 
     - op: add
@@ -65,10 +65,10 @@ spec:
         urls:
           - "https://raw.githubusercontent.com/carpenike/k8s-gitops/master/k8s/clusters/cluster-0/integrations/cilium-quick-install/quick-install.yaml"
 
-    - op: replace
-      path: /cluster/extraManifests
-      value:
-        - "https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.3.0/deploy/ha-install.yaml"
+    # - op: replace
+    #   path: /cluster/extraManifests
+    #   value:
+    #     - "https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.3.0/deploy/ha-install.yaml"
 
   selector:
     matchLabels:
