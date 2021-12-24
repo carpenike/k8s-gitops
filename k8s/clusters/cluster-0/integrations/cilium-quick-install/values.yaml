@@ -1,13 +1,13 @@
 # kubeProxyReplacement enables kube-proxy replacement in Cilium BPF datapath
-kubeProxyReplacement: "strict"
+#kubeProxyReplacement: "strict"
 
 k8sServiceHost: cluster-0.holthome.net
 k8sServicePort: 6443
 
-ipam:
-  # -- Configure IP Address Management mode.
-  # ref: https://docs.cilium.io/en/stable/concepts/networking/ipam/
-  mode: "kubernetes"
+# ipam:
+#   # -- Configure IP Address Management mode.
+#   # ref: https://docs.cilium.io/en/stable/concepts/networking/ipam/
+#   mode: "kubernetes"
 
 # autoDirectNodeRoutes enables installation of PodCIDR routes between worker
 # nodes if worker nodes share a common L2 network segment.
