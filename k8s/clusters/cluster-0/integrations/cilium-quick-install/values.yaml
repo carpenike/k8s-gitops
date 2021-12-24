@@ -1,17 +1,20 @@
 # kubeProxyReplacement enables kube-proxy replacement in Cilium BPF datapath
-#kubeProxyReplacement: "strict"
+kubeProxyReplacement: "strict"
 
 k8sServiceHost: cluster-0.holthome.net
 k8sServicePort: 6443
 
-# ipam:
-#   # -- Configure IP Address Management mode.
-#   # ref: https://docs.cilium.io/en/stable/concepts/networking/ipam/
-#   mode: "kubernetes"
+ipam:
+  #   # -- Configure IP Address Management mode.
+  #   # ref: https://docs.cilium.io/en/stable/concepts/networking/ipam/
+  mode: "cluster-pool"
+  operator:
+    clusterPoolIPv4PodCIDR: 10.244.0.0/16
+    clusterPoolIPv4MaskSize: 24
 
 # autoDirectNodeRoutes enables installation of PodCIDR routes between worker
 # nodes if worker nodes share a common L2 network segment.
-#autoDirectNodeRoutes: true
+autoDirectNodeRoutes: true
 
 # nativeRoutingCIDR allows to explicitly specify the CIDR for native routing. This
 # value corresponds to the configured cluster-cidr.
@@ -30,3 +33,14 @@ hubble:
 ipv6:
   # -- Enable IPv6 support.
   enabled: false
+
+tunnel: disabled
+
+# loadBalancer is the general configuration for service load balancing
+loadBalancer:
+  # algorithm is the name of the load balancing algorithm for backend
+  # selection e.g. random or maglev
+  algorithm: maglev
+  # mode is the operation mode of load balancing for remote backends
+  # e.g. snat, dsr, hybrid
+  mode: dsr
