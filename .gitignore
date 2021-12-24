@@ -20,5 +20,4 @@ rebuild/
 .DS_Store
 Thumbs.db
 bin/
-flux
 *.iso
