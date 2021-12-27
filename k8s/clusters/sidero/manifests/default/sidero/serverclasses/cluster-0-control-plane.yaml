@@ -54,6 +54,11 @@ spec:
         feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
 
     - op: add
+      path: /cluster/apiServer/certSANs
+      value:
+        - cluster-0.holthome.net
+
+    - op: add
       path: /machine/certSANs
       value:
         - cluster-0.holthome.net
