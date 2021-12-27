@@ -148,7 +148,6 @@ data:
   operator-api-serve-addr: "127.0.0.1:9234"
   ipam: "kubernetes"
   disable-cnp-status-updates: "true"
-  bgp-announce-lb-ip: "true"
   cgroup-root: "/run/cilium/cgroupv2"
   enable-k8s-terminating-endpoint: "true"
 ---
@@ -401,7 +400,7 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "335d6aff27d2256127d0a38a9bf75a7e38ed08083237c1cbb2532b91a0a090ed"
+        cilium.io/cilium-configmap-checksum: "dd6eaccdf3c765620ea8c9d2cc16e4134ed41a5435b6df37607c5d7a9a807258"
         # This annotation plus the CriticalAddonsOnly toleration makes
         # cilium to be a critical pod in the cluster, which ensures cilium
         # gets priority scheduling.
@@ -543,9 +542,6 @@ spec:
           readOnly: true
         - name: xtables-lock
           mountPath: /run/xtables.lock
-        - name: bgp-config-path
-          mountPath: /var/lib/cilium/bgp
-          readOnly: true
       hostNetwork: true
       initContainers:
       # Required to mount cgroup2 filesystem on the underlying Kubernetes node.
@@ -672,9 +668,6 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
-      - name: bgp-config-path
-        configMap:
-          name: bgp-config
 ---
 # Source: cilium/templates/cilium-operator/deployment.yaml
 apiVersion: apps/v1
@@ -702,7 +695,7 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "335d6aff27d2256127d0a38a9bf75a7e38ed08083237c1cbb2532b91a0a090ed"
+        cilium.io/cilium-configmap-checksum: "dd6eaccdf3c765620ea8c9d2cc16e4134ed41a5435b6df37607c5d7a9a807258"
       labels:
         io.cilium/app: operator
         name: cilium-operator
@@ -762,9 +755,6 @@ spec:
         - name: cilium-config-path
           mountPath: /tmp/cilium/config-map
           readOnly: true
-        - name: bgp-config-path
-          mountPath: /var/lib/cilium/bgp
-          readOnly: true
       hostNetwork: true
       restartPolicy: Always
       priorityClassName: system-cluster-critical
@@ -777,6 +767,3 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
-      - name: bgp-config-path
-        configMap:
-          name: bgp-config

@@ -35,7 +35,7 @@ nativeRoutingCIDR: 10.244.0.0/16
 
 # Cilium leverages MetalLB's simplified BGP announcement system for service type: LoadBalancer
 bgp:
-  enabled: true
+  enabled: false
   announce:
     loadbalancerIP: true
 
