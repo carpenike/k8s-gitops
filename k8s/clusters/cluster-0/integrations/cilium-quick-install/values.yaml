@@ -57,3 +57,8 @@ loadBalancer:
   # mode is the operation mode of load balancing for remote backends
   # e.g. snat, dsr, hybrid
   mode: dsr
+
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
