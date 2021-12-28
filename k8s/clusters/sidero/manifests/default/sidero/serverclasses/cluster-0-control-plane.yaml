@@ -40,9 +40,7 @@ spec:
     - op: add
       path: /machine/time
       value:
-        disabled: false
-        servers:
-          - 10.20.0.1
+        disabled: true
 
     - op: replace
       path: /cluster/proxy/disabled
