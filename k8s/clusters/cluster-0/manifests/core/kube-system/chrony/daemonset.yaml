@@ -36,7 +36,7 @@ spec:
               protocol: UDP
           env:
             - name: NTP_SERVER
-              value: 10.20.0.1
+              value: ${GATEWAY_IP}
           readinessProbe:
             exec:
               command:
