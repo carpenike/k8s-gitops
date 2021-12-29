@@ -10,8 +10,8 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
-    - "SECRET_PUBLIC_DOMAIN"
-    - "*.SECRET_PUBLIC_DOMAIN"
+    - "${SECRET_PUBLIC_DOMAIN}"
+    - "*.${SECRET_PUBLIC_DOMAIN}"
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
