@@ -31,4 +31,3 @@ spec:
   exclusionList:
     - "waiting.*socket"
   suspend: false
-  
