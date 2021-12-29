@@ -150,41 +150,41 @@ spec:
         tag: v1.4.2
         pullPolicy: IfNotPresent
       nameOverride: pushgateway
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              kind: Deployment
-              name: benji-maint
-            patch:
-              - op: add
-                path: /spec/template/spec/initContainers
-                value:
-                  - name: generate-ceph-files
-                    image: rook/ceph:v1.7.9
-                    imagePullPolicy: Always
-                    command: ["/usr/bin/bash"]
-                    args:
-                      [
-                        "-c",
-                        "bash /script/generate-ceph.sh",
-                      ]
-                    volumeMounts:
-                      - name: mon-endpoint-volume
-                        mountPath: /etc/rook
-                      - name: ceph-data
-                        mountPath: /etc/ceph
-                      - name: ceph-config
-                        mountPath: /script/generate-ceph.sh
-                        subPath: generate-ceph.sh
-                    env:
-                      - name: ROOK_CEPH_USERNAME
-                        valueFrom:
-                          secretKeyRef:
-                            name: rook-ceph-mon
-                            key: ceph-username
-                      - name: ROOK_CEPH_SECRET
-                        valueFrom:
-                          secretKeyRef:
-                            name: rook-ceph-mon
-                            key: ceph-secret
+  # postRenderers:
+  #   - kustomize:
+  #       patchesJson6902:
+  #         - target:
+  #             kind: Deployment
+  #             name: benji-maint
+  #           patch:
+  #             - op: add
+  #               path: /spec/template/spec/initContainers
+  #               value:
+  #                 - name: generate-ceph-files
+  #                   image: rook/ceph:v1.7.9
+  #                   imagePullPolicy: Always
+  #                   command: ["/usr/bin/bash"]
+  #                   args:
+  #                     [
+  #                       "-c",
+  #                       "bash /script/generate-ceph.sh",
+  #                     ]
+  #                   volumeMounts:
+  #                     - name: mon-endpoint-volume
+  #                       mountPath: /etc/rook
+  #                     - name: ceph-data
+  #                       mountPath: /etc/ceph
+  #                     - name: ceph-config
+  #                       mountPath: /script/generate-ceph.sh
+  #                       subPath: generate-ceph.sh
+  #                   env:
+  #                     - name: ROOK_CEPH_USERNAME
+  #                       valueFrom:
+  #                         secretKeyRef:
+  #                           name: rook-ceph-mon
+  #                           key: ceph-username
+  #                     - name: ROOK_CEPH_SECRET
+  #                       valueFrom:
+  #                         secretKeyRef:
+  #                           name: rook-ceph-mon
+  #                           key: ceph-secret
