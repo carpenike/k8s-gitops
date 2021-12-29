@@ -5,4 +5,6 @@ metadata:
   name: global-config
   namespace: flux-system
 data:
-  FOO: bar
+  CLUSTER_0_API_IP: 10.20.50.10
+  CLUSTER_0_POD_CIDR: 10.42.0.0/16
+  CLUSTER_0_SVC_CIDR: 10.43.0.0/12

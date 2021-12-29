@@ -129,7 +129,7 @@ data:
   auto-direct-node-routes: "true"
   enable-bandwidth-manager: "false"
   enable-local-redirect-policy: "true"
-  ipv4-native-routing-cidr: 10.244.0.0/16
+  ipv4-native-routing-cidr: 10.42.0.0/16
 
   kube-proxy-replacement:  "strict"
   kube-proxy-replacement-healthz-bind-address: "0.0.0.0:10256"
@@ -400,7 +400,7 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "a76721f59f7a7ebf67e2dbd48beac6f36d028bda643806ef49a0f96034985aa2"
+        cilium.io/cilium-configmap-checksum: "34693ccc4959f15d3b4b9575d6800ecdcd7d8951c98376a1411e5b3b29d87212"
         # This annotation plus the CriticalAddonsOnly toleration makes
         # cilium to be a critical pod in the cluster, which ensures cilium
         # gets priority scheduling.
@@ -664,7 +664,7 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "a76721f59f7a7ebf67e2dbd48beac6f36d028bda643806ef49a0f96034985aa2"
+        cilium.io/cilium-configmap-checksum: "34693ccc4959f15d3b4b9575d6800ecdcd7d8951c98376a1411e5b3b29d87212"
       labels:
         io.cilium/app: operator
         name: cilium-operator
