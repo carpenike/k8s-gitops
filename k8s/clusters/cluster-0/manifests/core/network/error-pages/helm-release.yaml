@@ -8,10 +8,10 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: /k8s/charts/kah-common/
+      chart: /k8s/charts/kah-common-chart/
       sourceRef:
         kind: GitRepository
-        name: flux-system
+        name: k8s-gitops
         namespace: flux-system
       interval: 5m
   dependsOn:
