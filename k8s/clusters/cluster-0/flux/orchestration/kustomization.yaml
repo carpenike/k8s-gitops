@@ -6,5 +6,5 @@ resources:
   - core-certificates.yaml
   - core-chrony.yaml
   - core-cilium.yaml
-  # - core-error-pages.yaml
+  - core-error-pages.yaml
   - core-traefik.yaml
