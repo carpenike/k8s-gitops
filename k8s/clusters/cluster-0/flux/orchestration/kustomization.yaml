@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - core-cert-manager.yaml
   - core-cilium.yaml
+  - core-traefik.yaml
