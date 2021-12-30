@@ -31,11 +31,12 @@ spec:
         fs.inotify.max_user_instances: "8192"
 
     - op: add
-      path: /machine/network/interfaces
+      path: /machine/network
       value:
-        - interface: ens1f0
-          dhcp: true
-
+        interfaces:
+          - interface: ens1f0
+            dhcp: true
+          
   selector:
     matchExpressions:
       - key: control-plane
