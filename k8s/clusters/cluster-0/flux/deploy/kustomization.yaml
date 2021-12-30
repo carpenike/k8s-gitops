@@ -5,7 +5,6 @@ resources:
   - cluster-repositories.yaml
   - manage-flux.yaml
   - cluster-config.yaml
-  # - cluster-crds.yaml
+  - cluster-crds.yaml
   - cluster-namespaces.yaml
   - cluster-orchestration.yaml
-  - cluster-storage.yaml
