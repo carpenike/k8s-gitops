@@ -23,6 +23,8 @@ spec:
       enabled: true
 
     cephClusterSpec:
+      mon:
+        count: 2
       mgr:
         count: 2
 
