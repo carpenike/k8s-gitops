@@ -116,8 +116,9 @@ spec:
         #     - cleanup
       volumes:
         - name: backup-nas
-          persistentVolumeClaim:
-            claimName: backup-system-nfs-tank-share-pvc
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         - name: mon-endpoint-volume
           configMap:
             name: rook-ceph-mon-endpoints
@@ -135,7 +136,7 @@ spec:
         - name: ceph-data
           mountPath: /etc/ceph
     fsfreeze:
-      enabled: true
+      enabled: false
     postgresql:
       enabled: false
       postgresqlUsername: benji
