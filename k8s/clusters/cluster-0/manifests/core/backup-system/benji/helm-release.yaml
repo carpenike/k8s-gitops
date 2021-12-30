@@ -17,7 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    timeZone: America/New_York
+    # timeZone: America/New_York
     benji:
       image:
         registry: ghcr.io
