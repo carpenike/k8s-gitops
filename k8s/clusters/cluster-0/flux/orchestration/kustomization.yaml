@@ -8,5 +8,5 @@ resources:
   - core-chrony.yaml
   - core-cilium.yaml
   - core-error-pages.yaml
-  - core-pvc.yaml
+  # - core-pvc.yaml
   - core-traefik.yaml
