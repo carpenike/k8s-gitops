@@ -33,7 +33,7 @@ spec:
     - op: add
       path: /machine/network/interfaces
       value:
-        - interface: eth0
+        - interface: ens1f0
           dhcp: true
 
   selector:
