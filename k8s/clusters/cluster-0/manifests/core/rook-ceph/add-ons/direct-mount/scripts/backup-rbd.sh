@@ -38,7 +38,7 @@ if [ ! -d "${target_folder}" ]; then
     mkdir -p "${target_folder}"
 fi
 
-rbd map -p replicapool "${rbd}" | xargs -I{} mount {} "${rbd_mountpath}"
+rbd map -p ceph-blockpool "${rbd}" | xargs -I{} mount {} "${rbd_mountpath}"
 tar czvf "${target_folder}/${application}.tar.gz" -C "${rbd_mountpath}/" .
 umount "${rbd_mountpath}"
-rbd unmap -p replicapool "${rbd}"
+rbd unmap -p ceph-blockpool "${rbd}"
