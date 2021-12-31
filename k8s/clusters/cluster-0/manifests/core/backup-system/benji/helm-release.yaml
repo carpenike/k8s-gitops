@@ -17,7 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    # timeZone: America/New_York
+    timeZone: America/New_York
     benji:
       image:
         registry: ghcr.io
@@ -36,7 +36,7 @@ spec:
               path: /backup-nas/k8s-backups
         ios:
           - module: rbdaio
-            name: replicapool
+            name: ceph-blockpool
             configuration:
               simultaneousReads: 3
               simultaneousWrites: 3
@@ -52,8 +52,7 @@ spec:
       cronJob:
         activeDeadlineSeconds: null
         startingDeadlineSeconds: null
-      crontab:
-        {}
+      crontab: {}
         # - name: backup-security
         #   schedule: "00 02 * * *"
         #   command:
@@ -166,7 +165,15 @@ spec:
                   - name: backup-nas
                     mountPath: /backup-nas
                   - name: ceph-data
-                    mountPath: /backup-nas
+                    mountPath: /etc/ceph
+              - op: add
+                path: /spec/template/metadata/annotations
+                value:
+                  configmap.reloader.stakater.com/reload: "ceph-config"
+              - op: add
+                path: /spec/template/metadata/annotations
+                value:
+                  secret.reloader.stakater.com/reload: "rook-ceph-mon"
               - op: add
                 path: /spec/template/spec/initContainers
                 value:
