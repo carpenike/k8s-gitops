@@ -163,6 +163,11 @@ spec:
                 value:
                   - name: benji-config
                     mountPath: /benji/etc
+              - op: add
+                path: /spec/template/spec/containers/1/volumeMounts
+                value:
+                  - name: backup-nas
+                    mountPath: /backup-nas
           - target:
               kind: DaemonSet
               name: benji-fsfreeze
@@ -172,34 +177,34 @@ spec:
                 value:
                   - name: rbd-mounts
                     mountPath: /var/lib/kubelet/plugins/kubernetes.io/rbd/mounts/
-  #             - op: add
-  #               path: /spec/template/spec/initContainers
-  #               value:
-  #                 - name: generate-ceph-files
-  #                   image: rook/ceph:v1.7.9
-  #                   imagePullPolicy: Always
-  #                   command: ["/usr/bin/bash"]
-  #                   args:
-  #                     [
-  #                       "-c",
-  #                       "bash /script/generate-ceph.sh",
-  #                     ]
-  #                   volumeMounts:
-  #                     - name: mon-endpoint-volume
-  #                       mountPath: /etc/rook
-  #                     - name: ceph-data
-  #                       mountPath: /etc/ceph
-  #                     - name: ceph-config
-  #                       mountPath: /script/generate-ceph.sh
-  #                       subPath: generate-ceph.sh
-  #                   env:
-  #                     - name: ROOK_CEPH_USERNAME
-  #                       valueFrom:
-  #                         secretKeyRef:
-  #                           name: rook-ceph-mon
-  #                           key: ceph-username
-  #                     - name: ROOK_CEPH_SECRET
-  #                       valueFrom:
-  #                         secretKeyRef:
-  #                           name: rook-ceph-mon
-  #                           key: ceph-secret
+              - op: add
+                path: /spec/template/spec/initContainers
+                value:
+                  - name: generate-ceph-files
+                    image: rook/ceph:v1.7.9
+                    imagePullPolicy: Always
+                    command: ["/usr/bin/bash"]
+                    args:
+                      [
+                        "-c",
+                        "bash /script/generate-ceph.sh",
+                      ]
+                    volumeMounts:
+                      - name: mon-endpoint-volume
+                        mountPath: /etc/rook
+                      - name: ceph-data
+                        mountPath: /etc/ceph
+                      - name: ceph-config
+                        mountPath: /script/generate-ceph.sh
+                        subPath: generate-ceph.sh
+                    env:
+                      - name: ROOK_CEPH_USERNAME
+                        valueFrom:
+                          secretKeyRef:
+                            name: rook-ceph-mon
+                            key: ceph-username
+                      - name: ROOK_CEPH_SECRET
+                        valueFrom:
+                          secretKeyRef:
+                            name: rook-ceph-mon
+                            key: ceph-secret
