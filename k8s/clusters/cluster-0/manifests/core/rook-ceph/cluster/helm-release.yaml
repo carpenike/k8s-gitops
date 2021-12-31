@@ -77,7 +77,7 @@ spec:
     cephBlockPools:
       - name: ceph-blockpool
         spec:
-          failureDomain: host
+          failureDomain: osd
           replicated:
             size: 3
         storageClass:
