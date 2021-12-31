@@ -163,32 +163,18 @@ spec:
                 value:
                   - name: benji-config
                     mountPath: /benji/etc
-              - op: add
-                path: /spec/template/spec/containers/1/volumeMounts
-                value:
                   - name: backup-nas
                     mountPath: /backup-nas
-          - target:
-              kind: DaemonSet
-              name: benji-fsfreeze
-            patch:
-              - op: replace
-                path: /spec/template/spec/containers/0/volumeMounts
-                value:
-                  - name: rbd-mounts
-                    mountPath: /var/lib/kubelet/plugins/kubernetes.io/rbd/mounts/
+                  - name: ceph-data
+                    mountPath: /backup-nas
               - op: add
                 path: /spec/template/spec/initContainers
                 value:
                   - name: generate-ceph-files
-                    image: rook/ceph:v1.7.9
+                    image: rook/ceph:v1.8.1
                     imagePullPolicy: Always
                     command: ["/usr/bin/bash"]
-                    args:
-                      [
-                        "-c",
-                        "bash /script/generate-ceph.sh",
-                      ]
+                    args: ["-c", "bash /script/generate-ceph.sh"]
                     volumeMounts:
                       - name: mon-endpoint-volume
                         mountPath: /etc/rook
@@ -208,3 +194,12 @@ spec:
                           secretKeyRef:
                             name: rook-ceph-mon
                             key: ceph-secret
+          - target:
+              kind: DaemonSet
+              name: benji-fsfreeze
+            patch:
+              - op: replace
+                path: /spec/template/spec/containers/0/volumeMounts
+                value:
+                  - name: rbd-mounts
+                    mountPath: /var/lib/kubelet/plugins/kubernetes.io/rbd/mounts/
