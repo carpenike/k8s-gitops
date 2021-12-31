@@ -34,7 +34,7 @@ spec:
       path: /machine/network
       value:
         interfaces:
-          - interface: ens1f0
+          - interface: eth2
             dhcp: true
           
   selector:
