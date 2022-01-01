@@ -26,7 +26,7 @@ spec:
 
       containers:
         - name: chrony
-          image: geoffh1977/chrony
+          image: quay.io/cybozu/chrony:4.1
           volumeMounts:
             - mountPath: /var/lib/chrony
               name: chrony

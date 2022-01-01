@@ -6,7 +6,7 @@ resources:
   - core-benji.yaml
   - core-cert-manager.yaml
   - core-certificates.yaml
-  # - core-chrony.yaml
+  - core-chrony.yaml
   - core-cilium.yaml
   - core-error-pages.yaml
   - core-rook-ceph.yaml
