@@ -56,29 +56,41 @@ spec:
       config:
         enabled: true
         existingClaim: plex-config-pvc
-      media:
+
+      transcode:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: emptyDir
+        medium: Memory
+
+      nfs-nas-media:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /data
+        readOnly: false
+
     podAnnotations:
       configmap.reloader.stakater.com/reload: "plex-promtail"
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
-    addons:
-      promtail:
-        enabled: true
-        image:
-          repository: grafana/promtail
-          tag: 2.4.1
-        loki: http://loki.logs.svc.cluster.local:3100/loki/api/v1/push
-        logs:
-        - name: promtail/plex
-          path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
-        - name: promtail/plex/plugins
-          path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
-        volumeMounts:
-        - name: config
-          mountPath: /config
-          readOnly: true
-        securityContext:
-          runAsUser: 0
+    # addons:
+    #   promtail:
+    #     enabled: true
+    #     image:
+    #       repository: grafana/promtail
+    #       tag: 2.4.1
+    #     loki: http://loki.logs.svc.cluster.local:3100/loki/api/v1/push
+    #     logs:
+    #     - name: promtail/plex
+    #       path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
+    #     - name: promtail/plex/plugins
+    #       path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
+    #     volumeMounts:
+    #     - name: config
+    #       mountPath: /config
+    #       readOnly: true
+    #     securityContext:
+    #       runAsUser: 0
