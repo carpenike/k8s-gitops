@@ -86,6 +86,6 @@ spec:
                 - "hubble.${SECRET_DOMAIN}"
 
     bgp:
-      enabled: false
+      enabled: true
       announce:
         loadbalancerIP: true
