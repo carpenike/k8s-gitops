@@ -32,11 +32,11 @@ spec:
       main:
         enabled: true
         type: LoadBalancer
-        externalIPs:
-        - 10.45.100.100
+        loadbalancerIP: 10.45.100.100
         externalTrafficPolicy: Local
         port:
           port: 32400
+
     ingress:
       main:
         enabled: true
