@@ -32,7 +32,7 @@ spec:
       main:
         enabled: true
         type: LoadBalancer
-        loadbalancerIP: 10.45.100.100
+        loadBalancerIP: 10.45.100.100
         externalTrafficPolicy: Local
         port:
           port: 32400
