@@ -29,10 +29,7 @@ spec:
     service:
       enabled: true
       type: LoadBalancer
-      spec:
-        externalIPs:
-          - "${SVC_TRAEFIK_ADDRESS}"
-        externalTrafficPolicy: Local
+      loadBalancerIP: ${SVC_TRAEFIK_ADDRESS}
       annotations:
         external-dns.alpha.kubernetes.io/hostname: "ipv4.${SECRET_DOMAIN}"
     logs:
