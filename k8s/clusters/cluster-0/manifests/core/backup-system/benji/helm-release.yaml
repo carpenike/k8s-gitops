@@ -145,8 +145,7 @@ spec:
         existingClaim: benji-postgresql-pvc
     pushgateway:
       image:
-        registry: docker.io
-        repository: prom/pushgateway
+        repository: quay.io/prometheus/pushgateway
         tag: v1.4.2
         pullPolicy: IfNotPresent
       nameOverride: pushgateway
