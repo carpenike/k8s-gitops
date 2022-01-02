@@ -116,8 +116,8 @@ spec:
       volumes:
         - name: backup-nas
           nfs:
-            server: "nas.${SECRET_DOMAIN}"
-            path: /mnt/tank/share
+            server: "nas-1.${SECRET_DOMAIN}"
+            path: /mnt/backup/share
         - name: mon-endpoint-volume
           configMap:
             name: rook-ceph-mon-endpoints
