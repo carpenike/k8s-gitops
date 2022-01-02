@@ -24,13 +24,10 @@ spec:
 
     cephClusterSpec:
       mon:
-        count: 2
+        count: 3
       mgr:
         count: 2
       
-      network:
-        provider: host
-
       dashboard:
         enabled: true
         urlPrefix: /
