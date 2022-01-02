@@ -28,8 +28,8 @@ spec:
       mgr:
         count: 2
       
-      # network:
-      #   provider: host
+      network:
+        provider: host
 
       dashboard:
         enabled: true
