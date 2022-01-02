@@ -22,14 +22,14 @@ spec:
     monitoring:
       enabled: true
 
-    network:
-      provider: host
-
     cephClusterSpec:
       mon:
         count: 2
       mgr:
         count: 2
+      
+      network:
+        provider: host
 
       dashboard:
         enabled: true
