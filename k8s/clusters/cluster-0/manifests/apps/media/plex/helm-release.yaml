@@ -27,7 +27,7 @@ spec:
       supplementalGroups:
       - 44
       - 109
-      - 100
+      - 65539
     service:
       main:
         enabled: true
