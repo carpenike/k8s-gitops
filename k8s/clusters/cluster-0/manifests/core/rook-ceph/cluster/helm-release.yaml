@@ -22,6 +22,9 @@ spec:
     monitoring:
       enabled: true
 
+    network:
+      provider: host
+
     cephClusterSpec:
       mon:
         count: 2
