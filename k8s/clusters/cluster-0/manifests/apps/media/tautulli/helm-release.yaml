@@ -28,6 +28,8 @@ spec:
         enabled: true
         ingressClassName: "traefik"
         annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
@@ -38,6 +40,7 @@ spec:
         tls:
         - hosts:
           - "tautulli.${SECRET_DOMAIN}"
+          secretName: tls.tautulli
     persistence:
       config:
         enabled: true
