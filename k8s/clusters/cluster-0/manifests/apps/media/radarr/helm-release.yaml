@@ -55,14 +55,18 @@ spec:
         tls:
           - hosts:
               - "radarr.${SECRET_DOMAIN}"
-            secretName: radarr-cert
+            secretName: tls.radarr
     persistence:
       config:
         enabled: true
-        existingClaim: radarr-pvc
-      media:
+        existingClaim: radarr-config-pvc
+      nfs-nas-media:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /media
     resources:
       requests:

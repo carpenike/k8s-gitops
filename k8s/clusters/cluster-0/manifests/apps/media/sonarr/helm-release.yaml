@@ -42,7 +42,7 @@ spec:
         tls:
           - hosts:
               - "sonarr.${SECRET_DOMAIN}"
-            secretName: sonarr-cert
+            secretName: tls.sonarr
       api:
         enabled: true
         ingressClassName: "traefik"
@@ -56,17 +56,22 @@ spec:
         tls:
           - hosts:
               - "sonarr.${SECRET_DOMAIN}"
-            secretName: sonarr-cert
+            secretName: tls.sonarr
     controllerLabels:
       kasten-backup: "true"
     persistence:
       config:
         enabled: true
-        existingClaim: sonarr-pvc
-      media:
+        existingClaim: sonarr-config-pvc
+      nfs-nas-media:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /media
+        readOnly: false
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000

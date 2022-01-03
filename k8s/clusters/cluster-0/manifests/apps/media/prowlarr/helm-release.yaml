@@ -28,6 +28,8 @@ spec:
         enabled: true
         ingressClassName: "traefik"
         annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
           external-dns/is-public: "true"
@@ -40,6 +42,7 @@ spec:
         tls:
           - hosts:
               - "{{ (index .Values.ingress.main.hosts 0).host }}"
+            secretName: tls.prowlarr
     persistence:
       config:
         enabled: true
