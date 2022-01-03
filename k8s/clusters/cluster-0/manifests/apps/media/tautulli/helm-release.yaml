@@ -41,7 +41,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: tautulli-pvc
+        existingClaim: tautulli-config-pvc
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
