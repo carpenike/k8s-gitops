@@ -10,6 +10,7 @@ resources:
   - core-chrony.yaml
   - core-cilium.yaml
   - core-error-pages.yaml
+  - core-nfd.yaml
   - core-rbac.yaml
   - core-rook-ceph.yaml
   - core-traefik.yaml
