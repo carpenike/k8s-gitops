@@ -40,7 +40,7 @@ spec:
       tls:
         - hosts:
             - "dex.${SECRET_DOMAIN}"
-          secretName: dex-cert
+          secretName: tls.dex
 
     config:
       issuer: https://dex.${SECRET_DOMAIN}
