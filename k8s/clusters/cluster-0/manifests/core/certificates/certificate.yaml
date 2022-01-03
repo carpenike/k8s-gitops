@@ -2,10 +2,10 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: acme-crt
+  name: tls.acme-wildcard
   namespace: kube-system
 spec:
-  secretName: acme-crt-secret
+  secretName: tls.acme-wildcard-secret
   commonName: "*.${SECRET_DOMAIN}"
   dnsNames:
     - "${SECRET_DOMAIN}"
