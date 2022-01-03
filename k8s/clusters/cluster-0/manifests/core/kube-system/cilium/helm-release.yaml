@@ -74,6 +74,7 @@ spec:
         rollOutPods: true
         ingress:
           enabled: true
+          className: traefik
           annotations:
             cert-manager.io/cluster-issuer: letsencrypt-production
             traefik.ingress.kubernetes.io/router.entrypoints: websecure
