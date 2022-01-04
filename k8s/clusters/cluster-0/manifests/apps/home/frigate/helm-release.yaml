@@ -39,7 +39,7 @@ spec:
               - path: /
                 pathType: Prefix
         tls:
-          - secretName: frigate-cert
+          - secretName: tls.frigate
             hosts:
               - "frigate.${SECRET_DOMAIN}"
     securityContext:
@@ -49,10 +49,15 @@ spec:
         enabled: true
         existingClaim: frigate-config-pvc
         mountPath: /data
-      media:
+      nfs-nas-media:
         enabled: true
-        existingClaim: home-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /media
+        readOnly: false
       usb:
         enabled: true
         type: hostPath
@@ -172,6 +177,7 @@ spec:
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate-config"
+
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
