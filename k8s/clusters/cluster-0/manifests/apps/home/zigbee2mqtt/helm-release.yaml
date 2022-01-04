@@ -40,11 +40,11 @@ spec:
         tls:
           - hosts:
               - "zigbee.${SECRET_DOMAIN}"
-            secretName: zigbee-cert
+            secretName: tls.zigbee2mqtt
     persistence:
       config:
         enabled: true
-        existingClaim: zigbee2mqtt-pvc
+        existingClaim: zigbee2mqtt-config-pvc
         mountPath: /data
 
     config:
