@@ -33,6 +33,7 @@ spec:
           - "02"
           - "03"
           - "0a"
+          - "0e"
           - "ef"
           - "fe"
           - "ff"
@@ -47,10 +48,10 @@ spec:
                 vendor: ["1a6e", "18d1"]
           - name: "zwave"
             matchOn:
-              - usbId:
-                  class: ["02"]
-                  vendor: ["0658"]
-                  device: ["0200"]
+            - usbId:
+                class: ["02"]
+                vendor: ["0658"]
+                device: ["0200"]
 
     annotations:
       configmap.reloader.stakater.com/reload: "nfd-worker-conf"
