@@ -11,6 +11,7 @@ resources:
   - core-chrony.yaml
   - core-cilium.yaml
   - core-error-pages.yaml
+  - core-metrics-server.yaml
   - core-nfd.yaml
   - core-rbac.yaml
   - core-rook-ceph.yaml

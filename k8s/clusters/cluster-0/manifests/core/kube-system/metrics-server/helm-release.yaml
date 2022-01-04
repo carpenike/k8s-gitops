@@ -8,17 +8,16 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://charts.bitnami.com/bitnami
+      # renovate: registryUrl=https://kubernetes-sigs.github.io/metrics-server/
       chart: metrics-server
-      version: 5.10.11
+      version: 3.7.0
       sourceRef:
         kind: HelmRepository
-        name: bitnami-charts
+        name: kubernetes-sigs-metrics-server-charts
         namespace: flux-system
       interval: 5m
+
   values:
-    apiService:
-      create: true
-    extraArgs:
-      kubelet-insecure-tls: true
-      kubelet-preferred-address-types: InternalIP,ExternalIP,Hostname
+    image:
+      repository: k8s.gcr.io/metrics-server/metrics-server
+      tag: v0.5.2
