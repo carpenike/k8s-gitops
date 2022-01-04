@@ -2,12 +2,34 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
+  name: apps-home-mosquitto
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+    - name: rook-ceph-cluster
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/apps/home/mosquitto"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
   name: apps-home-zwavejs2mqtt
   namespace: flux-system
 spec:
   dependsOn:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
+    - name: apps-home-mosquitto
     - name: core-nfd
   interval: 5m
   path: "./k8s/clusters/cluster-0/manifests/apps/home/zwavejs2mqtt"
