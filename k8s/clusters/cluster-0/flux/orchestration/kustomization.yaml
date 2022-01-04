@@ -5,7 +5,6 @@ resources:
   - apps-media.yaml
   - apps-security.yaml
   - apps-home.yaml
-  # - core-benji.yaml
   - core-cert-manager.yaml
   - core-certificates.yaml
   - core-chrony.yaml
