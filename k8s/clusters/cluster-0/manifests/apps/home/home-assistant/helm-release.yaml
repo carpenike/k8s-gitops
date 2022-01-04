@@ -24,7 +24,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: home-assistant-pvc
+        existingClaim: home-assistant-config-pvc
     extraEnv:
       TZ: "America/New_York"
     envFrom:
@@ -47,7 +47,7 @@ spec:
               - path: /
                 pathType: Prefix
         tls:
-          - secretName: home-assistant-cert
+          - secretName: tls.ha
             hosts:
               - "ha.${SECRET_DOMAIN}"
 
@@ -109,7 +109,7 @@ spec:
                 - path: /
                   pathType: Prefix
           tls:
-            - secretName: ha-vscode-cert
+            - secretName: tls.ha-vscode
               hosts:
                 - "ha-vscode.${SECRET_DOMAIN}"
         volumeMounts:
