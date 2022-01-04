@@ -22,3 +22,4 @@ resources:
   - security.yaml
   - tools.yaml
   - vpn-gateway.yaml
+  - velero.yaml
