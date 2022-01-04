@@ -20,38 +20,38 @@ spec:
     image:
       repository: k8s.gcr.io/nfd/node-feature-discovery
       tag: "v0.9.0"
-
-    config: |-
-      core:
+    worker:
+      config: |-
+        core:
+          sources:
+          - custom
+          - pci
+          - usb
         sources:
-        - custom
-        - pci
-        - usb
-      sources:
-        usb:
-          deviceClassWhitelist:
-          - "02"
-          - "03"
-          - "0a"
-          - "0e"
-          - "ef"
-          - "fe"
-          - "ff"
-          deviceLabelFields:
-          - "class"
-          - "vendor"
-          - "device"
-        custom:
-          - name: "coral-tpu"
-            matchOn:
-            - usbId:
-                vendor: ["1a6e", "18d1"]
-          - name: "zwave"
-            matchOn:
-            - usbId:
-                class: ["02"]
-                vendor: ["0658"]
-                device: ["0200"]
+          usb:
+            deviceClassWhitelist:
+            - "02"
+            - "03"
+            - "0a"
+            - "0e"
+            - "ef"
+            - "fe"
+            - "ff"
+            deviceLabelFields:
+            - "class"
+            - "vendor"
+            - "device"
+          custom:
+            - name: "coral-tpu"
+              matchOn:
+              - usbId:
+                  vendor: ["1a6e", "18d1"]
+            - name: "zwave"
+              matchOn:
+              - usbId:
+                  class: ["02"]
+                  vendor: ["0658"]
+                  device: ["0200"]
 
     annotations:
       configmap.reloader.stakater.com/reload: "nfd-worker-conf"
