@@ -39,7 +39,7 @@ spec:
             cert-manager.io/cluster-issuer: letsencrypt-production
           tls:
             - hosts:
-                - "zigbee.${SECRET_DOMAIN}"
+                - "thanos.${SECRET_DOMAIN}"
               secretName: thanos-cert
     queryFrontend:
       enabled: false
