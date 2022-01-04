@@ -39,18 +39,18 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
-        - host: "zwave.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "zwave.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "zwave.${SECRET_DOMAIN}"
-          secretName: zwave-cert
+          - hosts:
+              - "zwave.${SECRET_DOMAIN}"
+            secretName: tls.zwavejs2mqtt
     persistence:
       config:
         enabled: true
-        existingClaim: zwavejs2mqtt-pvc
+        existingClaim: zwavejs2mqtt-config-pvc
         mountPath: /usr/src/app/store
       usb:
         enabled: true
@@ -60,5 +60,9 @@ spec:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
+            - matchExpressions:
+                - {
+                    key: "feature.node.kubernetes.io/custom-zwave",
+                    operator: In,
+                    values: ["true"],
+                  }
