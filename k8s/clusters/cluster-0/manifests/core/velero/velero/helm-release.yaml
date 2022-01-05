@@ -30,8 +30,8 @@ spec:
         config:
           region: us-east-1
           s3ForcePathStyle: true
-          s3Url: https://nas.${SECRET_DOMAIN}:9000
-          publicUrl: https://nas.${SECRET_DOMAIN}:9000
+          s3Url: https://nas-1.${SECRET_DOMAIN}:9000
+          publicUrl: https://nas-1.${SECRET_DOMAIN}:9000
       resticTimeout: 4h
 
     credentials:
