@@ -30,16 +30,16 @@ spec:
         config:
           region: us-east-1
           s3ForcePathStyle: true
-          s3Url: https://nas-1.${SECRET_DOMAIN}:9000
-          publicUrl: https://nas-1.${SECRET_DOMAIN}:9000
+          s3Url: https://minio.${SECRET_DOMAIN}:9000
+          publicUrl: https://minio.${SECRET_DOMAIN}:9000
       resticTimeout: 4h
 
     credentials:
       secretContents:
         cloud: |
           [default]
-          aws_access_key_id = ${SECRET_MINIO_ACCESS_KEY}
-          aws_secret_access_key = ${SECRET_MINIO_SECRET_KEY}
+          aws_access_key_id = ${SECRET_MINIO_VELERO_ACCESS_KEY}
+          aws_secret_access_key = ${SECRET_MINIO_VELERO_SECRET_KEY}
 
     initContainers:
       - name: velero-plugin-for-aws
