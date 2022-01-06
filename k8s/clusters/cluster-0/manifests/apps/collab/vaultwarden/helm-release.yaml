@@ -26,9 +26,11 @@ spec:
       SIGNUPS_ALLOWED: "false"
       SMTP_FROM_NAME: Vault
       SMTP_FROM: vault@${SECRET_DOMAIN}
-      SMTP_HOST: mailu-front.mail.svc.cluster.local
-      SMTP_PORT: 587
+      SMTP_HOST: smtp.mailgun.org
+      SMTP_PORT: 465
       SMTP_SSL: "true"
+      SMTP_USERNAME: ${SECRET_MAILGUN_USERNAME}
+      SMTP_PASSWORD: ${SECRET_MAILGUN_PASSWORD}
       TZ: "America/New_York"
       WEBSOCKET_ADDRESS: 0.0.0.0
       WEBSOCKET_ENABLED: true
@@ -42,6 +44,8 @@ spec:
         enabled: true
         ingressClassName: "traefik"
         annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
           external-dns/is-public: "true"
           hajimari.io/enable: "true"
@@ -61,6 +65,7 @@ spec:
         tls:
           - hosts:
               - vault.${SECRET_DOMAIN}
+            secretName: tls.vaultwarden
       admin:
         enabled: true
         ingressClassName: "traefik"
@@ -75,6 +80,7 @@ spec:
         tls:
           - hosts:
               - "vault.${SECRET_DOMAIN}"
+            secretName: tls.vaultwarden
     persistence:
       config:
         enabled: true
