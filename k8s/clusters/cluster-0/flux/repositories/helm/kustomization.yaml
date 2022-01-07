@@ -42,6 +42,7 @@ resources:
   - pomerium-charts.yaml
   - rook-ceph-charts.yaml
   - timberio-charts.yaml
+  - vector-charts.yaml
   - vernemq-charts.yaml
   - weaveworks-kured-charts.yaml
   - yourls-charts.yaml
