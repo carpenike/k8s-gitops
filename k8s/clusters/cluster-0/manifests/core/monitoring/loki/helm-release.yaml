@@ -18,7 +18,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    replicas: 3
+    replicas: 2
     persistence:
       enabled: false
     config:
