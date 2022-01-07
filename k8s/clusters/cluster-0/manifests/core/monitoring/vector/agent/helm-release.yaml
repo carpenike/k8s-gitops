@@ -3,11 +3,8 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: vector-agent
-  namespace: system-monitoring
+  namespace: monitoring
 spec:
-  dependsOn:
-    - name: loki
-      namespace: system-monitoring
   interval: 5m
   chart:
     spec:
