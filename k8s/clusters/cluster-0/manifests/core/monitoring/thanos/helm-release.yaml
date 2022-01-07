@@ -39,8 +39,8 @@ spec:
             cert-manager.io/cluster-issuer: letsencrypt-production
           tls:
             - hosts:
-                - "zigbee.${SECRET_DOMAIN}"
-              secretName: thanos-cert
+                - "thanos.${SECRET_DOMAIN}"
+              secretName: tls.thanos
     queryFrontend:
       enabled: false
     bucket:
@@ -51,7 +51,7 @@ spec:
       enabled: true
       persistenceVolumeClaim:
         spec:
-          storageClassName: rook-ceph-block
+          storageClassName: ceph-block
           resources:
             requests:
               storage: 20Gi
