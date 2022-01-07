@@ -52,8 +52,6 @@ spec:
     schedules:
       daily-backup:
         disabled: false
-        labels:
-          default-backup: true
         schedule: "0 6 * * *"
         template:
           ttl: "168h"
