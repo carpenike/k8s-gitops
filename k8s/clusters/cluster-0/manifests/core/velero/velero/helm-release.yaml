@@ -51,9 +51,29 @@ spec:
 
     schedules:
       daily-backup:
+        disabled: false
+        labels:
+          default-backup: true
         schedule: "0 6 * * *"
         template:
           ttl: "168h"
+          includedNamespaces:
+            - collab
+    # Backup schedules to create.
+    # Eg:
+    # schedules:
+    #   mybackup:
+    #     disabled: false
+    #     labels:
+    #       myenv: foo
+    #     annotations:
+    #       myenv: foo
+    #     schedule: "0 0 * * *"
+    #     useOwnerReferencesInBackup: true
+    #     template:
+    #       ttl: "240h"
+    #       includedNamespaces:
+    #       - foo
 
     metrics:
       enabled: true
