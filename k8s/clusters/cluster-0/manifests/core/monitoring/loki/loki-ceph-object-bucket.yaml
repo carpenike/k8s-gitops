@@ -3,7 +3,7 @@ apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:
   name: loki-ceph-bucket
-  namespace: logs
+  namespace: monitoring
 spec:
   bucketName: loki
-  storageClassName: rook-ceph-bucket
+  storageClassName: ceph-bucket

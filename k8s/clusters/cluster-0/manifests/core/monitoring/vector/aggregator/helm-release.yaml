@@ -41,7 +41,7 @@ spec:
               port:
                 name: "vector"
       tls:
-        - secretName: vector-${CLUSTER_NAME}-tls
+        - secretName: tls.vector
           hosts:
             - "vector.${SECRET_DOMAIN}"
 
