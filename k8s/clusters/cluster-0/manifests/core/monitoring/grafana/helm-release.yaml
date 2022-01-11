@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://grafana.github.io/helm-charts
       chart: grafana
-      version: 6.18.1
+      version: 6.20.5
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -19,12 +19,18 @@ spec:
   values:
     deploymentStrategy:
       type: Recreate
+
+    image:
+      repository: ghcr.io/k8s-at-home/grafana
+
     env:
       GF_EXPLORE_ENABLED: true
       GF_PANELS_DISABLE_SANITIZE_HTML: true
       GF_LOG_FILTERS: rendering:debug
       VAR_BLOCKY_URL: "http://blocky.network.svc.cluster.local:4000"
+
     adminPassword: "${SECRET_GRAFANA_PASSWORD}"
+
     grafana.ini:
       server:
         root_url: "https://grafana.${SECRET_DOMAIN}"
@@ -64,43 +70,44 @@ spec:
         org_role: Viewer
       security:
         allow_embedding: true
+
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
         providers:
-        - name: 'default'
-          orgId: 1
-          folder: ''
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/default
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+
     datasources:
       datasources.yaml:
         apiVersion: 1
+        deleteDatasources:
+          - name: Loki
+            orgId: 1
         datasources:
-        - name: Prometheus
-          type: prometheus
-          access: proxy
-          url: http://thanos-query-http:10902/
-          isDefault: true
-        - name: Loki
-          type: loki
-          access: proxy
-          url: http://loki.logs.svc.cluster.local:3100
-        - name: TrueNAS
-          type: influxdb
-          access: proxy
-          url: http://influxdb:8086
-          database: graphitedb
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://thanos-query-http:10902/
+            isDefault: true
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://loki.monitoring.svc.cluster.local:3100
+
     dashboards:
       default:
         ceph-cluster:
           gnetId: 2842
           revision: 14
           datasource: Prometheus
-        # Ref: https://grafana.com/grafana/dashboards/5336
+        # Ref: https://grafana.com/grafana/dashboards/2842
         ceph-osd:
           gnetId: 5336
           revision: 5
@@ -109,12 +116,6 @@ spec:
         ceph-pools:
           gnetId: 5342
           revision: 5
-          datasource: Prometheus
-        vernemq:
-          url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
-          datasource: Prometheus
-        nginx-dashboard:
-          url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
           datasource: Prometheus
         apc-smart-ups-1500:
           url: https://raw.githubusercontent.com/k8s-at-home/grafana-dashboards/main/apc-smart-ups-1500-snmp.json
@@ -162,6 +163,10 @@ spec:
           gnetId: 13665
           revision: 1
           datasource: Prometheus
+        node-exporter-full:
+          url: https://grafana.com/api/dashboards/1860/revisions/22/download
+          datasource: Prometheus
+
     sidecar:
       dashboards:
         enabled: true
@@ -169,28 +174,40 @@ spec:
       datasources:
         enabled: true
         searchNamespace: ALL
+
+    imageRenderer:
+      enabled: true
+
     plugins:
-    - natel-discrete-panel
-    - pr0ps-trackmap-panel
-    - grafana-piechart-panel
-    - vonage-status-panel
-    - grafana-worldmap-panel
-    - grafana-clock-panel
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+      - grafana-piechart-panel
+      - vonage-status-panel
+      - grafana-worldmap-panel
+      - grafana-clock-panel
+
     serviceMonitor:
       enabled: true
+
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "traefik"
+        cert-manager.io/cluster-issuer: letsencrypt-production
         external-dns/is-public: "true"
         external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: network-rfc1918-ips@kubernetescrd
       hosts:
-      - "grafana.${SECRET_DOMAIN}"
-      tls:
-      - hosts:
         - "grafana.${SECRET_DOMAIN}"
+      tls:
+        - hosts:
+            - "grafana.${SECRET_DOMAIN}"
+          secretName: tls.grafana
+
     persistence:
       enabled: true
-      existingClaim: grafana-pvc
+      existingClaim: grafana-config-pvc
+
     podAnnotations:
       configmap.reloader.stakater.com/reload: "grafana"
