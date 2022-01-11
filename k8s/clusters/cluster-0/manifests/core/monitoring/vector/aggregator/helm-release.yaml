@@ -22,6 +22,10 @@ spec:
     podMonitor:
       enabled: true
 
+    service:
+      enabled: true
+      type: LoadBalancer
+
     ingress:
       enabled: true
       className: "traefik"
@@ -59,6 +63,11 @@ spec:
           type: vector
           version: "2"
 
+        vyos_logs:
+          address: 0.0.0.0:6001
+          type: vector
+          version: "2"
+
       # Sinks
       sinks:
         loki_kubernetes_sink:
@@ -88,3 +97,30 @@ spec:
               {{`{{ kubernetes.pod_node_name }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
+
+        loki_vyos:
+          type: loki
+          inputs:
+            - vyos_logs
+          endpoint: http://loki.monitoring:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 400000
+          out_of_order_action: rewrite_timestamp
+          labels:
+            hostname: >-
+              {{`{{ host }}`}}
+            syslog_identifier: >-
+              {{`{{ SYSLOG_IDENTIFIER }}`}}
+
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: Service
+              name: vector-aggregator
+            patch:
+              - op: add
+                path: /spec/loadBalancerIP
+                value: ${SVC_VECTOR_AGGREGATOR}
