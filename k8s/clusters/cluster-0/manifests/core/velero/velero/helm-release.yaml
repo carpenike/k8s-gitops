@@ -55,8 +55,6 @@ spec:
         schedule: "0 6 * * *"
         template:
           ttl: "168h"
-          includedNamespaces:
-            - collab
     # Backup schedules to create.
     # Eg:
     # schedules:
