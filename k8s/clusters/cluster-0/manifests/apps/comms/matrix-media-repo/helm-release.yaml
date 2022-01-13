@@ -32,10 +32,6 @@ spec:
           opts:
             tempPath: "/tmp/mediarepo_s3_upload"
             ssl: false
-            bucketName: matrix-media
-            endpoint: rook-ceph-rgw-object-store.rook-ceph.svc
-            accessKeyId: ${SECRET_MATRIX_MEDIA_S3_ACCESS_KEY_ID}
-            accessSecret: ${SECRET_MATRIX_MEDIA_S3_ACCESS_SECRET}
 
     admins:
       - "@ryan:${SECRET_PUBLIC_DOMAIN}"

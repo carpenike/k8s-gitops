@@ -6,4 +6,4 @@ metadata:
   namespace: comms
 spec:
   bucketName: matrix-media
-  storageClassName: rook-ceph-bucket
+  storageClassName: ceph-bucket
