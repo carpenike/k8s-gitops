@@ -4,5 +4,4 @@ kind: Kustomization
 resources:
   - signing-key.enc.yaml
   - postgresql-data-pvc.yaml
-  - matrix-media-pvc.yaml
   - helm-release.yaml
