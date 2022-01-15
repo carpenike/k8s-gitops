@@ -43,16 +43,15 @@ spec:
         tls:
           - hosts:
               - "unifi.${SECRET_DOMAIN}"
-            secretName: unifi-cert
+            secretName: tls.unifi
 
     service:
       main:
         type: LoadBalancer
+        loadBalancerIP: 10.45.10.17
         annotations:
           coredns.io/hostname: unifi
           # traefik.ingress.kubernetes.io/service.serversscheme: https
-        externalIPs:
-          - 10.45.10.17
         externalTrafficPolicy: Local
 
     nodeSelector:
