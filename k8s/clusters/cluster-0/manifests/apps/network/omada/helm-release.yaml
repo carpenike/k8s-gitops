@@ -138,7 +138,7 @@ spec:
         type: custom
         volumeSpec:
           secret:
-            secretName: omada-cert
+            secretName: tls.omada
 
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
