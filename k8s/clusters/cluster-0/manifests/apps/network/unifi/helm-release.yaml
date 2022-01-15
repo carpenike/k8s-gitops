@@ -60,7 +60,7 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: unifi-pvc
+        existingClaim: unifi-data-pvc
 
     resources:
       requests:
