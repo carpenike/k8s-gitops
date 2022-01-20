@@ -58,7 +58,7 @@ spec:
 
       # Sources
       sources:
-        vector_kubernetes_logs:
+        kubernetes_logs:
           address: 0.0.0.0:6000
           type: vector
           version: "2"
@@ -70,10 +70,10 @@ spec:
 
       # Sinks
       sinks:
-        loki_kubernetes_sink:
+        loki_kubernetes:
           type: loki
           inputs:
-            - vector_kubernetes_logs
+            - kubernetes_logs
           endpoint: http://loki.monitoring:3100
           encoding:
             codec: json
@@ -97,7 +97,6 @@ spec:
               {{`{{ kubernetes.pod_node_name }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
-
         loki_vyos:
           type: loki
           inputs:
