@@ -67,6 +67,7 @@ spec:
       config:
         enabled: true
         existingClaim: qb-config-pvc
+
       nfs-nas-media:
         enabled: true
         type: custom
