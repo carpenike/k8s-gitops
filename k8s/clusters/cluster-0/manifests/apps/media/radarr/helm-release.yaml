@@ -41,7 +41,7 @@ spec:
         tls:
           - hosts:
               - "radarr.${SECRET_DOMAIN}"
-            secretName: radarr-cert
+            secretName: tls.radarr
       api:
         enabled: true
         ingressClassName: "traefik"
