@@ -12,6 +12,7 @@ resources:
   - ext-gateway.yaml
   - flux-system.yaml
   - home.yaml
+  - kasten-io.yaml
   - kube-system.yaml
   - logs.yaml
   - mail.yaml
