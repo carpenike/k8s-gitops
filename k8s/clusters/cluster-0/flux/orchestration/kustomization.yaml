@@ -13,6 +13,7 @@ resources:
   - core-chrony.yaml
   - core-cilium.yaml
   - core-error-pages.yaml
+  - core-kasten-io.yaml
   - core-metrics-server.yaml
   - core-monitoring.yaml
   - core-nfd.yaml
