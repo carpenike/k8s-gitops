@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: pod-gateway
-      version: 5.1.0
+      version: 5.2.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -67,6 +67,9 @@ spec:
       failureThreshold: 1
 
     addons:
+      netshoot:
+        enabled: true
+
       vpn:
         enabled: true
         type: wireguard
@@ -80,6 +83,9 @@ spec:
         securityContext:
           runAsUser: 568
           runAsGroup: 568
+          capabilities:
+            drop:
+              - "SYS_MODULE"
 
         env:
           TZ: "America/New_York"
