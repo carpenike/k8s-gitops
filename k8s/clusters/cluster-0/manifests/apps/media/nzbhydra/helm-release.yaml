@@ -46,11 +46,11 @@ spec:
         tls:
         - hosts:
           - "nzbhydra.${SECRET_DOMAIN}"
-          secretName: nzbhydra-cert
+          secretName: tls.nzbhydra
     persistence:
       config:
         enabled: true
-        existingClaim: nzbhydra2-pvc
+        existingClaim: nzbhydra2-config-pvc
     resources:
       requests:
         memory: 250Mi
