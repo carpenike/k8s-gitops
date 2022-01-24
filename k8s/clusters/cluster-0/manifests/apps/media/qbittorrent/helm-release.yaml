@@ -21,11 +21,18 @@ spec:
     image:
       repository: ghcr.io/k8s-at-home/qbittorrent
       tag: v4.3.9
+
+    settings:
+      automaticPortSetup: false
+
     podAnnotations:
       setGateway: "true"
+
     hostname: qbittorrent
+
     env:
       TZ: "America/New_York"
+
     service:
       main:
         ports:
@@ -43,6 +50,7 @@ spec:
             protocol: TCP
             targetPort: 56059
         externalTrafficPolicy: Local
+
     ingress:
       main:
         enabled: true
@@ -59,6 +67,7 @@ spec:
           - hosts:
               - "qb.${SECRET_DOMAIN}"
             secretName: tls.qb
+
     podSecurityContext:
       supplementalGroups:
         - 100
@@ -91,27 +100,27 @@ spec:
         interval: 10m
         scrapeTimeout: 2m
 
-    additionalContainers:
-      - name: exporter
-        image: esanchezm/prometheus-qbittorrent-exporter:latest
-        imagePullPolicy: IfNotPresent
-        env:
-          - name: QBITTORRENT_HOST
-            value: "http://localhost"
-          - name: QBITTORRENT_PORT
-            value: "8080"
-          # - name: QBITTORRENT_USER
-          #   value: "${SECRET_QB_USER}"
-          # - name: QBITTORRENT_PASS
-          #   value: "${SECRET_QB_PASSWORD}"
-          - name: EXPORTER_PORT
-            value: "9022"
-          - name: EXPORTER_LOG_LEVEL
-            value: "INFO"
-          - name: METRICS_PREFIX
-            value: "qbittorrent"
-        ports:
-          - name: metrics
-            containerPort: 9022
-    nodeSelector:
-      node-role.kubernetes.io/worker: "true"
+    # additionalContainers:
+    #   - name: exporter
+    #     image: esanchezm/prometheus-qbittorrent-exporter:latest
+    #     imagePullPolicy: IfNotPresent
+    #     env:
+    #       - name: QBITTORRENT_HOST
+    #         value: "http://localhost"
+    #       - name: QBITTORRENT_PORT
+    #         value: "8080"
+    #       # - name: QBITTORRENT_USER
+    #       #   value: "${SECRET_QB_USER}"
+    #       # - name: QBITTORRENT_PASS
+    #       #   value: "${SECRET_QB_PASSWORD}"
+    #       - name: EXPORTER_PORT
+    #         value: "9022"
+    #       - name: EXPORTER_LOG_LEVEL
+    #         value: "INFO"
+    #       - name: METRICS_PREFIX
+    #         value: "qbittorrent"
+    #     ports:
+    #       - name: metrics
+    #         containerPort: 9022
+    # nodeSelector:
+    #   node-role.kubernetes.io/worker: "true"

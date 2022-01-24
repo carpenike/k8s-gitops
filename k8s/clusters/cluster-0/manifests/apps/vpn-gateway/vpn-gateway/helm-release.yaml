@@ -21,6 +21,8 @@ spec:
       repository: ghcr.io/k8s-at-home/pod-gateway
       tag: v1.4.0
 
+    DNS: 172.16.1.1
+
     routed_namespaces:
       - media
 
@@ -34,15 +36,12 @@ spec:
             port: ${VPN_FORWARDED_PORT_1}
 
     settings:
-      NOT_ROUTED_TO_GATEWAY_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
-      # tun0 for openvpn, wg0 for wireguard
       VPN_INTERFACE: wg0
-      # Prevent non VPN traffic to leave the gateway
+      VXLAN_ID: 43
+      VXLAN_IP_NETWORK: 172.16.1
       VPN_BLOCK_OTHER_TRAFFIC: true
-      # If VPN_BLOCK_OTHER_TRAFFIC is true, allow VPN traffic over this port
       VPN_TRAFFIC_PORT: ${VPN_GATEWAY_VPN_PORT}
-      # Traffic to these IPs will be send through the K8S gateway
-      # change if your K8S cluster or home network uses a different CIDR
+      NOT_ROUTED_TO_GATEWAY_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
       VPN_LOCAL_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
 
     webhook:
@@ -55,16 +54,6 @@ spec:
       gatewayAnnotation: setGateway
       namespaceSelector:
         label: "vpn-routed-gateway"
-
-    livenessProbe:
-      exec:
-        command:
-          - sh
-          - -c
-          - if [ $(wget -q -O- https://ipinfo.io/country) == '${VPN_COUNTRY}' ]; then exit 0; else exit $?; fi
-      initialDelaySeconds: 30
-      periodSeconds: 60
-      failureThreshold: 1
 
     addons:
       netshoot:
@@ -109,12 +98,17 @@ spec:
                 - ipBlock:
                     cidr: 0.0.0.0/0
               ports:
-                # VPN traffic port - change if your provider uses a different port
                 - port: ${VPN_GATEWAY_VPN_PORT}
                   protocol: UDP
             - to:
-                # Allow traffic within K8S - change if your K8S cluster uses a different CIDR
-                - ipBlock:
-                    cidr: ${NETWORK_K8S_CLUSTER_CIDR}
-                - ipBlock:
-                    cidr: ${NETWORK_K8S_SERVICE_CIDR}
+                - namespaceSelector: {}
+
+    # livenessProbe:
+    #   exec:
+    #     command:
+    #       - sh
+    #       - -c
+    #       - if [ $(wget -q -O- https://ipinfo.io/country) == '${VPN_COUNTRY}' ]; then exit 0; else exit $?; fi
+    #   initialDelaySeconds: 30
+    #   periodSeconds: 60
+    #   failureThreshold: 1
