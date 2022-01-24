@@ -28,21 +28,29 @@ spec:
         enabled: true
         ingressClassName: "traefik"
         annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "bazarr.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "bazarr.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "bazarr.${SECRET_DOMAIN}"
+          - hosts:
+              - "bazarr.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
-        existingClaim: bazarr-pvc
-      media:
+        existingClaim: bazarr-config-pvc
+      nfs-nas-media:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /media
