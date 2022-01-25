@@ -217,3 +217,46 @@ spec:
     provider: sops
     secretRef:
       name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: apps-media-calibre
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+    - name: rook-ceph-cluster
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/apps/media/calibre"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: apps-media-calibre-web
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+    - name: rook-ceph-cluster
+    - name: apps-media-calibre
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/apps/media/calibre-web"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg

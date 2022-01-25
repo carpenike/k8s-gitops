@@ -30,9 +30,13 @@ spec:
       config:
         enabled: true
         existingClaim: calibre-web-config-pvc
-      data:
+      nfs-nas-media:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /data
 
     ingress:
