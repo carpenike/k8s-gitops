@@ -57,10 +57,10 @@ spec:
         enabled: true
         existingClaim: plex-config-pvc
 
-      transcode:
-        enabled: true
-        type: emptyDir
-        medium: Memory
+      # transcode:
+      #   enabled: true
+      #   type: emptyDir
+      #   medium: Memory
 
       nfs-nas-media:
         enabled: true
