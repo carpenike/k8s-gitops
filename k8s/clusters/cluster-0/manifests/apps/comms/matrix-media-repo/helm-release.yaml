@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://ananace.gitlab.io/charts
       chart: matrix-media-repo
-      version: 1.0.6
+      version: 1.9.9
       sourceRef:
         kind: HelmRepository
         name: ananace-charts
@@ -28,7 +28,11 @@ spec:
           forKinds: ["all"]
           opts:
             tempPath: "/tmp/mediarepo_s3_upload"
+            endpoint: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
             ssl: false
+            accessKeyId: ${SECRET_MATRIX_MEDIA_S3_ACCESS_KEY_ID}
+            accessSecret: ${SECRET_MATRIX_MEDIA_S3_ACCESS_SECRET}
+            bucketName: "matrix-media"
 
     admins:
       - "@ryan:${SECRET_PUBLIC_DOMAIN}"
