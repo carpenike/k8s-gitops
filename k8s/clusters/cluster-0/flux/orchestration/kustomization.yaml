@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - apps-collab.yaml
   - apps-comms.yaml
+  - apps-db.yaml
   - apps-network.yaml
   - apps-home.yaml
   - apps-media.yaml
