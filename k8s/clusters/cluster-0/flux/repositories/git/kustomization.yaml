@@ -7,5 +7,6 @@ resources:
   - benji-charts.yaml
   - dacruz21-charts-git.yaml
   - invidious-charts-git.yaml
+  - kubegres.yaml
   - mintel-dex-charts.yaml
   - version-checker.yaml
