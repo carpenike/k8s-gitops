@@ -12,12 +12,6 @@ spec:
     storageClassName: ceph-block
   env:
     - name: POSTGRES_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: matrix-slack
-          key: MATRIX_SLACK_POSTGRESQL_PASSWORD
+      value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
     - name: POSTGRES_REPLICATION_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: matrix-slack
-          key: MATRIX_SLACK_POSTGRESQL_PASSWORD
+      value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}

@@ -64,15 +64,6 @@ spec:
           configMap:
             name: matrix-slack-config
 
-    postgresql:
-      enabled: true
-      postgresqlUsername: matrixuser
-      postgresqlPassword: matrixpass
-      postgresqlDatabase: matrix-slack
-      persistence:
-        enabled: true
-        existingClaim: matrix-slack-postgresql-pvc
-
     resources:
       requests:
         memory: 100Mi
