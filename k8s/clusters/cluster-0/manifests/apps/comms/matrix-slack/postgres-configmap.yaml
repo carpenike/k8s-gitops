@@ -22,6 +22,7 @@ data:
   primary_init_script.sh: |
     #!/bin/bash
     set -e
+    # testing to see if it's overridden
     # This script assumes that the env-var $POSTGRES_MYAPP_PASSWORD contains the password of the custom user to create.
     # You can add any env-var in your Kubegres resource config YAML.
     #dt=$(date '+%d/%m/%Y %H:%M:%S');
