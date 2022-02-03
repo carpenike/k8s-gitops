@@ -1,0 +1,23 @@
+---
+apiVersion: kubegres.reactive-tech.io/v1
+kind: Kubegres
+metadata:
+  name: matrix-slack-postgres
+  namespace: networking
+spec:
+  replicas: 1
+  image: docker.io/library/postgres:13.5
+  database:
+    size: 5Gi
+    storageClassName: ceph-block
+  env:
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: matrix-slack
+          key: MATRIX_SLACK_POSTGRESQL_PASSWORD
+    - name: POSTGRES_REPLICATION_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: matrix-slack
+          key: MATRIX_SLACK_POSTGRESQL_PASSWORD
