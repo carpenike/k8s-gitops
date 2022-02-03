@@ -8,6 +8,7 @@ resources:
   - cert-manager.yaml
   - collab.yaml
   - comms.yaml
+  - db.yaml
   - default.yaml
   - ext-gateway.yaml
   - flux-system.yaml
