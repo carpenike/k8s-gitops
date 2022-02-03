@@ -62,7 +62,7 @@ data:
       
       # A postgres connection string (unused if using nedb)
       #
-      connectionString: "postgresql://matrixuser:${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}@matrix-slack-postgresql/matrix-slack"
+      connectionString: "postgresql://matrixuser:${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}@matrix-slack-postgres/matrix-slack"
     
     # Optional. Use a matrix room to issue link and unlink commands to the bridge
     #
