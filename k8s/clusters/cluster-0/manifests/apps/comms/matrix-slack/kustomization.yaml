@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
   - config.yaml
   - postgres-configmap.yaml
-  - matrix-slack-postgresql-pvc.yaml
+  # - matrix-slack-postgresql-pvc.yaml
   - helm-release.yaml
   - postgres-db.yaml
