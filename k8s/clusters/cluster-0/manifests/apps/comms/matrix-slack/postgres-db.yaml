@@ -6,7 +6,7 @@ metadata:
   namespace: comms
 spec:
   replicas: 1
-  image: docker.io/library/postgres:13.5
+  image: docker.io/library/postgres:11.14
   database:
     size: 5Gi
     storageClassName: ceph-block
