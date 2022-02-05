@@ -16,9 +16,9 @@ spec:
       value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
     - name: POSTGRES_REPLICATION_PASSWORD
       value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
-    - name: CUSTOMDATABASENAME
+    - name: customDatabaseName
       value: matrix-slack
-    - name: CUSTOMUSERNAME
+    - name: customUserName
       value: matrixuser
     - name: POSTGRES_MYAPP_PASSWORD
-      value: mypass
+      value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
