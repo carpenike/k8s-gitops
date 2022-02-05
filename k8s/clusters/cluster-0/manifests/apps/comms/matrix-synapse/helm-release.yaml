@@ -101,13 +101,14 @@ spec:
             - matrix.${SECRET_DOMAIN}
 
     postgresql:
-      enabled: true
-      postgresqlPassword: ${SECRET_MATRIX_POSTGRESQL_PASSWORD}
-      postgresqlUsername: synapse
-      postgresqlDatabase: synapse
-      persistence:
-        enabled: true
-        existingClaim: matrix-postgresql-data-pvc
+      enabled: false
+
+    externalPostgresql:
+      host: matrix-synapse-postgres
+      port: 5432
+      username: synapse
+      password: ${SECRET_MATRIX_POSTGRESQL_PASSWORD}
+      database: "synapse"
 
     redis:
       enabled: true
@@ -122,12 +123,12 @@ spec:
 
     synapse:
       extraVolumes:
-        - name: mautrix-facebook
-          configMap:
-            name: mautrix-facebook-config
-            items:
-              - key: registration.yaml
-                path: registration.yaml
+        # - name: mautrix-facebook
+        #   configMap:
+        #     name: mautrix-facebook-config
+        #     items:
+        #       - key: registration.yaml
+        #         path: registration.yaml
         - name: matrix-slack
           configMap:
             name: matrix-slack-config
@@ -135,7 +136,7 @@ spec:
               - key: slack-registration.yaml
                 path: slack-registration.yaml
       extraVolumeMounts:
-        - name: mautrix-facebook
-          mountPath: /data/mautrix-facebook
+        # - name: mautrix-facebook
+        #   mountPath: /data/mautrix-facebook
         - name: matrix-slack
           mountPath: /data/matrix-slack
