@@ -10,15 +10,8 @@ spec:
   database:
     size: 5Gi
     storageClassName: ceph-block
-  customConfig: matrix-slack-postgres-configmap
   env:
     - name: POSTGRES_PASSWORD
       value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
     - name: POSTGRES_REPLICATION_PASSWORD
-      value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
-    - name: customDatabaseName
-      value: matrix-slack
-    - name: customUserName
-      value: matrixuser
-    - name: POSTGRES_MYAPP_PASSWORD
       value: ${SECRET_MATRIX_SLACK_POSTGRESQL_PASSWORD}
