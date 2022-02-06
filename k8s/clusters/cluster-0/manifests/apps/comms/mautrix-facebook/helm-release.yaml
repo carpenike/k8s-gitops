@@ -65,7 +65,7 @@ spec:
             name: mautrix-facebook-config
 
     postgresql:
-      enabled: true
+      enabled: false
       postgresqlUsername: mautrixuser
       postgresqlPassword: mautrixpass
       postgresqlDatabase: mautrix-facebook
