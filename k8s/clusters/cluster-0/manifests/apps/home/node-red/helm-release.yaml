@@ -29,7 +29,7 @@ spec:
       data:
         enabled: true
         mountPath: /data
-        existingClaim: node-red-pvc
+        existingClaim: node-red-config-pvc
     ingress:
       main:
         enabled: true
@@ -47,7 +47,7 @@ spec:
         tls:
         - hosts:
           - "node-red.${SECRET_DOMAIN}"
-          secretName: node-red-cert
+          secretName: tls.node-red
     resources:
       requests:
         memory: 350Mi
