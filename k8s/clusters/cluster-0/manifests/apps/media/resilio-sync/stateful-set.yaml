@@ -7,10 +7,6 @@ metadata:
   labels:
     app.kubernetes.io/instance: resilio-sync
     app.kubernetes.io/name: resilio-sync
-  annotations:
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.resilio-sync-ryan: glob:2*
-    fluxcd.io/tag.resilio-sync-stefanie: glob:2*
 spec:
   replicas: 1
   selector:
@@ -28,89 +24,93 @@ spec:
         app.kubernetes.io/name: resilio-sync
     spec:
       containers:
-      - image: linuxserver/resilio-sync:version-2.7.2.1375
-        name: resilio-sync-ryan
-        env:
-        - name: TZ
-          value: "America/New_York"
-        - name: PUID
-          value: "1000"
-        - name: PGID
-          value: "1000"
-        ports:
-        - containerPort: 8888
-          name: http-ryan
-        - containerPort: 55555
-          name: com-ryan
-        volumeMounts:
-        - name: config-ryan
-          mountPath: /config
-        - name: sync-conf-ryan
-          mountPath: /config/sync.conf
-          subPath: sync.conf
-        - name: home-ryan
-          mountPath: /sync/home
-        - name: pictures
-          mountPath: /sync/pictures
-        - name: media
-          mountPath: /sync/media
-        # - name: backup
-        #   mountPath: /sync/backup
-        # - name: music
-        #   mountPath: /sync/music
-        # - name: video
-        #   mountPath: /sync/video
-      - image: linuxserver/resilio-sync:version-2.7.2.1375
-        name: resilio-sync-stefanie
-        env:
-        - name: TZ
-          value: "America/New_York"
-        - name: PUID
-          value: "1001"
-        - name: PGID
-          value: "1001"
-        ports:
-        - containerPort: 8889
-          name: http-stefanie
-        - containerPort: 55556
-          name: com-stefanie
-        volumeMounts:
-        - name: config-stefanie
-          mountPath: /config
-        - name: sync-conf-stefanie
-          mountPath: /config/sync.conf
-          subPath: sync.conf
-        - name: home-stefanie
-          mountPath: /sync/home
-        - name: pictures
-          mountPath: /sync/pictures
-        # - name: backup
-        #   mountPath: /sync/backup
+        - image: linuxserver/resilio-sync:version-2.7.2.1375
+          name: resilio-sync-ryan
+          env:
+            - name: TZ
+              value: "America/New_York"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          ports:
+            - containerPort: 8888
+              name: http-ryan
+            - containerPort: 55555
+              name: com-ryan
+          volumeMounts:
+            - name: config-ryan
+              mountPath: /config
+            - name: sync-conf-ryan
+              mountPath: /config/sync.conf
+              subPath: sync.conf
+            - name: home-ryan
+              mountPath: /sync/home
+            - name: pictures
+              mountPath: /sync/pictures
+            - name: media
+              mountPath: /sync/media
+          # - name: backup
+          #   mountPath: /sync/backup
+          # - name: music
+          #   mountPath: /sync/music
+          # - name: video
+          #   mountPath: /sync/video
+        - image: linuxserver/resilio-sync:version-2.7.2.1375
+          name: resilio-sync-stefanie
+          env:
+            - name: TZ
+              value: "America/New_York"
+            - name: PUID
+              value: "1001"
+            - name: PGID
+              value: "1001"
+          ports:
+            - containerPort: 8889
+              name: http-stefanie
+            - containerPort: 55556
+              name: com-stefanie
+          volumeMounts:
+            - name: config-stefanie
+              mountPath: /config
+            - name: sync-conf-stefanie
+              mountPath: /config/sync.conf
+              subPath: sync.conf
+            - name: home-stefanie
+              mountPath: /sync/home
+            - name: pictures
+              mountPath: /sync/pictures
+          # - name: backup
+          #   mountPath: /sync/backup
       volumes:
-      - name: sync-conf-ryan
-        configMap:
-          name: resilio-sync-ryan-conf
-      - name: sync-conf-stefanie
-        configMap:
-          name: resilio-sync-stefanie-conf
-      - name: config-ryan
-        persistentVolumeClaim:
-          claimName: resilio-sync-config-ryan
-      - name: config-stefanie
-        persistentVolumeClaim:
-          claimName: resilio-sync-config-stefanie
-      - name: home-ryan
-        persistentVolumeClaim:
-          claimName: media-nfs-home-ryan-pvc
-      - name: home-stefanie
-        persistentVolumeClaim:
-          claimName: media-nfs-home-stefanie-pvc
-      - name: pictures
-        persistentVolumeClaim:
-          claimName: media-nfs-pictures-pvc
-      - name: media
-        persistentVolumeClaim:
-          claimName: media-nfs-tank-share-pvc
+        - name: sync-conf-ryan
+          configMap:
+            name: resilio-sync-ryan-conf
+        - name: sync-conf-stefanie
+          configMap:
+            name: resilio-sync-stefanie-conf
+        - name: config-ryan
+          persistentVolumeClaim:
+            claimName: resilio-sync-config-ryan-pvc
+        - name: config-stefanie
+          persistentVolumeClaim:
+            claimName: resilio-sync-config-stefanie-pvc
+        - name: home-ryan
+          nfs:
+            path: /mnt/tank/home/ryan
+            server: nas.${SECRET_DOMAIN}
+        - name: home-stefanie
+          nfs:
+            path: /mnt/tank/home/stefanie
+            server: nas.${SECRET_DOMAIN}
+        - name: pictures
+          nfs:
+            path: /mnt/tank/share/pictures
+            server: nas.${SECRET_DOMAIN}
+        - name: media
+          nfs:
+            path: /mnt/tank/share
+            server: nas.${SECRET_DOMAIN}
       # - name: backup
       #   persistentVolumeClaim:
       #     claimName: nfs-backups-pvc
@@ -122,8 +122,8 @@ spec:
       #     claimName: nfs-video-pvc
       dnsConfig:
         options:
-        - name: ndots
-          value: "1"
+          - name: ndots
+            value: "1"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -181,28 +181,28 @@ metadata:
   namespace: media
 spec:
   ports:
-  - name: http-ryan
-    port: 8888
-    protocol: TCP
-    targetPort: 8888
-  - name: http-stefanie
-    port: 8889
-    protocol: TCP
-    targetPort: 8889
-  - name: com-ryan
-    port: 55555
-    protocol: TCP
-    targetPort: 55555
-  - name: com-stefanie
-    port: 55556
-    protocol: TCP
-    targetPort: 55556
+    - name: http-ryan
+      port: 8888
+      protocol: TCP
+      targetPort: 8888
+    - name: http-stefanie
+      port: 8889
+      protocol: TCP
+      targetPort: 8889
+    - name: com-ryan
+      port: 55555
+      protocol: TCP
+      targetPort: 55555
+    - name: com-stefanie
+      port: 55556
+      protocol: TCP
+      targetPort: 55556
   selector:
     app.kubernetes.io/instance: resilio-sync
     app.kubernetes.io/name: resilio-sync
   type: LoadBalancer
-  externalIPs:
-  - 10.45.10.18
+  loadBalancerIP: 10.45.10.18
+
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -218,21 +218,21 @@ metadata:
   namespace: media
 spec:
   rules:
-  - host: "resilio-sync-ryan.${SECRET_DOMAIN}"
-    http:
-      paths:
-      - backend:
-          serviceName: resilio-sync
-          servicePort: 8888
-        path: /
-  - host: "resilio-sync-stefanie.${SECRET_DOMAIN}"
-    http:
-      paths:
-      - backend:
-          serviceName: resilio-sync
-          servicePort: 8889
-        path: /
+    - host: "resilio-sync-ryan.${SECRET_DOMAIN}"
+      http:
+        paths:
+          - backend:
+              serviceName: resilio-sync
+              servicePort: 8888
+            path: /
+    - host: "resilio-sync-stefanie.${SECRET_DOMAIN}"
+      http:
+        paths:
+          - backend:
+              serviceName: resilio-sync
+              servicePort: 8889
+            path: /
   tls:
-  - hosts:
-    - "resilio-sync-ryan.${SECRET_DOMAIN}"
-    - "resilio-sync-stefanie.${SECRET_DOMAIN}"
+    - hosts:
+        - "resilio-sync-ryan.${SECRET_DOMAIN}"
+        - "resilio-sync-stefanie.${SECRET_DOMAIN}"
