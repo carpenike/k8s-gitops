@@ -5,6 +5,7 @@ resources:
   - apps-collab.yaml
   - apps-comms.yaml
   - apps-db.yaml
+  - apps-monitoring.yaml
   - apps-network.yaml
   - apps-home.yaml
   - apps-media.yaml
