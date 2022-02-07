@@ -30,8 +30,12 @@ spec:
         enabled: true
         ingressClassName: "traefik"
         annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+          external-dns/is-public: "true"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          # traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
           - host: "mylar.${SECRET_DOMAIN}"
             paths:
@@ -40,11 +44,18 @@ spec:
         tls:
           - hosts:
               - "mylar.${SECRET_DOMAIN}"
+            secretName: tls.mylarr
     persistence:
       config:
         enabled: true
         existingClaim: mylar-config-pvc
-      data:
+
+      nfs-nas-media:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /data
+        readOnly: false
