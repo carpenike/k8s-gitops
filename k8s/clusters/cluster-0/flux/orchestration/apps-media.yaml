@@ -330,6 +330,9 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-namespaces
+    - name: apps-media-qbittorrent
+    - name: apps-media-sabnzbd
+    - name: apps-media-prowlarr
   interval: 5m
   path: "./k8s/clusters/cluster-0/manifests/apps/media/lidarr"
   prune: true
