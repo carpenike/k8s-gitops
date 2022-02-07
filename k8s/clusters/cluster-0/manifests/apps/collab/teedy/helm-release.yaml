@@ -43,23 +43,30 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "docs.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "docs.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "docs.${SECRET_DOMAIN}"
-          secretName: tls.teedy
+          - hosts:
+              - "docs.${SECRET_DOMAIN}"
+            secretName: tls.teedy
     persistence:
       data:
         enabled: true
         existingClaim: teedy-config-pvc
-      media:
+
+      nfs-nas-media:
         enabled: true
-        existingClaim: collab-nfs-tank-share-pvc
+        type: custom
         subPath: scans/import
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /media
+        readOnly: false
+
     postgresql:
       enabled: false
 
