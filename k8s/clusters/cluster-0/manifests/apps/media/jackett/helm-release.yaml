@@ -33,18 +33,18 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
         hosts:
-        - host: "jackett.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "jackett.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "jackett.${SECRET_DOMAIN}"
-          secretName: jackett-cert
+          - hosts:
+              - "jackett.${SECRET_DOMAIN}"
+            secretName: jackett-cert
     persistence:
       config:
         enabled: true
-        existingClaim: jackett-pvc
+        existingClaim: jackett-config-pvc
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
