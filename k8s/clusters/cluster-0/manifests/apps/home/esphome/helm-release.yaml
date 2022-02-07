@@ -37,15 +37,15 @@ spec:
           kubernetes.io/tls-acme: "true"
           hajimari.io/enable: "true"
         hosts:
-        - host: "esphome.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "esphome.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "esphome.${SECRET_DOMAIN}"
-          secretName: esphome-cert
+          - hosts:
+              - "esphome.${SECRET_DOMAIN}"
+            secretName: tls.esphome
     persistence:
       config:
         enabled: true
-        existingClaim: esphome-pvc
+        existingClaim: esphome-config-pvc
