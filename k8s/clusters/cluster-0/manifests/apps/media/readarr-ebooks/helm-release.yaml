@@ -27,6 +27,8 @@ spec:
         enabled: true
         ingressClassName: "traefik"
         annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
           external-dns/is-public: "true"
           hajimari.io/enable: "true"
@@ -41,6 +43,7 @@ spec:
         tls:
           - hosts:
               - "ebooks.${SECRET_DOMAIN}"
+            secretName: tls.readarr-ebooks
       api:
         enabled: true
         ingressClassName: "traefik"
@@ -54,6 +57,7 @@ spec:
         tls:
           - hosts:
               - "ebooks.${SECRET_DOMAIN}"
+            secretName: tls.readarr-ebooks
     podSecurityContext:
       supplementalGroups:
         - 100
@@ -61,9 +65,13 @@ spec:
       config:
         enabled: true
         existingClaim: readarr-ebooks-config-pvc
-      data:
+      nfs-nas-media:
         enabled: true
-        existingClaim: media-nfs-tank-share-pvc
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
         mountPath: /data
     resources:
       requests:

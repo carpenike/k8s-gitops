@@ -387,3 +387,43 @@ spec:
     provider: sops
     secretRef:
       name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: apps-media-readarr-audio
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/apps/media/readarr-audio"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: apps-media-readarr-ebooks
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/apps/media/readarr-ebooks"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
