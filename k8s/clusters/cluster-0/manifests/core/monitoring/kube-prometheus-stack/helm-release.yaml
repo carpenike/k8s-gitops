@@ -164,7 +164,7 @@ spec:
         tls:
           - hosts:
               - "prom-server.${SECRET_DOMAIN}"
-            secretName: prom-server-cert
+            secretName: tls.prom-server
       thanosService:
         enabled: true
       prometheusSpec:

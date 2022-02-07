@@ -20,22 +20,20 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/plex
-      tag: v1.25.2.5319-c43dc0277
+      tag: v1.25.4.5487-648a8f9f9
     env:
       TZ: "America/New_York"
     podSecurityContext:
       supplementalGroups:
       - 44
       - 109
-      - 65539
+      - 100
     service:
       main:
         enabled: true
         type: LoadBalancer
         loadBalancerIP: 10.45.100.100
         externalTrafficPolicy: Local
-        port:
-          port: 32400
 
     ingress:
       main:
@@ -74,7 +72,13 @@ spec:
             path: /mnt/tank/share
         mountPath: /data
         readOnly: false
-
+      backup:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "nas-1.${SECRET_DOMAIN}"
+            path: /mnt/backup/share/plex
     podAnnotations:
       configmap.reloader.stakater.com/reload: "plex-promtail"
     nodeSelector:
