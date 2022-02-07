@@ -123,12 +123,12 @@ spec:
 
     synapse:
       extraVolumes:
-        # - name: mautrix-facebook
-        #   configMap:
-        #     name: mautrix-facebook-config
-        #     items:
-        #       - key: registration.yaml
-        #         path: registration.yaml
+        - name: mautrix-facebook
+          configMap:
+            name: mautrix-facebook-config
+            items:
+              - key: registration.yaml
+                path: registration.yaml
         - name: matrix-slack
           configMap:
             name: matrix-slack-config
@@ -136,7 +136,7 @@ spec:
               - key: slack-registration.yaml
                 path: slack-registration.yaml
       extraVolumeMounts:
-        # - name: mautrix-facebook
-        #   mountPath: /data/mautrix-facebook
+        - name: mautrix-facebook
+          mountPath: /data/mautrix-facebook
         - name: matrix-slack
           mountPath: /data/matrix-slack
