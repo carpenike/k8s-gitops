@@ -26,16 +26,13 @@ spec:
       DOCS_DEFAULT_LANGUAGE: eng
       DOCS_BASE_URL: "https://docs.${SECRET_DOMAIN}"
       DOCS_ADMIN_EMAIL_INIT: "ryan@ryanholt.net"
-      DATABASE_URL: "jdbc:postgresql://teedy-postgresql:5432/teedydb"
+      DATABASE_URL: "jdbc:postgresql://teedy-postgres:5432/teedydb"
       DATABASE_USER: "teedyuser"
       DOCS_SMTP_HOSTNAME: "smtp.${SECRET_DOMAIN}"
       DOCS_SMTP_PORT: 25
       DATABASE_PASSWORD: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
       DOCS_ADMIN_PASSWORD_INIT: ${SECRET_TEEDY_ADMIN_PASSWORD_INIT_BCRYPT}
-    controllerAnnotations:
-      stash.appscode.com/backup-blueprint: daily-backup-to-minio-keep-5
-      stash.appscode.com/target-paths: "/data"
-      stash.appscode.com/volume-mounts: "data:/data"
+
     ingress:
       main:
         enabled: true
@@ -53,7 +50,7 @@ spec:
         tls:
         - hosts:
           - "docs.${SECRET_DOMAIN}"
-          secretName: teedy-cert
+          secretName: tls.teedy
     persistence:
       data:
         enabled: true
@@ -64,11 +61,8 @@ spec:
         subPath: scans/import
         mountPath: /media
     postgresql:
-      enabled: true
-      postgresqlPassword: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
-      persistence:
-        enabled: true
-        existingClaim: data-teedy-postgresql-0
+      enabled: false
+
     # additionalContainers:
     # - name: docs-importer
     #   image: sismics/docs-importer:latest
