@@ -54,7 +54,7 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: teedy-pvc
+        existingClaim: teedy-config-pvc
       media:
         enabled: true
         existingClaim: collab-nfs-tank-share-pvc
