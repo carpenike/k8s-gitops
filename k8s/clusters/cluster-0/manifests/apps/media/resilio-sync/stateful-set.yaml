@@ -209,6 +209,9 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: "traefik"
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     external-dns/is-public: "true"
     external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
   labels:
@@ -242,3 +245,4 @@ spec:
     - hosts:
         - "resilio-sync-ryan.${SECRET_DOMAIN}"
         - "resilio-sync-stefanie.${SECRET_DOMAIN}"
+      secretName: tls.resilio
