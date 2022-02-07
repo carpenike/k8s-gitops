@@ -44,7 +44,7 @@ spec:
         tls:
           - hosts:
               - "mylar.${SECRET_DOMAIN}"
-            secretName: tls.mylarr
+            secretName: tls.mylar
     persistence:
       config:
         enabled: true
