@@ -222,15 +222,19 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: resilio-sync
-              servicePort: 8888
+              service:
+                name: resilio-sync
+                port:
+                  number: 8888
             path: /
     - host: "resilio-sync-stefanie.${SECRET_DOMAIN}"
       http:
         paths:
           - backend:
-              serviceName: resilio-sync
-              servicePort: 8889
+              service:
+                name: resilio-sync
+                port:
+                  number: 8889
             path: /
   tls:
     - hosts:
