@@ -17,7 +17,6 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-
     image:
       repository: adguard/adguardhome
       tag: v0.106.3
@@ -27,7 +26,6 @@ spec:
       config:
         enabled: true
         existingClaim: adguard-0-config-pvc
-
 
     env:
       TZ: "America/New_York"
@@ -58,8 +56,9 @@ spec:
       main:
         enabled: true
         ingressClassName: "traefik"
-        # annotations:
-        #   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: "adguard.${SECRET_DOMAIN}"
             paths:
@@ -68,6 +67,7 @@ spec:
         tls:
           - hosts:
               - "adguard.${SECRET_DOMAIN}"
+            secretName: tls.adguard
 
     # nodeSelector:
     #   node-role.kubernetes.io/worker: "true"
