@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: adguard/adguardhome
-      tag: v0.106.3
+      tag: v0.108.0-b.3
       pullPolicy: Always
 
     persistence:
@@ -99,7 +99,7 @@ spec:
   values:
     image:
       repository: adguard/adguardhome
-      tag: v0.106.3
+      tag: v0.108.0-b.3
       pullPolicy: Always
 
     persistence:
