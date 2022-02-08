@@ -17,28 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    # initContainers:
-    # - name: git-config
-    #   image: alpine/git:v2.30.2
-    #   env:
-    #   - name: GITEA_TOKEN
-    #     value: "${SECRET_GITEA_ACCESS_TOKEN}"
-    #   - name: URL
-    #     value: "git.dev.${SECRET_DOMAIN}"
-    #   command:
-    #   - "sh"
-    #   - "-c"
-    #   - |
-    #     if [ ! -f /opt/adguardhome/conf/AdGuardHome.yaml ]; then
-    #       mkdir -p /opt/adguardhome/conf
-    #       git clone --depth 1 "https://${SECRET_GITEA_ACCESS_TOKEN}@git.dev.${SECRET_DOMAIN}/dcplaya/Configs.git" /opt/adguardhome/Configs
-    #       cp /opt/adguardhome/Configs/AdGuard-Home/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml
-    #     fi
-    #   volumeMounts:
-    #   - name: config
-    #     mountPath: /opt/adguardhome/conf
-    #   securityContext:
-    #     runAsUser: 0
+
     image:
       repository: adguard/adguardhome
       tag: v0.106.3
@@ -48,9 +27,7 @@ spec:
       config:
         enabled: true
         existingClaim: adguard-0-config-pvc
-      # data:
-      #   enabled: true
-      #   existingClaim: database-adguard-home
+
 
     env:
       TZ: "America/New_York"
@@ -63,8 +40,7 @@ spec:
       dns:
         enabled: true
         type: LoadBalancer
-        externalIPs:
-          - "${SVC_ADGUARD_ADDRESS}"
+        loadBalancerIP: ${SVC_ADGUARD_ADDRESS}
         externalTrafficPolicy: Local
         ports:
           tcp:
@@ -130,9 +106,6 @@ spec:
       config:
         enabled: true
         existingClaim: adguard-1-config-pvc
-      # data:
-      #   enabled: true
-      #   existingClaim: database-adguard-home
 
     env:
       TZ: "America/New_York"
@@ -145,8 +118,7 @@ spec:
       dns:
         enabled: true
         type: LoadBalancer
-        externalIPs:
-          - "${SVC_ADGUARD_ADDRESS}"
+        loadBalancerIP: ${SVC_ADGUARD_ADDRESS}
         externalTrafficPolicy: Local
         ports:
           tcp:
