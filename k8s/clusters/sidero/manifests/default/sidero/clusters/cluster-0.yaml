@@ -102,7 +102,7 @@ metadata:
   namespace: default
 spec:
   clusterName: cluster-0
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels: null
   template:
