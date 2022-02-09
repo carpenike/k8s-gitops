@@ -5,4 +5,5 @@ resources:
   - cp-0.yaml
   - node-0.yaml
   - node-1.yaml
+  - node-2.yaml
   - node-3.yaml
