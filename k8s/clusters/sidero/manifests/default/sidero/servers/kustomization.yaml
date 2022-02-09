@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - cp-0.yaml
   - cp-1.yaml
+  - cp-2.yaml
   - node-0.yaml
   - node-1.yaml
   - node-2.yaml
