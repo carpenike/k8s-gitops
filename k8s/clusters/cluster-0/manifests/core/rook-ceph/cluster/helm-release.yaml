@@ -24,7 +24,7 @@ spec:
 
     cephClusterSpec:
       mon:
-        count: 2
+        count: 3
       mgr:
         count: 2
       
@@ -77,7 +77,7 @@ spec:
     cephBlockPools:
       - name: ceph-blockpool
         spec:
-          failureDomain: osd
+          failureDomain: host
           replicated:
             size: 3
         storageClass:
