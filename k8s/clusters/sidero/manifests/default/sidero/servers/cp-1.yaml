@@ -1,0 +1,24 @@
+---
+apiVersion: metal.sidero.dev/v1alpha1
+kind: Server
+metadata:
+  labels:
+    control-plane: "true"
+  name: 391fdfe0-1b3a-4e33-87d9-bee99ed76f9c
+spec:
+  accepted: true
+  configPatches:
+    - op: replace
+      path: /machine/install/disk
+      value: /dev/vda
+
+  cpu:
+    manufacturer: Intel(R) Corporation
+    version: Intel(R) Core(TM) i3-7100 CPU @ 3.90GHz
+  hostname: cp-1
+  pxeBootAlways: true
+  system:
+    productName: BHYVE
+    serialNumber: None
+    skuNumber: None
+    version: "1.0"
