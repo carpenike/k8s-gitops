@@ -20,14 +20,14 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/plex
-      tag: v1.25.4.5487-648a8f9f9
+      tag: v1.25.5.5492-12f6b8c83
     env:
       TZ: "America/New_York"
     podSecurityContext:
       supplementalGroups:
-      - 44
-      - 109
-      - 100
+        - 44
+        - 109
+        - 100
     service:
       main:
         enabled: true
@@ -45,14 +45,14 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "plex.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "plex.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "plex.${SECRET_DOMAIN}"
-          secretName: tls.plex
+          - hosts:
+              - "plex.${SECRET_DOMAIN}"
+            secretName: tls.plex
     persistence:
       config:
         enabled: true
