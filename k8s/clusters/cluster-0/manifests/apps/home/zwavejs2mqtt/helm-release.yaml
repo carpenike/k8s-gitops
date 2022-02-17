@@ -24,11 +24,18 @@ spec:
       TZ: "America/New_York"
     securityContext:
       privileged: true
+
     service:
       main:
         annotations:
           prometheus.io/probe: "true"
           prometheus.io/protocol: http
+        ports:
+          http:
+            port: 8091
+          websocket:
+            enabled: true
+            port: 3000
     ingress:
       main:
         enabled: true
