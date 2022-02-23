@@ -92,7 +92,7 @@ spec:
       annotations:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
-        external-dns/is-public: "true"
+        external-dns/is-public: "false"
         external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       tls:
         - secretName: tls.matrix
