@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://helm.vector.dev
       chart: vector
-      version: 0.3.0
+      version: 0.6.0
       sourceRef:
         kind: HelmRepository
         name: vector-charts
@@ -25,26 +25,6 @@ spec:
     service:
       enabled: true
       type: LoadBalancer
-
-    ingress:
-      enabled: true
-      className: "traefik"
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        external-dns.alpha.kubernetes.io/target: ipv4.${SECRET_DOMAIN}
-        traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: network-rfc1918-ips@kubernetescrd
-      hosts:
-        - host: "vector.${SECRET_DOMAIN}"
-          paths:
-            - path: /
-              pathType: ImplementationSpecific
-              port:
-                name: "vector"
-      tls:
-        - secretName: tls.vector
-          hosts:
-            - "vector.${SECRET_DOMAIN}"
 
     tolerations:
       - key: node-role.kubernetes.io/master
