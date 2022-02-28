@@ -11,14 +11,14 @@ spec:
     spec:
       # renovate: registryUrl=https://grafana.github.io/helm-charts
       chart: loki
-      version: 2.8.4
+      version: 2.10.1
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
         namespace: flux-system
       interval: 5m
   values:
-    replicas: 2
+    replicas: 3
     persistence:
       enabled: false
     config:
@@ -71,10 +71,10 @@ spec:
           cache_location: /data/loki/index_cache
           resync_interval: 5s
           shared_store: s3
-      limits_config:
-        enforce_metric_name: false
-        reject_old_samples: true
-        reject_old_samples_max_age: 168h
+      # limits_config:
+      #   enforce_metric_name: false
+      #   reject_old_samples: true
+      #   reject_old_samples_max_age: 168h
     extraPorts:
       - port: 7956
         protocol: TCP

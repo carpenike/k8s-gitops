@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - loki-ceph-object-bucket.yaml
   - helm-release.yaml
+  - prometheus-rule.yaml
