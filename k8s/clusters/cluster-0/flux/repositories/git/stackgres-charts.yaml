@@ -8,7 +8,7 @@ spec:
   interval: 10m
   url: https://gitlab.com/ongresinc/stackgres
   ref:
-    tag: release-1.1.0
+    tag: 1.1.0
   ignore: |
     # exclude all
     /*
