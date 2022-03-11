@@ -18,5 +18,4 @@ resources:
   - network.yaml
   - rook-ceph.yaml
   - security.yaml
-  - tools.yaml
   - vpn-gateway.yaml
