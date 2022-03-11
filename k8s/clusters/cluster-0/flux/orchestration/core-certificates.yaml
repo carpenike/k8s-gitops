@@ -9,7 +9,7 @@ spec:
     - name: cluster-namespaces
     - name: core-cert-manager
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/certificates"
+  path: "./k8s/clusters/cluster-0/manifests/certificates"
   prune: true
   wait: true
   sourceRef:
