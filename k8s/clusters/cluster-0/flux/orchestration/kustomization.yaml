@@ -12,11 +12,8 @@ resources:
   - apps-vpn-gateway.yaml
   - core-cert-manager.yaml
   - core-certificates.yaml
-  - core-chrony.yaml
+  - core-kube-system.yaml
   - core-cilium.yaml
   - core-kasten-io.yaml
-  - core-metrics-server.yaml
   - core-monitoring.yaml
-  - core-nfd.yaml
-  - core-rbac.yaml
   - core-rook-ceph.yaml

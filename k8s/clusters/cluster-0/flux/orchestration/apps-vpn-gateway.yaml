@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/vpn-gateway/vpn-gateway"
+  path: "./k8s/clusters/cluster-0/manifests/vpn-gateway/vpn-gateway"
   prune: true
   wait: true
   sourceRef:
