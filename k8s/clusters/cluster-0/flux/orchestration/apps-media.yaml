@@ -52,7 +52,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/prowlarr"
+  path: "./k8s/clusters/cluster-0/manifests/media/prowlarr"
   prune: true
   wait: true
   sourceRef:
@@ -165,7 +165,7 @@ spec:
     - name: apps-media-sonarr
     - name: apps-media-radarr
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/overseerr"
+  path: "./k8s/clusters/cluster-0/manifests/media/overseerr"
   prune: true
   wait: true
   sourceRef:
@@ -186,7 +186,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/nzbhydra"
+  path: "./k8s/clusters/cluster-0/manifests/media/nzbhydra"
   prune: true
   wait: true
   sourceRef:
@@ -208,7 +208,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-vpn-gateway
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/qbittorrent"
+  path: "./k8s/clusters/cluster-0/manifests/media/qbittorrent"
   prune: true
   wait: true
   sourceRef:
@@ -251,7 +251,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/calibre"
+  path: "./k8s/clusters/cluster-0/manifests/media/calibre"
   prune: true
   wait: true
   sourceRef:
@@ -273,7 +273,7 @@ spec:
 #     - name: rook-ceph-cluster
 #     - name: apps-media-calibre
 #   interval: 5m
-#   path: "./k8s/clusters/cluster-0/manifests/apps/media/calibre-web"
+#   path: "./k8s/clusters/cluster-0/manifests/media/calibre-web"
 #   prune: true
 #   wait: true
 #   sourceRef:
@@ -294,7 +294,7 @@ spec:
     - name: cluster-namespaces
     - name: apps-media-overseerr
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/doplarr"
+  path: "./k8s/clusters/cluster-0/manifests/media/doplarr"
   prune: true
   wait: true
   sourceRef:
@@ -314,7 +314,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/flaresolverr"
+  path: "./k8s/clusters/cluster-0/manifests/media/flaresolverr"
   prune: true
   wait: true
   sourceRef:
@@ -334,7 +334,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/jackett"
+  path: "./k8s/clusters/cluster-0/manifests/media/jackett"
   prune: true
   wait: true
   sourceRef:
@@ -357,7 +357,7 @@ spec:
     - name: apps-media-sabnzbd
     - name: apps-media-prowlarr
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/lidarr"
+  path: "./k8s/clusters/cluster-0/manifests/media/lidarr"
   prune: true
   wait: true
   sourceRef:
@@ -377,7 +377,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/mylar"
+  path: "./k8s/clusters/cluster-0/manifests/media/mylar"
   prune: true
   wait: true
   sourceRef:
@@ -397,7 +397,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/readarr-audio"
+  path: "./k8s/clusters/cluster-0/manifests/media/readarr-audio"
   prune: true
   wait: true
   sourceRef:
@@ -417,7 +417,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/readarr-ebooks"
+  path: "./k8s/clusters/cluster-0/manifests/media/readarr-ebooks"
   prune: true
   wait: true
   sourceRef:
@@ -437,7 +437,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/resilio-sync"
+  path: "./k8s/clusters/cluster-0/manifests/media/resilio-sync"
   prune: true
   wait: true
   sourceRef:
