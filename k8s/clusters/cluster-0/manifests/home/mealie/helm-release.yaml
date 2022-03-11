@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: hkotel/mealie
-      tag: v0.5.4
+      tag: v0.5.6
     env:
       TZ: "America/New_York"
       DEFAULT_EMAIL: ryan@ryanholt.net
