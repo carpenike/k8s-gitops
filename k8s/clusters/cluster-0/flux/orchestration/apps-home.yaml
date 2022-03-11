@@ -9,7 +9,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/mosquitto"
+  path: "./k8s/clusters/cluster-0/manifests/home/mosquitto"
   prune: true
   wait: true
   sourceRef:
@@ -32,7 +32,7 @@ spec:
     - name: apps-home-mosquitto
     - name: core-nfd
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/zwavejs2mqtt"
+  path: "./k8s/clusters/cluster-0/manifests/home/zwavejs2mqtt"
   prune: true
   wait: true
   sourceRef:
@@ -54,7 +54,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-home-mosquitto
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/zigbee2mqtt"
+  path: "./k8s/clusters/cluster-0/manifests/home/zigbee2mqtt"
   prune: true
   wait: true
   sourceRef:
@@ -76,7 +76,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-home-mosquitto
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/home-assistant"
+  path: "./k8s/clusters/cluster-0/manifests/home/home-assistant"
   prune: true
   wait: true
   sourceRef:
@@ -99,7 +99,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-home-mosquitto
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/frigate"
+  path: "./k8s/clusters/cluster-0/manifests/home/frigate"
   prune: true
   wait: true
   sourceRef:
@@ -120,7 +120,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/mealie"
+  path: "./k8s/clusters/cluster-0/manifests/home/mealie"
   prune: true
   wait: true
   sourceRef:
@@ -142,7 +142,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-home-mosquitto
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/amcrest2mqtt"
+  path: "./k8s/clusters/cluster-0/manifests/home/amcrest2mqtt"
   prune: true
   wait: true
   sourceRef:
@@ -163,7 +163,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/home/esphome"
+  path: "./k8s/clusters/cluster-0/manifests/home/esphome"
   prune: true
   wait: true
   sourceRef:
