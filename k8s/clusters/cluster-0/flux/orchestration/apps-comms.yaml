@@ -10,7 +10,7 @@ spec:
     - name: rook-ceph-cluster
     - name: core-traefik
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/comms/matrix-synapse"
+  path: "./k8s/clusters/cluster-0/manifests/comms/matrix-synapse"
   prune: true
   wait: true
   sourceRef:
@@ -33,7 +33,7 @@ spec:
     - name: core-traefik
     - name: apps-comms-matrix-synapse
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/comms/matrix-media-repo"
+  path: "./k8s/clusters/cluster-0/manifests/comms/matrix-media-repo"
   prune: true
   wait: true
   sourceRef:
@@ -55,7 +55,7 @@ spec:
     - name: rook-ceph-cluster
     - name: core-traefik
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/comms/mautrix-facebook"
+  path: "./k8s/clusters/cluster-0/manifests/comms/mautrix-facebook"
   prune: true
   wait: true
   sourceRef:
@@ -77,7 +77,7 @@ spec:
     - name: rook-ceph-cluster
     - name: core-traefik
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/comms/matrix-slack"
+  path: "./k8s/clusters/cluster-0/manifests/comms/matrix-slack"
   prune: true
   wait: true
   sourceRef:

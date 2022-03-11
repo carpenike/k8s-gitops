@@ -10,7 +10,7 @@ spec:
     - name: rook-ceph-cluster
     - name: core-traefik
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/collab/vaultwarden"
+  path: "./k8s/clusters/cluster-0/manifests/collab/vaultwarden"
   prune: true
   wait: true
   sourceRef:
@@ -32,7 +32,7 @@ spec:
     - name: rook-ceph-cluster
     - name: core-traefik
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/collab/teedy"
+  path: "./k8s/clusters/cluster-0/manifests/collab/teedy"
   prune: true
   wait: true
   sourceRef:
