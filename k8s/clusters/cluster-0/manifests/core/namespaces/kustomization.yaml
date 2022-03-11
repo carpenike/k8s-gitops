@@ -2,9 +2,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  # - actions-runner-system.yaml
-  - backup-system.yaml
-  - calico-system.yaml
   - cert-manager.yaml
   - collab.yaml
   - comms.yaml
@@ -15,7 +12,6 @@ resources:
   - home.yaml
   - kasten-io.yaml
   - kube-system.yaml
-  - logs.yaml
   - mail.yaml
   - media.yaml
   - monitoring.yaml
@@ -24,4 +20,3 @@ resources:
   - security.yaml
   - tools.yaml
   - vpn-gateway.yaml
-  - velero.yaml
