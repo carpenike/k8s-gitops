@@ -12,6 +12,7 @@ resources:
   - apps-vpn-gateway.yaml
   - core-cert-manager.yaml
   - core-certificates.yaml
+  - core-flux-system.yaml
   - core-kube-system.yaml
   - core-cilium.yaml
   - core-kasten-io.yaml
