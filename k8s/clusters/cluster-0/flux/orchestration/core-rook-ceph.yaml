@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/rook-ceph/operator"
+  path: "./k8s/clusters/cluster-0/manifests/rook-ceph/operator"
   prune: true
   wait: true
   sourceRef:
@@ -25,7 +25,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-operator
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/rook-ceph/cluster"
+  path: "./k8s/clusters/cluster-0/manifests/rook-ceph/cluster"
   prune: true
   wait: true
   sourceRef:
@@ -43,7 +43,7 @@ spec:
     - name: rook-ceph-operator
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/rook-ceph/add-ons"
+  path: "./k8s/clusters/cluster-0/manifests/rook-ceph/add-ons"
   prune: true
   wait: true
   sourceRef:
@@ -62,7 +62,7 @@ spec:
     - name: rook-ceph-operator
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/rook-ceph/snapshot-controller/base"
+  path: "./k8s/clusters/cluster-0/manifests/rook-ceph/snapshot-controller/base"
   prune: true
   wait: true
   sourceRef:
@@ -82,7 +82,7 @@ spec:
     - name: rook-ceph-cluster
     - name: rook-ceph-snapshot-controller-base
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/rook-ceph/snapshot-controller/config"
+  path: "./k8s/clusters/cluster-0/manifests/rook-ceph/snapshot-controller/config"
   prune: true
   wait: true
   sourceRef:
