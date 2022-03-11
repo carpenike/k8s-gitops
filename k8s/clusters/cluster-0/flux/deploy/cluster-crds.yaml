@@ -10,7 +10,7 @@ spec:
     - name: cluster-repositories
     - name: manage-flux
   interval: 10m0s
-  path: ./k8s/clusters/cluster-0/manifests/crds
+  path: ./k8s/clusters/cluster-0/crds
   prune: true
   wait: true
   sourceRef:
