@@ -31,7 +31,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-media-plex
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/tautulli"
+  path: "./k8s/clusters/cluster-0/manifests/media/tautulli"
   prune: true
   wait: true
   sourceRef:
@@ -73,7 +73,7 @@ spec:
     - name: cluster-namespaces
     - name: rook-ceph-cluster
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/sabnzbd"
+  path: "./k8s/clusters/cluster-0/manifests/media/sabnzbd"
   prune: true
   wait: true
   sourceRef:
@@ -96,7 +96,7 @@ spec:
     - name: apps-media-prowlarr
     - name: apps-media-sabnzbd
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/sonarr"
+  path: "./k8s/clusters/cluster-0/manifests/media/sonarr"
   prune: true
   wait: true
   sourceRef:
@@ -119,7 +119,7 @@ spec:
     - name: apps-media-prowlarr
     - name: apps-media-sabnzbd
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/radarr"
+  path: "./k8s/clusters/cluster-0/manifests/media/radarr"
   prune: true
   wait: true
   sourceRef:
@@ -142,7 +142,7 @@ spec:
     - name: apps-media-prowlarr
     - name: apps-media-sabnzbd
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/radarr-uhd"
+  path: "./k8s/clusters/cluster-0/manifests/media/radarr-uhd"
   prune: true
   wait: true
   sourceRef:
@@ -230,7 +230,7 @@ spec:
     - name: rook-ceph-cluster
     - name: apps-vpn-gateway
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/apps/media/bazarr"
+  path: "./k8s/clusters/cluster-0/manifests/media/bazarr"
   prune: true
   wait: true
   sourceRef:
