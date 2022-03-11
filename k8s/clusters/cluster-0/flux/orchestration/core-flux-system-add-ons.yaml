@@ -9,7 +9,7 @@ spec:
     - name: manage-flux
     - name: cluster-namespaces
   interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/core/flux-system/add-ons"
+  path: "./k8s/clusters/cluster-0/manifests/flux-system/add-ons"
   prune: true
   wait: true
   sourceRef:
