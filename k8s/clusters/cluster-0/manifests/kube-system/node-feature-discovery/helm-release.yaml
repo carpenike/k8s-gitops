@@ -17,48 +17,43 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    nodeFeatureRule:
+      createCRD: false
+    worker:
+      annotations:
+        configmap.reloader.stakater.com/reload: node-feature-discovery-worker-conf
+      # nodeSelector:
+      #   node-role.kubernetes.io/worker: "true"
     image:
       repository: k8s.gcr.io/nfd/node-feature-discovery
       tag: "v0.10.1"
-    worker:
-      config: |-
-        core:
-          sources:
+    config:
+      core:
+        sources:
           - custom
           - pci
           - usb
-        sources:
-          usb:
-            deviceClassWhitelist:
+      sources:
+        usb:
+          deviceClassWhitelist:
             - "02"
             - "03"
-            - "0a"
             - "0e"
             - "ef"
             - "fe"
             - "ff"
-            deviceLabelFields:
-            - "class"
-            - "vendor"
-            - "device"
-          custom:
-            - name: "coral-tpu"
-              matchOn:
-              - usbId:
-                  vendor: ["1a6e", "18d1"]
-            - name: "zwave"
-              matchOn:
+          deviceLabelFields:
+            - class
+            - vendor
+            - device
+        custom:
+          - name: zwave
+            matchOn:
               - usbId:
                   class: ["02"]
                   vendor: ["0658"]
                   device: ["0200"]
-
-    annotations:
-      configmap.reloader.stakater.com/reload: "nfd-worker-conf"
-    master:
-      replicaCount: 1
-      tolerations:
-        - effect: "NoExecute"
-          operator: "Exists"
-        - effect: "NoSchedule"
-          operator: "Exists"
+          - name: coral-tpu
+            matchOn:
+              - usbId:
+                  vendor: ["1a6e", "18d1"]
