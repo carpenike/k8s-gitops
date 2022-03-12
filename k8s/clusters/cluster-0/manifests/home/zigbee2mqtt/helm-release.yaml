@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: zigbee2mqtt
-      version: 9.1.0
+      version: 9.2.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/koenkk/zigbee2mqtt
-      tag: 1.22.1
+      tag: 1.24.0
     env:
       TZ: "America/New_York"
       ZIGBEE2MQTT_DATA: /data

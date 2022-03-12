@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: mealie
-      version: 3.3.0
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: hkotel/mealie
-      tag: v0.5.4
+      tag: v0.5.6
     env:
       TZ: "America/New_York"
       DEFAULT_EMAIL: ryan@ryanholt.net

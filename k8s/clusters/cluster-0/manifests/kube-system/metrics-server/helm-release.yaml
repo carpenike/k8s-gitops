@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://kubernetes-sigs.github.io/metrics-server/
       chart: metrics-server
-      version: 3.7.0
+      version: 3.8.2
       sourceRef:
         kind: HelmRepository
         name: kubernetes-sigs-metrics-server-charts
@@ -20,4 +20,4 @@ spec:
   values:
     image:
       repository: k8s.gcr.io/metrics-server/metrics-server
-      tag: v0.5.2
+      tag: v0.6.1

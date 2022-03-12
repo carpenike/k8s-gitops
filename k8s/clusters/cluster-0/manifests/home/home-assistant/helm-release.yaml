@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: home-assistant
-      version: 11.2.1
+      version: 12.1.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/home-assistant/home-assistant
-      tag: 2022.2.5
+      tag: 2022.3.3
     persistence:
       config:
         enabled: true
@@ -69,7 +69,7 @@ spec:
       image:
         registry: docker.io
         repository: bitnami/postgresql
-        tag: 14.1.0-debian-10-r23
+        tag: 14.2.0-debian-10-r23
       existingSecret: home-assistant-postgresql-secret
       enabled: true
       persistence:
@@ -81,7 +81,7 @@ spec:
         enabled: true
         image:
           repository: codercom/code-server
-          tag: 3.12.0
+          tag: 4.1.0
         workingDir: "/config"
         git:
           deployKeySecret: home-assistant-code-server-secret
