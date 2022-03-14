@@ -19,41 +19,41 @@ spec:
   values:
     nodeFeatureRule:
       createCRD: false
+    image:
+      repository: k8s.gcr.io/nfd/node-feature-discovery
+      tag: "v0.10.1"
     worker:
       annotations:
         configmap.reloader.stakater.com/reload: node-feature-discovery-worker-conf
       # nodeSelector:
       #   node-role.kubernetes.io/worker: "true"
-    image:
-      repository: k8s.gcr.io/nfd/node-feature-discovery
-      tag: "v0.10.1"
-    config:
-      core:
+      config:
+        core:
+          sources:
+            - custom
+            - pci
+            - usb
         sources:
-          - custom
-          - pci
-          - usb
-      sources:
-        usb:
-          deviceClassWhitelist:
-            - "02"
-            - "03"
-            - "0e"
-            - "ef"
-            - "fe"
-            - "ff"
-          deviceLabelFields:
-            - class
-            - vendor
-            - device
-        custom:
-          - name: zwave
-            matchOn:
-              - usbId:
-                  class: ["02"]
-                  vendor: ["0658"]
-                  device: ["0200"]
-          - name: coral-tpu
-            matchOn:
-              - usbId:
-                  vendor: ["1a6e", "18d1"]
+          usb:
+            deviceClassWhitelist:
+              - "02"
+              - "03"
+              - "0e"
+              - "ef"
+              - "fe"
+              - "ff"
+            deviceLabelFields:
+              - class
+              - vendor
+              - device
+          custom:
+            - name: zwave
+              matchOn:
+                - usbId:
+                    class: ["02"]
+                    vendor: ["0658"]
+                    device: ["0200"]
+            - name: coral-tpu
+              matchOn:
+                - usbId:
+                    vendor: ["1a6e", "18d1"]
