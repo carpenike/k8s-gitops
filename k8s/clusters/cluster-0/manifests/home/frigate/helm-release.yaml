@@ -42,9 +42,22 @@ spec:
           - secretName: tls.frigate
             hosts:
               - "frigate.${SECRET_DOMAIN}"
+
     securityContext:
       privileged: true
+
+    configmap:
+      config:
+        enabled: false
+
     persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: frigate-config
+        subPath: config.yaml
+        mountPath: /config/config.yml
+        readOnly: true
       data:
         enabled: true
         existingClaim: frigate-config-pvc
@@ -68,112 +81,6 @@ spec:
         medium: Memory
         sizeLimit: 2Gi
         mountPath: /dev/shm
-    config: |
-      mqtt:
-        host: mosquitto
-        topic_prefix: frigate
-        user: admin
-        password: ${SECRET_MOSQUITTO_ADMIN_PASSWORD}
-      database:
-        path: /data/frigate.db
-      detectors:
-        coral:
-          type: edgetpu
-          device: usb
-      objects:
-        track:
-        - person
-        - dog
-        filters:
-          person:
-            min_area: 2500
-            max_area: 100000
-            threshold: 0.7
-          dog:
-            min_area: 1000
-            max_area: 10000
-            threshold: 0.7
-      # ffmpeg:
-      #   hwaccel_args:
-      #   - -hwaccel
-      #   - vaapi
-      #   - -hwaccel_device
-      #   - /dev/dri/renderD128
-      #   - -hwaccel_output_format
-      #   - yuv420p
-      cameras:
-        # --
-        patio:
-          ffmpeg:
-            inputs:
-            - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.50.100:554/Streaming/Channels/2
-              roles:
-              - detect
-            - path: rtsp://viewer:${SECRET_HIKVISION_VIEWER_PASSWORD}@10.50.50.100:554/Streaming/Channels/1
-              roles:
-              - record
-              - rtmp
-          detect:
-            height: 360
-            width: 640
-            fps: 10
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          record:
-            enabled: True
-            retain_days: 14
-            events:
-              objects:
-                - person
-                - dog
-          snapshots:
-            enabled: True
-            timestamp: False
-            retain:
-              default: 14
-          zones:
-            backyard:
-              coordinates: 640,0,640,360,0,360,0,0
-
-        frontdoor:
-          ffmpeg:
-            inputs:
-              - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.50.50.101:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
-                roles:
-                  - record
-                  - rtmp
-              - path: rtsp://admin:${SECRET_AMCREST2MQTT_AMCREST_PASSWORD}@10.50.50.101:554/cam/realmonitor?channel=1&subtype=1&authbasic=64
-                roles:
-                  - detect
-          detect:
-            width: 720
-            height: 576
-            fps: 15
-          record:
-            enabled: True
-            retain_days: 14
-            events:
-              objects:
-                - person
-              retain:
-                # Required: Default retention days (default: shown below)
-                default: 14
-          snapshots:
-            enabled: True
-            timestamp: True
-            retain:
-              # Required: Default retention days (default: shown below)
-              default: 14
-          rtmp:
-            enabled: True
-          objects:
-            track:
-              - person
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate-config"
@@ -194,3 +101,40 @@ spec:
         cpu: 500m
       limits:
         memory: 2000Mi
+
+  valuesFrom:
+    - kind: Secret
+      name: frigate
+      valuesKey: mqtt_password
+      targetPath: env.FRIGATE_MQTT_PASSWORD
+      optional: false
+    - kind: Secret
+      name: frigate
+      valuesKey: doorbell_camera_host
+      targetPath: env.FRIGATE_CAMERA_DOORBELL_HOST
+      optional: false
+    - kind: Secret
+      name: frigate
+      valuesKey: doorbell_camera_user
+      targetPath: env.FRIGATE_CAMERA_DOORBELL_USER
+      optional: false
+    - kind: Secret
+      name: frigate
+      valuesKey: doorbell_camera_password
+      targetPath: env.FRIGATE_CAMERA_DOORBELL_PASSWORD
+      optional: false
+    - kind: Secret
+      name: frigate
+      valuesKey: patio_camera_host
+      targetPath: env.FRIGATE_CAMERA_PATIO_HOST
+      optional: false
+    - kind: Secret
+      name: frigate
+      valuesKey: patio_camera_user
+      targetPath: env.FRIGATE_CAMERA_PATIO_USER
+      optional: false
+    - kind: Secret
+      name: frigate
+      valuesKey: patio_camera_password
+      targetPath: env.FRIGATE_CAMERA_PATIO_PASSWORD
+      optional: false
