@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Get carpenike token
         id: get-app-token
-        uses: getsentry/action-github-app-token@v1
+        uses: tibdex/github-app-token@v1
         with:
           app_id: ${{ secrets.CARPENIKE_APP_ID }}
           private_key: ${{ secrets.CARPENIKE_APP_PRIVATE_KEY }}
