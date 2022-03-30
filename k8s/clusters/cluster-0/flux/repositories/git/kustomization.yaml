@@ -9,5 +9,5 @@ resources:
   - invidious-charts-git.yaml
   - kubegres.yaml
   - mintel-dex-charts.yaml
-  - stackgres-charts.yaml
+  # - stackgres-charts.yaml
   - version-checker.yaml
