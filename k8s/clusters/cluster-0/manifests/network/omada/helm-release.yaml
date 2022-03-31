@@ -52,10 +52,10 @@ spec:
             secretName: tls.omada
 
     service:
-      # main:
-      #   enabled: true
-      #   annotations:
-      #     traefik.ingress.kubernetes.io/service.serversscheme: https
+      main:
+        enabled: true
+        annotations:
+          traefik.ingress.kubernetes.io/service.serversscheme: https
       controller:
         enabled: true
         type: LoadBalancer
@@ -117,6 +117,13 @@ spec:
             port: 29813
             protocol: UDP
             targetPort: 29813
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
 
     persistence:
       data:
