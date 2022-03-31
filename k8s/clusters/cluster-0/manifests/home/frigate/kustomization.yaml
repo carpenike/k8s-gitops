@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - config-pvc.yaml
   - helm-release.yaml
+namespace: home
 configMapGenerator:
   - name: frigate-config
     files:
