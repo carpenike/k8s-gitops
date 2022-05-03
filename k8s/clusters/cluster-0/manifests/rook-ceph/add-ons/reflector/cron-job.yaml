@@ -19,7 +19,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: secret-reflector
-              image: ghcr.io/k8s-at-home/kubectl:v1.23.4
+              image: ghcr.io/k8s-at-home/kubectl:v1.24.0
               env:
                 - name: SECRETS
                   value: "rook-ceph-mon"
@@ -32,7 +32,7 @@ spec:
                   subPath: secret-reflector.sh
                   readOnly: true
             - name: configmap-reflector
-              image: ghcr.io/k8s-at-home/kubectl:v1.23.4
+              image: ghcr.io/k8s-at-home/kubectl:v1.24.0
               env:
                 - name: CONFIGMAPS
                   value: "rook-ceph-mon-endpoints"
