@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: matrixdotorg/synapse
-      tag: v1.55.2
+      tag: v1.58.1
     serverName: ${SECRET_PUBLIC_DOMAIN}
     publicServerName: matrix.${SECRET_DOMAIN}
     wellknown:
