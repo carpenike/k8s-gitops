@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://ealenn.github.io/charts
       chart: echo-server
-      version: 0.3.1
+      version: 0.4.0
       sourceRef:
         kind: HelmRepository
         name: ealenn-charts
