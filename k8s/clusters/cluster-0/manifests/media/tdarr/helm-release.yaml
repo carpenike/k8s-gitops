@@ -35,7 +35,13 @@ spec:
       TZ: America/New_York
       ffmpegPath: /usr/bin/ffmpeg
     node:
-      enabled: false
+      enabled: true
+      id: node
+      image:
+        repository: haveagitgat/tdarr_node
+        tag: 2.00.18.1
+        pullPolicy: IfNotPresent
+
     persistence:
       data:
         enabled: true
