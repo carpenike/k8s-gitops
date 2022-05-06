@@ -447,3 +447,23 @@ spec:
     provider: sops
     secretRef:
       name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: apps-media-tdarr
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/media/tdarr"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
