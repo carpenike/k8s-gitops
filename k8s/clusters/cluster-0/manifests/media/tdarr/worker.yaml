@@ -52,28 +52,28 @@ spec:
           imagePullPolicy: IfNotPresent
           name: node
           volumeMounts:
-            - mountPath: /media
+            - mountPath: /data
               name: media
             - mountPath: /shared
               name: shared
           livenessProbe:
             tcpSocket:
               port: 8265
-            initialDelaySeconds: 0
+            initialDelaySeconds: 15
             failureThreshold: 3
             timeoutSeconds: 1
             periodSeconds: 10
           readinessProbe:
             tcpSocket:
               port: 8265
-            initialDelaySeconds: 0
+            initialDelaySeconds: 15
             failureThreshold: 3
             timeoutSeconds: 1
             periodSeconds: 10
           startupProbe:
             tcpSocket:
               port: 8265
-            initialDelaySeconds: 0
+            initialDelaySeconds: 15
             failureThreshold: 30
             timeoutSeconds: 1
             periodSeconds: 5
