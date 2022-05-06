@@ -40,7 +40,7 @@ spec:
       data:
         enabled: true
         mountPath: /app/server
-        existingClaim: tdarr-config-v1
+        existingClaim: tdarr-config-pvc
       shared:
         enabled: true
         type: emptyDir
