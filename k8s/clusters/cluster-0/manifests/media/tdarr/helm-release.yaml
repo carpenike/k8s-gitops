@@ -22,7 +22,7 @@ spec:
       gracePeriodSeconds: 120
     resources:
       limits:
-        cpu: 800m
+        cpu: 8000m
         memory: 712Mi
       requests:
         cpu: 5000m
