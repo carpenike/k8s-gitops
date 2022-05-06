@@ -26,7 +26,7 @@ spec:
         storageClass: ceph-block
     auth:
       k10AdminUsers:
-      - ryan
+      - ryan@ryanholt.net
       oidcAuth:
         enabled: true
         secretName: kasten-secret
