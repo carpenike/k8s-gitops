@@ -17,7 +17,7 @@ repos:
   - id: check-merge-conflict
 
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.1.13
+  rev: v1.1.15
   hooks:
   - id: forbid-crlf
   - id: remove-crlf
