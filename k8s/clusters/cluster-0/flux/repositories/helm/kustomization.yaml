@@ -12,7 +12,7 @@ resources:
   - cilium-charts.yaml
   - codecentric-charts.yaml
   - coredns-charts.yaml
-  - dacruz21-charts.yaml
+  # - dacruz21-charts.yaml
   - democratic-csi-charts.yaml
   - dex-charts.yaml
   - dexidp-charts.yaml
