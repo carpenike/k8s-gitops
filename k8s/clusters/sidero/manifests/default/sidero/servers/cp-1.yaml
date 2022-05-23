@@ -4,7 +4,7 @@ kind: Server
 metadata:
   labels:
     control-plane: "true"
-  name: 391fdfe0-1b3a-4e33-87d9-bee99ed76f9c
+  name: 3b42407d-2b67-bd35-9e57-09a9a5f48593
 spec:
   accepted: true
   configPatches:
