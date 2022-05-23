@@ -9,6 +9,12 @@ spec:
     - op: replace
       path: /machine/install/disk
       value: /dev/sda
+    - op: add
+      path: /machine/certSANs
+      value:
+        - node-2
+        - node-2.holthome.net
+        - cluster-0.holthome.net
   cpu:
     manufacturer: Intel(R) Corporation
     version: Intel(R) Core(TM) i3-7100 CPU @ 3.90GHz

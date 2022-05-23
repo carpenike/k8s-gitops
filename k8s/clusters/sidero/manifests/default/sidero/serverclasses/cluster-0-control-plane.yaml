@@ -27,15 +27,37 @@ spec:
         # renovate: docker-image
         image: docker.io/coredns/coredns:1.9.1
 
+
+    - op: add
+      path: /machine/time
+      value:
+        disabled: false
+        servers:
+          - 10.20.0.1
+
     - op: replace
       path: /persist
       value: false
 
     - op: add
-      path: /machine/kubelet/extraArgs
+      path: /cluster/apiServer/extraArgs
       value:
-        rotate-server-certificates: true
-        feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
+        feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+
+    - op: add
+      path: /cluster/controllerManager/extraArgs
+      value:
+        feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+
+    - op: add
+      path: /cluster/proxy/extraArgs
+      value:
+        feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+
+    - op: add
+      path: /cluster/scheduler/extraArgs
+      value:
+        feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
 
     - op: add
       path: /machine/time
@@ -52,14 +74,11 @@ spec:
         feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
 
     - op: add
-      path: /cluster/apiServer/certSANs
+      path: /machine/network/extraHostEntries
       value:
-        - cluster-0.holthome.net
-
-    - op: add
-      path: /machine/certSANs
-      value:
-        - cluster-0.holthome.net
+        - ip: 10.20.0.20
+          aliases:
+            - cluster-0.holthome.net
 
     - op: replace
       path: /cluster/network/cni

@@ -18,12 +18,15 @@ spec:
       path: /machine/kubelet/extraArgs
       value:
         rotate-server-certificates: true
+        feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
         # node-labels: node-role.kubernetes.io/worker=true
 
     - op: add
       path: /machine/time
       value:
-        disabled: true
+        disabled: false
+        servers:
+          - 10.20.0.1
 
     - op: add
       path: /machine/sysctls
@@ -32,12 +35,18 @@ spec:
         fs.inotify.max_user_instances: "8192"
 
     - op: add
-      path: /machine/network
+      path: /machine/network/interfaces
       value:
-        interfaces:
-          - interface: eth2
-            dhcp: true
-          
+        - interface: eth2
+          dhcp: true
+
+    - op: add
+      path: /machine/network/extraHostEntries
+      value:
+        - ip: 10.20.0.20
+          aliases:
+            - cluster-0.holthome.net
+
   selector:
     matchExpressions:
       - key: control-plane
