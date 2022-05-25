@@ -61,8 +61,6 @@ spec:
             interfaces:
               - interface: eth0
                 dhcp: true
-                vip:
-                  ip: ${CLUSTER_0_API_IP}
       generateType: controlplane
       talosVersion: v0.14.0
     init:
@@ -73,8 +71,6 @@ spec:
             interfaces:
               - interface: eth0
                 dhcp: true
-                vip:
-                  ip: ${CLUSTER_0_API_IP}
       generateType: init
       talosVersion: v0.14.0
   infrastructureTemplate:
