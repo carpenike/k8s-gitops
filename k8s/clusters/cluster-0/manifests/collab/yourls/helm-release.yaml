@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://charts.yourls.org/
       chart: yourls
-      version: 5.0.4
+      version: 5.0.13
       sourceRef:
         kind: HelmRepository
         name: yourls-charts
