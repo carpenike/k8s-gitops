@@ -63,11 +63,11 @@ spec:
         type: emptyDir
         medium: Memory
 
-    nfs-nas-media:
-      enabled: true
-      existingClaim: media-nfs-share-pvc
-      mountPath: /data
-      readOnly: false
+      nfs-nas-media:
+        enabled: true
+        existingClaim: media-nfs-share-pvc
+        mountPath: /data
+        readOnly: false
 
       # nfs-nas-media:
       #   enabled: true
