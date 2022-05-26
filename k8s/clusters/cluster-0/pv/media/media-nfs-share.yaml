@@ -4,6 +4,8 @@ kind: PersistentVolume
 metadata:
   name: media-nfs-share-pv
 spec:
+ capacity:
+    storage: 1Mi
   storageClassName: nfs
   accessModes:
     - ReadWriteMany
