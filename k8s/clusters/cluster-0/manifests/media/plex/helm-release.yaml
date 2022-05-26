@@ -63,15 +63,22 @@ spec:
         type: emptyDir
         medium: Memory
 
-      nfs-nas-media:
-        enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: "nas.${SECRET_DOMAIN}"
-            path: /mnt/tank/share
-        mountPath: /data
-        readOnly: false
+    nfs-nas-media:
+      enabled: true
+      existingClaim: media-nfs-share-pvc
+      mountPath: /data
+      readOnly: false
+
+      # nfs-nas-media:
+      #   enabled: true
+      #   type: custom
+      #   volumeSpec:
+      #     nfs:
+      #       server: "nas.${SECRET_DOMAIN}"
+      #       path: /mnt/tank/share
+      #   mountPath: /data
+      #   readOnly: false
+
       backup:
         enabled: true
         type: custom
@@ -79,6 +86,7 @@ spec:
           nfs:
             server: "nas-1.${SECRET_DOMAIN}"
             path: /mnt/backup/share/plex
+
     podAnnotations:
       configmap.reloader.stakater.com/reload: "plex-promtail"
     nodeSelector:
