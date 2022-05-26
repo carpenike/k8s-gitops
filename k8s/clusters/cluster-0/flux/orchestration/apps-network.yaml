@@ -125,27 +125,27 @@ spec:
     provider: sops
     secretRef:
       name: sops-gpg
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: core-error-pages
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: cluster-namespaces
-    - name: traefik-crds
-    - name: core-cilium
-    - name: core-cert-manager
-    - name: core-traefik
-  interval: 5m
-  path: "./k8s/clusters/cluster-0/manifests/network/error-pages"
-  prune: true
-  wait: true
-  sourceRef:
-    kind: GitRepository
-    name: k8s-gitops
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-gpg
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: core-error-pages
+#   namespace: flux-system
+# spec:
+#   dependsOn:
+#     - name: cluster-namespaces
+#     - name: traefik-crds
+#     - name: core-cilium
+#     - name: core-cert-manager
+#     - name: core-traefik
+#   interval: 5m
+#   path: "./k8s/clusters/cluster-0/manifests/network/error-pages"
+#   prune: true
+#   wait: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: k8s-gitops
+#   decryption:
+#     provider: sops
+#     secretRef:
+#       name: sops-gpg
