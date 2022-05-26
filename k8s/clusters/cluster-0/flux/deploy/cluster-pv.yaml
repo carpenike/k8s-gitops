@@ -16,3 +16,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
