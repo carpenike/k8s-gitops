@@ -8,4 +8,4 @@ resources:
   - cluster-crds.yaml
   - cluster-namespaces.yaml
   - cluster-orchestration.yaml
-  - cluster-pv.yaml
+  # - cluster-pv.yaml
