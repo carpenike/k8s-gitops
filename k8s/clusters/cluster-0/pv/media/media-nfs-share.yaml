@@ -9,12 +9,9 @@ spec:
   storageClassName: nfs
   accessModes:
     - ReadWriteMany
-  claimRef:
-    namespace: media
-    name: media-nfs-share-pvc
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: "nas.holthome.net"
+    server: "nas.${SECRET_DOMAIN}"
     path: /mnt/tank/share
   mountOptions:
     - nfsvers=4.1
@@ -38,3 +35,4 @@ spec:
   resources:
     requests:
       storage: 1Mi
+  volumeName: media-nfs-share-pv
