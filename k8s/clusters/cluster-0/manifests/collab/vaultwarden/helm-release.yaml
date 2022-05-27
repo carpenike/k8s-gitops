@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/vaultwarden
-      tag: v1.24.0
+      tag: v1.25.0
 
     podAnnotations:
       backup.velero.io/backup-volumes: config
