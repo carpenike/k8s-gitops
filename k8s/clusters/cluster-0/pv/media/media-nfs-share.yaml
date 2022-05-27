@@ -11,7 +11,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: "nas.${SECRET_DOMAIN}"
+    server: "nas.holthome.net"
     path: /mnt/tank/share
   mountOptions:
     - nfsvers=4.1
