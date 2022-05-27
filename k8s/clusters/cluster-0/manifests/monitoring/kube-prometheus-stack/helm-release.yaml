@@ -8,7 +8,6 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
       version: 35.4.2
       sourceRef:
@@ -49,18 +48,17 @@ spec:
           receiver: "discord"
           routes:
             - receiver: "null"
-              match:
-                alertname: Watchdog
+              matchers:
+                - alertname =~ "InfoInhibitor|Watchdog"
             - receiver: "discord"
-              match_re:
-                # severity: critical|warning
-                severity: critical
+              matchers:
+                - severity = "critical"
               continue: true
         inhibit_rules:
-          - source_match:
-              severity: "critical"
-            target_match:
-              severity: "warning"
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
             equal: ["alertname", "namespace"]
       ingress:
         enabled: true
@@ -73,16 +71,18 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-          - "alert-manager.${SECRET_DOMAIN}"
+          - &host "alert-manager.${SECRET_DOMAIN}"
         tls:
           - hosts:
-              - "alert-manager.${SECRET_DOMAIN}"
+              - *host
             secretName: alert-manager-cert
       alertmanagerSpec:
+        replicas: 3
+        podAntiAffinity: hard
         storage:
           volumeClaimTemplate:
             spec:
-              storageClassName: "rook-ceph-block"
+              storageClassName: "ceph-block"
               resources:
                 requests:
                   storage: 1Gi
@@ -97,8 +97,18 @@ spec:
             targetLabel: kubernetes_node
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
-    prometheus-node-exporter:
-      fullnameOverride: node-exporter
+      metricLabelsAllowlist:
+        - "persistentvolumeclaims=[*]"
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels:
+                - __meta_kubernetes_pod_node_name
+              targetLabel: kubernetes_node
     grafana:
       enabled: false
       forceDeployDashboards: true
@@ -160,20 +170,32 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-          - "prom-server.${SECRET_DOMAIN}"
+          - &host "prometheus.${SECRET_DOMAIN}"
         tls:
           - hosts:
-              - "prom-server.${SECRET_DOMAIN}"
+              - *host
             secretName: tls.prom-server
       thanosService:
         enabled: true
+      thanosServiceMonitor:
+        enabled: true
+      thanosIngress:
+        enabled: false
+        pathType: Prefix
+        ingressClassName: "traefik"
+        annotations:
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        hosts:
+          - &host "thanos-sidecar.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - *host
       prometheusSpec:
-        # externalUrl: "prom-server.${SECRET_DOMAIN}"
-        # image:
-        #   repository: quay.io/prometheus/prometheus
-        #   tag: v2.20.0
-        replicas: 1
+        replicas: 3
         replicaExternalLabelName: "replica"
+        podAntiAffinity: hard
+        retentionSize: "6GB"
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
@@ -184,13 +206,13 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: rook-ceph-block
+              storageClassName: ceph-block
               resources:
                 requests:
                   storage: 10Gi
         thanos:
           image: quay.io/thanos/thanos:v0.26.0
-          version: v0.21.1
+          version: v0.26.0
           objectStorageConfig:
             name: thanos
             key: object-store.yaml
