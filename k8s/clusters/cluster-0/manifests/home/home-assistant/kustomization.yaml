@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - config-pvc.yaml
   - postgresql-data-pvc.yaml
+  - postgres-secrets.enc.yaml
+  - postgres-db.yaml
   - home-assistant-code-server-secret.enc.yaml
   - home-assistant-postgresql-secret.enc.yaml
   - home-assistant-secrets.enc.yaml

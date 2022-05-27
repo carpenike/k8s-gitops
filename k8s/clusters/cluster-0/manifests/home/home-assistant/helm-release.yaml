@@ -71,7 +71,7 @@ spec:
         repository: bitnami/postgresql
         tag: 14.2.0-debian-10-r23
       existingSecret: home-assistant-postgresql-secret
-      enabled: true
+      enabled: false
       persistence:
         enabled: true
         existingClaim: home-assistant-postgresql-pvc
