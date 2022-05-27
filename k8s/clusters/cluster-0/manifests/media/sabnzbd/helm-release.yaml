@@ -63,13 +63,18 @@ spec:
         existingClaim: sabnzbd-config-pvc
       nfs-nas-media:
         enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: "nas.${SECRET_DOMAIN}"
-            path: /mnt/tank/share
+        existingClaim: media-nfs-share-pvc
         mountPath: /data
         readOnly: false
+      # nfs-nas-media:
+      #   enabled: true
+      #   type: custom
+      #   volumeSpec:
+      #     nfs:
+      #       server: "nas.${SECRET_DOMAIN}"
+      #       path: /mnt/tank/share
+      #   mountPath: /data
+      #   readOnly: false
     podAnnotations:
       cni.projectcalico.org/ipAddrs: "[\"10.42.45.10\"]"
     resources:

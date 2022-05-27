@@ -65,13 +65,19 @@ spec:
         existingClaim: sonarr-config-pvc
       nfs-nas-media:
         enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: "nas.${SECRET_DOMAIN}"
-            path: /mnt/tank/share
+        existingClaim: media-nfs-share-pvc
         mountPath: /media
         readOnly: false
+
+      # nfs-nas-media:
+      #   enabled: true
+      #   type: custom
+      #   volumeSpec:
+      #     nfs:
+      #       server: "nas.${SECRET_DOMAIN}"
+      #       path: /mnt/tank/share
+      #   mountPath: /media
+      #   readOnly: false
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
