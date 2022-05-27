@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/esphome/esphome
-      tag: 2022.4.0
+      tag: 2022.5.1
     env:
       TZ: "America/New_York"
       ESPHOME_DASHBOARD_USE_PING: true
