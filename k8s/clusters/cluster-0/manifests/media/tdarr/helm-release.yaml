@@ -39,7 +39,7 @@ spec:
       id: node
       image:
         repository: haveagitgat/tdarr_node
-        tag: 2.00.18.1
+        tag: 2.00.18.2
         pullPolicy: IfNotPresent
 
     persistence:
