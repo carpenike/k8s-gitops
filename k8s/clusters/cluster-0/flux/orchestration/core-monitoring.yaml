@@ -130,3 +130,26 @@ spec:
     provider: sops
     secretRef:
       name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: core-monitoring-prometheus
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespace
+    - name: rook-ceph-cluster
+    - name: kube-prometheus-stack-crds
+    - name: core-monitoring-thanos
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/monitoring/kube-prometheus-stack"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
