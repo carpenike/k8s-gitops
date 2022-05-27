@@ -75,7 +75,7 @@ spec:
     - op: add
       path: /machine/network/extraHostEntries
       value:
-        - ip: 10.20.0.20
+        - ip: 10.6.0.2
           aliases:
             - cluster-0.holthome.net
 
