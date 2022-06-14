@@ -51,7 +51,15 @@ spec:
             hosts:
               - "ha.${SECRET_DOMAIN}"
 
-    hostNetwork: true
+    service:
+      main:
+        type: LoadBalancer
+        loadBalancerIP: "${SVC_HASS_ADDRESS}"
+        externalTrafficPolicy: Local
+        ports:
+          http:
+            port: 8123
+
     dnsPolicy: ClusterFirstWithHostNet
 
     probes:
