@@ -60,7 +60,10 @@ spec:
           http:
             port: 8123
           sonos:
+            enabled: true
             port: 1400
+            protocol: TCP
+            targetPort: 1400
 
     dnsPolicy: ClusterFirstWithHostNet
 
