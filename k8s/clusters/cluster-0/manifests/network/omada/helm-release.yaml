@@ -117,6 +117,16 @@ spec:
             port: 29813
             protocol: UDP
             targetPort: 29813
+          eap-29814-tcp:
+            enabled: true
+            port: 29814
+            protocol: TCP
+            targetPort: 29814
+          eap-29814-udp:
+            enabled: true
+            port: 29814
+            protocol: UDP
+            targetPort: 29814
     probes:
       liveness:
         enabled: false
