@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/dexidp/dex
-      tag: v2.31.2
+      tag: v2.32.0
     env:
       KUBERNETES_POD_NAMESPACE: security
     ingress:
