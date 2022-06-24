@@ -64,6 +64,11 @@ spec:
             port: 1400
             protocol: TCP
             targetPort: 1400
+          lifx:
+            enabled: true
+            port: 56700
+            protocol: UDP
+            targetPort: 56700
 
     dnsPolicy: ClusterFirstWithHostNet
 
