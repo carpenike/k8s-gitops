@@ -93,7 +93,7 @@ spec:
         scrapeTimeout: 2m
     additionalContainers:
       - name: exportarr
-        image: ghcr.io/onedr0p/exportarr:v0.6.2
+        image: ghcr.io/onedr0p/exportarr:v1.0.0
         imagePullPolicy: IfNotPresent
         args: ["exportarr", "lidarr"]
         env:
