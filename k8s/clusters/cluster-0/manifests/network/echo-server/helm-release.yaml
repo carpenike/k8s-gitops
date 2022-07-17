@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: ealen/echo-server
-      tag: 0.5.1
+      tag: 0.6.0
 
     ingress:
       enabled: true
