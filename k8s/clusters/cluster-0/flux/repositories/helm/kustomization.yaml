@@ -10,6 +10,7 @@ resources:
   - bitwardenrs-charts.yaml
   - charlie-haley-charts.yaml
   - cilium-charts.yaml
+  - cloudnative-pg-charts.yaml
   - codecentric-charts.yaml
   - coredns-charts.yaml
   # - dacruz21-charts.yaml
