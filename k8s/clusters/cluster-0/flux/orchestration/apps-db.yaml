@@ -19,6 +19,27 @@ spec:
     provider: sops
     secretRef:
       name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: apps-db-cloudnative-pg
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-namespaces
+    - name: rook-ceph-cluster
+  interval: 5m
+  path: "./k8s/clusters/cluster-0/manifests/db/cloudnative-pg"
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
 # ---
 # apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 # kind: Kustomization
