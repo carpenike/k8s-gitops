@@ -10,3 +10,5 @@ resources:
   - home-assistant-postgresql-secret.enc.yaml
   - home-assistant-secrets.enc.yaml
   - helm-release.yaml
+patchesStrategicMerge:
+  - patches/postgres.yaml
