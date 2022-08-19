@@ -34,6 +34,7 @@ resources:
   - kubernetes-external-secrets-charts.yaml
   - kubernetes-sigs-descheduler-charts.yaml
   - kubernetes-stable-charts.yaml
+  - kyverno-charts.yaml
   - lwolf-charts.yaml
   - mailu-charts.yaml
   - minio-charts.yaml
