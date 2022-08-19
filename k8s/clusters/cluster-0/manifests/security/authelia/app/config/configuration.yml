@@ -8,6 +8,22 @@ access_control:
     - domain: ["grafana.${SECRET_DOMAIN}"]
       policy: bypass
 
+    - domain:
+        - "lidarr.${SECRET_DOMAIN}"
+        - "prowlarr.${SECRET_DOMAIN}"
+        - "readarr.${SECRET_DOMAIN}"
+        - "radarr.${SECRET_DOMAIN}"
+        - "radarr-uhd.${SECRET_DOMAIN}"
+        - "sabnzbd.${SECRET_DOMAIN}"
+        - "sonarr.${SECRET_DOMAIN}"
+        - "sonarr-uhd.${SECRET_DOMAIN}"
+      policy: bypass
+      resources: ["^/api([?/].*)?$"]
+
+    - domain: "*.${SECRET_DOMAIN}"
+      policy: bypass
+      networks: ["internal"]
+
 identity_providers:
   oidc:
     cors:
