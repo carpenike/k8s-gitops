@@ -2,63 +2,58 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: sonarr
+  name: &app sonarr
   namespace: media
 spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: sonarr
-      version: 16.3.2
+      chart: app-template
+      version: 0.1.0
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: bjw-s-charts
         namespace: flux-system
-      interval: 5m
   values:
-    controllerType: deployment
-    image:
-      repository: ghcr.io/k8s-at-home/sonarr
-      tag: v3.0.9.1549
+    global:
+      nameOverride: *app
+      image:
+        repository: ghcr.io/onedr0p/sonarr-develop
+        tag: 3.0.9.1555@sha256:b946bce56cd4d89c8ff754989034003e03b39a9574cfdc6d3b727c4f9f72bf7f
     env:
       TZ: "America/New_York"
+      SONARR__INSTANCE_NAME: Sonarr
+      SONARR__PORT: &port 80
+      SONARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+      SONARR__LOG_LEVEL: info
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: "nginx"
         annotations:
-          kubernetes.io/tls-acme: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
-          external-dns/is-public: "true"
-          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+          auth.home.arpa/enabled: "true"
+          external-dns.home.arpa/enabled: "true"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/sonarr/nord.css"></head>';
+            sub_filter_once on;
         hosts:
-          - host: "sonarr.${SECRET_DOMAIN}"
+          - host: *host
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "sonarr.${SECRET_DOMAIN}"
+              - *host
             secretName: tls.sonarr
-      api:
-        enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        hosts:
-          - host: "sonarr.${SECRET_DOMAIN}"
-            paths:
-              - path: /api
-                pathType: Prefix
-        tls:
-          - hosts:
-              - "sonarr.${SECRET_DOMAIN}"
-            secretName: tls.sonarr
-    controllerLabels:
-      kasten-backup: "true"
+
     persistence:
       config:
         enabled: true
@@ -69,51 +64,15 @@ spec:
         mountPath: /media
         readOnly: false
 
-      # nfs-nas-media:
-      #   enabled: true
-      #   type: custom
-      #   volumeSpec:
-      #     nfs:
-      #       server: "nas.${SECRET_DOMAIN}"
-      #       path: /mnt/tank/share
-      #   mountPath: /media
-      #   readOnly: false
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
+
     resources:
       requests:
         memory: 350Mi
         cpu: 25m
       limits:
         memory: 5000Mi
-    prometheus:
-      podMonitor:
-        enabled: true
-        interval: 10m
-        scrapeTimeout: 2m
-    additionalContainers:
-      - name: exportarr
-        image: ghcr.io/onedr0p/exportarr:v0.6.2
-        imagePullPolicy: IfNotPresent
-        args: ["exportarr", "sonarr"]
-        env:
-          - name: PORT
-            value: "32123"
-          - name: URL
-            value: "http://localhost"
-          - name: CONFIG
-            value: "/config/config.xml"
-          - name: ENABLE_UNKNOWN_QUEUE_ITEMS
-            value: "true"
-          - name: ENABLE_ADDITIONAL_METRICS
-            value: "true"
-        ports:
-          - name: exportarr
-            containerPort: 32123
-        volumeMounts:
-          - name: config
-            mountPath: /config
-            readOnly: true
