@@ -89,8 +89,8 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-namespaces
-    - name: app-security-glauth
-    - name: app-security-authelia-redis
+    - name: apps-security-glauth
+    - name: apps-security-authelia-redis
   interval: 5m
   path: "./k8s/clusters/cluster-0/manifests/security/authelia/app"
   prune: true
