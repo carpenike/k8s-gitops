@@ -27,7 +27,7 @@ spec:
             annotations:
               +(nginx.ingress.kubernetes.io/auth-method): GET
               +(nginx.ingress.kubernetes.io/auth-url): |-
-                https://auth.${SECRET_DOMAIN}/api/verify
+                http://authelia.security.svc.cluster.local/api/verify
               +(nginx.ingress.kubernetes.io/auth-signin): |-
                 https://auth.${SECRET_DOMAIN}?rm=$request_method
               +(nginx.ingress.kubernetes.io/auth-response-headers): |-
