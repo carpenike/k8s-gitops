@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/jackett
-      tag: v0.20.1790
+      tag: v0.20.1796
     env:
       TZ: "America/New_York"
       PUID: 1000
