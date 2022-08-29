@@ -5,30 +5,25 @@ metadata:
   name: vector-aggregator
   namespace: monitoring
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
-      # renovate: registryUrl=https://helm.vector.dev
       chart: vector
-      version: 0.11.0
+      version: 0.15.1
       sourceRef:
         kind: HelmRepository
         name: vector-charts
         namespace: flux-system
-      interval: 5m
+      interval: 15m
   values:
+    image:
+      repository: timberio/vector
+      tag: 0.23.3-debian
+
     role: "Stateless-Aggregator"
 
-    podMonitor:
-      enabled: true
-
-    service:
-      enabled: true
-      type: LoadBalancer
-
-    tolerations:
-      - key: node-role.kubernetes.io/master
-        effect: NoSchedule
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: vector-aggregator
 
     customConfig:
       data_dir: /vector-data-dir
@@ -48,6 +43,59 @@ spec:
           type: vector
           version: "2"
 
+        journal_logs:
+          type: vector
+          address: 0.0.0.0:6002
+          version: "2"
+
+        vector_metrics:
+          type: internal_metrics
+
+        talos_kernel_logs:
+          address: 0.0.0.0:6050
+          type: socket
+          mode: udp
+          max_length: 102400
+          decoding:
+            codec: json
+          host_key: __host
+
+        talos_service_logs:
+          address: 0.0.0.0:6051
+          type: socket
+          mode: udp
+          max_length: 102400
+          decoding:
+            codec: json
+          host_key: __host
+
+      # Transformations
+      transforms:
+        talos_kernel_logs_xform:
+          type: remap
+          inputs:
+            - talos_kernel_logs
+          source: |-
+            .__host, .err = replace(.__host, "10.20.0.20", "cp-0")
+            .__host = replace(.__host, "10.20.0.21", "cp-1")
+            .__host = replace(.__host, "10.20.0.22", "cp-2")
+            .__host = replace(.__host, "10.20.10.20", "node-0")
+            .__host = replace(.__host, "10.20.10.21", "node-1")
+            .__host = replace(.__host, "10.20.10.22", "node-2")
+            .__host = replace(.__host, "10.20.10.23", "node-3")
+        talos_service_logs_xform:
+          type: remap
+          inputs:
+            - talos_service_logs
+          source: |-
+            .__host, .err = replace(.__host, "10.20.0.20", "cp-0")
+            .__host = replace(.__host, "10.20.0.21", "cp-1")
+            .__host = replace(.__host, "10.20.0.22", "cp-2")
+            .__host = replace(.__host, "10.20.10.20", "node-0")
+            .__host = replace(.__host, "10.20.10.21", "node-1")
+            .__host = replace(.__host, "10.20.10.22", "node-2")
+            .__host = replace(.__host, "10.20.10.23", "node-3")
+
       # Sinks
       sinks:
         loki_kubernetes:
@@ -58,25 +106,26 @@ spec:
           encoding:
             codec: json
           batch:
-            max_bytes: 2049000
+            max_bytes: 400000
           out_of_order_action: rewrite_timestamp
           remove_label_fields: true
           remove_timestamp: true
           labels:
-            app: >-
-              {{`{{ kubernetes.pod_labels.app\.kubernetes\.io/name }}`}}
-            container: >-
-              {{`{{ kubernetes.container_name }}`}}
-            filename: >-
-              {{`{{ kubernetes.file }}`}}
-            instance: >-
-              {{`{{ kubernetes.pod_labels.app\.kubernetes\.io/instance }}`}}
-            namespace: >-
-              {{`{{ kubernetes.pod_namespace }}`}}
-            node: >-
-              {{`{{ kubernetes.pod_node_name }}`}}
-            pod: >-
-              {{`{{ kubernetes.pod_name }}`}}
+            k8s_app: >-
+              {{`{{ "kubernetes.pod_labels.app\.kubernetes\.io/name" }}`}}
+            k8s_container: >-
+              {{`{{ "kubernetes.container_name" }}`}}
+            k8s_filename: >-
+              {{`{{ "kubernetes.file" }}`}}
+            k8s_instance: >-
+              {{`{{ "kubernetes.pod_labels.app\.kubernetes\.io/instance" }}`}}
+            k8s_namespace: >-
+              {{`{{ "kubernetes.pod_namespace" }}`}}
+            k8s_node: >-
+              {{`{{ "kubernetes.pod_node_name" }}`}}
+            k8s_pod: >-
+              {{`{{ "kubernetes.pod_name" }}`}}
+
         loki_vyos:
           type: loki
           inputs:
@@ -93,6 +142,74 @@ spec:
             syslog_identifier: >-
               {{`{{ SYSLOG_IDENTIFIER }}`}}
 
+        loki_journal:
+          type: loki
+          inputs:
+            - journal_logs
+          endpoint: http://loki.monitoring:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 2049000
+          out_of_order_action: accept
+          remove_label_fields: true
+          remove_timestamp: true
+          labels:
+            hostname: >-
+              {{`{{ host }}`}}
+
+        talos_kernel:
+          type: loki
+          inputs:
+            - talos_kernel_logs_xform
+          endpoint: http://loki.monitoring:3100
+          encoding:
+            codec: json
+            except_fields:
+              - __host
+          batch:
+            max_bytes: 1048576
+          out_of_order_action: rewrite_timestamp
+          labels:
+            hostname: >-
+              {{`{{ __host }}`}}
+            service: >-
+              {{`{{ facility }}`}}
+
+        talos_service:
+          type: loki
+          inputs:
+            - talos_service_logs_xform
+          endpoint: http://loki.monitoring:3100
+          encoding:
+            codec: json
+            except_fields:
+              - __host
+          batch:
+            max_bytes: 400000
+          out_of_order_action: rewrite_timestamp
+          labels:
+            hostname: >-
+              {{`{{ __host }}`}}
+            service: >-
+              {{`{{ "talos-service" }}`}}
+
+    podMonitor:
+      enabled: true
+      jobLabel: vector-aggregator
+      port: prometheus-sink
+
+    resources:
+      requests:
+        cpu: 35m
+        memory: 249M
+      limits:
+        memory: 454M
+
+    service:
+      enabled: true
+      type: LoadBalancer
+
   postRenderers:
     - kustomize:
         patchesJson6902:
@@ -103,3 +220,6 @@ spec:
               - op: add
                 path: /spec/loadBalancerIP
                 value: ${SVC_VECTOR_AGGREGATOR}
+              - op: replace
+                path: /spec/externalTrafficPolicy
+                value: Local
