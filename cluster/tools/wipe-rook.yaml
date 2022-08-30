@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: disk-wipe-node-0
+spec:
+  restartPolicy: Never
+  nodeName: node-0
+  containers:
+    - name: disk-wipe
+      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      securityContext:
+        privileged: true
+      command:
+        [
+          "/bin/sh",
+          "-c",
+          "blkdiscard /dev/sdb",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
+          "blkdiscard /dev/sdc",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
+          "blkdiscard /dev/sdd",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+        ]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: disk-wipe-node-1
+spec:
+  restartPolicy: Never
+  nodeName: node-1
+  containers:
+    - name: disk-wipe
+      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      securityContext:
+        privileged: true
+      command:
+        [
+          "/bin/sh",
+          "-c",
+          "blkdiscard /dev/sdb",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
+          "blkdiscard /dev/sdc",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
+          "blkdiscard /dev/sdd",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+        ]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: disk-wipe-node-2
+spec:
+  restartPolicy: Never
+  nodeName: node-2
+  containers:
+    - name: disk-wipe
+      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      securityContext:
+        privileged: true
+      command:
+        [
+          "/bin/sh",
+          "-c",
+          "blkdiscard /dev/sdb",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
+          "blkdiscard /dev/sdc",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
+          "blkdiscard /dev/sdd",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+        ]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: disk-wipe-node-3
+spec:
+  restartPolicy: Never
+  nodeName: node-3
+  containers:
+    - name: disk-wipe
+      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      securityContext:
+        privileged: true
+      command:
+        [
+          "/bin/sh",
+          "-c",
+          "blkdiscard /dev/sdb",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
+          "blkdiscard /dev/sdc",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
+          "blkdiscard /dev/sdd",
+          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+        ]
