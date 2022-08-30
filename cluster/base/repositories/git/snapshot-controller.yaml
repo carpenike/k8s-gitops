@@ -8,8 +8,7 @@ spec:
   interval: 15m
   url: https://github.com/kubernetes-csi/external-snapshotter.git
   ref:
-    # renovate: registryUrl=https://prometheus-community.github.io/helm-charts chart=kube-prometheus-stack
-    tag: kube-prometheus-stack-39.9.0
+    tag: v6.0.1
   ignore: |
     # exclude all
     /*
