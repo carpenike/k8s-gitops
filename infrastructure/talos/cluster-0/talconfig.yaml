@@ -1,0 +1,198 @@
+---
+clusterName: cluster-0
+
+talosVersion: v1.1.2
+kubernetesVersion: 1.24.3
+endpoint: "https://cluster-0.${domainName}:6443"
+
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: cp-0.${domainName}
+    controlPlane: true
+    ipAddress: 10.20.0.20
+    installDisk: /dev/sda
+  - hostname: cp-1.${domainName}
+    ipAddress: 10.20.0.21
+    installDisk: /dev/sda
+    controlPlane: true
+  - hostname: cp-2.${domainName}
+    ipAddress: 10.20.0.22
+    installDisk: /dev/sda
+    controlPlane: true
+  - hostname: node-0.${domainName}
+    ipAddress: 10.20.10.20
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth0
+        dhcp: true
+        vlans:
+          - vlanId: 40
+            dhcp: false
+            addresses:
+              - 10.40.10.20/16
+  - hostname: node-1.${domainName}
+    ipAddress: 10.20.10.21
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth0
+        dhcp: true
+        vlans:
+          - vlanId: 40
+            dhcp: false
+            addresses:
+              - 10.40.10.21/16
+  - hostname: node-2.${domainName}
+    ipAddress: 10.20.10.22
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth0
+        dhcp: true
+        vlans:
+          - vlanId: 40
+            dhcp: false
+            addresses:
+              - 10.40.10.22/16
+  - hostname: node-3.${domainName}
+    ipAddress: 10.20.10.23
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth0
+        dhcp: true
+        vlans:
+          - vlanId: 40
+            dhcp: false
+            addresses:
+              - 10.40.10.23/16
+
+controlPlane:
+  inlinePatch:
+    cluster:
+      aescbcEncryptionSecret: ${aescbcEncryptionKey}
+      aggregatorCA:
+        crt: ${k8sAggregatorCert}
+        key: ${k8sAggregatorCertKey}
+      apiServer:
+        admissionControl: []
+        certSANs:
+          - ${clusterEndpointIP}
+          - cluster-0.${domainName}
+        extraArgs:
+          feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+      ca:
+        crt: ${clusterCert}
+        key: ${clusterCertKey}
+      controllerManager:
+        extraArgs:
+          feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+      discovery:
+        registries:
+          service:
+            disabled: true
+      etcd:
+        ca:
+          crt: ${etcdCert}
+          key: ${etcdCertKey}
+      extraManifests:
+        - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.5.1/deploy/ha-install.yaml
+      proxy:
+        disabled: true
+        extraArgs:
+          feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+      scheduler:
+        extraArgs:
+          feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+      secret: ${clusterSecret}
+      serviceAccount:
+        key: ${k8sServiceAccountKey}
+      token: ${clusterToken}
+
+    machine:
+      ca:
+        crt: ${machineCert}
+        key: ${machineCertKey}
+      certSANs:
+        - ${clusterEndpointIP}
+        - cluster-0.${domainName}
+      files:
+        - content: |
+            [plugins."io.containerd.grpc.v1.cri"]
+              enable_unprivileged_ports = true
+              enable_unprivileged_icmp = true
+          path: /var/cri/conf.d/allow-unpriv-ports.toml
+          op: create
+      kubelet:
+        extraArgs:
+          feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
+          rotate-server-certificates: "true"
+      install:
+        extraKernelArgs:
+          - "talos.logging.kernel=udp://10.45.10.16:6050/"
+      logging:
+        destinations:
+          - endpoint: "udp://10.45.10.16:6051/"
+            format: json_lines
+      network:
+        extraHostEntries:
+          - ip: ${clusterEndpointIP}
+            aliases:
+              - cluster-0.${domainName}
+      time:
+        disabled: false
+        servers:
+          - 10.20.0.1
+      token: ${machineToken}
+
+worker:
+  inlinePatch:
+    cluster:
+      aescbcEncryptionSecret: ${aescbcEncryptionKey}
+      ca:
+        crt: ${clusterCert}
+        key: ${clusterCertKey}
+      secret: ${clusterSecret}
+      token: ${clusterToken}
+      discovery:
+        registries:
+          service:
+            disabled: true
+
+    machine:
+      ca:
+        crt: ${machineCert}
+        key: ${machineCertKey}
+      certSANs:
+        - ${clusterEndpointIP}
+        - cluster-0.${domainName}
+      files:
+        - content: |
+            [plugins."io.containerd.grpc.v1.cri"]
+              enable_unprivileged_ports = true
+              enable_unprivileged_icmp = true
+          path: /var/cri/conf.d/allow-unpriv-ports.toml
+          op: create
+      install:
+        extraKernelArgs:
+          - "talos.logging.kernel=udp://10.45.10.16:6050/"
+      logging:
+        destinations:
+          - endpoint: "udp://10.45.10.16:6051/"
+            format: json_lines
+      network:
+        extraHostEntries:
+          - ip: ${clusterEndpointIP}
+            aliases:
+              - cluster-0.${domainName}
+      sysctls:
+        fs.inotify.max_user_watches: "1048576"
+        fs.inotify.max_user_instances: "8192"
+      time:
+        disabled: false
+        servers:
+          - 10.20.0.1
+      token: ${machineToken}
+      kubelet:
+        extraArgs:
+          rotate-server-certificates: "true"
+          feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
