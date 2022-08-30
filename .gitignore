@@ -21,3 +21,9 @@ rebuild/
 Thumbs.db
 bin/
 *.iso
+
+# Other files
+kubeconfig
+
+# Talos clusterconfigs
+infrastructure/talos/**/clusterconfig
