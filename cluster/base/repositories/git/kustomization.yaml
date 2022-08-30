@@ -5,3 +5,4 @@ resources:
   - flux.yaml
   - k8s-gitops.yaml
   - kube-prometheus-stack.yaml
+  - snapshot-controller.yaml
