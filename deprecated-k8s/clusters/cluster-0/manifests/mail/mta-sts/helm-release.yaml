@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: joseluisq/static-web-server
-      tag: 2.8.0-alpine
+      tag: 2.11.0-alpine
     controller:
       replicas: 3
     nameOverride: mta-sts
