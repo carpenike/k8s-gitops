@@ -21,7 +21,7 @@ spec:
       createCRD: false
     image:
       repository: k8s.gcr.io/nfd/node-feature-discovery
-      tag: "v0.11.0"
+      tag: "v0.11.2"
     worker:
       annotations:
         configmap.reloader.stakater.com/reload: node-feature-discovery-worker-conf
