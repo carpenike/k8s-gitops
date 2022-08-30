@@ -87,7 +87,7 @@ spec:
       image:
         registry: docker.io
         repository: bitnami/postgresql
-        tag: 14.2.0-debian-10-r23
+        tag: 14.3.0-debian-10-r23
       existingSecret: home-assistant-postgresql-secret
       enabled: false
       persistence:
