@@ -22,19 +22,19 @@ spec:
     - name: monitoring-namespace
   path: "./cluster/clusters/cluster-0/monitoring/kube-prometheus-stack/crds"
   prune: true
-# ---
-# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-# kind: Kustomization
-# metadata:
-#   name: monitoring-kube-prometheus-stack
-#   namespace: flux-system
-#   labels:
-#     component.cluster-0/part-of: definitions
-# spec:
-#   dependsOn:
-#     - name: monitoring-namespace
-#   path: "./kubernetes/clusters/cluster-0/monitoring/kube-prometheus-stack/app"
-#   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: monitoring-kube-prometheus-stack
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: monitoring-namespace
+  path: "./cluster/clusters/cluster-0/monitoring/kube-prometheus-stack/app"
+  prune: true
 # ---
 # apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 # kind: Kustomization
@@ -77,7 +77,7 @@ spec:
 #     - name: monitoring-namespace
 #     - name: monitoring-kps-crds
 #     - name: monitoring-kube-prometheus-stack
-#   path: "./kubernetes/clusters/cluster-0/monitoring/loki"
+#   path: "./cluster/clusters/cluster-0/monitoring/loki"
 #   prune: true
 # ---
 # apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
@@ -134,7 +134,7 @@ spec:
 #     - name: monitoring-namespace
 #     - name: monitoring-kps-crds
 #     - name: monitoring-loki
-#   path: "./kubernetes/clusters/cluster-0/monitoring/vector/aggregator"
+#   path: "./cluster/clusters/cluster-0/monitoring/vector/aggregator"
 #   prune: false
 # ---
 # apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
@@ -149,7 +149,7 @@ spec:
 #     - name: monitoring-namespace
 #     - name: monitoring-kps-crds
 #     - name: monitoring-vector-aggregator
-#   path: "./kubernetes/clusters/cluster-0/monitoring/vector/agent"
+#   path: "./cluster/clusters/cluster-0/monitoring/vector/agent"
 #   prune: false
 # ---
 # apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
