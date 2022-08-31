@@ -20,12 +20,11 @@ metadata:
 spec:
   path: "./cluster/clusters/cluster-0/db/cloudnative-pg/crds"
   prune: true
-
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: db-cloudnative-pg-operator
+  name: db-cnpg-operator
   namespace: flux-system
   labels:
     component.cluster-0/part-of: definitions
