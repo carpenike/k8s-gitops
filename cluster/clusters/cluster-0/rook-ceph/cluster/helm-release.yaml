@@ -204,7 +204,7 @@ spec:
             bucket:
               interval: 60s
         storageClass:
-          enabled: true
+          enabled: false
           name: ceph-bucket
           reclaimPolicy: Delete
           # see https://github.com/rook/rook/blob/master/Documentation/ceph-object-bucket-claim.md#storageclass for available configuration
