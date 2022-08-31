@@ -188,27 +188,27 @@ spec:
 
     kubeControllerManager:
       enabled: true
-      endpoints:
-        # - 10.20.0.10
-        - 10.20.0.11
-        - 10.20.0.12
+      # endpoints:
+      #   # - 10.20.0.10
+      #   - 10.20.0.11
+      #   - 10.20.0.12
 
     kubeScheduler:
       enabled: true
       endpoints:
-        # - 10.20.0.10
-        - 10.20.0.11
-        - 10.20.0.12
+        # # - 10.20.0.10
+        # - 10.20.0.11
+        # - 10.20.0.12
 
     kubeProxy:
       enabled: false
 
     kubeEtcd:
       enabled: true
-      endpoints:
-        # - 10.20.0.10
-        - 10.20.0.11
-        - 10.20.0.12
+      # endpoints:
+      #   # - 10.20.0.10
+      #   - 10.20.0.11
+      #   - 10.20.0.12
 
     ###
     ### Prometheus instance values
@@ -289,7 +289,7 @@ spec:
             honor_timestamps: true
             static_configs:
               - targets:
-                  - "fw.${SECRET_DOMAIN}:9100"
+                  # - "fw.${SECRET_DOMAIN}:9100"
                   - "cp-1.${SECRET_DOMAIN}:9100"
                   - "cp-2.${SECRET_DOMAIN}:9100"
                   - "node-0.${SECRET_DOMAIN}:9100"
