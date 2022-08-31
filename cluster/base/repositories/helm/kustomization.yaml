@@ -1,23 +1,23 @@
 ---
-  apiVersion: kustomize.config.k8s.io/v1beta1
-  kind: Kustomization
-  resources:
-    - bitnami-charts.yaml
-    - bjw-s-charts.yaml
-    - cilium-charts.yaml
-    - cloudnative-pg-charts.yaml
-    - fairwinds-charts.yaml
-    - grafana-charts.yaml
-    - ingress-nginx-charts.yaml
-    - jetstack-charts.yaml
-    - k8s-at-home-charts.yaml
-    - kubernetes-sigs-descheduler-charts.yaml
-    - kubernetes-sigs-external-dns-charts.yaml
-    - kubernetes-sigs-metrics-server-charts.yaml
-    - kubernetes-sigs-nfd-charts.yaml
-    - kyverno-charts.yaml
-    - prometheus-community-charts.yaml
-    - rook-ceph-charts.yaml
-    - stakater-charts.yaml
-    - vector-charts.yaml
-  
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - bitnami-charts.yaml
+  - bjw-s-charts.yaml
+  - cilium-charts.yaml
+  - cloudnative-pg-charts.yaml
+  - dex-charts.yaml
+  - fairwinds-charts.yaml
+  - grafana-charts.yaml
+  - ingress-nginx-charts.yaml
+  - jetstack-charts.yaml
+  - k8s-at-home-charts.yaml
+  - kubernetes-sigs-descheduler-charts.yaml
+  - kubernetes-sigs-external-dns-charts.yaml
+  - kubernetes-sigs-metrics-server-charts.yaml
+  - kubernetes-sigs-nfd-charts.yaml
+  - kyverno-charts.yaml
+  - prometheus-community-charts.yaml
+  - rook-ceph-charts.yaml
+  - stakater-charts.yaml
+  - vector-charts.yaml
