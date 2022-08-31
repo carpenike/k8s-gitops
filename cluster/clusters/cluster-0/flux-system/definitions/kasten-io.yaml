@@ -9,3 +9,17 @@ metadata:
 spec:
   path: "./cluster/clusters/cluster-0/kasten-io"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kasten-io-k10
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: kasten-io-namespace
+    - name: security-dex
+  path: "./cluster/clusters/cluster-0/kasten-io/k10"
+  prune: true
