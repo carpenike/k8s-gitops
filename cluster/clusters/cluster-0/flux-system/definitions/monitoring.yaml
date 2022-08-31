@@ -50,20 +50,20 @@ spec:
 #     - name: monitoring-kube-prometheus-stack
 #   path: "./kubernetes/clusters/cluster-0/monitoring/grafana"
 #   prune: true
-# ---
-# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-# kind: Kustomization
-# metadata:
-#   name: monitoring-thanos
-#   namespace: flux-system
-#   labels:
-#     component.cluster-0/part-of: definitions
-# spec:
-#   dependsOn:
-#     - name: monitoring-namespace
-#     - name: monitoring-kps-crds
-#   path: "./kubernetes/clusters/cluster-0/monitoring/thanos"
-#   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: monitoring-thanos
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: monitoring-namespace
+    - name: monitoring-kps-crds
+  path: "./cluster/clusters/cluster-0/monitoring/thanos"
+  prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
