@@ -23,6 +23,13 @@ spec:
       TZ: "America/New_York"
       PUSHOVER_DEBUG: "false"
       PUSHOVER_APP_URL: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+      JACKETT__PORT: &port 9117
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
 
     ingress:
       main:
