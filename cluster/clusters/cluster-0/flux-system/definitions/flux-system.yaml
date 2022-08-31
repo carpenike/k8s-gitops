@@ -68,18 +68,18 @@ spec:
         kind: NetworkPolicy
         metadata:
           name: not-used
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: flux-addons
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: flux
-    - name: monitoring-kps-crds
-  interval: 5m
-  path: "../cluster/clusters/cluster-0/flux-system/add-ons"
-  prune: false
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: flux-addons
+#   namespace: flux-system
+#   labels:
+#     component.cluster-0/part-of: definitions
+# spec:
+#   dependsOn:
+#     - name: flux
+#     - name: monitoring-kps-crds
+#   interval: 5m
+#   path: "../cluster/clusters/cluster-0/flux-system/add-ons"
+#   prune: false
