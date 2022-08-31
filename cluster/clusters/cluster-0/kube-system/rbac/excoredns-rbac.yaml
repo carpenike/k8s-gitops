@@ -10,22 +10,22 @@ kind: ClusterRole
 metadata:
   name: excoredns
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - services
-  - namespaces
-  verbs:
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - list
-  - watch
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - namespaces
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - list
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -36,6 +36,15 @@ roleRef:
   kind: ClusterRole
   name: excoredns
 subjects:
-- kind: ServiceAccount
+  - kind: ServiceAccount
+    name: excoredns
+    namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
   name: excoredns
   namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: "excoredns"
