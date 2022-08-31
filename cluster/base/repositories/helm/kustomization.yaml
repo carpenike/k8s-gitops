@@ -12,6 +12,7 @@ resources:
   - ingress-nginx-charts.yaml
   - jetstack-charts.yaml
   - k8s-at-home-charts.yaml
+  - kasten-charts.yaml
   - kubernetes-sigs-descheduler-charts.yaml
   - kubernetes-sigs-external-dns-charts.yaml
   - kubernetes-sigs-metrics-server-charts.yaml
