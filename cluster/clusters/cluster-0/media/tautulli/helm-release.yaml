@@ -30,6 +30,12 @@ spec:
     env:
       TZ: "America/New_York"
 
+    service:
+      main:
+        ports:
+          http:
+            port: 8181
+
     ingress:
       main:
         enabled: true
