@@ -3,94 +3,130 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: disk-wipe-node-0
+  namespace: rook-ceph
 spec:
   restartPolicy: Never
   nodeName: node-0
   containers:
     - name: disk-wipe
-      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      image: cmd.cat/sgdisk/fdisk/dd/partprobe
       securityContext:
         privileged: true
-      command:
-        [
+      command: [
           "/bin/sh",
           "-c",
-          "blkdiscard /dev/sdb",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
-          "blkdiscard /dev/sdc",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
-          "blkdiscard /dev/sdd",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+
+          sgdisk --zap-all /dev/sdb && \
+          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdb && \
+          partprobe /dev/sdb && \
+
+          sgdisk --zap-all /dev/sdc && \
+          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdc && \
+          partprobe /dev/sdc && \
+
+          sgdisk --zap-all /dev/sdd && \
+          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdd && \
+          partprobe /dev/sdd && \,
         ]
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: disk-wipe-node-1
+  namespace: rook-ceph
 spec:
   restartPolicy: Never
   nodeName: node-1
   containers:
     - name: disk-wipe
-      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      image: cmd.cat/sgdisk/fdisk/dd/partprobe
       securityContext:
         privileged: true
-      command:
-        [
+      command: [
           "/bin/sh",
           "-c",
-          "blkdiscard /dev/sdb",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
-          "blkdiscard /dev/sdc",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
-          "blkdiscard /dev/sdd",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+
+          sgdisk --zap-all /dev/sdb && \
+          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdb && \
+          partprobe /dev/sdb && \
+
+          sgdisk --zap-all /dev/sdc && \
+          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdc && \
+          partprobe /dev/sdc && \
+
+          sgdisk --zap-all /dev/sdd && \
+          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdd && \
+          partprobe /dev/sdd && \,
         ]
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: disk-wipe-node-2
+  namespace: rook-ceph
 spec:
   restartPolicy: Never
   nodeName: node-2
   containers:
     - name: disk-wipe
-      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      image: cmd.cat/sgdisk/fdisk/dd/partprobe
       securityContext:
         privileged: true
-      command:
-        [
+      command: [
           "/bin/sh",
           "-c",
-          "blkdiscard /dev/sdb",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
-          "blkdiscard /dev/sdc",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
-          "blkdiscard /dev/sdd",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+
+          sgdisk --zap-all /dev/sdb && \
+          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdb && \
+          partprobe /dev/sdb && \
+
+          sgdisk --zap-all /dev/sdc && \
+          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdc && \
+          partprobe /dev/sdc && \
+
+          sgdisk --zap-all /dev/sdd && \
+          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdd && \
+          partprobe /dev/sdd && \,
         ]
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: disk-wipe-node-3
+  namespace: rook-ceph
 spec:
   restartPolicy: Never
   nodeName: node-3
   containers:
     - name: disk-wipe
-      image: busybox@sha256:ef320ff10026a50cf5f0213d35537ce0041ac1d96e9b7800bafd8bc9eff6c693
+      image: cmd.cat/sgdisk/fdisk/dd/partprobe
       securityContext:
         privileged: true
-      command:
-        [
+      command: [
           "/bin/sh",
           "-c",
-          "blkdiscard /dev/sdb",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdb",
-          "blkdiscard /dev/sdc",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdc",
-          "blkdiscard /dev/sdd",
-          "dd if=/dev/zero bs=1M count=10000 oflag=direct of=/dev/sdd",
+
+          sgdisk --zap-all /dev/sdb && \
+          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdb && \
+          partprobe /dev/sdb && \
+
+          sgdisk --zap-all /dev/sdc && \
+          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdc && \
+          partprobe /dev/sdc && \
+
+          sgdisk --zap-all /dev/sdd && \
+          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
+          blkdiscard /dev/sdd && \
+          partprobe /dev/sdd && \,
         ]
