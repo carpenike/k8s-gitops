@@ -83,4 +83,4 @@ spec:
         - name: nas-backup
           nfs:
             server: "${NAS_ADDRESS}"
-            path: /mnt/tank/share/backup
+            path: /mnt/tank/share/backups
