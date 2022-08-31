@@ -41,9 +41,6 @@ spec:
 
     hostname: qbittorrent
 
-    env:
-      TZ: "America/New_York"
-
     service:
       main:
         ports:
