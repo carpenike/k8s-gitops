@@ -47,5 +47,5 @@ spec:
   dependsOn:
     - name: media-namespace
     - name: media-pvs
-  path: "./cluster/clusters/cluster-0/media/qb"
+  path: "./cluster/clusters/cluster-0/media/qbittorrent"
   prune: true
