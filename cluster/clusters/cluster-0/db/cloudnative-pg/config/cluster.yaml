@@ -21,17 +21,17 @@ spec:
   externalClusters:
     - name: clusterBackup
       barmanObjectStore:
+        wal:
+          compression: bzip2
+          maxParallel: 8
         destinationPath: https://minio.${SECRET_DOMAIN}:9000
-      s3Credentials:
-        accessKeyId:
-          name: postgres-minio
-          key: MINIO_ACCESS_KEY
-        secretAccessKey:
-          name: postgres-minio
-          key: MINIO_SECRET_KEY
-      wal:
-        compression: bzip2
-        maxParallel: 8
+        s3Credentials:
+          accessKeyId:
+            name: postgres-minio
+            key: MINIO_ACCESS_KEY
+          secretAccessKey:
+            name: postgres-minio
+            key: MINIO_SECRET_KEY
 
   backup:
     retentionPolicy: 30d
