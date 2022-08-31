@@ -25,11 +25,10 @@ spec:
       KUBERNETES_POD_NAMESPACE: security
     ingress:
       enabled: true
-      className: traefik
+      className: nginx
       annotations:
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: letsencrypt-production
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         external-dns/is-public: "true"
         external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       hosts:
@@ -90,38 +89,6 @@ spec:
               - name: holthome
 
       staticClients:
-        - id: dex-k8s-authenticator
-          name: dex-k8s-authenticator
-          secret: ${SECRET_DEX_K8S_AUTHENTICATOR_CLIENT_SECRET}
-          redirectURIs:
-            - https://login.${SECRET_DOMAIN}/callback/
-
-        - id: nextcloud
-          name: nextcloud
-          secret: ${SECRET_DEX_NEXTCLOUD_CLIENT_SECRET}
-          redirectURIs:
-            - https://nextcloud.${SECRET_DOMAIN}/apps/user_oidc/code
-            - https://nextcloud.${SECRET_DOMAIN}/apps/oidc_login/oidc
-
-        - id: oauth2-proxy
-          name: oauth2-proxy
-          secret: ${SECRET_DEX_OAUTH2_PROXY_CLIENT_SECRET}
-          redirectURIs:
-            - https://auth.${SECRET_DOMAIN}/oauth2/callback
-            - https://requests.${SECRET_DOMAIN}/oauth2/callback
-
-        - id: gitea
-          name: gitea
-          secret: ${SECRET_DEX_GITEA_CLIENT_SECRET}
-          redirectURIs:
-            - https://git.${SECRET_DOMAIN}/oauth2/dex/callback
-            - https://git.${SECRET_DOMAIN}/user/oauth2/dex/callback
-
-        - id: pomerium
-          name: pomerium
-          secret: ${SECRET_DEX_POMERIUM_CLIENT_SECRET}
-          redirectURIs:
-            - https://authenticate.${SECRET_DOMAIN}/oauth2/callback
 
         - id: step
           name: step
@@ -134,18 +101,6 @@ spec:
           secret: ${SECRET_DEX_K10_CLIENT_SECRET}
           redirectURIs:
             - https://k10.${SECRET_DOMAIN}/k10/auth-svc/v0/oidc/redirect
-
-        - id: authentik
-          name: authentik
-          secret: ${SECRET_DEX_AUTHENTIK_CLIENT_SECRET}
-          redirectURIs:
-            - https://id.${SECRET_DOMAIN}/source/oauth/callback/dex/
-
-        - id: vultr
-          name: vultr
-          secret: ${SECRET_DEX_VULTR_CLIENT_SECRET}
-          redirectURIs:
-            - https://my.vultr.com/openid/
 
     resources:
       requests:
