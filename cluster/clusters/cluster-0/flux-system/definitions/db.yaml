@@ -20,32 +20,32 @@ metadata:
 spec:
   path: "./cluster/clusters/cluster-0/db/cloudnative-pg/crds"
   prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: db-cnpg-operator
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: db-namespace
-    - name: db-cnpg-crds
-  path: "./cluster/clusters/cluster-0/db/cloudnative-pg/operator"
-  prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: db-cnpg-config
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: db-namespace
-    - name: db-cnpg-crds
-    - name: db-cnpg-operator
-  path: "./cluster/clusters/cluster-0/db/cloudnative-pg/config"
-  prune: true
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: db-cnpg-operator
+#   namespace: flux-system
+#   labels:
+#     component.cluster-0/part-of: definitions
+# spec:
+#   dependsOn:
+#     - name: db-namespace
+#     - name: db-cnpg-crds
+#   path: "./cluster/clusters/cluster-0/db/cloudnative-pg/operator"
+#   prune: true
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: db-cnpg-config
+#   namespace: flux-system
+#   labels:
+#     component.cluster-0/part-of: definitions
+# spec:
+#   dependsOn:
+#     - name: db-namespace
+#     - name: db-cnpg-crds
+#     - name: db-cnpg-operator
+#   path: "./cluster/clusters/cluster-0/db/cloudnative-pg/config"
+#   prune: true
