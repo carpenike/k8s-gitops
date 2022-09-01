@@ -20,6 +20,9 @@ spec:
       exclude:
         any:
           - resources:
+              namespaces:
+                - kube-system
+          - resources:
               kinds: ["Pod"]
               selector:
                 matchLabels:
