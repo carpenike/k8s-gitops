@@ -77,7 +77,7 @@ spec:
         cpu: 23m
         memory: 164M
       limits:
-        memory: 369M
+        memory: 500M
 
     service:
       enabled: false
