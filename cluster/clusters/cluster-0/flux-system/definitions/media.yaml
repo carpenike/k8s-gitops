@@ -91,3 +91,20 @@ spec:
     - name: media-plex
   path: "./cluster/clusters/cluster-0/media/tautulli"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: media-sonarr
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: media-namespace
+    - name: media-sabnzbd
+    - name: media-prowlarr
+    - name: media-qb
+    - name: media-pvs
+  path: "./cluster/clusters/cluster-0/media/sonarr"
+  prune: true
