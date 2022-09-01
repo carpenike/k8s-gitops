@@ -1,0 +1,101 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app vaultwarden
+  namespace: security
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 0.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  values:
+    image:
+      repository: ghcr.io/k8s-at-home/vaultwarden
+      tag: v1.25.0
+
+    env:
+      DATA_FOLDER: "config"
+      DOMAIN: https://vault.${SECRET_DOMAIN}
+      SIGNUPS_ALLOWED: "false"
+      SMTP_FROM_NAME: Vault
+      SMTP_FROM: vault@${SECRET_DOMAIN}
+      SMTP_HOST: smtp.mailgun.org
+      SMTP_PORT: 465
+      SMTP_SSL: "true"
+      SMTP_USERNAME: ${SECRET_MAILGUN_USERNAME}
+      SMTP_PASSWORD: ${SECRET_MAILGUN_PASSWORD}
+      TZ: "America/New_York"
+      WEBSOCKET_ADDRESS: 0.0.0.0
+      WEBSOCKET_ENABLED: true
+      WEBSOCKET_PORT: 3012
+
+    envFrom:
+      - secretRef:
+          name: vault-secrets
+
+    service:
+      main:
+        ports:
+          http:
+            port: 80
+          websocket:
+            enabled: true
+            port: 3012
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+          external-dns/is-public: "true"
+        hosts:
+          - host: vault.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+              - path: /notifications/hub
+                pathType: Prefix
+                service:
+                  port: 3012
+              - path: /notifications/hub/negotiate
+                pathType: Prefix
+        tls:
+          - hosts:
+              - vault.${SECRET_DOMAIN}
+            secretName: tls.vaultwarden
+
+      admin:
+        enabled: true
+        ingressClassName: "nginx"
+        # annotations:
+        #   traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        #   traefik.ingress.kubernetes.io/router.middlewares: "networking-rfc1918@kubernetescrd"
+        hosts:
+          - host: "vault.${SECRET_DOMAIN}"
+            paths:
+              - path: /admin
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "vault.${SECRET_DOMAIN}"
+            secretName: tls.vaultwarden
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: vaultwarden-config-pvc
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 2000Mi
