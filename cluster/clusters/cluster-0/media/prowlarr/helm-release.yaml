@@ -39,6 +39,11 @@ spec:
       - secretRef:
           name: *app
 
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
     hostname: prowlarr
 
     service:
