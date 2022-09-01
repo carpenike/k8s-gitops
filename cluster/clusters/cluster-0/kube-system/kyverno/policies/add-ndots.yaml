@@ -20,10 +20,9 @@ spec:
           kinds:
             - Pod
       exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
+        resources:
+          namespaces:
+            - kube-system
       mutate:
         patchStrategicMerge:
           spec:
