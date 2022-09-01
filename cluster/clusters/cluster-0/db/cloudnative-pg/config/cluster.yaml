@@ -10,29 +10,16 @@ spec:
   storage:
     size: 20Gi
     storageClass: ceph-block
+
   superuserSecret:
     name: postgres-superuser
+
   monitoring:
     enablePodMonitor: true
+
   bootstrap:
     recovery:
-      source: clusterBackup
-
-  externalClusters:
-    - name: clusterBackup
-      barmanObjectStore:
-        wal:
-          compression: bzip2
-          maxParallel: 8
-        destinationPath: s3://postgresql/
-        endpointURL: https://minio.${SECRET_DOMAIN}:9000
-        s3Credentials:
-          accessKeyId:
-            name: postgres-minio
-            key: MINIO_ACCESS_KEY
-          secretAccessKey:
-            name: postgres-minio
-            key: MINIO_SECRET_KEY
+      source: postgres-backup
 
   backup:
     retentionPolicy: 30d
@@ -42,7 +29,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://postgresql/
       endpointURL: https://minio.${SECRET_DOMAIN}:9000
-      serverName: postgres-v1
+      serverName: postgres-v2
       s3Credentials:
         accessKeyId:
           name: postgres-minio
@@ -50,3 +37,20 @@ spec:
         secretAccessKey:
           name: postgres-minio
           key: MINIO_SECRET_KEY
+
+  externalClusters:
+    - name: postgres-backup
+      barmanObjectStore:
+        wal:
+          compression: bzip2
+          maxParallel: 8
+        destinationPath: s3://postgresql/
+        endpointURL: https://minio.${SECRET_DOMAIN}:9000
+        serverName: postgres-v1
+        s3Credentials:
+          accessKeyId:
+            name: postgres-minio
+            key: MINIO_ACCESS_KEY
+          secretAccessKey:
+            name: postgres-minio
+            key: MINIO_SECRET_KEY
