@@ -30,6 +30,11 @@ spec:
     env:
       TZ: "America/New_York"
 
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
     service:
       main:
         enabled: true
