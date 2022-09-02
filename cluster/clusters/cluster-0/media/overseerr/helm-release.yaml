@@ -29,6 +29,12 @@ spec:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
       PORT: &port 80
+
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
     service:
       main:
         ports:
