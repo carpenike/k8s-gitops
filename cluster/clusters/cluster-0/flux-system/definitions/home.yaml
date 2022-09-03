@@ -13,6 +13,19 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
+  name: home-mosquitto
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: home-namespace
+  path: "./cluster/clusters/cluster-0/home/mosquitto"
+  prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
   name: home-zigbee2mqtt
   namespace: flux-system
   labels:
@@ -22,3 +35,5 @@ spec:
     - name: home-namespace
   path: "./cluster/clusters/cluster-0/home/zigbee2mqtt"
   prune: true
+  dependsOn:
+    - name: home-mosquitto

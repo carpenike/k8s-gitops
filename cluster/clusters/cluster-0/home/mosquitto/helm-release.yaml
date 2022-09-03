@@ -5,32 +5,36 @@ metadata:
   name: mosquitto
   namespace: home
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: mosquitto
-      version: 4.3.2
+      version: 4.8.2
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: k8s-at-home
         namespace: flux-system
-      interval: 5m
+      interval: 15m
+
   values:
+    podAnnotations:
+      secret.reloader.stakater.com/reload: mosquitto-config
+
     image:
-      repository: ghcr.io/k8s-at-home/eclipse-mosquitto
-      tag: v2.0.14
+      repository: eclipse-mosquitto
+      tag: 2.0.15
+
+    auth:
+      enabled: true
+
     service:
       main:
         type: LoadBalancer
+        loadBalancerIP: "${SVC_MOSQUITTO_ADDRESS}"
         annotations:
           coredns.io/hostname: "mqtt.${SECRET_DOMAIN}"
-        loadBalancerIP: "${SVC_MOSQUITTO_ADDRESS}"
         externalTrafficPolicy: Local
-    auth:
-      enabled: true
-    podAnnotations:
-      secret.reloader.stakater.com/reload: mosquitto-config
+
     persistence:
       data:
         enabled: true
@@ -41,3 +45,10 @@ spec:
         volumeSpec:
           secret:
             secretName: mosquitto-config
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 64M
+      limits:
+        memory: 124M
