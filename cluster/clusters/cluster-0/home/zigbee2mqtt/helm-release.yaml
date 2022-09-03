@@ -28,11 +28,16 @@ spec:
     env:
       TZ: "America/New_York"
       ZIGBEE2MQTT_DATA: /data
+
     service:
       main:
         ports:
           http:
             port: 8080
+
+    podAnnotations:
+      k8s.v1.cni.cncf.io/networks: macvlan-static-iot-z2m
+
     ingress:
       main:
         enabled: true
@@ -45,16 +50,19 @@ spec:
         tls:
           - hosts:
               - *host
+
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
       fsGroupChangePolicy: "OnRootMismatch"
+
     persistence:
       config:
         enabled: true
         existingClaim: zigbee2mqtt-config-pvc
         mountPath: "/data"
+
     resources:
       requests:
         cpu: 10m
