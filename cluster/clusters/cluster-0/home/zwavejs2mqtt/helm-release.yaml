@@ -2,58 +2,68 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: zwavejs2mqtt
+  name: &app zwavejs2mqtt
   namespace: home
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: zwavejs2mqtt
-      version: 5.4.2
+      chart: app-template
+      version: 0.1.1
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: bjw-s-charts
         namespace: flux-system
-      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
   values:
     image:
       repository: ghcr.io/zwave-js/zwavejs2mqtt
-      tag: 6.12.1
+      tag: 7.0.0
     env:
       TZ: "America/New_York"
-    securityContext:
-      privileged: true
-
     service:
       main:
-        annotations:
-          prometheus.io/probe: "true"
-          prometheus.io/protocol: http
         ports:
           http:
-            port: 8091
+            port: &port 8091
           websocket:
             enabled: true
             port: 3000
+    probes:
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /health
+            port: *port
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      readiness: *probes
+      startup:
+        enabled: false
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          kubernetes.io/tls-acme: "true"
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.middlewares: "network-internal-auth@kubernetescrd"
+        ingressClassName: "nginx"
         hosts:
-          - host: "zwave.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "zwave.${SECRET_DOMAIN}"
-            secretName: tls.zwavejs2mqtt
+              - *host
+    securityContext:
+      privileged: true
     persistence:
       config:
         enabled: true
@@ -61,15 +71,21 @@ spec:
         mountPath: /usr/src/app/store
       usb:
         enabled: true
+        type: hostPath
         hostPath: /dev/serial/by-id/usb-0658_0200-if00
-        mountPath: /dev/serial/by-id/usb-0658_0200-if00
+        hostPathType: CharDevice
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-                - {
-                    key: "feature.node.kubernetes.io/custom-zwave",
-                    operator: In,
-                    values: ["true"],
-                  }
+                - key: feature.node.kubernetes.io/custom-zwave
+                  operator: In
+                  values:
+                    - "true"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 500Mi
