@@ -33,6 +33,5 @@ metadata:
 spec:
   dependsOn:
     - name: home-namespace
-    - name: home-mosquitto
   path: "./cluster/clusters/cluster-0/home/zigbee2mqtt"
   prune: true
