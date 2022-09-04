@@ -77,7 +77,7 @@ metadata:
   labels:
     component.cluster-0/part-of: definitions
 spec:
-  path: "./cluster/clusters/cluster-0/kube-system/app/node-feature-discovery/crds"
+  path: "./cluster/clusters/cluster-0/kube-system/node-feature-discovery/crds"
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
