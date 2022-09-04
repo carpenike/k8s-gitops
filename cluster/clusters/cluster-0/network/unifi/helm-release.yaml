@@ -82,9 +82,6 @@ spec:
             port: 10001
             protocol: UDP
 
-    nodeSelector:
-      node-role.kubernetes.io/worker: "true"
-
     persistence:
       data:
         enabled: true
