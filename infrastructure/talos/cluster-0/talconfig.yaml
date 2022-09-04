@@ -25,7 +25,7 @@ nodes:
     ipAddress: 10.20.10.20
     installDisk: /dev/sda
     networkInterfaces:
-      - interface: eth0
+      - interface: eth2
         dhcp: true
         vlans:
           - vlanId: 40
@@ -36,7 +36,7 @@ nodes:
     ipAddress: 10.20.10.21
     installDisk: /dev/sda
     networkInterfaces:
-      - interface: eth0
+      - interface: eth2
         dhcp: true
         vlans:
           - vlanId: 40
@@ -47,7 +47,7 @@ nodes:
     ipAddress: 10.20.10.22
     installDisk: /dev/sda
     networkInterfaces:
-      - interface: eth0
+      - interface: eth2
         dhcp: true
         vlans:
           - vlanId: 40
@@ -58,7 +58,7 @@ nodes:
     ipAddress: 10.20.10.23
     installDisk: /dev/sda
     networkInterfaces:
-      - interface: eth0
+      - interface: eth2
         dhcp: true
         vlans:
           - vlanId: 40
