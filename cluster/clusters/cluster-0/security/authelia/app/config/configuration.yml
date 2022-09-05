@@ -64,3 +64,10 @@ identity_providers:
       #   redirect_uris:
       #     - "https://miniflux.${INGRESS_DOMAIN}/oauth2/oidc/callback"
       #   userinfo_signing_algorithm: none
+
+webauthn:
+  disable: false
+  display_name: Authelia
+  attestation_conveyance_preference: indirect
+  user_verification: preferred
+  timeout: 60s
