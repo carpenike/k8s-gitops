@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://stakater.github.io/stakater-charts
       chart: forecastle
-      version: v1.0.80
+      version: v1.0.98
       sourceRef:
         kind: HelmRepository
         name: stakater-charts
