@@ -21,9 +21,9 @@ access_control:
       policy: bypass
       resources: ["^/api([?/].*)?$"]
 
-    - domain: "*.${SECRET_DOMAIN}"
-      policy: bypass
-      networks: ["internal"]
+    # - domain: "*.${SECRET_DOMAIN}"
+    #   policy: bypass
+    #   networks: ["internal"]
 
 identity_providers:
   oidc:
