@@ -139,5 +139,5 @@ metadata:
 spec:
   dependsOn:
     - name: network-namespace
-  path: "./kubernetes/clusters/cluster-0/network/omada/controller"
+  path: "./cluster/clusters/cluster-0/network/omada/controller"
   prune: true
