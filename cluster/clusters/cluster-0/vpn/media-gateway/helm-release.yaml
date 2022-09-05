@@ -1,0 +1,86 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: media-gateway
+  namespace: vpn
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: pod-gateway
+      interval: 15m
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home
+        namespace: flux-system
+      version: 5.6.2
+  values:
+    image:
+      repository: ghcr.io/k8s-at-home/pod-gateway
+      tag: v1.7.0@sha256:ce4871ccdfb98e8dcb5330125a06954ca3b40d9cff3235fb39ac2ba33feff0ff
+
+    DNS: 172.16.1.1
+
+    additionalContainers:
+      gluetun:
+        image: qmcgaw/gluetun:v3.31.0@sha256:9ef4853dab38fb829d481283e9f154243b61e54e3fa7973fa9bfb966d08f9f19
+
+        env:
+          - name: VPN_TYPE
+            value: wireguard
+          - name: VPN_INTERFACE
+            value: wg0
+          - name: FIREWALL
+            value: "off"
+          - name: DOT
+            value: "off"
+
+        envFrom:
+          - secretRef:
+              name: media-gateway-vpnconfig
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+
+    webhook:
+      image:
+        repository: ghcr.io/k8s-at-home/gateway-admision-controller
+        tag: v3.6.0
+
+      gatewayDefault: false
+      gatewayLabel: setGateway
+      gatewayAnnotation: setGateway
+      namespaceSelector:
+        label: "vpn-routed-gateway"
+
+    addons:
+      netshoot:
+        enabled: true
+
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: downloads-gateway-pod-gateway
+      secret.reloader.stakater.com/reload: downloads-gateway-vpnconfig
+
+    publicPorts:
+      - hostname: qbittorrent #hostname assigned to the pod
+        IP: 10 # must be an integer between 2 and VXLAN_GATEWAY_FIRST_DYNAMIC_IP (20 by default)
+        ports:
+          - type: udp
+            port: ${VPN_FORWARDED_PORT_1}
+          - type: tcp
+            port: ${VPN_FORWARDED_PORT_1}
+
+    routed_namespaces:
+      - media
+
+    settings:
+      VPN_INTERFACE: wg0
+      VXLAN_ID: 43
+      VXLAN_IP_NETWORK: 172.16.1
+      VPN_BLOCK_OTHER_TRAFFIC: true
+      VPN_TRAFFIC_PORT: ${VPN_GATEWAY_VPN_PORT}
+      NOT_ROUTED_TO_GATEWAY_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
+      VPN_LOCAL_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
