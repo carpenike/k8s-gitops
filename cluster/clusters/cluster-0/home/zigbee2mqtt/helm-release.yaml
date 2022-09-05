@@ -35,8 +35,8 @@ spec:
           http:
             port: 8080
 
-    podAnnotations:
-      k8s.v1.cni.cncf.io/networks: macvlan-static-iot-z2m
+    # podAnnotations:
+    #   k8s.v1.cni.cncf.io/networks: macvlan-static-iot-z2m
 
     ingress:
       main:
