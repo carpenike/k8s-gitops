@@ -199,12 +199,12 @@ spec:
       jobLabel: vector-aggregator
       port: prometheus-sink
 
-    resources:
-      requests:
-        cpu: 35m
-        memory: 249M
-      limits:
-        memory: 454M
+    # resources:
+    #   requests:
+    #     cpu: 35m
+    #     memory: 249M
+    #   limits:
+    #     memory: 454M
 
     service:
       enabled: true
