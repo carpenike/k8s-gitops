@@ -31,6 +31,8 @@ spec:
         reject_old_samples_max_age: 168h
         ingestion_rate_mb: 16
         ingestion_burst_size_mb: 1024
+        per_stream_rate_limit: 32MB
+        per_stream_rate_limit_burst: 64MB
 
       ruler:
         alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring:9093
