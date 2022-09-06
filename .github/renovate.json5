@@ -8,7 +8,6 @@
     ":enablePreCommit",
     ":automergeDigest",
     ":automergeBranchPush",
-    "github>carpenike/k8s-gitops//.github/renovate/allowedVersions.json5",
     "github>carpenike/k8s-gitops//.github/renovate/autoMerge.json5",
     "github>carpenike/k8s-gitops//.github/renovate/commitMessage.json5",
     "github>carpenike/k8s-gitops//.github/renovate/groups.json5",
