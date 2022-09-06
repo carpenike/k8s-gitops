@@ -20,6 +20,6 @@ metadata:
 spec:
   dependsOn:
     - name: kasten-io-namespace
-    - name: security-dex
+    - name: security-authelia
   path: "./cluster/clusters/cluster-0/kasten-io/k10"
   prune: true
