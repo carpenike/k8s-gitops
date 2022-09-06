@@ -61,17 +61,17 @@ spec:
         enabled: true
 
     podAnnotations:
-      configmap.reloader.stakater.com/reload: downloads-gateway-pod-gateway
-      secret.reloader.stakater.com/reload: downloads-gateway-vpnconfig
+      configmap.reloader.stakater.com/reload: media-gateway-pod-gateway
+      secret.reloader.stakater.com/reload: media-gateway-vpnconfig
 
     publicPorts:
       - hostname: qbittorrent #hostname assigned to the pod
         IP: 10 # must be an integer between 2 and VXLAN_GATEWAY_FIRST_DYNAMIC_IP (20 by default)
         ports:
           - type: udp
-            port: ${VPN_FORWARDED_PORT_1}
+            port: 54972
           - type: tcp
-            port: ${VPN_FORWARDED_PORT_1}
+            port: 54972
 
     routed_namespaces:
       - media
