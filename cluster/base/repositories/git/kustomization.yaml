@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - cloudnative-pg.yaml
   - flux.yaml
+  - grafana.yaml
   - k8s-gitops.yaml
   - kube-prometheus-stack.yaml
   - nfd.yaml
