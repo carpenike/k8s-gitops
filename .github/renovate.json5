@@ -1,139 +1,86 @@
 {
-  // General RenovateBot configuration
-  extends: [
-    ":enableRenovate",
+  "extends": [
     "config:base",
+    "docker:enableMajor",
     ":disableRateLimiting",
     ":dependencyDashboard",
     ":semanticCommits",
-    ":separatePatchReleases",
-    "docker:enableMajor",
     ":enablePreCommit",
-    "github>carpenike/k8s-gitops//.github/renovate/commitMessage",
-    "github>carpenike/k8s-gitops//.github/renovate/labels",
-    // "github>carpenike/k8s-gitops//.github/renovate/privateModules",
-    "github>carpenike/k8s-gitops//.github/renovate/semanticCommits",
-    "github>carpenike/k8s-gitops//.github/renovate/allowedVersions",
-    "github>carpenike/k8s-gitops//.github/renovate/autoMerge",
-    "github>carpenike/k8s-gitops//.github/renovate/updateSchedule",
+    ":automergeDigest",
+    ":automergeBranchPush",
+    "github>carpenike/k8s-gitops//.github/renovate/allowedVersions.json5",
+    "github>carpenike/k8s-gitops//.github/renovate/autoMerge.json5",
+    "github>carpenike/k8s-gitops//.github/renovate/commitMessage.json5",
+    "github>carpenike/k8s-gitops//.github/renovate/groups.json5",
+    "github>carpenike/k8s-gitops//.github/renovate/labels.json5",
+    "github>carpenike/k8s-gitops//.github/renovate/semanticCommits.json5"
   ],
-  platform: "github",
-  username: "carpenike-bot[bot]",
-  repositories: ["carpenike/k8s-gitops"],
-  onboarding: false,
-  requireConfig: false,
+  "platform": "github",
+  "username": "carpenike-bot[bot]",
+  "repositories": ["carpenike/k8s-gitops"],
+  "onboarding": false,
+  "requireConfig": false,
   gitAuthor: "carpenike-bot <1302442+carpenike[bot]@users.noreply.github.com>",
-  timezone: "America/New_York",
-  dependencyDashboardTitle: "Renovate Dashboard",
-  suppressNotifications: ["prIgnoreNotification"],
-  rebaseWhen: "conflicted",
-  // Set up Renovate Managers
+  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+  "suppressNotifications": ["prIgnoreNotification"],
+  "rebaseWhen": "conflicted",
+  "commitBodyTable": true,
+  "ignorePaths": ["archive/**"],
+  "docker-compose": {
+    "fileMatch": ["ansible/.+/docker-compose.*\\.ya?ml(\\.j2)?$"]
+  },
+  "flux": {
+    "fileMatch": ["cluster/.+\\.ya?ml$"]
+  },
   "helm-values": {
-    fileMatch: [
-      "cluster/clusters/.+/helm-release\\.yaml$",
-    ],
+    "fileMatch": ["cluster/.+\\.ya?ml$"]
   },
-  kubernetes: {
-    fileMatch: ["cluster/clusters/.+\\.yaml$"],
+  "kubernetes": {
+    "fileMatch": ["cluster/.+\\.ya?ml$"]
   },
-  flux: {
-    fileMatch: ["cluster/clusters/.+\\.yaml$"],
-  },
-  regexManagers: [
-    // regexManager to read and process GitHub release artifacts
+  "regexManagers": [
     {
-      fileMatch: ["cluster/clusters/.+\\.yaml$"],
-      matchStrings: [
-        "https://github.com/(?<org>.*=?)/(?<repo>.*=?)/releases/download/(?<currentValue>.*=?)/.*",
+      "description": "Process CRD dependencies",
+      "fileMatch": ["cluster/.+\\.ya?ml$"],
+      "matchStrings": [
+        // GitRepository where 'Git release/tag' matches 'Helm' version
+        "registryUrl=(?<registryUrl>\\S+) chart=(?<depName>\\S+)\n.*?(?<currentValue>[^-\\s]*)\n",
+        // Kustomization where 'GitHub release artifact URL' matches 'Docker image' version
+        "datasource=(?<datasource>\\S+) image=(?<depName>\\S+)\n.*?-\\s(.*?)\/(?<currentValue>[^/]+)\/[^/]+\n"
       ],
-      datasourceTemplate: "github-releases",
-      depNameTemplate: "{{org}}/{{repo}}",
+      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}helm{{/if}}"
     },
-    // Generic Regex Manager
     {
-      fileMatch: ["cluster/clusters/.+\\.yaml$"],
-      matchStrings: [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( registryUrl=(?<registryUrl>.*?))?( versioning=(?<versioning>.*=?))?\n .*: (?<currentValue>.*=?)",
+      "description": "Process various dependencies",
+      "fileMatch": [
+        "ansible/.+\\.ya?ml$",
+        "cluster/.+\\.ya?ml$"
       ],
-      versioningTemplate: "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
-      registryUrlTemplate: "{{#if registryUrl}}{{{registryUrl}}}{{else}}{{/if}}",
+      "matchStrings": [
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( versioning=(?<versioning>\\S+))?\n.*?\"(?<currentValue>.*)\"\n"
+      ],
+      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     },
-    // Generic Docker image Regex manager
     {
-      fileMatch: ["cluster/clusters/.+\\.yaml$"],
-      matchStrings: [
-        "# renovate: docker-image( registryUrl=(?<registryUrl>.*?))?( versioning=(?<versioning>.*=?))?\n .*: (?<depName>.*?):(?<currentValue>.*=?)",
+      "description": "Process raw GitHub URLs",
+      "fileMatch": ["cluster/.+\\.ya?ml$"],
+      "matchStrings": [
+        "https:\\/\\/raw.githubusercontent.com\\/(?<depName>[\\w\\d\\-_]+\\/[\\w\\d\\-_]+)\\/(?<currentValue>[\\w\\d\\.\\-_]+)\\/.*"
       ],
-      datasourceTemplate: "docker",
-      versioningTemplate: "{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}",
-      registryUrlTemplate: "{{#if registryUrl}}{{{registryUrl}}}{{else}}{{/if}}",
-    },
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    }
   ],
-  packageRules: [
-    // Setup datasources
+  "packageRules": [
     {
-      matchDatasources: ["helm"],
-      ignoreDeprecated: true,
-    },
-    {
-      matchDatasources: ["docker"],
-      commitMessageExtra: "to {{newVersion}}",
-    },
-    // Custom version schemes
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: ["blakeblackshear/frigate"],
-      versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
-    },
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: ["xirixiz/dsmr-reader-docker"],
-      versioning: "regex:^(?<compatibility>.*)-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
-    },
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: [
-        "ghcr.io/linuxserver/calibre",
-        "ghcr.io/linuxserver/calibre-web",
-      ],
-      versioning: "regex:^version-v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
-    },
-    // Version strategies
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: ["ghcr.io/k8s-at-home/plex"],
-      versioning: "loose",
-    },
-    // Group packages
-    {
-      matchDatasources: ["helm", "docker"],
-      matchPackagePatterns: ["^rook.ceph"],
-      groupName: "rook-ceph-suite",
-      additionalBranchPrefix: "",
-      separateMinorPatch: true,
-    },
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: [
-        "k8s.gcr.io/kube-apiserver",
-        "k8s.gcr.io/kube-controller-manager",
-        "k8s.gcr.io/kube-scheduler",
-        "ghcr.io/talos-systems/kubelet",
-      ],
-      groupName: "kubernetes",
-      additionalBranchPrefix: "",
-      separateMinorPatch: true,
-    },
-    {
-      matchDatasources: ["helm", "docker"],
-      matchPackageNames: [
-        "quay.io/cilium/cilium",
-        "quay.io/cilium/operator-generic",
-        "cilium",
-      ],
-      groupName: "cilium",
-      additionalBranchPrefix: "",
-      separateMinorPatch: true,
-    },
-  ],
+      "description": "Use loose versioning for certain dependencies",
+      "matchDatasources": ["docker", "github-releases"],
+      "versioning": "loose",
+      "matchPackageNames": [
+        "ghcr.io/onedr0p/plex",
+        "ghcr.io/onedr0p/qbittorrent"
+      ]
+    }
+  ]
 }
