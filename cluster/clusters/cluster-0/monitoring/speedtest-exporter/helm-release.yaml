@@ -21,6 +21,11 @@ spec:
       repository: ghcr.io/miguelndecarvalho/speedtest-exporter
       tag: v3.5.2
 
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
     resources:
       requests:
         cpu: 15m
