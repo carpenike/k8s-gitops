@@ -54,7 +54,7 @@ spec:
             isDefault: true
             name: Prometheus
             type: prometheus
-            url: http://thanos-query.monitoring:9090
+            url: http://thanos-query.monitoring.svc.cluster.local:9090
           - access: proxy
             name: Loki
             type: loki
