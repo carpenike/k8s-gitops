@@ -50,6 +50,21 @@ identity_providers:
           - "https://grafana.${SECRET_DOMAIN}/login/generic_oauth"
         userinfo_signing_algorithm: none
 
+      - id: k10
+        description: Kasten K10
+        secret: "${SECRET_AUTHELIA_K10_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes:
+          - openid
+          - profile
+          - groups
+          - email
+        redirect_uris:
+          - "https://k10.${SECRET_DOMAIN}/k10/auth-svc/v0/oidc/redirect"
+        userinfo_signing_algorithm: none
+
       # - id: miniflux
       #   description: Miniflux
       #   secret: "${SECRET_MINIFLUX_OAUTH_CLIENT_SECRET}"
