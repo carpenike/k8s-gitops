@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: home-assistant
+  name: &app home-assistant
   namespace: home
 spec:
   values:
@@ -13,12 +13,12 @@ spec:
           - name: POSTGRES_HOST
             valueFrom:
               secretKeyRef:
-                name: home-assistant-secrets
+                name: *app
                 key: HOME_ASSISTANT_STORAGE_POSTGRES_HOST
           - name: POSTGRES_DB
             valueFrom:
               secretKeyRef:
-                name: home-assistant-secrets
+                name: *app
                 key: HOME_ASSISTANT_STORAGE_POSTGRES_DATABASE
           - name: POSTGRES_SUPER_PASS
             valueFrom:
@@ -28,10 +28,10 @@ spec:
           - name: POSTGRES_USER
             valueFrom:
               secretKeyRef:
-                name: home-assistant-secrets
+                name: *app
                 key: HOME_ASSISTANT_STORAGE_POSTGRES_USERNAME
           - name: POSTGRES_PASS
             valueFrom:
               secretKeyRef:
-                name: home-assistant-secrets
+                name: *app
                 key: HOME_ASSISTANT_STORAGE_POSTGRES_PASSWORD
