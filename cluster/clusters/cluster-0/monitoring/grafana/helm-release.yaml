@@ -83,8 +83,8 @@ spec:
       auth.generic_oauth:
         enabled: true
         name: Authelia
-        client_id: "${SECRET_GRAFANA_OAUTH_CLIENT_ID}"
-        client_secret: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"
+        client_id: grafana
+        client_secret: "${SECRET_AUTHELIA_GRAFANA_CLIENT_SECRET}"
         scopes: "openid profile email groups"
         empty_scopes: false
         auth_url: "https://auth.${SECRET_DOMAIN}/api/oidc/authorization"
@@ -108,7 +108,7 @@ spec:
         plugins: /var/lib/grafana/plugins
         provisioning: /etc/grafana/provisioning
       server:
-        root_url: https://grafana.${INGRESS_DOMAIN}
+        root_url: https://grafana.${SECRET_DOMAIN}
 
     imageRenderer:
       enabled: true
