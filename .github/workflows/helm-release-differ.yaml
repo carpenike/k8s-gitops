@@ -4,13 +4,13 @@ name: Helm Release Differ
 on: # yamllint disable-line rule:truthy
   pull_request:
     branches:
-      - master
+      - main
     paths:
-      - "k8s/clusters/**.yaml"
+      - "cluster/clusters/**.yaml"
 
 env:
   # Currently no way to detect automatically
-  DEFAULT_BRANCH: master
+  DEFAULT_BRANCH: main
 
 jobs:
   detect-file-changes:
