@@ -24,47 +24,47 @@ nodes:
   - hostname: node-0.${domainName}
     ipAddress: 10.20.10.20
     installDisk: /dev/sda
-    networkInterfaces:
-      - interface: eth2
-        dhcp: true
-        vlans:
-          - vlanId: 40
-            dhcp: false
-            addresses:
-              - 10.40.10.20/16
+    # networkInterfaces:
+    #   - interface: eth2
+    #     dhcp: true
+    #     vlans:
+    #       - vlanId: 40
+    #         dhcp: false
+    #         addresses:
+    #           - 10.40.10.20/16
   - hostname: node-1.${domainName}
     ipAddress: 10.20.10.21
     installDisk: /dev/sda
-    networkInterfaces:
-      - interface: eth2
-        dhcp: true
-        vlans:
-          - vlanId: 40
-            dhcp: false
-            addresses:
-              - 10.40.10.21/16
+    # networkInterfaces:
+    #   - interface: eth2
+    #     dhcp: true
+    #     vlans:
+    #       - vlanId: 40
+    #         dhcp: false
+    #         addresses:
+    #           - 10.40.10.21/16
   - hostname: node-2.${domainName}
     ipAddress: 10.20.10.22
     installDisk: /dev/sda
-    networkInterfaces:
-      - interface: eth2
-        dhcp: true
-        vlans:
-          - vlanId: 40
-            dhcp: false
-            addresses:
-              - 10.40.10.22/16
+    # networkInterfaces:
+    #   - interface: eth2
+    #     dhcp: true
+    #     vlans:
+    #       - vlanId: 40
+    #         dhcp: false
+    #         addresses:
+    #           - 10.40.10.22/16
   - hostname: node-3.${domainName}
     ipAddress: 10.20.10.23
     installDisk: /dev/sda
-    networkInterfaces:
-      - interface: eth2
-        dhcp: true
-        vlans:
-          - vlanId: 40
-            dhcp: false
-            addresses:
-              - 10.40.10.23/16
+    # networkInterfaces:
+    #   - interface: eth2
+    #     dhcp: true
+    #     vlans:
+    #       - vlanId: 40
+    #         dhcp: false
+    #         addresses:
+    #           - 10.40.10.23/16
 
 controlPlane:
   inlinePatch:
