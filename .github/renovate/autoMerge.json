@@ -1,36 +1,22 @@
 {
-  "packageRules": [
+  packageRules: [
     {
-      "matchDatasources": ["docker"],
-      "automerge": true,
-      "automergeType": "branch",
-      "requiredStatusChecks": null,
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchPackageNames": [
-        "ghcr.io/k8s-at-home/jackett",
-        "ghcr.io/k8s-at-home/lidarr",
-        "ghcr.io/k8s-at-home/plex",
-        "ghcr.io/k8s-at-home/prowlarr",
-        "ghcr.io/k8s-at-home/radarr",
-        "ghcr.io/k8s-at-home/readarr",
-        "ghcr.io/k8s-at-home/sonarr"
-      ]
+      description: "Auto merge container digests",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "branch",
+      requiredStatusChecks: null,
+      matchUpdateTypes: ["digest"],
+      matchPackagePattern: ["ghcr.io/k8s-at-home", "ghcr.io/onedr0p"],
     },
     {
-      "matchDatasources": ["helm"],
-      "automerge": true,
-      "automergeType": "branch",
-      "requiredStatusChecks": null,
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchPackageNames": ["kube-prometheus-stack"]
+      description: "Auto merge containers",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "branch",
+      requiredStatusChecks: null,
+      matchUpdateTypes: ["minor", "patch"],
+      matchPackageNames: ["ghcr.io/onedr0p/prowlarr-nightly"],
     },
-    {
-      "matchManagers": ["github-actions"],
-      "automerge": true,
-      "automergeType": "branch",
-      "requiredStatusChecks": null,
-      "matchUpdateTypes": ["minor", "patch"],
-      "excludePackageNames": ["lycheeverse/lychee-action"]
-    }
-  ]
+  ],
 }
