@@ -69,9 +69,9 @@ spec:
         IP: 10 # must be an integer between 2 and VXLAN_GATEWAY_FIRST_DYNAMIC_IP (20 by default)
         ports:
           - type: udp
-            port: 54972
+            port: 61144
           - type: tcp
-            port: 54972
+            port: 61144
 
     routed_namespaces:
       - media
