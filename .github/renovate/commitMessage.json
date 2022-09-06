@@ -5,11 +5,11 @@
   "packageRules": [
     {
       "matchDatasources": ["helm"],
-      "commitMessageTopic": "Helm chart {{depName}}"
+      "commitMessageTopic": "chart {{depName}}"
     },
     {
       "matchDatasources": ["docker"],
-      "commitMessageTopic": "Docker image {{depName}}"
+      "commitMessageTopic": "image {{depName}}"
     }
   ]
 }

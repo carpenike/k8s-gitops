@@ -1,9 +1,11 @@
 ---
 ignore: |
+  charts/
+  docs/
   .private/
+  .terraform/
   .vscode/
   *.sops.*
-  ansible/roles/xanmanning.k3s/
   gotk-components.yaml
 extends: default
 rules:

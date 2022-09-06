@@ -1,0 +1,7 @@
+charts/
+docs/
+.private/
+.terraform/
+.vscode/
+*.sops.*
+gotk-components.yaml
