@@ -107,20 +107,20 @@ spec:
     - name: monitoring-vpa
   path: "./cluster/clusters/cluster-0/monitoring/goldilocks"
   prune: true
-# ---
-# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-# kind: Kustomization
-# metadata:
-#   name: monitoring-speedtest-exporter
-#   namespace: flux-system
-#   labels:
-#     component.cluster-0/part-of: definitions
-# spec:
-#   dependsOn:
-#     - name: monitoring-namespace
-#     - name: monitoring-kps-crds
-#   path: "./kubernetes/clusters/cluster-0/monitoring/speedtest-exporter"
-#   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: monitoring-speedtest-exporter
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: monitoring-namespace
+    - name: monitoring-kps-crds
+  path: "./cluster/clusters/cluster-0/monitoring/speedtest-exporter"
+  prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
