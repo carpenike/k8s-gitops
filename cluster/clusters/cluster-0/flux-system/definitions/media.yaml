@@ -144,17 +144,3 @@ spec:
     - name: media-radarr
   path: "./cluster/clusters/cluster-0/media/overseerr"
   prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: media-bazarr
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: media-namespace
-    - name: media-pvs
-  path: "./cluster/clusters/cluster-0/media/bazarr"
-  prune: true
