@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: loki
+  name: &app loki
   namespace: monitoring
 spec:
   interval: 15m
@@ -14,133 +14,141 @@ spec:
         kind: HelmRepository
         name: grafana-charts
         namespace: flux-system
-      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
   values:
-    image:
-      repository: ghcr.io/k8s-at-home/loki
-
-    replicas: 3
-
-    persistence:
-      enabled: false
-
-    config:
-      limits_config:
-        enforce_metric_name: false
-        reject_old_samples: true
-        reject_old_samples_max_age: 168h
-        ingestion_rate_mb: 16
-        ingestion_burst_size_mb: 1024
-        per_stream_rate_limit: 32MB
-        per_stream_rate_limit_burst: 64MB
-
-      ruler:
-        alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring:9093
-
-      auth_enabled: false
-
-      server:
-        http_listen_port: 3100
-
-      distributor:
-        ring:
-          kvstore:
-            store: memberlist
-
-      ingester:
-        lifecycler:
+    loki:
+      structuredConfig:
+        auth_enabled: false
+        server:
+          log_level: info
+          http_listen_port: 3100
+          grpc_listen_port: 9095
+        memberlist:
+          join_members: ["loki-memberlist"]
+        limits_config:
+          retention_period: 14d
+          enforce_metric_name: false
+          reject_old_samples: true
+          reject_old_samples_max_age: 168h
+          max_cache_freshness_per_query: 10m
+          split_queries_by_interval: 15m
+          ingestion_rate_mb: 8
+          ingestion_burst_size_mb: 16
+        schema_config:
+          configs:
+            - from: "2021-08-01"
+              store: boltdb-shipper
+              object_store: s3
+              schema: v11
+              index:
+                prefix: loki_index_
+                period: 24h
+        common:
+          path_prefix: /var/loki
+          replication_factor: 3
+          storage:
+            s3:
+              s3: null
+              insecure: true
+              s3forcepathstyle: true
           ring:
             kvstore:
               store: memberlist
-            replication_factor: 1
-          final_sleep: 0s
-        chunk_idle_period: 5m
-        chunk_retain_period: 30s
-
-      memberlist:
-        abort_if_cluster_join_fails: false
-        # Expose this port on all distributor, ingester
-        # and querier replicas.
-        bind_port: 7946
-        # You can use a headless k8s service for all distributor,
-        # ingester and querier components.
-        join_members:
-          # - loki-gossip-ring.logs.svc.cluster.local:7946
-          - loki-headless.logs.svc.cluster.local:7946
-        max_join_backoff: 1m
-        max_join_retries: 10
-        min_join_backoff: 1s
-
-      schema_config:
-        configs:
-          - from: "2020-10-24"
-            store: boltdb-shipper
-            object_store: s3
-            schema: v11
-            index:
-              prefix: index_
-              period: 24h
-
-      storage_config:
-        aws:
-          s3forcepathstyle: true
-          insecure: true
-        #     s3: "s3://${SECRET_LOKI_S3_ACCESS_KEY}:${SECRET_LOKI_S3_SECRET_KEY}@rook-ceph-rgw-object-store.rook-ceph.svc:80/loki"
-        #     s3forcepathstyle: true
-        boltdb_shipper:
-          active_index_directory: /data/loki/index
-          cache_location: /data/loki/index_cache
-          resync_interval: 5s
+        ruler:
+          enable_api: true
+          enable_alertmanager_v2: true
+          alertmanager_url: http://kube-prometheus-stack-alertmanager:9093
+          storage:
+            type: local
+            local:
+              directory: /rules
+          rule_path: /tmp/scratch
+          ring:
+            kvstore:
+              store: memberlist
+        distributor:
+          ring:
+            kvstore:
+              store: memberlist
+        compactor:
+          working_directory: /var/loki/boltdb-shipper-compactor
           shared_store: s3
-
-      compactor:
-        retention_enabled: true
-
-    ingress:
+          compaction_interval: 10m
+          retention_enabled: true
+          retention_delete_delay: 2h
+          retention_delete_worker_count: 150
+        ingester:
+          max_chunk_age: 1h
+          lifecycler:
+            ring:
+              kvstore:
+                store: memberlist
+        analytics:
+          reporting_enabled: false
+    gateway:
       enabled: true
-      ingressClassName: nginx
-      hosts:
-        - host: &host "loki.${SECRET_DOMAIN}"
-          paths:
-            - /
-      tls:
-        - hosts:
-            - *host
-
-    extraPorts:
-      - port: 7956
-        protocol: TCP
-        name: loki-gossip-ring
-        targetPort: 7946
-
-    serviceMonitor:
-      enabled: true
-
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                    - loki
-            topologyKey: "kubernetes.io/hostname"
-
+      replicas: 3
+      ingress:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "loki.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    write:
+      replicas: 3
+      persistence:
+        size: 10Gi
+        storageClass: ceph-block
+    read:
+      replicas: 3
+      extraVolumeMounts:
+        - name: loki-rules
+          mountPath: /rules/fake
+        - name: loki-rules-tmp
+          mountPath: /tmp/scratch
+        - name: loki-tmp
+          mountPath: /tmp/loki-tmp
+      extraVolumes:
+        - name: loki-rules
+          configMap:
+            name: loki-alerting-rules
+        - name: loki-rules-tmp
+          emptyDir: {}
+        - name: loki-tmp
+          emptyDir: {}
+      persistence:
+        size: 10Gi
+        storageClass: ceph-block
+    monitoring:
+      selfMonitoring:
+        enabled: false
+        grafanaAgent:
+          installOperator: false
   valuesFrom:
     - kind: ConfigMap
+      targetPath: loki.structuredConfig.common.storage.s3.bucketnames
       name: loki-ceph-bucket
       valuesKey: BUCKET_NAME
-      targetPath: config.storage_config.aws.bucketnames
     - kind: ConfigMap
+      targetPath: loki.structuredConfig.common.storage.s3.endpoint
       name: loki-ceph-bucket
       valuesKey: BUCKET_HOST
-      targetPath: config.storage_config.aws.endpoint
     - kind: Secret
+      targetPath: loki.structuredConfig.common.storage.s3.access_key_id
       name: loki-ceph-bucket
       valuesKey: AWS_ACCESS_KEY_ID
-      targetPath: config.storage_config.aws.access_key_id
     - kind: Secret
+      targetPath: loki.structuredConfig.common.storage.s3.secret_access_key
       name: loki-ceph-bucket
       valuesKey: AWS_SECRET_ACCESS_KEY
-      targetPath: config.storage_config.aws.secret_access_key
