@@ -187,14 +187,14 @@ spec:
       enabled: true
 
     kubeControllerManager:
-      enabled: true
+      enabled: false
       endpoints:
         # - 10.20.0.10
         - 10.20.0.11
         - 10.20.0.12
 
     kubeScheduler:
-      enabled: true
+      enabled: false
       endpoints:
         # - 10.20.0.10
         - 10.20.0.11
@@ -204,7 +204,7 @@ spec:
       enabled: false
 
     kubeEtcd:
-      enabled: true
+      enabled: false
       endpoints:
         # - 10.20.0.10
         - 10.20.0.11
