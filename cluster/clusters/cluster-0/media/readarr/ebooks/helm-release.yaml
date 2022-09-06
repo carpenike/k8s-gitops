@@ -42,7 +42,7 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/readarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: &host "audio.${SECRET_DOMAIN}"
+          - host: &host "ebooks.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
