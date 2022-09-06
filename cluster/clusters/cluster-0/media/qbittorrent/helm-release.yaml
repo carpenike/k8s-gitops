@@ -31,12 +31,7 @@ spec:
     env:
       TZ: "America/New_York"
       QBITTORRENT__PORT: &port 80
-      QBITTORRENT__BT_PORT: &port-bt 56059
-
-    dnsConfig:
-      options:
-        - name: ndots
-          value: "1"
+      QBITTORRENT__BT_PORT: &port-bt 61144
 
     settings:
       automaticPortSetup: false
