@@ -7,7 +7,7 @@ resources:
   - secret.sops.yaml
   - helm-release.yaml
 configMapGenerator:
-  - name: frigate-config
+  - name: frigate
     files:
       - config.yaml
 generatorOptions:
