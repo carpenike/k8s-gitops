@@ -1,7 +1,7 @@
 mqtt:
   host: mosquitto
   topic_prefix: frigate
-  user: { FRIGATE_MQTT_USER }
+  user: "{FRIGATE_MQTT_USER}"
   password: "{FRIGATE_MQTT_PASSWORD}"
 
 database:
