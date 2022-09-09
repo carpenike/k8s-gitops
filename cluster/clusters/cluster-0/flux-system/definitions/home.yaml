@@ -65,6 +65,20 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
+  name: home-hass-code-server
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  path: "./cluster/clusters/cluster-0/home-automation/home-assistant/code-server"
+  prune: true
+  dependsOn:
+    - name: home-namespace
+    - name: home-hass-app
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
   name: home-frigate
   namespace: flux-system
   labels:
