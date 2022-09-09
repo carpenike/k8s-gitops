@@ -2,6 +2,7 @@ mqtt:
   host: mosquitto
   topic_prefix: frigate
   user: admin
+  password: "{FRIGATE_MQTT_PASSWORD}"
 
 database:
   path: /data/frigate.db
