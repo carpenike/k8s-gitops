@@ -70,7 +70,7 @@ metadata:
   labels:
     component.cluster-0/part-of: definitions
 spec:
-  path: "./cluster/clusters/cluster-0/home-automation/home-assistant/code-server"
+  path: "./cluster/clusters/cluster-0/home/home-assistant/code-server"
   prune: true
   dependsOn:
     - name: home-namespace
