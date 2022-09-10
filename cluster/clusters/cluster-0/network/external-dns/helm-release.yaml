@@ -23,7 +23,7 @@ spec:
       retries: 5
   values:
     interval: 2m
-    # logLevel: debug
+    logLevel: debug
     provider: cloudflare
     env:
       - name: CF_API_EMAIL
