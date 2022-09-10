@@ -141,16 +141,3 @@ spec:
     - name: network-namespace
   path: "./cluster/clusters/cluster-0/network/omada/controller"
   prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: network-dns-update
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: network-namespace
-  path: "./cluster/clusters/cluster-0/network/dns-update"
-  prune: true
