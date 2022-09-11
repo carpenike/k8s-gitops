@@ -41,6 +41,8 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
+          auth.home.arpa/enabled: "true"
+          external-dns.home.arpa/enabled: "true"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
