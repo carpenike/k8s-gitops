@@ -10,3 +10,6 @@ data:
 
   # Networks
   NETWORK_SERVERS_CIDR: 10.20.0.0/16
+
+  # Timezone
+  TIMEZONE: "America/New_York"
