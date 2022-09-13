@@ -713,7 +713,7 @@ config:
         protocol: tcp
         interface: wan
         port: 32400
-        address: ${address_book.services.plex.ipv4_addr}
+        address: ${address_book.services.k8s_plex.ipv4_addr}
       - description: Force DNS for IoT
         port: 53
         protocol: tcp_udp
