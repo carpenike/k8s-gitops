@@ -1,7 +1,5 @@
----
-
-# Identified with `terraform console, cidrhost("10.20.0.0/16",1XXXX)`
 hosts:
+  # Identified with `terraform console, cidrhost("10.20.0.0/16",1XXXX)`
   ########################
   ### Non-DHCP Clients ###
   ########################
