@@ -3,7 +3,7 @@ resource "vyos_config_block_tree" "nat-source" {
 
   configs = merge([
     {
-      "rule 100 description"         = "LAN -> WAN"
+      "rule 100 description"         = "MGMT -> WAN"
       "rule 100 outbound-interface"  = var.config.zones.wan.interface
       "rule 100 destination address" = "0.0.0.0/0"
       "rule 100 translation address" : "masquerade"
@@ -12,7 +12,7 @@ resource "vyos_config_block_tree" "nat-source" {
   )
   depends_on = [
     vyos_config_block_tree.interface-wan,
-    vyos_config_block_tree.interface-lan
+    vyos_config_block_tree.interface-mgmt
   ]
 }
 
@@ -35,6 +35,6 @@ resource "vyos_config_block_tree" "nat-destination" {
   )
   depends_on = [
     vyos_config_block_tree.interface-wan,
-    vyos_config_block_tree.interface-lan
+    vyos_config_block_tree.interface-mgmt
   ]
 }

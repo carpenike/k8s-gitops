@@ -14,7 +14,7 @@ provider "remote" {
     host             = local.config.fqdn
     port             = local.config.ssh.port
     user             = local.config.ssh.user
-    private_key_path = pathexpand("~/.ssh/identities/personal/id_personal")
+    private_key_path = pathexpand("~/.ssh/identities/tf/id_tf")
 
     sudo = true
   }
