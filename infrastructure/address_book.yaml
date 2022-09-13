@@ -1,4 +1,6 @@
 ---
+
+# Identified with `terraform console, cidrhost("10.20.0.0/16",1XXXX)`
 hosts:
   ########################
   ### Non-DHCP Clients ###
@@ -15,7 +17,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 00:a0:98:5a:f7:f0
-    ipv4_addr: 10.20.0.20
+    ipv4_hostid: 20
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -26,7 +28,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 64:00:6a:71:38:52
-    ipv4_addr: 10.20.0.21
+    ipv4_hostid: 21
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -37,7 +39,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 34:17:eb:dd:36:b9
-    ipv4_addr: 10.20.0.22
+    ipv4_hostid: 22
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -49,28 +51,28 @@ hosts:
     aliases:
       - nas.holthome.net
     dhcp_client: false
-    ipv4_addr: 10.20.0.10
+    ipv4_hostid: 10
     groups:
       - nas_nodes
   nas-0-ipmi:
     hostname: nas-0-ipmi
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.10
+    ipv4_hostid: 10
     groups:
       - ipmi
   nas-1:
     hostname: nas-1
     network: servers
     dhcp_client: false
-    ipv4_addr: 10.20.0.11
+    ipv4_hostid: 11
     groups:
       - nas_nodes
   nas-1-ipmi:
     hostname: nas-1-ipmi
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.11
+    ipv4_hostid: 11
     groups:
       - ipmi
   node-0:
@@ -78,7 +80,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 0c:c4:7a:8e:90:f4
-    ipv4_addr: 10.20.10.20
+    ipv4_hostid: 2580
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -88,7 +90,7 @@ hosts:
     hostname: node-0-ipmi
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.20
+    ipv4_hostid: 20
     groups:
       - ipmi
   node-1:
@@ -96,7 +98,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 0c:c4:7a:8f:9f:f2
-    ipv4_addr: 10.20.10.21
+    ipv4_hostid: 2581
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -106,7 +108,7 @@ hosts:
     hostname: node-1-ipmi
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.21
+    ipv4_hostid: 21
     groups:
       - ipmi
   node-2:
@@ -114,7 +116,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 0c:c4:7a:8f:3e:04
-    ipv4_addr: 10.20.10.22
+    ipv4_hostid: 2582
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -124,7 +126,7 @@ hosts:
     hostname: node-2-ipmi
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.22
+    ipv4_hostid: 22
     groups:
       - ipmi
   node-3:
@@ -132,7 +134,7 @@ hosts:
     network: servers
     dhcp_client: true
     mac_addr: 0c:c4:7a:eb:21:fc
-    ipv4_addr: 10.20.10.23
+    ipv4_hostid: 2583
     groups:
       - k8s_nodes
       - sonos_controllers
@@ -142,57 +144,44 @@ hosts:
     hostname: node-3-ipmi
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.23
+    ipv4_hostid: 23
     groups:
       - ipmi
   pki:
     hostname: pki
     network: servers
     dhcp_client: false
-    ipv4_addr: 10.20.0.15
+    ipv4_hostid: 15
     groups:
       - pki
   sidero:
     hostname: sidero
     network: servers
     dhcp_client: false
-    ipv4_addr: 10.20.10.18
+    ipv4_hostid: 2578
     groups:
       - sidero
   sw-3com:
     hostname: sw-3com
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.254
+    ipv4_hostid: 254
     groups:
       - networking
   apc-ups:
     hostname: apc-ups
     network: mgmt
     dhcp_client: false
-    ipv4_addr: 10.9.18.245
+    ipv4_hostid: 245
     groups:
       - apc
       - snmp_nodes
-  azure-bgp-endpoint-1:
-    hostname: azure-bgp-endpoint-1
-    network: wan
-    dhcp_client: false
-    ipv4_addr: 172.16.11.244
-    groups:
-      - azure_bgp
-  azure-bgp-endpoint-2:
-    hostname: azure-bgp-endpoint-2
-    network: wan
-    dhcp_client: false
-    ipv4_addr: 172.16.11.245
-    groups:
-      - azure_bgp
+
   k8s-hass-homekit:
     hostname: k8s-hass-homekit
     network: servers
     dhcp_client: false
-    ipv4_addr: 10.45.10.15
+    ipv4_hostid: 2575
     groups:
       - homekit_devices
   ####################
@@ -214,7 +203,7 @@ hosts:
     mac_addr: 80:2a:a8:10:ed:da
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.100
+    ipv4_hostid: 100
     groups:
       - unifi_devices
   ubnt-basement:
@@ -222,7 +211,7 @@ hosts:
     mac_addr: 80:2a:a8:56:70:a4
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.101
+    ipv4_hostid: 101
     groups:
       - unifi_devices
   ubnt-10gbswitch:
@@ -230,7 +219,7 @@ hosts:
     mac_addr: b4:fb:e4:56:cf:8e
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.102
+    ipv4_hostid: 102
     groups:
       - unifi_devices
   ubnt-16poeswitch:
@@ -238,7 +227,7 @@ hosts:
     mac_addr: b4:fb:e4:1c:a1:f6
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.103
+    ipv4_hostid: 103
     groups:
       - unifi_devices
   ap-patio:
@@ -246,7 +235,7 @@ hosts:
     mac_addr: 00:31:92:8a:7e:ee
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.105
+    ipv4_hostid: 105
     groups:
       - tplink_eap_devices
   sw-0:
@@ -254,7 +243,7 @@ hosts:
     mac_addr: c0:06:c3:c9:72:03
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.106
+    ipv4_hostid: 106
     groups:
       - tplink_eap_devices
   ap-upstairs:
@@ -262,7 +251,7 @@ hosts:
     mac_addr: c0:06:c3:aa:81:28
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.107
+    ipv4_hostid: 107
     groups:
       - tplink_eap_devices
   ap-basement:
@@ -270,7 +259,7 @@ hosts:
     mac_addr: c0:06:c3:aa:84:ea
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.108
+    ipv4_hostid: 108
     groups:
       - tplink_eap_devices
   ap-garage:
@@ -278,7 +267,7 @@ hosts:
     mac_addr: 00:31:92:8A:74:A6
     network: mgmt
     dhcp_client: true
-    ipv4_addr: 10.9.18.109
+    ipv4_hostid: 109
     groups:
       - tplink_eap_devices
   ###
@@ -297,7 +286,7 @@ hosts:
     mac_addr: 8a:3c:36:ca:48:4e
     network: wired
     dhcp_client: true
-    ipv4_addr: 10.10.0.200
+    ipv4_hostid: 200
     groups:
       - sonos_controllers
       - nfs_clients
@@ -310,7 +299,7 @@ hosts:
     mac_addr: 52:54:00:f5:e6:19
     network: wired
     dhcp_client: true
-    ipv4_addr: 10.10.0.198
+    ipv4_hostid: 198
     groups:
       - sonos_controllers
       - nfs_clients
@@ -324,7 +313,7 @@ hosts:
     mac_addr: 00:1c:2d:05:22:80
     network: wired
     dhcp_client: true
-    ipv4_addr: 10.10.0.50
+    ipv4_hostid: 50
     groups:
       - flex_radio
   ### Wireless ###
@@ -333,7 +322,7 @@ hosts:
     mac_addr: 80:d6:05:3b:32:20
     network: wireless
     dhcp_client: true
-    ipv4_addr: 10.30.50.240
+    ipv4_hostid: 13040
     groups:
       - sonos_controllers
       - media_players
@@ -344,7 +333,7 @@ hosts:
     mac_addr: 5c:52:30:2b:6a:f7
     network: wireless
     dhcp_client: true
-    ipv4_addr: 10.30.50.200
+    ipv4_hostid: 13000
     groups:
       - sonos_controllers
       - media_players
@@ -365,7 +354,7 @@ hosts:
     mac_addr: bc:83:85:cf:53:82
     network: wireless
     dhcp_client: true
-    ipv4_addr: 10.30.50.250
+    ipv4_hostid: 13050
     groups:
       - sonos_controllers
       - media_players
@@ -377,7 +366,7 @@ hosts:
     mac_addr: 88:b9:45:32:84:e4
     network: wireless
     dhcp_client: true
-    ipv4_addr: 10.30.50.201
+    ipv4_hostid: 13001
     groups:
       - sonos_controllers
       - media_players
@@ -397,7 +386,7 @@ hosts:
     mac_addr: 50:1a:c5:e9:75:af
     network: wireless
     dhcp_client: true
-    ipv4_addr: 10.30.50.251
+    ipv4_hostid: 13051
     groups:
       - sonos_controllers
       - media_players
@@ -408,7 +397,7 @@ hosts:
     mac_addr: 10:00:20:33:a3:84
     network: wireless
     dhcp_client: true
-    ipv4_addr: 10.30.50.202
+    ipv4_hostid: 13052
     groups:
       - media_players
       - print_clients
@@ -420,7 +409,7 @@ hosts:
     mac_addr: f8:0d:ac:7b:d9:90
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.5
+    ipv4_hostid: 12805
     groups:
       - printers
       - smb_clients
@@ -429,7 +418,7 @@ hosts:
     mac_addr: 58:2f:40:7c:25:19
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.10
+    ipv4_hostid: 12810
     groups:
       - nintendo_switches
   nintendo-switch-2:
@@ -437,7 +426,7 @@ hosts:
     mac_addr: 48:a5:e7:79:07:ef
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.11
+    ipv4_hostid: 12811
     groups:
       - nintendo_switches
   nvidia-shield-tv-livingroom:
@@ -445,7 +434,7 @@ hosts:
     mac_addr: 00:04:4b:83:12:01
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.12
+    ipv4_hostid: 12812
     groups:
       - media_players
       - nvidia_shields
@@ -459,7 +448,7 @@ hosts:
     mac_addr: 48:b0:2d:13:b7:a0
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.13
+    ipv4_hostid: 12813
     groups:
       - media_players
       - nvidia_shields
@@ -473,7 +462,7 @@ hosts:
     mac_addr: 48:b0:2d:13:d1:d6
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.14
+    ipv4_hostid: 12814
     groups:
       - media_players
       - nvidia_shields
@@ -487,7 +476,7 @@ hosts:
     mac_addr: 74:ec:b2:5a:c3:47
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.15
+    ipv4_hostid: 12815
     groups:
       - media_players
       - android_tvs
@@ -497,7 +486,7 @@ hosts:
     mac_addr: 4c:3b:df:db:0e:92
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.16
+    ipv4_hostid: 12816
     groups:
       - media_players
       - xbox
@@ -506,7 +495,7 @@ hosts:
     mac_addr: 00:18:dd:04:cb:77
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.70
+    ipv4_hostid: 12870
     groups:
       - media_players
       - hd_homeruns
@@ -515,7 +504,7 @@ hosts:
     mac_addr: 30:fd:38:75:0f:a1
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.112
+    ipv4_hostid: 12912
     groups:
       - media_players
       - google_device
@@ -524,7 +513,7 @@ hosts:
     mac_addr: a4:77:33:f2:65:38
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.114
+    ipv4_hostid: 12914
     groups:
       - media_players
       - google_device
@@ -533,7 +522,7 @@ hosts:
     mac_addr: 34:7e:5c:1e:04:82
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.150
+    ipv4_hostid: 12950
     groups:
       - media_players
       - sonos_players
@@ -543,7 +532,7 @@ hosts:
     mac_addr: 34:7e:5c:1e:04:4c
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.158
+    ipv4_hostid: 12958
     groups:
       - media_players
       - sonos_players
@@ -553,7 +542,7 @@ hosts:
     mac_addr: 5c:aa:fd:4e:d2:9e
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.151
+    ipv4_hostid: 12951
     groups:
       - media_players
       - sonos_players
@@ -563,7 +552,7 @@ hosts:
     mac_addr: 5c:aa:fd:4e:d6:24
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.152
+    ipv4_hostid: 12952
     groups:
       - media_players
       - sonos_players
@@ -573,7 +562,7 @@ hosts:
     mac_addr: 48:a6:b8:f9:11:b6
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.153
+    ipv4_hostid: 12953
     groups:
       - media_players
       - sonos_players
@@ -583,7 +572,7 @@ hosts:
     mac_addr: 48:a6:b8:e0:cd:ec
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.154
+    ipv4_hostid: 12954
     groups:
       - media_players
       - sonos_players
@@ -593,7 +582,7 @@ hosts:
     mac_addr: 48:a6:b8:68:81:b5
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.155
+    ipv4_hostid: 12955
     groups:
       - media_players
       - sonos_players
@@ -603,7 +592,7 @@ hosts:
     mac_addr: 54:2a:1b:87:58:10
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.156
+    ipv4_hostid: 12956
     groups:
       - media_players
       - sonos_players
@@ -613,7 +602,7 @@ hosts:
     mac_addr: 48:a6:b8:b3:9f:e7
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.157
+    ipv4_hostid: 12957
     groups:
       - media_players
       - sonos_players
@@ -623,7 +612,7 @@ hosts:
     mac_addr: 20:3d:bd:6b:24:d2
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.170
+    ipv4_hostid: 12970
     groups:
       - media_players
       - lg_tvs
@@ -632,7 +621,7 @@ hosts:
     mac_addr: ac:f1:08:59:b5:46
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.171
+    ipv4_hostid: 12971
     groups:
       - media_players
       - lg_tvs
@@ -641,7 +630,7 @@ hosts:
     mac_addr: 44:61:32:f0:99:8b
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.180
+    ipv4_hostid: 12980
     groups:
       - ecobee
       - homekit_devices
@@ -650,7 +639,7 @@ hosts:
     mac_addr: ec:b5:fa:9c:5a:d3
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.181
+    ipv4_hostid: 12981
     groups:
       - hue_bridge
       - homekit_devices
@@ -659,7 +648,7 @@ hosts:
     mac_addr: 48:3f:da:52:ec:3c
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.182
+    ipv4_hostid: 12982
     groups:
       - flair
   zigbee-controller:
@@ -667,7 +656,7 @@ hosts:
     mac_addr: 94:b9:7e:6b:bb:d3
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.185
+    ipv4_hostid: 12985
     groups:
       - zigbee_controllers
   miele-dishwasher:
@@ -675,7 +664,7 @@ hosts:
     mac_addr: 00:1d:63:27:64:45
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.186
+    ipv4_hostid: 12986
     groups:
       - miele_dishwashers
   lifx-bar-ceiling-1:
@@ -683,7 +672,7 @@ hosts:
     mac_addr: d0:73:d5:20:16:2a
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.190
+    ipv4_hostid: 12990
     groups:
       - lifx_devices
       - homekit_devices
@@ -692,7 +681,7 @@ hosts:
     mac_addr: d0:73:d5:20:18:7d
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.191
+    ipv4_hostid: 12991
     groups:
       - lifx_devices
       - homekit_devices
@@ -701,7 +690,7 @@ hosts:
     mac_addr: d0:73:d5:20:24:d5
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.192
+    ipv4_hostid: 12992
     groups:
       - lifx_devices
       - homekit_devices
@@ -710,7 +699,7 @@ hosts:
     mac_addr: d0:73:d5:11:55:05
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.195
+    ipv4_hostid: 12995
     groups:
       - lifx_devices
       - homekit_devices
@@ -719,7 +708,7 @@ hosts:
     mac_addr: d0:73:d5:11:59:1c
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.196
+    ipv4_hostid: 12996
     groups:
       - lifx_devices
       - homekit_devices
@@ -728,7 +717,7 @@ hosts:
     mac_addr: 9c:04:a0:71:66:26
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.197
+    ipv4_hostid: 12997
     groups:
       - govee_devices
   energy-meter:
@@ -736,7 +725,7 @@ hosts:
     mac_addr: 3c:61:05:2a:e4:a0
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.200
+    ipv4_hostid: 13000
     groups:
       - esphome_devices
   utility-closet-sensors:
@@ -744,7 +733,7 @@ hosts:
     mac_addr: 7c:9e:bd:f5:2e:b0
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.201
+    ipv4_hostid: 13001
     groups:
       - esphome_devices
   sunroom-corner-lights:
@@ -752,7 +741,7 @@ hosts:
     mac_addr: e8:68:e7:f1:5a:c3
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.202
+    ipv4_hostid: 13002
     groups:
       - esphome_devices
   front-under-bar-lights:
@@ -760,7 +749,7 @@ hosts:
     mac_addr: 84:cc:a8:af:a2:ca
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.203
+    ipv4_hostid: 13003
     groups:
       - esphome_devices
   garage-front-lights:
@@ -768,7 +757,7 @@ hosts:
     mac_addr: 68:c6:3a:fb:70:ae
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.204
+    ipv4_hostid: 13004
     groups:
       - esphome_devices
   patio-door-lights:
@@ -776,7 +765,7 @@ hosts:
     mac_addr: 68:c6:3a:fb:42:b6
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.205
+    ipv4_hostid: 13005
     groups:
       - esphome_devices
   well-switch:
@@ -784,7 +773,7 @@ hosts:
     mac_addr: dc:4f:22:4c:98:98
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.206
+    ipv4_hostid: 13006
     groups:
       - esphome_devices
   master-bathroom-counter-light:
@@ -792,7 +781,7 @@ hosts:
     mac_addr: e8:68:e7:f0:45:cd
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.207
+    ipv4_hostid: 13007
     groups:
       - esphome_devices
   garage-door:
@@ -800,7 +789,7 @@ hosts:
     mac_addr: e8:db:84:d4:cd:53
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.208
+    ipv4_hostid: 13008
     groups:
       - esphome_devices
   porch-ceiling-lights:
@@ -808,7 +797,7 @@ hosts:
     mac_addr: 68:c6:3a:fb:67:e3
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.209
+    ipv4_hostid: 13009
     groups:
       - esphome_devices
   garage-side-lights:
@@ -816,7 +805,7 @@ hosts:
     mac_addr: 68:c6:3a:fb:3b:78
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.210
+    ipv4_hostid: 13010
     groups:
       - esphome_devices
   sunroom-window-lights:
@@ -824,7 +813,7 @@ hosts:
     mac_addr: 3c:61:05:eb:e0:29
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.211
+    ipv4_hostid: 13011
     groups:
       - esphome_devices
   upstairs-caydan-switch-lights:
@@ -832,7 +821,7 @@ hosts:
     mac_addr: 8c:aa:b5:5f:97:26
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.212
+    ipv4_hostid: 13012
     groups:
       - esphome_devices
   upstairs-taylor-switch-lights:
@@ -840,7 +829,7 @@ hosts:
     mac_addr: e8:db:84:d2:e0:67
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.213
+    ipv4_hostid: 13013
     groups:
       - esphome_devices
   upstairs-jayme-switch-lights:
@@ -848,7 +837,7 @@ hosts:
     mac_addr: e8:db:84:d2:2b:fb
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.214
+    ipv4_hostid: 13014
     groups:
       - esphome_devices
   august-front-door:
@@ -856,7 +845,7 @@ hosts:
     mac_addr: 78:9c:85:0d:91:4d
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.220
+    ipv4_hostid: 13020
     groups:
       - august_locks
       - homekit_devices
@@ -865,7 +854,7 @@ hosts:
     mac_addr: 78:9c:85:21:7c:01
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.221
+    ipv4_hostid: 13021
     groups:
       - august_locks
       - homekit_devices
@@ -874,7 +863,7 @@ hosts:
     mac_addr: 94:b5:55:26:37:c4
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.240
+    ipv4_hostid: 13040
     groups:
       - espresense_devices
       - mqtt_devices
@@ -883,7 +872,7 @@ hosts:
     mac_addr: 7c:df:a1:e6:d5:ac
     network: iot
     dhcp_client: true
-    ipv4_addr: 10.40.50.245
+    ipv4_hostid: 13045
     groups:
       - openspot_devices
   ####
@@ -893,7 +882,7 @@ hosts:
     mac_addr: 58:50:ed:2d:47:4b
     network: video
     dhcp_client: true
-    ipv4_addr: 10.50.50.100
+    ipv4_hostid: 12900
     groups:
       - rtsp
   amcrest-frontdoor:
@@ -901,7 +890,7 @@ hosts:
     mac_addr: 9c:8e:cd:30:99:4d
     network: video
     dhcp_client: true
-    ipv4_addr: 10.50.50.101
+    ipv4_hostid: 12901
     groups:
       - rtsp
       - amcrest_cameras
@@ -910,7 +899,7 @@ hosts:
     mac_addr: d0:3f:27:01:4a:0f
     network: video
     dhcp_client: true
-    ipv4_addr: 10.50.50.102
+    ipv4_hostid: 12902
     groups:
       - rtsp
       - wyze_cameras
