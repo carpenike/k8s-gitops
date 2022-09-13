@@ -75,6 +75,7 @@ accept_mdns:
     port: mdns
 
 accept_vyos_coredns:
+  action: accept
   protocol: tcp_udp
   destination:
     port: domain,domain-s
