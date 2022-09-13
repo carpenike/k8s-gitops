@@ -1,13 +1,9 @@
----
-name: "Schedule - Check links"
+name: "Schedule: Link Checker"
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
-  push:
-    branches:
-      - main
 
 jobs:
   link-checker:
@@ -29,10 +25,6 @@ jobs:
         id: lychee
         env:
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
-        with:
-          args: --verbose --no-progress .
-          output: ./lychee.md
-          format: markdown
 
       - name: Find Link Checker Issue
         id: link-checker-issue
@@ -45,9 +37,9 @@ jobs:
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@v4
         with:
-          title: Link Checker Dashboard
-          issue-number: "${{ steps.link-checker-issue.outputs.issue_number }}"
-          content-filepath: ./lychee.md
+          title: Broken links detected in docs 🔗
+          issue-number: "${{ steps.link-checker-issue.outputs.issue-number }}"
+          content-filepath: ./lychee/out.md
           token: "${{ steps.generate-token.outputs.token }}"
           labels: |
             link-checker

@@ -1,5 +1,5 @@
 ---
-name: Meta - Labeler
+name: "Meta: Labeler"
 
 on: # yamllint disable-line rule:truthy
   pull_request:
@@ -21,5 +21,5 @@ jobs:
       - name: Labeler
         uses: actions/labeler@v4
         with:
-          repo-token: "${{ steps.generate-token.outputs.token }}"
           configuration-path: .github/labeler.yaml
+          repo-token: "${{ steps.generate-token.outputs.token }}"

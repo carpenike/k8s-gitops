@@ -1,5 +1,5 @@
 ---
-name: Helm Release Differ
+name: "Helm Release Differ"
 
 on: # yamllint disable-line rule:truthy
   pull_request:
@@ -20,7 +20,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: dorny/paths-filter@v2
+      - name: Filter Helm Releases
+        uses: dorny/paths-filter@v2
         id: filter
         with:
           list-files: json
@@ -57,7 +58,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.6.3
+          version: latest
 
       - name: Helm Release Differ
         id: diff
@@ -75,7 +76,7 @@ jobs:
         with:
           issue-number: "${{ github.event.pull_request.number }}"
           comment-author: "carpenike[bot]"
-          body-includes: helm-release.yaml
+          body-includes: "${{ matrix.file }}"
 
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v2
