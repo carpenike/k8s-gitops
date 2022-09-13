@@ -9,7 +9,7 @@ resource "vyos_config_block_tree" "container-udp-broadcast-relay-mdns" {
 
     "environment CFG_ID value"        = "2"
     "environment CFG_PORT value"      = "5353"
-    "environment CFG_DEV value"       = "${var.config.zones.trusted.interface};${var.config.zones.iot.interface}"
+    "environment CFG_DEV value"       = "${var.config.zones.servers.interface};${var.config.zones.iot.interface};${var.config.zones.wireless.interface}"
     "environment CFG_MULTICAST value" = "224.0.0.251"
     "environment SEPARATOR value"     = ";"
   }
@@ -26,7 +26,7 @@ resource "vyos_config_block_tree" "container-udp-broadcast-relay-sonos" {
 
     "environment CFG_ID value"        = "1"
     "environment CFG_PORT value"      = "1900"
-    "environment CFG_DEV value"       = "${var.config.zones.trusted.interface};${var.config.zones.iot.interface}"
+    "environment CFG_DEV value"       = "${var.config.zones.servers.interface};${var.config.zones.iot.interface};${var.config.zones.wireless.interface}"
     "environment CFG_MULTICAST value" = "239.255.255.250"
     "environment SEPARATOR value"     = ";"
   }
