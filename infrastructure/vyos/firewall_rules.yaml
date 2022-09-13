@@ -1,6 +1,4 @@
-# -------------------------
-# Firewall Rule definition
-# -------------------------
+---
 accept_established:
   action: accept
   state:
@@ -657,14 +655,6 @@ accept_flex_discovery_from_flex_radio:
   source:
     address-group: flex_radio
     port: 4992
-# accept_flex_radio_to_flex_clients_udp:
-#   action: accept
-#   protocol: udp
-#   source:
-#     address-group: flex_radio
-#   destination:
-#     address-group: flex_clients
-#     port: 4992,4993
 accept_bgp_from_azure_to_local:
   action: accept
   protocol: tcp
