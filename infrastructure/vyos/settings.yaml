@@ -233,8 +233,7 @@ config:
               - drop_invalid: null
               - accept_http: null
               - accept_https: null
-              # - accept_snmp_to_snmp_nodes_from_k8s_nodes: null
-              # - accept_sidero_to_server_ipmi: null
+              - accept_snmp_to_snmp_nodes_from_k8s_nodes: null
           - zones:
               - wireless
             default: drop
@@ -268,7 +267,7 @@ config:
               - drop_invalid: null
               - accept_igmp: null
               - accept_mdns: null
-              # - accept_discovery_from_sonos_players: null
+              - accept_discovery_from_sonos_players: null
           - zones:
               - servers
             default: drop
@@ -276,8 +275,8 @@ config:
               - accept_established: null
               - accept_related: null
               - drop_invalid: null
-              # - accept_mdns: null
-              # - accept_resilio_from_k8s_nodes: null
+              - accept_mdns: null
+              - accept_resilio_from_k8s_nodes: null
           - zones:
               - wan
             default: drop
@@ -285,8 +284,8 @@ config:
               - accept_established: null
               - accept_related: null
               - drop_invalid: null
-              # - accept_smart_link_to_flex_radio_tcp: null
-              # - accept_smart_link_to_flex_radio_udp: null
+              - accept_smart_link_to_flex_radio_tcp: null
+              - accept_smart_link_to_flex_radio_udp: null
           - zones:
               - wireless
             default: drop
@@ -295,8 +294,8 @@ config:
               - accept_related: null
               - drop_invalid: null
               - accept_icmp: null
-              # - accept_smart_link_to_flex_radio_from_flex_clients_tcp: null
-              # - accept_smart_link_to_flex_radio_from_flex_clients_udp: null
+              - accept_smart_link_to_flex_radio_from_flex_clients_tcp: null
+              - accept_smart_link_to_flex_radio_from_flex_clients_udp: null
           - zones:
               - wg_trusted
             default: accept
@@ -313,10 +312,10 @@ config:
               - accept_established: null
               - accept_related: null
               - drop_invalid: null
-              # - accept_udp_from_sonos_players_to_sonos_controllers: null
-              # - accept_tcp_from_sonos_players_to_sonos_controllers: null
-              # - accept_gamestream_from_gamestream_clients_tcp: null
-              # - accept_gamestream_from_gamestream_clients_udp: null
+              - accept_udp_from_sonos_players_to_sonos_controllers: null
+              - accept_tcp_from_sonos_players_to_sonos_controllers: null
+              - accept_gamestream_from_gamestream_clients_tcp: null
+              - accept_gamestream_from_gamestream_clients_udp: null
 
     rescue:
       interface: bond0.5
