@@ -130,7 +130,6 @@ config:
               - accept_ssh: null
               - accept_discovery_from_sonos_controllers: null
               - accept_flex_discovery_from_flex_clients: null
-              
 
     wan:
       description: WAN zone
@@ -456,7 +455,6 @@ config:
               - accept_discovery_from_sonos_controllers: null
               - accept_flex_discovery_from_flex_radio: null
 
-
     wireless:
       interface: bond0.30
       dhcp:
@@ -552,15 +550,15 @@ config:
               - accept_icmp: null
               - accept_http: null
               - accept_https: null
-              # - accept_app_control_from_sonos_controllers_tcp: null
-              # - accept_app_control_from_sonos_controllers_udp: null
-              # - accept_media_players_to_hdhr: null
-              # - accept_chromecast_to_chromecast_players_from_chromecast_clients: null
-              # - accept_print_clients_to_printers: null
-              # - accept_ecobee_from_ecobee_clients: null
-              # - accept_airplay_to_airplay_devices_from_airplay_clients_tcp: null
-              # - accept_airplay_to_airplay_devices_from_airplay_clients_udp: null
-              # - accept_hue_clients_to_hue_bridge: null
+              - accept_app_control_from_sonos_controllers_tcp: null
+              - accept_app_control_from_sonos_controllers_udp: null
+              - accept_media_players_to_hdhr: null
+              - accept_chromecast_to_chromecast_players_from_chromecast_clients: null
+              - accept_print_clients_to_printers: null
+              - accept_ecobee_from_ecobee_clients: null
+              - accept_airplay_to_airplay_devices_from_airplay_clients_tcp: null
+              - accept_airplay_to_airplay_devices_from_airplay_clients_udp: null
+              - accept_hue_clients_to_hue_bridge: null
           - zones:
               - servers
             default: drop
@@ -570,15 +568,15 @@ config:
               - accept_related: null
               - drop_invalid: null
               - accept_icmp: null
-              # - accept_esphome_from_k8s_nodes: null
-              # - accept_homekit_from_k8s_nodes: null
-              # - accept_android_adb_from_k8s_nodes: null
-              # - accept_app_control_from_sonos_controllers_tcp: null
-              # - accept_app_control_from_sonos_controllers_udp: null
-              # - accept_media_players_to_hdhr: null
-              # - accept_plex_to_media_players: null
-              # - accept_k8s_nodes_to_poe_zigbee_controller: null
-              # - accept_lg_remote_to_lg_tvs_from_k8s_nodes: null
+              - accept_esphome_from_k8s_nodes: null
+              - accept_homekit_from_k8s_nodes: null
+              - accept_android_adb_from_k8s_nodes: null
+              - accept_app_control_from_sonos_controllers_tcp: null
+              - accept_app_control_from_sonos_controllers_udp: null
+              - accept_media_players_to_hdhr: null
+              - accept_plex_to_media_players: null
+              - accept_k8s_nodes_to_poe_zigbee_controller: null
+              - accept_lg_remote_to_lg_tvs_from_k8s_nodes: null
           - zones:
               - local
             default: drop
@@ -589,8 +587,7 @@ config:
               - drop_invalid: null
               - accept_igmp: null
               - accept_mdns: null
-              # # - accept_discovery_from_sonos_controllers: null
-              # - accept_lifx_discovery: null
+              - accept_discovery_from_sonos_controllers: null
 
     video:
       interface: bond0.50
@@ -629,7 +626,7 @@ config:
               - accept_icmp: null
               - accept_http: null
               - accept_https: null
-              # - accept_rtsp_from_k8s_nodes: null
+              - accept_rtsp_from_k8s_nodes: null
 
     wg_trusted:
       interface: wg01
