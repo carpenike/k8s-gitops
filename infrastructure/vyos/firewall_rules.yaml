@@ -700,7 +700,7 @@ accept_haproxy_exporter_from_k8s_nodes:
     port: 8404
 accept_speedtest_from_k8s_nodes:
   action: accept
-  protocol: tcp
+  protocol: tcp_udp
   source:
     address-group: k8s_nodes
   destination:
