@@ -93,6 +93,12 @@ accept_tftp:
   destination:
     port: 69
 
+accept_vyos_api:
+  action: accept
+  protocol: tcp
+  destination:
+    port: 8443
+
 accept_k8s_api:
   action: accept
   log: true
