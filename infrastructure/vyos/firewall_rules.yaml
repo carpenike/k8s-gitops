@@ -698,3 +698,10 @@ accept_haproxy_exporter_from_k8s_nodes:
     address-group: k8s_nodes
   destination:
     port: 8404
+accept_speedtest_from_k8s_nodes:
+  action: accept
+  protocol: tcp
+  source:
+    address-group: k8s_nodes
+  destination:
+    port: 8080,5060
