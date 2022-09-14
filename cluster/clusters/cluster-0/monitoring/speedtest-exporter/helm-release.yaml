@@ -26,7 +26,7 @@ spec:
       repository: ghcr.io/miguelndecarvalho/speedtest-exporter
       tag: v3.5.2
     env:
-      SPEEDTEST_SERVER: "10292"
+      SPEEDTEST_SERVER: "14229"
     service:
       main:
         ports:
