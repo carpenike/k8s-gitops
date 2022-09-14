@@ -102,7 +102,7 @@ spec:
           type: loki
           inputs:
             - kubernetes_logs
-          endpoint: http://loki.monitoring:3100
+          endpoint: http://loki-gateway.monitoring:80
           encoding:
             codec: json
           batch:
@@ -130,7 +130,7 @@ spec:
           type: loki
           inputs:
             - vyos_logs
-          endpoint: http://loki.monitoring:3100
+          endpoint: http://loki-gateway.monitoring:80
           encoding:
             codec: json
           batch:
@@ -146,7 +146,7 @@ spec:
           type: loki
           inputs:
             - journal_logs
-          endpoint: http://loki.monitoring:3100
+          endpoint: http://loki-gateway.monitoring:80
           encoding:
             codec: json
           batch:
@@ -162,7 +162,7 @@ spec:
           type: loki
           inputs:
             - talos_kernel_logs_xform
-          endpoint: http://loki.monitoring:3100
+          endpoint: http://loki-gateway.monitoring:80
           encoding:
             codec: json
             except_fields:
@@ -180,7 +180,7 @@ spec:
           type: loki
           inputs:
             - talos_service_logs_xform
-          endpoint: http://loki.monitoring:3100
+          endpoint: http://loki-gateway.monitoring:80
           encoding:
             codec: json
             except_fields:
