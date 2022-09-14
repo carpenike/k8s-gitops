@@ -15,7 +15,7 @@ defaults
     log                     global
     option                  httplog
     option                  dontlognull
-    option http-server-close
+    option                  http-server-close
     option forwardfor       except 127.0.0.0/8
     option                  redispatch
     retries                 1
@@ -36,6 +36,12 @@ frontend k8s_apiserver
     option tcplog
     default_backend k8s_controlplane
 
+frontend stats
+   bind *:8404
+   http-request use-service prometheus-exporter if { path /metrics }
+   stats enable
+   stats uri /stats
+   stats refresh 10s
 #---------------------------------------------------------------------
 # round robin balancing for apiserver
 #---------------------------------------------------------------------
