@@ -34,3 +34,11 @@ spec:
       ignoreUnfixed: true
     serviceMonitor:
       enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: "nginx"
+      hosts:
+        - host: trivy.${SECRET_DOMAIN}
+      tls:
+        - hosts:
+            - trivy.${SECRET_DOMAIN}
