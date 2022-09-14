@@ -10,29 +10,23 @@ spec:
     spec:
       chart: app-template
       version: 0.1.1
-      interval: 15m
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
         namespace: flux-system
-
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
   values:
     image:
       repository: ghcr.io/miguelndecarvalho/speedtest-exporter
-      tag: v3.5.3
-
-    dnsConfig:
-      options:
-        - name: ndots
-          value: "1"
-
-    resources:
-      requests:
-        cpu: 15m
-        memory: 64M
-      limits:
-        memory: 64M
-
+      tag: v3.5.2
+    env:
+      SPEEDTEST_SERVER: "10292"
     service:
       main:
         ports:
@@ -42,3 +36,9 @@ spec:
             enabled: true
             protocol: TCP
             port: 9798
+    resources:
+      requests:
+        cpu: 15m
+        memory: 50M
+      limits:
+        memory: 100M
