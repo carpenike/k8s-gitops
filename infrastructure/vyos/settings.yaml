@@ -348,13 +348,13 @@ config:
               - accept_icmp: null
               - accept_ssh: null
               - accept_k8s_api: null
-              # - accept_k8s_ingress_from_internal: null
-              # - accept_k8s_ingress_from_internal: null
-              # - accept_plex_from_internal_tcp: null
-              # - accept_plex_from_internal_udp: null
-              # - accept_smb_from_smb_clients: null
-              # - accept_nfs_from_nfs_clients: null
-              # - accept_stepca_ingress_from_internal: null
+              - accept_k8s_ingress_from_internal: null
+              - accept_k8s_ingress_from_internal: null
+              - accept_plex_from_internal_tcp: null
+              - accept_plex_from_internal_udp: null
+              - accept_smb_from_smb_clients: null
+              - accept_nfs_from_nfs_clients: null
+              - accept_stepca_ingress_from_internal: null
           - zones:
               - wan
             default: drop
@@ -363,8 +363,8 @@ config:
               - accept_established: null
               - accept_related: null
               - drop_invalid: null
-              # - accept_ingress_from_cloudflare: null
-              # - accept_plex_from_external: null
+              - accept_ingress_from_cloudflare: null
+              - accept_plex_from_external: null
           - zones:
               - mgmt
             default: drop
@@ -376,13 +376,13 @@ config:
               - accept_icmp: null
               - accept_k8s_api: null
               - accept_dns: null
-              # - accept_k8s_ingress_from_internal: null
-              # - accept_ssh: null
-              # - accept_unifi_inform: null
-              # - accept_unifi_stun: null
-              # - accept_stepca_ingress_from_internal: null
-              # - accept_tplink_to_controller_udp: null
-              # - accept_tplink_to_controller_tcp: null
+              - accept_k8s_ingress_from_internal: null
+              - accept_ssh: null
+              - accept_unifi_inform: null
+              - accept_unifi_stun: null
+              - accept_stepca_ingress_from_internal: null
+              - accept_tplink_to_controller_udp: null
+              - accept_tplink_to_controller_tcp: null
           - zones:
               - wireless
             default: drop
@@ -394,12 +394,12 @@ config:
               - accept_icmp: null
               - accept_k8s_api: null
               - accept_dns: null
-              # - accept_smb_from_smb_clients: null
-              # - accept_plex_from_internal_tcp: null
-              # - accept_plex_from_internal_udp: null
-              # - accept_k8s_ingress_from_internal: null
-              # - accept_homekit_from_ios_devices_to_k8s_nodes_tcp: null
-              # - accept_homekit_from_ios_devices_to_k8s_nodes_udp: null
+              - accept_smb_from_smb_clients: null
+              - accept_plex_from_internal_tcp: null
+              - accept_plex_from_internal_udp: null
+              - accept_k8s_ingress_from_internal: null
+              - accept_homekit_from_ios_devices_to_k8s_nodes_tcp: null
+              - accept_homekit_from_ios_devices_to_k8s_nodes_udp: null
           - zones:
               - services
             default: drop
@@ -422,14 +422,14 @@ config:
               - drop_invalid: null
               - accept_dns: null
               - accept_mqtt: null
-              # - accept_plex_from_internal_tcp: null
-              # - accept_plex_from_internal_udp: null
-              # - accept_smb_from_smb_clients: null
-              # - accept_hdhr_to_media_players: null
-              # - accept_k8s_ingress_from_sonos_players: null
-              # - accept_tcp_from_sonos_players_to_sonos_controllers: null
-              # - accept_udp_from_sonos_players_to_sonos_controllers: null
-              # - accept_sonos_players_to_hass: null
+              - accept_plex_from_internal_tcp: null
+              - accept_plex_from_internal_udp: null
+              - accept_smb_from_smb_clients: null
+              - accept_hdhr_to_media_players: null
+              - accept_k8s_ingress_from_sonos_players: null
+              - accept_tcp_from_sonos_players_to_sonos_controllers: null
+              - accept_udp_from_sonos_players_to_sonos_controllers: null
+              - accept_sonos_players_to_hass: null
           - zones:
               - video
             default: drop
@@ -451,11 +451,11 @@ config:
               - accept_bgp: null
               - accept_mdns: null
               - accept_k8s_api: null
-              # - accept_vector_syslog: null
-              # - accept_discovery_from_sonos_players: null
-              # # - accept_discovery_from_sonos_controllers: null
-              # - accept_flex_discovery_from_flex_radio: null
-              
+              - accept_vector_syslog: null
+              - accept_discovery_from_sonos_players: null
+              - accept_discovery_from_sonos_controllers: null
+              - accept_flex_discovery_from_flex_radio: null
+
 
     wireless:
       interface: bond0.30
