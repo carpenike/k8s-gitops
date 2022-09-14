@@ -26,7 +26,7 @@
 }
 
 (k8s_gateway) {
-  forward . 10.45.0.3:53
+  forward . 10.45.10.13:53
 }
 
 . {
@@ -42,25 +42,7 @@
   }
 }
 
-${sensitive(domains.ingress)} {
-  import common
-  import local_hosts
-  import k8s_gateway
-}
-
-${sensitive(domains.family)} {
-  import common
-  import local_hosts
-  import k8s_gateway
-}
-
-${sensitive(domains.personal)} {
-  import common
-  import local_hosts
-  import k8s_gateway
-}
-
 ${sensitive(domains.hardware)} {
   import common
-  import local_hosts_without_fallthrough
+  import local_hosts
 }

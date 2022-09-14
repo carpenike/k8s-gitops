@@ -36,12 +36,6 @@ frontend k8s_apiserver
     option tcplog
     default_backend k8s_controlplane
 
-frontend talos_apiserver
-    bind *:50000
-    mode tcp
-    option tcplog
-    default_backend talos_controlplane
-
 #---------------------------------------------------------------------
 # round robin balancing for apiserver
 #---------------------------------------------------------------------
@@ -51,16 +45,6 @@ backend k8s_controlplane
     mode tcp
     option ssl-hello-chk
     balance     roundrobin
-        server cp-0 cp-0.${domains.hardware}:6443 check
-        server cp-1 cp-1.${domains.hardware}:6443 check
-        server cp-2 cp-2.${domains.hardware}:6443 check
-
-backend talos_controlplane
-    option httpchk GET /healthz
-    http-check expect status 200
-    mode tcp
-    option ssl-hello-chk
-    balance     roundrobin
-        server worker1 worker1.cluster-0.${domains.hardware}:50000 check
-        server worker2 worker2.cluster-0.${domains.hardware}:50000 check
-        server worker3 worker3.cluster-0.${domains.hardware}:50000 check
+        server cp-0 10.20.0.20:6443 check
+        server cp-1 10.20.0.21:6443 check
+        server cp-2 10.20.0.22:6443 check

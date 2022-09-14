@@ -1,19 +1,14 @@
-resource "vyos_config_block_tree" "interface-wan" {
-  path = "interfaces bonding ${var.config.zones.wan.interface}"
-  configs = {
-    "hw-id"       = "00:01:c0:21:33:f2"
-
-    "vif 4000 description" = "WAN"
-    "vif 4000 address"     = "dhcp"
-  }
-}
-
-resource "vyos_config_block_tree" "interface-mgmt" {
-  path = "interfaces bonding ${var.config.zones.mgmt.interface}"
+resource "vyos_config_block_tree" "interfaces" {
+  path = "interfaces bonding bond0"
   configs = {
     "address"     = "${cidrhost(var.networks.mgmt, 1)}/16"
     "description" = "MGMT"
     "hw-id"       = "00:01:c0:21:33:f2"
+
+    "member interface eth0" = ""
+    "member interface eth1" = ""
+    "member interface eth2" = ""
+    "member interface eth3" = ""
 
     "vif 5 description" = "RESCUE"
     "vif 5 address"     = "${cidrhost(var.networks.rescue, 1)}/16"
@@ -29,6 +24,8 @@ resource "vyos_config_block_tree" "interface-mgmt" {
     "vif 40 address"     = "${cidrhost(var.networks.iot, 1)}/16"
     "vif 50 description" = "VIDEO"
     "vif 50 address"     = "${cidrhost(var.networks.video, 1)}/16"
+    "vif 4000 description" = "WAN"
+    "vif 4000 address"     = "dhcp"
 
   }
 }

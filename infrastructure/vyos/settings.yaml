@@ -105,7 +105,7 @@ config:
               - accept_discovery_from_hass: null
               - accept_node_exporter_from_k8s_nodes: null
               - accept_flex_discovery_from_flex_clients: null
-              - accept_lifx_discovery: null
+              # - accept_lifx_discovery: null
               - accept_haproxy_exporter_from_k8s_nodes: null
           - zones:
               - wan
@@ -133,7 +133,7 @@ config:
 
     wan:
       description: WAN zone
-      interface: bond0
+      interface: bond0.4000
       firewall:
         default:
           default: accept
@@ -353,7 +353,7 @@ config:
               - accept_plex_from_internal_tcp: null
               - accept_plex_from_internal_udp: null
               - accept_smb_from_smb_clients: null
-              - accept_nfs_from_smb_clients: null
+              - accept_nfs_from_nfs_clients: null
               - accept_stepca_ingress_from_internal: null
           - zones:
               - wan
@@ -578,7 +578,7 @@ config:
               - accept_plex_to_media_players: null
               - accept_k8s_nodes_to_poe_zigbee_controller: null
               - accept_lg_remote_to_lg_tvs_from_k8s_nodes: null
-              - accept_lifx_discovery: null
+              # - accept_lifx_discovery: null
           - zones:
               - local
             default: drop
@@ -590,7 +590,7 @@ config:
               - accept_igmp: null
               - accept_mdns: null
               - accept_discovery_from_sonos_controllers: null
-              - accept_lifx_discovery: null
+              # - accept_lifx_discovery: null
 
     video:
       interface: bond0.50
@@ -753,7 +753,7 @@ config:
     network_groups:
       - name: k8s_services
         networks:
-          - 10.45.0.0/16
+          - '10.45.0.0/16'
 
     port_groups:
       - name: wireguard
