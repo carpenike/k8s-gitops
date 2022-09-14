@@ -9,14 +9,13 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: esphome
-      version: 8.4.2
+      chart: app-template
+      version: 0.2.1
+      interval: 15m
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: bjw-s-charts
         namespace: flux-system
-      interval: 5m
   values:
     image:
       repository: ghcr.io/esphome/esphome
@@ -24,18 +23,20 @@ spec:
     env:
       TZ: "America/New_York"
       ESPHOME_DASHBOARD_USE_PING: true
+
+    service:
+      main:
+        ports:
+          http:
+            port: 6052
+
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
+
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.middlewares: "network-rfc1918-ips@kubernetescrd"
-          kubernetes.io/tls-acme: "true"
-          hajimari.io/enable: "true"
+        ingressClassName: "nginx"
         hosts:
           - host: "esphome.${SECRET_DOMAIN}"
             paths:
@@ -45,6 +46,7 @@ spec:
           - hosts:
               - "esphome.${SECRET_DOMAIN}"
             secretName: tls.esphome
+
     persistence:
       config:
         enabled: true
