@@ -479,7 +479,7 @@ config:
               - accept_related: null
               - drop_invalid: null
               - accept_icmp: null
-              # - accept_resilio_from_k8s_nodes: null
+              - accept_resilio_from_k8s_nodes: null
           - zones:
               - local
             default: drop
@@ -488,9 +488,9 @@ config:
               - accept_related: null
               - drop_invalid: null
               - accept_igmp: null
-              # - accept_mdns: null
-              # - accept_discovery_from_sonos_players: null
-              # - accept_flex_discovery_from_flex_radio: null
+              - accept_mdns: null
+              - accept_discovery_from_sonos_players: null
+              - accept_flex_discovery_from_flex_radio: null
           - zones:
               - iot
             default: drop
@@ -500,8 +500,8 @@ config:
               - accept_related: null
               - drop_invalid: null
               - accept_icmp: null
-              # - accept_udp_from_sonos_players_to_sonos_controllers: null
-              # - accept_tcp_from_sonos_players_to_sonos_controllers: null
+              - accept_udp_from_sonos_players_to_sonos_controllers: null
+              - accept_tcp_from_sonos_players_to_sonos_controllers: null
           - zones:
               - wired
             default: drop
