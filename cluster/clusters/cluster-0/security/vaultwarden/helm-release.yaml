@@ -53,10 +53,9 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
+          external-dns.home.arpa/enabled: "true"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
-          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-          external-dns/is-public: "true"
         hosts:
           - host: vault.${SECRET_DOMAIN}
             paths:
