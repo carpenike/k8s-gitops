@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: synapse-delegation-nginx
+  namespace: matrix
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, HEAD, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+spec:
+  rules:
+    - host: ${SECRET_PUBLIC_DOMAIN}
+      http:
+        paths:
+          - path: /.well-known/matrix/
+            backend:
+              serviceName: delegation-service
+              servicePort: 80
+  tls:
+    - hosts:
+        - ${SECRET_PUBLIC_DOMAIN}
