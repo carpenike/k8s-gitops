@@ -75,6 +75,7 @@ identity_providers:
           - openid
           - profile
           - groups
+          - email
         redirect_uris:
           - "https://synapse.${SECRET_DOMAIN}/_synapse/client/oidc/callback"
         userinfo_signing_algorithm: none
