@@ -1,0 +1,144 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app matrix-synapse
+  namespace: matrix
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: matrix-synapse
+      version: 2.7.1
+      sourceRef:
+        kind: HelmRepository
+        name: ananace-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: matrixdotorg/synapse
+      tag: v1.67.0
+    serverName: ${SECRET_PUBLIC_DOMAIN}
+    publicServerName: matrix.${SECRET_DOMAIN}
+    wellknown:
+      enabled: true
+
+    workers:
+      media_repository:
+        enabled: false
+      # default:
+      #   volumes:
+      #     - name: mautrix-facebook
+      #       configMap:
+      #         name: mautrix-facebook-config
+      #         items:
+      #           - key: registration.yaml
+      #             path: registration.yaml
+      #     - name: matrix-slack
+      #       configMap:
+      #         name: matrix-slack-config
+      #         items:
+      #           - key: slack-registration.yaml
+      #             path: slack-registration.yaml
+      #   volumeMounts:
+      #     - name: mautrix-facebook
+      #       mountPath: /data/mautrix-facebook
+      #     - name: matrix-slack
+      #       mountPath: /data/matrix-slack
+
+    extraConfig:
+      email:
+        smtp_host: smtp.mailgun.org
+        smtp_port: 587
+        smtp_user: ${SECRET_MAILGUN_USERNAME}
+        smtp_pass: ${SECRET_MAILGUN_PASSWORD}
+        notif_from: "Your Friendly %(app)s homeserver <noreply@${SECRET_DOMAIN}>"
+
+      enable_3pid_lookup: true
+      allowed_local_3pids:
+        - medium: email
+          pattern: ".*"
+        - medium: msisdn
+          pattern: '\+1'
+      account_threepid_delegates:
+        msisdn: https://vector.im
+
+      # app_service_config_files:
+      #   - /data/mautrix-facebook/registration.yaml
+      #   - /data/matrix-slack/slack-registration.yaml
+
+      oidc_providers:
+        - idp_id: dex
+          idp_name: dex
+          discover: true
+          issuer: "https://auth.${SECRET_DOMAIN}/"
+          client_id: "matrix"
+          client_secret: ${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}
+          scopes:
+            - "openid"
+            - "profile"
+            - "email"
+          user_mapping_provider:
+            config:
+              localpart_template: "{{ user.preferred_name }}"
+              display_name_template: "{{ user.name | capitalize }}"
+
+    ingress:
+      enabled: true
+      traefikPaths: true
+      className: nginx
+      annotations:
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        external-dns.home.arpa/enabled: "true"
+      tls:
+        - secretName: tls.matrix
+          hosts:
+            - ${SECRET_PUBLIC_DOMAIN}
+            - matrix.${SECRET_DOMAIN}
+
+    postgresql:
+      enabled: false
+
+    externalPostgresql:
+      host: postgres-rw.db.svc.cluster.local
+      port: 5432
+      username: matrix-synapse
+      password: ${SECRET_MATRIX_POSTGRES_PASSWORD}
+      database: matrix-synapse
+
+    redis:
+      enabled: false
+
+    externalRedis:
+      enabled: true
+      host: redis-headless.db.svc.cluster.local:26379
+
+    signingkey:
+      existingSecret: *app
+      job:
+        enabled: false
+
+    persistence:
+      enabled: false
+
+    # synapse:
+    #   extraVolumes:
+    #     - name: mautrix-facebook
+    #       configMap:
+    #         name: mautrix-facebook-config
+    #         items:
+    #           - key: registration.yaml
+    #             path: registration.yaml
+    #     - name: matrix-slack
+    #       configMap:
+    #         name: matrix-slack-config
+    #         items:
+    #           - key: slack-registration.yaml
+    #             path: slack-registration.yaml
+    #   extraVolumeMounts:
+    #     - name: mautrix-facebook
+    #       mountPath: /data/mautrix-facebook
+    #     - name: matrix-slack
+    #       mountPath: /data/matrix-slack
