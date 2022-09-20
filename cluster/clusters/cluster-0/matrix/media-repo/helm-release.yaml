@@ -1,0 +1,93 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: matrix-media-repo
+  namespace: matrix
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: matrix-media-repo
+      version: 1.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: ananace-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: turt2live/matrix-media-repo
+      tag: v1.2.12
+
+    config:
+      datastores:
+        - type: s3
+          enabled: true
+          forKinds: ["all"]
+          opts:
+            tempPath: "/tmp/mediarepo_s3_upload"
+            endpoint: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+            ssl: false
+            accessKeyId: ${SECRET_MATRIX_MEDIA_S3_ACCESS_KEY_ID}
+            accessSecret: ${SECRET_MATRIX_MEDIA_S3_ACCESS_SECRET}
+            bucketName: "matrix-media"
+
+    admins:
+      - "@ryan:${SECRET_PUBLIC_DOMAIN}"
+
+    homeservers:
+      "matrix.${SECRET_DOMAIN}":
+        csApi: "http://matrix-synapse:8008"
+        backoffAt: 10
+        adminApiKind: "matrix"
+        identicons:
+          enabled: false
+
+    ingress:
+      enabled: true
+      className: nginx
+      annotations:
+        external-dns.home.arpa/enabled: "true"
+      hosts:
+        - host: matrix.${SECRET_DOMAIN}
+          paths:
+            - "/_matrix/media"
+      tls:
+        - secretName: matrix-cert
+          hosts:
+            - matrix.${SECRET_DOMAIN}
+
+    externalPostgresql:
+      host: postgres-rw.db.svc.cluster.local
+      port: 5432
+      username: matrix-media-repo
+      password: ${SECRET_MATRIX_MEDIA_REPO_STORAGE_POSTGRES_PASSWORD}
+
+    redis:
+      enabled: false
+
+    externalRedis:
+      enabled: true
+      host: redis-headless.db.svc.cluster.local:26379
+
+    persistence:
+      enabled: false
+
+  # valuesFrom:
+  #   - kind: ConfigMap
+  #     name: matrix-media-ceph-bucket
+  #     valuesKey: BUCKET_NAME
+  #     targetPath: config.datastores.opts.bucketName
+  #   - kind: ConfigMap
+  #     name: matrix-media-ceph-bucket
+  #     valuesKey: BUCKET_HOST
+  #     targetPath: config.datastores.opts.endpoint
+  #   - kind: Secret
+  #     name: matrix-media-ceph-bucket
+  #     valuesKey: AWS_ACCESS_KEY_ID
+  #     targetPath: config.datastores.opts.accessKeyId
+  #   - kind: Secret
+  #     name: matrix-media-ceph-bucket
+  #     valuesKey: AWS_SECRET_ACCESS_KEY
+  #     targetPath: config.datastores.opts.accessSecret
