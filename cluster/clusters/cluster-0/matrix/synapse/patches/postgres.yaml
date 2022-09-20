@@ -13,13 +13,13 @@ spec:
           - name: POSTGRES_HOST
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: matrix-synapse-postgres
                 key: MATRIX_POSTGRES_HOST
           - name: POSTGRES_DB
             valueFrom:
               secretKeyRef:
-                name: *app
-                key: MATRIX__POSTGRES_DATABASE
+                name: matrix-synapse-postgres
+                key: MATRIX_POSTGRES_DATABASE
           - name: POSTGRES_SUPER_PASS
             valueFrom:
               secretKeyRef:
@@ -28,10 +28,10 @@ spec:
           - name: POSTGRES_USER
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: matrix-synapse-postgres
                 key: MATRIX_POSTGRES_USERNAME
           - name: POSTGRES_PASS
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: matrix-synapse-postgres
                 key: MATRIX_POSTGRES_PASSWORD

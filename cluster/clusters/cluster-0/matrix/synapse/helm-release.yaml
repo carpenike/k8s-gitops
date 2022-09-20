@@ -116,7 +116,7 @@ spec:
       host: redis-headless.db.svc.cluster.local:26379
 
     signingkey:
-      existingSecret: *app
+      existingSecret: matrix-synapse-signing-key
       job:
         enabled: false
 
