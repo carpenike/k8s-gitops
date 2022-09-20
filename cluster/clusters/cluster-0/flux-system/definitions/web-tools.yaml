@@ -36,3 +36,16 @@ spec:
     - name: web-tools-shlink-api
   path: "./cluster/clusters/cluster-0/web-tools/shlink/web"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: web-tools-smtp-relay
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: web-tools-namespace
+  path: "./cluster/clusters/cluster-0/web-tools/smtp-relay"
+  prune: true
