@@ -69,20 +69,21 @@ spec:
       #   - /data/matrix-slack/slack-registration.yaml
 
       oidc_providers:
-        - idp_id: dex
-          idp_name: dex
+        - idp_id: authelia
+          idp_name: "Authelia"
+          idp_icon: "mxc://authelia.com/cKlrTPsGvlpKxAYeHWJsdVHI"
           discover: true
           issuer: "https://auth.${SECRET_DOMAIN}/"
-          client_id: "matrix"
+          client_id: "synapse"
           client_secret: ${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}
-          scopes:
-            - "openid"
-            - "profile"
-            - "email"
+          scopes: ["openid", "profile", "email"]
+          allow_existing_users: true
           user_mapping_provider:
             config:
-              localpart_template: "{{ user.preferred_name }}"
-              display_name_template: "{{ user.name | capitalize }}"
+              subject_claim: "sub"
+              localpart_template: "{{ user.preferred_username }}"
+              display_name_template: "{{ user.name }}"
+              email_template: "{{ user.email }}"
 
     ingress:
       enabled: true

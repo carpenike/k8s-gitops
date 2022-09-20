@@ -65,7 +65,7 @@ identity_providers:
           - "https://k10.${SECRET_DOMAIN}/k10/auth-svc/v0/oidc/redirect"
         userinfo_signing_algorithm: none
 
-      - id: matrix
+      - id: synapse
         description: Matrix Synapse
         secret: "${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}"
         public: false
@@ -75,7 +75,6 @@ identity_providers:
           - openid
           - profile
           - groups
-          - email
         redirect_uris:
           - "https://matrix.${SECRET_DOMAIN}/_synapse/client/oidc/callback"
         userinfo_signing_algorithm: none
