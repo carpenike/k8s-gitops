@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: ananace-charts
         namespace: flux-system
-      interval: 5m
+      interval: 15m
   values:
     image:
       repository: matrixdotorg/synapse
