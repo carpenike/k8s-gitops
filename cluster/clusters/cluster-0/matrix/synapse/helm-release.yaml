@@ -118,11 +118,11 @@ spec:
         enabled: false
 
     externalRedis:
-      enabled: false
-      # host: redis.db.svc.cluster.local
-      # port: 6379
-      # existingSecret: redis
-      # existingSecretPasswordKey: redis-password
+      enabled: true
+      host: redis-headless.db.svc.cluster.local
+      port: 6379
+      existingSecret: redis
+      existingSecretPasswordKey: redis-password
 
     signingkey:
       existingSecret: matrix-synapse-signing-key
