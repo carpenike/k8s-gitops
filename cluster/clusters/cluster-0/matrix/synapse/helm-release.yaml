@@ -20,7 +20,7 @@ spec:
       repository: matrixdotorg/synapse
       tag: v1.67.0
     serverName: ${SECRET_PUBLIC_DOMAIN}
-    publicServerName: matrix.${SECRET_DOMAIN}
+    publicServerName: synapse.${SECRET_DOMAIN}
     wellknown:
       enabled: true
 
@@ -97,7 +97,7 @@ spec:
         - secretName: tls.matrix
           hosts:
             - ${SECRET_PUBLIC_DOMAIN}
-            - matrix.${SECRET_DOMAIN}
+            - synapse.${SECRET_DOMAIN}
 
     postgresql:
       enabled: false
