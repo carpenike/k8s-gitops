@@ -79,6 +79,7 @@ spec:
     externalRedis:
       enabled: true
       host: redis-headless.db.svc.cluster.local
+      port: 26379
 
     persistence:
       enabled: false
