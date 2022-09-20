@@ -118,6 +118,8 @@ spec:
       enabled: true
       host: redis-headless.db.svc.cluster.local
       port: 26379
+      existingSecret: redis
+      existingSecretPasswordKey: redis-password
 
     signingkey:
       existingSecret: matrix-synapse-signing-key

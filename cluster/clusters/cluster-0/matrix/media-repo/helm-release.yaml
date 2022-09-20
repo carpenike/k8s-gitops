@@ -80,6 +80,8 @@ spec:
       enabled: true
       host: redis-headless.db.svc.cluster.local
       port: 26379
+      existingSecret: redis
+      existingSecretPasswordKey: redis-password
 
     persistence:
       enabled: false
