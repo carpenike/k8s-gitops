@@ -5,4 +5,5 @@ resources:
   - add-ndots.yaml
   - delete-cpu-limits.yaml
   - sync-postgres-secrets.yaml
+  - sync-redis-secrets.yaml
   - update-ingress-annotations.yaml
