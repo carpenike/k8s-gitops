@@ -106,7 +106,9 @@ spec:
       host: postgres-rw.db.svc.cluster.local
       port: 5432
       username: matrix-synapse
-      password: ${SECRET_MATRIX_POSTGRES_PASSWORD}
+      #password: ${SECRET_MATRIX_POSTGRES_PASSWORD}
+      existingSecret: matrix-synapse-postgres
+      existingSecretPasswordKey: MATRIX_POSTGRES_PASSWORD
       database: matrix-synapse
 
     redis:
