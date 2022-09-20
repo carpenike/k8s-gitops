@@ -4,5 +4,5 @@ kind: Kustomization
 resources:
   - matrix-media-ceph-object-bucket.yaml
   # - helm-release.yaml
-patchesStrategicMerge:
-  - patches/postgres.yaml
+# patchesStrategicMerge:
+#   - patches/postgres.yaml
