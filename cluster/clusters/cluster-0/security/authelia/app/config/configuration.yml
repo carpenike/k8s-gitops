@@ -76,7 +76,7 @@ identity_providers:
           - profile
           - groups
         redirect_uris:
-          - "https://matrix.${SECRET_DOMAIN}/_synapse/client/oidc/callback"
+          - "https://synapse.${SECRET_DOMAIN}/_synapse/client/oidc/callback"
         userinfo_signing_algorithm: none
 
       # - id: miniflux
