@@ -116,7 +116,7 @@ spec:
 
     externalRedis:
       enabled: true
-      host: redis-headless.db.svc.cluster.local:26379
+      host: redis-headless.db.svc.cluster.local
       existingSecret: redis
       existingSecretPasswordKey: redis-password
 
