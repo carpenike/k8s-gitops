@@ -65,6 +65,21 @@ identity_providers:
           - "https://k10.${SECRET_DOMAIN}/k10/auth-svc/v0/oidc/redirect"
         userinfo_signing_algorithm: none
 
+      - id: matrix
+        description: Matrix Synapse
+        secret: "${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes:
+          - openid
+          - profile
+          - groups
+          - email
+        redirect_uris:
+          - "https://matrix.${SECRET_DOMAIN}/_synapse/client/oidc/callback"
+        userinfo_signing_algorithm: none
+
       # - id: miniflux
       #   description: Miniflux
       #   secret: "${SECRET_MINIFLUX_OAUTH_CLIENT_SECRET}"
