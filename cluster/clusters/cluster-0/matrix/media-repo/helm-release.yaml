@@ -37,7 +37,7 @@ spec:
       - "@ryan:${SECRET_PUBLIC_DOMAIN}"
 
     homeservers:
-      "matrix.${SECRET_DOMAIN}":
+      "synapse.${SECRET_DOMAIN}":
         csApi: "http://matrix-synapse:8008"
         backoffAt: 10
         adminApiKind: "matrix"
@@ -50,13 +50,13 @@ spec:
       annotations:
         external-dns.home.arpa/enabled: "true"
       hosts:
-        - host: matrix.${SECRET_DOMAIN}
+        - host: synapse.${SECRET_DOMAIN}
           paths:
             - "/_matrix/media"
       tls:
-        - secretName: matrix-cert
+        - secretName: synapse-cert
           hosts:
-            - matrix.${SECRET_DOMAIN}
+            - synapse.${SECRET_DOMAIN}
 
     externalPostgresql:
       host: postgres-rw.db.svc.cluster.local
