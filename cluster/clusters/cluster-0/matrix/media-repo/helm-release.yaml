@@ -63,12 +63,14 @@ spec:
       host: postgres-rw.db.svc.cluster.local
       port: 5432
       username: matrix-media-repo
+      database: matrix-media-repo
       password: ${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}
 
     externalPostgresql:
       host: postgres-rw.db.svc.cluster.local
       port: 5432
       username: matrix-media-repo
+      database: matrix-media-repo
       password: ${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}
 
     redis:
