@@ -118,7 +118,6 @@ spec:
 
     signingkey:
       existingSecret: matrix-synapse-signing-key
-      existingSecretKey: matrix-synapse-signing-key
       job:
         enabled: false
 
