@@ -77,7 +77,7 @@ spec:
       enabled: false
 
     externalRedis:
-      enabled: true
+      enabled: false
       host: matrix-synapse-redis-master
       password: ${SECRET_MATRIX_REDIS_PASSWORD}
       # host: redis.db.svc.cluster.local

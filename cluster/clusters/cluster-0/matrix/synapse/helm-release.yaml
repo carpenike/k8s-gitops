@@ -112,7 +112,7 @@ spec:
       database: matrix-synapse
 
     redis:
-      enabled: true
+      enabled: false
       password: ${SECRET_MATRIX_REDIS_PASSWORD}
       auth:
         enabled: false
