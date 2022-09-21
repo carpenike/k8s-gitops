@@ -32,7 +32,7 @@ appservice:
   max_body_size: 1
 
   # The full URI to the database. Only Postgres is currently supported.
-  database: postgres://mautrixuser:mautrixpass@mautrix-facebook-postgres/mautrix-facebook
+  database: postgres://mautrix-facebook:${SECRET_MAUTRIX_FACEBOOK_POSTGRES_PASSWORD}@postgres-rw.db.svc.cluster.local/mautrix-facebook
   # Additional arguments for asyncpg.create_pool()
   # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.pool.create_pool
   database_opts:
