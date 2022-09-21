@@ -48,6 +48,8 @@ spec:
             port: 9093
           listener:
             port: 8083
+          metrics:
+            port: 9093
 
     persistence:
       config-homeserver:
