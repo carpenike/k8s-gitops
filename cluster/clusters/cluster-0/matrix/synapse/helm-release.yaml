@@ -5,146 +5,72 @@ metadata:
   name: &app matrix-synapse
   namespace: matrix
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
-      chart: matrix-synapse
-      version: 2.7.1
+      chart: app-template
+      version: 0.2.1
       sourceRef:
         kind: HelmRepository
-        name: ananace-charts
+        name: bjw-s-charts
         namespace: flux-system
-      interval: 15m
+
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+
   values:
+    global:
+      nameOverride: *app
+
     image:
       repository: matrixdotorg/synapse
       tag: v1.67.0
-    serverName: ${SECRET_PUBLIC_DOMAIN}
-    publicServerName: synapse.${SECRET_DOMAIN}
-    wellknown:
-      enabled: true
 
-    workers:
-      media_repository:
-        enabled: false
-      # default:
-      #   volumes:
-      #     - name: mautrix-facebook
-      #       configMap:
-      #         name: mautrix-facebook-config
-      #         items:
-      #           - key: registration.yaml
-      #             path: registration.yaml
-      #     - name: matrix-slack
-      #       configMap:
-      #         name: matrix-slack-config
-      #         items:
-      #           - key: slack-registration.yaml
-      #             path: slack-registration.yaml
-      #   volumeMounts:
-      #     - name: mautrix-facebook
-      #       mountPath: /data/mautrix-facebook
-      #     - name: matrix-slack
-      #       mountPath: /data/matrix-slack
+    env:
+      TZ: "America/New_York"
+      SYNAPSE_CONFIG_DIR: "/synapse/config"
 
-    extraConfig:
-      email:
-        smtp_host: smtp.mailgun.org
-        smtp_port: 587
-        smtp_user: ${SECRET_MAILGUN_USERNAME}
-        smtp_pass: ${SECRET_MAILGUN_PASSWORD}
-        notif_from: "Your Friendly %(app)s homeserver <noreply@${SECRET_DOMAIN}>"
+    envFrom:
+      - secretRef:
+          name: *app
 
-      enable_3pid_lookup: true
-      allowed_local_3pids:
-        - medium: email
-          pattern: ".*"
-        - medium: msisdn
-          pattern: '\+1'
-      account_threepid_delegates:
-        msisdn: https://vector.im
-
-      # app_service_config_files:
-      #   - /data/mautrix-facebook/registration.yaml
-      #   - /data/matrix-slack/slack-registration.yaml
-
-      oidc_providers:
-        - idp_id: authelia
-          idp_name: "Authelia"
-          idp_icon: "mxc://authelia.com/cKlrTPsGvlpKxAYeHWJsdVHI"
-          discover: true
-          issuer: "https://auth.${SECRET_DOMAIN}/"
-          client_id: "synapse"
-          client_secret: ${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}
-          scopes: ["openid", "profile", "email"]
-          allow_existing_users: true
-          user_mapping_provider:
-            config:
-              subject_claim: "sub"
-              localpart_template: "{{ user.preferred_username }}"
-              display_name_template: "{{ user.name }}"
-              email_template: "{{ user.email }}"
-
-    ingress:
-      enabled: true
-      traefikPaths: true
-      className: nginx
-      annotations:
-        kubernetes.io/tls-acme: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        external-dns.home.arpa/enabled: "true"
-      tls:
-        - secretName: tls.matrix
-          hosts:
-            - ${SECRET_PUBLIC_DOMAIN}
-            - synapse.${SECRET_DOMAIN}
-
-    postgresql:
-      enabled: false
-
-    externalPostgresql:
-      host: postgres-rw.db.svc.cluster.local
-      port: 5432
-      username: matrix-synapse
-      #password: ${SECRET_MATRIX_POSTGRES_PASSWORD}
-      existingSecret: matrix-synapse-postgres
-      existingSecretPasswordKey: MATRIX_POSTGRES_PASSWORD
-      database: matrix-synapse
-
-    redis:
-      enabled: false
-
-    externalRedis:
-      enabled: true
-      host: matrix-redis.matrix.svc.cluster.local
-      port: 6379
-      existingSecret: matrix-redis
-      existingSecretPasswordKey: REDIS_PASSWORD
-
-    signingkey:
-      existingSecret: matrix-synapse-signing-key
-      job:
-        enabled: false
+    service:
+      main:
+        ports:
+          http:
+            port: 8008
+          replication:
+            port: 9093
+          listener:
+            port: 8083
 
     persistence:
-      enabled: false
+      config:
+        enabled: true
+        type: custom
+        volumeSpec:
+          configMap:
+            name: *app
+        subPath:
+          - path: homeserver.yaml
+            mountPath: /synapse/config/homeserver.yaml
+          - path: logs.yaml
+            mountPath: /synapse/config/logs.yaml
 
-    # synapse:
-    #   extraVolumes:
-    #     - name: mautrix-facebook
-    #       configMap:
-    #         name: mautrix-facebook-config
-    #         items:
-    #           - key: registration.yaml
-    #             path: registration.yaml
-    #     - name: matrix-slack
-    #       configMap:
-    #         name: matrix-slack-config
-    #         items:
-    #           - key: slack-registration.yaml
-    #             path: slack-registration.yaml
-    #   extraVolumeMounts:
-    #     - name: mautrix-facebook
-    #       mountPath: /data/mautrix-facebook
-    #     - name: matrix-slack
-    #       mountPath: /data/matrix-slack
+      signing-key:
+        enabled: true
+        type: custom
+        volumeSpec:
+          secret:
+            name: *app
+        subPath:
+          - path: signing.key
+            mountPath: /synapse/keys/signing.key
+
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
