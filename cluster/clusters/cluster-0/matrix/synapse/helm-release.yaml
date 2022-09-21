@@ -61,6 +61,9 @@ spec:
           - host: &host "synapse.${SECRET_DOMAIN}"
             paths:
               - path: /_matrix
+                service:
+                  name: main
+                  port: 8008 
           - host: &host2 "${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /.well-known/matrix
