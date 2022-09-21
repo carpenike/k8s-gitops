@@ -1,0 +1,50 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: matrix-redis
+  namespace: matrix
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 0.2.1
+      interval: 15m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controller:
+      strategy: RollingUpdate
+
+    image:
+      repository: docker.io/library/redis
+      tag: 7.0.4
+
+    command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+
+    env:
+      REDIS_REPLICATION_MODE: master
+
+    envFrom:
+      - secretRef:
+          name: matrix-redis
+
+    service:
+      main:
+        ports:
+          http:
+            enabled: false
+          redis:
+            enabled: true
+            port: 6379
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 64M
+      limits:
+        memory: 128M
