@@ -41,11 +41,14 @@ registration_shared_secret: "${SECRET_MATRIX_REGISTRATION_SHARED_SECRET}"
 
 ## Metrics ###
 enable_metrics: true
+
 ## Signing Keys ##
 signing_key_path: "/synapse/keys/signing.key"
+
 # The trusted servers to download signing keys from.
 trusted_key_servers:
   - server_name: matrix.org
+
 ## Workers ##
 ## Extra config ##
 account_threepid_delegates:
@@ -54,13 +57,15 @@ allowed_local_3pids:
   - medium: email
     pattern: .*
   - medium: msisdn
-    pattern: \+1
+    pattern: '\+1'
+
 email:
   notif_from: Your Friendly %(app)s homeserver <noreply@${SECRET_DOMAIN}>
   smtp_host: smtp.mailgun.org
   smtp_pass: ${SECRET_MAILGUN_PASSWORD}
   smtp_port: 587
   smtp_user: ${SECRET_MAILGUN_USERNAME}
+
 enable_3pid_lookup: true
 oidc_providers:
   - allow_existing_users: true
