@@ -26,7 +26,7 @@ redis:
   databaseNumber: 0
   shards:
     - name: external
-      addr: "redis://:${SECRET_MATRIX_REDIS_PASSWORD}@matrix-redis.matrix.svc.cluster.local:6379/0"
+      addr: "redis://default:${SECRET_MATRIX_REDIS_PASSWORD}@matrix-redis.matrix.svc.cluster.local:6379/0"
 
 datastores:
   - enabled: true
