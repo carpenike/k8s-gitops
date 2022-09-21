@@ -120,7 +120,7 @@ spec:
     externalRedis:
       enabled: true
       host: redis-headless.db.svc.cluster.local
-      port: 6379
+      port: 26739
       existingSecret: redis
       existingSecretPasswordKey: redis-password
 
