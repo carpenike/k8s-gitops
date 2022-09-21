@@ -9,3 +9,5 @@ configMapGenerator:
   - name: matrix-media-repo
     files:
       - configuration.yaml=config/configuration.yaml
+generatorOptions:
+  disableNameSuffixHash: true
