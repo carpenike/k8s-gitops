@@ -74,5 +74,10 @@ spec:
         subPath: signing.key
         type: secret
 
+      data:
+        enabled: true
+        type: emptyDir
+        mountPath: /synapse/data
+
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
