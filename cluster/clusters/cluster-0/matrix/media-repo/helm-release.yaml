@@ -78,10 +78,10 @@ spec:
 
     externalRedis:
       enabled: true
-      host: redis-headless.db.svc.cluster.local
-      port: 26739
-      existingSecret: redis
-      existingSecretPasswordKey: redis-password
+      host: matrix-redis.matrix.svc.cluster.local
+      port: 6739
+      existingSecret: matrix-redis
+      existingSecretPasswordKey: REDIS_PASSWORD
 
     persistence:
       enabled: false
