@@ -22,7 +22,7 @@ metrics:
   port: 9000
 
 redis:
-  enabled: true
+  enabled: false
   databaseNumber: 0
   shards:
     - name: external
