@@ -106,3 +106,6 @@ redis:
   host: "matrix-redis.matrix.svc.cluster.local"
   password: "${SECRET_MATRIX_REDIS_PASSWORD}"
   port: 6379
+
+app_service_config_files:
+  - /synapse/config/facebook-registration.yaml
