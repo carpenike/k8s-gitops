@@ -93,6 +93,14 @@ spec:
         subPath: logs.yaml
         type: configMap
 
+      facebook-registration:
+        enabled: true
+        name: mautrix-facebook
+        readOnly: true
+        mountPath: /synapse/config/facebook-registration.yaml
+        subPath: registration.yaml
+        type: configMap
+
       signing-key:
         enabled: true
         name: *app
