@@ -187,6 +187,7 @@ spec:
         readOnly: true
         mountPath: /var/www/localhost/htdocs/server.json
         subPath: server.json
+        type: configMap
       run:
         enabled: true
         type: emptyDir
