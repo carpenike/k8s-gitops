@@ -62,6 +62,8 @@ spec:
             paths:
               - path: /_matrix
           - host: &host2 "${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
         tls:
           - hosts:
               - *host
