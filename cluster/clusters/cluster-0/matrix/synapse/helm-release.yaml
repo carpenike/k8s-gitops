@@ -148,9 +148,6 @@ spec:
     env:
       TZ: "America/New_York"
 
-    envFrom:
-      - secretRef:
-          name: *app
     service:
       main:
         ports:
