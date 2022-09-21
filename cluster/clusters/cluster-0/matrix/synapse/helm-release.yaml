@@ -51,6 +51,23 @@ spec:
           metrics:
             port: 9093
 
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.home.arpa/enabled: "true"
+        hosts:
+          - host: &host "synapse.${SECRET_DOMAIN}"
+            paths:
+              - path: /_matrix
+          - host: &host2 "${SECRET_PUBLIC_DOMAIN}"
+        tls:
+          - hosts:
+              - *host
+              - *host2
+            secretName: tls.matrix
+
     persistence:
       config-homeserver:
         enabled: true
