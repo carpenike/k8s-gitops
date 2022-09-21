@@ -8,98 +8,78 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: matrix-media-repo
-      version: 1.1.1
+      chart: app-template
+      version: 0.2.1
       sourceRef:
         kind: HelmRepository
-        name: ananace-charts
+        name: bjw-s-charts
         namespace: flux-system
-      interval: 5m
+
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+
   values:
+    global:
+      nameOverride: *app
+
     image:
       repository: turt2live/matrix-media-repo
       tag: v1.2.12
 
-    config:
-      datastores:
-        - type: s3
-          enabled: true
-          forKinds: ["all"]
-          opts:
-            tempPath: "/tmp/mediarepo_s3_upload"
-            endpoint: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
-            ssl: false
-            accessKeyId: ${SECRET_MATRIX_MEDIA_S3_ACCESS_KEY_ID}
-            accessSecret: ${SECRET_MATRIX_MEDIA_S3_ACCESS_SECRET}
-            bucketName: "matrix-media"
+    env:
+      TZ: "America/New_York"
+      REPO_CONFIG: "/config"
 
-    admins:
-      - "@ryan:${SECRET_PUBLIC_DOMAIN}"
-
-    homeservers:
-      "synapse.${SECRET_DOMAIN}":
-        csApi: "http://matrix-synapse:8008"
-        backoffAt: 10
-        adminApiKind: "matrix"
-        identicons:
-          enabled: false
+    service:
+      main:
+        ports:
+          http:
+            port: 8000
 
     ingress:
-      enabled: true
-      className: nginx
-      annotations:
-        external-dns.home.arpa/enabled: "true"
-      hosts:
-        - host: synapse.${SECRET_DOMAIN}
-          paths:
-            - "/_matrix/media"
-      tls:
-        - secretName: synapse-cert
-          hosts:
-            - synapse.${SECRET_DOMAIN}
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.home.arpa/enabled: "true"
+        hosts:
+          - host: &host "synapse.${SECRET_DOMAIN}"
+            paths:
+              - path: /_matrix/media
 
-    postgresql:
-      enabled: false
-      host: postgres-rw.db.svc.cluster.local
-      port: 5432
-      username: matrix-media-repo
-      database: matrix-media-repo
-      password: ${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}
+        tls:
+          - hosts:
+              - *host
+            secretName: tls.matrix
 
-    externalPostgresql:
-      host: postgres-rw.db.svc.cluster.local
-      port: 5432
-      username: matrix-media-repo
-      database: matrix-media-repo
-      password: ${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}
-
-    redis:
-      enabled: false
-
-    externalRedis:
-      enabled: true
-      host: matrix-redis.matrix.svc.cluster.local
-      port: 6379
-      existingSecret: matrix-redis
-      existingSecretPasswordKey: REDIS_PASSWORD
+    probes:
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+      readinessProbe:
+        httpGet:
+          path: /healthz
+          port: http
 
     persistence:
-      enabled: false
+      config:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /config/configuration.yaml
+        subPath: configuration.yaml
+        type: configMap
 
-  # valuesFrom:
-  #   - kind: ConfigMap
-  #     name: matrix-media-ceph-bucket
-  #     valuesKey: BUCKET_NAME
-  #     targetPath: config.datastores.opts.bucketName
-  #   - kind: ConfigMap
-  #     name: matrix-media-ceph-bucket
-  #     valuesKey: BUCKET_HOST
-  #     targetPath: config.datastores.opts.endpoint
-  #   - kind: Secret
-  #     name: matrix-media-ceph-bucket
-  #     valuesKey: AWS_ACCESS_KEY_ID
-  #     targetPath: config.datastores.opts.accessKeyId
-  #   - kind: Secret
-  #     name: matrix-media-ceph-bucket
-  #     valuesKey: AWS_SECRET_ACCESS_KEY
-  #     targetPath: config.datastores.opts.accessSecret
+      data:
+        enabled: true
+        type: emptyDir
+        mountPath: /media
+
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
