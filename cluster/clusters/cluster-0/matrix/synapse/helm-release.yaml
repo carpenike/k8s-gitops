@@ -63,7 +63,7 @@ spec:
               - path: /_matrix
           - host: &host2 "${SECRET_PUBLIC_DOMAIN}"
             paths:
-              - path: /
+              - path: /.well-known/matrix
         tls:
           - hosts:
               - *host
