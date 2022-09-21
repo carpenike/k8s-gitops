@@ -1,0 +1,38 @@
+database:
+  postgres: "postgres://matrix-media-repo:${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}@postgres-rw.db.svc.cluster.local/matrix-media-repo"
+repo:
+  bindAddress: "0.0.0.0"
+  port: 8000
+  logDirectory: "-"
+
+metrics:
+  enabled: true
+  bindAddress: "0.0.0.0"
+  port: 9000
+
+redis:
+  enabled: true
+  databaseNumber: 0
+  shards:
+    - name: external
+      addr: "redis://:${SECRET_MATRIX_REDIS_PASSWORD}@matrix-redis.matrix.svc.cluster.local:6379/0"
+
+datastores:
+  - enabled: true
+    forKinds:
+      - all
+    opts:
+      accessKeyId: ${SECRET_MATRIX_MEDIA_S3_ACCESS_KEY_ID}
+      accessSecret: ${SECRET_MATRIX_MEDIA_S3_ACCESS_SECRET}
+      bucketName: matrix-media
+      endpoint: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+      ssl: false
+      tempPath: /tmp/mediarepo_s3_upload
+    type: s3
+
+homeserver: synapse.${SECRET_DOMAIN}
+adminApiKind: matrix
+backoffAt: 10
+csApi: http://matrix-synapse:8008
+identicons:
+  enabled: false
