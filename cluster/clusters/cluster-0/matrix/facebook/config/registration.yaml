@@ -1,0 +1,14 @@
+id: facebook
+as_token: ${SECRET_MAUTRIX_FACEBOOK_AS_TOKEN}
+hs_token: ${SECRET_MAUTRIX_FACEBOOK_HS_TOKEN}
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@facebook_.*:ryanholt\.net'
+      group_id: +facebook:ryanholt.net
+    - exclusive: true
+      regex: '@facebookbot:ryanholt\.net'
+  aliases: []
+url: http://mautrix-facebook:29319
+sender_localpart: ${SECRET_MAUTRIX_FACEBOOK_SENDER_LOCALPART}
+rate_limited: false

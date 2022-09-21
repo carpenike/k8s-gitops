@@ -1,0 +1,119 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app mautrix-facebook
+  namespace: matrix
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 0.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    global:
+      nameOverride: *app
+
+    image:
+      repository: dock.mau.dev/mautrix/facebook
+      tag: v0.4.0
+
+    command:
+      - "python3"
+    args:
+      - "-m"
+      - "mautrix_facebook"
+      - "-c"
+      - "/data/config.yaml"
+
+    service:
+      main:
+        ports:
+          http:
+            port: 29319
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+        hosts:
+          - host: &host "mau-fb.${SECRET_DOMAIN}"
+            paths:
+              - path: /public
+                pathType: Prefix
+        tls:
+          - secretName: tls.mau-fb
+            hosts:
+              - *host
+
+    persistence:
+      data:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /data/config.yaml
+        subPath: config.yaml
+        type: configMap
+      registration:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /data/registration.yaml
+        subPath: registration.yaml
+        type: configMap
+
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
+
+    probes:
+      liveness:
+        custom: true
+        spec:
+          failureThreshold: 5
+          httpGet:
+            path: /_matrix/mau/live
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+      startup:
+        custom: true
+        spec:
+          failureThreshold: 5
+          httpGet:
+            path: /_matrix/mau/live
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+      readiness:
+        custom: true
+        spec:
+          failureThreshold: 5
+          httpGet:
+            path: /_matrix/mau/live
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
