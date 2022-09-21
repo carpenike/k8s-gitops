@@ -50,27 +50,29 @@ spec:
             port: 8083
 
     persistence:
-      config:
+      config-homeserver:
         enabled: true
-        type: custom
-        volumeSpec:
-          configMap:
-            name: *app
-        subPath:
-          - path: homeserver.yaml
-            mountPath: /synapse/config/homeserver.yaml
-          - path: logs.yaml
-            mountPath: /synapse/config/logs.yaml
+        name: *app
+        readOnly: true
+        mountPath: /synapse/config/homeserver.yaml
+        subPath: homeserver.yaml
+        type: configMap
+
+      config-logs:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /synapse/config/logs.yaml
+        subPath: logs.yaml
+        type: configMap
 
       signing-key:
         enabled: true
-        type: custom
-        volumeSpec:
-          secret:
-            name: *app
-        subPath:
-          - path: signing.key
-            mountPath: /synapse/keys/signing.key
+        name: *app
+        readOnly: true
+        mountPath: /synapse/keys/signing.key
+        subPath: signing.key
+        type: secret
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
