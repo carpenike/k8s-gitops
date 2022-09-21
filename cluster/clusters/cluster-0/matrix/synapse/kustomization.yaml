@@ -4,3 +4,14 @@ kind: Kustomization
 resources:
   - secret.sops.yaml
   # - helm-release.yaml
+configMapGenerator:
+  - name: synapse
+    files:
+      - homeserver.yaml=config/homeserver.yaml
+      - logs.yaml=config/logs.yaml
+# secretGenerator:
+#   - name: signing
+#     files:
+#       - config.ini=config/signing-key.yaml
+generatorOptions:
+  disableNameSuffixHash: true

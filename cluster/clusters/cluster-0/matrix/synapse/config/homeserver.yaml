@@ -1,0 +1,103 @@
+## Server ##
+server_name: "${SECRET_PUBLIC_DOMAIN}"
+public_baseurl: "https://synapse.${SECRET_DOMAIN}"
+pid_file: /homeserver.pid
+web_client: False
+soft_file_limit: 0
+log_config: "/synapse/config/log.yaml"
+report_stats: false
+## Ports ##
+listeners:
+  - port: 8008
+    tls: false
+    bind_addresses: ["::"]
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+  - port: 9090
+    tls: false
+    bind_addresses: ["::"]
+    type: http
+    resources:
+      - names: [metrics]
+        compress: false
+  - port: 9093
+    tls: false
+    bind_addresses: ["::"]
+    type: http
+    resources:
+      - names: [replication]
+        compress: false
+
+## Files ##
+media_store_path: "/synapse/data/media"
+uploads_path: "/synapse/data/uploads"
+
+## Registration ##
+enable_registration: false
+registration_shared_secret: "${SECRET_MATRIX_REGISTRATION_SHARED_SECRET}"
+
+## Metrics ###
+enable_metrics: true
+## Signing Keys ##
+signing_key_path: "/synapse/keys/signing.key"
+# The trusted servers to download signing keys from.
+trusted_key_servers:
+  - server_name: matrix.org
+## Workers ##
+## Extra config ##
+account_threepid_delegates:
+  msisdn: https://vector.im
+allowed_local_3pids:
+  - medium: email
+    pattern: .*
+  - medium: msisdn
+    pattern: \+1
+email:
+  notif_from: Your Friendly %(app)s homeserver <noreply@${SECRET_DOMAIN}>
+  smtp_host: smtp.mailgun.org
+  smtp_pass: ${SECRET_MAILGUN_PASSWORD}
+  smtp_port: 587
+  smtp_user: ${SECRET_MAILGUN_USERNAME}
+enable_3pid_lookup: true
+oidc_providers:
+  - allow_existing_users: true
+    client_id: synapse
+    client_secret: ${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}
+    discover: true
+    idp_icon: mxc://authelia.com/cKlrTPsGvlpKxAYeHWJsdVHI
+    idp_id: authelia
+    idp_name: Authelia
+    issuer: https://auth.${SECRET_DOMAIN}/
+    scopes:
+      - openid
+      - profile
+      - email
+    user_mapping_provider:
+      config:
+        display_name_template: "{{ user.name }}"
+        email_template: "{{ user.email }}"
+        localpart_template: "{{ user.preferred_username }}"
+        subject_claim: sub
+
+## Database configuration ##
+database:
+  name: "psycopg2"
+  args:
+    user: "matrix-synapse"
+    password: "${SECRET_MATRIX_POSTGRES_PASSWORD}"
+    database: "matrix-synapse"
+    host: "postgres-rw.db.svc.cluster.local"
+    port: 5432
+    sslmode: "prefer"
+    cp_min: 5
+    cp_max: 10
+
+## Redis configuration ##
+redis:
+  enabled: true
+  host: "matrix-redis.matrix.svc.cluster.local"
+  password: "${SECRET_MATRIX_REDIS_PASSWORD}"
+  port: 6379
