@@ -7,7 +7,7 @@ database:
   postgres: "postgres://matrix-media-repo:${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}@postgres-rw.db.svc.cluster.local/matrix-media-repo"
 
 homeservers:
-  - name: ${SECRET_PUBLIC_DOMAIN}
+  - name: synapse.${SECRET_DOMAIN}
     csApi: http://matrix-synapse:8008
     adminApiKind: "matrix"
     identicons:
