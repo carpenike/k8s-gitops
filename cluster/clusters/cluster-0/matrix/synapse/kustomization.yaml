@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - secret.sops.yaml
   # - helm-release.yaml
+namespace: matrix
 configMapGenerator:
   - name: synapse
     files:
