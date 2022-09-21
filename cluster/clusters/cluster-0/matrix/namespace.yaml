@@ -6,4 +6,3 @@ metadata:
   labels:
     goldilocks.fairwinds.com/enabled: "true"
     secret.home.arpa/postgres-superuser: "true"
-    secret.home.arpa/redis-superuser: "true"
