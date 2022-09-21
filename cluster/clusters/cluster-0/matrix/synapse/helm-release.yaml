@@ -120,7 +120,7 @@ spec:
     externalRedis:
       enabled: true
       host: matrix-redis.matrix.svc.cluster.local
-      port: 6739
+      port: 6379
       existingSecret: matrix-redis
       existingSecretPasswordKey: REDIS_PASSWORD
 
