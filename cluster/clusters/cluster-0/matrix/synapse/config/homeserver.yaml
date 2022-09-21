@@ -4,7 +4,7 @@ public_baseurl: "https://synapse.${SECRET_DOMAIN}"
 pid_file: /homeserver.pid
 web_client: False
 soft_file_limit: 0
-log_config: "/synapse/config/log.yaml"
+log_config: "/synapse/config/logs.yaml"
 report_stats: false
 ## Ports ##
 listeners:
