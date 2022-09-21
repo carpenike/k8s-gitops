@@ -10,6 +10,11 @@ configMapGenerator:
     files:
       - homeserver.yaml=config/homeserver.yaml
       - logs.yaml=config/logs.yaml
+  - name: matrix-well-known
+    files:
+      - client.json=config/client.json
+      - lighttpd.conf=config/lighttpd.conf
+      - server.json=config/server.json
 # secretGenerator:
 #   - name: signing
 #     files:
