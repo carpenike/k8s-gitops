@@ -1,5 +1,6 @@
 database:
   postgres: "postgres://matrix-media-repo:${SECRET_MATRIX_MEDIA_REPO_POSTGRES_PASSWORD}@postgres-rw.db.svc.cluster.local/matrix-media-repo"
+
 repo:
   bindAddress: "0.0.0.0"
   port: 8000
