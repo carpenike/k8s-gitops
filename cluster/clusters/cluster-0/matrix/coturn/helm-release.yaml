@@ -55,6 +55,14 @@ spec:
       - -c
       - /config/turnserver.conf
 
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+
     persistence:
       config:
         enabled: true
