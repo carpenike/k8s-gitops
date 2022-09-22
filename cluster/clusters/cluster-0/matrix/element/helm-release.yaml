@@ -54,7 +54,7 @@ spec:
               - path: /
                 pathType: Prefix
         tls:
-          - secretName: tls.matrix-admin
+          - secretName: tls.matrix-element
             hosts:
               - *host
 
