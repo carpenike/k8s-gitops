@@ -38,22 +38,27 @@ spec:
           coturn-plain-tcp:
             enabled: true
             port: 3478
+            targetPort: 3478
             protocol: TCP
           coturn-plain-udp:
             enabled: true
             port: 3478
+            targetPort: 3478
             protocol: UDP
           coturn-encrypted-tcp:
             enabled: true
             port: 5349
+            targetPort: 5349
             protocol: TCP
           coturn-encrypted-udp:
             enabled: true
             port: 5349
+            targetPort: 5349
             protocol: UDP
           prometheus:
             enabled: true
             port: 9641
+            targetPort: 9641
             protocol: TCP
 
     args:
