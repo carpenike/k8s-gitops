@@ -1,0 +1,63 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app matrix-coturn
+  namespace: matrix
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 0.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    global:
+      nameOverride: *app
+
+    image:
+      repository: coturn/coturn
+      tag: "4.6.0"
+
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+            protocol: tcp
+          coturn-plain:
+            port: 3478
+            protocol: tcp_udp
+          coturn-encrypted:
+            port: 5349
+            protocol: tcp_udp
+          prometheus:
+            port: 9641
+            protocol: tcp
+
+    args:
+      - -c
+      - /config/turnserver.conf
+
+    persistence:
+      config:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /config/turnserver.conf
+        subPath: turnserver.conf
+        type: configMap
+
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
+      k8s.v1.cni.cncf.io/networks: macvlan-static-servers-coturn

@@ -89,3 +89,16 @@ spec:
     - name: matrix-namespace
   path: "./cluster/clusters/cluster-0/matrix/element"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: mautrix-coturn
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: matrix-namespace
+  path: "./cluster/clusters/cluster-0/matrix/coturnI"
+  prune: true
