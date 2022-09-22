@@ -100,5 +100,5 @@ metadata:
 spec:
   dependsOn:
     - name: matrix-namespace
-  path: "./cluster/clusters/cluster-0/matrix/coturnI"
+  path: "./cluster/clusters/cluster-0/matrix/coturn"
   prune: true
