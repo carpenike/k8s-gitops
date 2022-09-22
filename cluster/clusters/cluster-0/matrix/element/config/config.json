@@ -1,7 +1,7 @@
 {
   "default_server_config": {
     "m.homeserver": {
-      "base_url": "https://element.${SECRET_DOMAIN}",
+      "base_url": "https://synapse.${SECRET_DOMAIN}",
       "server_name": "synapse.${SECRET_DOMAIN}"
     },
     "m.identity_server": {
