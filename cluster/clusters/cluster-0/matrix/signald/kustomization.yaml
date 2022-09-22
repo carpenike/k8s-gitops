@@ -5,12 +5,12 @@ resources:
   - helm-release.yaml
   - secret.sops.yaml
 namespace: matrix
-configMapGenerator:
-  - name: mautrix-facebook
-    files:
-      - config.yaml=config/config.yaml
-      - registration.yaml=config/registration.yaml
-generatorOptions:
-  disableNameSuffixHash: true
+# configMapGenerator:
+#   - name: mautrix-facebook
+#     files:
+#       - config.yaml=config/config.yaml
+#       - registration.yaml=config/registration.yaml
+# generatorOptions:
+#   disableNameSuffixHash: true
 patchesStrategicMerge:
   - patches/postgres.yaml

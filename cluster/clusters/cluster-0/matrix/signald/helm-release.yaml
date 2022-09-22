@@ -40,63 +40,11 @@ spec:
     service:
       main:
         ports:
-          metrics:
+          http:
             port: 9595
 
     persistence:
-      data:
+      signald:
         enabled: true
         name: *app
-        readOnly: true
-        mountPath: /data/config.yaml
-        subPath: config.yaml
-        type: configMap
-      registration:
-        enabled: true
-        name: *app
-        readOnly: true
-        mountPath: /data/registration.yaml
-        subPath: registration.yaml
-        type: configMap
-
-    resources:
-      requests:
-        memory: 100Mi
-        cpu: 100m
-      limits:
-        memory: 500Mi
-
-    probes:
-      liveness:
-        custom: true
-        spec:
-          failureThreshold: 5
-          httpGet:
-            path: /_matrix/mau/live
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-      startup:
-        custom: true
-        spec:
-          failureThreshold: 5
-          httpGet:
-            path: /_matrix/mau/live
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-      readiness:
-        custom: true
-        spec:
-          failureThreshold: 5
-          httpGet:
-            path: /_matrix/mau/live
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
+        type: emptyDir
