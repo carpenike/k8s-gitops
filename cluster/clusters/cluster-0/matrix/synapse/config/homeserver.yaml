@@ -2,7 +2,7 @@
 server_name: "${SECRET_PUBLIC_DOMAIN}"
 public_baseurl: "https://synapse.${SECRET_DOMAIN}"
 pid_file: /homeserver.pid
-web_client: False
+web_client_location: https://element.${SECRET_DOMAIN}
 soft_file_limit: 0
 log_config: "/synapse/config/logs.yaml"
 report_stats: false
