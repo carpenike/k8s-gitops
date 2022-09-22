@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - secret.sops.yaml
+  - signald-pvc.yaml
 namespace: matrix
 # configMapGenerator:
 #   - name: mautrix-facebook
