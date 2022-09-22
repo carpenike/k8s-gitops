@@ -35,12 +35,18 @@ spec:
           http:
             port: 8080
             protocol: tcp
-          coturn-plain:
+          coturn-plain-tcp:
             port: 3478
-            protocol: tcp_udp
-          coturn-encrypted:
+            protocol: tcp
+          coturn-plain-udp:
+            port: 3478
+            protocol: udp
+          coturn-encrypted-tcp:
             port: 5349
-            protocol: tcp_udp
+            protocol: tcp
+          coturn-encrypted-udp:
+            port: 5349
+            protocol: udp
           prometheus:
             port: 9641
             protocol: tcp
