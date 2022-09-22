@@ -47,6 +47,7 @@ spec:
         ingressClassName: "nginx"
         annotations:
           external-dns.home.arpa/enabled: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "100m"
         hosts:
           - host: &host "synapse.${SECRET_DOMAIN}"
             paths:
