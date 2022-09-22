@@ -64,6 +64,14 @@ spec:
                 service:
                   name: matrix-synapse
                   port: 8008
+              - path: /_synapse
+                service:
+                  name: matrix-synapse
+                  port: 8008
+              - path: /client
+                service:
+                  name: matrix-synapse
+                  port: 8008
           - host: &host2 "${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /.well-known/matrix
