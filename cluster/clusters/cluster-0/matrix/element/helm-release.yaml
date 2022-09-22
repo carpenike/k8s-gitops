@@ -43,6 +43,11 @@ spec:
           external-dns.home.arpa/enabled: "true"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            add_header X-Frame-Options SAMEORIGIN;
+            add_header X-Content-Type-Options nosniff;
+            add_header X-XSS-Protection "1; mode=block";
+            add_header Content-Security-Policy "frame-ancestors 'none'";
         hosts:
           - host: &host "element.${SECRET_DOMAIN}"
             paths:
@@ -52,3 +57,12 @@ spec:
           - secretName: tls.matrix-admin
             hosts:
               - *host
+
+    persistence:
+      config:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /app/config.json
+        subPath: config.json
+        type: configMap
