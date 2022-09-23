@@ -4,6 +4,7 @@ metadata:
   name: signald-socket
   namespace: matrix
 spec:
+  storageClassName: ceph-filesystem
   accessModes:
     - ReadWriteMany
   resources:
