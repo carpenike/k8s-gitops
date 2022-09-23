@@ -45,18 +45,18 @@ spec:
         enabled: true
         existingClaim: signald-socket
 
-      config:
+      data:
         enabled: true
         name: *app
         readOnly: true
-        mountPath: /config/config.yaml
+        mountPath: /data/config.yaml
         subPath: config.yaml
         type: configMap
       registration:
         enabled: true
         name: *app
         readOnly: true
-        mountPath: /config/registration.yaml
+        mountPath: /data/registration.yaml
         subPath: registration.yaml
         type: configMap
 
