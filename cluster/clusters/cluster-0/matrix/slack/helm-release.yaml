@@ -68,3 +68,6 @@ spec:
         mountPath: /config/slack-registration.yaml
         subPath: registration.yaml
         type: configMap
+
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
