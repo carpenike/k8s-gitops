@@ -14,7 +14,7 @@ configMapGenerator:
     files:
       - client.json=config/client.json
       - lighttpd.conf=config/lighttpd.conf
-      - server.json=config/server.jsoni
+      - server.json=config/server.json
 # secretGenerator:
 #   - name: signing
 #     files:
