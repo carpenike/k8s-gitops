@@ -6,4 +6,4 @@ sender_localpart: slackbot
 namespaces:
   users:
     - exclusive: true
-      regex: "@slack_.*:synapse.${SECRET_DOMAIN}"
+      regex: "@slack_.*:${SECRET_PUBLIC_DOMAIN}"
