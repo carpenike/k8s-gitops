@@ -79,13 +79,13 @@ slack_hook_port: 9898
 # as this one must be publicly visible to the Slack API.
 # Optional if using RTM API, required otherwise.
 #
-#inbound_uri_prefix: "https://my.server.here:9898/"
+inbound_uri_prefix: "https://ma-slack.${SECRET_DOMAIN)/"
 
 # Optional. Allow users to add channels dynamically by using oauth, or puppet themselves.
 #
-#oauth2:
-#client_id: ""
-#client_secret: ""
+oauth2:
+client_id: "${SECRET_MATRIX_SLACK_CLIENT_ID}"
+client_secret: "${SECRET_MATRIX_SLACK_CLIENT_SECRET}"
 
 # A prefix similar to inbound_uri_prefix for oauth2 requests. inbound_uri_prefix will be used if this is not set
 # Optional
@@ -187,10 +187,10 @@ slack_hook_port: 9898
 # Optional. Allows Matrix users to optionally authenticate their Slack accounts.
 # When a Matrix user posts, the bridge will post using their Slack account.
 #
-# puppeting:
-#   # Should the bridge allow users to puppet their accounts
-#   #
-#   enabled: false
+puppeting:
+  # Should the bridge allow users to puppet their accounts
+  #
+  enabled: true
 
 # Should the bridge send users a onboarding message when
 # they join a Slack channel for the first time.
