@@ -2,21 +2,21 @@ homeserver:
   # The domain name of your homeserver
   #
   server_name: ${SECRET_PUBLIC_DOMAIN}
-  
+
   # The URL for connecting to your homeserver
   #
   url: http://matrix-synapse:8008
-  
+
   # The public facing url for media on your homeserver.
   # This is usually the public url of your homeserver.
   # Optional. Defaults to the value of `url`.
   #
   media_url: "https://synapse.${SECRET_DOMAIN}"
-  
+
   # Optional. The maximum size of a uploaded file to Matrix in bytes. No limit by default
   #
   #max_upload_size: 104857600
-  
+
   # Optional. Used to specify the port of the appservice in the config, rather than the command line.
   # This will be overriden by any ports given in the process arguments.
   #
@@ -41,10 +41,10 @@ db:
   # Deprecated: "nedb"
   #
   engine: "postgres"
-  
+
   # A postgres connection string (unused if using nedb)
   #
-  connectionString: "postgresql://matrix-slack:${SECRET_MATRIX_SLACK_POSTGRES_PASSWORD}@localhost/matrix-slack"
+  connectionString: "postgresql://matrix-slack:${SECRET_MATRIX_SLACK_POSTGRES_PASSWORD}@postgres-rw.db.svc.cluster.local/matrix-slack"
 
 # Optional. Use a matrix room to issue link and unlink commands to the bridge
 #
@@ -52,8 +52,8 @@ matrix_admin_room: "!slack_admin:${SECRET_PUBLIC_DOMAIN}"
 
 # Optional. TLS files to be used when handling Slack requests
 #tls:
-  #key_file: /path/to/tls.key
-  #crt_file: /path/to/tls.crt
+#key_file: /path/to/tls.key
+#crt_file: /path/to/tls.crt
 
 # Real Time Messaging API (RTM)
 # Optional if slack_hook_port and inbound_uri_prefix are defined, required otherwise.
@@ -74,7 +74,6 @@ rtm:
 # Optional if using RTM API, required otherwise.
 #
 slack_hook_port: 9898
-
 # Prefix of incoming requests to strip. This is NOT the bind host.
 # Unlike most of the other urls, this one cannot use localhost,
 # as this one must be publicly visible to the Slack API.
@@ -85,18 +84,18 @@ slack_hook_port: 9898
 # Optional. Allow users to add channels dynamically by using oauth, or puppet themselves.
 #
 #oauth2:
-  #client_id: ""
-  #client_secret: ""
-  
-  # A prefix similar to inbound_uri_prefix for oauth2 requests. inbound_uri_prefix will be used if this is not set
-  # Optional
-  #
-  #redirect_prefix: "https://my.server.here:9898/mycustomoauthendpoint"
+#client_id: ""
+#client_secret: ""
+
+# A prefix similar to inbound_uri_prefix for oauth2 requests. inbound_uri_prefix will be used if this is not set
+# Optional
+#
+#redirect_prefix: "https://my.server.here:9898/mycustomoauthendpoint"
 
 # Optional
 # logging:
 #   console: "info" # One of "debug", "info", "warning", "error", "silent"
-  
+
 #   # Files that the bridge may log into. The key is the minimum level to report.
 #   #
 #   files:
@@ -110,80 +109,80 @@ slack_hook_port: 9898
 # Optional. Sync team users and channels
 #
 # team_sync:
-  # Entry for a single team
-  # T0123ABCDEF:
-  #   channels:
-  #     enabled: true
-  #     # Allow or deny private channels from being synced. Defaults to true.
-  #     #
-  #     allow_private: true
-  #    
-  #    # Optional. 
-  #    # Allow or deny public channels from being synced. Defaults to true.
-  #    #
-  #    allow_public: true
-  #  
-  #
-  #     # Optional. blacklist for channel ids. Trumps the whitelist.
-  #     #
-  #     #blacklist: ['CVCCPEY9X', 'C0108F9K37X']
-  #
-  #     # Optional. whitelist for channel ids.
-  #     #
-  #     #whitelist: []
-  #
-  #     # Prefix for room aliases in Matrix
-  #     #
-  #     #alias_prefix: "slack_"
-  #
-  #     # Send a hint to channel admins how to invite matrix bridge if automatic join does not work
-  #     #
-  #     #hint_channel_admins: true
-  #
-  #   # Should sync *all* team users to Matrix
-  #   #
-  #   users:
-  #     enabled: true
-  # Defaults for all other teams
-  # all:
-  #   channels:
-  #     enabled: false
-  #     #whitelist: []
-  #     #blacklist: []
-  #     #alias_prefix: "slack_"
-  #   users:
-  #     enabled: false
+# Entry for a single team
+# T0123ABCDEF:
+#   channels:
+#     enabled: true
+#     # Allow or deny private channels from being synced. Defaults to true.
+#     #
+#     allow_private: true
+#
+#    # Optional.
+#    # Allow or deny public channels from being synced. Defaults to true.
+#    #
+#    allow_public: true
+#
+#
+#     # Optional. blacklist for channel ids. Trumps the whitelist.
+#     #
+#     #blacklist: ['CVCCPEY9X', 'C0108F9K37X']
+#
+#     # Optional. whitelist for channel ids.
+#     #
+#     #whitelist: []
+#
+#     # Prefix for room aliases in Matrix
+#     #
+#     #alias_prefix: "slack_"
+#
+#     # Send a hint to channel admins how to invite matrix bridge if automatic join does not work
+#     #
+#     #hint_channel_admins: true
+#
+#   # Should sync *all* team users to Matrix
+#   #
+#   users:
+#     enabled: true
+# Defaults for all other teams
+# all:
+#   channels:
+#     enabled: false
+#     #whitelist: []
+#     #blacklist: []
+#     #alias_prefix: "slack_"
+#   users:
+#     enabled: false
 
 # Optional.
 #
 # provisioning:
 #   enabled: true
 
-  # Should the bridge deny users bridging channels to private rooms.
-  # Optional.
-  # require_public_room: false
-  
-  # Should the bridge allow users to bridge private channels.
-  # Optional. Defaults to true.
-  # allow_private_channels: true
-  # Limit the number of bridged rooms and teams.
-  # Optional. Unlimited by default.
-  # limits:
-  #  room_count: 20
-  #  team_count: 1
-  
-  # Allow deny list for which Slack channels may be bridged.
-  # If allow is defined, all other channels are blocked by default
-  # If deny is defined, all other channels are allowed by default
-  # If both are defined, allow takes precedence.
-  # Optional. 
-  # channel_adl:
-  #   allow: 
-  #     #- "CCZ41UJV7"
-  #     #- "#open.*"
-  #   deny:
-  #     #- "CRBCPA771"
-  #     #- "#secret.*"
+# Should the bridge deny users bridging channels to private rooms.
+# Optional.
+# require_public_room: false
+
+# Should the bridge allow users to bridge private channels.
+# Optional. Defaults to true.
+# allow_private_channels: true
+# Limit the number of bridged rooms and teams.
+# Optional. Unlimited by default.
+# limits:
+#  room_count: 20
+#  team_count: 1
+
+# Allow deny list for which Slack channels may be bridged.
+# If allow is defined, all other channels are blocked by default
+# If deny is defined, all other channels are allowed by default
+# If both are defined, allow takes precedence.
+# Optional.
+# channel_adl:
+#   allow:
+#     #- "CCZ41UJV7"
+#     #- "#open.*"
+#   deny:
+#     #- "CRBCPA771"
+#     #- "#secret.*"
 
 # Optional. Allows Matrix users to optionally authenticate their Slack accounts.
 # When a Matrix user posts, the bridge will post using their Slack account.
@@ -192,48 +191,48 @@ slack_hook_port: 9898
 #   # Should the bridge allow users to puppet their accounts
 #   #
 #   enabled: false
-  
-  # Should the bridge send users a onboarding message when
-  # they join a Slack channel for the first time.
-  # Optional.
-  # onboard_users: false
-  
-  # Settings regarding who can send direct messages.
-  # If allow is defined, all other users are blocked by default
-  # If deny is defined, all other users are allowed by default
-  # If both are defined, allow takes precedence.
-  # Optional.
-  # direct_messages:
-  #   allow:
-  #     # Which Slack users may DM Matrix users.
-  #     #
-  #     slack: 
-  #       #- "U0156TG3W48"
-      
-  #     # Which Matrix users may DM Slack users.
-  #     #
-  #     matrix: 
-  #       #- "@badactor:badhost"
-  #       #- "@.*:badhost"
 
-  #   deny:
-  #     # Which Slack users may NOT DM Matrix users.
-  #     #
-  #     slack: 
-  #       #- "U0156TG3W48"
-      
-  #     # Which Matrix users may NOT DM Slack users.
-  #     #
-  #     matrix: 
-  #       #- "@badactor:badhost"
-  #       #- "@.*:badhost"
+# Should the bridge send users a onboarding message when
+# they join a Slack channel for the first time.
+# Optional.
+# onboard_users: false
+
+# Settings regarding who can send direct messages.
+# If allow is defined, all other users are blocked by default
+# If deny is defined, all other users are allowed by default
+# If both are defined, allow takes precedence.
+# Optional.
+# direct_messages:
+#   allow:
+#     # Which Slack users may DM Matrix users.
+#     #
+#     slack:
+#       #- "U0156TG3W48"
+
+#     # Which Matrix users may DM Slack users.
+#     #
+#     matrix:
+#       #- "@badactor:badhost"
+#       #- "@.*:badhost"
+
+#   deny:
+#     # Which Slack users may NOT DM Matrix users.
+#     #
+#     slack:
+#       #- "U0156TG3W48"
+
+#     # Which Matrix users may NOT DM Slack users.
+#     #
+#     matrix:
+#       #- "@badactor:badhost"
+#       #- "@.*:badhost"
 
 # # Optional. Set the bot's profile on startup
 # bot_profile:
 #   # Optional. Set the displayname.
 #   #
 #   displayname: "Slack Bridge"
-  
+
 #   # Optional. Set the avatar.
 #   #
 #   avatar_url: "mxc://half-shot.uk/ea64c71ee946ca2f61379abefe2c7d977d276fbb"
