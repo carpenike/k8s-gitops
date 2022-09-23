@@ -1,6 +1,6 @@
 id: signal
-as_token: M3fdi0pMqhkxyoB0Ui6WTjJlJDUDObyMRGfughlJ6UqCnQZf3gZUOI3JPHyd-co9
-hs_token: lMp_XPDqWfYyrzIa9IPssEg6_pMMfYAntkmNH0iSpwqaSZMMg562y4iTQAb8TOJz
+as_token: ${SECRET_MATRIX_SIGNAL_AS_TOKEN}
+hs_token: ${SECRET_MATRIX_SIGNAL_HS_TOKEN}
 namespaces:
     users:
     - exclusive: true
