@@ -61,3 +61,10 @@ spec:
         mountPath: /config/config.yaml
         subPath: config.yaml
         type: configMap
+      registration:
+        enabled: true
+        name: *app
+        readOnly: true
+        mountPath: /config/slack-registration.yaml
+        subPath: registration.yaml
+        type: configMap

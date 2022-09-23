@@ -9,6 +9,7 @@ configMapGenerator:
   - name: matrix-slack
     files:
       - config.yaml=config/config.yaml
+      - registration.yaml=config/registration.yaml
 generatorOptions:
   disableNameSuffixHash: true
 patchesStrategicMerge:
