@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app mautrix-facebook
+  name: &app matrix-slack
   namespace: matrix
 spec:
   values:
@@ -14,12 +14,12 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: *app
-                key: MAUTRIX_FACEBOOK_POSTGRES_HOST
+                key: MATRIX_SLACK_POSTGRES_HOST
           - name: POSTGRES_DB
             valueFrom:
               secretKeyRef:
                 name: *app
-                key: MAUTRIX_FACEBOOK_POSTGRES_DATABASE
+                key: MATRIX_SLACK_POSTGRES_DATABASE
           - name: POSTGRES_SUPER_PASS
             valueFrom:
               secretKeyRef:
@@ -29,9 +29,9 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: *app
-                key: MAUTRIX_FACEBOOK_POSTGRES_USERNAME
+                key: MATRIX_SLACK_POSTGRES_USERNAME
           - name: POSTGRES_PASS
             valueFrom:
               secretKeyRef:
                 name: *app
-                key: MAUTRIX_FACEBOOK_POSTGRES_PASSWORD
+                key: MATRIX_SLACK_POSTGRES_PASSWORD
