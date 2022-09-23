@@ -46,5 +46,4 @@ spec:
     persistence:
       signald:
         enabled: true
-        name: *app
-        type: emptyDir
+        existingClaim: signald-socket
