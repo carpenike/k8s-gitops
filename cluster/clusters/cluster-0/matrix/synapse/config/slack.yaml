@@ -1,9 +1,0 @@
-id: 22b87b03ecdbef57977503c690cbd00354f5cb2e7ec9a2226ea4b52b9fcbfcb3
-hs_token: ${SECRET_MATRIX_SLACK_HS_TOKEN}
-as_token: ${SECRET_MATRIX_SLACK_AS_TOKEN}
-url: http://matrix-slack:9898
-sender_localpart: slackbot
-namespaces:
-  users:
-    - exclusive: true
-      regex: "@slack_.*:${SECRET_PUBLIC_DOMAIN}"

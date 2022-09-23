@@ -14,10 +14,7 @@ configMapGenerator:
     files:
       - client.json=config/client.json
       - lighttpd.conf=config/lighttpd.conf
-      - server.json=config/server.json
-  - name: matrix-synapse-app-registrations
-    files:
-      - slack.yaml=config/slack.yaml
+      - server.json=config/server.jsoni
 # secretGenerator:
 #   - name: signing
 #     files:
