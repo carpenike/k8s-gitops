@@ -6,7 +6,7 @@ resources:
   - secret.sops.yaml
 namespace: matrix
 configMapGenerator:
-  - name: mautrix-facebook
+  - name: matrix-slack
     files:
       - config.yaml=config/config.yaml
 generatorOptions:
