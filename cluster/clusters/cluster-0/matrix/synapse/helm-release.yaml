@@ -119,6 +119,14 @@ spec:
         subPath: registration.yaml
         type: configMap
 
+      signal-registration:
+        enabled: true
+        name: mautrix-signal
+        readOnly: true
+        mountPath: /synapse/config/signal-registration.yaml
+        subPath: registration.yaml
+        type: configMap
+
       signing-key:
         enabled: true
         name: *app
