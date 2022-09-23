@@ -111,6 +111,14 @@ spec:
         subPath: registration.yaml
         type: configMap
 
+      slack-registration:
+        enabled: true
+        name: matrix-synapse-app-registrations
+        readOnly: true
+        mountPath: /synapse/config/slack-registration.yaml
+        subPath: slack.yaml
+        type: configMap
+
       signing-key:
         enabled: true
         name: *app
