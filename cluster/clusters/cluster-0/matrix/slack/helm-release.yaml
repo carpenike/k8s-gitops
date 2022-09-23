@@ -37,6 +37,8 @@ spec:
           matrix:
             enabled: true
             port: 5858
+            targetPort: 5858
+            protocol: TCP
 
     ingress:
       main:
