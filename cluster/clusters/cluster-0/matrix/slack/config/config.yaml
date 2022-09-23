@@ -48,7 +48,7 @@ db:
 
 # Optional. Use a matrix room to issue link and unlink commands to the bridge
 #
-matrix_admin_room: "slack_admin:${SECRET_PUBLIC_DOMAIN}"
+matrix_admin_room: "!kodHxuoPtXkOdHEJfa:${SECRET_PUBLIC_DOMAIN}"
 
 # Optional. TLS files to be used when handling Slack requests
 #tls:
