@@ -100,6 +100,10 @@ spec:
         mountPath: /config/turnserver.conf
         subPath: turnserver.conf
         type: configMap
-
+      tls:
+        enabled: true
+        name: tls.coturn
+        readOnly: true
+        type: secret
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
