@@ -56,6 +56,9 @@ spec:
     persistence:
       data:
         enabled: true
+        type: emptyDir
+      config:
+        enabled: true
         name: *app
         readOnly: true
         mountPath: /data/config.yaml
