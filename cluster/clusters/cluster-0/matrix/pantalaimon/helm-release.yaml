@@ -33,7 +33,7 @@ spec:
       main:
         ports:
           http:
-            port: 8008
+            port: 8009
 
     persistence:
       config:
@@ -41,7 +41,7 @@ spec:
         name: *app
         readOnly: true
         mountPath: /data/pantalaimon.conf
-        subPath: config.yaml
+        subPath: config.conf
         type: configMap
       # registration:
       #   enabled: true
