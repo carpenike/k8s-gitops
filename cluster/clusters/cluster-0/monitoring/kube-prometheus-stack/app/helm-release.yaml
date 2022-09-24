@@ -46,40 +46,40 @@ spec:
                     {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
                     {{ end }}
                   {{ end }}
-          - name: "pushover"
-            pushover_configs:
-              - token: "${SECRET_PUSHOVER_ALERT_MANAGER_APIKEY}"
-                user_key: "${SECRET_PUSHOVER_USERKEY}"
-                send_resolved: true
-                html: true
-                priority: |-
-                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
-                url_title: View in Alert Manager
-                title: |-
-                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
-                message: |-
-                  {{- range .Alerts }}
-                    {{- if ne .Labels.severity "" }}
-                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-                    {{- else }}
-                      <b>Severity:</b> <i>N/A</i>
-                    {{- end }}
-                    {{- if ne .Annotations.description "" }}
-                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
-                    {{- else if ne .Annotations.summary "" }}
-                      <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
-                    {{- else if ne .Annotations.message "" }}
-                      <b>Message:</b> <i>{{ .Annotations.message }}</i>
-                    {{- else }}
-                      <b>Description:</b> <i>N/A</i>
-                    {{- end }}
-                    {{- if gt (len .Labels.SortedPairs) 0 }}
-                      <b>Details:</b>
-                      {{- range .Labels.SortedPairs }}
-                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
-                      {{- end }}
-                    {{- end }}
-                  {{- end }}
+          # - name: "pushover"
+          #   pushover_configs:
+          #     - token: "${SECRET_PUSHOVER_ALERT_MANAGER_APIKEY}"
+          #       user_key: "${SECRET_PUSHOVER_USERKEY}"
+          #       send_resolved: true
+          #       html: true
+          #       priority: |-
+          #         {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+          #       url_title: View in Alert Manager
+          #       title: |-
+          #         [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+          #       message: |-
+          #         {{- range .Alerts }}
+          #           {{- if ne .Labels.severity "" }}
+          #             <b>Severity:</b> <i>{{ .Labels.severity }}</i>
+          #           {{- else }}
+          #             <b>Severity:</b> <i>N/A</i>
+          #           {{- end }}
+          #           {{- if ne .Annotations.description "" }}
+          #             <b>Description:</b> <i>{{ .Annotations.description }}</i>
+          #           {{- else if ne .Annotations.summary "" }}
+          #             <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
+          #           {{- else if ne .Annotations.message "" }}
+          #             <b>Message:</b> <i>{{ .Annotations.message }}</i>
+          #           {{- else }}
+          #             <b>Description:</b> <i>N/A</i>
+          #           {{- end }}
+          #           {{- if gt (len .Labels.SortedPairs) 0 }}
+          #             <b>Details:</b>
+          #             {{- range .Labels.SortedPairs }}
+          #               • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+          #             {{- end }}
+          #           {{- end }}
+          #         {{- end }}
 
         route:
           group_by: ["alertname", "job"]
