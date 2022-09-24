@@ -60,6 +60,12 @@ spec:
         subPath: registration.yaml
         type: configMap
 
+    podSecurityContext:
+      runAsUser: 101336
+      runAsGroup: 101336
+      fsGroup: 101336
+      fsGroupChangePolicy: "OnRootMismatch"
+
     resources:
       requests:
         memory: 100Mi
