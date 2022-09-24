@@ -1,7 +1,7 @@
 ---
 clusterName: cluster-0
 
-talosVersion: v1.2.2
+talosVersion: v1.2.3
 kubernetesVersion: 1.24.3
 endpoint: "https://cluster-0.${domainName}:6443"
 
@@ -12,7 +12,7 @@ nodes:
   - hostname: cp-0.${domainName}
     controlPlane: true
     ipAddress: 10.20.0.20
-    installDisk: /dev/sda
+    installDisk: /dev/vda
   - hostname: cp-1.${domainName}
     ipAddress: 10.20.0.21
     installDisk: /dev/sda
@@ -69,20 +69,15 @@ nodes:
 controlPlane:
   inlinePatch:
     cluster:
-      aescbcEncryptionSecret: ${aescbcEncryptionKey}
-      aggregatorCA:
-        crt: ${k8sAggregatorCert}
-        key: ${k8sAggregatorCertKey}
+      allowSchedulingOnMasters: false
       apiServer:
+        disablePodSecurityPolicy: true
         admissionControl: []
         certSANs:
           - ${clusterEndpointIP}
           - cluster-0.${domainName}
         extraArgs:
           feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
-      ca:
-        crt: ${clusterCert}
-        key: ${clusterCertKey}
       controllerManager:
         extraArgs:
           feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
@@ -90,12 +85,10 @@ controlPlane:
         registries:
           service:
             disabled: true
-      etcd:
-        ca:
-          crt: ${etcdCert}
-          key: ${etcdCertKey}
+      # etcd:
+      #   subnet: 10.20.0.0/16
       extraManifests:
-        - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.5.1/deploy/ha-install.yaml
+        - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.6.1/deploy/ha-install.yaml
       proxy:
         disabled: true
         extraArgs:
@@ -103,15 +96,8 @@ controlPlane:
       scheduler:
         extraArgs:
           feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
-      secret: ${clusterSecret}
-      serviceAccount:
-        key: ${k8sServiceAccountKey}
-      token: ${clusterToken}
 
     machine:
-      ca:
-        crt: ${machineCert}
-        key: ${machineCertKey}
       certSANs:
         - ${clusterEndpointIP}
         - cluster-0.${domainName}
@@ -124,8 +110,11 @@ controlPlane:
           op: create
       kubelet:
         extraArgs:
-          feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
+          feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true,EphemeralContainers=True
           rotate-server-certificates: "true"
+        # nodeIP:
+        #   validSubnets:
+        #     - 10.20.0.0/16
       install:
         extraKernelArgs:
           - "talos.logging.kernel=udp://10.45.10.16:6050/"
@@ -138,33 +127,23 @@ controlPlane:
           - ip: ${clusterEndpointIP}
             aliases:
               - cluster-0.${domainName}
+      sysctls:
+        fs.inotify.max_user_watches: "1048576"
+        fs.inotify.max_user_instances: "8192"
       time:
         disabled: false
         servers:
           - 10.20.0.1
-      token: ${machineToken}
 
 worker:
   inlinePatch:
     cluster:
-      aescbcEncryptionSecret: ${aescbcEncryptionKey}
-      ca:
-        crt: ${clusterCert}
-        key: ${clusterCertKey}
-      secret: ${clusterSecret}
-      token: ${clusterToken}
       discovery:
         registries:
           service:
             disabled: true
 
     machine:
-      ca:
-        crt: ${machineCert}
-        key: ${machineCertKey}
-      certSANs:
-        - ${clusterEndpointIP}
-        - cluster-0.${domainName}
       files:
         - content: |
             [plugins."io.containerd.grpc.v1.cri"]
@@ -191,8 +170,11 @@ worker:
         disabled: false
         servers:
           - 10.20.0.1
-      token: ${machineToken}
+
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
-          feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
+          feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true,EphemeralContainers=True
+        # nodeIP:
+        #   validSubnets:
+        #     - 10.20.0.0/16
