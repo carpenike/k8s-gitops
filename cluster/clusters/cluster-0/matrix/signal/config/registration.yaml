@@ -4,9 +4,9 @@ hs_token: ${SECRET_MATRIX_SIGNAL_HS_TOKEN}
 namespaces:
   users:
     - exclusive: true
-      regex: '@signal_.*:ryanholt\.net'
+      regex: '@signal_.*:ryanholt.net'
     - exclusive: true
-      regex: '@signalbot:ryanholt\.net'
+      regex: '@signalbot:ryanholt.net'
   aliases: []
 url: http://mautrix-signal:29328
 sender_localpart: signalbot
