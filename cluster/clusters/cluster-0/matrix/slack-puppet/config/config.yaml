@@ -1,0 +1,123 @@
+# For more generic bridge configuration options have a look at
+# https://github.com/Sorunome/mx-puppet-bridge/blob/master/sample.config.yaml
+
+bridge:
+  # Port to host the bridge on
+  # Used for communication between the homeserver and the bridge
+  port: 8432
+  # The host connections to the bridge's webserver are allowed from
+  bindAddress: 0.0.0.0
+  # Public domain of the homeserver
+  domain: ${SECRET_PUBLIC_DOMAIN}
+  # Reachable URL of the Matrix homeserver
+  homeserverUrl: http://matrix-synapse:8008
+
+# Slack OAuth settings. See README.md for info on how to configure.
+oauth:
+  enabled: false
+  # Slack app credentials.
+  # N.B. This must be quoted so YAML wouldn't parse it as a float.
+  clientId: "242181311531.253471660323"
+  clientSecret: b3561066aa9af814155a12d33d9a28be
+  # Path where to listen for OAuth redirect callbacks.
+  redirectPath: /slack/oauth
+  # Set up proxying from https://your.domain/redirect_path to http://bindAddress:port/redirect_path,
+  # then set this field and the Slack app redirect URI field to the former.
+  redirectUri: https://ma-slack-puppet.${SECRET_DOMAIN}/slack/oauth
+
+presence:
+  # Bridge Discord online/offline status
+  enabled: true
+  # How often to send status to the homeserver in milliseconds
+  interval: 500
+
+provisioning:
+  # Regex of Matrix IDs allowed to use the puppet bridge
+  whitelist:
+    # Allow a specific user
+    #- "@user:server\\.com"
+    # Allow users on a specific homeserver
+    - "@.*:ryanholt\\.net"
+    # Allow anyone
+    #- ".*"
+  # Regex of Matrix IDs forbidden from using the puppet bridge
+  #blacklist:
+    # Disallow a specific user
+    #- "@user:server\\.com"
+    # Disallow users on a specific homeserver
+    #- "@.*:yourserver\\.com"
+
+  # Shared secret for the provisioning API for use by integration managers.
+  # If this is not set, the provisioning API will not be enabled.
+  sharedSecret: ${SECRET_MATRIX_SLACK_PUPPET_SHARED_SECRET}
+  # Path prefix for the provisioning API. /v1 will be appended to the prefix automatically.
+  apiPrefix: /_matrix/provision
+
+database:
+  # Use Postgres as a database backend
+  # If set, will be used instead of SQLite3
+  # Connection string to connect to the Postgres instance
+  # with username "user", password "pass", host "localhost" and database name "dbname".
+  # Modify each value as necessary
+  connString: "postgres://matrix-slack-puppet:${SECRET_MATRIX_SLACK_PUPPET_POSTGRES_PASSWORD}@postgres-rw.db.svc.cluster.local/matrix-slack-puppet?sslmode=disable"
+  # Use SQLite3 as a database backend
+  # The name of the database file
+  # filename: database.db
+
+logging:
+  # Log level of console output
+  # Allowed values starting with most verbose:
+  # silly, verbose, info, warn, error
+  console: info
+  # Date and time formatting
+  lineDateFormat: MMM-D HH:mm:ss.SSS
+  # Logging files
+  # Log files are rotated daily by default
+  files:
+    # Log file path
+    - file: "bridge.log"
+      # Log level for this file
+      # Allowed values starting with most verbose:
+      # silly, debug, verbose, info, warn, error
+      level: info
+      # Date and time formatting
+      datePattern: YYYY-MM-DD
+      # Maximum number of logs to keep.
+      # This can be a number of files or number of days.
+      # If using days, add 'd' as a suffix
+      maxFiles: 14d
+      # Maximum size of the file after which it will rotate. This can be a
+      # number of bytes, or units of kb, mb, and gb. If using the units, add
+      # 'k', 'm', or 'g' as the suffix
+      maxSize: 50m
+
+namePatterns:
+  # The default displayname for a bridged user
+  #
+  # Available variables:
+  #
+  # name: username of the user
+  # team: name of the team
+  user: :name
+
+  # Name of bridged Slack channels
+  #
+  # Available variables:
+  #
+  # name: name of the channel
+  # team: name of the team
+  # type: type of the room
+  room: :name[:team? - :team,]
+
+  # Names of bridged Slack groups
+  #
+  # Available variables:
+  #
+  # name: name of the group
+  group: :name
+
+slack:
+  # Defines behavior of @room broadcast
+  # Allowed values:
+  # channel, here, everyone
+  roomBroadcast: "here"
