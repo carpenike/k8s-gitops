@@ -119,6 +119,14 @@ spec:
         subPath: registration.yaml
         type: configMap
 
+      slack-puppet-registration:
+        enabled: true
+        name: matrix-slack-puppet
+        readOnly: true
+        mountPath: /synapse/config/slack-puppet-registration.yaml
+        subPath: registration.yaml
+        type: configMap
+
       signal-registration:
         enabled: true
         name: mautrix-signal

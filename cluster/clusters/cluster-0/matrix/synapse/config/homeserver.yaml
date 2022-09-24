@@ -110,4 +110,5 @@ redis:
 app_service_config_files:
   - /synapse/config/facebook-registration.yaml
   - /synapse/config/slack-registration.yaml
+  - /synapse/config/slack-puppet-registration.yaml
   - /synapse/config/signal-registration.yaml
