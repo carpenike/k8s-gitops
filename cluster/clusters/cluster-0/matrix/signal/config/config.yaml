@@ -15,9 +15,9 @@ homeserver:
   # The URL to push real-time bridge status to.
   # If set, the bridge will make POST requests to this URL whenever a user's Signal connection state changes.
   # The bridge will use the appservice as_token to authorize requests.
-  status_endpoint:
+  status_endpoint: null
   # Endpoint for reporting per-message status.
-  message_send_checkpoint_endpoint:
+  message_send_checkpoint_endpoint: null
   # Maximum number of simultaneous HTTP connections to the homeserver.
   connection_limit: 100
   # Whether asynchronous uploads via MSC2246 should be enabled for media.
@@ -53,6 +53,8 @@ appservice:
   database_opts:
     min_size: 1
     max_size: 10
+
+  # The unique ID of this appservice.
   id: signal
   # Username of the appservice bot.
   bot_username: signalbot
@@ -70,7 +72,7 @@ appservice:
   as_token: ${SECRET_MATRIX_SLACK_AS_TOKEN}
   hs_token: ${SECRET_MATRIX_SLACK_HS_TOKEN}
 
-  # Prometheus telemetry config. Requires prometheus-client to be installed.
+# Prometheus telemetry config. Requires prometheus-client to be installed.
 metrics:
   enabled: true
   listen_port: 8000
@@ -85,6 +87,7 @@ manhole:
   # If empty, any UIDs can be specified in the open-manhole command.
   whitelist:
     - 0
+
 signal:
   # Path to signald unix socket
   socket_path: /signald/signald.sock
@@ -112,7 +115,7 @@ signal:
 bridge:
   # Localpart template of MXIDs for Signal users.
   # {userid} is replaced with the UUID of the Signal user.
-  username_template: signal_{userid}
+  username_template: "signal_{userid}"
   # Displayname template for Signal users.
   # {displayname} is replaced with the displayname of the Signal user, which is the first
   # available variable in displayname_preference. The variables in displayname_preference
@@ -128,6 +131,8 @@ bridge:
   displayname_preference:
     - full_name
     - phone
+
+  # Whether or not to create portals for all groups on login/connect.
   autocreate_group_portal: true
   # Whether or not to create portals for all contacts on login/connect.
   autocreate_contact_portal: false
@@ -146,8 +151,17 @@ bridge:
   # Servers to allow double puppeting from, even if double_puppet_allow_discovery is false.
   double_puppet_server_map:
     example.com: https://example.com
+  # Shared secret for https://github.com/devture/matrix-synapse-shared-secret-auth
+  #
+  # If set, custom puppets will be enabled automatically for local users
+  # instead of users having to find an access token and run `login-matrix`
+  # manually.
+  # If using this for other servers than the bridge's server,
+  # you must also set the URL in the double_puppet_server_map.
   login_shared_secret_map:
     example.com: foo
+  # Whether or not created rooms should have federation enabled.
+  # If false, created portal rooms will never be federated.
   federate_rooms: true
   # End-to-bridge encryption support options.
   #
@@ -235,7 +249,7 @@ bridge:
     # endpoints. Set to null to disable.
     # Currently the only events are login start, QR code scan, and login
     # success/failure.
-    segment_key:
+    segment_key: null
 
   # The prefix for commands. Only required in non-management rooms.
   command_prefix: "!signal"
@@ -244,11 +258,11 @@ bridge:
   # Markdown is supported. The defaults are listed below.
   management_room_text:
     # Sent when joining a room.
-    welcome: Hello, I'm a Signal bridge bot.
+    welcome: "Hello, I'm a Signal bridge bot."
     # Sent when joining a management room and the user is already logged in.
-    welcome_connected: Use `help` for help.
+    welcome_connected: "Use `help` for help."
     # Sent when joining a management room and the user is not logged in.
-    welcome_unconnected: Use `help` for help or `link` to log in.
+    welcome_unconnected: "Use `help` for help or `link` to log in."
     # Optional extra text sent when joining a management room.
     additional_help: ""
 
@@ -283,17 +297,20 @@ bridge:
       m.text: "$sender_displayname: $message"
       m.notice: "$sender_displayname: $message"
       m.emote: "* $sender_displayname $message"
-      m.file: $sender_displayname sent a file
-      m.image: $sender_displayname sent an image
-      m.audio: $sender_displayname sent an audio file
-      m.video: $sender_displayname sent a video
-      m.location: $sender_displayname sent a location
+      m.file: "$sender_displayname sent a file"
+      m.image: "$sender_displayname sent an image"
+      m.audio: "$sender_displayname sent an audio file"
+      m.video: "$sender_displayname sent a video"
+      m.location: "$sender_displayname sent a location"
+    # Specify a dedicated relay account. Must be a regular matrix account logged into this bridge
+    # and double puppeting working to auto-accept invites. When this user is invited to a room
+    # it will automatically be set as the relay user. May be overridden with `set-relay` or `unset-relay`
     relaybot: "@relaybot:example.com"
 
   # Format for generting URLs from location messages for sending to Signal
   # Google Maps: 'https://www.google.com/maps/place/{lat},{long}'
   # OpenStreepMap: 'https://www.openstreetmap.org/?mlat={lat}&mlon={long}'
-  location_format: https://www.google.com/maps/place/{lat},{long}
+  location_format: "https://www.google.com/maps/place/{lat},{long}"
 
 # Python logging configuration.
 #
@@ -308,6 +325,12 @@ logging:
     normal:
       format: "[%(asctime)s] [%(levelname)s@%(name)s] %(message)s"
   handlers:
+    file:
+      class: logging.handlers.RotatingFileHandler
+      formatter: normal
+      filename: ./mautrix-signal.log
+      maxBytes: 10485760
+      backupCount: 10
     console:
       class: logging.StreamHandler
       formatter: colored
@@ -318,4 +341,4 @@ logging:
       level: INFO
   root:
     level: DEBUG
-    handlers: [console]
+    handlers: [file, console]
