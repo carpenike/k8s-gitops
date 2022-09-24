@@ -1,0 +1,16 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm-release.yaml
+  - secret.sops.yaml
+namespace: matrix
+configMapGenerator:
+  - name: matrix-pantalaimon
+    files:
+      - config.conf=config/config.conf
+      # - registration.yaml=config/registration.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+# patchesStrategicMerge:
+#   - patches/postgres.yaml

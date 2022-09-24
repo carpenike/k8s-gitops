@@ -42,10 +42,10 @@ provisioning:
     #- ".*"
   # Regex of Matrix IDs forbidden from using the puppet bridge
   #blacklist:
-    # Disallow a specific user
-    #- "@user:server\\.com"
-    # Disallow users on a specific homeserver
-    #- "@.*:yourserver\\.com"
+  # Disallow a specific user
+  #- "@user:server\\.com"
+  # Disallow users on a specific homeserver
+  #- "@.*:yourserver\\.com"
 
   # Shared secret for the provisioning API for use by integration managers.
   # If this is not set, the provisioning API will not be enabled.
