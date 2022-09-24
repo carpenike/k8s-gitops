@@ -31,7 +31,7 @@ spec:
 
     service:
       main:
-        type: LoadBalncer
+        type: LoadBalancer
         loadBalancerIP: "${SVC_COTURN_ADDRESS}"
         externalTrafficPolicy: Local
         ports:
