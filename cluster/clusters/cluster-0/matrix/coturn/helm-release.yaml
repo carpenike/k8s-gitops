@@ -31,6 +31,9 @@ spec:
 
     service:
       main:
+        type: LoadBalncer
+        loadBalancerIP: "${SVC_COTURN_ADDRESS}"
+        externalTrafficPolicy: Local
         ports:
           http:
             port: 8080
@@ -84,4 +87,3 @@ spec:
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
-      k8s.v1.cni.cncf.io/networks: macvlan-static-servers-coturn
