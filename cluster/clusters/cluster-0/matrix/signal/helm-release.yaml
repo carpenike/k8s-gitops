@@ -60,11 +60,11 @@ spec:
         subPath: registration.yaml
         type: configMap
 
-    podSecurityContext:
-      runAsUser: 1337
-      runAsGroup: 1337
-      fsGroup: 1337
-      fsGroupChangePolicy: "OnRootMismatch"
+    # podSecurityContext:
+    #   runAsUser: 1337
+    #   runAsGroup: 1337
+    #   fsGroup: 1337
+    #   fsGroupChangePolicy: "OnRootMismatch"
 
     resources:
       requests:
