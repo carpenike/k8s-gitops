@@ -5,13 +5,13 @@ homeserver:
 
   # The URL for connecting to your homeserver
   #
-  url: http://matrix-synapse:8008
+  url: https://synapse.${SECRET_DOMAIN}
 
   # The public facing url for media on your homeserver.
   # This is usually the public url of your homeserver.
   # Optional. Defaults to the value of `url`.
   #
-  media_url: "https://synapse.${SECRET_DOMAIN}"
+  # media_url: "https://synapse.${SECRET_DOMAIN}"
 
   # Optional. The maximum size of a uploaded file to Matrix in bytes. No limit by default
   #

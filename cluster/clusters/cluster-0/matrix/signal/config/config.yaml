@@ -1,7 +1,7 @@
 # Homeserver details
 homeserver:
     # The address that this appservice can use to connect to the homeserver.
-    address: http://matrix-synapse:8008
+    address: https://synapse.${SECRET_DOMAIN}
     # The domain of the homeserver (for MXIDs, etc).
     domain: ${SECRET_PUBLIC_DOMAIN}
     # Whether or not to verify the SSL certificate of the homeserver.
