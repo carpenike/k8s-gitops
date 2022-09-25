@@ -6,7 +6,7 @@ bridge:
   # Used for communication between the homeserver and the bridge
   port: 8432
   # The host connections to the bridge's webserver are allowed from
-  bindAddress: 0.0.0.0
+  bindAddress: mautrix-slack-puppet
   # Public domain of the homeserver
   domain: ${SECRET_PUBLIC_DOMAIN}
   # Reachable URL of the Matrix homeserver
@@ -37,7 +37,7 @@ provisioning:
     # Allow a specific user
     #- "@user:server\\.com"
     # Allow users on a specific homeserver
-    - "@.*:ryanholt\\.net"
+    - "@.*:${SECRET_PUBLIC_DOMAIN}"
     # Allow anyone
     #- ".*"
   # Regex of Matrix IDs forbidden from using the puppet bridge

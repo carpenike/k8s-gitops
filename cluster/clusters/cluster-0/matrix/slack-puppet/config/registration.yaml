@@ -4,13 +4,13 @@ id: slack-puppet
 namespaces:
   users:
     - exclusive: true
-      regex: "@slackpuppet.*"
+      regex: '@_slackpuppet_.*'
   rooms: []
   aliases:
     - exclusive: true
-      regex: "#slackpuppet.*"
+      regex: '#_slackpuppet_.*'
 protocols: []
 rate_limited: false
-sender_localpart: slackpuppet
-url: "http://matrix-slack-puppet:8432"
+sender_localpart: _slackpuppet_bot
+url: 'http://mautrix-slack-puppet:8432'
 de.sorunome.msc2409.push_ephemeral: true
