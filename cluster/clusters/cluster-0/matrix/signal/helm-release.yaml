@@ -61,9 +61,9 @@ spec:
         type: configMap
 
     podSecurityContext:
-      runAsUser: 101336
-      runAsGroup: 101336
-      fsGroup: 101336
+      runAsUser: 1337
+      runAsGroup: 1337
+      fsGroup: 1337
       fsGroupChangePolicy: "OnRootMismatch"
 
     resources:
