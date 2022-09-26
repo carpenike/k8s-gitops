@@ -1,0 +1,14 @@
+id: whatsapp
+url: http://mautrix-whatsapp:29318
+as_token: ${SECRET_MAUTRIX_WHATSAPP_AS_TOKEN}
+hs_token: ${SECRET_MAUTRIX_WHATSAPP_HS_TOKEN}
+sender_localpart: rN1yBMx3vkHVdyHMwk8RoySy3286hxwD
+rate_limited: false
+namespaces:
+    users:
+        - regex: ^@whatsappbot:ryanholt\.net$
+          exclusive: true
+        - regex: ^@whatsapp_[0-9]+:ryanholt\.net$
+          exclusive: true
+de.sorunome.msc2409.push_ephemeral: true
+push_ephemeral: true
