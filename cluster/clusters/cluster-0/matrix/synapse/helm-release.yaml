@@ -135,6 +135,14 @@ spec:
         subPath: registration.yaml
         type: configMap
 
+      whatsapp-registration:
+        enabled: true
+        name: mautrix-whatsapp
+        readOnly: true
+        mountPath: /synapse/config/whatsapp-registration.yaml
+        subPath: registration.yaml
+        type: configMap
+
       signing-key:
         enabled: true
         name: *app

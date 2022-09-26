@@ -112,3 +112,4 @@ app_service_config_files:
   - /synapse/config/slack-registration.yaml
   - /synapse/config/slack-puppet-registration.yaml
   - /synapse/config/signal-registration.yaml
+  - /synapse/config/whatsapp-registration.yaml
