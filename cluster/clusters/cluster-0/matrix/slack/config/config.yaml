@@ -104,7 +104,7 @@ oauth2:
 
 # Optional. Enable metrics reporting on http://0.0.0.0:bridgePort/metrics which can be scraped by prometheus
 #
-# enable_metrics: true
+enable_metrics: true
 
 # Optional. Sync team users and channels
 #

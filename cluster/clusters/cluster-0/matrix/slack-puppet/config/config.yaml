@@ -17,8 +17,8 @@ oauth:
   enabled: false
   # Slack app credentials.
   # N.B. This must be quoted so YAML wouldn't parse it as a float.
-  clientId: "242181311531.253471660323"
-  clientSecret: b3561066aa9af814155a12d33d9a28be
+  clientId: "${SECRET_MATRIX_SLACK_CLIENT_ID}"
+  clientSecret: ${SECRET_MATRIX_SLACK_CLIENT_SECRET}
   # Path where to listen for OAuth redirect callbacks.
   redirectPath: /slack/oauth
   # Set up proxying from https://your.domain/redirect_path to http://bindAddress:port/redirect_path,
