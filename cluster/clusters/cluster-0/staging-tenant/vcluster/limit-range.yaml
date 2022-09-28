@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: vcluster-limit-range
+  namespace: staging-tenant
+spec:
+  limits:
+    - default:
+        memory: 512Mi
+        cpu: "1"
+      defaultRequest:
+        memory: 128Mi
+        cpu: 100m
+      type: Container

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: vcluster-quota
+  namespace: staging-tenant
+spec:
+  hard:
+    cpu: "10"
+    memory: 20Gi
+    pods: "10"
