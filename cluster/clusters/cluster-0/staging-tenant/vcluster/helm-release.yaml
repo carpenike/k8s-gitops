@@ -27,6 +27,11 @@ spec:
     vcluster:
       image: rancher/k3s:v1.25.0-k3s1
 
+    sync:
+      nodes:
+        enabled: true
+        syncAllNodes: true
+
     # Enable HA mode
     enableHA: true
     # Scale up syncer replicas
