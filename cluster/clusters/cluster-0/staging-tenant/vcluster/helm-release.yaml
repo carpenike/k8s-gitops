@@ -106,6 +106,57 @@ spec:
         runAsUser: 12345
         seccompProfile:
           type: RuntimeDefault
+
+    isolation:
+      enabled: false
+
+      podSecurityStandard: baseline
+
+      resourceQuota:
+        enabled: true
+        quota:
+          requests.cpu: 10
+          requests.memory: 20Gi
+          requests.storage: "100Gi"
+          requests.ephemeral-storage: 60Gi
+          limits.cpu: 20
+          limits.memory: 40Gi
+          limits.ephemeral-storage: 160Gi
+          services.nodeports: 0
+          services.loadbalancers: 1
+          count/endpoints: 40
+          count/pods: 20
+          count/services: 20
+          count/secrets: 100
+          count/configmaps: 100
+          count/persistentvolumeclaims: 20
+        scopeSelector:
+          matchExpressions:
+        scopes:
+
+      limitRange:
+        enabled: true
+        default:
+          ephemeral-storage: 8Gi
+          memory: 512Mi
+          cpu: "1"
+        defaultRequest:
+          ephemeral-storage: 3Gi
+          memory: 128Mi
+          cpu: 100m
+
+      networkPolicy:
+        enabled: true
+        outgoingConnections:
+          ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 100.64.0.0/10
+              - 127.0.0.0/8
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+
     ingress:
       enabled: true
       ingressClassName: "nginx"
@@ -115,3 +166,7 @@ spec:
         nginx.ingress.kubernetes.io/ssl-passthrough: "true"
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         external-dns.home.arpa/enabled: "true"
+
+    securityContext:
+      runAsUser: 10000
+      runAsNonRoot: true
