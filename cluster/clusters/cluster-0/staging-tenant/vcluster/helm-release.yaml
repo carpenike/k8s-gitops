@@ -26,6 +26,30 @@ spec:
   values:
     vcluster:
       image: rancher/k3s:v1.25.0-k3s1
+
+    # Enable HA mode
+    enableHA: true
+    
+    # Scale up syncer replicas
+    syncer:
+      replicas: 3
+    
+    # Scale up etcd
+    etcd:
+      replicas: 3
+    
+    # Scale up controller manager
+    controller:
+      replicas: 3
+    
+    # Scale up api server
+    api:
+      replicas: 3
+    
+    # Scale up DNS server
+    coredns:
+      replicas: 3
+
     ingress:
       enabled: true
       ingressClassName: "nginx"
