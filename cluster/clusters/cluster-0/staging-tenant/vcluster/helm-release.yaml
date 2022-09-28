@@ -29,23 +29,25 @@ spec:
 
     # Enable HA mode
     enableHA: true
-    
+
     # Scale up syncer replicas
     syncer:
       replicas: 3
-    
+      extraArgs:
+        - --tls-san=staging-tenant.${SECRET_DOMAIN}
+
     # Scale up etcd
     etcd:
       replicas: 3
-    
+
     # Scale up controller manager
     controller:
       replicas: 3
-    
+
     # Scale up api server
     api:
       replicas: 3
-    
+
     # Scale up DNS server
     coredns:
       replicas: 3
@@ -59,6 +61,3 @@ spec:
         nginx.ingress.kubernetes.io/ssl-passthrough: "true"
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         external-dns.home.arpa/enabled: "true"
-    syncer:
-      extraArgs:
-        - --tls-san=staging-tenant.${SECRET_DOMAIN}
