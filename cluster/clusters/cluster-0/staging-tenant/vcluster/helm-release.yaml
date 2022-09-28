@@ -25,4 +25,4 @@ spec:
       retries: 5
   values:
     vcluster:
-      image: rancher/k3s:v1.23.5-k3s1
+      image: rancher/k3s:v1.25.0-k3s1
