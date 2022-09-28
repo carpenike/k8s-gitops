@@ -1,0 +1,28 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vcluster
+  namespace: staging-tenant
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: vcluster
+      version: v0.12.0
+      sourceRef:
+        kind: HelmRepository
+        name: loft-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    crds: CreateReplace
+    remediation:
+      retries: 5
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 5
+  values:
+    vcluster:
+      image: rancher/k3s:v1.23.5-k3s1
