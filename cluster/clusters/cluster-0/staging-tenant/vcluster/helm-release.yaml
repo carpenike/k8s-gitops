@@ -45,25 +45,25 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 12345
+        runAsGroup: 10000
         runAsNonRoot: true
-        runAsUser: 12345
+        runAsUser: 10000
         seccompProfile:
           type: RuntimeDefault
 
     # Scale up etcd
     etcd:
       replicas: 3
-      fsGroup: 12345
+      fsGroup: 10000
       securityContext:
         allowPrivilegeEscalation: false
         capabilities:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 12345
+        runAsGroup: 10000
         runAsNonRoot: true
-        runAsUser: 12345
+        runAsUser: 10000
         seccompProfile:
           type: RuntimeDefault
 
@@ -76,9 +76,9 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 12345
+        runAsGroup: 10000
         runAsNonRoot: true
-        runAsUser: 12345
+        runAsUser: 10000
         seccompProfile:
           type: RuntimeDefault
 
@@ -91,9 +91,9 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 12345
+        runAsGroup: 10000
         runAsNonRoot: true
-        runAsUser: 12345
+        runAsUser: 10000
         seccompProfile:
           type: RuntimeDefault
 
@@ -106,9 +106,9 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 12345
+        runAsGroup: 10000
         runAsNonRoot: true
-        runAsUser: 12345
+        runAsUser: 10000
         seccompProfile:
           type: RuntimeDefault
 
