@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - limit-range.yaml
-  - resource-quota.yaml
+  # - resource-quota.yaml
