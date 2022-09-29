@@ -176,5 +176,3 @@ spec:
       runAsUser: 10000
       runAsGroup: 10000
       runAsNonRoot: true
-      fsGroup: 10000
-      fsGroupChangePolicy: "OnRootMismatch"
