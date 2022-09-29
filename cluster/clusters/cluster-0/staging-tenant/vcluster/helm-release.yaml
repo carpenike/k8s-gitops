@@ -172,6 +172,6 @@ spec:
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         external-dns.home.arpa/enabled: "true"
 
-    securityContext:
-      runAsUser: 12345
-      runAsNonRoot: true
+    # securityContext:
+    #   runAsUser: 12345
+    #   runAsNonRoot: true
