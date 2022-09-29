@@ -127,8 +127,8 @@ spec:
           limits.cpu: 20
           limits.memory: 40Gi
           limits.ephemeral-storage: 160Gi
-          services.nodeports: 0
-          services.loadbalancers: 1
+          services.nodeports: 20
+          services.loadbalancers: 20
           count/endpoints: 40
           count/pods: 20
           count/services: 20
