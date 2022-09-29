@@ -45,25 +45,25 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 10000
+        runAsGroup: 12345
         runAsNonRoot: true
-        runAsUser: 10000
+        runAsUser: 12345
         seccompProfile:
           type: RuntimeDefault
 
     # Scale up etcd
     etcd:
       replicas: 3
-      fsGroup: 10000
+      fsGroup: 12345
       securityContext:
         allowPrivilegeEscalation: false
         capabilities:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 10000
+        runAsGroup: 12345
         runAsNonRoot: true
-        runAsUser: 10000
+        runAsUser: 12345
         seccompProfile:
           type: RuntimeDefault
 
@@ -76,9 +76,9 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 10000
+        runAsGroup: 12345
         runAsNonRoot: true
-        runAsUser: 10000
+        runAsUser: 12345
         seccompProfile:
           type: RuntimeDefault
 
@@ -91,9 +91,9 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 10000
+        runAsGroup: 12345
         runAsNonRoot: true
-        runAsUser: 10000
+        runAsUser: 12345
         seccompProfile:
           type: RuntimeDefault
 
@@ -106,9 +106,9 @@ spec:
           drop:
             - ALL
         readOnlyRootFilesystem: true
-        runAsGroup: 10000
+        runAsGroup: 12345
         runAsNonRoot: true
-        runAsUser: 10000
+        runAsUser: 12345
         seccompProfile:
           type: RuntimeDefault
 
@@ -173,6 +173,5 @@ spec:
         external-dns.home.arpa/enabled: "true"
 
     securityContext:
-      runAsUser: 10000
-      runAsGroup: 10000
+      runAsUser: 12345
       runAsNonRoot: true
