@@ -113,7 +113,7 @@ spec:
           type: RuntimeDefault
 
     isolation:
-      enabled: false
+      enabled: true
 
       podSecurityStandard: baseline
 
