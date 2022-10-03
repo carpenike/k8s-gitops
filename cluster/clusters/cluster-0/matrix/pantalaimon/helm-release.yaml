@@ -43,13 +43,6 @@ spec:
         mountPath: /data/pantalaimon.conf
         subPath: config.conf
         type: configMap
-      # registration:
-      #   enabled: true
-      #   name: *app
-      #   readOnly: true
-      #   mountPath: /config/slack-registration.yaml
-      #   subPath: registration.yaml
-      #   type: configMap
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
