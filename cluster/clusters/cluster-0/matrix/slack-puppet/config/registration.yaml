@@ -12,5 +12,5 @@ namespaces:
 protocols: []
 rate_limited: false
 sender_localpart: _slackpuppet_bot
-url: 'http://mautrix-slack-puppet:8432'
+url: 'http://matrix-slack-puppet:8432'
 de.sorunome.msc2409.push_ephemeral: true
