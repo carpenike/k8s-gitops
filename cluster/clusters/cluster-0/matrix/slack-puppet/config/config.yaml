@@ -11,6 +11,7 @@ bridge:
   domain: ${SECRET_PUBLIC_DOMAIN}
   # Reachable URL of the Matrix homeserver
   homeserverUrl: https://synapse.${SECRET_DOMAIN}
+  enableGroupSync: true
 
 # Slack OAuth settings. See README.md for info on how to configure.
 oauth:
