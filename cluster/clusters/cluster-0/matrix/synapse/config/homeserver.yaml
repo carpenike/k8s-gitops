@@ -5,6 +5,7 @@ pid_file: /homeserver.pid
 web_client_location: https://element.${SECRET_DOMAIN}
 soft_file_limit: 0
 log_config: "/synapse/config/logs.yaml"
+enable_group_creation: true
 report_stats: false
 ## Ports ##
 listeners:
