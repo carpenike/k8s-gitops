@@ -27,7 +27,7 @@ spec:
         count: 3
       mgr:
         count: 2
-      
+
       dashboard:
         enabled: true
         urlPrefix: /
