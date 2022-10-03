@@ -49,7 +49,7 @@ provisioning:
 
   # Shared secret for the provisioning API for use by integration managers.
   # If this is not set, the provisioning API will not be enabled.
-  sharedSecret: ${SECRET_MATRIX_SLACK_PUPPET_SHARED_SECRET}
+  #sharedSecret: ${SECRET_MATRIX_SLACK_PUPPET_SHARED_SECRET}
   # Path prefix for the provisioning API. /v1 will be appended to the prefix automatically.
   apiPrefix: /_matrix/provision
 
