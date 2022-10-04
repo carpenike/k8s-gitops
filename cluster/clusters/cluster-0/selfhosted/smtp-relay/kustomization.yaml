@@ -5,11 +5,11 @@ resources:
   - helm-release.yaml
   - secret.sops.yaml
   - service-monitor.yaml
-namespace: web-tools
+namespace: selfhosted
 configMapGenerator:
   - name: smtp-relay
     files:
-      - maddy.conf
+      - config/maddy.conf
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

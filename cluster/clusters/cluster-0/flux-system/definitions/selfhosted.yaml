@@ -2,50 +2,50 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: web-tools-namespace
+  name: selfhosted-namespace
   namespace: flux-system
   labels:
     component.cluster-0/part-of: definitions
 spec:
-  path: "./cluster/clusters/cluster-0/web-tools"
+  path: "./cluster/clusters/cluster-0/selfhosted"
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: web-tools-shlink-api
+  name: selfhosted-shlink-api
   namespace: flux-system
   labels:
     component.cluster-0/part-of: definitions
 spec:
   dependsOn:
-    - name: web-tools-namespace
-  path: "./cluster/clusters/cluster-0/web-tools/shlink/api"
+    - name: selfhosted-namespace
+  path: "./cluster/clusters/cluster-0/selfhosted/shlink/api"
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: web-tools-shlink-web
+  name: selfhosted-shlink-web
   namespace: flux-system
   labels:
     component.cluster-0/part-of: definitions
 spec:
   dependsOn:
-    - name: web-tools-namespace
-    - name: web-tools-shlink-api
-  path: "./cluster/clusters/cluster-0/web-tools/shlink/web"
+    - name: selfhosted-namespace
+    - name: selfhosted-shlink-api
+  path: "./cluster/clusters/cluster-0/selfhosted/shlink/web"
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: web-tools-smtp-relay
+  name: selfhosted-smtp-relay
   namespace: flux-system
   labels:
     component.cluster-0/part-of: definitions
 spec:
   dependsOn:
-    - name: web-tools-namespace
-  path: "./cluster/clusters/cluster-0/web-tools/smtp-relay"
+    - name: selfhosted-namespace
+  path: "./cluster/clusters/cluster-0/selfhosted/smtp-relay"
   prune: true
