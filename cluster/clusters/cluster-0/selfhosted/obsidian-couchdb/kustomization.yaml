@@ -1,0 +1,19 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: selfhosted
+resources:
+  - helm-release.yaml
+  - data-pvc.yaml
+  - secret.sops.yaml
+commonLabels:
+  app.kubernetes.io/name: obsidian-couchdb
+  app.kubernetes.io/instance: obsidian-couchdb
+configMapGenerator:
+  - name: obsidian-couchdb-config
+    files:
+      - config/config.ini
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
