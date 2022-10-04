@@ -19,9 +19,6 @@ spec:
   values:
     replicas: 1
 
-    image:
-      repository: ghcr.io/k8s-at-home/grafana
-
     admin:
       existingSecret: grafana-secrets
       passwordKey: adminPass
@@ -122,7 +119,7 @@ spec:
       enabled: true
       ingressClassName: nginx
       annotations:
-        auth.home.arpa/enabled: "true"
+        external-dns.home.arpa/enabled: "true"
       hosts:
         - &host grafana.${SECRET_DOMAIN}
       tls:
