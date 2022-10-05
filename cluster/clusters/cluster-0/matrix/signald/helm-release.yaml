@@ -27,7 +27,7 @@ spec:
 
     image:
       repository: registry.gitlab.com/signald/signald
-      tag: "0.22.1"
+      tag: "0.22.2"
     env:
       TZ: "America/New_York"
       SIGNALD_LOG_DB_TRANSACTIONS: true
