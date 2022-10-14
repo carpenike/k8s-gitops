@@ -6,3 +6,5 @@ resources:
   - secret.sops.yaml
   - gitea-ceph-object-bucket.yaml
   - helm-release.yaml
+patchesStrategicMerge:
+  - patches/postgres.yaml
