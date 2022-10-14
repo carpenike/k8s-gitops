@@ -124,12 +124,12 @@ spec:
         serviceMonitor:
           enabled: true
       podAnnotations:
-        secret.reloader.stakater.com/reload: gitea-config
+        secret.reloader.stakater.com/reload: gitea
 
   valuesFrom:
     - targetPath: gitea.admin.password
       kind: Secret
-      name: gitea-config
+      name: gitea
       valuesKey: adminPassword
     - targetPath: gitea.config.attachment.MINIO_ACCESS_KEY_ID
       kind: Secret
