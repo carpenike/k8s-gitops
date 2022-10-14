@@ -13,12 +13,12 @@ spec:
           - name: POSTGRES_HOST
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: gitea-config
                 key: GITEA_POSTGRES_HOST
           - name: POSTGRES_DB
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: gitea-config
                 key: GITEA_POSTGRES_DATABASE
           - name: POSTGRES_SUPER_PASS
             valueFrom:
@@ -28,10 +28,10 @@ spec:
           - name: POSTGRES_USER
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: gitea-config
                 key: GITEA_POSTGRES_USERNAME
           - name: POSTGRES_PASS
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: gitea-config
                 key: GITEA_POSTGRES_PASSWORD

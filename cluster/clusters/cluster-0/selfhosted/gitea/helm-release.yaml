@@ -78,7 +78,6 @@ spec:
           DB_TYPE: postgres
           HOST: postgres-rw.db.svc.cluster.local:3306
           NAME: gitea
-          PASSWD: ${SECRET_GITEA_POSTGRES_PASSWORD}
 
         service:
           DISABLE_REGISTRATION: false
@@ -124,12 +123,12 @@ spec:
         serviceMonitor:
           enabled: true
       podAnnotations:
-        secret.reloader.stakater.com/reload: gitea
+        secret.reloader.stakater.com/reload: gitea-config
 
   valuesFrom:
     - targetPath: gitea.admin.password
       kind: Secret
-      name: gitea
+      name: gitea-config
       valuesKey: adminPassword
     - targetPath: gitea.config.attachment.MINIO_ACCESS_KEY_ID
       kind: Secret
@@ -163,3 +162,7 @@ spec:
       kind: ConfigMap
       name: gitea-ceph-bucket
       valuesKey: BUCKET_NAME
+    - targetPath: gitea.config.database.PASSWD
+      kind: Secret
+      name: gitea-config
+      valuesKey: GITEA_POSTGRES_PASSWORD
