@@ -1,0 +1,9 @@
+---
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: gitea-ceph-bucket
+  namespace: selfhosted
+spec:
+  bucketName: gitea
+  storageClassName: ceph-bucket
