@@ -101,7 +101,7 @@ spec:
         mailer:
           ENABLED: true
           MAILER_TYPE: smtp
-          HOST: smtp-relay.default:2525
+          HOST: smtp-relay.selfhosted:2525
           FROM: "Gitea <gitea@${SECRET_DOMAIN}>"
 
         openid:
