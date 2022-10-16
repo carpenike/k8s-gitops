@@ -31,6 +31,8 @@ spec:
     ingress:
       enabled: true
       ingressClassName: "nginx"
+      annotations:
+        external-dns.home.arpa/enabled: "true"
       hosts:
         - host: &host "git.${SECRET_DOMAIN}"
           paths:
