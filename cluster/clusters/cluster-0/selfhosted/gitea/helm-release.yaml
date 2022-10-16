@@ -113,7 +113,7 @@ spec:
         - name: authelia
           provider: openidConnect
           key: gitea
-          secret: "${SECRET_GITEA_OAUTH_CLIENT_SECRET}"
+          secret: "${SECRET_AUTHELIA_GITEA_CLIENT_SECRET}"
           autoDiscoverUrl: "https://auth.${SECRET_DOMAIN}/.well-known/openid-configuration"
           groupClaimName: groups
           adminGroup: admins

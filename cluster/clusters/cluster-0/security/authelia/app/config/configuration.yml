@@ -80,6 +80,21 @@ identity_providers:
           - "https://synapse.${SECRET_DOMAIN}/_synapse/client/oidc/callback"
         userinfo_signing_algorithm: none
 
+      - id: gitea
+        description: Gitea
+        secret: "${SECRET_AUTHELIA_GITEA_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes:
+          - openid
+          - profile
+          - groups
+          - email
+        redirect_uris:
+          - "https://git.${SECRET_DOMAIN}/user/oauth2/authelia/callback"
+        userinfo_signing_algorithm: none
+
       # - id: miniflux
       #   description: Miniflux
       #   secret: "${SECRET_MINIFLUX_OAUTH_CLIENT_SECRET}"
