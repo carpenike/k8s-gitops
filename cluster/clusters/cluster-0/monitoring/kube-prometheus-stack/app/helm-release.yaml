@@ -290,8 +290,8 @@ spec:
             static_configs:
               - targets:
                   # - "fw.${SECRET_DOMAIN}:9100"
-                  - "cp-1.${SECRET_DOMAIN}:9100"
-                  - "cp-2.${SECRET_DOMAIN}:9100"
+                  # - "cp-1.${SECRET_DOMAIN}:9100"
+                  # - "cp-2.${SECRET_DOMAIN}:9100"
                   - "node-0.${SECRET_DOMAIN}:9100"
                   - "node-1.${SECRET_DOMAIN}:9100"
                   - "node-2.${SECRET_DOMAIN}:9100"
