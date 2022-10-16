@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: selfhosted
 resources:
   - helm-release.yaml
+  - excalidraw-ceph-object-bucket.yaml
 commonLabels:
   app.kubernetes.io/name: excalidraw
   app.kubernetes.io/instance: excalidraw
