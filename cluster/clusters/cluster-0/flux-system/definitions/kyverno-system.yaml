@@ -1,0 +1,37 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kyverno-system-namespace
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  path: "./cluster/clusters/cluster-0/kyverno-system"
+  prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kyverno-system-kyverno-app
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  path: "./cluster/clusters/cluster-0/kyverno-system/kyverno/app"
+  prune: true
+  dependsOn:
+    - name: kyverno-system-namespace
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kyverno-system-kyverno-policies
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  path: "./cluster/clusters/cluster-0/kyverno-system/kyverno/policies"
+  prune: true
+  dependsOn:
+    - name: kyverno-system-kyverno-app
