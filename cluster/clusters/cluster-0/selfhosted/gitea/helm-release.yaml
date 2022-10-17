@@ -102,9 +102,8 @@ spec:
 
         mailer:
           ENABLED: true
-          protocol: smtp+startls
-          SMTP_ADDR: smtp.mailgun.org
-          SMTP_PORT: 587
+          MAILER_TYPE: smtp+startls
+          HOST: smtp.mailgun.org:587
           USER: ${SECRET_MAILGUN_USERNAME}
           PASSWD: ${SECRET_MAILGUN_PASSWORD}
           FROM: "Gitea <gitea@${SECRET_DOMAIN}>"
