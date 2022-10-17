@@ -63,7 +63,7 @@ spec:
 
       extraArgs:
         default-ssl-certificate: "network/${SECRET_DOMAIN/./-}-tls"
-        enable-ssl-passthrough: ""
+        # enable-ssl-passthrough: ""
 
       topologySpreadConstraints:
         - maxSkew: 1
