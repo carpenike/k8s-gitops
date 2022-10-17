@@ -23,8 +23,8 @@ spec:
       retries: 5
   values:
     image:
-      repository: ghcr.io/zwave-js/zwavejs2mqtt
-      tag: 7.2.0
+      repository: ghcr.io/zwave-js/zwave-js-ui
+      tag: 8.2.1
     env:
       TZ: "America/New_York"
     service:
