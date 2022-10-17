@@ -5,6 +5,7 @@ namespace: selfhosted
 resources:
   - helm-release.yaml
   - excalidraw-ceph-object-bucket.yaml
+  - secret.sops.yaml
 commonLabels:
   app.kubernetes.io/name: excalidraw
   app.kubernetes.io/instance: excalidraw
