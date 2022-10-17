@@ -21,6 +21,16 @@ spec:
       repository: ghcr.io/onedr0p/excalidraw
       tag: 0.12.0
 
+    env:
+      REACT_APP_BACKEND_V1_GET_URL: https://draw.${SECRET_DOMAIN}/api/v1/
+      REACT_APP_BACKEND_V2_GET_URL: https://draw.${SECRET_DOMAIN}/api/v2/
+      REACT_APP_BACKEND_V2_POST_URL: https://draw.${SECRET_DOMAIN}/api/v2/post
+      REACT_APP_SOCKET_SERVER_URL: https://draw.${SECRET_DOMAIN}
+
+    envFrom:
+      - secretRef:
+          name: *app
+      
     service:
       main:
         ports:
