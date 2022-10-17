@@ -102,8 +102,8 @@ spec:
 
         mailer:
           ENABLED: true
-          MAILER_TYPE: smtp+startls
-          HOST: smtp.mailgun.org
+          protocol: smtp+startls
+          SMTP_ADDR: smtp.mailgun.org
           SMTP_PORT: 587
           USER: ${SECRET_MAILGUN_USERNAME}
           PASSWD: ${SECRET_MAILGUN_PASSWORD}
