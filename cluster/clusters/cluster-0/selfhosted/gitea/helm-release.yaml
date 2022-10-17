@@ -102,8 +102,11 @@ spec:
 
         mailer:
           ENABLED: true
-          MAILER_TYPE: smtp
-          HOST: smtp-relay.selfhosted:2525
+          MAILER_TYPE: smtp+startls
+          HOST: smtp.mailgun.org
+          SMTP_PORT: 587
+          USER: ${SECRET_MAILGUN_USERNAME}
+          PASSWD: ${SECRET_MAILGUN_PASSWORD}
           FROM: "Gitea <gitea@${SECRET_DOMAIN}>"
 
         openid:
