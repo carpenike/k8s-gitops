@@ -16,5 +16,3 @@ Don't forget to apply the `sops-age` Secret that allows Flux to decrypt encrypte
 sops -d ../../base/sops-age.sops.yaml | kubectl apply -f /dev/stdin
 
 ```
-
-# Test change
