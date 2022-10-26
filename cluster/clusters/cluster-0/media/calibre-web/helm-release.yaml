@@ -1,0 +1,81 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: calibre-web
+  namespace: media
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 0.2.2
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  interval: 30m
+  values:
+    image:
+      repository: ghcr.io/bjw-s/calibre-web
+      tag: 0.6.19@sha256:e9536e29cfeaaa481abb5ca492dca28b8b36ac544c7c533cd42528e327f25abe
+
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 65539
+
+    enableServiceLinks: false
+
+    service:
+      main:
+        ports:
+          http:
+            port: 8083
+
+    ingress:
+      main:
+        enabled: true
+        annotations:
+          auth.home.arpa/enabled: "true"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${INGRESS_DOMAIN}/css/base/calibreweb/nord.css"></head>';
+            sub_filter_once on;
+        ingressClassName: nginx
+        hosts:
+          - host: &host calibre-web.${SECRET_DOMAIN}
+            paths:
+              - path: /
+        tls:
+          - hosts:
+              - *host
+      kobo:
+        enabled: true
+        ingressClassName: nginx
+        hosts:
+          - host: &host_kobo calibre-kobo.${SECRET_DOMAIN}
+            paths:
+              - path: /kobo/
+        tls:
+          - hosts:
+              - *host_kobo
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: calibre-web-config-pvc
+      media:
+        enabled: true
+        mountPath: /data/media
+        existingClaim: media-nfs-share-pvc
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 249M
+      limits:
+        memory: 299M
