@@ -26,7 +26,7 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/qbittorrent
-      tag: 4.4.5@sha256:cf03c34e1b83c287490f2705944e879dce70fd94ffc8cc76dcc6004620576dad
+      tag: 4.4.5@sha256:849a1d69e539301e5f6f1e5366dd160b3508666f60d72a12df48ac8f4b149f96
 
     env:
       TZ: "America/New_York"
