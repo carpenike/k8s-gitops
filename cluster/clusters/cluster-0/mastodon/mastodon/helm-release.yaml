@@ -1,0 +1,29 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app mastodon
+  namespace: mastodon
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: mastodon
+      version: 2.0.0
+      sourceRef:
+        kind: GitRepository
+        name: mastodon
+        namespace: flux-system
+
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+
+  values:
+    image:
+      repository: tootsuite/mastodon
+      tag: v3.5.2
