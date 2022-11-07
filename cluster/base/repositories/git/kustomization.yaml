@@ -7,5 +7,6 @@ resources:
   - grafana.yaml
   - k8s-gitops.yaml
   - kube-prometheus-stack.yaml
+  - mastodon.yaml
   - nfd.yaml
   - snapshot-controller.yaml

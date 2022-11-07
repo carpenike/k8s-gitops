@@ -1,0 +1,15 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: mastodon
+  namespace: flux-system
+spec:
+  interval: 30m
+  ref:
+    tag: v4.0.0rc2
+  url: https://github.com/funkypenguin/mastodon 
+  ignore: |
+    # exclude all
+    /*
+    # include gitops dirs
+    !/chart
