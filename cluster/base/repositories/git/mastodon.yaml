@@ -7,7 +7,7 @@ spec:
   interval: 30m
   ref:
     tag: v4.0.0rc2
-  url: https://github.com/funkypenguin/mastodon 
+  url: https://github.com/mastodon/mastodon
   ignore: |
     # exclude all
     /*
