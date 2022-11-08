@@ -86,7 +86,8 @@ spec:
         existingSecret: *app
 
     redis:
-      existingSecret: *app
+      auth:
+        existingSecret: *app
 
     externalAuth:
       oidc:
