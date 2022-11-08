@@ -45,7 +45,7 @@ spec:
           accessmode: ReadWriteMany
 
       s3:
-        enabled: false
+        enabled: true
         existingSecret: "mastodon-ceph-bucket"
         bucket: "mastodon"
         endpoint: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
