@@ -2,7 +2,7 @@
 apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:
-  name: mastodon-media-ceph-bucket
+  name: mastodon-ceph-bucket
   namespace: mastodon
 spec:
   bucketName: mastodon
