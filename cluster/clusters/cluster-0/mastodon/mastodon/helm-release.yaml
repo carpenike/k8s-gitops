@@ -35,7 +35,7 @@ spec:
         email: ${SECRET_EMAIL}
 
       local_domain: ${SECRET_PUBLIC_DOMAIN}
-      web_domain: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+      web_domain: &host mastodon.${SECRET_DOMAIN}
       singleUserMode: true
 
       persistence:
