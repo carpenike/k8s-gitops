@@ -27,3 +27,76 @@ spec:
     image:
       repository: tootsuite/mastodon
       tag: v3.5.2
+
+    mastodon:
+      createAdmin:
+        enabled: true
+        username: ryan
+        email: ${SECRET_EMAIL}
+
+      local_domain: ${SECRET_PUBLIC_DOMAIN}
+      web_domain: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+      singleUserMode: true
+
+      persistence:
+        assets:
+          accessMode: ReadWriteMany
+        system:
+          accessmode: ReadWriteMany
+
+      s3:
+        enabled: true
+        existingSecret: "mastodon-ceph-bucket"
+        bucket: "mastodon"
+        endpoint: https//rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+
+      secrets:
+        existingSecret: *app
+
+      smtp:
+        domain: ${SECRET_DOMAIN}
+        from_address: mastodon@${SECRET_DOMAIN}
+        server: smtp.mailgun.org
+        port: 587
+        existingSecret: *app
+
+    ingress:
+      enabled: true
+      annotations:
+        external-dns.home.arpa/enabled: "true"
+      hosts:
+        - host: *host
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - *host
+
+    elasticsearch:
+      enabled: true
+
+    postgresql:
+      enabled: false
+      auth:
+        database: mastodon
+        username: mastodon
+        existingSecret: *app
+
+    redis:
+      existingSecret: *app
+
+    externalAuth:
+      oidc:
+        enabled: true
+        display_name: authelia
+        issuer: https://auth.${SECRET_DOMAIN}
+        discovery: true
+        scope: "openid,profile,email"
+        uid_field: preferred_username
+        client_id: mastodon
+        client_secret: ${SECRET_AUTHELIA_MASTODON_CLIENT_SECRET}
+        redirect_uri: https://mastodon.${SECRET_DOMAIN}/auth/auth/openid_connect/callback
+        assume_email_is_verified: true
+      oauth_global:
+        oauth_redirect_at_sign_in: false
