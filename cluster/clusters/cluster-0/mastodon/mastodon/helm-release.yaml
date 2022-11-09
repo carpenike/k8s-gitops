@@ -26,7 +26,7 @@ spec:
   values:
     image:
       repository: tootsuite/mastodon
-      tag: v3.5.2
+      tag: v3.5.3
 
     mastodon:
       createAdmin:
