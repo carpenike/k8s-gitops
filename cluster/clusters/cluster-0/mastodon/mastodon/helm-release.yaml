@@ -83,7 +83,7 @@ spec:
       auth:
         database: mastodon
         username: mastodon
-        existingSecret: *app
+        existingSecret: mastodon-sql
 
     redis:
       auth:
