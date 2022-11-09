@@ -101,7 +101,7 @@ spec:
       #   limits:
       #     memory: 64M
     tcp:
-      "5432": db/postgres-rw:5432
+      5432: "db/postgres-rw:5432"
 
   valuesFrom:
     # Cloudflare Networks
