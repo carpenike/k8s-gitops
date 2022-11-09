@@ -48,7 +48,7 @@ spec:
         enabled: true
         existingSecret: "mastodon-ceph-bucket"
         bucket: "mastodon"
-        endpoint: https://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+        endpoint: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
         hostname: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
 
       secrets:
@@ -103,3 +103,14 @@ spec:
         assume_email_is_verified: true
       oauth_global:
         oauth_redirect_at_sign_in: false
+
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: ConfigMap
+              name: mastodon-env
+            patch:
+              - op: replace
+                path: /data/S3_PROTOCOL
+                value: HTTP
