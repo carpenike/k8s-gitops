@@ -52,14 +52,14 @@ spec:
         hostname: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
 
       secrets:
-        existingSecret: mastodon-secrets
+        existingSecret: *app
 
       smtp:
         domain: ${SECRET_DOMAIN}
         from_address: mastodon@${SECRET_DOMAIN}
         server: smtp.mailgun.org
         port: 587
-        existingSecret: mastodon-secrets
+        existingSecret: *app
 
     ingress:
       enabled: true
@@ -83,11 +83,11 @@ spec:
       auth:
         database: mastodon
         username: mastodon
-        existingSecret: mastodon-sql
+        existingSecret: *app
 
     redis:
       auth:
-        existingSecret: mastodon-secrets
+        existingSecret: *app
 
     externalAuth:
       oidc:
