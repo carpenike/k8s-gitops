@@ -197,7 +197,7 @@ spec:
           preservePoolsOnDelete: true
           gateway:
             port: 80
-            securePort: 443
+            # securePort: 443
             # sslCertificateRef: tls.rook-ceph
             instances: 1
           healthCheck:
