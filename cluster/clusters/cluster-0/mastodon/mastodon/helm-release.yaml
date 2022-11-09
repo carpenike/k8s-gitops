@@ -30,7 +30,7 @@ spec:
 
     mastodon:
       createAdmin:
-        enabled: false
+        enabled: true
         username: ryan
         email: ${SECRET_EMAIL}
 
@@ -38,11 +38,11 @@ spec:
       web_domain: &host mastodon.${SECRET_DOMAIN}
       singleUserMode: true
 
-      persistence:
-        assets:
-          accessMode: ReadWriteMany
-        system:
-          accessmode: ReadWriteMany
+      # persistence:
+      #   assets:
+      #     accessMode: ReadWriteMany
+      #   system:
+      #     accessmode: ReadWriteMany
 
       s3:
         enabled: true
@@ -79,8 +79,8 @@ spec:
       enabled: true
 
     postgresql:
-      enabled: false
-      postgresqlHostname: postgres-rw.db.svc.cluster.local
+      enabled: true
+      # postgresqlHostname: postgres-rw.db.svc.cluster.local
       auth:
         database: mastodon
         username: mastodon
