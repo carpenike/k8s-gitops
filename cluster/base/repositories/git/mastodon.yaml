@@ -6,7 +6,8 @@ metadata:
 spec:
   interval: 30m
   ref:
-    tag: v4.0.0rc2
+    # tag: v4.0.0rc2
+    branch: main
   url: https://github.com/mastodon/mastodon
   ignore: |
     # exclude all
