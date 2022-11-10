@@ -59,6 +59,9 @@ spec:
           external-dns.home.arpa/enabled: "true"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_intercept_errors off;
+            location = /.well-known/webfinger {
+                return 301 https://mastodon.${SECRET_DOMAIN}/.well-known/webfinger;
+            }
         hosts:
           - host: &host "synapse.${SECRET_DOMAIN}"
             paths:
