@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - ceph-bucket-storage-class.yaml
+  - ceph-bucket-ingress.yaml
