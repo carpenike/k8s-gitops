@@ -107,7 +107,7 @@ identity_providers:
           - groups
           - email
         redirect_uris:
-          - "https://mastodon.${SECRET_DOMAIN}/auth/openid_connect/callback"
+          - "https://mastodon.${SECRET_DOMAIN}/auth/auth/openid_connect/callback"
         userinfo_signing_algorithm: none
 
       # - id: miniflux

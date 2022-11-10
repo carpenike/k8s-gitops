@@ -100,7 +100,7 @@ spec:
         uid_field: preferred_username
         client_id: mastodon
         client_secret: ${SECRET_AUTHELIA_MASTODON_CLIENT_SECRET}
-        redirect_uri: https://mastodon.${SECRET_DOMAIN}/auth/openid_connect/callback
+        redirect_uri: https://mastodon.${SECRET_DOMAIN}/auth/auth/openid_connect/callback
         assume_email_is_verified: true
       oauth_global:
         oauth_redirect_at_sign_in: false
