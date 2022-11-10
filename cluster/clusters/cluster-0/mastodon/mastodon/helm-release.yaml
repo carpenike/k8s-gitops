@@ -79,8 +79,8 @@ spec:
       enabled: true
 
     postgresql:
-      enabled: true
-      # postgresqlHostname: postgres-rw.db.svc.cluster.local
+      enabled: false
+      postgresqlHostname: postgres-rw.db.svc.cluster.local
       auth:
         database: mastodon
         username: mastodon
