@@ -30,7 +30,7 @@ spec:
     envFrom:
       - secretRef:
           name: *app
-      
+
     service:
       main:
         ports:
