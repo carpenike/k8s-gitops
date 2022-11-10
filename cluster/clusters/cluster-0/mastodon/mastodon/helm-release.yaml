@@ -48,9 +48,8 @@ spec:
         enabled: true
         existingSecret: "mastodon-ceph-bucket"
         bucket: "mastodon"
-        endpoint: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
-        hostname: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
-        alias_host: s3.${SECRET_DOMAIN}
+        endpoint: https://s3.${SECRET_DOMAIN}
+        hostname: s3.${SECRET_DOMAIN}
 
       secrets:
         existingSecret: *app
@@ -106,13 +105,13 @@ spec:
       oauth_global:
         oauth_redirect_at_sign_in: false
 
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              kind: ConfigMap
-              name: mastodon-env
-            patch:
-              - op: replace
-                path: /data/S3_PROTOCOL
-                value: HTTP
+  # postRenderers:
+  #   - kustomize:
+  #       patchesJson6902:
+  #         - target:
+  #             kind: ConfigMap
+  #             name: mastodon-env
+  #           patch:
+  #             - op: replace
+  #               path: /data/S3_PROTOCOL
+  #               value: HTTP
