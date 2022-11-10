@@ -7,6 +7,10 @@ metadata:
 spec:
   instances: 3
   primaryUpdateStrategy: unsupervised
+  postgresql:
+    parameters:
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
   storage:
     size: 20Gi
     storageClass: ceph-block
