@@ -30,7 +30,7 @@ spec:
 
     mastodon:
       createAdmin:
-        enabled: true
+        enabled: false
         username: ryan
         email: ${SECRET_EMAIL}
 
