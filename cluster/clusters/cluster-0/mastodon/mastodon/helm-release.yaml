@@ -48,7 +48,7 @@ spec:
         enabled: true
         existingSecret: "mastodon-ceph-bucket"
         bucket: "mastodon"
-        endpoint: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+        endpoint: https://s3.${SECRET_DOMAIN}
         hostname: rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
 
       secrets:
