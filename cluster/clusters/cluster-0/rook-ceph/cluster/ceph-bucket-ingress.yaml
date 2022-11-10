@@ -5,9 +5,9 @@ metadata:
   name: ceph-bucket
   namespace: rook-ceph
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     external-dns.home.arpa/enabled: "true"
 spec:
+  ingressClassName: nginx
   rules:
     - host: "s3.${SECRET_DOMAIN}"
       http:
