@@ -130,6 +130,7 @@ config:
               - accept_ssh: null
               - accept_discovery_from_sonos_controllers: null
               - accept_flex_discovery_from_flex_clients: null
+              - accept_vyos_api: null
 
     wan:
       description: WAN zone

@@ -300,6 +300,18 @@ hosts:
       - smb_clients
       - print_clients
       - flex_clients
+
+  rymac:
+    mac_addr: bc:d0:74:22:c9:68
+    network: wireless
+    ipv4_hostid: 13051
+    groups:
+      - sonos_controllers
+      - media_players
+      - smb_clients
+      - print_clients
+      - flex_clients
+      
   StefaniesiPhone:
     mac_addr: 88:b9:45:32:84:e4
     network: wireless
