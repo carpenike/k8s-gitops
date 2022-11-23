@@ -182,6 +182,8 @@ config:
               - accept_plex_from_plex_clients_to_public: null
               - accept_govee_ports_to_wan: null
               - accept_openspot_to_brandmeister_network: null
+              - accept_sea_of_thieves_ports_tcp: null
+              - accept_sea_of_thieves_ports_udp: null
           - zones:
               - servers
             default: drop
