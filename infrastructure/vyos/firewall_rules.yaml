@@ -712,7 +712,7 @@ accept_sea_of_thieves_ports_tcp:
   source:
     address-group: xbox
   destination:
-    port: 4735,3074
+    port: 3074,4735
 
 accept_sea_of_thieves_ports_udp:
   action: accept
@@ -720,4 +720,4 @@ accept_sea_of_thieves_ports_udp:
   source:
     address-group: xbox
   destination:
-    port: 88,500,3074,3075,3544,4500,30720,30780,31320
+    port: 3074,3075,3544,30720,30780,31320

@@ -8,17 +8,20 @@ terraform {
 
   required_providers {
     vyos = {
-      source  = "Foltik/vyos"
-      version = "0.3.3"
+      source  = "TGNThump/vyos"
+      version = "1.0.0"
     }
     sops = {
       source  = "carlpett/sops"
       version = "0.7.1"
     }
-
     remote = {
       source  = "tenstad/remote"
       version = "0.1.1"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "3.2.1"
     }
   }
 }
@@ -27,19 +30,32 @@ data "sops_file" "vyos_secrets" {
   source_file = "secret.sops.yaml"
 }
 
-data "sops_file" "domains" {
-  source_file = pathexpand("${path.module}/../domains.sops.yaml")
+data "http" "carpenike_common_domains" {
+  url = "https://raw.githubusercontent.com/carpenike/k8s-gitops/main/infrastructure/_shared/domains.sops.yaml"
+}
+
+data "sops_external" "domains" {
+  source     = data.http.carpenike_common_domains.response_body
+  input_type = "yaml"
+}
+
+data "http" "address_book" {
+  url = "https://raw.githubusercontent.com/carpenike/k8s-gitops/main/infrastructure/_shared/address_book.yaml"
+}
+
+data "http" "carpenike_common_networks" {
+  url = "https://raw.githubusercontent.com/carpenike/k8s-gitops/main/infrastructure/_shared/networks.yaml"
 }
 
 module "config" {
-  source = "./config"
+  source = "./modules/config"
 
   config         = local.config
   networks       = local.networks
   domains        = local.domains
   address_book   = local.address_book
   firewall_rules = local.firewall_rules
-  secrets        = sensitive(yamldecode(nonsensitive(data.sops_file.vyos_secrets.raw)))
+  secrets        = local.vyos_secrets
 
   providers = {
     vyos   = vyos.vyos

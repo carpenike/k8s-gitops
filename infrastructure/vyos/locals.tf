@@ -11,10 +11,11 @@ locals {
     )
   )
 
-  domains        = yamldecode(nonsensitive(data.sops_file.domains.raw))
-  networks       = yamldecode(file(pathexpand("${path.module}/../networks.yaml")))
-  address_book   = yamldecode(file(pathexpand("${path.module}/../address_book.yaml")))
+  domains        = yamldecode(nonsensitive(data.sops_external.domains.raw))
+  networks       = yamldecode(chomp(data.http.carpenike_common_networks.response_body))
+  address_book   = yamldecode(chomp(data.http.address_book.response_body))
   firewall_rules = yamldecode(file(pathexpand("${path.module}/firewall_rules.yaml")))
 
-  config = local._config.config
+  config       = local._config.config
+  vyos_secrets = sensitive(yamldecode(nonsensitive(data.sops_file.vyos_secrets.raw)))
 }
