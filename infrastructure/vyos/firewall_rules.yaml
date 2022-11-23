@@ -720,4 +720,4 @@ accept_sea_of_thieves_ports_udp:
   source:
     address-group: xbox
   destination:
-    port: 88,500,3074,3544,4500,30720
+    port: 88,500,3074,3544,4500,30720,30780,31320
