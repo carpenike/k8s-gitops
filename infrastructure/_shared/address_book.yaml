@@ -304,7 +304,7 @@ hosts:
   rymac:
     mac_addr: bc:d0:74:22:c9:68
     network: wireless
-    ipv4_hostid: 13051
+    ipv4_hostid: 13053
     groups:
       - sonos_controllers
       - media_players
