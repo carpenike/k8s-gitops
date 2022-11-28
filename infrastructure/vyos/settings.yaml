@@ -299,6 +299,7 @@ config:
               - accept_icmp: null
               - accept_smart_link_to_flex_radio_from_flex_clients_tcp: null
               - accept_smart_link_to_flex_radio_from_flex_clients_udp: null
+              - accept_ssh: null
           - zones:
               - wg_trusted
             default: accept
@@ -403,6 +404,9 @@ config:
               - accept_k8s_ingress_from_internal: null
               - accept_homekit_from_ios_devices_to_k8s_nodes_tcp: null
               - accept_homekit_from_ios_devices_to_k8s_nodes_udp: null
+              - accept_nfs_from_nfs_clients: null
+              - accept_http: null
+              - accept_https: null
           - zones:
               - services
             default: drop

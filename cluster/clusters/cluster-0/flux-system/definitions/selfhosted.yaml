@@ -101,3 +101,16 @@ spec:
     - name: selfhosted-namespace
   path: "./cluster/clusters/cluster-0/selfhosted/n8n"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: selfhosted-teedy
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: selfhosted-namespace
+  path: "./cluster/clusters/cluster-0/selfhosted/teedy"
+  prune: true

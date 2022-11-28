@@ -1,0 +1,106 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: teedy
+  namespace: selfhosted
+spec:
+  interval: 5m
+  releaseName: teedy
+  chart:
+    spec:
+      chart: app-template
+      version: 1.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+      interval: 15m
+  values:
+    image:
+      repository: sismics/docs
+      tag: v1.10
+    env:
+      TZ: "America/New_York"
+      DOCS_DEFAULT_LANGUAGE: eng
+      DOCS_BASE_URL: "https://docs.${SECRET_DOMAIN}"
+      DOCS_ADMIN_EMAIL_INIT: "ryan@ryanholt.net"
+      DATABASE_URL: "jdbc:postgresql://postgres-rw.db.svc.cluster.local:5432/teedydb"
+      DATABASE_USER: "teedyuser"
+      DOCS_SMTP_HOSTNAME: "smtp.${SECRET_DOMAIN}"
+      DOCS_SMTP_PORT: 25
+      DATABASE_PASSWORD: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
+      DOCS_ADMIN_PASSWORD_INIT: ${SECRET_TEEDY_ADMIN_PASSWORD_INIT_BCRYPT}
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        hosts:
+          - host: "docs.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "docs.${SECRET_DOMAIN}"
+            secretName: tls.teedy
+    persistence:
+      data:
+        enabled: true
+        existingClaim: teedy-config-pvc
+
+      nfs-nas-media:
+        enabled: true
+        type: custom
+        subPath: scans/import
+        volumeSpec:
+          nfs:
+            server: "nas.${SECRET_DOMAIN}"
+            path: /mnt/tank/share
+        mountPath: /media
+        readOnly: false
+
+    postgresql:
+      enabled: false
+
+    # additionalContainers:
+    # - name: docs-importer
+    #   image: sismics/docs-importer:latest
+    #   imagePullPolicy: Always
+    #   env:
+    #   - name: TEEDY_TAG
+    #     value: "9fdc3144-7fdf-46a9-819e-363ef2f4032f"
+    #   - name: TEEDY_ADDTAGS
+    #     value: "false"
+    #   - name: TEEDY_LANG
+    #     value: "eng"
+    #   - name: TEEDY_URL
+    #     value: "http://teedy:8080"
+    #   - name: TEEDY_USERNAME
+    #     value: "importer"
+    #   - name: TEEDY_PASSWORD
+    #     value: "importerpass"
+    #   volumeMounts:
+    #   - mountPath: /import
+    #     name: media
+    #     subPath: scans/import
+
+    # podSecurityContext:
+    #   runAsUser: 1000
+    #   runAsGroup: 1000
+    #   fsGroup: 1000
+    # resources:
+    #   requests:
+    #     memory: 350Mi
+    #     cpu: 500m
+    #   limits:
+    #     memory: 1500Mi
+  # valuesFrom:
+  # - kind: Secret
+  #   name: "teedy-helm-values"
