@@ -725,4 +725,3 @@ accept_xbox_port_forward_tcp_udp:
   destination:
     port: 3074
     address-group: xbox
-
