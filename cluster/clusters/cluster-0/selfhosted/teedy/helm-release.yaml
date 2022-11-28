@@ -32,6 +32,12 @@ spec:
       DATABASE_PASSWORD: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
       DOCS_ADMIN_PASSWORD_INIT: ${SECRET_TEEDY_ADMIN_PASSWORD_INIT_BCRYPT}
 
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+
     ingress:
       main:
         enabled: true
