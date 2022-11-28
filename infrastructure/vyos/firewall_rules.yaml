@@ -706,18 +706,23 @@ accept_speedtest_from_k8s_nodes:
   destination:
     port: 8080,5060
 
-accept_sea_of_thieves_ports_tcp:
+accept_xbox_wan_tcp_udp:
   action: accept
-  protocol: tcp
+  protocol: tcp_udp
   source:
     address-group: xbox
-  destination:
-    port: 3074,4735
 
-accept_sea_of_thieves_ports_udp:
+accept_xbox_port_forward_udp:
   action: accept
   protocol: udp
-  source:
-    address-group: xbox
   destination:
-    port: 3074,3075,3544,30720,30780,31320
+    port: 88,500,3544,4500
+    address-group: xbox
+
+accept_xbox_port_forward_tcp_udp:
+  action: accept
+  protocol: tcp_udp
+  destination:
+    port: 3074
+    address-group: xbox
+

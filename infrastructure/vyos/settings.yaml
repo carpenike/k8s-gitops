@@ -183,8 +183,8 @@ config:
               - accept_plex_from_plex_clients_to_public: null
               - accept_govee_ports_to_wan: null
               - accept_openspot_to_brandmeister_network: null
-              - accept_sea_of_thieves_ports_tcp: null
-              - accept_sea_of_thieves_ports_udp: null
+              - accept_xbox_wan_tcp_udp: null
+
           - zones:
               - servers
             default: drop
@@ -542,6 +542,16 @@ config:
             - drop_invalid: null
         fromZones:
           - zones:
+              - wan
+            default: drop
+            defaultLog: true
+            rules:
+              - accept_established: null
+              - accept_related: null
+              - drop_invalid: null
+              - accept_xbox_port_forward_udp: null
+              - accept_xbox_port_forward_tcp_udp: null
+          - zones:
               - wired
               - wg_trusted
               - wireless
@@ -749,6 +759,42 @@ config:
         interface: wg_trusted
         destinationAddress: "!${cidrhost(networks.wg_trusted, 1)}"
         address: "${cidrhost(networks.wg_trusted, 1)}"
+
+      - description: Forward UDP Xbox Ports to Xbox (88)
+        port: 88
+        protocol: udp
+        interface: wan
+        address: "${cidrhost(networks.iot, 12816)}"
+
+      - description: Forward UDP Xbox Ports to Xbox (500)
+        port: 500
+        protocol: udp
+        interface: wan
+        address: "${cidrhost(networks.iot, 12816)}"
+
+      - description: Forward UDP Xbox Ports to Xbox (3074)
+        port: 3074
+        protocol: udp
+        interface: wan
+        address: "${cidrhost(networks.iot, 12816)}"
+
+      - description: Forward UDP Xbox Ports to Xbox (3544)
+        port: 3544
+        protocol: udp
+        interface: wan
+        address: "${cidrhost(networks.iot, 12816)}"
+
+      - description: Forward UDP Xbox Ports to Xbox (4500)
+        port: 4500
+        protocol: udp
+        interface: wan
+        address: "${cidrhost(networks.iot, 12816)}"
+
+      - description: Forward TCP Xbox Ports to Xbox
+        port: 3074
+        protocol: tcp
+        interface: wan
+        address: "${cidrhost(networks.iot, 12816)}"
 
   firewall:
     network_groups:
