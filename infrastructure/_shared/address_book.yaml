@@ -309,9 +309,13 @@ hosts:
       - sonos_controllers
       - media_players
       - smb_clients
+      - nfs_clients
       - print_clients
       - flex_clients
-      
+      - plex_clients
+      - airplay_clients
+      - lifx_clients
+
   StefaniesiPhone:
     mac_addr: 88:b9:45:32:84:e4
     network: wireless
