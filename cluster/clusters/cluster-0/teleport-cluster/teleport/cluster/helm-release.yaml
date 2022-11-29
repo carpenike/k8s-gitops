@@ -20,8 +20,11 @@ spec:
     clusterName: teleport.${SECRET_DOMAIN}
     kubeClusterName: cluster-0
 
-    acme: true
+    acme: false
     acmeEmail: ${SECRET_EMAIL}
+
+    tls:
+      existingSecretName: network/holthome-net-tls
 
     annotations:
       service:
