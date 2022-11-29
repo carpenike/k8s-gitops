@@ -28,3 +28,4 @@ resources:
   - stakater-charts.yaml
   - teleport-charts.yaml
   - vector-charts.yaml
+  - weave-gitops-charts.yaml
