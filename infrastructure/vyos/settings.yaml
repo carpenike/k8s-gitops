@@ -407,6 +407,7 @@ config:
               - accept_nfs_from_nfs_clients: null
               - accept_http: null
               - accept_https: null
+              - accept_ssh: null
           - zones:
               - services
             default: drop
