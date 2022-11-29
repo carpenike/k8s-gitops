@@ -48,9 +48,9 @@ spec:
     persistence:
       enabled: true
       existingClaim: gitea-config-pvc
-    signing:
-      enabled: true
-      gpgHome: /data/git/.gnupg
+    # signing:
+    #   enabled: true
+    #   gpgHome: /data/git/.gnupg
     gitea:
       admin:
         email: "gitea@${SECRET_DOMAIN}"
