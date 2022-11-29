@@ -25,7 +25,7 @@ spec:
     replicaCount: 3
     adminUser:
       create: true
-      username: admin
+      username: weave-gitops-admin
     oidcSecret:
       create: true
       clientID: weave-gitops
