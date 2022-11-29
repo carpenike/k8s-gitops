@@ -8,7 +8,7 @@ spec:
   interval: 15m
   url: https://github.com/kubernetes-csi/external-snapshotter.git
   ref:
-    tag: v6.0.1
+    tag: v6.1.0
   ignore: |
     # exclude all
     /*
@@ -24,7 +24,7 @@ spec:
   interval: 15m
   url: https://github.com/kubernetes-csi/external-snapshotter.git
   ref:
-    tag: v6.0.1
+    tag: v6.1.0
   ignore: |
     # exclude all
     /*
