@@ -1,4 +1,16 @@
 ---
+session:
+  redis:
+    high_availability:
+      sentinel_name: redis-master
+      nodes:
+        - host: redis-node-0.redis-headless.db.svc.cluster.local
+          port: 26379
+        - host: redis-node-1.redis-headless.db.svc.cluster.local
+          port: 26379
+        - host: redis-node-2.redis-headless.db.svc.cluster.local
+          port: 26379
+
 access_control:
   default_policy: two_factor
   networks:
@@ -108,6 +120,16 @@ identity_providers:
           - email
         redirect_uris:
           - "https://mastodon.${SECRET_DOMAIN}/auth/auth/openid_connect/callback"
+        userinfo_signing_algorithm: none
+
+      - id: weave-gitops
+        description: Weave GitOps
+        secret: "${SECRET_AUTHELIA_WEAVEGITOPS_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes: ["openid", "profile", "groups", "email"]
+        redirect_uris: ["https://gitops.${SECRET_DOMAIN}/oauth2/callback"]
         userinfo_signing_algorithm: none
 
       # - id: miniflux
