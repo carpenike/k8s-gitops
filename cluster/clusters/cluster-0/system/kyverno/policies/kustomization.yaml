@@ -5,7 +5,6 @@ resources:
   - apply-ingress-auth-annotations.yaml
   - apply-ingress-external-dns-annotations.yaml
   - apply-ingress-whitelist-annotations.yaml
-  - add-ndots.yaml
   - inject-tz.yaml
   - delete-cpu-limits.yaml
   - sync-postgres-secrets.yaml
