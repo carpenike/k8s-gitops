@@ -20,6 +20,14 @@ spec:
     clusterName: teleport.${SECRET_DOMAIN}
     kubeClusterName: cluster-0
 
+    acme:
+      enabled: true
+      acmeEmail: ${SECRET_EMAIL}
+
+    annotations:
+      service:
+        "coredns.io/hostname": teleport.${SECRET_DOMAIN}
+
     persistence:
       enabled: true
       existingClaim: teleport-cluster-config-pvc
