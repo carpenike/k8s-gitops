@@ -13,7 +13,7 @@ spec:
       interval: 30m
       sourceRef:
         kind: HelmRepository
-        name: bjw-s
+        name: bjw-s-charts
         namespace: flux-system
 
   values:
@@ -28,8 +28,8 @@ spec:
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
       PAPERLESS_ENABLE_HTTP_REMOTE_USER: "true"
       PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME: HTTP_X_AUTH_REQUEST_EMAIL
-      PAPERLESS_OCR_LANGUAGES: nld
-      PAPERLESS_OCR_LANGUAGE: nld
+      PAPERLESS_OCR_LANGUAGES: en
+      PAPERLESS_OCR_LANGUAGE: en
       PAPERLESS_PORT: 8000
       PAPERLESS_REDIS: redis://paperless-redis.selfhosted.svc.cluster.local:6379
       PAPERLESS_TASK_WORKERS: 2
@@ -67,26 +67,26 @@ spec:
         enabled: true
         mountPath: /usr/src/paperless/data
         type: nfs
-        server: "${NAS_ADDRESS}"
-        path: /volume1/Docs/paperless/data
+        server: "nas.${SECRET_DOMAIN}"
+        path: /mnt/tank/share/paperless/data
       media:
         enabled: true
         mountPath: /usr/src/paperless/media
         type: nfs
-        server: "${NAS_ADDRESS}"
-        path: /volume1/Docs/paperless/media
+        server: "nas.${SECRET_DOMAIN}"
+        path: /mnt/tank/share/paperless/media
       consume:
         enabled: true
         mountPath: /usr/src/paperless/consume
         type: nfs
-        server: "${NAS_ADDRESS}"
-        path: /volume1/Docs/paperless/incoming
+        server: "nas.${SECRET_DOMAIN}"
+        path: /mnt/tank/share/paperless/incoming
       export:
         enabled: true
         mountPath: /usr/src/paperless/export
         type: nfs
-        server: "${NAS_ADDRESS}"
-        path: /volume1/Docs/paperless/export
+        server: "nas.${SECRET_DOMAIN}"
+        path: /mnt/tank/share/paperless/export
 
     resources:
       requests:
