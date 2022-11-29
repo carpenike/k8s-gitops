@@ -20,9 +20,8 @@ spec:
     clusterName: teleport.${SECRET_DOMAIN}
     kubeClusterName: cluster-0
 
-    acme:
-      enabled: true
-      acmeEmail: ${SECRET_EMAIL}
+    acme: true
+    acmeEmail: ${SECRET_EMAIL}
 
     annotations:
       service:
