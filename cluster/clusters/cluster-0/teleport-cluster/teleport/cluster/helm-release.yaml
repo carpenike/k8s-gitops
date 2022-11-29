@@ -24,7 +24,7 @@ spec:
     acmeEmail: ${SECRET_EMAIL}
 
     tls:
-      existingSecretName: network/holthome-net-tls
+      existingSecretName: teleport.tls
 
     annotations:
       service:
