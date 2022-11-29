@@ -20,8 +20,8 @@ spec:
     clusterName: teleport.${SECRET_DOMAIN}
     kubeClusterName: cluster-0
 
-    acme: false
-    acmeEmail: ${SECRET_EMAIL}
+    authentication:
+      type: github
 
     tls:
       existingSecretName: teleport.tls
