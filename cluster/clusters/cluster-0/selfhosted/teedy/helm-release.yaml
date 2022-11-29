@@ -63,17 +63,11 @@ spec:
 
       nfs-nas-media:
         enabled: true
-        type: custom
+        server: "nas.${SECRET_DOMAIN}"
         subPath: scans/import
-        volumeSpec:
-          nfs:
-            server: "nas.${SECRET_DOMAIN}"
-            path: /mnt/tank/share
         mountPath: /media
-        readOnly: false
-
-    postgresql:
-      enabled: false
+        path: /mnt/tank/share
+        type: nfs
 
     # additionalContainers:
     # - name: docs-importer
