@@ -26,9 +26,9 @@ spec:
     tls:
       existingSecretName: teleport.tls
 
-    annotations:
-      service:
-        coredns.io/hostname: teleport.${SECRET_DOMAIN}
+    # annotations:
+    #   service:
+    #     coredns.io/hostname: teleport.${SECRET_DOMAIN}
 
     persistence:
       enabled: true
