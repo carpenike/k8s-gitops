@@ -274,7 +274,7 @@ accept_nfs_from_nfs_clients:
   source:
     address-group: nfs_clients
   destination:
-    port: 111,2049
+    port: 111,2049,918
     address-group: nas_nodes
 accept_smb_from_smb_clients:
   action: accept
