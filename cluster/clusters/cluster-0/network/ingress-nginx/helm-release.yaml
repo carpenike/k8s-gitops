@@ -102,10 +102,6 @@ spec:
       #     memory: 64M
     tcp:
       "5432": "db/postgres-rw:5432"
-      "3023": "teleport-cluster/teleport-cluster:3023"
-      "3024": "teleport-cluster/teleport-cluster:3024"
-      "3026": "teleport-cluster/teleport-cluster:3026"
-      "3036": "teleport-cluster/teleport-cluster:3036"
 
   valuesFrom:
     # Cloudflare Networks
