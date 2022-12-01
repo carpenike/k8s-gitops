@@ -30,6 +30,9 @@ spec:
 
     enableServiceLinks: false
 
+    env:
+      CACHE_DIR: /cache
+
     service:
       main:
         ports:
@@ -41,9 +44,10 @@ spec:
         enabled: true
         annotations:
           auth.home.arpa/enabled: "true"
+          nginx.ingress.kubernetes.io/auth-url: https://auth.${SECRET_DOMAIN}/oauth2/auth?allowed_groups=calibre-web
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${INGRESS_DOMAIN}/css/base/calibreweb/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/calibreweb/nord.css"></head>';
             sub_filter_once on;
         ingressClassName: nginx
         hosts:
@@ -72,6 +76,10 @@ spec:
         enabled: true
         mountPath: /data/media
         existingClaim: media-nfs-share-pvc
+      cache:
+        enabled: true
+        type: emptyDir
+        mountPath: /cache
 
     resources:
       requests:
