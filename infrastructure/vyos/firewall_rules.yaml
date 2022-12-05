@@ -451,7 +451,7 @@ accept_snmp_to_snmp_nodes_from_k8s_nodes:
     address-group: k8s_nodes
   destination:
     port: snmp
-    address-gorup: snmp_nodes
+    address-group: snmp_nodes
 accept_wide_range_from_k8s:
   action: accept
   protocol: tcp
@@ -725,3 +725,11 @@ accept_xbox_port_forward_tcp_udp:
   destination:
     port: 3074
     address-group: xbox
+
+accept_android_tv_to_iptv:
+  action: accept
+  protocol: tcp
+  destination:
+    port: 8443
+  source:
+    address-group: android_tvs

@@ -184,6 +184,7 @@ config:
               - accept_govee_ports_to_wan: null
               - accept_openspot_to_brandmeister_network: null
               - accept_xbox_wan_tcp_udp: null
+              - accept_android_tv_to_iptv: null
 
           - zones:
               - servers
