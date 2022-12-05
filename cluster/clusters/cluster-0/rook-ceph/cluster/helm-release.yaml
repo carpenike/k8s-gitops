@@ -82,7 +82,7 @@ spec:
             memory: "1G"
 
       crashCollector:
-        disable: false
+        disable: true
 
       dashboard:
         enabled: true
