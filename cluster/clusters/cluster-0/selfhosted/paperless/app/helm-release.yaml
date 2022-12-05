@@ -53,6 +53,8 @@ spec:
         ingressClassName: "nginx"
         annotations:
           auth.home.arpa/enabled: "true"
+          nginx.ingress.kubernetes.io/auth-response-headers: Remote-Email,Remote-Name
+          nginx.ingress.kubernetes.io/auth-url: https://auth.${SECRET_DOMAIN}/oauth2/auth?allowed_groups=paperless
         hosts:
           - host: &host "paperless.${SECRET_DOMAIN}"
             paths:
