@@ -26,4 +26,4 @@ spec:
         patchStrategicMerge:
           metadata:
             annotations:
-              +(external-dns.alpha.kubernetes.io/target): ipvr.${SECRET_DOMAIN}
+              +(external-dns.alpha.kubernetes.io/target): ipv4.${SECRET_DOMAIN}
