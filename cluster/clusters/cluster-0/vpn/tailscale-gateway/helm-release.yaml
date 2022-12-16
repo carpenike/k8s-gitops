@@ -36,7 +36,9 @@ spec:
 
     service:
       main:
-        enabled: false
+        ports:
+          http:
+            port: &port 8080
 
     podSecurityContext:
       runAsUser: 1000
