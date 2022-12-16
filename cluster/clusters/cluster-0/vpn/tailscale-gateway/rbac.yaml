@@ -1,0 +1,34 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tailscale
+  namespace: vpn
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["secrets"]
+    # Create can not be restricted to a resource name.
+    verbs: ["create"]
+  - apiGroups: [""] # "" indicates the core API group
+    resourceNames: ["tailscale-auth"]
+    resources: ["secrets"]
+    verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tailscale
+  namespace: vpn
+subjects:
+  - kind: ServiceAccount
+    name: "tailscale"
+roleRef:
+  kind: Role
+  name: tailscale
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tailscale
+  namespace: vpn

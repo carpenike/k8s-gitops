@@ -1,0 +1,43 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app tailscale-gateway
+  namespace: vpn
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.1.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    image:
+      repository: ghcr.io/tailscale/tailscale
+      tag: 1.34.1
+    env:
+      TZ: "America/New_York"
+      TS_KUBE_SECRET: "tailscale"
+      TS_USERSPACE: "true"
+      TS_ROUTES: "10.244.0.0/16,10.96.0.0/12"
+    envFrom:
+      - secretRef:
+          name: *app
+
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+
+    ingress:
+      main:
+        enabled: false
