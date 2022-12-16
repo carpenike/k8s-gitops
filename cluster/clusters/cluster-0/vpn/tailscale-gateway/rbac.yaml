@@ -22,6 +22,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: "tailscale"
+    namespace: vpn
 roleRef:
   kind: Role
   name: tailscale
