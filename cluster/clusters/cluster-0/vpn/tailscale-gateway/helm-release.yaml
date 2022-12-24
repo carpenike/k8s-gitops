@@ -22,6 +22,9 @@ spec:
     remediation:
       retries: 5
   values:
+    serviceAccount:
+      name: tailscale
+
     image:
       repository: ghcr.io/tailscale/tailscale
       tag: v1.34.1
