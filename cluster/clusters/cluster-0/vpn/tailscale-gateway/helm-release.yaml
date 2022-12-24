@@ -27,7 +27,8 @@ spec:
       tag: v1.34.1
     env:
       TZ: "America/New_York"
-      TS_KUBE_SECRET: "tailscale"
+      TS_KUBE_SECRET: "tailscale-auth"
+      SA_NAME: tailscale
       TS_USERSPACE: "true"
       TS_ROUTES: "10.244.0.0/16,10.96.0.0/12"
     envFrom:
