@@ -33,7 +33,7 @@ spec:
       TS_KUBE_SECRET: "tailscale-auth"
       SA_NAME: tailscale
       TS_USERSPACE: "true"
-      TS_ROUTES: "10.244.0.0/16,10.96.0.0/12,10.45.0.0/16"
+      TS_ROUTES: "10.244.0.0/16,10.96.0.0/12,10.45.0.0/16,0.0.0.0/0"
     envFrom:
       - secretRef:
           name: tailscale-auth
