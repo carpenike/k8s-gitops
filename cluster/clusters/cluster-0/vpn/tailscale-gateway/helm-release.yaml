@@ -37,6 +37,8 @@ spec:
     envFrom:
       - secretRef:
           name: tailscale-auth
+    args:
+      - --advertise-exit-node
 
     service:
       main:
