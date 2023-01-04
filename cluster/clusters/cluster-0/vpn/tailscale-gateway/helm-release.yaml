@@ -34,11 +34,10 @@ spec:
       SA_NAME: tailscale
       TS_USERSPACE: "true"
       TS_ROUTES: "10.244.0.0/16,10.96.0.0/12,10.45.0.0/16"
+      TS_EXTRA_ARGS: "--advertise-exit-node"
     envFrom:
       - secretRef:
           name: tailscale-auth
-    args:
-      - --advertise-exit-node
 
     service:
       main:
