@@ -27,7 +27,7 @@ spec:
 
     initContainers:
       init-config:
-        image: busybox:latest@sha256:31be1a93878929d166befc4fa5d2415a9a8ec59f1da96850e5ce3ea45cc83db1
+        image: busybox:latest@sha256:7b3ccabffc97de872a30dfd234fd972a66d247c8cfc69b0550f276481852627c
         command:
           - "sh"
           - "-c"
