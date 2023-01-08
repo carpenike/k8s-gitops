@@ -728,6 +728,7 @@ hosts:
     ipv4_hostid: 12900
     groups:
       - rtsp
+
   amcrest-frontdoor:
     mac_addr: 9c:8e:cd:30:99:4d
     network: video
@@ -735,6 +736,7 @@ hosts:
     groups:
       - rtsp
       - amcrest_cameras
+
   wyze-hazel:
     mac_addr: d0:3f:27:01:4a:0f
     network: video
@@ -742,6 +744,14 @@ hosts:
     groups:
       - rtsp
       - wyze_cameras
+
+  camera-driveway:
+    mac_addr: 58:50:ed:2d:46:bf
+    network: video
+    ipv4_hostid: 12903
+    groups:
+      - rtsp
+
 ####
 ### SERVICES ###
 services:
