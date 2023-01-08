@@ -71,7 +71,42 @@ cameras:
     zones:
       backyard:
         coordinates: 640,0,640,360,0,360,0,0
-
+  driveway:
+    ffmpeg:
+      inputs:
+        - path: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/2
+          roles:
+            - detect
+        - path: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/1
+          roles:
+            - record
+            - rtmp
+    detect:
+      height: 360
+      width: 640
+      fps: 10
+    objects:
+      filters:
+        person:
+          min_area: 1500
+          max_area: 100000
+          threshold: 0.75
+          min_score: 0.60
+    record:
+      enabled: True
+      retain_days: 14
+      events:
+        objects:
+          - person
+          - car
+    snapshots:
+      enabled: True
+      timestamp: False
+      retain:
+        default: 14
+    # zones:
+    #   backyard:
+    #     coordinates: 640,0,640,360,0,360,0,0
   frontdoor:
     ffmpeg:
       inputs:
