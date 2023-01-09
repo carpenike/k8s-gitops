@@ -12,7 +12,7 @@ spec:
       pg_stat_statements.max: '10000'
       pg_stat_statements.track: all
   storage:
-    size: 20Gi
+    size: 50Gi
     storageClass: ceph-block
 
   superuserSecret:
