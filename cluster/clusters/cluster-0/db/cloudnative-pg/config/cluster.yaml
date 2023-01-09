@@ -33,7 +33,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://postgresql/
       endpointURL: https://minio.${SECRET_DOMAIN}:9000
-      serverName: postgres-v2
+      serverName: postgres-v3
       s3Credentials:
         accessKeyId:
           name: postgres-minio
@@ -50,7 +50,7 @@ spec:
           maxParallel: 8
         destinationPath: s3://postgresql/
         endpointURL: https://minio.${SECRET_DOMAIN}:9000
-        serverName: postgres-v1
+        serverName: postgres-v2
         s3Credentials:
           accessKeyId:
             name: postgres-minio
