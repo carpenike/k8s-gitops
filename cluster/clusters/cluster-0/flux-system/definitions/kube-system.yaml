@@ -68,3 +68,16 @@ spec:
     - name: kube-system-nfd-crds
   path: "./cluster/clusters/cluster-0/kube-system/node-feature-discovery/app"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kube-system-kubelet-csr-approver
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: kube-system-nfd-crds
+  path: "./cluster/clusters/cluster-0/kube-system/kubelet-csr-approver"
+  prune: true
