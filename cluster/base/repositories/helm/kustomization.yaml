@@ -11,6 +11,7 @@ resources:
   - cloudnative-pg-charts.yaml
   - dex-charts.yaml
   - external-dns-charts.yaml
+  - external-secrets-charts.yaml
   - fairwinds-charts.yaml
   - gitea-charts.yaml
   - grafana-charts.yaml
