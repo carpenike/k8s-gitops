@@ -101,7 +101,7 @@ sinks:
       k8s_app: '{{ custom_app_name }}'
       k8s_container: '{{ kubernetes.container_name }}'
       k8s_filename: '{{ kubernetes.file }}'
-      # k8s_instance: '{{ kubernetes.pod_labels."app.kubernetes.io/instance" }}'
+      k8s_instance: '{{ kubernetes.pod_labels."app.kubernetes.io/instance" }}'
       k8s_namespace: '{{ kubernetes.pod_namespace }}'
       k8s_node: '{{ kubernetes.pod_node_name }}'
       k8s_pod: '{{ kubernetes.pod_name }}'
