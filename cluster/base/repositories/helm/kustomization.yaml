@@ -25,6 +25,7 @@ resources:
   - kubernetes-sigs-metrics-server-charts.yaml
   - kubernetes-sigs-nfd-charts.yaml
   - kyverno-charts.yaml
+  - piraeus.yaml
   - postfinance.yaml
   - prometheus-community-charts.yaml
   - rook-ceph-charts.yaml
