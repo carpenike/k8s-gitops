@@ -5,16 +5,27 @@ metadata:
   name: metrics-server
   namespace: kube-system
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: metrics-server
-      version: 3.8.2
+      version: 3.8.3
       sourceRef:
         kind: HelmRepository
-        name: kubernetes-sigs-metrics-server-charts
+        name: kubernetes-sigs-metrics-server
         namespace: flux-system
-      interval: 15m
+      interval: 30m
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
     metrics:
       enabled: true
