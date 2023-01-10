@@ -125,6 +125,19 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
+  name: monitoring-vector-geoipupdate
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: monitoring-namespace
+  path: "./cluster/clusters/cluster-0/monitoring/vector/geoipupdate"
+  prune: false
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
   name: monitoring-vector-aggregator
   namespace: flux-system
   labels:
