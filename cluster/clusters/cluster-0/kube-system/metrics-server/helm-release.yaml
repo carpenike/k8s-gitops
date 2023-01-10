@@ -12,7 +12,7 @@ spec:
       version: 3.8.3
       sourceRef:
         kind: HelmRepository
-        name: kubernetes-sigs-metrics-server
+        name: kubernetes-sigs-metrics-server-charts
         namespace: flux-system
       interval: 30m
   maxHistory: 3
