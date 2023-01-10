@@ -1,0 +1,16 @@
+---
+apiVersion: snapscheduler.backube/v1
+kind: SnapshotSchedule
+metadata:
+  name: main
+  namespace: default
+spec:
+  disabled: false
+  claimSelector:
+    matchLabels:
+      snapshot.home.arpa/enabled: "true"
+  retention:
+    expires: 48h
+  schedule: "@daily"
+  snapshotTemplate:
+    snapshotClassName: csi-ceph-blockpool
