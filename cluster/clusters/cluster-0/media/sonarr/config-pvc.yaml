@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: sonarr-config-pvc
   namespace: media
+  labels:
+    snapshot.home.arpa/enabled: "true"
 spec:
   accessModes:
     - ReadWriteOnce

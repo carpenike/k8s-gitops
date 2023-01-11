@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: readarr-audio-config-pvc
   namespace: media
+  labels:
+    snapshot.home.arpa/enabled: "true"
 spec:
   accessModes:
     - ReadWriteOnce
