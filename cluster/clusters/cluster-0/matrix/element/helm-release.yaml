@@ -27,7 +27,7 @@ spec:
 
     image:
       repository: vectorim/element-web
-      tag: v1.11.17
+      tag: v1.11.20
 
     service:
       main:
