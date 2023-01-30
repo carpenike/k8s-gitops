@@ -25,7 +25,7 @@ spec:
   values:
     image:
       repository: mbentley/omada-controller
-      tag: "5.7"
+      tag: "5.8"
     env:
       TZ: "America/New_York"
       MANAGE_HTTP_PORT: 8088
