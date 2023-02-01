@@ -49,5 +49,5 @@ sops:
         =/kGu
         -----END PGP MESSAGE-----
       fp: 76DAFEBE0E21604BB9F2D6C11850C928A0D756C8
-  encrypted_regex: ^(data|stringData)$
+  encrypted_regex: _unencrypted
   version: 3.7.3
