@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: obsidian-couchdb-pvc
   namespace: selfhosted
+  labels:
+    snapshot.home.arpa/enabled: "true"
 spec:
   accessModes:
     - ReadWriteOnce
