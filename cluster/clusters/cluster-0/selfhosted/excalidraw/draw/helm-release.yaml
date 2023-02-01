@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/excalidraw
-      tag: 0.13.0
+      tag: 1da3256a3c5a41358ea0f2158c960ddccbae1b49a052ec9710f2096652699e1d
 
     env:
       REACT_APP_BACKEND_V1_GET_URL: https://draw.${SECRET_DOMAIN}/api/v1/
