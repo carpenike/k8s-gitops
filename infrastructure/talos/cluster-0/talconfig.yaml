@@ -131,3 +131,7 @@ controlPlane:
           disabled: false
           servers:
             - 10.20.0.1
+
+    - |-
+      - op: remove
+        path: /cluster/apiServer/admissionControl
