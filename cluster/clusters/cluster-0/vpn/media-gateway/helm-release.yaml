@@ -2,31 +2,38 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: media-gateway
+  name: downloads-gateway
   namespace: vpn
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: pod-gateway
-      interval: 15m
+      version: 6.0.0
+      interval: 30m
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: angelnu-charts
         namespace: flux-system
-      version: 5.6.2
+
   values:
     image:
-      repository: ghcr.io/k8s-at-home/pod-gateway
-      tag: v1.7.0@sha256:ce4871ccdfb98e8dcb5330125a06954ca3b40d9cff3235fb39ac2ba33feff0ff
+      repository: ghcr.io/angelnu/pod-gateway
+      tag: v1.8.1@sha256:690b6365728fe9012ad4cdfca38334992664596513dca187d1b93d2025205776
 
     DNS: 172.16.1.1
 
-    additionalContainers:
-      gluetun:
-        image: qmcgaw/gluetun:v3.32.0@sha256:70e2b9fe66941d6de31419c3207b525293f2e6a92a3788869bb337a17e0e5ec8
-
+    addons:
+      vpn:
+        enabled: true
+        type: gluetun
+        image:
+          # TODO: Replace with ghcr.io/qdm12/gluetun when a versioned tag is available
+          repository: docker.io/qmcgaw/gluetun
+          tag: v3.32.0@sha256:70e2b9fe66941d6de31419c3207b525293f2e6a92a3788869bb337a17e0e5ec8
         env:
+          - name: VPN_SERVICE_PROVIDER
+            value: mullvad
           - name: VPN_TYPE
             value: wireguard
           - name: VPN_INTERFACE
@@ -35,28 +42,25 @@ spec:
             value: "off"
           - name: DOT
             value: "off"
-
-        envFrom:
-          - secretRef:
-              name: media-gateway-vpnconfig
-
+          - name: SERVER_CITIES
+            value: Amsterdam
+          - name: SERVER_HOSTNAMES
+            value: nl5-wireguard
+          - name: WIREGUARD_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: media-gateway-vpnconfig
+                key: WIREGUARD_PRIVATE_KEY
+          - name: WIREGUARD_ADDRESSES
+            valueFrom:
+              secretKeyRef:
+                name: media-gateway-vpnconfig
+                key: WIREGUARD_ADDRESSES
         securityContext:
           capabilities:
             add:
               - NET_ADMIN
 
-    webhook:
-      image:
-        repository: ghcr.io/k8s-at-home/gateway-admision-controller
-        tag: v3.6.0
-
-      gatewayDefault: false
-      gatewayLabel: setGateway
-      gatewayAnnotation: setGateway
-      namespaceSelector:
-        label: "vpn-routed-gateway"
-
-    addons:
       netshoot:
         enabled: true
 
@@ -65,8 +69,8 @@ spec:
       secret.reloader.stakater.com/reload: media-gateway-vpnconfig
 
     publicPorts:
-      - hostname: qbittorrent #hostname assigned to the pod
-        IP: 10 # must be an integer between 2 and VXLAN_GATEWAY_FIRST_DYNAMIC_IP (20 by default)
+      - IP: 10
+        hostname: qbittorrent
         ports:
           - type: udp
             port: 61144
@@ -77,10 +81,18 @@ spec:
       - media
 
     settings:
+      NOT_ROUTED_TO_GATEWAY_CIDRS: 172.16.0.0/12 10.45.0.0/16 10.20.0.0/16
+      VPN_BLOCK_OTHER_TRAFFIC: true
       VPN_INTERFACE: wg0
+      VPN_LOCAL_CIDRS: 10.0.0.0/8 192.168.0.0/16
+      VPN_TRAFFIC_PORT: "51820"
       VXLAN_ID: 43
       VXLAN_IP_NETWORK: 172.16.1
-      VPN_BLOCK_OTHER_TRAFFIC: true
-      VPN_TRAFFIC_PORT: ${VPN_GATEWAY_VPN_PORT}
-      NOT_ROUTED_TO_GATEWAY_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
-      VPN_LOCAL_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_CLUSTER_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_MANAGEMENT_CIDR}"
+
+    webhook:
+      gatewayAnnotation: setGateway
+      gatewayDefault: false
+      gatewayLabel: setGateway
+      image:
+        repository: ghcr.io/angelnu/gateway-admision-controller
+        tag: v3.7.0@sha256:985eb60fd0017f657d5e66707f7e9b3f764f3337a87a379d26cd15e950bd79ad
