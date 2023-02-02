@@ -5,4 +5,4 @@ metadata:
   name: media
   labels:
     goldilocks.fairwinds.com/enabled: "true"
-    vpn-routed-gateway: "true"
+    routed-gateway: "true"
