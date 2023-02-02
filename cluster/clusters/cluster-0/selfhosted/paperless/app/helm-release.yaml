@@ -27,19 +27,30 @@ spec:
       PAPERLESS_CONSUMER_RECURSIVE: "true"
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
       PAPERLESS_ENABLE_HTTP_REMOTE_USER: "true"
-      PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME: Remote-Email
+      PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME: HTTP_X_AUTH_REQUEST_EMAIL
       PAPERLESS_OCR_LANGUAGES: eng
       PAPERLESS_OCR_LANGUAGE: eng
       PAPERLESS_PORT: 8000
       PAPERLESS_REDIS: redis://paperless-redis.selfhosted.svc.cluster.local:6379
       PAPERLESS_TASK_WORKERS: 2
       PAPERLESS_TIME_ZONE: "America/New_York"
-      PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
+      PAPERLESS_URL: https://paperless.holthome.net
       USERMAP_GID: 65543
-
-    envFrom:
-      - secretRef:
-          name: paperless-secrets
+      PAPERLESS_ADMIN_USER:
+        valueFrom:
+          secretKeyRef:
+            name: paperless-secrets
+            key: PAPERLESS_ADMIN_USER
+      PAPERLESS_ADMIN_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: paperless-secrets
+            key: PAPERLESS_ADMIN_PASSWORD
+      PAPERLESS_SECRET_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: paperless-secrets
+            key: PAPERLESS_SECRET_KEY
 
     service:
       main:
@@ -53,8 +64,9 @@ spec:
         ingressClassName: "nginx"
         annotations:
           auth.home.arpa/enabled: "true"
+          nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/oauth2/auth?allowed_groups=paperless
         hosts:
-          - host: &host "paperless.${SECRET_DOMAIN}"
+          - host: &host "paperless.holthome.net"
             paths:
               - path: /
         tls:
@@ -66,7 +78,7 @@ spec:
         enabled: true
         mountPath: /usr/src/paperless/data
         type: nfs
-        server: "nas.${SECRET_DOMAIN}"
+        server: "nas.holthome.net"
         path: /mnt/tank/share/paperless/data
       media:
         enabled: true
