@@ -70,7 +70,7 @@ spec:
         hosts:
           - host: *host
             paths:
-              - path: /
+              - path: /api
                 pathType: Prefix
         tls:
           - hosts:
