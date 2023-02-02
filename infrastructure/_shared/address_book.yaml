@@ -272,7 +272,7 @@ hosts:
       - print_clients
       - flex_clients
   Ryans-iPhone:
-    mac_addr: 5c:52:30:2b:6a:f7
+    mac_addr: ac:00:7a:55:4b:07
     network: wireless
     ipv4_hostid: 13000
     groups:
