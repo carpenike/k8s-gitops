@@ -33,10 +33,10 @@ spec:
       QBITTORRENT__PORT: &port 80
       QBITTORRENT__BT_PORT: &port-bt 61144
 
-    # dnsConfig:
-    #   options:
-    #     - name: ndots
-    #       value: "1"
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
 
     settings:
       automaticPortSetup: false
