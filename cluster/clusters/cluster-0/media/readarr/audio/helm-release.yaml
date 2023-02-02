@@ -61,6 +61,22 @@ spec:
               - *host
             secretName: tls.readarr-audio
 
+      api:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          auth.home.arpa/enabled: "false"
+          external-dns.home.arpa/enabled: "true"
+        hosts:
+          - host: *host
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+            secretName: tls.readarr-audio
+
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
