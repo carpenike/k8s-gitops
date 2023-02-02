@@ -6,7 +6,7 @@ resources:
   - externalsecret.yaml
   - helm-release.yaml
   # - secret.sops.yaml
-  - network-policy.yaml
+  # - network-policy.yaml
 commonLabels:
   app.kubernetes.io/name: pod-gateway
   app.kubernetes.io/instance: downloads-gateway
