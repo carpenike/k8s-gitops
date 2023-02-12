@@ -29,7 +29,7 @@ spec:
 
     image:
       repository: turt2live/matrix-media-repo
-      tag: v1.2.12
+      tag: v1.2.13
 
     env:
       TZ: "America/New_York"
