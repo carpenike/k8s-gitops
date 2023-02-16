@@ -27,7 +27,7 @@ spec:
 
     image:
       repository: dock.mau.dev/mautrix/whatsapp
-      tag: v0.8.1
+      tag: v0.8.2
 
     service:
       main:
