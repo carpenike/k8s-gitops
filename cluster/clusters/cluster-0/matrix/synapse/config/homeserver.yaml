@@ -69,24 +69,35 @@ email:
 
 enable_3pid_lookup: true
 oidc_providers:
-  - allow_existing_users: true
-    client_id: synapse
-    client_secret: ${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}
-    discover: true
-    idp_icon: mxc://authelia.com/cKlrTPsGvlpKxAYeHWJsdVHI
-    idp_id: authelia
-    idp_name: Authelia
-    issuer: https://auth.${SECRET_DOMAIN}/
-    scopes:
-      - openid
-      - profile
-      - email
+  # - allow_existing_users: true
+  #   client_id: synapse
+  #   client_secret: ${SECRET_AUTHELIA_MATRIX_CLIENT_SECRET}
+  #   discover: true
+  #   idp_icon: mxc://authelia.com/cKlrTPsGvlpKxAYeHWJsdVHI
+  #   idp_id: authelia
+  #   idp_name: Authelia
+  #   issuer: https://auth.${SECRET_DOMAIN}/
+  #   scopes:
+  #     - openid
+  #     - profile
+  #     - email
+  #   user_mapping_provider:
+  #     config:
+  #       display_name_template: "{{ user.name }}"
+  #       email_template: "{{ user.email }}"
+  #       localpart_template: "{{ user.preferred_username }}"
+  #       subject_claim: sub
+
+  - idp_id: auth0
+    idp_name: Auth0
+    issuer: "https://holthome.auth0.com/"
+    client_id: "GRYTCvIKQ02bv2vuKyl5puJagtMHSbNs"
+    client_secret: ${SECRET_AUTH0_MATRIX_CLIENT_SECRET}
+    scopes: ["openid", "profile"]
     user_mapping_provider:
       config:
-        display_name_template: "{{ user.name }}"
-        email_template: "{{ user.email }}"
         localpart_template: "{{ user.preferred_username }}"
-        subject_claim: sub
+        display_name_template: "{{ user.name }}"
 
 ## Database configuration ##
 database:
