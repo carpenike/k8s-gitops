@@ -94,10 +94,10 @@ oidc_providers:
     client_id: "GRYTCvIKQ02bv2vuKyl5puJagtMHSbNs"
     client_secret: ${SECRET_AUTH0_MATRIX_CLIENT_SECRET}
     scopes: ["openid", "profile"]
-    # user_mapping_provider:
-    #   config:
+    user_mapping_provider:
+      config:
     #     localpart_template: "{{ user.preferred_username }}"
-    #     display_name_template: "{{ user.name }}"
+        display_name_template: "{{ user.name }}"
 
 ## Database configuration ##
 database:
