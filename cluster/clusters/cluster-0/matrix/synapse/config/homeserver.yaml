@@ -96,8 +96,10 @@ oidc_providers:
     scopes: ["openid", "profile"]
     user_mapping_provider:
       config:
-        localpart_template: "{{ user.preferred_username }}"
         display_name_template: "{{ user.name }}"
+        email_template: "{{ user.email }}"
+        localpart_template: "{{ user.preferred_username }}"
+        subject_claim: sub
 
 ## Database configuration ##
 database:
