@@ -693,6 +693,12 @@ hosts:
     ipv4_hostid: 13014
     groups:
       - esphome_devices
+  basement-tv-switch:
+    mac_addr: 48:3f:da:2b:14:3b
+    network: iot
+    ipv4_hostid: 13015
+    groups:
+      - esphome_devices
   august-front-door:
     mac_addr: 78:9c:85:0d:91:4d
     network: iot
