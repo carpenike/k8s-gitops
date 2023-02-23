@@ -609,7 +609,7 @@ hosts:
     ipv4_hostid: 13000
     groups:
       - esphome_devices
-  utility-closet-sensors:
+  utility-room-sensors:
     mac_addr: 7c:9e:bd:f5:2e:b0
     network: iot
     ipv4_hostid: 13001
