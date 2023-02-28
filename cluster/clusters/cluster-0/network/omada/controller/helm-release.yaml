@@ -2,66 +2,61 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: omada-controller
+  name: &app omada-controller
   namespace: network
 spec:
   interval: 15m
   chart:
     spec:
-      chart: omada-controller
-      version: 4.4.2
+      chart: app-template
+      version: 1.3.2
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: bjw-s-charts
         namespace: flux-system
-      interval: 15m
+  test:
+    enable: false
   install:
-    createNamespace: true
     remediation:
       retries: 5
   upgrade:
     remediation:
       retries: 5
+      remediateLastFailure: true
+    cleanupOnFail: true
+  rollback:
+    timeout: 10m
+    recreate: true
+    cleanupOnFail: true
   values:
+    global:
+      nameOverride: *app
+
     image:
       repository: mbentley/omada-controller
-      tag: "5.9"
+      tag: 5.9@sha256:dbc036862e61b356c44f01f9b9863777dab4da16656556004568e0894c8b5718
+
     env:
       TZ: "America/New_York"
-      MANAGE_HTTP_PORT: 8088
-      MANAGE_HTTPS_PORT: 8043
-      PORTAL_HTTP_PORT: 8088
-      PORTAL_HTTPS_PORT: 8843
-      SHOW_SERVER_LOGS: true
-      SHOW_MONGODB_LOGS: true
+      MANAGE_HTTP_PORT: "8088"
+      MANAGE_HTTPS_PORT: "8043"
+      PORTAL_HTTP_PORT: "8088"
+      PORTAL_HTTPS_PORT: "8843"
+      SHOW_SERVER_LOGS: "true"
+      SHOW_MONGODB_LOGS: "true"
+
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          coredns.io/hostname: &host "omada.${SECRET_DOMAIN}"
           cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "router-wireless-settings"
-          # TODO: #331 configure nginx redirect rules and headers
-          # Add a proxy redirect because omada expects it and will redirect to the ssl port if it's not explicitly in the URL
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
           nginx.ingress.kubernetes.io/proxy-ssl-verify: "off"
+          nginx.ingress.kubernetes.io/use-regex: "true"
           nginx.ingress.kubernetes.io/upstream-vhost: "omada.${SECRET_DOMAIN}:8043"
-          nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-          nginx.ingress.kubernetes.io/ssl-redirect: "true"
-
           nginx.ingress.kubernetes.io/proxy-redirect-from: "~https://(.+):8043/(.+)/login$"
-          nginx.ingress.kubernetes.io/proxy-redirect-to: "https://$http_host/$2/login"
-
-          # Add a few more headers to make Omada happy
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header        X-Real-IP                 $remote_addr;
-            proxy_set_header        X-Forwarded-For           $proxy_add_x_forwarded_for;
-            proxy_set_header        Cookie                    $http_cookie;
-            proxy_set_header        X-Forwarded-Proto         $scheme;
-            proxy_set_header        Upgrade                   $http_upgrade;
-            proxy_set_header        Connection                "upgrade";
+          nginx.ingress.kubernetes.io/proxy-redirect-to: "https://$1/$2/login"
 
         hosts:
           - host: *host
@@ -75,19 +70,23 @@ spec:
     service:
       main:
         enabled: true
+        ports:
+          http:
+            enabled: true
+            port: 8043
+            targetPort: 8043
+            protocol: TCP
       controller:
         enabled: true
         type: LoadBalancer
         loadBalancerIP: "${SVC_OMADA_ADDRESS}"
         externalTrafficPolicy: Local
         ports:
-          # see https://www.tp-link.com/us/support/faq/3265/
-          # Web Management and Portal
           mgmt-8088-tcp:
             enabled: true
             port: 8088
-            protocol: TCP
             targetPort: 8088
+            protocol: TCP
           mgmt-8043-tcp:
             enabled: true
             port: 8043
@@ -98,7 +97,6 @@ spec:
             port: 8843
             protocol: TCP
             targetPort: 8843
-          # EAP Discovery, Adoption, Management, and Upgrade
           eap-discovery:
             enabled: true
             port: 29810
@@ -124,7 +122,6 @@ spec:
             port: 29814
             protocol: TCP
             targetPort: 29814
-          # Initialization Check
           init-check:
             enabled: true
             port: 27001
@@ -135,7 +132,6 @@ spec:
             port: 27002
             protocol: TCP
             targetPort: 27002
-          # Database Access
           old-db-access:
             enabled: true
             port: 27017
@@ -146,6 +142,7 @@ spec:
             port: 27217
             protocol: TCP
             targetPort: 27217
+
     persistence:
       data:
         enabled: true
@@ -159,17 +156,10 @@ spec:
         enabled: true
         mountPath: /opt/tplink/EAPController/logs
         existingClaim: omada-logs-pvc
-      cert:
-        enabled: true
-        mountPath: /cert
-        type: custom
-        volumeSpec:
-          secret:
-            secretName: omada-controller-tls
 
     resources:
       requests:
-        memory: 1200M
+        memory: 1200Mi
         cpu: 1200m
       limits:
-        memory: 1500M
+        memory: 1500Mi
