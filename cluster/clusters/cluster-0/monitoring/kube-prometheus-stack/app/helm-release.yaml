@@ -203,7 +203,16 @@ spec:
           - &host prometheus.holthome.net
         tls:
           - hosts:
-              - *host
+              - *host_prometheus
+
+      thanos:
+        image: quay.io/thanos/thanos:v0.30.1@sha256:3e9ab226c7bad747969ad2b73e08988558e45986e16925397072d57bcceff645
+        objectStorageConfig:
+          name: thanos
+          key: objstore.yml
+        # renovate: datasource=docker depName=quay.io/thanos/thanos
+        version: "v0.30.1"
+      walCompression: true
       thanosService:
         enabled: true
       thanosServiceMonitor:
@@ -215,10 +224,9 @@ spec:
         # externalLabels:
         #   cluster: home # must match with thanos value `.ruler.clusterName`
         thanos:
-          image: quay.io/thanos/thanos:v0.30.2
-          objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
+          image: quay.io/thanos/thanos:v0.30.1
+          # renovate: datasource=docker depName=quay.io/thanos/thanos
+          version: "v0.30.1"
         podAntiAffinity: hard
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.2.1
+      version: 1.3.2
       interval: 15m
       sourceRef:
         kind: HelmRepository
@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: ghcr.io/coder/code-server
-      tag: 4.10.0
+      tag: 4.10.1
 
     podSecurityContext:
       runAsUser: 0
