@@ -21,18 +21,22 @@ additionalMachineCertSans:
 nodes:
   - hostname: cp-0.${domainName}
     controlPlane: true
+    disableSearchDomain: true
     ipAddress: 10.20.0.20
     installDisk: /dev/vda
   - hostname: cp-1.${domainName}
+    disableSearchDomain: true
     ipAddress: 10.20.0.21
     installDisk: /dev/sda
     controlPlane: true
   - hostname: cp-2.${domainName}
+    disableSearchDomain: true
     ipAddress: 10.20.0.22
     installDisk: /dev/sda
     controlPlane: true
   - hostname: node-0.${domainName}
     controlPlane: true
+    disableSearchDomain: true
     ipAddress: 10.20.10.20
     installDisk: /dev/sda
     networkInterfaces:
@@ -45,6 +49,7 @@ nodes:
               - 10.40.10.20/16
   - hostname: node-1.${domainName}
     controlPlane: true
+    disableSearchDomain: true
     ipAddress: 10.20.10.21
     installDisk: /dev/sda
     networkInterfaces:
@@ -57,6 +62,7 @@ nodes:
               - 10.40.10.21/16
   - hostname: node-2.${domainName}
     controlPlane: true
+    disableSearchDomain: true
     ipAddress: 10.20.10.22
     installDisk: /dev/sda
     networkInterfaces:
@@ -69,6 +75,7 @@ nodes:
               - 10.40.10.22/16
   - hostname: node-3.${domainName}
     controlPlane: true
+    disableSearchDomain: true
     ipAddress: 10.20.10.23
     installDisk: /dev/sda
     networkInterfaces:
