@@ -360,6 +360,14 @@ hosts:
       - media_players
       - print_clients
       - plex_clients
+  Taylors-iPad:
+    mac_addr: 6c:7e:67:af:7d:46
+    network: wireless
+    ipv4_hostid: 13055
+    groups:
+      - media_players
+      - print_clients
+      - plex_clients
   ####
   ### IOT ###
   hp-printer:
