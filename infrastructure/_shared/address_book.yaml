@@ -343,6 +343,15 @@ hosts:
       - media_players
       - smb_clients
       - print_clients
+  Stefanies-MBP:
+    mac_addr: 5c:e9:1e:b0:89:f1
+    network: wireless
+    ipv4_hostid: 13054
+    groups:
+      - sonos_controllers
+      - media_players
+      - smb_clients
+      - print_clients
   Caydans-iPad:
     mac_addr: 10:00:20:33:a3:84
     network: wireless
