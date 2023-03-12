@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: sismics/docs
-      tag: v1.10
+      tag: v1.11
     env:
       TZ: "America/New_York"
       DOCS_DEFAULT_LANGUAGE: eng
