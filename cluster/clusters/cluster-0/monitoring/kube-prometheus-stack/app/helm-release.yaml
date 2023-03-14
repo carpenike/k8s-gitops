@@ -203,7 +203,7 @@ spec:
           - &host prometheus.holthome.net
         tls:
           - hosts:
-              - *host_prometheus
+              - *host
 
       thanos:
         image: quay.io/thanos/thanos:v0.30.1@sha256:3e9ab226c7bad747969ad2b73e08988558e45986e16925397072d57bcceff645
