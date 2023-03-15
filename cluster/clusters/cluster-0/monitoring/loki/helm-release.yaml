@@ -119,6 +119,8 @@ spec:
               - *host
     read:
       replicas: 3
+      persistence:
+        storageClass: ceph-block
     write:
       replicas: 3
       persistence:
