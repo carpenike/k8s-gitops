@@ -18,6 +18,9 @@ spec:
   bootstrap:
     recovery:
       source: &previous-cluster postgres-v3
+      recoveryTarget:
+        backupID: 20230312T000002
+        exclusive: false
   postgresql:
     parameters:
       max_connections: "300"
