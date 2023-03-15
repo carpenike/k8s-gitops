@@ -62,19 +62,19 @@ spec:
     - name: selfhosted-namespace
   path: "./cluster/clusters/cluster-0/selfhosted/obsidian-couchdb"
   prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: selfhosted-gitea
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: selfhosted-namespace
-  path: "./cluster/clusters/cluster-0/selfhosted/gitea"
-  prune: true
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: selfhosted-gitea
+#   namespace: flux-system
+#   labels:
+#     component.cluster-0/part-of: definitions
+# spec:
+#   dependsOn:
+#     - name: selfhosted-namespace
+#   path: "./cluster/clusters/cluster-0/selfhosted/gitea"
+#   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
