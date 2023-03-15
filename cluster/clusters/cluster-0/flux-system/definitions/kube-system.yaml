@@ -21,7 +21,7 @@ spec:
   path: "./cluster/clusters/cluster-0/kube-system/metrics-server"
   prune: true
   dependsOn:
-    - name: monitoring-kps-crds
+    - name: monitoring-kube-prometheus-stack
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
