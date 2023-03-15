@@ -9,19 +9,19 @@ metadata:
 spec:
   path: "./cluster/clusters/cluster-0/monitoring"
   prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: monitoring-kps-crds
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: monitoring-namespace
-  path: "./cluster/clusters/cluster-0/monitoring/kube-prometheus-stack/crds"
-  prune: true
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: monitoring-kps-crds
+#   namespace: flux-system
+#   labels:
+#     component.cluster-0/part-of: definitions
+# spec:
+#   dependsOn:
+#     - name: monitoring-namespace
+#   path: "./cluster/clusters/cluster-0/monitoring/kube-prometheus-stack/crds"
+#   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -46,7 +46,6 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
     - name: monitoring-kube-prometheus-stack
   path: "./cluster/clusters/cluster-0/monitoring/grafana"
   prune: true
@@ -61,7 +60,6 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
   path: "./cluster/clusters/cluster-0/monitoring/thanos"
   prune: true
 ---
@@ -75,7 +73,6 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
     - name: monitoring-kube-prometheus-stack
   path: "./cluster/clusters/cluster-0/monitoring/loki"
   prune: true
@@ -118,7 +115,6 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
   path: "./cluster/clusters/cluster-0/monitoring/speedtest-exporter"
   prune: true
 ---
@@ -145,7 +141,6 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
     - name: monitoring-loki
   path: "./cluster/clusters/cluster-0/monitoring/vector/aggregator"
   prune: false
@@ -160,7 +155,6 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
     - name: monitoring-vector-aggregator
   path: "./cluster/clusters/cluster-0/monitoring/vector/agent"
   prune: false
@@ -189,6 +183,5 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring-namespace
-    - name: monitoring-kps-crds
   path: "./cluster/clusters/cluster-0/monitoring/snmp-exporter/apc-ups"
   prune: false
