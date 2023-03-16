@@ -99,7 +99,7 @@ spec:
         use_pkce: true
       auth.generic_oauth.group_mapping:
         role_attribute_path: |
-          contains("https://holthome/groups"[*], 'grafana-admin') && 'Admin' || contains("https://holthome/groups"[*], 'grafana-viewer') && 'Viewer'
+          contains("https://holthome/groups"[*], 'grafana-admins') && 'Admin' || contains("https://holthome/groups"[*], 'grafana-viewer') && 'Viewer'
         org_id: 1
       auth.anonymous:
         enabled: true
