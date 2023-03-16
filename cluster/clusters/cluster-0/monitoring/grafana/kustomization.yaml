@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - helm-release.yaml
-  - secret.sops.yaml
+  - externalsecret.yaml.yaml
 commonLabels:
   app.kubernetes.io/name: grafana
   app.kubernetes.io/instance: grafana
