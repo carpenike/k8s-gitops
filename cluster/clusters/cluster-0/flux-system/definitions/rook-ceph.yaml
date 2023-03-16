@@ -20,7 +20,7 @@ metadata:
 spec:
   dependsOn:
     - name: rook-ceph-namespace
-    - name: monitoring-kps-crds
+    - name: monitoring-kube-prometheus-stack
   path: "./cluster/clusters/cluster-0/rook-ceph/operator"
   prune: true
 ---

@@ -85,7 +85,7 @@ metadata:
 spec:
   dependsOn:
     - name: network-namespace
-    - name: monitoring-kps-crds
+    - name: monitoring-kube-prometheus-stack
   path: "./cluster/clusters/cluster-0/network/external-dns"
   prune: true
 ---
