@@ -19,10 +19,10 @@ spec:
   values:
     replicas: 1
 
-    admin:
-      existingSecret: grafana-secrets
-      passwordKey: adminPass
-      userKey: adminUser
+    # admin:
+    #   existingSecret: grafana-secrets
+    #   passwordKey: adminPass
+    #   userKey: adminUser
 
     dashboardProviders:
       dashboardproviders.yaml:
