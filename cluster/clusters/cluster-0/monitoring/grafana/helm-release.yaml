@@ -90,7 +90,7 @@ spec:
       auth.generic_oauth:
         enabled: true
         name: Auth0
-        scopes: "openid profile email"
+        scopes: "openid profile email offline_access"
         client_id: # Set by env vars
         client_secret: # Set by env vars
         auth_url: # Set by env vars
