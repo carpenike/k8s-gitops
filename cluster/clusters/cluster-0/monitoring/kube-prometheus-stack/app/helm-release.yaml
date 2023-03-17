@@ -132,15 +132,12 @@ spec:
           multicluster:
             etcd:
               enabled: true
-    kubelet:
+
+    kubeStateMetrics:
       enabled: true
-      serviceMonitor:
-        metricRelabelings:
-          - action: replace
-            sourceLabels: ["node"]
-            targetLabel: instance
     kube-state-metrics:
-      metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
+      metricLabelsAllowlist:
+        - "persistentvolumeclaims=[*]"
       prometheus:
         monitor:
           enabled: true
@@ -148,47 +145,34 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              sourceLabels:
+                - __meta_kubernetes_pod_node_name
               targetLabel: kubernetes_node
+
     kubeApiServer:
       enabled: true
+
     kubeControllerManager:
-      enabled: true
-      endpoints:
-        [
-          "10.20.0.20",
-          "10.20.10.20",
-          "10.20.10.21",
-          "10.20.10.22",
-          "10.20.10.23",
-        ]
-    kubeScheduler:
-      enabled: true
-      endpoints:
-        [
-          "10.20.0.20",
-          "10.20.10.20",
-          "10.20.10.21",
-          "10.20.10.22",
-          "10.20.10.23",
-        ]
-    kubeProxy:
-      enabled: false # Enable if not using eBPF
-      # endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
+      enabled: false
+
     kubeEtcd:
+      enabled: false
+
+    kubelet:
       enabled: true
-      endpoints:
-        [
-          "10.20.0.20",
-          "10.20.10.20",
-          "10.20.10.21",
-          "10.20.10.22",
-          "10.20.10.23",
-        ]
-      service:
-        enabled: true
-        port: 2381
-        targetPort: 2381
+      serviceMonitor:
+        metricRelabelings:
+          - action: replace
+            sourceLabels:
+              - node
+            targetLabel: instance
+
+    kubeProxy:
+      enabled: false
+
+    kubeScheduler:
+      enabled: false
+
     prometheus:
       ingress:
         enabled: true
