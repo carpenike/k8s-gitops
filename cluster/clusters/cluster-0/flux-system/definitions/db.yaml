@@ -47,16 +47,16 @@ spec:
     - name: db-cnpg-app
   path: "./cluster/clusters/cluster-0/db/cloudnative-pg/cluster"
   prune: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: db-redis
-  namespace: flux-system
-  labels:
-    component.cluster-0/part-of: definitions
-spec:
-  dependsOn:
-    - name: db-namespace
-  path: "./cluster/clusters/cluster-0/db/redis"
-  prune: true
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: db-redis
+#   namespace: flux-system
+#   labels:
+#     component.cluster-0/part-of: definitions
+# spec:
+#   dependsOn:
+#     - name: db-namespace
+#   path: "./cluster/clusters/cluster-0/db/redis"
+#   prune: true
