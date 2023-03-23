@@ -1,9 +1,0 @@
-id: 56e89ececb7045d9f2f525c840d423c7b78f300d2be5b0ab97869359fd900d7e
-hs_token: ${SECRET_MATRIX_SLACK_HS_TOKEN}
-as_token: ${SECRET_MATRIX_SLACK_AS_TOKEN}
-url: http://matrix-slack:5858
-sender_localpart: slackbot
-namespaces:
-  users:
-    - exclusive: true
-      regex: "@slack_.*:${SECRET_PUBLIC_DOMAIN}"

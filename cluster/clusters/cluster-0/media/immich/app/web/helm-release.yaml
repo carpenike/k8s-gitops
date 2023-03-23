@@ -58,7 +58,7 @@ spec:
           nginx.ingress.kubernetes.io/configuration-snippet: |
             rewrite /api/(.*) /$1 break;
           nignx.ingress.kubernetes.io/force-ssl-redirect: "true"
-          nginx.ingress.kubernetes.io/proxy-body-size: "0"
+          nginx.ingress.kubernetes.io/client-max-body-size: "0"
         hosts:
           - host: &host photos.holthome.net
             paths:
