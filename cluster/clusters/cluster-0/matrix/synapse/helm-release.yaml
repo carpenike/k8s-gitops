@@ -174,7 +174,7 @@ spec:
       configmap.reloader.stakater.com/reload: *app
 
     sidecars:
-      subcleaner:
+      shared-secret-auth:
         image: registry.k8s.io/git-sync/git-sync:v3.6.5
         imagePullPolicy: IfNotPresent
         args:
