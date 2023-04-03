@@ -8,7 +8,7 @@ spec:
   interval: 15m
   url: https://github.com/kubernetes-sigs/node-feature-discovery.git
   ref:
-    tag: v0.12.1
+    tag: v0.12.2
   ignore: |
     # exclude all
     /*
