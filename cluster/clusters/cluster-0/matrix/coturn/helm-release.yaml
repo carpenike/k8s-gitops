@@ -27,7 +27,7 @@ spec:
 
     image:
       repository: coturn/coturn
-      tag: "4.6.1"
+      tag: "4.6.2"
 
     service:
       main:
