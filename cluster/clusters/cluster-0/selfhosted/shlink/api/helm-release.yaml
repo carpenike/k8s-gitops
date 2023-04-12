@@ -27,7 +27,7 @@ spec:
       strategy: RollingUpdate
     image:
       repository: ghcr.io/shlinkio/shlink
-      tag: 3.5.2
+      tag: 3.5.4
     env:
       DB_DRIVER: postgres
       DB_HOST: postgres-rw.db.svc.cluster.local
