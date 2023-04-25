@@ -1,36 +1,18 @@
-# https://taskfile.dev
+---
+version: "3"
 
-version: '3'
+vars:
+  PROJECT_DIR:
+    sh: "git rev-parse --show-toplevel"
+
+includes:
+  flux: .taskfiles/flux/tasks.yaml
+  k8s: .taskfiles/k8s/tasks.yaml
+  externalsecrets: .taskfiles/externalsecrets/tasks.yaml
+  volsync: .taskfiles/volsync/tasks.yaml
 
 tasks:
-  render-templates:
-    desc: Render *.tmpl template files to actual files
+  default:
     silent: true
     cmds:
-      - ./.github/scripts/render_templates.sh
-    preconditions:
-      - test -f ./.github/scripts/render_templates.sh
-
-  lint-scripts:
-    desc: Lint all script files in the repo
-    silent: true
-    cmds:
-      - ./.github/scripts/lint_scripts.sh
-    preconditions:
-      - test -f ./.github/scripts/lint_scripts.sh
-
-  lint-yaml:
-    desc: Lint all yaml files in the repo
-    silent: true
-    cmds:
-      - ./.github/scripts/lint_yaml.sh
-    preconditions:
-      - test -f ./.github/scripts/lint_yaml.sh
-
-  renovate:helm-releases:
-    desc: Create renovate annotations for HelmReleases
-    silent: true
-    cmds:
-      - ./.github/scripts/create-helmrelease-annotations.sh
-    preconditions:
-      - test -f ./.github/scripts/create-helmrelease-annotations.sh
+      - task -l
