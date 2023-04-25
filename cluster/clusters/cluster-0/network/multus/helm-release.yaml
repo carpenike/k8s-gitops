@@ -5,25 +5,25 @@ metadata:
   name: multus
   namespace: network
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: multus
-      version: 3.5.2
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: angelnu-charts
         namespace: flux-system
-      interval: 15m
+      interval: 30m
   values:
     image:
       repository: ghcr.io/k8snetworkplumbingwg/multus-cni
-      tag: v4.0.1
+      tag: v3.9.3
 
     cni:
       image:
-        repository: ghcr.io/k8s-at-home/cni-plugins
-        tag: v1.1.1
+        repository: ghcr.io/angelnu/cni-plugins
+        tag: 1.2.0
 
       paths:
         config: /etc/cni/net.d
