@@ -36,6 +36,14 @@ spec:
       PAPERLESS_TIME_ZONE: "America/New_York"
       PAPERLESS_URL: https://paperless.holthome.net
       USERMAP_GID: 65543
+      PAPERLESS_WEBSERVER_WORKERS: "2"
+
+      # Configure folders
+      PAPERLESS_CONSUMPTION_DIR: /data/nas/consume
+      PAPERLESS_DATA_DIR: /data/local/data
+      PAPERLESS_EXPORT_DIR: /data/nas/export
+      PAPERLESS_MEDIA_ROOT: /data/local/media
+
       PAPERLESS_ADMIN_USER:
         valueFrom:
           secretKeyRef:
@@ -65,6 +73,8 @@ spec:
         annotations:
           auth.home.arpa/enabled: "true"
           nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/oauth2/auth?allowed_groups=paperless
+          nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start?rd=$scheme://$best_http_host$request_uri
+          nginx.ingress.kubernetes.io/auth-response-headers: "x-auth-request-email, x-auth-request-groups"
         hosts:
           - host: &host "paperless.holthome.net"
             paths:
@@ -74,30 +84,25 @@ spec:
               - *host
 
     persistence:
-      data:
-        enabled: true
-        mountPath: /usr/src/paperless/data
-        type: nfs
-        server: "nas.holthome.net"
-        path: /mnt/tank/share/paperless/data
-      media:
-        enabled: true
-        mountPath: /usr/src/paperless/media
-        type: nfs
-        server: "nas.${SECRET_DOMAIN}"
-        path: /mnt/tank/share/paperless/media
       consume:
         enabled: true
-        mountPath: /usr/src/paperless/consume
+        mountPath: /data/nas/consume
         type: nfs
         server: "nas.${SECRET_DOMAIN}"
         path: /mnt/tank/share/paperless/incoming
       export:
         enabled: true
-        mountPath: /usr/src/paperless/export
+        mountPath: /data/nas/export
         type: nfs
         server: "nas.${SECRET_DOMAIN}"
         path: /mnt/tank/share/paperless/export
+
+    volumeClaimTemplates:
+      - name: data
+        mountPath: /data/local
+        accessMode: ReadWriteOnce
+        size: 15Gi
+        storageClass: ceph-block
 
     resources:
       requests:
