@@ -17,6 +17,11 @@ spec:
         namespace: flux-system
 
   values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
     image:
       repository: ghcr.io/paperless-ngx/paperless-ngx
       tag: 1.14.1
