@@ -27,7 +27,7 @@ spec:
       strategy: RollingUpdate
     image:
       repository: ghcr.io/shlinkio/shlink-web-client
-      tag: 3.10.0
+      tag: 3.10.1
     env:
       SHLINK_SERVER_URL: "https://${SECRET_SHORT_DOMAIN}"
     envFrom:
