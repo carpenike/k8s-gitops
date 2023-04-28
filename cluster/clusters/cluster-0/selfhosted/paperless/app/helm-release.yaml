@@ -97,16 +97,16 @@ spec:
         server: "nas.${SECRET_DOMAIN}"
         path: /mnt/tank/share/paperless/export
 
-    volumeClaimTemplates:
-      - name: data
-        mountPath: /data/local
-        accessMode: ReadWriteOnce
-        size: 15Gi
-        storageClass: ceph-block
-
     resources:
       requests:
         cpu: 23m
         memory: 2975M
       limits:
         memory: 6572M
+
+    volumeClaimTemplates:
+      - name: data
+        mountPath: /data/local
+        accessMode: ReadWriteOnce
+        size: 15Gi
+        storageClass: ceph-block
