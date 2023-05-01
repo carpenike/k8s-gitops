@@ -43,10 +43,10 @@ nodes:
       - interface: eth2
         dhcp: true
         vlans:
-          - vlanId: 40
+          - vlanId: 30
             dhcp: false
             addresses:
-              - 10.40.10.20/16
+              - 10.30.10.20/16
   - hostname: node-1.${domainName}
     controlPlane: true
     disableSearchDomain: true
@@ -56,10 +56,10 @@ nodes:
       - interface: eth2
         dhcp: true
         vlans:
-          - vlanId: 40
+          - vlanId: 30
             dhcp: false
             addresses:
-              - 10.40.10.21/16
+              - 10.30.10.21/16
   - hostname: node-2.${domainName}
     controlPlane: true
     disableSearchDomain: true
@@ -69,10 +69,10 @@ nodes:
       - interface: eth2
         dhcp: true
         vlans:
-          - vlanId: 40
+          - vlanId: 30
             dhcp: false
             addresses:
-              - 10.40.10.22/16
+              - 10.30.10.22/16
   - hostname: node-3.${domainName}
     controlPlane: true
     disableSearchDomain: true
@@ -82,10 +82,10 @@ nodes:
       - interface: eth2
         dhcp: true
         vlans:
-          - vlanId: 40
+          - vlanId: 30
             dhcp: false
             addresses:
-              - 10.40.10.23/16
+              - 10.30.10.23/16
 
 controlPlane:
   patches:
