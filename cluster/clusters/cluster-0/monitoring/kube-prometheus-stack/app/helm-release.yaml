@@ -76,7 +76,7 @@ spec:
                   {{- end }}
         route:
           group_by: ["alertname", "job"]
-          group_wait: 45s
+          group_wait: 1m
           group_interval: 10m
           repeat_interval: 12h
           receiver: pushover
@@ -116,7 +116,6 @@ spec:
               - *host
       alertmanagerSpec:
         replicas: 3
-        podAntiAffinity: hard
         storage:
           volumeClaimTemplate:
             spec:
@@ -137,6 +136,8 @@ spec:
       enabled: true
     kube-state-metrics:
       metricLabelsAllowlist:
+        - "pods=[*]"
+        - "deployments=[*]"
         - "persistentvolumeclaims=[*]"
       prometheus:
         monitor:
@@ -162,10 +163,13 @@ spec:
       enabled: true
       serviceMonitor:
         metricRelabelings:
-          - action: replace
-            sourceLabels:
-              - node
+          # Remove duplicate metrics
+          - sourceLabels: ["__name__"]
+            regex: "(apiserver_audit|apiserver_client|apiserver_delegated|apiserver_envelope|apiserver_storage|apiserver_webhooks|authentication_token|cadvisor_version|container_blkio|container_cpu|container_fs|container_last|container_memory|container_network|container_oom|container_processes|container|csi_operations|disabled_metric|get_token|go|hidden_metric|kubelet_certificate|kubelet_cgroup|kubelet_container|kubelet_containers|kubelet_cpu|kubelet_device|kubelet_graceful|kubelet_http|kubelet_lifecycle|kubelet_managed|kubelet_node|kubelet_pleg|kubelet_pod|kubelet_run|kubelet_running|kubelet_runtime|kubelet_server|kubelet_started|kubelet_volume|kubernetes_build|kubernetes_feature|machine_cpu|machine_memory|machine_nvm|machine_scrape|node_namespace|plugin_manager|prober_probe|process_cpu|process_max|process_open|process_resident|process_start|process_virtual|registered_metric|rest_client|scrape_duration|scrape_samples|scrape_series|storage_operation|volume_manager|volume_operation|workqueue)_(.+)"
+            action: keep
+          - sourceLabels: ["node"]
             targetLabel: instance
+            action: replace
 
     kubeProxy:
       enabled: false
@@ -189,37 +193,21 @@ spec:
           - hosts:
               - *host
 
-      thanos:
-        image: quay.io/thanos/thanos:v0.31.0@sha256:e7d337d6ac2aea3f0f9314ec9830291789e16e2b480b9d353be02d05ce7f2a7e
-        objectStorageConfig:
-          name: thanos
-          key: objstore.yml
-        # renovate: datasource=docker depName=quay.io/thanos/thanos
-        version: "v0.31.0"
-      walCompression: true
       thanosService:
         enabled: true
       thanosServiceMonitor:
         enabled: true
+
       prometheusSpec:
         replicas: 3
-        replicaExternalLabelName: __replica__ # must match with thanos value `.query.replicaLabel[0]`
-        # Breaks any metric that has an existing "cluster" label on a metric
-        # externalLabels:
-        #   cluster: home # must match with thanos value `.ruler.clusterName`
+        replicaExternalLabelName: __replica__
         thanos:
           image: quay.io/thanos/thanos:v0.31.0
-          # renovate: datasource=docker depName=quay.io/thanos/thanos
-          version: "v0.31.0"
-        podAntiAffinity: hard
-        ruleSelectorNilUsesHelmValues: false
-        serviceMonitorSelectorNilUsesHelmValues: false
-        podMonitorSelectorNilUsesHelmValues: false
-        probeSelectorNilUsesHelmValues: false
+          objectStorageConfig:
+            name: thanos-objstore-secret
+            key: objstore.yml
         retention: 2d
-        retentionSize: 6GB
-        enableAdminAPI: true
-        walCompression: true
+        retentionSize: 15GB
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -227,6 +215,20 @@ spec:
               resources:
                 requests:
                   storage: 20Gi
+        podAntiAffinity: hard
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        enableAdminAPI: true
+        walCompression: true
+
+        additionalScrapeConfigs:
+          - job_name: minio
+            metrics_path: /minio/v2/metrics/cluster
+            static_configs:
+              - targets: ["minio.holthome.net:9000"]
+
         resources:
           requests:
             cpu: 150m
