@@ -1,5 +1,5 @@
 ---
-clusterName: cluster-0
+clusterName: ${clusterName}
 clusterPodNets:
   - 10.244.0.0/16
 clusterSvcNets:
@@ -92,45 +92,32 @@ controlPlane:
     - |-
       cluster:
         allowSchedulingOnMasters: true
-        controllerManager:
-          extraArgs:
-            feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
-        discovery:
-          registries:
-            service:
-              disabled: true
         proxy:
           disabled: true
-          extraArgs:
-            feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
-        scheduler:
-          extraArgs:
-            feature-gates: MixedProtocolLBService=true,EphemeralContainers=True
 
+    - |-
+      - op: remove
+        path: /cluster/apiServer/admissionControl
+
+    - |-
       machine:
         files:
-          - content: |
-              [plugins."io.containerd.grpc.v1.cri"]
-                enable_unprivileged_ports = true
-                enable_unprivileged_icmp = true
+          - op: create
             path: /etc/cri/conf.d/20-customization.part
-            op: create
+            content: |
+              [plugins]
+                [plugins."io.containerd.grpc.v1.cri"]
+                  enable_unprivileged_ports = true
+                  enable_unprivileged_icmp = true
         kubelet:
           extraArgs:
-            feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true,EphemeralContainers=True
+            feature-gates: CronJobTimeZone=true,GracefulNodeShutdown=true
             rotate-server-certificates: "true"
-        install:
-          extraKernelArgs:
-            - "talos.logging.kernel=udp://10.45.10.16:6050/"
-        logging:
-          destinations:
-            - endpoint: "udp://10.45.10.16:6051/"
-              format: json_lines
         network:
           extraHostEntries:
             - ip: ${clusterEndpointIP}
               aliases:
-                - cluster-0.${domainName}
+                - ${clusterName}.holthome.net
         sysctls:
           fs.inotify.max_user_watches: "1048576"
           fs.inotify.max_user_instances: "8192"
@@ -138,7 +125,3 @@ controlPlane:
           disabled: false
           servers:
             - 10.20.0.1
-
-    - |-
-      - op: remove
-        path: /cluster/apiServer/admissionControl
