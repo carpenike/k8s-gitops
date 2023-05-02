@@ -8,7 +8,7 @@ spec:
   interval: 15m
   url: https://github.com/grafana/agent.git
   ref:
-    tag: v0.33.0
+    tag: v0.33.1
   ignore: |
     # exclude all
     /*
