@@ -11,7 +11,7 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:14.5
   primaryUpdateStrategy: unsupervised
   storage:
-    size: 50Gi
+    size: 100Gi
     storageClass: ceph-block
   superuserSecret:
     name: cloudnative-pg-secret
