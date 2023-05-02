@@ -29,6 +29,7 @@ spec:
     global:
       # imageRegistry: public.ecr.aws
       storageClass: ceph-block
+      size: 20Gi
     auth:
       enabled: false
       sentinel: false
