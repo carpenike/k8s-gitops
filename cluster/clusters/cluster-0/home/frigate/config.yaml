@@ -164,8 +164,6 @@ cameras:
       retain:
         # Required: Default retention days (default: shown below)
         default: 14
-    rtmp:
-      enabled: True
     objects:
       track:
         - person
