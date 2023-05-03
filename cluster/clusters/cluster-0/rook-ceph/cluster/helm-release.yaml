@@ -37,7 +37,7 @@ spec:
             cpu: "500m"
             memory: "549M"
           limits:
-            memory: "1219M"
+            memory: "2Gi"
         mon:
           requests:
             cpu: "1"
