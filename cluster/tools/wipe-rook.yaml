@@ -1,132 +1,130 @@
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: disk-wipe-node-0
-  namespace: rook-ceph
-spec:
-  restartPolicy: Never
-  nodeName: node-0
-  containers:
-    - name: disk-wipe
-      image: cmd.cat/sgdisk/fdisk/dd/partprobe
-      securityContext:
-        privileged: true
-      command: [
-          "/bin/sh",
-          "-c",
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: disk-wipe-node-0
+# spec:
+#   restartPolicy: Never
+#   nodeName: node-0
+#   containers:
+#     - name: disk-wipe
+#       image: ghcr.io/onedr0p/alpine:3.17.3@sha256:999384960b6114496a5e4036e945141c205d064ce23b87326bd3f8d878c5a9d4
+#       securityContext:
+#         privileged: true
+#       resources: {}
+#       env:
+#         - name: CEPH_DISK
+#           value: /dev/sdd
+#       command: ["/bin/sh", "-c"]
+#       args:
+#         - apk add --no-cache sgdisk util-linux parted;
+#           sgdisk --zap-all $CEPH_DISK;
+#           blkdiscard $CEPH_DISK;
+#           dd if=/dev/zero bs=1M count=10000 oflag=direct of=$CEPH_DISK;
+#           partprobe $CEPH_DISK;
+#           rm -rf /mnt/host_var/lib/rook
+#       volumeMounts:
+#         - mountPath: /mnt/host_var
+#           name: host-var
+#   volumes:
+#     - name: host-var
+#       hostPath:
+#         path: /var
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: disk-wipe-node-1
+# spec:
+#   restartPolicy: Never
+#   nodeName: node-1
+#   containers:
+#     - name: disk-wipe
+#       image: ghcr.io/onedr0p/alpine:3.17.3@sha256:999384960b6114496a5e4036e945141c205d064ce23b87326bd3f8d878c5a9d4
+#       securityContext:
+#         privileged: true
+#       resources: {}
+#       env:
+#         - name: CEPH_DISK
+#           value: /dev/sdd
+#       command: ["/bin/sh", "-c"]
+#       args:
+#         - apk add --no-cache sgdisk util-linux parted;
+#           sgdisk --zap-all $CEPH_DISK;
+#           blkdiscard $CEPH_DISK;
+#           dd if=/dev/zero bs=1M count=10000 oflag=direct of=$CEPH_DISK;
+#           partprobe $CEPH_DISK;
+#           # rm -rf /mnt/host_var/lib/rook
+#       volumeMounts:
+#         - mountPath: /mnt/host_var
+#           name: host-var
+#   volumes:
+#     - name: host-var
+#       hostPath:
+#         path: /var
 
-          sgdisk --zap-all /dev/sdb && \
-          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdb && \
-          partprobe /dev/sdb && \
-
-          sgdisk --zap-all /dev/sdc && \
-          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdc && \
-          partprobe /dev/sdc && \
-
-          sgdisk --zap-all /dev/sdd && \
-          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdd && \
-          partprobe /dev/sdd && \,
-        ]
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: disk-wipe-node-1
-  namespace: rook-ceph
-spec:
-  restartPolicy: Never
-  nodeName: node-1
-  containers:
-    - name: disk-wipe
-      image: cmd.cat/sgdisk/fdisk/dd/partprobe
-      securityContext:
-        privileged: true
-      command: [
-          "/bin/sh",
-          "-c",
-
-          sgdisk --zap-all /dev/sdb && \
-          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdb && \
-          partprobe /dev/sdb && \
-
-          sgdisk --zap-all /dev/sdc && \
-          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdc && \
-          partprobe /dev/sdc && \
-
-          sgdisk --zap-all /dev/sdd && \
-          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdd && \
-          partprobe /dev/sdd && \,
-        ]
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: disk-wipe-node-2
-  namespace: rook-ceph
 spec:
   restartPolicy: Never
   nodeName: node-2
   containers:
     - name: disk-wipe
-      image: cmd.cat/sgdisk/fdisk/dd/partprobe
+      image: ghcr.io/onedr0p/alpine:3.17.3@sha256:999384960b6114496a5e4036e945141c205d064ce23b87326bd3f8d878c5a9d4
       securityContext:
         privileged: true
-      command: [
-          "/bin/sh",
-          "-c",
+      resources: {}
+      env:
+        - name: CEPH_DISK
+          value: /dev/sdb
+      command: ["/bin/sh", "-c"]
+      args:
+        - apk add --no-cache sgdisk util-linux parted;
+          sgdisk --zap-all $CEPH_DISK;
+          blkdiscard $CEPH_DISK;
+          dd if=/dev/zero bs=1M count=10000 oflag=direct of=$CEPH_DISK;
+          partprobe $CEPH_DISK;
+          # rm -rf /mnt/host_var/lib/rook
+      volumeMounts:
+        - mountPath: /mnt/host_var
+          name: host-var
+  volumes:
+    - name: host-var
+      hostPath:
+        path: /var
 
-          sgdisk --zap-all /dev/sdb && \
-          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdb && \
-          partprobe /dev/sdb && \
-
-          sgdisk --zap-all /dev/sdc && \
-          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdc && \
-          partprobe /dev/sdc && \
-
-          sgdisk --zap-all /dev/sdd && \
-          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdd && \
-          partprobe /dev/sdd && \,
-        ]
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: disk-wipe-node-3
-  namespace: rook-ceph
-spec:
-  restartPolicy: Never
-  nodeName: node-3
-  containers:
-    - name: disk-wipe
-      image: cmd.cat/sgdisk/fdisk/dd/partprobe
-      securityContext:
-        privileged: true
-      command: [
-          "/bin/sh",
-          "-c",
-
-          sgdisk --zap-all /dev/sdb && \
-          dd if=/dev/zero of=/dev/sdb bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdb && \
-          partprobe /dev/sdb && \
-
-          sgdisk --zap-all /dev/sdc && \
-          dd if=/dev/zero of=/dev/sdc bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdc && \
-          partprobe /dev/sdc && \
-
-          sgdisk --zap-all /dev/sdd && \
-          dd if=/dev/zero of=/dev/sdd bs=4096k count=100 oflag=direct,dsync && \
-          blkdiscard /dev/sdd && \
-          partprobe /dev/sdd && \,
-        ]
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: disk-wipe-node-3
+# spec:
+#   restartPolicy: Never
+#   nodeName: node-3
+#   containers:
+#     - name: disk-wipe
+#       image: ghcr.io/onedr0p/alpine:3.17.3@sha256:999384960b6114496a5e4036e945141c205d064ce23b87326bd3f8d878c5a9d4
+#       securityContext:
+#         privileged: true
+#       resources: {}
+#       env:
+#         - name: CEPH_DISK
+#           value: /dev/sdd
+#       command: ["/bin/sh", "-c"]
+#       args:
+#         - apk add --no-cache sgdisk util-linux parted;
+#           sgdisk --zap-all $CEPH_DISK;
+#           blkdiscard $CEPH_DISK;
+#           dd if=/dev/zero bs=1M count=10000 oflag=direct of=$CEPH_DISK;
+#           partprobe $CEPH_DISK;
+#           rm -rf /mnt/host_var/lib/rook
+#       volumeMounts:
+#         - mountPath: /mnt/host_var
+#           name: host-var
+#   volumes:
+#     - name: host-var
+#       hostPath:
+#         path: /var˝
