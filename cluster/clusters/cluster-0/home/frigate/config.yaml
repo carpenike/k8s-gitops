@@ -1,3 +1,8 @@
+logger:
+  default: info
+  # logs:
+  #   frigate.record: debug
+
 mqtt:
   host: mosquitto
   topic_prefix: frigate
@@ -12,10 +17,33 @@ detectors:
     type: edgetpu
     device: usb
 
+# ffmpeg:
+#   global_args: ["-hide_banner", "-loglevel", "warning"]
+#   hwaccel_args: ["-hwaccel", "vaapi", "-hwaccel_device", "/dev/dri/renderD128", "-hwaccel_output_format", "yuv420p"]
+#   output_args:
+#     record: preset-record-ubiquiti
+
+snapshots:
+  enabled: true
+  timestamp: false
+  bounding_box: true
+  retain:
+    default: 2
+
+record:
+  enabled: true
+  retain:
+    days: 2
+    mode: all
+  events:
+    retain:
+      default: 2
+      mode: active_objects
+
 objects:
   track:
     - person
-    - dog
+    - car
   filters:
     person:
       min_area: 2500
@@ -25,26 +53,27 @@ objects:
       min_area: 1000
       max_area: 10000
       threshold: 0.7
-# ffmpeg:
-#   hwaccel_args:
-#   - -hwaccel
-#   - vaapi
-#   - -hwaccel_device
-#   - /dev/dri/renderD128
-#   - -hwaccel_output_format
-#   - yuv420p
+
+go2rtc:
+  streams:
+    frigate_patio_hq: rtsp://{FRIGATE_CAMERA_PATIO_USER}:{FRIGATE_CAMERA_PATIO_PASSWORD}@{FRIGATE_CAMERA_PATIO_HOST}:554/Streaming/Channels/1
+    frigate_patio_lq: rtsp://{FRIGATE_CAMERA_PATIO_USER}:{FRIGATE_CAMERA_PATIO_PASSWORD}@{FRIGATE_CAMERA_PATIO_HOST}:554/Streaming/Channels/2
+    frigate_driveway_hq: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/1
+    frigate_driveway_lq: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/2
+    frigate_frontdoor_lq: rtsp://{FRIGATE_CAMERA_DOORBELL_USER}:{FRIGATE_CAMERA_DOORBELL_PASSWORD}@{FRIGATE_CAMERA_DOORBELL_HOST}:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
+    frigate_frontdoor_hq: rtsp://{FRIGATE_CAMERA_DOORBELL_USER}:{FRIGATE_CAMERA_DOORBELL_PASSWORD}@{FRIGATE_CAMERA_DOORBELL_HOST}:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
+
 cameras:
   # --
   patio:
     ffmpeg:
       inputs:
-        - path: rtsp://{FRIGATE_CAMERA_PATIO_USER}:{FRIGATE_CAMERA_PATIO_PASSWORD}@{FRIGATE_CAMERA_PATIO_HOST}:554/Streaming/Channels/2
+        - path: rtsp://localhost:8554/frigate_patio_lq
           roles:
             - detect
-        - path: rtsp://{FRIGATE_CAMERA_PATIO_USER}:{FRIGATE_CAMERA_PATIO_PASSWORD}@{FRIGATE_CAMERA_PATIO_HOST}:554/Streaming/Channels/1
+        - path: rtsp://localhost:8554/frigate_patio_hq
           roles:
             - record
-            - rtmp
     detect:
       height: 360
       width: 640
@@ -71,16 +100,16 @@ cameras:
     zones:
       backyard:
         coordinates: 640,0,640,360,0,360,0,0
+
   driveway:
     ffmpeg:
       inputs:
-        - path: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/2
+        - path: rtsp://localhost:8554/frigate_driveway_lq
           roles:
             - detect
-        - path: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/1
+        - path: rtsp://localhost:8554/frigate_driveway_hq
           roles:
             - record
-            - rtmp
     detect:
       height: 360
       width: 640
@@ -110,13 +139,12 @@ cameras:
   frontdoor:
     ffmpeg:
       inputs:
-        - path: rtsp://{FRIGATE_CAMERA_DOORBELL_USER}:{FRIGATE_CAMERA_DOORBELL_PASSWORD}@{FRIGATE_CAMERA_DOORBELL_HOST}:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
-          roles:
-            - record
-            - rtmp
-        - path: rtsp://{FRIGATE_CAMERA_DOORBELL_USER}:{FRIGATE_CAMERA_DOORBELL_PASSWORD}@{FRIGATE_CAMERA_DOORBELL_HOST}:554/cam/realmonitor?channel=1&subtype=1&authbasic=64
+        - path: rtsp://localhost:8554/frigate_frontdoor_lq
           roles:
             - detect
+        - path: rtsp://localhost:8554/frigate_frontdoor_hq
+          roles:
+            - record
     detect:
       width: 720
       height: 576

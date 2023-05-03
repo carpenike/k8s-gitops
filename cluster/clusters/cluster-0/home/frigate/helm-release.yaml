@@ -21,10 +21,16 @@ spec:
   upgrade:
     remediation:
       retries: 5
+  uninstall:
+    keepHistory: false
   values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: docker.io/blakeblackshear/frigate
-      tag: 0.11.0-rc2
+      tag: 0.12.0
     env:
       TZ: "America/New_York"
     envFrom:
@@ -36,6 +42,9 @@ spec:
         ports:
           http:
             port: &port 5000
+          rtsp:
+            enabled: true
+            port: 8554
 
     probes:
       liveness: &probes
@@ -61,7 +70,7 @@ spec:
           auth.home.arpa/enabled: "true"
           external-dns.home.arpa/enabled: "true"
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.holthome.net"
             paths:
               - path: /
                 pathType: Prefix
@@ -105,9 +114,6 @@ spec:
         medium: Memory
         sizeLimit: 4Gi
         mountPath: /dev/shm
-
-    podAnnotations:
-      configmap.reloader.stakater.com/reload: *app
 
     nodeSelector:
       google.feature.node.kubernetes.io/coral: "true"
