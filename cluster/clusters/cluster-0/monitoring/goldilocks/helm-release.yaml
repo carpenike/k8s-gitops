@@ -9,29 +9,42 @@ spec:
   chart:
     spec:
       chart: goldilocks
-      version: 6.5.5
+      version: 6.5.1
       sourceRef:
         kind: HelmRepository
         name: fairwinds-charts
         namespace: flux-system
-      interval: 15m
-  timeout: 20m
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
     controller:
       resources:
         requests:
-          cpu: 15m
-          memory: 145M
+          cpu: 25m
+          memory: 50Mi
         limits:
-          memory: 174M
-
+          cpu: 500m
+          memory: 200Mi
     dashboard:
       replicaCount: 1
       ingress:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: |
+            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+          hajimari.io/icon: mdi:align-vertical-top
         hosts:
-          - host: &host "goldilocks.${SECRET_DOMAIN}"
+          - host: &host goldilocks.holthome.net
             paths:
               - path: /
                 type: Prefix
@@ -40,7 +53,8 @@ spec:
               - *host
       resources:
         requests:
-          cpu: 15m
-          memory: 64M
+          cpu: 25m
+          memory: 50Mi
         limits:
-          memory: 64M
+          cpu: 500m
+          memory: 200Mi
