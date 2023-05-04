@@ -78,7 +78,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: network-external-dns
+  name: network-external-dns-shared
   namespace: flux-system
   labels:
     component.cluster-0/part-of: definitions
@@ -86,7 +86,37 @@ spec:
   dependsOn:
     - name: network-namespace
     - name: monitoring-kube-prometheus-stack
-  path: "./cluster/clusters/cluster-0/network/external-dns"
+  path: "./cluster/clusters/cluster-0/network/external-dns/shared"
+  prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: network-external-dns-external
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: network-namespace
+    - name: monitoring-kube-prometheus-stack
+    - name: network-external-dns-shared
+  path: "./cluster/clusters/cluster-0/network/external-dns/external"
+  prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: network-external-dns-internal
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: network-namespace
+    - name: monitoring-kube-prometheus-stack
+    - name: network-external-dns-shared
+  path: "./cluster/clusters/cluster-0/network/external-dns/internal"
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
