@@ -52,10 +52,10 @@ spec:
 
     resources:
       requests:
-        cpu: 5m
+        cpu: 20m
         memory: 40M
       limits:
-        memory: 40M
+        memory: 100MM
 
     serviceMonitor:
       enabled: true
