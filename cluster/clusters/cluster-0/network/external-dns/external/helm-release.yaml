@@ -22,6 +22,7 @@ spec:
     remediation:
       retries: 5
   values:
+    fullnameOverride: &name externaldns-external
     interval: 2m
     logLevel: debug
     provider: cloudflare
