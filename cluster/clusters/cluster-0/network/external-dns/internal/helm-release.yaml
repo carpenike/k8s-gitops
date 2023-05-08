@@ -55,7 +55,7 @@ spec:
         cpu: 20m
         memory: 40M
       limits:
-        memory: 100MM
+        memory: 1024M
 
     serviceMonitor:
       enabled: true
