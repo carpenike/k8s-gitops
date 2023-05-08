@@ -31,6 +31,40 @@ spec:
       network:
         provider: host
 
+      crashCollector:
+        disable: false
+
+      dashboard:
+        enabled: true
+        urlPrefix: /
+
+      storage:
+        useAllNodes: false
+        useAllDevices: false
+        config:
+          osdsPerDevice: "1"
+        nodes:
+          - name: "node-0"
+            devices:
+              - name: "sdb"
+              - name: "sdc"
+              - name: "sdd"
+          - name: "node-1"
+            devices:
+              - name: "sdb"
+              - name: "sdc"
+              # - name: "sdd"
+          - name: "node-2"
+            devices:
+              - name: "sdb"
+              - name: "sdc"
+              - name: "sdd"
+          - name: "node-3"
+            devices:
+              - name: "sdb"
+              - name: "sdc"
+              - name: "sdd"
+
       resources:
         mgr:
           requests:
@@ -81,13 +115,6 @@ spec:
           limits:
             memory: "1G"
 
-      crashCollector:
-        disable: false
-
-      dashboard:
-        enabled: true
-        urlPrefix: /
-
     ingress:
       ingressClassName: "nginx"
       dashboard:
@@ -102,33 +129,6 @@ spec:
           - secretName: tls.rook-ceph
             hosts:
               - *host
-
-    storage:
-      useAllNodes: false
-      useAllDevices: false
-      config:
-        osdsPerDevice: "1"
-      nodes:
-        - name: "node-0"
-          devices:
-            - name: "sdb"
-            - name: "sdc"
-            - name: "sdd"
-        - name: "node-1"
-          devices:
-            - name: "sdb"
-            - name: "sdc"
-            # - name: "sdd"
-        - name: "node-2"
-          devices:
-            - name: "sdb"
-            - name: "sdc"
-            - name: "sdd"
-        - name: "node-3"
-          devices:
-            - name: "sdb"
-            - name: "sdc"
-            - name: "sdd"
 
     cephBlockPools:
       - name: ceph-blockpool
