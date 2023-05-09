@@ -229,6 +229,13 @@ spec:
             static_configs:
               - targets: ["minio.holthome.net:9000"]
 
+          - job_name: speedtest-exporter
+            scrape_interval: 60m
+            scrape_timeout: 60s
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - fw.holthome.net:9798
         resources:
           requests:
             cpu: 150m
