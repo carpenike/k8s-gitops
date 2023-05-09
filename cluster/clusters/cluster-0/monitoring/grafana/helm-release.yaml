@@ -43,6 +43,13 @@ spec:
           datasource: Prometheus
           url: https://grafana.com/api/dashboards/1860/revisions/22/download
 
+        speedtest-exporter-hub:
+          gnetId: 13665
+          revision: 4
+          datasource:
+            - name: "DS_PROMETHEUS"
+              value: Prometheus
+
     datasources:
       datasources.yaml:
         apiVersion: 1
