@@ -225,7 +225,9 @@ spec:
 
         additionalScrapeConfigs:
           - job_name: minio
+            bearer_token: ${SECRET_MINIO_NAS_1_BEARER_TOKEN}
             metrics_path: /minio/v2/metrics/cluster
+            scheme: https
             static_configs:
               - targets: ["minio.holthome.net:9000"]
 
