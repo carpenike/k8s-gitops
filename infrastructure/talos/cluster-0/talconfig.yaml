@@ -4,7 +4,7 @@ clusterPodNets:
   - 10.244.0.0/16
 clusterSvcNets:
   - 10.96.0.0/12
-talosVersion: v1.4.2
+talosVersion: v1.4.3
 kubernetesVersion: 1.27.1
 endpoint: "https://cluster-0.${domainName}:6443"
 
@@ -23,7 +23,7 @@ nodes:
     controlPlane: true
     disableSearchDomain: true
     ipAddress: 10.20.0.20
-    installDisk: /dev/vda
+    installDisk: /dev/sda
   - hostname: cp-1.${domainName}
     disableSearchDomain: true
     ipAddress: 10.20.0.21
