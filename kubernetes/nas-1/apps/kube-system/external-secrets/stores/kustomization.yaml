@@ -5,4 +5,4 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - ./secret.sops.yaml
-  # - ./clustersecretstore.yaml
+  - ./clustersecretstore.yaml
