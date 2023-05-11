@@ -55,7 +55,7 @@ spec:
             port: &api-port 9000
     serviceMonitor:
       main:
-        enabled: true
+        enabled: false
         # endpoints:
         #   - port: api
         #     scheme: http
