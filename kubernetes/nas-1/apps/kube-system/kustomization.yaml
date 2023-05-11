@@ -6,6 +6,7 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
+  - ./traefik/ks.yaml
   # - ./csi-driver-nfs/ks.yaml
   - ./external-secrets/ks.yaml
   # - ./intel-device-plugin/ks.yaml
