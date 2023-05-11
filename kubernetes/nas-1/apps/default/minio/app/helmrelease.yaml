@@ -121,7 +121,7 @@ spec:
       data:
         enabled: true
         type: hostPath
-        hostPath: /mnt/backup/minio
+        hostPath: /mnt/backup/minio/
         hostPathType: Directory
         # mountPath: /var/log
         readOnly: false
