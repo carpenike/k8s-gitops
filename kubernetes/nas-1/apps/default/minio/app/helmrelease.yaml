@@ -86,6 +86,7 @@ spec:
         ingressClassName: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "web"
+          cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: &console-host "{{ .Release.Name }}.holthome.net"
             paths:
@@ -101,6 +102,7 @@ spec:
         ingressClassName: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "web"
+          cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: &api-host s3.holthome.net
             paths:
