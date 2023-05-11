@@ -1,0 +1,15 @@
+defaults
+auth off
+tls  off
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile /var/log/msmtp
+
+account        maddy
+host           smtp-relay.holthome.net
+port           25
+from           nas-1@holthome.net
+tls_starttls   off
+
+account default: maddy
+
+aliases /etc/aliases

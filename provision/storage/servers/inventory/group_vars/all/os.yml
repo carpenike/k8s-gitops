@@ -1,0 +1,62 @@
+---
+timezone: America/New_York
+create_user:
+  id: 568
+  name: ryan
+  group: ryan
+  additional_groups: ["users"]
+create_group:
+  id: 568
+  name: ryan
+ssh_authorized_keys:
+  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC598M/7+HdUT6J1plbqAZ+2P78Y1bQF+sHQ9MQEYQVG2B2P2vTKKZlRxm6PE8smFzwTawHPNY/x/9B0Q5YkYBQS+yyo3ICFUMpjS0IBc1uEszl3MmMmpCWDq6MiySFZAKxwnYLNIJv82YywqD+Gyo0U5sQpUWQ1OR2qZaFaOaPLwuOFxr6/uVxnUEVxNSUflLx8SR4YlfdwQdgpq8LTt5PMi+FNRLYNgJ89g4g6GkpCcXNS2auZDq93B2YwKwPxm5UjbJh8WkCbAzYxYiGHuel01Ll1uqAH4zu7rw5G0vsDhudY51AmRicK8vNMvvAtrTxEqeZwE1K6VQ7BvsuApvkC58qYm8s02llLvTvoTM1HRyGLVqIFKE8M0Vpz01wa/ss2L0rFntmC/asph1unJQMFg+eB1L85Ppa4z0q9lYV0iuyQZgTs0XISDyQqr7l1nv1JxgMSSUlAomemchH733gYM64xalNzK8OMG73ku9EWIpEFr87OcjYYtrcjtRNWLaxRZ/cpTrd1H4B3S/nL9/VtrNSSvo9gdacRm6bBVepIBsD7v7Lo5DxP2iW6JaGgstQttbGtwnYAoqf0pyA3PWeKjKBzrw+X7DMAXNDVpNia3yscSmkJ2JE+sS/3d6S1ESbxuxUq6ojNp+rL9YFd9v5yZNZ4UqMGjwoR3DrRfSOyQ== cardno:22_276_666"
+  - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOslNYCKlAhgO9vxUVt4Vq0diz35JD0f6Vtdh2zfZwyb+SI/TPC+U06TPsxS++KN+HHkQvNBcqpQ6a8qNsYsVJA= cardno:22_276_666"
+packages_repositories:
+  - ppa:fish-shell/release-3
+packages_install:
+  - apt-transport-https
+  - ca-certificates
+  - containernetworking-plugins
+  - curl
+  - ffmpeg
+  - figlet
+  - fish
+  - fzf
+  - gettext
+  - git
+  - htop
+  - ifenslave
+  - iputils-ping
+  - net-tools
+  - lolcat
+  - mailutils
+  - msmtp
+  - msmtp-mta
+  - nano
+  - neofetch
+  - ntpdate
+  - podman
+  - psmisc
+  - rclone
+  - software-properties-common
+  - tmux
+  - tree
+  - uidmap
+  - unzip
+  - zfs-zed
+  - zfsutils-linux
+  - dmraid
+  - gdisk
+  - hdparm
+  - lvm2
+  - nfs-common
+  - nfs-kernel-server
+  - nvme-cli
+  - open-iscsi
+  - samba
+  - smartmontools
+  - socat
+packages_remove:
+  - apparmor
+  - ufw
+  - unattended-upgrades
