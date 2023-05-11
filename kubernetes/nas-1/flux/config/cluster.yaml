@@ -27,7 +27,7 @@ spec:
   wait: false
   sourceRef:
     kind: GitRepository
-    name: home-ops-kubernetes
+    name: k8s-gitops-kubernetes
   decryption:
     provider: sops
     secretRef:
