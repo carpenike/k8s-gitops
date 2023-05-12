@@ -33,7 +33,7 @@ spec:
         compression: bzip2
         maxParallel: 8
       destinationPath: s3://postgresql/
-      endpointURL: http://nas-1.holthome.net:9000
+      endpointURL: https://minio.holthome.net
       serverName: postgres-v6
       s3Credentials:
         accessKeyId:
@@ -50,7 +50,7 @@ spec:
           compression: bzip2
           maxParallel: 8
         destinationPath: s3://postgresql/
-        endpointURL: http://nas-1.holthome.net:9000
+        endpointURL: https://minio.holthome.net
         s3Credentials:
           accessKeyId:
             name: cloudnative-pg-secret
