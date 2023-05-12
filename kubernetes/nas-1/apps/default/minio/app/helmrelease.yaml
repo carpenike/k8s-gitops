@@ -107,7 +107,7 @@ spec:
           traefik.ingress.kubernetes.io/router.tls: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
-          - host: &api-host s3.holthome.net
+          - host: &api-host minio-s3.holthome.net
             paths:
               - path: /
                 pathType: Prefix
