@@ -85,7 +85,8 @@ spec:
         enabled: true
         ingressClassName: traefik
         annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "web"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.tls: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: &console-host "{{ .Release.Name }}.holthome.net"
@@ -102,7 +103,8 @@ spec:
         enabled: true
         ingressClassName: traefik
         annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "web"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.tls: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: &api-host s3.holthome.net
