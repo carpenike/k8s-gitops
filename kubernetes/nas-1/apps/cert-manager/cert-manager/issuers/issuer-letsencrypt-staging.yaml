@@ -15,7 +15,7 @@ spec:
           cloudflare:
             apiTokenSecretRef:
               name: cloudflare-api-token
-              key: api-token
+              key: api-key
         selector:
           dnsZones:
             - ryanholt.net
