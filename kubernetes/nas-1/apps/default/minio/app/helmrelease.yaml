@@ -97,6 +97,7 @@ spec:
         tls:
           - hosts:
               - *console-host
+            secretName: tls.minio
       s3:
         enabled: true
         ingressClassName: traefik
@@ -113,6 +114,7 @@ spec:
         tls:
           - hosts:
               - *api-host
+            secretName: tls.minio-s3
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
