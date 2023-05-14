@@ -229,7 +229,7 @@ spec:
             metrics_path: /minio/v2/metrics/cluster
             scheme: https
             static_configs:
-              - targets: ["s3.holthome.net"]
+              - targets: ["minio-s3.holthome.net"]
 
           - job_name: speedtest-exporter
             scrape_interval: 60m
