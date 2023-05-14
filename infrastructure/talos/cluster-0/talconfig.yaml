@@ -23,7 +23,7 @@ nodes:
     controlPlane: true
     disableSearchDomain: true
     ipAddress: 10.20.0.20
-    installDisk: /dev/sda
+    installDisk: /dev/vda
   - hostname: cp-1.${domainName}
     disableSearchDomain: true
     ipAddress: 10.20.0.21
