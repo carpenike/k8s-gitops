@@ -1,54 +1,75 @@
 {
-  "packageRules": [
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
     {
-      "description": "Cert-Manager image (for CRDs) and chart",
-      "groupName": "Cert-Manager",
-      "matchPackagePatterns": ["cert-manager"],
-      "matchDatasources": ["docker", "helm"],
-      "group": { "commitMessageTopic": "{{{groupName}}} group" },
-      "separateMinorPatch": true
+      description: "Immich images",
+      groupName: "Immich",
+      matchPackageNames: [
+        "ghcr.io/immich-app/immich-server",
+        "ghcr.io/immich-app/immich-web",
+        "ghcr.io/immich-app/immich-machine-learning",
+      ],
+      matchDatasources: ["docker"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      separateMinorPatch: true,
     },
     {
-      "description": "External Snapshotter kustomization (for CRDs) and chart",
-      "groupName": "External Snapshotter",
-      "matchPackagePatterns": ["external-snapshotter", "snapshot-controller"],
-      "matchDatasources": ["docker", "github-tags"],
-      "group": { "commitMessageTopic": "{{{groupName}}} group" },
-      "separateMinorPatch": true
+      description: "Rook-Ceph image and chart",
+      groupName: "Rook Ceph",
+      matchPackagePatterns: ["rook.ceph"],
+      matchDatasources: ["docker", "helm"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      separateMinorPatch: true,
     },
     {
-      "description": "Node Feature Discovery kustomization (for CRDs) and chart",
-      "groupName": "Node Feature Discovery",
-      "matchPackagePatterns": ["node-feature-discovery"],
-      "matchDatasources": ["helm", "github-tags"],
-      "group": { "commitMessageTopic": "{{{groupName}}} group" },
-      "separateMinorPatch": true
+      description: "Cilium image and chart",
+      groupName: "cilium",
+      matchPackageNames: [
+        "quay.io/cilium/cilium",
+        "quay.io/cilium/operator-generic",
+        "cilium",
+      ],
+      matchDatasources: ["helm", "docker"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      separateMinorPatch: true,
     },
     {
-      "description": "Rook-Ceph image and chart",
-      "groupName": "Rook-Ceph",
-      "matchPackagePatterns": ["rook.ceph"],
-      "matchDatasources": ["docker", "helm"],
-      "group": { "commitMessageTopic": "{{{groupName}}} group" },
-      "separateMinorPatch": true
+      description: "External Snapshotter charts",
+      groupName: "External Snapshotter",
+      matchPackageNames: ["snapshot-controller", "snapshot-validation-webhook"],
+      matchDatasources: ["helm"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      separateMinorPatch: true,
     },
     {
-      "description": "Thanos image and chart - mismatched versions",
-      "groupName": "Thanos",
-      "matchPackagePatterns": ["thanos"],
-      "matchDatasources": ["docker", "github-releases", "helm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "group": { "commitMessageTopic": "{{{groupName}}} group" },
-      "separateMinorPatch": false
+      description: "Thanos image and chart - versions do not match",
+      groupName: "Thanos",
+      matchPackagePatterns: ["quay.io/thanos/thanos", "thanos"],
+      matchDatasources: ["docker", "github-releases", "helm"],
+      matchUpdateTypes: ["minor", "patch"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      separateMinorPatch: false,
     },
     {
-      "description": "Vector image and chart - mismatched versions",
-      "groupName": "Vector",
-      "matchPackagePatterns": ["vector"],
-      "matchDatasources": ["docker", "github-releases", "helm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "group": { "commitMessageTopic": "{{{groupName}}} group" },
-      "separateMinorPatch": false
-    }
-  ]
+      description: "Vector image and chart - versions do not match",
+      groupName: "Vector",
+      matchPackagePatterns: ["vector"],
+      matchDatasources: ["docker", "github-releases", "helm"],
+      matchUpdateTypes: ["minor", "patch"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      separateMinorPatch: false,
+    },
+  ],
 }

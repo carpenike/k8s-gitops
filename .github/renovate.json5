@@ -29,57 +29,80 @@
     "fileMatch": ["ansible/.+/docker-compose.*\\.ya?ml(\\.j2)?$"]
   },
   "flux": {
-    "fileMatch": ["cluster/.+\\.ya?ml$"]
+    "fileMatch": [
+      "kubernetes/.+\\.ya?ml$",
+      "cluster/.+\\.ya?ml$"
+    ]
   },
   "helm-values": {
-    "fileMatch": ["cluster/.+\\.ya?ml$"]
+    "fileMatch": [
+      "kubernetes/.+\\.ya?ml$",
+      "cluster/.+\\.ya?ml$"
+      ]
   },
   "kubernetes": {
-    "fileMatch": ["cluster/.+\\.ya?ml$"]
+    "fileMatch": [
+      "kubernetes/.+\\.ya?ml$",
+      "cluster/.+\\.ya?ml$"
+      ]
   },
   "regexManagers": [
     {
-      "description": "Process CRD dependencies",
-      "fileMatch": ["cluster/.+\\.ya?ml$"],
+      "description": ["Process CRD dependencies - Chart and Github Release are the same version"],
+      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
       "matchStrings": [
-        // GitRepository where 'Git release/tag' matches 'Helm' version
-        "registryUrl=(?<registryUrl>\\S+) chart=(?<depName>\\S+)\n.*?(?<currentValue>[^-\\s]*)\n",
-        // Kustomization where 'GitHub release artifact URL' matches 'Docker image' version
-        "datasource=(?<datasource>\\S+) image=(?<depName>\\S+)\n.*?-\\s(.*?)\/(?<currentValue>[^/]+)\/[^/]+\n"
+        "# renovate: registryUrl=(?<registryUrl>\\S+) chart=(?<depName>\\S+)\n.*?(?<currentValue>[^-\\s]*)\n",
       ],
-      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}helm{{/if}}"
+      "datasourceTemplate": "helm"
     },
     {
-      "description": "Process various dependencies",
+      "description": ["Generic Docker image Regex manager"],
       "fileMatch": [
-        "ansible/.+\\.ya?ml$",
-        "cluster/.+\\.ya?ml$"
+        "infrastructure/.+\\.ya?ml$",
+        "infrastructure/.+\\.tf$"
       ],
       "matchStrings": [
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( versioning=(?<versioning>\\S+))?\n.*?\"(?<currentValue>.*)\"\n"
+        "# renovate: docker-image( versioning=(?<versioning>.*=?))?\n .*[:|=] \"?(?<depName>.*?):(?<currentValue>[^\"\n]*=?)\"?",
       ],
-      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
+      "datasourceTemplate": "docker",
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     },
     {
-      "description": "Process raw GitHub URLs",
-      "fileMatch": ["cluster/.+\\.ya?ml$"],
+      "description": ["Raw GitHub URL Regex manager"],
+      "fileMatch": [
+        "infrastructure/.+\\.ya?ml$",
+        "kubernetes/.+\\.ya?ml$",
+        "cluster/.+\\.ya?ml$"
+      ],
       "matchStrings": [
-        "https:\\/\\/raw.githubusercontent.com\\/(?<depName>[\\w\\d\\-_]+\\/[\\w\\d\\-_]+)\\/(?<currentValue>[\\w\\d\\.\\-_]+)\\/.*"
+        "https:\\/\\/raw.githubusercontent.com\\/(?<depName>[\\w\\d\\-_]+\\/[\\w\\d\\-_]+)\\/(?<currentValue>[\\w\\d\\.\\-_]+)\\/.*",
       ],
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
+    // Custom version schemes
     {
-      "description": "Use loose versioning for certain dependencies",
-      "matchDatasources": ["docker", "github-releases"],
-      "versioning": "loose",
-      "matchPackageNames": [
-        "ghcr.io/onedr0p/plex",
-        "ghcr.io/onedr0p/qbittorrent"
-      ]
+      "description": "Use custom versioning for Vector",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["docker.io/timberio/vector"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$"
+    },
+    {
+      "description": "Use custom versioning for http-https-echo",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/mendhak/http-https-echo"],
+      "versioning": "regex:^(?<major>\\d+)$"
+    },
+    // Version strategies
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/onedr0p/plex", "ghcr.io/onedr0p/qbittorrent"],
+      "versioning": "loose"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["tomsquest/docker-radicale"],
+      "versioning": "pep440"
     }
-  ]
-}
