@@ -1,12 +1,14 @@
-name: "Schedule: Renovate"
+---
+name: Schedule - Renovate
 
-on: # yamllint disable-line rule:truthy
+on:
   workflow_dispatch:
     inputs:
       dryRun:
         description: "Dry-Run"
-        default: "false"
+        default: false
         required: false
+        type: boolean
       logLevel:
         description: "Log-Level"
         default: "debug"
@@ -18,35 +20,18 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - ".github/renovate.json5"
+      - ".github/renovate/**.json"
       - ".github/renovate/**.json5"
-
-env:
-  LOG_LEVEL: debug
-  RENOVATE_DRY_RUN: false
-  RENOVATE_CONFIG_FILE: .github/renovate.json5
+      - ".github/workflows/schedule-renovate.yaml"
 
 jobs:
   renovate:
     name: Renovate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Generate Token
-        uses: tibdex/github-app-token@v1
-        id: generate-token
-        with:
-          app_id: ${{ secrets.CARPENIKE_APP_ID }}
-          private_key: ${{ secrets.CARPENIKE_APP_PRIVATE_KEY }}
-
-      - name: Override default config from dispatch variables
-        run: |
-          echo "RENOVATE_DRY_RUN=${{ github.event.inputs.dryRun || env.RENOVATE_DRY_RUN }}" >> "${GITHUB_ENV}"
-          echo "LOG_LEVEL=${{ github.event.inputs.logLevel || env.LOG_LEVEL }}" >> "${GITHUB_ENV}"
-
-      - name: Renovate
-        uses: renovatebot/github-action@v37.0.0
-        with:
-          configurationFile: "${{ env.RENOVATE_CONFIG_FILE }}"
-          token: "${{ steps.generate-token.outputs.token }}"
+    uses: carpenike/gh-workflows/.github/workflows/run-renovate.yaml@main
+    with:
+      configurationFile: ".github/renovate.json5"
+      dryRun: ${{ inputs.dryRun || 'false' }}
+      renovateLogLevel: ${{ inputs.logLevel || 'debug' }}
+    secrets:
+      app_id: ${{ secrets.CARPENIKE_APP_ID }}
+      app_private_key: ${{ secrets.CARPENIKE_APP_PRIVATE_KEY }}

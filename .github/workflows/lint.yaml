@@ -1,5 +1,5 @@
 ---
-name: "Lint"
+name: Lint
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build:
-    name: MegaLinter
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,8 +41,11 @@ jobs:
                   [
                     "ACTION_ACTIONLINT",
                     "ANSIBLE_ANSIBLE_LINT",
+                    "COPYPASTE_JSCPD",
                     "KUBERNETES_KUBEVAL",
                     "MARKDOWN_MARKDOWNLINT",
+                    "PYTHON_FLAKE8",
+                    "PYTHON_PYLINT",
                     "REPOSITORY_GIT_DIFF",
                     "REPOSITORY_SECRETLINT",
                     "TERRAFORM_TERRAFORM_FMT",
@@ -53,13 +56,12 @@ jobs:
                 ','
               )
             }}
-          ANSIBLE_DIRECTORY: ansible
-          ANSIBLE_ANSIBLE_LINT_CONFIG_FILE: .ansible-lint
-          KUBERNETES_DIRECTORY: cluster
+          COPYPASTE_JSCPD_CONFIG_FILE: .ci/jscpd/jscpd.json
+          KUBERNETES_DIRECTORY: k8s
           KUBERNETES_KUBEVAL_ARGUMENTS: --ignore-missing-schemas
           KUBERNETES_KUBEVAL_FILTER_REGEX_INCLUDE: "(kubernetes)"
-          MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .github/linters/.markdownlint.yaml
+          MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .github/linters/markdownlint.config.yaml
           MARKDOWN_MARKDOWNLINT_RULES_PATH: .github/
+          PYTHON_FLAKE8_CONFIG_FILE: .github/linters/.flake8
           YAML_YAMLLINT_CONFIG_FILE: .github/linters/.yamllint.yaml
-          YAML_PRETTIER_CONFIG_FILE: .github/linters/.prettierrc.yaml
-          YAML_PRETTIER_FILTER_REGEX_EXCLUDE: "(.*\\.sops\\.ya?ml)"
+          YAML_PRETTIER_CONFIG_FILE: .ci/prettier/.prettierrc.yaml
