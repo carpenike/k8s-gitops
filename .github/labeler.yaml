@@ -9,3 +9,7 @@ area/hack:
   - "hack/**/*"
 area/infrastructure:
   - "infrastructure/**/*"
+area/ci:
+  - ".github/**/*"
+area/kubernetes:
+  - "kubernetes/**/*"
