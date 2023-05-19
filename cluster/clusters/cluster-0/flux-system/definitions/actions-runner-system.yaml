@@ -20,7 +20,7 @@ metadata:
 spec:
   dependsOn:
     - name: actions-runner-system-namespace
-  path: "./cluster/clusters/cluster-0/actions-runner-system/app"
+  path: "./cluster/clusters/cluster-0/actions-runner-system/actions-runner-controller/app"
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
@@ -34,5 +34,5 @@ spec:
   dependsOn:
     - name: actions-runner-system-namespace
     - name: actions-runner-app
-  path: "./cluster/clusters/cluster-0/actions-runner-system/runners"
+  path: "./cluster/clusters/cluster-0/actions-runner-system/actions-runner-controller/runners"
   prune: true
