@@ -17,6 +17,7 @@
     "**/*.html",
     "**/*.xml",
     "kubernetes/**/scripts/pushover-notify.sh",
-    "cluster/**/scripts/pushover-notify.sh"
+    "cluster/**/scripts/pushover-notify.sh",
+    ".taskfiles/**"
   ]
 }
