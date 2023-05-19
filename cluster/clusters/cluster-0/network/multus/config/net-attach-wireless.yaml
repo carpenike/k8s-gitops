@@ -1,0 +1,28 @@
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: multus-wireless
+  namespace: network
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "multus-wireless",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "master": "eth2.30",
+          "mode": "bridge",
+          "capabilities": {
+            "ips": true
+          },
+          "ipam": {
+            "type": "static",
+            "routes": [
+              { "dst": "10.20.0.0/16", "gw": "10.30.0.1" }
+            ]
+          }
+        }
+      ]
+    }
