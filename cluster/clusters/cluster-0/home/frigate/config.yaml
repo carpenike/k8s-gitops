@@ -148,7 +148,7 @@ cameras:
     detect:
       width: 720
       height: 576
-      fps: 15
+      fps: 20
     record:
       enabled: True
       retain_days: 14
