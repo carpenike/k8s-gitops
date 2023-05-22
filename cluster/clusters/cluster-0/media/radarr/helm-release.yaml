@@ -94,14 +94,7 @@ spec:
         existingClaim: media-nfs-share-pvc
         mountPath: /media
         readOnly: false
-      scripts:
-        enabled: true
-        type: configMap
-        name: radarr-pushover
-        subPath: pushover-notify.sh
-        mountPath: /scripts/pushover-notify.sh
-        defaultMode: 0775
-        readOnly: true
+
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: radarr-pushover
