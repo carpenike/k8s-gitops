@@ -90,7 +90,7 @@ plex:
   optimize: false
 
 tmdb: # REQUIRED for the script to run
-  apikey:
+  apikey: {{ .TMDB_APIKEY }}
   language: en
 
 tautulli:
