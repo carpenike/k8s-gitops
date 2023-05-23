@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/readarr-nightly
-      tag: 0.1.6.1851@sha256:3f1ffb309013bc15c376332c95bc3754074ef29f243c24a85c79352b92ca4f80
+      tag: 0.1.6.1859@sha256:0f12f1c2dd7175c4e2631e14121d642944708c48c6e57572284c8f3f50334750
     env:
       TZ: "America/New_York"
       READARR__INSTANCE_NAME: Readarr (Ebooks)
