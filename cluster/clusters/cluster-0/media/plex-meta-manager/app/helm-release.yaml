@@ -47,7 +47,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: pmm-config
+        existingClaim: pmm-config-pvc
       config-file:
         enabled: true
         type: secret
