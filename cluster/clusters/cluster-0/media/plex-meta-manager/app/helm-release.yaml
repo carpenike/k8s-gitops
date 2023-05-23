@@ -55,13 +55,13 @@ spec:
         mountPath: /config/config.yml
         subPath: config.yml
         readOnly: true
-      # config-prerolls:
-      #   enabled: true
-      #   type: configMap
-      #   name: pmm-prerolls
-      #   mountPath: /config/Pre-rolls.yml
-      #   subPath: Pre-rolls.yml
-      #   readOnly: true
+      config-prerolls:
+        enabled: true
+        type: configMap
+        name: pmm-prerolls
+        mountPath: /config/Pre-rolls.yml
+        subPath: Pre-rolls.yml
+        readOnly: true
       scripts:
         enabled: true
         type: configMap
