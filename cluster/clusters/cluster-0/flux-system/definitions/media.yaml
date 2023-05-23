@@ -247,3 +247,21 @@ spec:
     - name: media-pvs
   path: "./cluster/clusters/cluster-0/media/bazarr/app"
   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: media-plex-meta-manager
+  namespace: flux-system
+  labels:
+    component.cluster-0/part-of: definitions
+spec:
+  dependsOn:
+    - name: media-namespace
+    - name: media-pvs
+    - name: media-plex
+    - name: media-sonarr
+    - name: media-radarr
+    - name: media-tautulli
+  path: "./cluster/clusters/cluster-0/media/plex-meta-manager/app"
+  prune: true
