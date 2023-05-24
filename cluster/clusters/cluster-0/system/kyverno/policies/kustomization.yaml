@@ -2,10 +2,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - apply-ingress-auth-annotations.yaml
-  - apply-ingress-external-dns-annotations.yaml
-  - apply-ingress-whitelist-annotations.yaml
-  # - inject-tz.yaml
+  # - apply-ingress-auth-annotations.yaml
+  # - apply-ingress-external-dns-annotations.yaml
+  # - apply-ingress-whitelist-annotations.yaml
+  - inject-tz.yaml
   - remove-cpu-limit.yaml
-  - sync-postgres-secrets.yaml
-  - sync-redis-secrets.yaml
+  # - sync-postgres-secrets.yaml
+  # - sync-redis-secrets.yaml
