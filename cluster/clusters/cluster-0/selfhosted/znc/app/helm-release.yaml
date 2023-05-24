@@ -31,6 +31,8 @@ spec:
       main:
         enabled: true
         type: LoadBalancer
+        annotation:
+          external-dns.alpha.kubernetes.io/hostname: "znc.holthome.net"
         loadBalancerIP: "${SVC_ZNC_ADDRESS}"
         externalTrafficPolicy: Local
         ports:
