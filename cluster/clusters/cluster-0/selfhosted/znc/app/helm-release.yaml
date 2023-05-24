@@ -22,7 +22,7 @@ spec:
       tag: 1.8.2
 
     podAnnotations:
-      secret.reloader.stakater.com/reload: znc-secrets
+      secret.reloader.stakater.com/reload: znc-tls
 
     env:
       TIMEZONE: "America/New_York"
@@ -55,6 +55,13 @@ spec:
         enabled: true
         existingClaim: znc-config-pvc
         mountPath: /znc-data
+
+      cert:
+        enabled: true
+        type: secret
+        name: znc-tls
+        mountPath: /config/tls
+        readOnly: true
 
     resources:
       requests:
