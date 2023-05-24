@@ -43,15 +43,17 @@ spec:
       main:
         enabled: true
         annotations:
-          auth.home.arpa/enabled: "true"
-          nginx.ingress.kubernetes.io/auth-url: https://auth.${SECRET_DOMAIN}/oauth2/auth?allowed_groups=calibre-web
+          external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
+          nginx.ingress.kubernetes.io/auth-url: https://auth.holthome.net/oauth2/auth?allowed_groups=calibre-web
+          nginx.ingress.kubernetes.io/auth-signin: https://auth.holthome.net/oauth2/start?rd=$scheme://$best_http_host$request_uri
+          nginx.ingress.kubernetes.io/auth-response-headers: "x-auth-request-email, x-auth-request-groups"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/calibreweb/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.holthome.net/css/base/calibreweb/nord.css"></head>';
             sub_filter_once on;
         ingressClassName: nginx
         hosts:
-          - host: &host calibre-web.${SECRET_DOMAIN}
+          - host: &host calibre-web.holthome.net
             paths:
               - path: /
         tls:
@@ -61,7 +63,7 @@ spec:
         enabled: true
         ingressClassName: nginx
         hosts:
-          - host: &host_kobo calibre-kobo.${SECRET_DOMAIN}
+          - host: &host_kobo calibre-kobo.holthome.net
             paths:
               - path: /kobo/
         tls:

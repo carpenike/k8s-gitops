@@ -22,10 +22,10 @@ spec:
       tag: 1da3256a3c5a41358ea0f2158c960ddccbae1b49a052ec9710f2096652699e1d
 
     env:
-      REACT_APP_BACKEND_V1_GET_URL: https://draw.${SECRET_DOMAIN}/api/v1/
-      REACT_APP_BACKEND_V2_GET_URL: https://draw.${SECRET_DOMAIN}/api/v2/
-      REACT_APP_BACKEND_V2_POST_URL: https://draw.${SECRET_DOMAIN}/api/v2/post
-      REACT_APP_SOCKET_SERVER_URL: https://draw.${SECRET_DOMAIN}
+      REACT_APP_BACKEND_V1_GET_URL: https://draw.holthome.net/api/v1/
+      REACT_APP_BACKEND_V2_GET_URL: https://draw.holthome.net/api/v2/
+      REACT_APP_BACKEND_V2_POST_URL: https://draw.holthome.net/api/v2/post
+      REACT_APP_SOCKET_SERVER_URL: https://draw.holthome.net
 
     envFrom:
       - secretRef:
@@ -42,9 +42,9 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          external-dns.home.arpa/enabled: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
         hosts:
-          - host: &host "draw.${SECRET_DOMAIN}"
+          - host: &host "draw.holthome.net"
             paths:
               - path: /
         tls:

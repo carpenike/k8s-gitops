@@ -56,15 +56,15 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          external-dns.home.arpa/enabled: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_intercept_errors off;
           nginx.ingress.kubernetes.io/server-snippet: |
             location = /.well-known/webfinger {
-                return 301 https://mastodon.${SECRET_DOMAIN}/.well-known/webfinger;
+                return 301 https://mastodon.holthome.net/.well-known/webfinger;
             }
         hosts:
-          - host: &host "synapse.${SECRET_DOMAIN}"
+          - host: &host "synapse.holthome.net"
             paths:
               - path: /_matrix
                 service:
@@ -78,7 +78,7 @@ spec:
                 service:
                   name: matrix-synapse
                   port: 8008
-          - host: &host2 "${SECRET_PUBLIC_DOMAIN}"
+          - host: &host2 "ryanholt.net"
             paths:
               - path: /.well-known/matrix
                 service:

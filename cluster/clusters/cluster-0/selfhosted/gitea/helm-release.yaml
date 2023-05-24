@@ -32,9 +32,9 @@ spec:
       enabled: true
       ingressClassName: "nginx"
       annotations:
-        external-dns.home.arpa/enabled: "true"
+        external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
       hosts:
-        - host: &host "git.${SECRET_DOMAIN}"
+        - host: &host "git.holthome.net"
           paths:
             - path: /
               pathType: Prefix
@@ -53,7 +53,7 @@ spec:
     #   gpgHome: /data/git/.gnupg
     gitea:
       admin:
-        email: "gitea@${SECRET_DOMAIN}"
+        email: "gitea@holthome.net"
         username: gitea
 
       config:
@@ -61,8 +61,8 @@ spec:
 
         server:
           DISABLE_SSH: true
-          DOMAIN: "git.${SECRET_DOMAIN}"
-          ROOT_URL: "https://git.${SECRET_DOMAIN}"
+          DOMAIN: "git.holthome.net"
+          ROOT_URL: "https://git.holthome.net"
           ENABLE_GZIP: true
           LANDING_PAGE: login
           LFS_START_SERVER: true
@@ -111,14 +111,14 @@ spec:
         openid:
           ENABLE_OPENID_SIGNIN: false
           ENABLE_OPENID_SIGNUP: true
-          WHITELISTED_URIS: "auth.${SECRET_DOMAIN}"
+          WHITELISTED_URIS: "auth.holthome.net"
 
       oauth:
         - name: authelia
           provider: openidConnect
           key: gitea
           secret: "${SECRET_AUTHELIA_GITEA_CLIENT_SECRET}"
-          autoDiscoverUrl: "https://auth.${SECRET_DOMAIN}/.well-known/openid-configuration"
+          autoDiscoverUrl: "https://auth.holthome.net/.well-known/openid-configuration"
           groupClaimName: groups
           adminGroup: admins
           restrictedGroup: people

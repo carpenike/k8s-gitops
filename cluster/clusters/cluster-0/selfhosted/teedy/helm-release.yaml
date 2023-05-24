@@ -23,11 +23,11 @@ spec:
     env:
       TZ: "America/New_York"
       DOCS_DEFAULT_LANGUAGE: eng
-      DOCS_BASE_URL: "https://docs.${SECRET_DOMAIN}"
+      DOCS_BASE_URL: "https://docs.holthome.net"
       DOCS_ADMIN_EMAIL_INIT: "ryan@ryanholt.net"
       DATABASE_URL: "jdbc:postgresql://postgres-rw.db.svc.cluster.local:5432/teedydb"
       DATABASE_USER: "teedyuser"
-      DOCS_SMTP_HOSTNAME: "smtp.${SECRET_DOMAIN}"
+      DOCS_SMTP_HOSTNAME: "smtp.holthome.net"
       DOCS_SMTP_PORT: 25
       DATABASE_PASSWORD: ${SECRET_TEEDY_POSTGRESQL_PASSWORD}
       DOCS_ADMIN_PASSWORD_INIT: ${SECRET_TEEDY_ADMIN_PASSWORD_INIT_BCRYPT}
@@ -44,17 +44,17 @@ spec:
         ingressClassName: nginx
         annotations:
           auth.home.arpa/enabled: "false"
-          external-dns.home.arpa/enabled: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
-          - host: "docs.${SECRET_DOMAIN}"
+          - host: "docs.holthome.net"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "docs.${SECRET_DOMAIN}"
+              - "docs.holthome.net"
             secretName: tls.teedy
     persistence:
       data:
@@ -63,7 +63,7 @@ spec:
 
       nfs-nas-media:
         enabled: true
-        server: "nas.${SECRET_DOMAIN}"
+        server: "nas.holthome.net"
         subPath: scans/import
         mountPath: /media
         path: /mnt/tank/share

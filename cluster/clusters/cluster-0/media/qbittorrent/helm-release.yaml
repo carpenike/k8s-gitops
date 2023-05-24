@@ -68,7 +68,7 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          external-dns.home.arpa/enabled: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
           kubernetes.io/tls-acme: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
           nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -76,11 +76,11 @@ spec:
             proxy_hide_header "content-security-policy";
             proxy_hide_header "X-Frame-Options";
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${INGRESS_DOMAIN}/css/base/qbittorrent/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.holthome.net/css/base/qbittorrent/nord.css"></head>';
             sub_filter_once on;
 
         hosts:
-          - host: &host "qb.${SECRET_DOMAIN}"
+          - host: &host "qb.holthome.net"
             paths:
               - path: /
                 pathType: Prefix
