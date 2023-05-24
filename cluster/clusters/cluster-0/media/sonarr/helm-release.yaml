@@ -63,7 +63,7 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/sonarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: *host
+          - host: &host sonarr.holthome.net
             paths:
               - path: /
                 pathType: Prefix
@@ -78,7 +78,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
         hosts:
-          - host: &host sonarr.holthome.net
+          - host: *host
             paths:
               - path: /api
                 pathType: Prefix
