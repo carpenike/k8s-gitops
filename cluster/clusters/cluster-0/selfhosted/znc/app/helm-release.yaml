@@ -18,7 +18,7 @@ spec:
 
   values:
     image:
-      repository: docker.io/znc/znc
+      repository: znc
       tag: 1.8.2
 
     podAnnotations:
