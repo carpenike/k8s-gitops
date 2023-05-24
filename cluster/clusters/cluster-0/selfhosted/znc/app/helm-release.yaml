@@ -29,6 +29,10 @@ spec:
 
     service:
       main:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: "${SVC_ZNC_ADDRESS}"
+        externalTrafficPolicy: Local
         ports:
           http:
             port: 1111
