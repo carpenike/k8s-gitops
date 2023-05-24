@@ -133,7 +133,7 @@ spec:
       ingressClassName: nginx
       annotations:
         external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
-        hosts:
+      hosts:
         - &host grafana.holthome.net
       tls:
         - hosts:
