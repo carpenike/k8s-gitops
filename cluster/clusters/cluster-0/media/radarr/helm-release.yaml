@@ -28,8 +28,6 @@ spec:
       tag: 4.5.2.7318@sha256:821502cc07e2a222ac91b358b43a7974277fa8f2dfee34d8a0a70b6be45cb629
     env:
       TZ: "America/New_York"
-      PUSHOVER_DEBUG: "false"
-      PUSHOVER_APP_URL: &host "radarr.holthome.net"
       RADARR__INSTANCE_NAME: Radarr
       RADARR__PORT: &port 80
       RADARR__APPLICATION_URL: "https://radarr.holthome.net"
@@ -57,7 +55,7 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/radarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: *host
+          - host: &host radarr.holthome.net
             paths:
               - path: /
                 pathType: Prefix

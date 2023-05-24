@@ -78,7 +78,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
         hosts:
-          - host: *host
+          - host: &host sonarr.holthome.net
             paths:
               - path: /api
                 pathType: Prefix
