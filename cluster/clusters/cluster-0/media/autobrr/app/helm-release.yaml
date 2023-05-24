@@ -74,7 +74,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: autobrr-config
+        existingClaim: autobrr-config-pvc
       config-file:
         enabled: true
         type: configMap
