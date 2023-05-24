@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "znc-tls"
+  namespace: selfhosted
+spec:
+  secretName: "znc-tls"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "znc-admin.holthome.net"
+  dnsNames:
+    - "znc-admin.holthome.net"

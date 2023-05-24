@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: selfhosted
 resources:
   - helm-release.yaml
+  - certificate.yaml
   - config-pvc.yaml
 commonLabels:
   app.kubernetes.io/name: n8n
