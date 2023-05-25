@@ -36,7 +36,7 @@ spec:
         loadBalancerIP: "${SVC_ZNC_ADDRESS}"
         externalTrafficPolicy: Local
         ports:
-          http:
+          bouncer:
             port: 1111
       http:
         enabled: true
