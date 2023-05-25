@@ -1,8 +1,8 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: selfhosted
 resources:
-  - secret.sops.yaml
-  - helm-release.yaml
-patchesStrategicMerge:
-  - patches/postgres.yaml
+  - ./externalsecret.yaml
+  - ./helm-release.yaml

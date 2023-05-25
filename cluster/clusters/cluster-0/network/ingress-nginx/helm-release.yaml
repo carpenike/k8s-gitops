@@ -90,16 +90,9 @@ spec:
         repository: ghcr.io/tarampampam/error-pages
         tag: 2.24.0
       extraEnvs:
-        - name: TEMPLATE_NAME
-          value: ghost
-        - name: SHOW_DETAILS
-          value: "false"
-      # resources:
-      #   requests:
-      #     cpu: 15m
-      #     memory: 64M
-      #   limits:
-      #     memory: 64M
+        - { name: TEMPLATE_NAME, value: lost-in-space }
+        - { name: SHOW_DETAILS, value: "false" }
+
     tcp:
       "5432": "db/postgres-rw:5432"
 

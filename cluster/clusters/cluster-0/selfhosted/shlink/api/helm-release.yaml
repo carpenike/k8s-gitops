@@ -5,33 +5,43 @@ metadata:
   name: &app shlink-api
   namespace: selfhosted
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: app-template
       version: 1.5.0
       sourceRef:
         kind: HelmRepository
-        name: bjw-s-charts
+        name: bjw-s
         namespace: flux-system
+  maxHistory: 2
   install:
     createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
+    cleanupOnFail: true
     remediation:
-      retries: 5
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
+    initContainers:
+      01-init-db:
+        image: ghcr.io/onedr0p/postgres-init:14.8
+        imagePullPolicy: IfNotPresent
+        envFrom:
+          - secretRef:
+              name: shlink-secret
     controller:
-      replicas: 3
+      replicas: 2
       strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/shlinkio/shlink
-      tag: 3.6.0
+      tag: 3.6.0-non-root
     env:
-      DB_DRIVER: postgres
-      DB_HOST: postgres-rw.db.svc.cluster.local
-      DB_NAME: shlink
       DEFAULT_DOMAIN: &host "ryho.lt"
       DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       ENABLE_PERIODIC_VISIT_LOCATE: "true"
@@ -46,7 +56,7 @@ spec:
       TIMEZONE: "America/New_York"
     envFrom:
       - secretRef:
-          name: *app
+          name: shlink-secret
     service:
       main:
         ports:
@@ -68,9 +78,6 @@ spec:
         tls:
           - hosts:
               - *host
-            secretName: shlink.tls
-    podAnnotations:
-      secret.reloader.stakater.com/reload: *app
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
