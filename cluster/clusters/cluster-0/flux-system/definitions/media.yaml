@@ -306,6 +306,6 @@ spec:
     - name: media-namespace
     - name: media-sonarr
     - name: media-radarr
-    - name: media-omegabrr
+    - name: media-autobrr
   path: "./cluster/clusters/cluster-0/media/omegabrr/app"
   prune: true
