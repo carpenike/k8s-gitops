@@ -22,6 +22,8 @@ spec:
   upgrade:
     remediation:
       retries: 5
+  uninstall:
+    keepHistory: false
 
   values:
     image:
@@ -30,17 +32,9 @@ spec:
     env:
       TZ: "America/New_York"
 
-    dnsConfig:
-      options:
-        - name: ndots
-          value: "1"
-
     service:
       main:
         enabled: true
-        type: LoadBalancer
-        loadBalancerIP: "${SVC_PLEX_ADDRESS}"
-        externalTrafficPolicy: Local
         ports:
           http:
             port: 32400
@@ -55,7 +49,7 @@ spec:
           cert-manager.io/cluster-issuer: letsencrypt-production
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - host: &host "plex.holthome.net"
             paths:
               - path: /
                 pathType: Prefix
@@ -78,6 +72,10 @@ spec:
       config:
         enabled: true
         existingClaim: plex-config-pvc
+
+      tmp:
+        enabled: true
+        type: emptyDir
 
       transcode:
         enabled: true
