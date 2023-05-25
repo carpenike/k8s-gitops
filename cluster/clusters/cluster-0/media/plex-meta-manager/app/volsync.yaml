@@ -28,7 +28,7 @@ metadata:
   name: pmm
   namespace: media
 spec:
-  sourcePVC: pmm-config
+  sourcePVC: pmm-config-pvc
   trigger:
     schedule: "0 8 * * *"
   restic:

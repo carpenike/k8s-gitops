@@ -28,7 +28,7 @@ metadata:
   name: autobrr
   namespace: media
 spec:
-  sourcePVC: autobrr-config
+  sourcePVC: autobrr-config-pvc
   trigger:
     schedule: "0 8 * * *"
   restic:
