@@ -90,4 +90,4 @@ spec:
         cpu: 10m
         memory: 100Mi
       limits:
-        memory: 750Mi
+        memory: 1.5Gi
