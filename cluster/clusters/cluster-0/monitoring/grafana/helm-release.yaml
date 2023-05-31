@@ -17,13 +17,12 @@ spec:
   interval: 15m
   timeout: 20m
   values:
-    extraInitContainers:
-      - name: init-db
+    initContainers:
+      init-db:
         image: ghcr.io/onedr0p/postgres-initdb:14.8
-        imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
-              name: grafana-secret
+              name: grafana-secrets
 
     replicas: 1
 
