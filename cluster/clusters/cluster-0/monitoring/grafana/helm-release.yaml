@@ -17,13 +17,6 @@ spec:
   interval: 15m
   timeout: 20m
   values:
-    initContainers:
-      init-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.8
-        envFrom:
-          - secretRef:
-              name: grafana-secrets
-
     replicas: 1
 
     # admin:
