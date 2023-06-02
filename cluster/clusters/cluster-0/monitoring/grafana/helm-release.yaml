@@ -230,7 +230,6 @@ spec:
       - grafana-clock-panel
       - natel-plotly-panel
       - https://github.com/panodata/panodata-map-panel/releases/download/0.16.0/panodata-map-panel-0.16.0.zip;grafana-worldmap-panel-ng
-      - panodata-map-panel
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: grafana
