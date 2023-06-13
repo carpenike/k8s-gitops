@@ -23,7 +23,7 @@ spec:
         imagePullPolicy: IfNotPresent
         envFrom: &envFrom
           - secretRef:
-              name: minflux-secret
+              name: miniflux-secret
     controller:
       annotations:
         reloader.stakater.com/auto: "true"
