@@ -46,6 +46,7 @@ spec:
       OAUTH2_PROVIDER: oidc
       OAUTH2_REDIRECT_URL: "https://miniflux.holthome.net/oauth2/oidc/callback"
       BASE_URL: "https://miniflux.holthome.net"
+      METRICS_COLLECTOR: "1"
 
     envFrom: *envFrom
 
