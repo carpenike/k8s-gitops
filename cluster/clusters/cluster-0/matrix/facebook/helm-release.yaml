@@ -27,7 +27,7 @@ spec:
 
     image:
       repository: dock.mau.dev/mautrix/facebook
-      tag: v0.4.1
+      tag: v0.5.0
 
     command:
       - "python3"
