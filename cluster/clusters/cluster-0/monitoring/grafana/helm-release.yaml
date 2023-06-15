@@ -37,7 +37,7 @@ spec:
             orgId: 1
             type: file
 
-          - name: 'teslamate'
+          - name: "teslamate"
             orgId: 1
             folder: Teslamate
             type: file
@@ -46,7 +46,7 @@ spec:
             allowUiUpdates: true
             options:
               path: /var/lib/grafana/dashboards/teslamate
-  
+
     dashboards:
       default:
         node-exporter-full:
