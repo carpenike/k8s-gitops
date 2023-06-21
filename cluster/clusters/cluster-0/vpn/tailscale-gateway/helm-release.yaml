@@ -27,7 +27,7 @@ spec:
 
     image:
       repository: ghcr.io/tailscale/tailscale
-      tag: v1.40.1
+      tag: v1.44.0
     env:
       TZ: "America/New_York"
       TS_KUBE_SECRET: "tailscale-auth"
