@@ -1,4 +1,3 @@
----
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
@@ -12,8 +11,6 @@ metadata:
       environment variable so the container will have the correct
       time.
 spec:
-  mutateExistingOnPolicyUpdate: true
-  generateExistingOnPolicyUpdate: true
   rules:
     - name: inject-timezone
       match:
@@ -21,6 +18,11 @@ spec:
           - resources:
               kinds:
                 - Pod
+      exclude:
+        any:
+          - resources:
+              annotations:
+                kyverno-no-tz: "true"
       mutate:
         patchStrategicMerge:
           spec:
@@ -43,7 +45,7 @@ spec:
                   - mountPath: /etc/localtime
                     name: timezone
                     readOnly: true
-                    subPath: &timezone America/New_York
+                    subPath: &timezone Europe/Amsterdam
                   - mountPath: /usr/share/zoneinfo
                     name: timezone
                     readOnly: true
