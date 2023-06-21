@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 5.8.0
+      version: 5.8.2
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -103,7 +103,7 @@ spec:
       image:
         registry: ghcr.io
         repository: nginxinc/nginx-unprivileged
-        tag: 1.24-alpine
+        tag: 1.25-alpine
       ingress:
         enabled: true
         ingressClassName: nginx
