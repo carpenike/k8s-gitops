@@ -22,7 +22,7 @@ spec:
 
     image:
       repository: docker.io/library/redis
-      tag: 7.0.11
+      tag: 7.0.12
 
     command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
 
