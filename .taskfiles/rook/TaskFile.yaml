@@ -15,15 +15,15 @@ tasks:
   wipe-node-node-0:
     desc: Trigger a wipe of Rook-Ceph data on node "node-0"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sd3
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdd"
@@ -36,15 +36,15 @@ tasks:
   wipe-node-node-1:
     desc: Trigger a wipe of Rook-Ceph data on node "node-1"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sd3
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdd"
@@ -57,15 +57,15 @@ tasks:
   wipe-node-node-2:
     desc: Trigger a wipe of Rook-Ceph data on node "node-2"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sd3
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdd"
@@ -78,15 +78,15 @@ tasks:
   wipe-node-node-3:
     desc: Trigger a wipe of Rook-Ceph data on node "node-3"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sd3
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
           ceph_disk: "/dev/sdd"
