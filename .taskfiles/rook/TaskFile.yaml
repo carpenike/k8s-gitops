@@ -8,93 +8,48 @@ x-task-vars: &task-vars
   jobName: "{{.jobName}}"
 
 vars:
-  waitForJobScript: "{{.PROJECT_DIR}}/.taskfiles/_scripts/wait-for-k8s-job.sh"
+  waitForJobScript: "../_scripts/wait-for-k8s-job.sh"
   ts: '{{now | date "150405"}}'
 
 tasks:
-  wipe-node-node-0:
-    desc: Trigger a wipe of Rook-Ceph data on node "node-0"
+  wipe-node-delta:
+    desc: Trigger a wipe of Rook-Ceph data on node "delta"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
-          ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sdd
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdd"
+          ceph_disk: "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S649NX0RB57009Y"
       - task: wipe-data
         vars:
           node: "{{.node}}"
     vars:
-      node: node-0
+      node: delta
 
-  wipe-node-node-1:
-    desc: Trigger a wipe of Rook-Ceph data on node "node-1"
+  wipe-node-enigma:
+    desc: Trigger a wipe of Rook-Ceph data on node "enigma"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
-          ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sdd
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdd"
+          ceph_disk: "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S649NX0RB57050E"
       - task: wipe-data
         vars:
           node: "{{.node}}"
     vars:
-      node: node-1
+      node: enigma
 
-  wipe-node-node-2:
-    desc: Trigger a wipe of Rook-Ceph data on node "node-2"
+  wipe-node-felix:
+    desc: Trigger a wipe of Rook-Ceph data on node "felix"
     cmds:
-      - task: wipe-disk-sdb
+      - task: wipe-disk
         vars:
           node: "{{.node}}"
-          ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sdd
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdd"
+          ceph_disk: "/dev/disk/by-id/nvme-CT1000P1SSD8_202228759489"
       - task: wipe-data
         vars:
           node: "{{.node}}"
     vars:
-      node: node-2
-
-  wipe-node-node-3:
-    desc: Trigger a wipe of Rook-Ceph data on node "node-3"
-    cmds:
-      - task: wipe-disk-sdb
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdb"
-      - task: wipe-disk-sdc
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdc"
-      - task: wipe-disk-sdd
-        vars:
-          node: "{{.node}}"
-          ceph_disk: "/dev/sdd"
-      - task: wipe-data
-        vars:
-          node: "{{.node}}"
-    vars:
-      node: node-3
+      node: felix
 
   wipe-disk:
     desc: Wipe all remnants of rook-ceph from a given disk (ex. task rook:wipe-disk node=delta ceph_disk="/dev/nvme0n1")
@@ -110,7 +65,7 @@ tasks:
       node: '{{ or .node (fail "`node` is required") }}'
       ceph_disk: '{{ or .ceph_disk (fail "`ceph_disk` is required") }}'
       jobName: 'wipe-disk-{{- .node -}}-{{- .ceph_disk | replace "/" "-" -}}-{{- .ts -}}'
-      wipeRookDiskJobTemplate: "{{.PROJECT_DIR}}/.taskfiles/rook/WipeDiskJob.tmpl.yaml"
+      wipeRookDiskJobTemplate: "WipeDiskJob.tmpl.yaml"
     env: *task-vars
     preconditions:
       - sh: test -f {{.waitForJobScript}}
@@ -129,7 +84,7 @@ tasks:
     vars:
       node: '{{ or .node (fail "`node` is required") }}'
       jobName: "wipe-rook-data-{{- .node -}}-{{- .ts -}}"
-      wipeRookDataJobTemplate: "{{.PROJECT_DIR}}/.taskfiles/rook/WipeRookDataJob.tmpl.yaml"
+      wipeRookDataJobTemplate: "WipeRookDataJob.tmpl.yaml"
     env: *task-vars
     preconditions:
       - sh: test -f {{.waitForJobScript}}
