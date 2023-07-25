@@ -7,7 +7,7 @@ NAMESPACE="${2:-default}"
 
 while true; do
     STATUS="$(kubectl -n "${NAMESPACE}" get pod -l job-name="${JOB_NAME}" -o jsonpath='{.items[*].status.phase}')"
-    if [ "${STATUS}" == "Pending" ]; then
+    if [ "${STATUS}" == "Succeeded" ]; then
         break
     fi
     sleep 1

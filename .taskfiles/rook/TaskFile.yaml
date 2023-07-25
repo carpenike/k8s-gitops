@@ -124,7 +124,7 @@ tasks:
       - envsubst < <(cat {{.wipeRookDataJobTemplate}}) | kubectl apply -f -
       - bash {{.waitForJobScript}} {{.wipeRookDataJobName}} default
       - kubectl -n default wait job/{{.wipeRookDataJobName}} --for condition=complete --timeout=1m
-      - kubectl -n default logs job/{{.wipeRookDataJobName}} --container list
+      - kubectl -n default logs job/{{.wipeRookDataJobName}}
       - kubectl -n default delete job {{.wipeRookDataJobName}}
     vars:
       node: '{{ or .node (fail "`node` is required") }}'
