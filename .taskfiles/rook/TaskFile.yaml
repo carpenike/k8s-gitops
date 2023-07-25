@@ -12,47 +12,92 @@ vars:
   ts: '{{now | date "150405"}}'
 
 tasks:
-  wipe-node-delta:
-    desc: Trigger a wipe of Rook-Ceph data on node "delta"
+  wipe-node-node-0:
+    desc: Trigger a wipe of Rook-Ceph data on node "node-0"
     cmds:
-      - task: wipe-disk
+      - task: wipe-disk-sdb
         vars:
           node: "{{.node}}"
-          ceph_disk: "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S649NX0RB57009Y"
+          ceph_disk: "/dev/sdb"
+      - task: wipe-disk-sdc
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdc"
+      - task: wipe-disk-sd3
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdd"
       - task: wipe-data
         vars:
           node: "{{.node}}"
     vars:
-      node: delta
+      node: node-0
 
-  wipe-node-enigma:
-    desc: Trigger a wipe of Rook-Ceph data on node "enigma"
+  wipe-node-node-1:
+    desc: Trigger a wipe of Rook-Ceph data on node "node-1"
     cmds:
-      - task: wipe-disk
+      - task: wipe-disk-sdb
         vars:
           node: "{{.node}}"
-          ceph_disk: "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S649NX0RB57050E"
+          ceph_disk: "/dev/sdb"
+      - task: wipe-disk-sdc
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdc"
+      - task: wipe-disk-sd3
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdd"
       - task: wipe-data
         vars:
           node: "{{.node}}"
     vars:
-      node: enigma
+      node: node-1
 
-  wipe-node-felix:
-    desc: Trigger a wipe of Rook-Ceph data on node "felix"
+  wipe-node-node-2:
+    desc: Trigger a wipe of Rook-Ceph data on node "node-2"
     cmds:
-      - task: wipe-disk
+      - task: wipe-disk-sdb
         vars:
           node: "{{.node}}"
-          ceph_disk: "/dev/disk/by-id/nvme-CT1000P1SSD8_202228759489"
+          ceph_disk: "/dev/sdb"
+      - task: wipe-disk-sdc
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdc"
+      - task: wipe-disk-sd3
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdd"
       - task: wipe-data
         vars:
           node: "{{.node}}"
     vars:
-      node: felix
+      node: node-2
+
+  wipe-node-node-3:
+    desc: Trigger a wipe of Rook-Ceph data on node "node-3"
+    cmds:
+      - task: wipe-disk-sdb
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdb"
+      - task: wipe-disk-sdc
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdc"
+      - task: wipe-disk-sd3
+        vars:
+          node: "{{.node}}"
+          ceph_disk: "/dev/sdd"
+      - task: wipe-data
+        vars:
+          node: "{{.node}}"
+    vars:
+      node: node-3
 
   wipe-disk:
-    desc: Wipe all remnants of rook-ceph from a given disk (ex. task rook:wipe-disk node=delta ceph_disk="/dev/nvme0n1")
+    desc: Wipe all remnants of rook-ceph from a given disk (ex. task rook:wipe-disk node=node-0 ceph_disk="/dev/sdb")
     silent: true
     internal: true
     cmds:
