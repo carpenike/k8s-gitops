@@ -1,0 +1,57 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  chart:
+    spec:
+      chart: cilium
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+      version: 1.14.0-snapshot.4
+  interval: 30m
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-values
+
+  values:
+    hubble:
+      serviceMonitor:
+        enabled: true
+
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        namespace: monitoring
+        labelValue: "1"
+        annotations: {}
+
+      relay:
+        prometheus:
+          serviceMonitor:
+            enabled: true
+
+      ui:
+        ingress:
+          enabled: true
+          className: "nginx"
+          hosts:
+            - &host hubble-cluster-0.holthome.net
+          tls:
+            - hosts:
+                - *host
+
+    prometheus:
+      serviceMonitor:
+        enabled: true
+
+    operator:
+      prometheus:
+        serviceMonitor:
+          enabled: true
