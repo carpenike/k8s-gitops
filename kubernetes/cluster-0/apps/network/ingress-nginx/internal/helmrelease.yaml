@@ -59,10 +59,10 @@ spec:
         proxy-buffer-size: "16k"
         ssl-protocols: "TLSv1.3 TLSv1.2"
 
-        custom-http-errors: >-
-          403,404,500,501,502,503
-        forwarded-for-header: "CF-Connecting-IP"
-        use-forwarded-headers: "true"
+        # custom-http-errors: >-
+        #   403,404,500,501,502,503
+        # forwarded-for-header: "CF-Connecting-IP"
+        # use-forwarded-headers: "true"
 
       metrics:
         enabled: true
