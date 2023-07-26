@@ -83,5 +83,5 @@ spec:
       - name: config
         mountPath: /config
         accessMode: ReadWriteOnce
-        size: 20Gi
+        size: 50Gi
         storageClass: ceph-block
