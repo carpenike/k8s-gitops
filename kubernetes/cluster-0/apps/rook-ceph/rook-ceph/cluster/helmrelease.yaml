@@ -19,8 +19,8 @@ spec:
       enabled: false
 
     monitoring:
-      enabled: true
-      createPrometheusRules: true
+      enabled: false
+      createPrometheusRules: false
 
     configOverride: |
       [global]
