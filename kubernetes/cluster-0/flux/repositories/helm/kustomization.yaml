@@ -13,4 +13,5 @@ resources:
   - kubernetes-sigs-metrics-server.yaml
   - kubernetes-sigs-nfd.yaml
   - postfinance.yaml
+  - prometheus-community.yaml
   - rook-ceph.yaml
