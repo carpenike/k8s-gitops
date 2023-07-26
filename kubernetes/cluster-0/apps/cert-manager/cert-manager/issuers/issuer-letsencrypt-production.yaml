@@ -19,5 +19,5 @@ spec:
           cloudflare:
             email: "ryan@ryanholt.net"
             apiTokenSecretRef:
-              name: cloudflare-token-secret
-              key: cloudflare-token
+              name: cloudflare-api-token
+              key: api-key
