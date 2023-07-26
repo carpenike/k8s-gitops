@@ -1,0 +1,11 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: cloudflared-tunnel
+  namespace: network
+spec:
+  endpoints:
+    - dnsName: external.holthome.net
+      recordType: CNAME
+      targets: ["528f3e61-764c-4556-804d-550e6e8046b0.cfargotunnel.com"]
