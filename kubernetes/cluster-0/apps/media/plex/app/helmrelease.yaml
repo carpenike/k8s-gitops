@@ -35,7 +35,7 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: "internal"
         annotations:
           external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
           kubernetes.io/tls-acme: "true"
