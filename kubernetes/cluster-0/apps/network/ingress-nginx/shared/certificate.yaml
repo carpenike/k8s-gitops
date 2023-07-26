@@ -1,0 +1,15 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "holthome-net"
+  namespace: network
+spec:
+  secretName: "holthome-net-tls"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "holthome.net"
+  dnsNames:
+    - "holthome.net"
+    - "*.holthome.net"
