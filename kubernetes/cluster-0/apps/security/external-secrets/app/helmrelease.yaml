@@ -22,17 +22,17 @@ spec:
     grafana:
       enabled: true
     serviceMonitor:
-      enabled: true
+      enabled: false
       interval: 1m
     backgroundController:
       serviceMonitor:
-        enabled: true
+        enabled: false
         interval: 1m
     cleanupController:
       serviceMonitor:
-        enabled: true
+        enabled: false
         interval: 1m
     reportsController:
       serviceMonitor:
-        enabled: true
+        enabled: false
         interval: 1m
