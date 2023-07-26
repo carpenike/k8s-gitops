@@ -35,11 +35,9 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: "external-nginx"
         annotations:
-          external-dns.alpha.kubernetes.io/target: "ipv4.holthome.net"
-          kubernetes.io/tls-acme: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-production
+          external-dns.alpha.kubernetes.io/target: "external.holthome.net"
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         hosts:
           - host: &host "plex.holthome.net"
@@ -49,7 +47,6 @@ spec:
         tls:
           - hosts:
               - *host
-            secretName: tls.plex
 
     persistence:
       nfs-nas-media:
