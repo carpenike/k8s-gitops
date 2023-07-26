@@ -8,4 +8,4 @@ spec:
   endpoints:
     - dnsName: external.holthome.net
       recordType: CNAME
-      targets: ["528f3e61-764c-4556-804d-550e6e8046b0.cfargotunnel.com"]
+      targets: ["72f8a637-1c52-4e87-8c36-75c599a8a33a.cfargotunnel.com"]
