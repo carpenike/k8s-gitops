@@ -95,6 +95,9 @@ spec:
         limits:
           memory: 1Gi
 
+    defaultBackend:
+      enabled: false
+
   #   defaultBackend:
   #     enabled: true
   #     image:
