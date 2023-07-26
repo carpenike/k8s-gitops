@@ -5,7 +5,7 @@ metadata:
   name: volsync
   namespace: system
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: volsync
@@ -14,17 +14,7 @@ spec:
         kind: HelmRepository
         name: backube
         namespace: flux-system
-  maxHistory: 3
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
+      interval: 30m
   values:
     manageCRDs: true
     metrics:
