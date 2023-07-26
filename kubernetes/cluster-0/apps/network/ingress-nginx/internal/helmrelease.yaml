@@ -2,10 +2,9 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: ingress-nginx
-  namespace: network
+  name: nginx-internal
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: ingress-nginx
@@ -14,20 +13,21 @@ spec:
         kind: HelmRepository
         name: ingress-nginx
         namespace: flux-system
-      interval: 15m
+      interval: 30m
   values:
+    fullnameOverride: nginx-internal
+
     controller:
       replicaCount: 3
 
       updateStrategy:
         type: RollingUpdate
-        rollingUpdate:
-          maxSurge: 1
 
       service:
         enabled: true
+        type: LoadBalancer
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: "ipv4.holthome.net"
+          external-dns.alpha.kubernetes.io/hostname: "internal.holthome.net"
           io.cilium/lb-ipam-ips: "10.45.10.10"
         externalTrafficPolicy: Cluster
 
@@ -35,7 +35,17 @@ spec:
         enabled: true
 
       ingressClassResource:
+        name: internal-nginx
         default: true
+        controllerValue: k8s.io/ingress-nginx-internal
+
+      admissionWebhooks:
+        objectSelector:
+          matchExpressions:
+            - key: ingress-class
+              operator: In
+              values:
+                - internal-nginx
 
       config:
         client-header-timeout: 120
@@ -59,11 +69,6 @@ spec:
         proxy-buffer-size: "16k"
         ssl-protocols: "TLSv1.3 TLSv1.2"
 
-        # custom-http-errors: >-
-        #   403,404,500,501,502,503
-        # forwarded-for-header: "CF-Connecting-IP"
-        # use-forwarded-headers: "true"
-
       metrics:
         enabled: true
         serviceMonitor:
@@ -74,7 +79,6 @@ spec:
 
       extraArgs:
         default-ssl-certificate: "network/holthome-net-tls"
-        # enable-ssl-passthrough: ""
 
       topologySpreadConstraints:
         - maxSkew: 2
@@ -85,35 +89,12 @@ spec:
               app.kubernetes.io/instance: ingress-nginx
               app.kubernetes.io/component: controller
 
-      # podAnnotations:
-      #   configmap.reloader.stakater.com/reload: "cloudflare-proxied-networks"
-
       resources:
         requests:
           cpu: 99m
           memory: 768Mi
         limits:
-          memory: 1Gi
+          memory: 768Mi
 
     defaultBackend:
       enabled: false
-
-  #   defaultBackend:
-  #     enabled: true
-  #     image:
-  #       repository: ghcr.io/tarampampam/error-pages
-  #       tag: 2.24.0
-  #     extraEnvs:
-  #       - { name: TEMPLATE_NAME, value: lost-in-space }
-  #       - { name: SHOW_DETAILS, value: "false" }
-
-  #   tcp:
-  #     "5432": "db/postgres-rw:5432"
-
-  # valuesFrom:
-  #   # Cloudflare Networks
-  #   # https://www.cloudflare.com/ips/
-  #   - kind: ConfigMap
-  #     name: cloudflare-proxied-networks
-  #     valuesKey: cloudflare-proxied-networks.txt
-  #     targetPath: controller.config.proxy-real-ip-cidr
