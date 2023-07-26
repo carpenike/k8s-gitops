@@ -4,5 +4,5 @@ kind: Kustomization
 namespace: cert-manager
 resources:
   - ./externalsecret.yaml
-  - ./issuer-letsencrypt-prd.yaml
+  - ./issuer-letsencrypt-production.yaml
   - ./issuer-letsencrypt-staging.yaml

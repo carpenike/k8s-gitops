@@ -1,0 +1,23 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ryan@ryanholt.net
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - selector:
+          dnsZones:
+            - "holthome.net"
+            - "ryho.lt"
+            - "ryanholt.net"
+        dns01:
+          cloudflare:
+            email: "ryan@ryanholt.net"
+            apiTokenSecretRef:
+              name: cloudflare-token-secret
+              key: cloudflare-token
