@@ -1,0 +1,228 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  chart:
+    spec:
+      chart: grafana
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+      version: 6.58.6
+  interval: 30m
+  timeout: 20m
+  values:
+    replicas: 1
+
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            disableDeletion: false
+            editable: true
+            folder: ""
+            options:
+              path: /var/lib/grafana/dashboards/default
+            orgId: 1
+            type: file
+          - name: node-exporter
+            disableDeletion: false
+            editable: true
+            folder: "node-exporter"
+            options:
+              path: /var/lib/grafana/dashboards/node-exporter
+            orgId: 1
+            type: file
+          - name: unpoller
+            disableDeletion: false
+            editable: true
+            folder: "UniFi Poller"
+            options:
+              path: /var/lib/grafana/dashboards/unpoller
+            orgId: 1
+            type: file
+
+    dashboards:
+      default:
+        speedtest-exporter-hub:
+          gnetId: 13665
+          revision: 4
+          datasource:
+            - name: "DS_PROMETHEUS"
+              value: Prometheus
+
+      node-exporter:
+        # Ref: https://grafana.com/grafana/dashboards/1860-node-exporter-full/
+        node-exporter:
+          gnetId: 1860
+          revision: 29
+          datasource: Prometheus
+
+      unpoller:
+        # Ref: https://grafana.com/grafana/dashboards/11315
+        clients:
+          gnetId: 11315
+          revision: 9
+          datasource:
+            - name: "DS_PROMETHEUS"
+              value: Prometheus
+        # Ref: https://grafana.com/grafana/dashboards/11312
+        usw:
+          gnetId: 11312
+          revision: 9
+          datasource:
+            - name: "DS_PROMETHEUS"
+              value: Prometheus
+        # Ref: https://grafana.com/grafana/dashboards/11314
+        uap:
+          gnetId: 11314
+          revision: 10
+          datasource:
+            - name: "DS_PROMETHEUS"
+              value: Prometheus
+
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - access: proxy
+            isDefault: true
+            name: Prometheus
+            type: prometheus
+            url: http://thanos-query.monitoring:9090
+          - access: proxy
+            name: Loki
+            type: loki
+            url: http://loki-gateway.monitoring.svc.cluster.local:80
+          - name: Alertmanager
+            type: alertmanager
+            access: proxy
+            url: http://alertmanager.monitoring.svc.cluster.local:9093
+            jsonData:
+              implementation: prometheus
+        deleteDatasources:
+          - name: Loki
+            orgId: 1
+          - name: Alertmanager
+            orgId: 1
+
+    deploymentStrategy:
+      type: Recreate
+
+    envFromSecret: grafana-secret
+
+    grafana.ini:
+      analytics:
+        check_for_updates: false
+        check_for_plugin_updates: false
+        reporting_enabled: false
+      auth:
+        oauth_auto_login: true
+        oauth_allow_insecure_email_lookup: true
+      auth.basic:
+        enabled: false
+      auth.generic_oauth:
+        enabled: true
+        name: Authelia
+        icon: signin
+        scopes: openid profile email groups
+        empty_scopes: false
+        login_attribute_path: preferred_username
+        groups_attribute_path: groups
+        name_attribute_path: name
+        use_pkce: true
+        client_id: grafana
+        client_secret: # Set by env vars
+        auth_url: https://auth.holthome.net/api/oidc/authorization
+        token_url: https://auth.holthome.net/api/oidc/token
+        api_url: https://auth.holthome.net/api/oidc/userinfo
+      auth.generic_oauth.group_mapping:
+        org_id: 1
+        role_attribute_path: |
+          contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'people') && 'Viewer'
+      dashboards:
+        default_home_dashboard_path: /tmp/dashboards/home.json
+      date_formats:
+        use_browser_locale: true
+      explore:
+        enabled: true
+      grafana_net:
+        url: https://grafana.net
+      log:
+        mode: console
+      news:
+        news_feed_enabled: false
+      panels:
+        disable_sanitize_html: true
+      paths:
+        data: /var/lib/grafana/data
+        logs: /var/log/grafana
+        plugins: /var/lib/grafana/plugins
+        provisioning: /etc/grafana/provisioning
+      security:
+        allow_embedding: true
+        cookie_samesite: grafana
+      server:
+        root_url: https://grafana.holthome.net
+
+    imageRenderer:
+      enabled: true
+
+    ingress:
+      enabled: true
+      ingressClassName: internal-nginx
+      hosts:
+        - &host grafana.holthome.net
+      tls:
+        - hosts:
+            - *host
+
+    persistence:
+      enabled: false
+
+    plugins:
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+      - grafana-piechart-panel
+      - vonage-status-panel
+      - grafana-worldmap-panel
+      - grafana-clock-panel
+
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: grafana
+      secret.reloader.stakater.com/reload: grafana-secrets
+
+    rbac:
+      pspEnabled: false
+
+    resources:
+      limits:
+        memory: 219M
+      requests:
+        cpu: 23m
+        memory: 127M
+
+    serviceMonitor:
+      enabled: true
+
+    sidecar:
+      dashboards:
+        enabled: true
+        labelValue: ""
+        label: grafana_dashboard
+        folderAnnotation: grafana_folder
+        searchNamespace: ALL
+        provider:
+          disableDelete: true
+          foldersFromFilesStructure: true
+      datasources:
+        enabled: true
+        labelValue: ""
+        searchNamespace: ALL
+      logLevel: INFO
