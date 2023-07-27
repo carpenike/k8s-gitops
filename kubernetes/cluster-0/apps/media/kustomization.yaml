@@ -7,4 +7,5 @@ resources:
   # Flux-Kustomizations
   - ./_pvs/ks.yaml
   - ./plex/ks.yaml
+  - ./qbittorrent/ks.yaml
   - ./tautulli/ks.yaml
