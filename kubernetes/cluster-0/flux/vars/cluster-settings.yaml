@@ -5,4 +5,4 @@ metadata:
   name: cluster-settings
   namespace: flux-system
 data:
-  CLUSTER_NAME: nas-1
+  CLUSTER_NAME: cluster-0
