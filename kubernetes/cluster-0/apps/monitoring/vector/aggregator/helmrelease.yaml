@@ -1,0 +1,104 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  labels:
+    app.kubernetes.io/instance: vector-aggregator
+    app.kubernetes.io/name: vector-aggregator
+  name: vector-aggregator
+  namespace: monitoring
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  interval: 30m
+  values:
+    controller:
+      replicas: 1
+      strategy: Recreate
+      annotations:
+        reloader.stakater.com/auto: "true"
+
+    initContainers:
+      01-init-geoip:
+        image: ghcr.io/maxmind/geoipupdate:v6.0.0@sha256:e0d5c1dee7379d360e0f355557542d9672c616215dfdd5aaf917382de84cb84c
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: GEOIPUPDATE_EDITION_IDS
+            value: GeoLite2-City
+          - name: GEOIPUPDATE_FREQUENCY
+            value: "0"
+          - name: GEOIPUPDATE_VERBOSE
+            value: "true"
+        envFrom:
+          - secretRef:
+              name: vector-aggregator-secret
+        volumeMounts:
+          - name: geoip
+            mountPath: /usr/share/GeoIP
+
+    image:
+      repository: ghcr.io/onedr0p/vector
+      tag: 0.31.0-debian@sha256:00918218d9c53f62a2f48ed6eeee2fb06ee48a55129ffeb7c713264a2d3f5eab
+
+    args:
+      - "--config"
+      - "/etc/vector/vector.yaml"
+
+    service:
+      main:
+        type: LoadBalancer
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: "vector.holthome.net"
+          io.cilium/lb-ipam-ips: "10.45.10.16"
+        externalTrafficPolicy: Cluster
+        ports:
+          http:
+            port: 8686
+          kubernetes-logs:
+            enabled: true
+            port: 6000
+          vyos-syslog:
+            enabled: true
+            port: 6001
+          journald-logs:
+            enabled: true
+            port: 6002
+
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: vector-aggregator-configmap
+        subPath: vector.yaml
+        mountPath: /etc/vector/vector.yaml
+        readOnly: true
+      data:
+        enabled: true
+        type: emptyDir
+        mountPath: /vector-data-dir
+      geoip:
+        enabled: true
+        type: emptyDir
+        mountPath: /usr/share/GeoIP
+
+    # resources:
+    #   requests:
+    #     cpu: 35m
+    #     memory: 381M
+    #   limits:
+    #     memory: 726M
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: vector-aggregator
