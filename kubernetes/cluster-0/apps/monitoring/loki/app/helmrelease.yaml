@@ -136,7 +136,7 @@ spec:
         annotations:
           hajimari.io/enable: "false"
         hosts:
-          - host: &host loki-cluster-0.holthome.net
+          - host: &host loki.holthome.net
             paths:
               - path: /
                 pathType: Prefix
