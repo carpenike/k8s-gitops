@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: vpn
 resources:
   - externalsecret.yaml
-  - helm-release.yaml
-  - network-policy.yaml
+  - helmrelease.yaml
+  - networkpolicy.yaml
 commonLabels:
   app.kubernetes.io/name: pod-gateway
   app.kubernetes.io/instance: media-gateway
