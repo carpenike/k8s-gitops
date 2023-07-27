@@ -36,20 +36,7 @@ spec:
       type: s3
       config:
         insecure: true
-    queryFrontend:
-      enabled: true
-      replicaCount: 3
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-        hostname: &host thanos-query-frontend.holthome.net
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
+
     query:
       enabled: true
       replicaCount: 3
@@ -57,9 +44,30 @@ spec:
       dnsDiscovery:
         sidecarsService: kube-prometheus-stack-thanos-discovery
         sidecarsNamespace: monitoring
+      resources:
+        requests:
+          cpu: 15m
+          memory: 64M
+
+    queryFrontend:
+      enabled: true
+      replicaCount: 3
+      ingress:
+        enabled: true
+        ingressClassName: "internal-nginx"
+        hostname: &host thanos.holthome.net
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
+
     bucketweb:
       enabled: true
       replicaCount: 3
+      resources:
+        requests:
+          cpu: 15m
+          memory: 64M
 
     compactor:
       enabled: true
@@ -69,6 +77,10 @@ spec:
       retentionResolutionRaw: 14d
       retentionResolution5m: 14d
       retentionResolution1h: 30d
+      resources:
+        requests:
+          cpu: 15m
+          memory: 204M
       persistence:
         enabled: true
         storageClass: "ceph-block"
@@ -76,6 +88,10 @@ spec:
 
     storegateway:
       enabled: true
+      resources:
+        requests:
+          cpu: 23m
+          memory: 204M
       persistence:
         enabled: true
         storageClass: "ceph-block"
@@ -86,9 +102,9 @@ spec:
       replicaCount: 3
       replicaLabel: __replica__
       alertmanagers:
-        - http://kube-prometheus-stack-alertmanager.monitoring:9093
+        - http://alertmanager.monitoring.svc.cluster.local:9093
       extraFlags: ["--web.prefix-header=X-Forwarded-Prefix"]
-      clusterName: ${CLUSTER_NAME}
+      clusterName: cluster-0
       config: |-
         groups:
           - name: PrometheusWatcher
@@ -100,10 +116,18 @@ spec:
                 for: 5m
                 labels:
                   severity: critical
+      dnsDiscovery:
+        enabled: true
       persistence:
         enabled: true
         storageClass: "ceph-block"
         size: 20Gi
+      resources:
+        requests:
+          cpu: 23m
+          memory: 94M
+        limits:
+          memory: 113M
 
     metrics:
       enabled: true
