@@ -1,0 +1,86 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mosquitto
+  namespace: home
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
+    image:
+      repository: public.ecr.aws/docker/library/eclipse-mosquitto
+      tag: 2.0.15
+
+    initContainers:
+      copy-config:
+        image: public.ecr.aws/docker/library/eclipse-mosquitto:2.0.15@sha256:efc3fd76a152985decdbd3768f79e4635d2e47febaeb1349d8f421a48fb0564b
+        command:
+          - "/bin/sh"
+          - -c
+        args:
+          - cp /data/mosquitto_secret/* /data/external_config/ && mosquitto_passwd -U /data/external_config/mosquitto_pwd
+        volumeMounts:
+          - name: mosquitto-secret
+            mountPath: /data/mosquitto_secret
+          - name: external-config
+            mountPath: /data/external_config
+
+    service:
+      main:
+        type: LoadBalancer
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: "mqtt.holthome.net."
+          io.cilium/lb-ipam-ips: "10.45.10.11"
+        externalTrafficPolicy: Cluster
+        ports:
+          http:
+            enabled: false
+          mqtt:
+            enabled: true
+            port: 1883
+
+    persistence:
+      mosquitto-config:
+        enabled: true
+        type: configMap
+        name: mosquitto-configmap
+        mountPath: /mosquitto/config/mosquitto.conf
+        subPath: mosquitto.conf
+      mosquitto-secret:
+        enabled: true
+        type: secret
+        name: mosquitto-secret
+        mountPath: "-"
+      external-config:
+        enabled: true
+        type: emptyDir
+        mountPath: /mosquitto/external_config
+
+    resources:
+      requests:
+        cpu: 5m
+        memory: 10M
+      limits:
+        memory: 10M
+
+    volumeClaimTemplates:
+      - name: data
+        mountPath: /data
+        accessMode: ReadWriteOnce
+        size: 512Mi
+        storageClass: ceph-block
