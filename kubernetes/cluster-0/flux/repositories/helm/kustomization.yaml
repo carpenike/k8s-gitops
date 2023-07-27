@@ -7,6 +7,7 @@ resources:
   - bitnami.yaml
   - bjw-s.yaml
   - cilium.yaml
+  - cloudnative-pg.yaml
   - democratic-csi.yaml
   - external-secrets.yaml
   - grafana.yaml
