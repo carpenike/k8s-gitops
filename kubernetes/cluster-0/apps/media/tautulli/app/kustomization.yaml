@@ -5,3 +5,6 @@ resources:
   - pvc.yaml
   - helmrelease.yaml
   - volsync.yaml
+commonLabels:
+  app.kubernetes.io/name: tautulli
+  app.kubernetes.io/instance: tautulli
