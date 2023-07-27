@@ -8,6 +8,7 @@ resources:
   - bjw-s.yaml
   - cilium.yaml
   - external-secrets.yaml
+  - grafana.yaml
   - ingress-nginx.yaml
   - jetstack.yaml
   - kubernetes-sigs-descheduler.yaml
