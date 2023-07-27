@@ -1,0 +1,60 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  namespace: db
+  annotations:
+    kyverno.io/ignore: "true"
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:14.5
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 100Gi
+    storageClass: local-hostpath
+  superuserSecret:
+    name: cloudnative-pg-secret
+  bootstrap:
+    recovery:
+      source: &previous-cluster postgres-v7
+  postgresql:
+    parameters:
+      max_connections: "300"
+      shared_buffers: 512MB
+      pg_stat_statements.max: "10000"
+      pg_stat_statements.track: all
+  monitoring:
+    enablePodMonitor: true
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore:
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://postgresql/
+      endpointURL: https://minio-s3.holthome.net
+      serverName: postgres-v8
+      s3Credentials:
+        accessKeyId:
+          name: cloudnative-pg-secret
+          key: aws-access-key-id
+        secretAccessKey:
+          name: cloudnative-pg-secret
+          key: aws-secret-access-key
+  # Note: externalClusters is needed when recovering from an existing cnpg cluster
+  externalClusters:
+    - name: *previous-cluster
+      barmanObjectStore:
+        wal:
+          compression: bzip2
+          maxParallel: 8
+        destinationPath: s3://postgresql/
+        endpointURL: https://minio-s3.holthome.net
+        s3Credentials:
+          accessKeyId:
+            name: cloudnative-pg-secret
+            key: aws-access-key-id
+          secretAccessKey:
+            name: cloudnative-pg-secret
+            key: aws-secret-access-key
