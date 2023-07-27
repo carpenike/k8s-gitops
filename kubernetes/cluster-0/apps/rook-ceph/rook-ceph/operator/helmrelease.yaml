@@ -127,7 +127,7 @@ spec:
               memory: 256Mi
 
     monitoring:
-      enabled: false
+      enabled: true
 
     pspEnable: false
 

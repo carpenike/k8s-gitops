@@ -19,8 +19,8 @@ spec:
       enabled: false
 
     monitoring:
-      enabled: false
-      createPrometheusRules: false
+      enabled: true
+      createPrometheusRules: true
 
     configOverride: |
       [global]
@@ -110,7 +110,7 @@ spec:
               - name: "/dev/sdd"
 
     ingress:
-      ingressClassName: "nginx"
+      ingressClassName: "internal-nginx"
       dashboard:
         annotations:
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
