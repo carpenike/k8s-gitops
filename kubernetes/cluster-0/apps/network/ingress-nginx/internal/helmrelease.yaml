@@ -94,7 +94,7 @@ spec:
           cpu: 99m
           memory: 768Mi
         limits:
-          memory: 768Mi
+          memory: 1.5Gi
 
     defaultBackend:
       enabled: false
