@@ -51,7 +51,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.holthome.net
         hosts:
-          - host: &host "hass.holthome.net"
+          - host: &host "ha.holthome.net"
             paths:
               - path: /
         tls:
