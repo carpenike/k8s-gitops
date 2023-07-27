@@ -42,7 +42,7 @@ spec:
           enabled: true
           className: "internal-nginx"
           hosts:
-            - &host hubble-cluster-0.holthome.net
+            - &host hubble.holthome.net
           tls:
             - hosts:
                 - *host
