@@ -110,12 +110,12 @@ spec:
               - name: "/dev/sdd"
 
     ingress:
-      ingressClassName: "internal-nginx"
       dashboard:
+        ingressClassName: "internal-nginx"
         annotations:
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         host:
-          name: &host rook-cluster-0.holthome.net
+          name: &host rook.holthome.net
           path: "/"
         tls:
           - hosts:
