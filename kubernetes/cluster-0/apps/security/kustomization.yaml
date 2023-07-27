@@ -5,6 +5,6 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
-  # - ./authelia/ks.yaml
+  - ./authelia/ks.yaml
   - ./external-secrets/ks.yaml
   - ./lldap/ks.yaml
