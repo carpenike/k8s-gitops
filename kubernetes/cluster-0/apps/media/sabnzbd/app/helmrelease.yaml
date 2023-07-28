@@ -51,9 +51,6 @@ spec:
         sabnzbd.media.svc.cluster,
         sabnzbd.media.svc.cluster.local,
         sabnzbd.holthome.net
-    envFrom:
-      - secretRef:
-          name: *app
 
     service:
       main:
