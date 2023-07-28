@@ -9,7 +9,7 @@ spec:
     kind: ClusterSecretStore
     name: onepassword-connect
   target:
-    name: qb-restic-secret
+    name: qbittorrent-restic-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
@@ -34,7 +34,7 @@ spec:
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 10
-    repository: qb-restic-secret
+    repository: qbittorrent-restic-secret
     cacheCapacity: 5Gi
     volumeSnapshotClassName: csi-ceph-blockpool
     storageClassName: ceph-block
