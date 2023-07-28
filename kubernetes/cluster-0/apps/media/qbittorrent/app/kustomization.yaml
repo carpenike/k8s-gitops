@@ -4,3 +4,7 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - volsync.yaml
+commonLabels:
+  app.kubernetes.io/name: qbittorrent
+  app.kubernetes.io/instance: qbittorrent
+  app.kubernetes.io/component: app
