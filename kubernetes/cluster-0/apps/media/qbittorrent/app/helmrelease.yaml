@@ -79,7 +79,6 @@ spec:
         tls:
           - hosts:
               - *host
-            secretName: tls.qb
 
     persistence:
       nfs-nas-media:
