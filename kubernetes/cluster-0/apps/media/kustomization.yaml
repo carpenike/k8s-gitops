@@ -9,4 +9,5 @@ resources:
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
+  - ./recyclarr/ks.yaml
   - ./tautulli/ks.yaml
