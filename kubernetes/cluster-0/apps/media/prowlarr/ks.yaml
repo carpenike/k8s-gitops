@@ -13,6 +13,6 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false # no flux ks dependents
   dependsOn:
-    - name: cluster-apps-pod-gateway-downloads
+    - name: cluster-apps-pod-gateway-media
     - name: cluster-apps-external-secrets-stores
     - name: cluster-apps-rook-ceph-cluster
