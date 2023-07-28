@@ -51,6 +51,16 @@ spec:
         sabnzbd.media.svc.cluster,
         sabnzbd.media.svc.cluster.local,
         sabnzbd.holthome.net
+      SABNZBD__API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: sabnzbd-secret
+            key: api_key
+      SABNZBD__NZB_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: sabnzbd-secret
+            key: nzb_key
 
     service:
       main:
