@@ -24,7 +24,7 @@ spec:
   values:
     image:
       repository: docker.io/filebrowser/filebrowser
-      tag: v2.22.4
+      tag: v2.24.0
 
     env:
       TZ: "America/New_York"
