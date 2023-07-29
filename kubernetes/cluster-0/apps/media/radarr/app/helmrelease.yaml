@@ -50,7 +50,7 @@ spec:
         valueFrom:
           secretKeyRef:
             name: radarr-secret
-            key: api_key
+            key: RADARR_APIKEY
 
     service:
       main:
