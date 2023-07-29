@@ -1,0 +1,98 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app radarr
+  namespace: media
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
+    image:
+      repository: ghcr.io/onedr0p/radarr-develop
+      tag: 4.6.4.7568@sha256:7dd197028efcc9e4e4bc52cd383efbaa1b6631c8932b3f831a3a1b1687fa8954
+
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
+
+    env:
+      TZ: "America/New_York"
+      RADARR__INSTANCE_NAME: Radarr
+      RADARR__PORT: &port 80
+      RADARR__APPLICATION_URL: "https://radarr.holthome.net"
+      RADARR__LOG_LEVEL: info
+      RADARR__API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: radarr-secret
+            key: api_key
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "internal-nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/radarr/nord.css"></head>';
+            sub_filter_once on;
+        hosts:
+          - host: &host radarr.holthome.net
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+
+    persistence:
+      nfs-nas-media:
+        enabled: true
+        existingClaim: media-nfs-share-pvc
+        mountPath: /media
+        readOnly: false
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 250Mi
+      limits:
+        memory: 2000Mi
+
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
