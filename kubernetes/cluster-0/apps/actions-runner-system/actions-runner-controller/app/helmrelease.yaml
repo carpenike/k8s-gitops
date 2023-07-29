@@ -8,8 +8,8 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: actions-runner-controller
-      version: 0.23.3
+      chart: gha-runner-scale-set-controller
+      version: 0.4.0
       sourceRef:
         kind: HelmRepository
         name: actions-runner-controller
@@ -28,47 +28,4 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    image:
-      repository: ghcr.io/actions-runner-controller/actions-runner-controller
-    authSecret:
-      create: false
-      name: &secret actions-runner-controller-secret
-    podAnnotations:
-      secret.reloader.stakater.com/reload: *secret
-    githubWebhookServer:
-      enabled: true
-      syncPeriod: 10m
-      secret:
-        create: false
-        name: *secret
-      podAnnotations:
-        secret.reloader.stakater.com/reload: *secret
-      ingress:
-        enabled: true
-        annotations:
-          external-dns.alpha.kubernetes.io/target: ipv4.holthome.net
-        ingressClassName: nginx
-        hosts:
-          - host: &host arc-webhook.holthome.net
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - *host
-    metrics:
-      serviceMonitor: false
-      port: 8080
-      proxy:
-        enabled: false
-    actionsMetricsServer:
-      enabled: true
-      secret:
-        enabled: true
-        create: false
-        name: *secret
-    actionsMetrics:
-      serviceMonitor: false
-      port: 8080
-      proxy:
-        enabled: false
+    fullnameOverride: gha-runner-scale-set-controller
