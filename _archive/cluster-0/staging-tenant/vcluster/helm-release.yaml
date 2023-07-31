@@ -25,7 +25,7 @@ spec:
       retries: 5
   values:
     vcluster:
-      image: rancher/k3s:v1.27.3-k3s1
+      image: rancher/k3s:v1.27.4-k3s1
 
     sync:
       nodes:
