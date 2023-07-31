@@ -11,7 +11,7 @@ data:
     endpoints:
       - name: home-assistant
         group: external
-        url: https://hass.holthome.net
+        url: https://ha.holthome.net
         interval: 1m
         client:
           dns-resolver: tcp://1.1.1.1:53
