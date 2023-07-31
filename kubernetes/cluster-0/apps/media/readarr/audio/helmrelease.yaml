@@ -64,7 +64,6 @@ spec:
         tls:
           - hosts:
               - *host
-            secretName: tls.readarr-audio
 
     podSecurityContext:
       runAsUser: 568
