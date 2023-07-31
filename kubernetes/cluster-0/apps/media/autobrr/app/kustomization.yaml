@@ -5,6 +5,7 @@ namespace: media
 resources:
   - ./helmrelease.yaml
   - ./volsync.yaml
+  - ./gatus.yaml
 configMapGenerator:
   - name: autobrr-configmap
     files:
