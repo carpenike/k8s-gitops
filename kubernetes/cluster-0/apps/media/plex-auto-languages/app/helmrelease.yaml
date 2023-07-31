@@ -27,21 +27,28 @@ spec:
     keepHistory: false
   values:
     controller:
+      type: statefulset
       annotations:
+        reloader.stakater.com/auto: "true"
         secret.reloader.stakater.com/reload: &secret plex-auto-languages-secret
+
     image:
       repository: docker.io/remirigal/plex-auto-languages
       tag: v1.2.1
+
     env:
       TZ: "America/New_York"
       PLEX_URL: "http://plex.media.svc.cluster.local:32400"
       REFRESH_LIBRARY_ON_SCAN: "false"
+
     envFrom:
       - secretRef:
           name: *secret
+
     service:
       main:
         enabled: false
+
     resources:
       requests:
         cpu: 50m
