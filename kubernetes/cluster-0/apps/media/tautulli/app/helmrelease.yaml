@@ -25,7 +25,7 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/tautulli
-      tag: 2.12.3@sha256:6049e9877a7ac505a33c134ad58ca5b29dfbc34c1505e5df7d7784428942a9d0
+      tag: 2.12.5@sha256:d0757cd22196df22e251b9be8db9e729493fb573a07d4d957b553c6676e64440
 
     env:
       TZ: "America/New_York"
