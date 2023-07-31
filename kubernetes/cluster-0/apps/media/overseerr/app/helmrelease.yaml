@@ -29,7 +29,7 @@ spec:
 
     image:
       repository: ghcr.io/sct/overseerr
-      tag: 1.33.0
+      tag: 1.33.2
     env:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
