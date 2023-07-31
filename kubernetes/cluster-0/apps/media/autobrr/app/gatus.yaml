@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: autobrr-gatus-ep
-  namespace: default
+  namespace: media
   labels:
     gatus.io/enabled: "true"
 data:
