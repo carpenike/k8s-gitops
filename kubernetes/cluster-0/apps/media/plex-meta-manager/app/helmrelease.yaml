@@ -1,0 +1,70 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: plex-meta-manager
+  namespace: media
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controller:
+      type: cronjob
+      annotations:
+        secret.reloader.stakater.com/reload: &secret pmm-secret
+      cronjob:
+        schedule: 0 6 * * *
+    image:
+      repository: docker.io/meisnate12/plex-meta-manager
+      tag: v1.19.0
+    env:
+      TZ: "America/New_York"
+      PUID: "568"
+      PGID: "568"
+    command:
+      - /scripts/run.sh
+    service:
+      main:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        existingClaim: pmm-config-pvc
+      config-file:
+        enabled: true
+        type: secret
+        name: *secret
+        mountPath: /config/config.yml
+        subPath: config.yml
+        readOnly: true
+      config-prerolls:
+        enabled: true
+        type: configMap
+        name: pmm-prerolls
+        mountPath: /config/Pre-rolls.yml
+        subPath: Pre-rolls.yml
+        readOnly: true
+      scripts:
+        enabled: true
+        type: configMap
+        name: pmm-scripts
+        mountPath: /scripts
+        defaultMode: 511

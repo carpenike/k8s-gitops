@@ -10,6 +10,7 @@ resources:
   - ./omegabrr/ks.yaml
   - ./overseer/ks.yaml
   - ./plex/ks.yaml
+  - ./plex-meta-manager/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
   - ./radarr/ks.yaml
