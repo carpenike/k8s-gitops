@@ -11,7 +11,7 @@ data:
     endpoints:
       - name: plex
         group: external
-        url: https://plex.holthome.net
+        url: https://plex.holthome.net/web/index.html
         interval: 1m
         client:
           dns-resolver: tcp://1.1.1.1:53
