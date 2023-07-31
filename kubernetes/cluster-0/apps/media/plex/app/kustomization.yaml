@@ -5,6 +5,7 @@ namespace: media
 resources:
   - ./helmrelease.yaml
   - ./volsync.yaml
+  - ./gatus.yaml
 commonLabels:
   app.kubernetes.io/name: plex
   app.kubernetes.io/instance: plex
