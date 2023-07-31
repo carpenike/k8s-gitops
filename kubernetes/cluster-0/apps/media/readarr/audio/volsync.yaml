@@ -28,7 +28,7 @@ metadata:
   name: readarr-audio
   namespace: media
 spec:
-  sourcePVC: readarr-audio-config-pvc
+  sourcePVC: config-readarr-audio-0
   trigger:
     schedule: "0 0 * * *"
   restic:
