@@ -8,6 +8,7 @@ resources:
   - ./_pvs/ks.yaml
   - ./autobrr/ks.yaml
   - ./omegabrr/ks.yaml
+  - ./overseer/ks.yaml
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
