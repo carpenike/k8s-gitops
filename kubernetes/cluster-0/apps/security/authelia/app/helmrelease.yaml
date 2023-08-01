@@ -52,10 +52,10 @@ spec:
       AUTHELIA_DEFAULT_REDIRECTION_URL: https://auth.holthome.net
       AUTHELIA_DUO_API_DISABLE: "true"
       AUTHELIA_LOG_LEVEL: info
-      AUTHELIA_NOTIFIER_SMTP_HOST: smtp.eu.mailgun.org
+      AUTHELIA_NOTIFIER_SMTP_HOST: smtp.mailgun.org
       AUTHELIA_NOTIFIER_SMTP_PORT: "587"
-      AUTHELIA_NOTIFIER_SMTP_USERNAME: "authelia@mg.holthome.net"
-      AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@mg.holthome.net>
+      AUTHELIA_NOTIFIER_SMTP_USERNAME: "authelia@holthome.net"
+      AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@holthome.net>
       AUTHELIA_SERVER_DISABLE_HEALTHCHECK: "true"
       AUTHELIA_SERVER_PORT: &port 80
       AUTHELIA_SESSION_DOMAIN: holthome.net
