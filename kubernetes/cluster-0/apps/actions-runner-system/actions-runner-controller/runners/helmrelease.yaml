@@ -25,7 +25,7 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    runnerScaleSetName: arc-runner-set-k8s-gitops
+    runnerScaleSetName: arc-runner-set-home-ops
     githubConfigUrl: https://github.com/carpenike/k8s-gitops
     minRunners: 1
     maxRunners: 3
