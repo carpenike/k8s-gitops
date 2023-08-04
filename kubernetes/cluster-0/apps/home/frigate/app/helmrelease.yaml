@@ -90,11 +90,11 @@ spec:
         storageClass: ceph-block
 
     persistence:
-      config:
+      config-file:
         enabled: true
         type: configMap
-        name: *app
-        subPath: config.yaml
+        name: frigate-configmap
+        subPath: config.yml
         mountPath: /config/config.yml
         readOnly: true
 
