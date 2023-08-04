@@ -94,7 +94,7 @@ spec:
         cpu: 48m
         memory: 146M
       limits:
-        memory: 146M
+        memory: 1Gi
 
     volumeClaimTemplates:
       - name: data
