@@ -5,7 +5,7 @@ metadata:
   name: cluster-apps-frigate
   namespace: flux-system
 spec:
-  path: ./kubernetes/cluster-0/apps/default/frigate/app
+  path: ./kubernetes/cluster-0/apps/home/frigate/app
   prune: true
   sourceRef:
     kind: GitRepository
