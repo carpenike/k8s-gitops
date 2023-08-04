@@ -8,7 +8,7 @@ resources:
   # - ./immich/ks.yaml
   - ./miniflux/ks.yaml
   # - ./node-red/ks.yaml
-  # - ./obsidian-couchdb/ks.yaml
+  - ./obsidian-couchdb/ks.yaml
   # - ./paperless/ks.yaml
   # - ./radicale/ks.yaml
   # - ./theme-park/ks.yaml
