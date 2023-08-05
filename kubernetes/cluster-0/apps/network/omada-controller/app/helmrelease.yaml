@@ -145,20 +145,6 @@ spec:
             protocol: TCP
             targetPort: 27217
 
-    persistence:
-      data:
-        enabled: true
-        mountPath: /opt/tplink/EAPController/data
-        existingClaim: omada-data-pvc
-      work:
-        enabled: true
-        mountPath: /opt/tplink/EAPController/work
-        existingClaim: omada-work-pvc
-      logs:
-        enabled: true
-        mountPath: /opt/tplink/EAPController/logs
-        existingClaim: omada-logs-pvc
-
     resources:
       requests:
         memory: 1200Mi
