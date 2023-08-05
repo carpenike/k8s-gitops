@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omada-gatus-ep
+  namespace: network
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: omada
+        group: guarded
+        url: 1.1.1.1
+        interval: 1m
+        dns:
+          query-name: omada.holthome.net
+          query-type: A
+        conditions:
+          - "len([BODY]) == 0"
+        alerts:
+          - type: pushover

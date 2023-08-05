@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: network
+resources:
+  - helmrelease.yaml
+commonLabels:
+  app.kubernetes.io/name: omada-controller
+  app.kubernetes.io/instance: omada-controller
