@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: selfhosted
 resources:
   - ./externalsecret.yaml
+  - ./gatus.yaml
   - ./helmrelease.yaml
 labels:
   - pairs:

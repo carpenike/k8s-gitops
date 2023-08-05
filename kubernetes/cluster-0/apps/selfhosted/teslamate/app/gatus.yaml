@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: teslamate-gatus-ep
+  namespace: media
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: teslamate
+        group: guarded
+        url: 1.1.1.1
+        interval: 1m
+        dns:
+          query-name: teslamate.holthome.net
+          query-type: A
+        conditions:
+          - "len([BODY]) == 0"
+        alerts:
+          - type: pushover
