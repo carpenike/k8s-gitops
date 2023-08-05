@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: media
 resources:
   - externalsecret.yaml
+  - gatus.yaml
   - helmrelease.yaml
   - volsync.yaml
 commonLabels:
