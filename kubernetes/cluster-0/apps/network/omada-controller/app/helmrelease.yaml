@@ -81,7 +81,7 @@ spec:
       controller:
         enabled: true
         type: LoadBalancer
-        loadBalancerIP: "${SVC_OMADA_ADDRESS}"
+        loadBalancerIP: "10.45.10.20"
         externalTrafficPolicy: Local
         ports:
           mgmt-8088-tcp:
