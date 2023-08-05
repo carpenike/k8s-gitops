@@ -11,3 +11,4 @@ resources:
   - ./mosquitto/ks.yaml
   # - ./scrypted/ks.yaml
   # - ./zigbee2mqtt/ks.yaml
+  - ./zwavejs2mqtt/ks.yaml
