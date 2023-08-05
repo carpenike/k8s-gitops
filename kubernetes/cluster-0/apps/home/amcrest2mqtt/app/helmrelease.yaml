@@ -5,7 +5,7 @@ metadata:
   name: amcrest2mqtt
   namespace: home
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: app-template
@@ -13,16 +13,18 @@ spec:
       interval: 15m
       sourceRef:
         kind: HelmRepository
-        name: bjw-s-charts
+        name: bjw-s
         namespace: flux-system
 
   values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
     image:
       repository: dchesterton/amcrest2mqtt
       tag: 1.0.16
-
-    podAnnotations:
-      secret.reloader.stakater.com/reload: "amcrest2mqtt-secrets"
 
     env:
       MQTT_HOST: mosquitto.home
@@ -31,7 +33,7 @@ spec:
 
     envFrom:
       - secretRef:
-          name: amcrest2mqtt-secrets
+          name: amcrest2mqtt-secret
 
     service:
       main:
