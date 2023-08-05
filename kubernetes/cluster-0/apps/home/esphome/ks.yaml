@@ -10,9 +10,9 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops-kubernetes
+    name: k8s-gitops-kubernetes
   wait: false # no flux ks dependents
   dependsOn:
-    - name: cluster-apps-multus-config
+    # - name: cluster-apps-multus-config
     - name: cluster-apps-external-secrets-stores
     - name: cluster-apps-rook-ceph-cluster
