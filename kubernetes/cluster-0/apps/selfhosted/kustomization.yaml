@@ -10,6 +10,7 @@ resources:
   # - ./node-red/ks.yaml
   - ./obsidian-couchdb/ks.yaml
   - ./teslamate/ks.yaml
+  - ./thelounge/ks.yaml
   # - ./paperless/ks.yaml
   # - ./radicale/ks.yaml
   # - ./theme-park/ks.yaml
