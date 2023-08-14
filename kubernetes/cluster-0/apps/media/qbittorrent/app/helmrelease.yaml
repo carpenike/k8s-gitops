@@ -86,13 +86,43 @@ spec:
         existingClaim: media-nfs-share-pvc
         mountPath: /media
         readOnly: false
-
+      scripts:
+        enabled: true
+        type: configMap
+        name: qbittorrent-scripts
+        mountPath: /scripts/xseed.sh
+        subPath: xseed.sh
+        defaultMode: 0775
+        readOnly: true
+      xseed:
+        enabled: true
+        type: secret
+        name: cross-seed-secret
+        mountPath: /config/config.js
+        subPath: config.js
+        readOnly: true
     resources:
       requests:
         memory: 250Mi
         cpu: 500m
       limits:
         memory: 6000Mi
+
+    sidecars:
+      xseed:
+        image: ghcr.io/cross-seed/cross-seed:5.4.0@sha256:0c696fb49adb401b481df58b5bc649434860fb25c25efcb0d2a0a7161e2ff971
+        imagePullPolicy: IfNotPresent
+        args:
+          - daemon
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: xseed
+            mountPath: /config/config.js
+            subPath: config.js
+            readOnly: true
+          - name: media
+            mountPath: /media
 
     volumeClaimTemplates:
       - name: config

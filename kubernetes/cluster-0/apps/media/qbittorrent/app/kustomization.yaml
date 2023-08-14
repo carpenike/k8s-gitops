@@ -5,6 +5,15 @@ resources:
   - helmrelease.yaml
   - ./gatus.yaml
   - volsync.yaml
+configMapGenerator:
+  - name: qbittorrent-scripts
+    files:
+      - ./scripts/xseed.sh
+  - name: cross-seed-config-tpl
+    files:
+      - ./configs/config.js
+generatorOptions:
+  disableNameSuffixHash: true
 commonLabels:
   app.kubernetes.io/name: qbittorrent
   app.kubernetes.io/instance: qbittorrent
