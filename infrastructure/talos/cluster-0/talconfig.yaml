@@ -30,53 +30,53 @@ nodes:
     disableSearchDomain: true
     ipAddress: 10.20.10.20
     installDisk: /dev/sda
-    # networkInterfaces:
-    #   - interface: eth2
-    #     dhcp: true
-    #     vlans:
-    #       - vlanId: 30
-    #         dhcp: true
-    #         dhcpOptions:
-    #           routeMetric: 4096
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - vlanId: 30
+            dhcp: true
+            dhcpOptions:
+              routeMetric: 4096
   - hostname: node-1.holthome.net
     controlPlane: true
     disableSearchDomain: true
     ipAddress: 10.20.10.21
     installDisk: /dev/sda
-    # networkInterfaces:
-    #   - interface: eth2
-    #     dhcp: true
-    #     vlans:
-    #       - vlanId: 30
-    #         dhcp: true
-    #         dhcpOptions:
-    #           routeMetric: 4096
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - vlanId: 30
+            dhcp: true
+            dhcpOptions:
+              routeMetric: 4096
   - hostname: node-2.holthome.net
     controlPlane: true
     disableSearchDomain: true
     ipAddress: 10.20.10.22
     installDisk: /dev/sda
-    # networkInterfaces:
-    #   - interface: eth2
-    #     dhcp: true
-    #     vlans:
-    #       - vlanId: 30
-    #         dhcp: true
-    #         dhcpOptions:
-    #           routeMetric: 4096
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - vlanId: 30
+            dhcp: true
+            dhcpOptions:
+              routeMetric: 4096
   - hostname: node-3.holthome.net
     controlPlane: true
     disableSearchDomain: true
     ipAddress: 10.20.10.23
     installDisk: /dev/sda
-    # networkInterfaces:
-    #   - interface: eth2
-    #     dhcp: true
-    #     vlans:
-    #       - vlanId: 30
-    #         dhcp: true
-    #         dhcpOptions:
-    #           routeMetric: 4096
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - vlanId: 30
+            dhcp: true
+            dhcpOptions:
+              routeMetric: 4096
 
 controlPlane:
   patches:
