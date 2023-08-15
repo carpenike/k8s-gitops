@@ -12,6 +12,5 @@ resources:
   - ./multus/ks.yaml
   - ./omada-controller/ks.yaml
   - ./theme-park/ks.yaml
-  - ./unifi/ks.yaml
   # Standard Resources
   # - ./external-services
