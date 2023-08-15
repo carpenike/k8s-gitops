@@ -121,7 +121,7 @@ spec:
             mountPath: /config/config.js
             subPath: config.js
             readOnly: true
-          - name: media
+          - name: nfs-nas-media
             mountPath: /media
 
     volumeClaimTemplates:
