@@ -57,6 +57,8 @@ spec:
         ports:
           http:
             port: *port
+          xseed:
+            port: 2468
 
     ingress:
       main:
