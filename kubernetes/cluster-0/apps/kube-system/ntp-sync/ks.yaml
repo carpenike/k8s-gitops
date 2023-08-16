@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-apps-ntp-sync
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: "./kubernetes/cluster-0/apps/kube-system/ntp-sync/app"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+  wait: true

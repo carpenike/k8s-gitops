@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ntp-sync
+  namespace: kube-system
+  labels:
+    k8s-app: ntp-sync
+spec:
+  selector:
+    matchLabels:
+      name: ntp-sync
+  template:
+    metadata:
+      labels:
+        name: ntp-sync
+    spec:
+      containers:
+        - name: ntp-sync
+          image: alpine
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do hwclock -s; sleep 86400; done"]
+          resources:
+            limits:
+              memory: 20Mi
+              cpu: 20m
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          securityContext:
+            privileged: true
