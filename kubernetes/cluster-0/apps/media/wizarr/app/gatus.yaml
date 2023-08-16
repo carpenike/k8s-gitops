@@ -10,13 +10,12 @@ data:
   config.yaml: |
     endpoints:
       - name: wizarr
-        group: guarded
-        url: 1.1.1.1
+        group: external
+        url: https://invite.holthome.net
         interval: 1m
-        dns:
-          query-name: invite.holthome.net
-          query-type: A
+        client:
+          dns-resolver: tcp://1.1.1.1:53
         conditions:
-          - "len([BODY]) == 0"
+          - "[STATUS] == 200"
         alerts:
           - type: pushover
