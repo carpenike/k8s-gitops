@@ -835,7 +835,7 @@ config:
 
     haproxy:
       # renovate: docker-image
-      image: docker.io/library/haproxy:2.8.1
+      image: docker.io/library/haproxy:2.8.2
 
     vector:
       # renovate: docker-image
