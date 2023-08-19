@@ -34,7 +34,7 @@ spec:
 
     image:
       repository: docker.io/remirigal/plex-auto-languages
-      tag: v1.2.1
+      tag: v1.2.3
 
     env:
       TZ: "America/New_York"
