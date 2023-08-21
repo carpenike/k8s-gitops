@@ -33,7 +33,7 @@ spec:
 
     image:
       repository: ghcr.io/actualbudget/actual-server
-      tag: 23.8.0
+      tag: 23.8.1
 
     env:
       TZ: "America/New_York"
