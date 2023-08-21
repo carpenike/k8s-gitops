@@ -1,0 +1,68 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: unpackerr
+  namespace: media
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controller:
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: ghcr.io/onedr0p/unpackerr
+      tag: 0.12.0@sha256:b2838a40b8c892a371f7d3ccdf72a983ff666cf9f0fa4e72f4c34c431559980d
+    env:
+      TZ: America/New_York
+      UN_INTERVAL: 1m
+      UN_WEBSERVER_METRICS: true
+      UN_SONARR_0_URL: http://sonarr.media.svc.cluster.local:80
+      UN_SONARR_0_PATHS_0: /media/qb/downloads/sonarr
+      UN_RADARR_0_URL: http://radarr.media.svc.cluster.local:80
+      UN_RADARR_0_PATHS_0: /media/qb/downloads/radarr
+    envFrom:
+      - secretRef:
+          name: unpackerr-secret
+    service:
+      main:
+        ports:
+          http:
+            port: 5656
+    serviceMonitor:
+      main:
+        enabled: true
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
+      supplementalGroups: [10000]
+    persistence:
+      media:
+        enabled: true
+        existingClaim: media
+    resources:
+      requests:
+        memory: 2048Mi
+        cpu: 10m
+      limits:
+        memory: 2048Mi
