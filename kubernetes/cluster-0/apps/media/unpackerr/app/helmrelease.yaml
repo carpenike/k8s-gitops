@@ -59,7 +59,7 @@ spec:
     persistence:
       media:
         enabled: true
-        existingClaim: media
+        existingClaim: media-nfs-share-pvc
     resources:
       requests:
         memory: 2048Mi
