@@ -1,0 +1,74 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: actual
+  namespace: seflhosted
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
+    image:
+      repository: ghcr.io/actualbudget/actual-server
+      tag: 23.8.0
+
+    env:
+      TZ: "America/New_York"
+
+    nameOverride: actual
+
+    service:
+      main:
+        ports:
+          http:
+            port: 5006
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: internal-nginx
+        hosts:
+          - host: &host "actual.holthome.net"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 80Mi
+      limits:
+        memory: 256Mi
+
+    volumeClaimTemplates:
+      - name: data
+        mountPath: /data
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
