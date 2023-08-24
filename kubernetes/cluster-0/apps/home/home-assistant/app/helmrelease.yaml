@@ -26,13 +26,13 @@ spec:
       repository: ghcr.io/home-assistant/home-assistant
       tag: 2023.8.3@sha256:aa6ed476b0da1dd38be99c59d8566fc9937d9bc0f1e416b3cdcb011749f667e0
 
-      # podAnnotations:
-      #   k8s.v1.cni.cncf.io/networks: |
-      #     [{
-      #       "name":"multus-wireless",
-      #       "namespace": "network",
-      #       "ips": ["10.30.10.15/16"]
-      #     }]
+      podAnnotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [{
+            "name":"multus-wireless",
+            "namespace": "network",
+            "ips": ["10.30.10.15/16"]
+          }]
 
     envFrom:
       - secretRef:
