@@ -15,6 +15,7 @@ module.exports = {
     "http://prowlarr.media.svc.cluster.local:80/3/api?apikey={{ .api_key }}", // btn
     "http://prowlarr.media.svc.cluster.local:80/5/api?apikey={{ .api_key }}", // or
     "http://prowlarr.media.svc.cluster.local:80/14/api?apikey={{ .api_key }}", // mtv
+    "http://prowlarr.media.svc.cluster.local:80/15/api?apikey={{ .api_key }}", // ant
   ],
 
   action: "inject",
