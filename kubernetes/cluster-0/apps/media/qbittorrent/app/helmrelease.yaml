@@ -124,7 +124,7 @@ spec:
 
     sidecars:
       xseed:
-        image: ghcr.io/cross-seed/cross-seed:5.4.0@sha256:0c696fb49adb401b481df58b5bc649434860fb25c25efcb0d2a0a7161e2ff971
+        image: ghcr.io/cross-seed/cross-seed:5.4.2@sha256:66fd47aba319c7239e7ab87086ad82edae03d53719d1009b1af4ed93594e994b
         imagePullPolicy: IfNotPresent
         args:
           - daemon
