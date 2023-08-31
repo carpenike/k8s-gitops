@@ -32,7 +32,7 @@ spec:
 
     image:
       repository: ghcr.io/wizarrrr/wizarr
-      tag: 2.2.0
+      tag: 3.0.1
 
     env:
       TZ: America/New_York
