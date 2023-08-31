@@ -75,7 +75,7 @@ spec:
 
     volumeClaimTemplates:
       - name: config
-        mountPath: /data/database
+        mountPath: /config/database
         accessMode: ReadWriteOnce
         size: 10Gi
         storageClass: ceph-block
