@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://frigate.holthome.net/api/config/schema.json
 logger:
   default: info
   # logs:
@@ -28,21 +29,23 @@ snapshots:
   timestamp: false
   bounding_box: true
   retain:
-    default: 2
+    default: 14
 
 record:
   enabled: true
   retain:
-    days: 2
+    days: 14
     mode: all
   events:
     retain:
-      default: 2
+      default: 14
       mode: active_objects
 
 objects:
   track:
     - person
+    - car
+    - dog
   filters:
     person:
       min_area: 2500
