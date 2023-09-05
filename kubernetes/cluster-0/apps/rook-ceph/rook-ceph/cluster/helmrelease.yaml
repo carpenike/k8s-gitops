@@ -202,7 +202,7 @@ spec:
                 cpu: 100m
                 memory: 128M
               limits:
-                memory: 2Gi
+                memory: 4Gi
             instances: 1
           healthCheck:
             bucket:
