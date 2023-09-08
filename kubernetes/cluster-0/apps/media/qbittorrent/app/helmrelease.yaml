@@ -120,7 +120,7 @@ spec:
         memory: 250Mi
         cpu: 500m
       limits:
-        memory: 10Gi
+        memory: 20Gi
 
     sidecars:
       xseed:
