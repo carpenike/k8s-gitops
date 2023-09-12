@@ -1,7 +1,7 @@
 ---
 clusterName: ${clusterName}
 talosVersion: v1.5.1
-kubernetesVersion: 1.27.4
+kubernetesVersion: 1.27.5
 endpoint: "https://cluster-0.${domainName}:6443"
 
 clusterPodNets:
