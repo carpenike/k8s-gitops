@@ -101,7 +101,7 @@ spec:
         memory: 250Mi
         cpu: 500m
       limits:
-        memory: 7500Mi
+        memory: 10Gi
 
     volumeClaimTemplates:
       - name: config
