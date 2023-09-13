@@ -24,7 +24,7 @@ spec:
 
     image:
       repository: ghcr.io/home-assistant/home-assistant
-      tag: 2023.8.4@sha256:5970dce5dab73ec4c70be107b799b59e9f47027ac6ec0215d34cf89f664fed9c
+      tag: 2023.9.2@sha256:223c9986ff318eaf35fac70351900cf766c15faf82fbe54150b73b7cfc3c933a
 
       podAnnotations:
         k8s.v1.cni.cncf.io/networks: |
