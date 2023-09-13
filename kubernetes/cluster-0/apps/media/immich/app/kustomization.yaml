@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: media
+resources:
+  - ./externalsecret.yaml
+  - ./gatus.yaml
+  - ./configmap.yaml
+  - ./nfs-pvc.yaml
+  - ./typesense
+  - ./server
+  - ./microservices
+  - ./machine-learning
+  - ./web
+labels:
+  - pairs:
+      app.kubernetes.io/name: immich
+      app.kubernetes.io/instance: immich
+      app.kubernetes.io/part-of: immich

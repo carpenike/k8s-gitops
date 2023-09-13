@@ -1,0 +1,34 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-apps-immich-redis
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: "./kubernetes/cluster-0/apps/media/immich/redis"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-apps-immich
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: "./kubernetes/cluster-0/apps/media/immich/app"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+  wait: false # no flux ks dependents
+  dependsOn:
+    - name: cluster-apps-immich-redis
+    - name: cluster-apps-external-secrets-stores
+    - name: cluster-apps-rook-ceph-cluster
+    - name: cluster-apps-cloudnative-pg-cluster
+    - name: cluster-apps-external-secrets-cluster-secrets
