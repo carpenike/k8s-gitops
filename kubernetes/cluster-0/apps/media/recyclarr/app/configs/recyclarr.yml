@@ -1,8 +1,8 @@
 ---
 sonarr:
-  main:
-    base_url: http://sonarr.media.svc.cluster.local:80
-    api_key: {{ .SONARR_APIKEY }}
+  sonarr:
+    base_url: http://sonarr.media.svc.cluster.local:8989
+    api_key: !env_var SONARR_API_KEY
 
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
@@ -12,7 +12,34 @@ sonarr:
 
     quality_profiles:
       - name: Web-1080p
-        reset_unmatched_scores: true
+        min_format_score: 0
+        qualities:
+          - name: Bluray-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBRip-1080p
+              - WEBDL-1080p
+          - name: Bluray-720p
+          - name: WEB 720p
+            qualities:
+              - WEBRip-720p
+              - WEBDL-720p
+          - name: HDTV-1080p
+          - name: HDTV-720p
+          - name: DVD
+          - name: Bluray-480p
+          - name: WEB 480p
+            qualities:
+              - WEBRip-480p
+              - WEBDL-480p
+          - name: SDTV
+        quality_sort: top
+        reset_unmatched_scores:
+          enabled: true
+        upgrade:
+          allowed: true
+          until_quality: Bluray-1080p
+          until_score: 999999999
 
     custom_formats:
       # Audio Advanced #1
@@ -123,9 +150,9 @@ sonarr:
           - name: Web-1080p
 
 radarr:
-  main:
-    base_url: http://radarr.media.svc.cluster.local:80
-    api_key: {{ .RADARR_APIKEY }}
+  radarr:
+    base_url: http://radarr.media.svc.cluster.local:7878
+    api_key: !env_var RADARR_API_KEY
 
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
@@ -135,7 +162,27 @@ radarr:
 
     quality_profiles:
       - name: Remux-1080p
-        reset_unmatched_scores: true
+        min_format_score: 0
+        qualities:
+          - name: Remux-1080p
+          - name: Bluray-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBRip-1080p
+              - WEBDL-1080p
+          - name: HDTV-1080p
+          - name: Bluray-720p
+          - name: WEB 720p
+            qualities:
+              - WEBRip-480p
+              - WEBDL-480p
+        quality_sort: top
+        reset_unmatched_scores:
+          enabled: true
+        upgrade:
+          allowed: true
+          until_quality: Remux-1080p
+          until_score: 999999999
 
     custom_formats:
       # Audio Advanced #1

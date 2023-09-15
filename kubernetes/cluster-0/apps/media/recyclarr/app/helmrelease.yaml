@@ -14,9 +14,8 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 3
+  maxHistory: 2
   install:
-    createNamespace: true
     remediation:
       retries: 3
   upgrade:
@@ -34,23 +33,36 @@ spec:
         schedule: 0 6 * * *
     image:
       repository: ghcr.io/recyclarr/recyclarr
-      tag: 5.4.1
-    env:
-      TZ: "America/New_York"
-      PUID: "568"
-      PGID: "568"
-    command:
-      - /app/recyclarr/recyclarr
+      tag: 5.4.2
     args:
       - sync
+    env:
+      TZ: America/New_York
+    envFrom:
+      - secretRef:
+          name: recyclarr-secret
     service:
       main:
         enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
     persistence:
       config:
         enabled: true
-        type: secret
-        name: recyclarr-secret
+        existingClaim: recyclarr-config-pvc
+      config-file:
+        enabled: true
+        type: configMap
+        name: recyclarr-configmap
         mountPath: /config/recyclarr.yml
         subPath: recyclarr.yml
         readOnly: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 200Mi
