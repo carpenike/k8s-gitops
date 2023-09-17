@@ -48,7 +48,7 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: external-nginx
+        ingressClassName: internal-nginx
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.holthome.net"
         hosts:
