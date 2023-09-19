@@ -6,7 +6,7 @@ storage:
     path: /config/db.sqlite3
 
 access_control:
-  default_policy: deny
+  default_policy: two_factor
   networks:
     - name: internal
       networks:
