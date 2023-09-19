@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: media
 resources:
   - ./helmrelease.yaml
-  # - ./gatus.yaml
+  - ./gatus.yaml
   - ./volsync.yaml
 labels:
   - pairs:
