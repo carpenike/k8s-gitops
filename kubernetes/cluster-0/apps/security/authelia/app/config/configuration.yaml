@@ -18,6 +18,9 @@ access_control:
       policy: one_factor
       subject:
         - ["group:admins"]
+    - domain: ["invite.holthome.net"]
+      resources: ["^/join(/.*)?$", "^/j(/.*)?$", "^/setup(/.*)?$", "^/static(/.*)?$"]
+      policy: bypass
 
 identity_providers:
   oidc:
