@@ -5,7 +5,7 @@ metadata:
   name: actions-runner-controller
   namespace: actions-runner-system
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: gha-runner-scale-set-controller
@@ -16,7 +16,6 @@ spec:
         namespace: flux-system
   maxHistory: 2
   install:
-    createNamespace: true
     crds: CreateReplace
     remediation:
       retries: 3
@@ -27,5 +26,3 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  values:
-    fullnameOverride: gha-runner-scale-set-controller
