@@ -28,7 +28,10 @@ tasks:
                     {
                       "name": "config",
                       "mountPath": "/data/config"
-                    }
+                    },
+                    {
+                      "name": "share",
+                      "mountPath": "/data/share"}
                   ]
                 }
               ],
@@ -37,6 +40,12 @@ tasks:
                   "name": "config",
                   "persistentVolumeClaim": {
                     "claimName": "{{.claim}}"
+                  }
+                },
+                {
+                  "name": "share",
+                  "persistentVolumeClaim": {
+                    "claimName": "{{.namespace | default "default"}}"
                   }
                 }
               ],
