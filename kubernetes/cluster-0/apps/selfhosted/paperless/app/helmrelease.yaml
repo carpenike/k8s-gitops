@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: paperless
+  namespace: selfhosted
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
+    image:
+      repository: ghcr.io/bjw-s/paperless-ngx
+      tag: 1.17.4@sha256:f0c59f0e4e9e3b5cd37e0e548deb2551df9462920590fef117e79dec7e3347f0
+
+    envFrom:
+      - secretRef:
+          name: paperless-secret
+      - configMapRef:
+          name: paperless-configmap
+
+    service:
+      main:
+        ports:
+          http:
+            port: 8000
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "internal-nginx"
+        hosts:
+          - host: &host "paperless.holthome.net"
+            paths:
+              - path: /
+        tls:
+          - hosts:
+              - *host
+
+    persistence:
+      consume:
+        enabled: true
+        mountPath: /data/nas/consume
+        type: nfs
+        server: "nas.holthome.net"
+        path: /mnt/tank/share/paperless/incoming
+      export:
+        enabled: true
+        mountPath: /data/nas/export
+        type: nfs
+        server: "nas.holthome.net"
+        path: /mnt/tank/share/paperless/export
+
+    resources:
+      requests:
+        cpu: 11m
+        memory: 1812M
+      limits:
+        memory: 1812M
+
+    volumeClaimTemplates:
+      - name: data
+        mountPath: /data/local
+        accessMode: ReadWriteOnce
+        size: 15Gi
+        storageClass: ceph-block
