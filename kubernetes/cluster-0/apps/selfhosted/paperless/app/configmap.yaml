@@ -18,7 +18,7 @@ data:
   PAPERLESS_LDAP_AUTH_SEARCH_BASE: "ou=people,dc=holthome,dc=net"
   PAPERLESS_LDAP_UID_FORMAT: "uid=%s,ou=people,dc=holthome,dc=net"
   PAPERLESS_LDAP_USER_GROUP: "cn=paperless,ou=groups,dc=holthome,dc=net"
-  PAPERLESS_LDAP_ADMIN_GROUP: "cn=paperless_admin,ou=groups,dc=holthome,dc=net"
+  PAPERLESS_LDAP_ADMIN_GROUP: "cn=paperless_admins,ou=groups,dc=holthome,dc=net"
   PAPERLESS_LDAP_LLDAP_FIX: "true"
 
   # Configure folders
