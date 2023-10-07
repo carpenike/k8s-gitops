@@ -30,7 +30,7 @@ spec:
         reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/onedr0p/unpackerr
-      tag: 0.12.0@sha256:5ebb64f4ad04d98598276f2f3cff55dd02f1a61fe73e88685529eb9ae1428663
+      tag: 0.12.0@sha256:4b552727ee6f86a1eeb492b4f29c49dd87ef0132270da05b7173f05da685e381
     env:
       TZ: America/New_York
       UN_INTERVAL: 1m
