@@ -31,7 +31,7 @@ spec:
 
     image:
       repository: ghcr.io/onedr0p/sabnzbd
-      tag: 4.1.0@sha256:d7eabae44168417a6acbc8f6e8510b0187a3f26d648941b3cf61b4c04a904da2
+      tag: 4.1.0@sha256:210e6c0ee247f8c58f8fe7b61cc405bb578e29070b45671cea1c81bef01762c3
 
     podSecurityContext:
       runAsUser: 568
