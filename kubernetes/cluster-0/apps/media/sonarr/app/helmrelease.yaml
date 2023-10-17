@@ -1,57 +1,60 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app sonarr
+  name: sonarr
   namespace: media
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.0.3
+      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
 
-  install:
-    createNamespace: true
-    remediation:
-      retries: 5
-  upgrade:
-    remediation:
-      retries: 5
-
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
 
-    image:
-      repository: ghcr.io/onedr0p/sonarr-develop
-      tag: 4.0.0.688@sha256:cc88687162269b73c0e9bd6f147d4f7957639a4bdae3741cffe4bcabd7978e1f
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+            supplementalGroups:
+              - 65539
 
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups:
-        - 100
-
-    env:
-      TZ: "America/New_York"
-      SONARR__INSTANCE_NAME: Sonarr
-      SONARR__PORT: &port 80
-      SONARR__APPLICATION_URL: "https://sonarr.holthome.net"
-      SONARR__LOG_LEVEL: info
-      SONARR__API_KEY:
-        valueFrom:
-          secretKeyRef:
-            name: sonarr-secret
-            key: SONARR_APIKEY
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/sonarr-develop
+              tag: 4.0.0.697@sha256:fa87be887075ebef98933fe409b83e348eb0a3908e9c86ed5526a333250b98e6
+            env:
+              SONARR__INSTANCE_NAME: Sonarr
+              SONARR__PORT: &port 8989
+              SONARR__AUTHENTICATION_METHOD: External
+              SONARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
+              SONARR__APPLICATION_URL: "https://sonarr.holthome.net"
+              SONARR__LOG_LEVEL: info
+              SONARR__API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: sonarr-secret
+                    key: api_key
+            resources:
+              requests:
+                cpu: 20m
+                memory: 512M
+              limits:
+                memory: 768M
 
     service:
       main:
@@ -62,38 +65,23 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "internal-nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.holthome.net/css/base/sonarr/nord.css"></head>';
-            sub_filter_once on;
+        className: "internal-nginx"
         hosts:
-          - host: &host sonarr.holthome.net
+          - host: &host "sonarr.holthome.net"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
 
     persistence:
-      nfs-nas-media:
+      config:
         enabled: true
-        existingClaim: media-nfs-share-pvc
-        mountPath: /media
-        readOnly: false
-
-    resources:
-      requests:
-        memory: 350Mi
-        cpu: 25m
-      limits:
-        memory: 5000Mi
-
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
+        existingClaim: sonarr-config
+      media:
+        existingClaim: nmedia-nfs-share-pvc
+        globalMounts:
+          - path: /media

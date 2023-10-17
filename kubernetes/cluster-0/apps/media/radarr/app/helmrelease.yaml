@@ -82,6 +82,6 @@ spec:
         enabled: true
         existingClaim: radarr-config
       media:
-        existingClaim: nas-media
+        existingClaim: nmedia-nfs-share-pvc
         globalMounts:
-          - path: /data/nas-media
+          - path: /media
