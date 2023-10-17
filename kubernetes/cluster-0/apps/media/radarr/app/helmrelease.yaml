@@ -22,50 +22,50 @@ spec:
       annotations:
         reloader.stakater.com/auto: "true"
 
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: "OnRootMismatch"
-            supplementalGroups:
-              - 65539
+      pod:
+        securityContext:
+          runAsUser: 568
+          runAsGroup: 568
+          fsGroup: 568
+          fsGroupChangePolicy: "OnRootMismatch"
+          supplementalGroups:
+            - 65539
 
-        initContainers:
-          01-init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 14.8
-              pullPolicy: IfNotPresent
-            envFrom: &envFrom
-              - secretRef:
+      initContainers:
+        01-init-db:
+          image:
+            repository: ghcr.io/onedr0p/postgres-init
+            tag: 14.8
+            pullPolicy: IfNotPresent
+          envFrom: &envFrom
+            - secretRef:
+                name: radarr-secret
+
+      containers:
+        main:
+          image:
+            repository: ghcr.io/onedr0p/radarr-develop
+            tag: 5.0.3.8127@sha256:f5ef22e9de96c1fafe915e09cc17caaa6344a92bcd8dfca1af798ee849a23abb
+          env:
+            RADARR__INSTANCE_NAME: Radarr
+            RADARR__PORT: &port 80
+            RADARR__AUTHENTICATION_METHOD: External
+            RADARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
+            RADARR__APPLICATION_URL: "https://radarr.holthome.net"
+            RADARR__LOG_LEVEL: info
+            RADARR__THEME: dark
+            RADARR__API_KEY:
+              valueFrom:
+                secretKeyRef:
                   name: radarr-secret
-
-        containers:
-          main:
-            image:
-              repository: ghcr.io/onedr0p/radarr-develop
-              tag: 5.0.3.8127@sha256:f5ef22e9de96c1fafe915e09cc17caaa6344a92bcd8dfca1af798ee849a23abb
-            env:
-              RADARR__INSTANCE_NAME: Radarr
-              RADARR__PORT: &port 80
-              RADARR__AUTHENTICATION_METHOD: External
-              RADARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
-              RADARR__APPLICATION_URL: "https://radarr.holthome.net"
-              RADARR__LOG_LEVEL: info
-              RADARR__THEME: dark
-              RADARR__API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: radarr-secret
-                    key: api_key
-            envFrom: *envFrom
-            resources:
-              requests:
-                cpu: 14m
-                memory: 431M
-              limits:
-                memory: 2Gi
+                  key: api_key
+          envFrom: *envFrom
+          resources:
+            requests:
+              cpu: 14m
+              memory: 431M
+            limits:
+              memory: 2Gi
 
     service:
       main:
