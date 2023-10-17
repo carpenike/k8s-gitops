@@ -18,10 +18,17 @@ spec:
         namespace: flux-system
 
   values:
-    controllers:
-      main:
-        annotations:
-          reloader.stakater.com/auto: "true"
+    # initContainers:
+    #   01-init-db:
+    #     image: ghcr.io/onedr0p/postgres-init:14.8
+    #     imagePullPolicy: IfNotPresent
+    #     envFrom: &envFrom
+    #       - secretRef:
+    #           name: radarr-secret
+
+    controller:
+      annotations:
+        reloader.stakater.com/auto: "true"
 
         pod:
           securityContext:
@@ -39,16 +46,18 @@ spec:
               tag: 5.0.3.8127@sha256:f5ef22e9de96c1fafe915e09cc17caaa6344a92bcd8dfca1af798ee849a23abb
             env:
               RADARR__INSTANCE_NAME: Radarr
-              RADARR__PORT: &port 7878
+              RADARR__PORT: &port 80
               RADARR__AUTHENTICATION_METHOD: External
               RADARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
               RADARR__APPLICATION_URL: "https://radarr.holthome.net"
               RADARR__LOG_LEVEL: info
+              RADARR__THEME: dark
               RADARR__API_KEY:
                 valueFrom:
                   secretKeyRef:
                     name: radarr-secret
                     key: api_key
+            envFrom: *envFrom
             resources:
               requests:
                 cpu: 14m
@@ -61,6 +70,22 @@ spec:
         ports:
           http:
             port: *port
+
+    probes:
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /ping
+            port: *port
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      readiness: *probes
+      startup:
+        enabled: false
 
     ingress:
       main:
@@ -80,8 +105,8 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: radarr-config
+        existingClaim: config-radarr-0
       media:
-        existingClaim: nmedia-nfs-share-pvc
+        existingClaim: media-nfs-share-pvc
         globalMounts:
           - path: /media
