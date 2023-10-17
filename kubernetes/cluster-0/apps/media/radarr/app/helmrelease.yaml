@@ -1,56 +1,60 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app radarr
+  name: radarr
   namespace: media
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.0.3
+      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  install:
-    createNamespace: true
-    remediation:
-      retries: 5
-  upgrade:
-    remediation:
-      retries: 5
 
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
 
-    image:
-      repository: ghcr.io/onedr0p/radarr-develop
-      tag: 5.0.3.8107@sha256:c6e7a24d62986213e2a19f0f928f0512b3aec4402f6a9f2967e917a4bbe278cb
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+            supplementalGroups:
+              - 65539
 
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      supplementalGroups:
-        - 100
-
-    env:
-      TZ: "America/New_York"
-      RADARR__INSTANCE_NAME: Radarr
-      RADARR__PORT: &port 80
-      RADARR__APPLICATION_URL: "https://radarr.holthome.net"
-      RADARR__LOG_LEVEL: info
-      RADARR__API_KEY:
-        valueFrom:
-          secretKeyRef:
-            name: radarr-secret
-            key: RADARR_APIKEY
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/radarr-develop
+              tag: 5.0.3.8127@sha256:f5ef22e9de96c1fafe915e09cc17caaa6344a92bcd8dfca1af798ee849a23abb
+            env:
+              RADARR__INSTANCE_NAME: Radarr
+              RADARR__PORT: &port 7878
+              RADARR__AUTHENTICATION_METHOD: External
+              RADARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
+              RADARR__APPLICATION_URL: "https://radarr.holthome.net"
+              RADARR__LOG_LEVEL: info
+              RADARR__API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: radarr-secret
+                    key: api_key
+            resources:
+              requests:
+                cpu: 14m
+                memory: 431M
+              limits:
+                memory: 431M
 
     service:
       main:
@@ -61,38 +65,23 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "internal-nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_DOMAIN}/css/base/radarr/nord.css"></head>';
-            sub_filter_once on;
+        className: "internal-nginx"
         hosts:
           - host: &host radarr.holthome.net
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
 
     persistence:
-      nfs-nas-media:
+      config:
         enabled: true
-        existingClaim: media-nfs-share-pvc
-        mountPath: /media
-        readOnly: false
-
-    resources:
-      requests:
-        cpu: 10m
-        memory: 250Mi
-      limits:
-        memory: 7Gi
-
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
+        existingClaim: radarr-config
+      media:
+        existingClaim: nas-media
+        globalMounts:
+          - path: /data/nas-media
