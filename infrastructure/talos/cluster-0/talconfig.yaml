@@ -1,13 +1,9 @@
 ---
 clusterName: ${clusterName}
+
 talosVersion: v1.5.1
 kubernetesVersion: 1.28.1
-endpoint: "https://cluster-0.${domainName}:6443"
-
-clusterPodNets:
-  - 10.244.0.0/16
-clusterSvcNets:
-  - 10.96.0.0/12
+endpoint: "https://${clusterName}.${domainName}:6443"
 
 cniConfig:
   name: none
@@ -17,7 +13,7 @@ additionalApiServerCertSans:
 
 additionalMachineCertSans:
   - ${clusterEndpointIP}
-  - ${clusterName}.holthome.net
+  - ${clusterName}.${domainName}
 
 nodes:
   - hostname: cp-0.holthome.net
@@ -88,9 +84,6 @@ controlPlane:
         etcd:
           advertisedSubnets:
             - 10.20.0.0/16
-        extraManifests:
-          - https://raw.githubusercontent.com/carpenike/k8s-gitops/main/infrastructure/talos/cluster-0/integrations/cni/cilium.yaml
-          - https://raw.githubusercontent.com/carpenike/k8s-gitops/main/infrastructure/talos/cluster-0/integrations/kubelet-csr-approver/kubelet-csr-approver.yaml
 
     - |-
       - op: remove
@@ -119,7 +112,8 @@ controlPlane:
           extraHostEntries:
             - ip: ${clusterEndpointIP}
               aliases:
-                - ${clusterName}.holthome.net
+                - ${clusterName}.${domainName}
+
         sysctls:
           fs.inotify.max_user_watches: "1048576"
           fs.inotify.max_user_instances: "8192"
