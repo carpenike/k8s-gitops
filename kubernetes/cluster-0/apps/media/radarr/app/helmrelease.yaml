@@ -18,13 +18,13 @@ spec:
         namespace: flux-system
 
   values:
-    # initContainers:
-    #   01-init-db:
-    #     image: ghcr.io/onedr0p/postgres-init:14.8
-    #     imagePullPolicy: IfNotPresent
-    #     envFrom: &envFrom
-    #       - secretRef:
-    #           name: radarr-secret
+    initContainers:
+      01-init-db:
+        image: ghcr.io/onedr0p/postgres-init:14.8
+        imagePullPolicy: IfNotPresent
+        envFrom: &envFrom
+          - secretRef:
+              name: radarr-secret
 
     controller:
       annotations:
@@ -105,7 +105,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: config-radarr-0
+        existingClaim: radarr-config-pvc
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
