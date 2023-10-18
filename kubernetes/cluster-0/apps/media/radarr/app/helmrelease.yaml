@@ -55,11 +55,6 @@ spec:
               RADARR__APPLICATION_URL: "https://radarr.holthome.net"
               RADARR__LOG_LEVEL: info
               RADARR__THEME: dark
-              RADARR__API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: radarr-secret
-                    key: api_key
             envFrom: *envFrom
             resources:
               requests:
