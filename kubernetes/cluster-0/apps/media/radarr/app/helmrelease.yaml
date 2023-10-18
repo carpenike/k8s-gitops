@@ -18,7 +18,7 @@ spec:
         namespace: flux-system
 
   values:
-    controller:
+    controllers:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
