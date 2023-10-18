@@ -5,11 +5,11 @@ metadata:
   name: postgres-lb
   namespace: db
   annotations:
-    coredns.io/hostname: postgres.holthome.net
+    external-dns.alpha.kubernetes.io/hostname: postgres.holthome.net
+    io.cilium/lb-ipam-ips: 10.45.20.15
 spec:
   type: LoadBalancer
-  externalTrafficPolicy: Local
-  externalIPs: ["10.45.20.15"]
+  externalTrafficPolicy: Cluster
   ports:
     - name: postgres
       port: 5432
