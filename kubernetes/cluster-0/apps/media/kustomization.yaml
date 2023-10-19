@@ -6,7 +6,7 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./_pvs/ks.yaml
-  - ./arr_migration/ks.yaml
+  - ./arr-migration/ks.yaml
   - ./autobrr/ks.yaml
   - ./bazarr/ks.yaml
   - ./immich/ks.yaml
