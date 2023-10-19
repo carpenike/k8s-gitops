@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: public.ecr.aws/docker/library/redis
-      tag: 7.2.1@sha256:4ca2a277f1dc3ddd0da33a258096de9a1cf5b9d9bd96b27ee78763ee2248c28c
+      tag: 7.2.2@sha256:eb37f58646a901dc7727cf448cae36daaefaba79de33b5058dab79aa4c04aefb
 
     service:
       main:
