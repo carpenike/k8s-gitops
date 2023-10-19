@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: arr_migration
+  name: arr-migration
   namespace: media
 spec:
   interval: 30m
@@ -39,7 +39,6 @@ spec:
               tag: 1.9.4.4039@sha256:b7653578d4d6900cf2c00f0f09b447301fc8c7a58d822e8b271e3047c54941ae
             env:
               PROWLARR__PORT: &port 80
-            envFrom: *envFrom
             resources:
               requests:
                 cpu: 14m
