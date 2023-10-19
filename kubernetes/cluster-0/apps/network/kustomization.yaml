@@ -9,7 +9,7 @@ resources:
   # - ./echo-server/ks.yaml
   - ./external-dns/ks.yaml
   - ./ingress-nginx/ks.yaml
-  - ./kubernetes-schemas/ks.yaml
+  # - ./kubernetes-schemas/ks.yaml
   - ./multus/ks.yaml
   - ./omada-controller/ks.yaml
   - ./theme-park/ks.yaml
