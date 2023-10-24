@@ -67,10 +67,6 @@ spec:
               readiness: *probes
               startup:
                 enabled: false
-            dnsConfig:
-              options:
-                - name: ndots
-                  value: "1"
             resources:
               requests:
                 cpu: 10m
