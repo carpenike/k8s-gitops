@@ -35,8 +35,8 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/onedr0p/prowlarr-develop
-              tag: 1.9.4.4039@sha256:b7653578d4d6900cf2c00f0f09b447301fc8c7a58d822e8b271e3047c54941ae
+              repository: ghcr.io/onedr0p/radarr-develop
+              tag: 5.0.3.8127@sha256:f5ef22e9de96c1fafe915e09cc17caaa6344a92bcd8dfca1af798ee849a23abb
             env:
               PROWLARR__PORT: &port 80
             resources:
@@ -86,7 +86,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: config-prowlarr-0
+        existingClaim: config-radarr-0
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
