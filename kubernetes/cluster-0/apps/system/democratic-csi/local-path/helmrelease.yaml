@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -9,7 +10,7 @@ spec:
   chart:
     spec:
       chart: democratic-csi
-      version: 0.14.1
+      version: 0.14.2
       sourceRef:
         name: democratic-csi
         kind: HelmRepository
@@ -42,6 +43,7 @@ spec:
         enabled: false
       externalProvisioner:
         enabled: true
+        image: registry.k8s.io/sig-storage/csi-provisioner:v3.6.1
         extraArgs:
           - --leader-election=false
           - --node-deployment=true
@@ -62,13 +64,17 @@ spec:
       driver:
         extraVolumeMounts:
           - name: local-hostpath
-            mountPath: /var/k8s/demo-csi-local-path
+            mountPath: /var/mnt/sata/demo-csi-local-path
             mountPropagation: Bidirectional
+
+      driverRegistrar:
+        enabled: true
+        image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.9.0
 
       extraVolumes:
         - name: local-hostpath
           hostPath:
-            path: /var/k8s/demo-csi-local-path
+            path: /var/mnt/sata/demo-csi-local-path
             type: DirectoryOrCreate
 
     driver:
