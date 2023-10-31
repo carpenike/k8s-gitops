@@ -107,4 +107,4 @@ spec:
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
-          - path: /media
+          - path: /data
