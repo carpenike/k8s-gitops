@@ -10,7 +10,7 @@ resources:
   - ./autobrr/ks.yaml
   - ./bazarr/ks.yaml
   - ./immich/ks.yaml
-  - ./omegabrr/ks.yaml
+  # - ./omegabrr/ks.yaml
   - ./overseerr/ks.yaml
   - ./plex/ks.yaml
   - ./plex-auto-languages/ks.yaml
