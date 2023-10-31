@@ -11,51 +11,77 @@ spec:
     spec:
       chart: app-template
       version: 2.0.3
-      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
     controllers:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
-
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 14.9
+              pullPolicy: IfNotPresent
+            envFrom: &envFrom
+              - secretRef:
+                  name: sonarr-secret
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/sonarr-develop
+              tag: 4.0.0.710@sha256:438f46db13f15df81159118a9f1d74ce7e2a46e9bd45024b2fa6aecae6036068
+            env:
+              TZ: America/New_York
+              PUSHOVER_DEBUG: "false"
+              SONARR__AUTHENTICATION_METHOD: External
+              SONARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
+              SONARR__INSTANCE_NAME: Sonarr
+              SONARR__PORT: &port 80
+              SONARR__LOG_LEVEL: info
+              SONARR__THEME: dark
+            envFrom: *envFrom
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ping
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256M
+              limits:
+                memory: 1Gi
         pod:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
             fsGroup: 568
-            fsGroupChangePolicy: "OnRootMismatch"
-            supplementalGroups:
-              - 65539
-
-        containers:
-          main:
-            image:
-              repository: ghcr.io/onedr0p/sonarr-develop
-              tag: 4.0.0.697@sha256:fa87be887075ebef98933fe409b83e348eb0a3908e9c86ed5526a333250b98e6
-            env:
-              SONARR__INSTANCE_NAME: Sonarr
-              SONARR__PORT: &port 8989
-              SONARR__AUTHENTICATION_METHOD: External
-              SONARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
-              SONARR__APPLICATION_URL: "https://sonarr.holthome.net"
-              SONARR__LOG_LEVEL: info
-              SONARR__API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: sonarr-secret
-                    key: api_key
-            resources:
-              requests:
-                cpu: 20m
-                memory: 512M
-              limits:
-                memory: 768M
-
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         ports:
@@ -65,7 +91,7 @@ spec:
     ingress:
       main:
         enabled: true
-        className: "internal-nginx"
+        className: internal-nginx
         hosts:
           - host: &host "sonarr.holthome.net"
             paths:
@@ -76,12 +102,11 @@ spec:
         tls:
           - hosts:
               - *host
-
     persistence:
       config:
         enabled: true
-        existingClaim: sonarr-config
+        existingClaim: sonarr-config-pvc
       media:
-        existingClaim: nmedia-nfs-share-pvc
+        existingClaim: media-nfs-share-pvc
         globalMounts:
-          - path: /media
+          - path: /data
