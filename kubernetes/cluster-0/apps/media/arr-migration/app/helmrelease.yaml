@@ -38,7 +38,7 @@ spec:
               repository: ghcr.io/onedr0p/radarr-develop
               tag: 5.0.3.8127@sha256:f5ef22e9de96c1fafe915e09cc17caaa6344a92bcd8dfca1af798ee849a23abb
             env:
-              PROWLARR__PORT: &port 80
+              RADARR__PORT: &port 80
             resources:
               requests:
                 cpu: 14m
@@ -53,10 +53,18 @@ spec:
             port: *port
 
     probes:
-      liveness: 
-        enabled: false
-      readiness:
-        enabled: false
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /ping
+            port: *port
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      readiness: *probes
       startup:
         enabled: false
 
