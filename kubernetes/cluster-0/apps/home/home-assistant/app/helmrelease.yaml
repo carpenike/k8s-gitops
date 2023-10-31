@@ -76,7 +76,7 @@ spec:
         enabled: true
         className: "external-nginx"
         annotations:
-          external-dns.alpha.kubernetes.io/target: externa.holthome.net
+          external-dns.alpha.kubernetes.io/target: external.holthome.net
         hosts:
           - host: &host "ha.holthome.net"
             paths:
