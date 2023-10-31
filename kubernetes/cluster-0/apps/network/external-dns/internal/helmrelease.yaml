@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -52,10 +53,10 @@ spec:
 
     resources:
       requests:
-        cpu: 20m
-        memory: 40M
+        cpu: 16m
+        memory: 90M
       limits:
-        memory: 1024M
+        memory: 90M
 
     serviceMonitor:
       enabled: true
