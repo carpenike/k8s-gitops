@@ -113,4 +113,6 @@ spec:
             subPath: completed.sh
             readOnly: true
       media:
-        existingClaim: media
+        existingClaim: media-nfs-share-pvc
+        globalMounts:
+          - path: /data
