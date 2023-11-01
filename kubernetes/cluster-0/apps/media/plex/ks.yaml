@@ -15,6 +15,24 @@ spec:
   dependsOn:
     - name: cluster-apps-rook-ceph-cluster
     - name: cluster-apps-media-pvs
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-apps-plex-tools
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-apps-plex
+  path: ./kubernetes/cluster-0apps/media/plex/tools
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
 # ---
 # apiVersion: kustomize.toolkit.fluxcd.io/v1
 # kind: Kustomization

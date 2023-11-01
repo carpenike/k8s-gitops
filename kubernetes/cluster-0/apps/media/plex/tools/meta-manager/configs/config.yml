@@ -1,4 +1,5 @@
-libraries: # This is called out once within the config.yml file
+---
+libraries:
   Movies:
     metadata_path:
       - file: config/Pre-rolls.yml
@@ -83,53 +84,53 @@ settings:
 
 plex:
   url: http://plex.media.svc.cluster.local:32400
-  token: {{ .PLEX_APIKEY }}
+  token: <<PLEX_API_KEY>>
   timeout: 60
   clean_bundles: false
   empty_trash: false
   optimize: false
 
-tmdb: # REQUIRED for the script to run
-  apikey: {{ .TMDB_APIKEY }}
-  language: en
-
 tautulli:
-  url: http://tautulli.media.svc.cluster.local:8181
-  apikey: {{ .TAUTULLI_APIKEY }}
+  url: http://tautulli.media.svc.cluster.local:80
+  apikey: <<TAUTULLI_API_KEY>>
+
+tmdb:
+  apikey: <<TMDB_API_KEY>>
+  language: en
+  cache_expiration: 60
+  region:
 
 omdb:
-  apikey: {{ .OMDB_APIKEY }}
+  apikey: <<OMDB_API_KEY>>
   cache_expiration: 60
 
 mdblist:
-  apikey: {{ .MDBLIST_APIKEY }}
+  apikey: <<MDBLIST_API_KEY>>
   cache_expiration: 60
-notifiarr:
-  apikey: {{ .NOTIFIARR_APIKEY }}
 
 radarr:
   url: http://radarr.media.svc.cluster.local:80
-  token: {{ .RADARR_APIKEY }}
+  token: <<RADARR_API_KEY>>
   add_missing: false
   add_existing: false
-  root_folder_path: "/media/media/movies"
+  root_folder_path: /media/movies
   monitor: true
   availability: announced
-  quality_profile: HD-720p/1080p
+  quality_profile: Remux-1080p
   tag:
   search: false
   radarr_path:
   plex_path:
-  update_existing: false
+  upgrade_existing: false
 
 sonarr:
   url: http://sonarr.media.svc.cluster.local:80
-  token: {{ .SONARR_APIKEY }}
+  token: <<SONARR_API_KEY>>
   add_missing: false
   add_existing: false
-  root_folder_path: "/media/media/tv"
+  root_folder_path: /media/shows
   monitor: all
-  quality_profile: HD-All
+  quality_profile: Web-1080p
   language_profile: English
   series_type: standard
   season_folder: true
@@ -141,13 +142,13 @@ sonarr:
   upgrade_existing: false
 
 trakt:
-  client_id: {{ .TRAKT_CLIENT_ID }}
-  client_secret: {{ .TRAKT_CLIENT_SECRET }}
+  client_id: <<TRAKT_CLIENT_ID>>
+  client_secret: <<TRAKT_CLIENT_SECRET>>
   authorization:
-    access_token: {{ .TRAKT_ACCESS_TOKEN }}
+    access_token: <<TRAKT_ACCESS_TOKEN>>
     token_type: Bearer
-    expires_in: {{ .TRAKT_EXPIRES_IN }}
-    refresh_token: {{ .TRAKT_REFRESH_TOKEN }}
+    expires_in: <<TRAKT_EXPIRES_IN>>
+    refresh_token: <<TRAKT_REFRESH_TOKEN>>
     scope: public
-    created_at: {{ .TRAKT_CREATED_AT }}
+    created_at: <<TRAKT_CREATED_AT>>
   pin:
