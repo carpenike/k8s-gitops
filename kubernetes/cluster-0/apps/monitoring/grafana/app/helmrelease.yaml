@@ -205,17 +205,14 @@ spec:
       auth:
         oauth_auto_login: true
         oauth_allow_insecure_email_lookup: true
+        signout_redirect_url: https://authentik.holthome.net/application/o/grafana/end-session/
       auth.basic:
         enabled: false
-      auth.anonymous:
-        enabled: true
-        org_id: 1
-        org_role: Viewer
       auth.generic_oauth:
         enabled: true
-        name: Authelia
+        name: Authentik
         icon: signin
-        scopes: openid profile email groups
+        scopes: openid profile email
         empty_scopes: false
         login_attribute_path: preferred_username
         groups_attribute_path: groups
@@ -223,13 +220,12 @@ spec:
         use_pkce: true
         client_id: grafana
         client_secret: # Set by env vars
-        auth_url: https://auth.holthome.net/api/oidc/authorization
-        token_url: https://auth.holthome.net/api/oidc/token
-        api_url: https://auth.holthome.net/api/oidc/userinfo
-      auth.generic_oauth.group_mapping:
-        org_id: 1
+        auth_url: https://authentik.holthome.net/application/o/authorize/
+        token_url: https://authentik.holthome.net/application/o/token/
+        api_url: https://authentik.holthome.net/application/o/userinfo/
+        # map user groups to Grafana roles
         role_attribute_path: |
-          contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'people') && 'Viewer'
+          contains(groups[*], 'Grafana admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'
       dashboards:
         default_home_dashboard_path: /tmp/dashboards/home.json
       date_formats:
