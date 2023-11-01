@@ -6,4 +6,4 @@ namespace: security
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ./gatus.yaml
+  # - ./gatus.yaml
