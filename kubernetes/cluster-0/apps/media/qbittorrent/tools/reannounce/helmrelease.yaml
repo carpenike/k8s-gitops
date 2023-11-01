@@ -41,7 +41,7 @@ spec:
                 "reannounce",
                 "--process-seeding",
                 "--server",
-                "qb.media.svc.cluster.local",
+                "qbittorrent.media.svc.cluster.local",
                 "--port",
                 "80",
               ]

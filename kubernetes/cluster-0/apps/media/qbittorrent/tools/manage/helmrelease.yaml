@@ -49,7 +49,7 @@ spec:
                 "--sites",
                 "--unregistered",
                 "--server",
-                "qb.media.svc.cluster.local",
+                "qbittorrent.media.svc.cluster.local",
                 "--port",
                 "80",
                 "--config",
@@ -76,7 +76,7 @@ spec:
                 "unregistered",
                 # "--dry-run",
                 "--server",
-                "qb.media.svc.cluster.local",
+                "qbittorrent.media.svc.cluster.local",
                 "--port",
                 "80",
               ]
@@ -100,7 +100,7 @@ spec:
                 "activity:24h",
                 "--dry-run",
                 "--server",
-                "qb.media.svc.cluster.local",
+                "qbittorrent.media.svc.cluster.local",
                 "--port",
                 "80",
               ]
