@@ -225,7 +225,7 @@ spec:
         api_url: https://authentik.holthome.net/application/o/userinfo/
         # map user groups to Grafana roles
         role_attribute_path: |
-          contains(groups[*], 'Grafana admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'
+          contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'
       dashboards:
         default_home_dashboard_path: /tmp/dashboards/home.json
       date_formats:
