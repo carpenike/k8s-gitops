@@ -15,7 +15,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: authentik
-        namespace: security
+        namespace: flux-system
   values:
     annotations:
       secret.reloader.stakater.com/reload: authentik-secret,authentik-redis-secret
