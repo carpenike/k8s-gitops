@@ -1,76 +1,93 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: lldap
+  name: &app lldap
   namespace: security
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
-      interval: 30m
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
-    controller:
-      replicas: 1
-      strategy: Recreate
-      annotations:
-        reloader.stakater.com/auto: "true"
-
-    image:
-      repository: ghcr.io/lldap/lldap
-      # TODO: Switch to release tag on next release
-      tag: latest-alpine@sha256:a3b65be40ad4e0b8ab9073713bde6c88ae09c811ddc3ab8fcc09e95503f17da1
-
-    env:
-      LLDAP_HTTP_PORT: &port 80
-      LLDAP_HTTP_URL: https://lldap.holthome.net
-      LLDAP_LDAP_PORT: &ldapPort 389
-      LLDAP_LDAP_BASE_DN: dc=holthome,dc=net
-
-    envFrom:
-      - secretRef:
-          name: lldap-secret
-
+    controllers:
+      main:
+        replicas: 2
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 14.9
+              pullPolicy: IfNotPresent
+            envFrom: &envFrom
+              - secretRef:
+                  name: lldap-secret
+        containers:
+          main:
+            image:
+              repository: ghcr.io/lldap/lldap
+              tag: v0.5.0
+            env:
+              TZ: America/New_York
+              LLDAP_HTTP_PORT: &port 80
+              LLDAP_HTTP_URL: https://lldap.holthome.net
+              LLDAP_LDAP_PORT: &ldapPort 389
+              LLDAP_LDAP_BASE_DN: dc=home,dc=arpa
+            envFrom: *envFrom
+            resources:
+              requests:
+                cpu: 5m
+                memory: 36M
+              limits:
+                memory: 128M
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
     service:
       main:
         ports:
           http:
             port: *port
           ldap:
-            enabled: true
             port: *ldapPort
-
     ingress:
       main:
         enabled: true
-        ingressClassName: "external-nginx"
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.holthome.net
+        className: internal-nginx
         hosts:
           - host: &host "lldap.holthome.net"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-
     persistence:
       data:
-        enabled: true
-        type: pvc
-        existingClaim: data-lldap
-
-    resources:
-      requests:
-        cpu: 5m
-        memory: 128Mi
-      limits:
-        memory: 512Mi
+        type: emptyDir
