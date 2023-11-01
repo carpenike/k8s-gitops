@@ -1,104 +1,136 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app frigate
+  name: frigate
   namespace: home
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  maxHistory: 2
   install:
-    createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
+    cleanupOnFail: true
     remediation:
-      retries: 5
+      retries: 3
   uninstall:
     keepHistory: false
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
-
-    image:
-      repository: ghcr.io/blakeblackshear/frigate
-      tag: 0.12.1
-
-    env:
-      TZ: "America/New_York"
-    envFrom:
-      - secretRef:
-          name: frigate-secret
-
+    controllers:
+      main:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/blakeblackshear/frigate
+              tag: 0.13.0-beta3
+            env:
+              TZ: America/New_York
+              LIBVA_DRIVER_NAME: i965
+            envFrom:
+              - secretRef:
+                  name: frigate-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/version
+                    port: &port 5000
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 1000m
+                memory: 2Gi
+                gpu.intel.com/i915: "1"
+              limits:
+                memory: 8Gi
+                gpu.intel.com/i915: "1"
+        pod:
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: ["plex"]
+                  topologyKey: kubernetes.io/hostname
+          nodeSelector:
+            google.feature.node.kubernetes.io/coral: "true"
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /data
     service:
       main:
         ports:
           http:
-            port: &port 5000
-          rtsp:
-            enabled: true
-            port: 8554
-
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /api/version
             port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
-
+          rtsp:
+            port: 8554
     ingress:
       main:
         enabled: true
-        ingressClassName: "internal-nginx"
-        # annotations:
-        #   external-dns.alpha.kubernetes.io/target: "external.holthome.net"
+        className: internal-nginx
         hosts:
           - host: &host "frigate.holthome.net"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-
-    securityContext:
-      privileged: true
-
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /data
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
-
     persistence:
       config-file:
-        enabled: true
         type: configMap
         name: frigate-configmap
-        subPath: config.yml
-        mountPath: /config/config.yml
-        readOnly: true
-
-      nfs-nas-media:
+        globalMounts:
+          - path: /config/config.yml
+            subPath: config.yml
+            readOnly: true
+      cache:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 4Gi
+        globalMounts:
+          - path: /dev/shm
+      usb:
+        enabled: true
+        type: hostPath
+        hostPath: /dev/bus/usb
+        hostPathType: Directory
+        globalMounts:
+          - path: /dev/bus/usb
+      media:
         enabled: true
         type: custom
         volumeSpec:
@@ -107,27 +139,3 @@ spec:
             path: /mnt/tank/share
         mountPath: /media
         readOnly: false
-
-      cache:
-        enabled: true
-        type: emptyDir
-        medium: Memory
-        sizeLimit: 4Gi
-        mountPath: /dev/shm
-
-      usb:
-        enabled: true
-        type: hostPath
-        hostPath: /dev/bus/usb
-        hostPathType: Directory
-        mountPath: /dev/bus/usb
-
-    nodeSelector:
-      google.feature.node.kubernetes.io/coral: "true"
-
-    resources:
-      requests:
-        memory: 100Mi
-        cpu: 500m
-      limits:
-        memory: 4Gi
