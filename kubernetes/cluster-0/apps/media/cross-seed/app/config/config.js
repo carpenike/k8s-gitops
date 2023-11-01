@@ -5,7 +5,7 @@
 
 module.exports = {
   delay: 30,
-  qbittorrentUrl: "http://localhost:80",
+  qbittorrentUrl: "http://qb.media.svc.cluster.local:80",
 
   torznab: [
     "http://prowlarr.media.svc.cluster.local:80/13/api?apikey={{ .api_key }}", // tl
@@ -19,13 +19,14 @@ module.exports = {
   ],
 
   action: "inject",
-  includeEpisodes: true,
+  includeEpisodes: false,
+  includeSingleEpisodes: true,
   includeNonVideos: true,
   duplicateCategories: true,
 
   matchMode: "safe",
   skipRecheck: true,
-  linkType: "symlink",
+  linkType: "hardlink",
   linkDir: "/media/qb/downloads/xseeds",
 
   // I have sonarr, radarr, and prowlarr categories set in qBittorrent
@@ -35,7 +36,7 @@ module.exports = {
     "/media/qb/downloads/radarr",
     "/media/qb/downloads/prowlarr",
   ],
-
+  maxDataDepth: 1,
   outputDir: "/config/xseeds",
   torrentDir: "/config/qBittorrent/BT_backup",
 };

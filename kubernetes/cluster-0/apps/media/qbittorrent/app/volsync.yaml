@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/external-secrets.io/externalsecret_v1beta1.json
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -22,26 +23,29 @@ spec:
     - extract:
         key: volsync-restic-template
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
   name: qbittorrent
   namespace: media
 spec:
-  sourcePVC: config-qbittorrent-0
+  sourcePVC: qbittorrent-config
   trigger:
-    schedule: "0 0 * * *"
+    schedule: "0 7 * * *"
   restic:
     copyMethod: Snapshot
-    pruneIntervalDays: 10
+    pruneIntervalDays: 7
     repository: qbittorrent-restic-secret
-    cacheCapacity: 5Gi
-    volumeSnapshotClassName: csi-ceph-blockpool
-    storageClassName: ceph-block
+    cacheCapacity: 8Gi
+    cacheStorageClassName: local-hostpath
+    cacheAccessModes: ["ReadWriteOnce"]
+    volumeSnapshotClassName: csi-ceph-filesystem
+    storageClassName: ceph-filesystem
     moverSecurityContext:
       runAsUser: 568
       runAsGroup: 568
       fsGroup: 568
     retain:
-      daily: 10
+      daily: 7
       within: 3d

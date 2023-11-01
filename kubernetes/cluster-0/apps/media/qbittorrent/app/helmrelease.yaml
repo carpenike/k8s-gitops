@@ -1,146 +1,116 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app qbittorrent
+  name: qbittorrent
   namespace: media
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
+  maxHistory: 2
   install:
-    createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
+    cleanupOnFail: true
     remediation:
-      retries: 5
-
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
-
-    image:
-      repository: ghcr.io/onedr0p/qbittorrent
-      tag: 4.5.5@sha256:f4a1a5eece13beed61e579172d2a54b1fc2e7ff2bbdbd7ef22a4d9f6fc36e198
-
-    podAnnotations:
-      setGateway: "true"
-
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      supplementalGroups:
-        - 100
-
-    env:
-      UMASK: "022"
-      TZ: "America/New_York"
-      QBITTORRENT__PORT: &port 80
-      QBITTORRENT__BT_PORT: &port-bt 61144
-
-    hostname: qbittorrent-0
-
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: 4.5.5@sha256:f4a1a5eece13beed61e579172d2a54b1fc2e7ff2bbdbd7ef22a4d9f6fc36e198
+            env:
+              TZ: America/New_York
+              QBITTORRENT__PORT: &port 80
+              QBITTORRENT__BT_PORT: &bittorrentPort 61144
+              QBT_Preferences__WebUI__AlternativeUIEnabled: false
+              QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
+              QBT_Preferences__WebUI__AuthSubnetWhitelist: 10.32.0.0/16
+              QBT_Preferences__WebUI__LocalHostAuth: false
+              QBT_BitTorrent__Session__Interface: eth0
+              QBT_BitTorrent__Session__InterfaceAddress:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              QBT_BitTorrent__Session__InterfaceName: eth0
+            resources:
+              requests:
+                cpu: 200m
+                memory: 2Gi
+              limits:
+                memory: 8Gi
+        pod:
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: ["sabnzbd"]
+                  topologyKey: kubernetes.io/hostname
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         ports:
           http:
             port: *port
-          xseed:
-            port: 2468
       bittorrent:
-        enabled: true
+        controller: main
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: 10.45.10.19
         ports:
           bittorrent:
             enabled: true
-            port: *port-bt
+            port: *bittorrentPort
             protocol: TCP
-            targetPort: *port-bt
-        externalTrafficPolicy: Local
-
     ingress:
       main:
         enabled: true
-        ingressClassName: "internal-nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_hide_header "x-webkit-csp";
-            proxy_hide_header "content-security-policy";
-            proxy_hide_header "X-Frame-Options";
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.holthome.net/css/base/qbittorrent/nord.css"></head>';
-            sub_filter_once on;
-
+        className: internal-nginx
         hosts:
-          - host: &host "qb.holthome.net"
+          - host: &host qb.holthome.net
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-
     persistence:
-      nfs-nas-media:
+      config:
         enabled: true
-        existingClaim: media-nfs-share-pvc
-        mountPath: /media
-        readOnly: false
-      scripts:
-        enabled: true
+        existingClaim: qbittorrent-config
+      completed-script:
         type: configMap
         name: qbittorrent-scripts
-        mountPath: /scripts/xseed.sh
-        subPath: xseed.sh
         defaultMode: 0775
-        readOnly: true
-      xseed:
-        enabled: true
-        type: secret
-        name: cross-seed-secret
-        mountPath: /config/config.js
-        subPath: config.js
-        readOnly: true
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 500m
-      limits:
-        memory: 20Gi
-
-    sidecars:
-      xseed:
-        image: ghcr.io/cross-seed/cross-seed:5.5.3@sha256:65320f9e9ea0c6ec8595292306bb10653591f9e883cc598cb01eb1b7fd2a3a3e
-        imagePullPolicy: IfNotPresent
-        args:
-          - daemon
-        volumeMounts:
-          - name: config
-            mountPath: /config
-          - name: xseed
-            mountPath: /config/config.js
-            subPath: config.js
+        globalMounts:
+          - path: /scripts/completed.sh
+            subPath: completed.sh
             readOnly: true
-          - name: nfs-nas-media
-            mountPath: /media
-
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
+      media:
+        existingClaim: media

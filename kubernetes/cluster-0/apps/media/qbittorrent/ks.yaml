@@ -13,50 +13,17 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false # no flux ks dependents
   dependsOn:
-    - name: cluster-apps-pod-gateway-media
     - name: cluster-apps-rook-ceph-cluster
     - name: cluster-apps-external-secrets-stores
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-qbittorrent-tag
+  name: cluster-apps-qbittorrent-tools
   namespace: flux-system
 spec:
   interval: 10m
-  path: "./kubernetes/cluster-0/apps/media/qbittorrent/tag"
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: k8s-gitops-kubernetes
-  wait: false # no flux ks dependents
-  dependsOn:
-    - name: cluster-apps-qbittorrent
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cluster-apps-qbittorrent-reannounce
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: "./kubernetes/cluster-0/apps/media/qbittorrent/reannounce"
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: k8s-gitops-kubernetes
-  wait: false # no flux ks dependents
-  dependsOn:
-    - name: cluster-apps-qbittorrent
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cluster-apps-qbittorrent-orphaned
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: "./kubernetes/cluster-0/apps/media/qbittorrent/orphaned"
+  path: "./kubernetes/cluster-0/apps/media/qbittorrent/tools"
   prune: true
   sourceRef:
     kind: GitRepository
