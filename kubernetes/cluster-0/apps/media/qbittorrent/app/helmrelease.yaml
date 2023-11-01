@@ -114,5 +114,3 @@ spec:
             readOnly: true
       media:
         existingClaim: media-nfs-share-pvc
-        globalMounts:
-          - path: /data
