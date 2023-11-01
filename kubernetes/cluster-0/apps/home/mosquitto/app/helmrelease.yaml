@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -11,47 +11,37 @@ spec:
     spec:
       chart: app-template
       version: 2.0.3
-      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
     controllers:
       main:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
-
-        statefulset:
-          volumeClaimTemplates:
-            - name: data
-              accessMode: ReadWriteOnce
-              size: 512Mi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /data
-
-        pod:
-          # annotations:
-          #   k8s.v1.cni.cncf.io/networks: |
-          #     [{
-          #       "name":"multus-iot",
-          #       "namespace": "network",
-          #       "ips": ["10.1.3.151/24"]
-          #     }]
-
         initContainers:
           init-config:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
               tag: 2.0.18
-            command:
-              - "/bin/sh"
-              - "-c"
-              - "cp /tmp/secret/* /mosquitto/external_config/ && mosquitto_passwd -U /mosquitto/external_config/mosquitto_pwd"
-
+              pullPolicy: IfNotPresent
+            command: ["/bin/sh", "-c"]
+            args:
+              [
+                "cp /tmp/secret/* /mosquitto/external_config/ && mosquitto_passwd -U /mosquitto/external_config/mosquitto_pwd",
+              ]
         containers:
           main:
             image:
@@ -60,10 +50,23 @@ spec:
             resources:
               requests:
                 cpu: 5m
-                memory: 10M
+                memory: 4Mi
               limits:
-                memory: 10M
-
+                memory: 16Mi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+        statefulset:
+          volumeClaimTemplates:
+            - name: data
+              accessMode: ReadWriteOnce
+              size: 512Mi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /data
     service:
       main:
         type: LoadBalancer
@@ -73,28 +76,24 @@ spec:
         externalTrafficPolicy: Cluster
         ports:
           http:
-            enabled: false
-          mqtt:
-            enabled: true
             port: 1883
-
     persistence:
-      mosquitto-configfile:
+      config-file:
         type: configMap
-        name: mosquitto-configmap
+        name: mosquitto-configmap # overriden by kustomizeconfig
         advancedMounts:
           main:
             main:
               - path: /mosquitto/config/mosquitto.conf
                 subPath: mosquitto.conf
-      mosquitto-secret:
+      secret-file:
         type: secret
         name: mosquitto-secret
         advancedMounts:
           main:
             init-config:
               - path: /tmp/secret
-      mosquitto-externalconfig:
+      external-config:
         type: emptyDir
         globalMounts:
           - path: /mosquitto/external_config
