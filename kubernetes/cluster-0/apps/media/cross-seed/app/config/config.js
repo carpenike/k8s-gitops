@@ -5,7 +5,7 @@
 
 module.exports = {
   delay: 30,
-  qbittorrentUrl: "http://qb.media.svc.cluster.local:80",
+  qbittorrentUrl: "http://qbittorrent.media.svc.cluster.local:80",
 
   torznab: [
     "http://prowlarr.media.svc.cluster.local:80/13/api?apikey={{ .api_key }}", // tl
