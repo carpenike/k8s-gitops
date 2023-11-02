@@ -103,7 +103,7 @@ spec:
     persistence:
       config:
         enabled: true
-        type: emptyDir
+        existingClaim: readarr-ebooks-config-pvc
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
