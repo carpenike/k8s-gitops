@@ -6,9 +6,8 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./_pvs/ks.yaml
-  - ./arr-migration/ks.yaml
+  # - ./arr-migration/ks.yaml
   - ./autobrr/ks.yaml
-  - ./autobrr-migration/ks.yaml
   - ./bazarr/ks.yaml
   - ./immich/ks.yaml
   # - ./omegabrr/ks.yaml
