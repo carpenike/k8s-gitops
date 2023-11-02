@@ -35,10 +35,10 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/onedr0p/sonarr-develop
-              tag: 4.0.0.710@sha256:438f46db13f15df81159118a9f1d74ce7e2a46e9bd45024b2fa6aecae6036068
+              repository: ghcr.io/autobrr/autobrr
+              tag: v1.33.0
             env:
-              SONARR__PORT: &port 80
+              AUTOBRR__PORT: &port 80
             resources:
               requests:
                 cpu: 14m
@@ -86,7 +86,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: config-sonarr-0
+        existingClaim: config-autobrr-0
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
