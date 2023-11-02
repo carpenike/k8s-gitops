@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -9,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -25,23 +26,38 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    controller:
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: ghcr.io/onedr0p/unpackerr
-      tag: 0.12.0@sha256:8bbf35be449b89041f07fc069812f79b4eadf56e1c7c7720935fe166016376ef
-    env:
-      TZ: America/New_York
-      UN_INTERVAL: 1m
-      UN_WEBSERVER_METRICS: true
-      UN_SONARR_0_URL: http://sonarr.media.svc.cluster.local:80
-      UN_SONARR_0_PATHS_0: /media/qb/downloads/sonarr
-      UN_RADARR_0_URL: http://radarr.media.svc.cluster.local:80
-      UN_RADARR_0_PATHS_0: /media/qb/downloads/radarr
-    envFrom:
-      - secretRef:
-          name: unpackerr-secret
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: docker.io/golift/unpackerr
+              tag: 0.12.0
+            env:
+              TZ: America/New_York
+              UN_WEBSERVER_METRICS: "true"
+              UN_SONARR_0_URL: http://sonarr.media.svc.cluster.local:80
+              UN_SONARR_0_PATHS_0: /media/qb/downloads/sonarr
+              UN_RADARR_0_URL: http://radarr.media.svc.cluster.local:80
+              UN_RADARR_0_PATHS_0: /media/qb/downloads/radarr
+            envFrom:
+              - secretRef:
+                  name: unpackerr-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         ports:
@@ -50,19 +66,6 @@ spec:
     serviceMonitor:
       main:
         enabled: true
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
     persistence:
       media:
-        enabled: true
         existingClaim: media-nfs-share-pvc
-    resources:
-      requests:
-        memory: 2048Mi
-        cpu: 10m
-      limits:
-        memory: 4096Mi
