@@ -4,3 +4,7 @@ kind: Kustomization
 namespace: media
 resources:
   - helmrelease.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/name: arr-migration
+      app.kubernetes.io/instance: arr-migration
