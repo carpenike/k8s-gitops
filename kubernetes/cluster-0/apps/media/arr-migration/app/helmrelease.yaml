@@ -35,13 +35,13 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/autobrr/autobrr
-              tag: v1.33.0
+              repository: ghcr.io/onedr0p/readarr-develop
+              tag: 0.3.8.2267@sha256:b844031cf2e1ee3ac332ac5b64f1ba628157097748a405a3a11aea8c5c803561
             env:
-              AUTOBRR__CHECKFORUPDATES: false
-              AUTOBRR__HOST: 0.0.0.0
-              AUTOBRR__PORT: &port 80
-              AUTOBRR__LOGLEVEL: INFO
+              # READARR__CHECKFORUPDATES: false
+              # AUTOBRR__HOST: 0.0.0.0
+              READARR__PORT: &port 80
+              # AUTOBRR__LOGLEVEL: INFO
             resources:
               requests:
                 cpu: 14m
@@ -55,34 +55,34 @@ spec:
           http:
             port: *port
 
-    # probes:
-    #   liveness: &probes
-    #     enabled: true
-    #     custom: true
-    #     spec:
-    #       httpGet:
-    #         path: /ping
-    #         port: *port
-    #       initialDelaySeconds: 0
-    #       periodSeconds: 10
-    #       timeoutSeconds: 1
-    #       failureThreshold: 3
-    #   readiness: *probes
     probes:
       liveness: &probes
         enabled: true
         custom: true
         spec:
           httpGet:
-            path: /api/healthz/liveness
+            path: /ping
             port: *port
           initialDelaySeconds: 0
           periodSeconds: 10
           timeoutSeconds: 1
           failureThreshold: 3
       readiness: *probes
-      startup:
-        enabled: false
+    # probes:
+    #   liveness: &probes
+    #     enabled: true
+    #     custom: true
+    #     spec:
+    #       httpGet:
+    #         path: /api/healthz/liveness
+    #         port: *port
+    #       initialDelaySeconds: 0
+    #       periodSeconds: 10
+    #       timeoutSeconds: 1
+    #       failureThreshold: 3
+    #   readiness: *probes
+    #   startup:
+    #     enabled: false
 
     ingress:
       main:
@@ -102,7 +102,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: config-autobrr-0
+        existingClaim: config-readarr-ebooks-0
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
