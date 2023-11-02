@@ -35,12 +35,12 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/onedr0p/readarr-develop
-              tag: 0.3.8.2267@sha256:b844031cf2e1ee3ac332ac5b64f1ba628157097748a405a3a11aea8c5c803561
+              repository: ghcr.io/autobrr/autobrr
+              tag: v1.33.0
             env:
               # READARR__CHECKFORUPDATES: false
               # AUTOBRR__HOST: 0.0.0.0
-              READARR__PORT: &port 80
+              AUTOBRR__PORT: &port 80
               # AUTOBRR__LOGLEVEL: INFO
             resources:
               requests:
@@ -102,7 +102,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: config-readarr-audio-0
+        existingClaim: config-autobrr-0
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
