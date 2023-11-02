@@ -102,7 +102,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: config-readarr-ebooks-0
+        existingClaim: config-readarr-audio-0
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:
