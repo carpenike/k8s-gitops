@@ -24,7 +24,7 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-apps-plex
-  path: ./kubernetes/cluster-0apps/media/plex/tools
+  path: ./kubernetes/cluster-0/apps/media/plex/tools
   prune: true
   sourceRef:
     kind: GitRepository
