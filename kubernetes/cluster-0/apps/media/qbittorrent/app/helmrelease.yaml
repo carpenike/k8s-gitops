@@ -54,7 +54,7 @@ spec:
                 cpu: 200m
                 memory: 2Gi
               limits:
-                memory: 8Gi
+                memory: 20Gi
         pod:
           affinity:
             podAntiAffinity:
