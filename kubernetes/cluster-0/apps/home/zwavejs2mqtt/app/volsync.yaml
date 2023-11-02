@@ -2,14 +2,14 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: zwavejs2mqtt-restic
+  name: zwave-js-ui-restic
   namespace: home
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword-connect
   target:
-    name: zwavejs2mqtt-restic-secret
+    name: zwave-js-ui-restic-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
@@ -25,16 +25,16 @@ spec:
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: zwavejs2mqtt
+  name: zwave-js-ui
   namespace: home
 spec:
-  sourcePVC: config-zwavejs2mqtt-0
+  sourcePVC: config-zwave-js-ui-0
   trigger:
     schedule: "0 */12 * * *"
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 14
-    repository: zwavejs2mqtt-restic-secret
+    repository: zwave-js-ui-restic-secret
     retain:
       daily: 14
     volumeSnapshotClassName: csi-ceph-blockpool
