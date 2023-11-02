@@ -38,7 +38,10 @@ spec:
               repository: ghcr.io/autobrr/autobrr
               tag: v1.33.0
             env:
+              AUTOBRR__CHECKFORUPDATES: false
+              AUTOBRR__HOST: 0.0.0.0
               AUTOBRR__PORT: &port 80
+              AUTOBRR__LOGLEVEL: INFO
             resources:
               requests:
                 cpu: 14m
