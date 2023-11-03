@@ -9,6 +9,7 @@ resources:
   - ./arr-migration/ks.yaml
   - ./autobrr/ks.yaml
   - ./bazarr/ks.yaml
+  - ./cross-seed/ks.yaml
   - ./immich/ks.yaml
   # - ./omegabrr/ks.yaml
   - ./overseerr/ks.yaml
