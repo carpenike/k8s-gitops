@@ -91,9 +91,9 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: bazarr-config
-      media:
-        existingClaim: media
+        existingClaim: bazarr-config-pvc
+      data:
+        existingClaim: nfs-media-share-pvc
       scripts:
         type: configMap
         name: bazarr-scripts
