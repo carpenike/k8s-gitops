@@ -93,7 +93,7 @@ spec:
         enabled: true
         existingClaim: bazarr-config-pvc
       data:
-        existingClaim: nfs-media-share-pvc
+        existingClaim: media-nfs-share-pvc
       scripts:
         type: configMap
         name: bazarr-scripts
