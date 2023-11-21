@@ -36,7 +36,7 @@ spec:
 
     image:
       repository: mbentley/omada-controller
-      tag: 5.12@sha256:84a36ab87657e7e698c395448ca481b3fece29ac3a7ede5b3eb0cd256c98e6a2
+      tag: 5.12@sha256:71673bd6c6397b4c63b978999132d1bfea48d9f92495475faa766dc61f9ac258
 
     env:
       TZ: "America/New_York"
