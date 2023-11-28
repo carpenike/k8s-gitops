@@ -32,11 +32,6 @@ spec:
             env:
               BASE_URL: https://miniflux.holthome.net
               CREATE_ADMIN: "1"
-              DATABASE_URL:
-                valueFrom:
-                  secretKeyRef:
-                    name: "${APP}-pguser-${DB_USER}"
-                    key: uri
               DEBUG: "1"
               LOG_DATE_TIME: "1"
               OAUTH2_CLIENT_ID: miniflux
