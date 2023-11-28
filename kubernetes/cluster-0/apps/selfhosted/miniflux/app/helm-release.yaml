@@ -35,7 +35,6 @@ spec:
               DEBUG: "1"
               LOG_DATE_TIME: "1"
               OAUTH2_USER_CREATION: "1"
-              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://auth.holthome.net/application/o/miniflux/
               OAUTH2_PROVIDER: oidc
               OAUTH2_REDIRECT_URL: https://miniflux.holthome.net/oauth2/oidc/callback
               POLLING_SCHEDULER: "entry_frequency"
