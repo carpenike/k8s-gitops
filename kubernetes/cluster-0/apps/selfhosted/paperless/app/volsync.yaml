@@ -28,7 +28,7 @@ metadata:
   name: paperless
   namespace: selfhosted
 spec:
-  sourcePVC: data-paperless-0
+  sourcePVC: data-paperless-pvc
   trigger:
     schedule: "0 */12 * * *"
   restic:
