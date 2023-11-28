@@ -3,7 +3,7 @@ apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
   name: mosquitto-restic
-  namespace: home-automation
+  namespace: home
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -26,7 +26,7 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
   name: mosquitto
-  namespace: home-automation
+  namespace: home
 spec:
   sourcePVC: data-mosquitto-0
   trigger:
