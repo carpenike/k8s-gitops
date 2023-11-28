@@ -165,7 +165,7 @@ spec:
                 cpu: "35m"
                 memory: "64M"
               limits:
-                memory: "144M"
+                memory: "1Gi"
         storageClass:
           enabled: true
           isDefault: false
