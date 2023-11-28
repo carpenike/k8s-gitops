@@ -82,7 +82,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.holthome.net"
         hosts:
-          - host: &host miniflux.holthome.net
+          - host: &host "miniflux.holthome.net"
             paths:
               - path: /
                 service:
