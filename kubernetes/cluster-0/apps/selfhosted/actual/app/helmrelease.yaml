@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -9,36 +10,38 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.3.0
+      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 2
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
+
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
 
-    image:
-      repository: ghcr.io/actualbudget/actual-server
-      tag: 23.9.0
+        pod:
+          enableServiceLinks: false
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
 
-    env:
-      TZ: "America/New_York"
-
-    nameOverride: actual
+        containers:
+          main:
+            image:
+              repository: ghcr.io/actualbudget/actual-server
+              tag: 23.11.0
+            resources:
+              requests:
+                cpu: 12m
+                memory: 128M
+              limits:
+                memory: 512M
 
     service:
       main:
@@ -49,26 +52,23 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: internal-nginx
+        className: "internal-nginx"
         hosts:
           - host: &host "actual.holthome.net"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
 
-    resources:
-      requests:
-        cpu: 15m
-        memory: 80Mi
-      limits:
-        memory: 256Mi
-
-    volumeClaimTemplates:
-      - name: data
-        mountPath: /data
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
+    persistence:
+      data:
+        enabled: true
+        existingClaim: "actual-data-pvc"
+        advancedMounts:
+          main:
+            main:
+              - path: /data

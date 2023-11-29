@@ -28,7 +28,7 @@ metadata:
   name: actual
   namespace: selfhosted
 spec:
-  sourcePVC: data-actual-0
+  sourcePVC: actual-data-pvc
   trigger:
     schedule: "0 0 * * *"
   restic:
