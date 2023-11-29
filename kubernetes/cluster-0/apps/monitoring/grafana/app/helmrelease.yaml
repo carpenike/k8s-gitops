@@ -203,7 +203,7 @@ spec:
         check_for_plugin_updates: false
         reporting_enabled: false
       auth:
-        oauth_auto_login: false
+        oauth_auto_login: true
         oauth_allow_insecure_email_lookup: true
         signout_redirect_url: https://auth.holthome.net/application/o/grafana/end-session/
       auth.basic:
@@ -224,8 +224,7 @@ spec:
         token_url: https://auth.holthome.net/application/o/token/
         api_url: https://auth.holthome.net/application/o/userinfo/
         # map user groups to Grafana roles
-        role_attribute_path: |
-          contains(groups[*], 'Grafana Admins') && 'Admin' || 'Viewer'
+        role_attribute_path: contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'
       dashboards:
         default_home_dashboard_path: /tmp/dashboards/home.json
       date_formats:
