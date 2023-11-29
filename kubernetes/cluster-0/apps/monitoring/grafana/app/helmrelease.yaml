@@ -273,6 +273,7 @@ spec:
       - grafana-worldmap-panel
       - grafana-clock-panel
       - panodata-map-panel
+      - natel-plotly-panel
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: grafana
