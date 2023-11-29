@@ -1,15 +1,16 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: teslamate
   namespace: selfhosted
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -27,25 +28,30 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    initContainers:
-      init-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.8
-        envFrom:
-          - secretRef:
-              name: teslamate-secret
-    image:
-      repository: teslamate/teslamate
-      tag: 1.27.3
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image: ghcr.io/onedr0p/postgres-initdb:14.8
+            envFrom:
+              - secretRef:
+                  name: teslamate-secret
+        containers:
+          image:
+            repository: teslamate/teslamate
+            tag: 1.27.3
 
-    env:
-      TZ: "America/New_York"
-      DISABLE_MQTT: "false"
-      MQTT_HOST: "mosquitto.home.svc.cluster.local"
-      MQTT_USERNAME: "teslamate"
+          env:
+            TZ: "America/New_York"
+            DISABLE_MQTT: "false"
+            MQTT_HOST: "mosquitto.home.svc.cluster.local"
+            MQTT_USERNAME: "teslamate"
 
-    envFrom:
-      - secretRef:
-          name: teslamate-secret
+          envFrom:
+            - secretRef:
+                name: teslamate-secret
 
     service:
       main:
