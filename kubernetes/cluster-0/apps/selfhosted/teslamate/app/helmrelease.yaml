@@ -59,7 +59,6 @@ spec:
 
     service:
       main:
-        type: ClusterIP
         ports:
           http:
             port: 4000
@@ -67,11 +66,14 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "internal-nginx"
+        className: "internal-nginx"
         hosts:
           - host: "teslamate.holthome.net"
             paths:
               - path: /
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - teslamate.holthome.net
