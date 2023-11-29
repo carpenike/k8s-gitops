@@ -272,6 +272,7 @@ spec:
       - vonage-status-panel
       - grafana-worldmap-panel
       - grafana-clock-panel
+      - panodata-map-panel
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: grafana
