@@ -52,10 +52,6 @@ spec:
               MQTT_HOST: "mosquitto.home.svc.cluster.local"
               MQTT_USERNAME: "teslamate"
             envFrom: *envFrom
-            probes:
-              liveness:
-                enabled: true
-                custom: true
 
     service:
       main:
