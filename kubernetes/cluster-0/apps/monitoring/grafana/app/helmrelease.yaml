@@ -18,7 +18,7 @@ spec:
   timeout: 20m
   values:
     replicas: 1
-    admin.existingSecret: grafana-secret
+
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
