@@ -272,7 +272,7 @@ spec:
       - vonage-status-panel
       - grafana-worldmap-panel
       - grafana-clock-panel
-      - panodata-map-panel
+      # - panodata-map-panel
       - natel-plotly-panel
 
     podAnnotations:
