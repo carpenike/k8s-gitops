@@ -9,12 +9,11 @@ metadata:
     io.cilium/lb-ipam-ips: 10.45.20.15
 spec:
   type: LoadBalancer
-  externalTrafficPolicy: Cluster
   ports:
     - name: postgres
       port: 5432
       protocol: TCP
       targetPort: 5432
   selector:
-    postgresql: postgres
+    cnpg.io/cluster: postgres
     role: primary
