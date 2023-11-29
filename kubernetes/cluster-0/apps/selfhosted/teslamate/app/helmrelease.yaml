@@ -38,23 +38,24 @@ spec:
               repository: ghcr.io/onedr0p/postgres-init
               tag: 14.9
               pullPolicy: IfNotPresent
-            envFrom:
+            envFrom: &envFrom
               - secretRef:
                   name: teslamate-secret
         containers:
-          image:
-            repository: teslamate/teslamate
-            tag: 1.27.3
-
-          env:
-            TZ: "America/New_York"
-            DISABLE_MQTT: "false"
-            MQTT_HOST: "mosquitto.home.svc.cluster.local"
-            MQTT_USERNAME: "teslamate"
-
-          envFrom:
-            - secretRef:
-                name: teslamate-secret
+          main:
+            image:
+              repository: teslamate/teslamate
+              tag: 1.27.3
+            env:
+              TZ: "America/New_York"
+              DISABLE_MQTT: "false"
+              MQTT_HOST: "mosquitto.home.svc.cluster.local"
+              MQTT_USERNAME: "teslamate"
+            envFrom: *envFrom
+            probes:
+              liveness:
+                enabled: true
+                custom: true
 
     service:
       main:
