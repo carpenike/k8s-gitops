@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -29,44 +30,23 @@ spec:
     recreate: true
     cleanupOnFail: true
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
-
-    image:
-      repository: mbentley/omada-controller
-      tag: 5.12@sha256:9a256fc4383a3c4ee9ff2db5f24064728601ee874683ec0db7672b0e72bd5e20
-
-    env:
-      TZ: "America/New_York"
-      MANAGE_HTTP_PORT: "8088"
-      MANAGE_HTTPS_PORT: "8043"
-      PORTAL_HTTP_PORT: "8088"
-      PORTAL_HTTPS_PORT: "8843"
-      SHOW_SERVER_LOGS: "true"
-      SHOW_MONGODB_LOGS: "true"
-
-    ingress:
+    controllers:
       main:
-        enabled: true
-        ingressClassName: "internal-nginx"
         annotations:
-          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-          nginx.ingress.kubernetes.io/proxy-ssl-verify: "off"
-          nginx.ingress.kubernetes.io/use-regex: "true"
-          nginx.ingress.kubernetes.io/upstream-vhost: "omada.holthome.net:8043"
-          nginx.ingress.kubernetes.io/proxy-redirect-from: "~https://(.+):8043/(.+)/login$"
-          nginx.ingress.kubernetes.io/proxy-redirect-to: "https://$1/$2/login"
-
-        hosts:
-          - host: &host omada.holthome.net
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - *host
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: mbentley/omada-controller
+              tag: 5.12@sha256:9a256fc4383a3c4ee9ff2db5f24064728601ee874683ec0db7672b0e72bd5e20
+            env:
+              TZ: America/New_York
+              MANAGE_HTTP_PORT: "8088"
+              MANAGE_HTTPS_PORT: "8043"
+              PORTAL_HTTP_PORT: "8088"
+              PORTAL_HTTPS_PORT: "8843"
+              SHOW_SERVER_LOGS: "true"
+              SHOW_MONGODB_LOGS: "true"
 
     service:
       main:
@@ -145,6 +125,27 @@ spec:
             protocol: TCP
             targetPort: 27217
 
+    ingress:
+      main:
+        enabled: true
+        className: "internal-nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+          nginx.ingress.kubernetes.io/proxy-ssl-verify: "off"
+          nginx.ingress.kubernetes.io/use-regex: "true"
+          nginx.ingress.kubernetes.io/upstream-vhost: "omada.holthome.net:8043"
+          nginx.ingress.kubernetes.io/proxy-redirect-from: "~https://(.+):8043/(.+)/login$"
+          nginx.ingress.kubernetes.io/proxy-redirect-to: "https://$1/$2/login"
+
+        hosts:
+          - host: &host omada.holthome.net
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+
     resources:
       requests:
         memory: 1200Mi
@@ -152,19 +153,19 @@ spec:
       limits:
         memory: 2000Mi
 
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /opt/tplink/EAPController/data
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
-      - name: work
-        mountPath: /opt/tplink/EAPController/work
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
-      - name: logs
-        mountPath: /opt/tplink/EAPController/logs
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
+    persistence:
+      config:
+        enabled: true
+        existingClaim: omada-controller-config-pvc
+        globalMounts:
+          - path: /opt/tplink/EAPController/data
+      work:
+        enabled: true
+        existingClaim: omada-controller-work-pvc
+        globalMounts:
+          - path: /opt/tplink/EAPController/work
+      logs:
+        enabled: true
+        existingClaim: omada-controller-logs-pvc
+        globalMounts:
+          - path: /opt/tplink/EAPController/logs

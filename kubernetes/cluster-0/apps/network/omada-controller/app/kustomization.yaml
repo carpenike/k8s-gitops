@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: network
 resources:
   - helmrelease.yaml
+  - pvc.yaml
 commonLabels:
   app.kubernetes.io/name: omada-controller
   app.kubernetes.io/instance: omada-controller
