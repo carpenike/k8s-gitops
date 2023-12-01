@@ -142,7 +142,9 @@ spec:
           - host: &host omada.holthome.net
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
