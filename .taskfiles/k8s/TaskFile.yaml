@@ -17,9 +17,9 @@ tasks:
               "containers": [
                 {
                   "name": "debug",
-                  "image": "alpine/sqlite:latest",
+                  "image": "ghcr.io/onedr0p/alpine:rolling",
                   "command": [
-                    "/bin/sh"
+                    "/bin/bash"
                   ],
                   "stdin": true,
                   "stdinOnce": true,
