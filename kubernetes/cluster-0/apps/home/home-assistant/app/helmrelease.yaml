@@ -70,6 +70,10 @@ spec:
         ports:
           http:
             port: 8123
+          homekit:
+            enabled: true
+            port: 21063
+            protocol: TCP
 
     ingress:
       main:
