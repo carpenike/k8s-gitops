@@ -71,4 +71,4 @@ spec:
         advancedMounts:
           main:
             main:
-              - path: /app
+              - path: /data
