@@ -22,7 +22,7 @@ spec:
 
     image:
       repository: ghcr.io/bjw-s/k8s-ycl
-      tag: v0.1.0@sha256:5b18b022759d2dbee690ba2d75ea378b0a0e9bb4f16ba5ca0abafb428878b795
+      tag: v0.2.0@sha256:3e78959d126ad6d5dbdb4301839ce2a200e95c46699c81eef591a06a2ef91646
 
     topologySpreadConstraints:
       - maxSkew: 2
