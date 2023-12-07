@@ -34,7 +34,7 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/actualbudget/actual-server
+              repository: ghcr.io/bjw-s/actual-server
               tag: pr-289
             resources:
               requests:
