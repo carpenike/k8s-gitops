@@ -108,3 +108,5 @@ spec:
     persistence:
       media:
         existingClaim: media-nfs-share-pvc
+        globalMounts:
+          - path: /data
