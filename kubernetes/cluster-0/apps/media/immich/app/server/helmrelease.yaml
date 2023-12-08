@@ -35,7 +35,7 @@ spec:
 
     image:
       repository: ghcr.io/immich-app/immich-server
-      tag: v1.90.0
+      tag: v1.90.2
 
     command: /bin/sh
     args:
