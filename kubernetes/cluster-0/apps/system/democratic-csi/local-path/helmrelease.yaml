@@ -64,7 +64,7 @@ spec:
       driver:
         extraVolumeMounts:
           - name: local-hostpath
-            mountPath: /var/mnt/sata/demo-csi-local-path
+            mountPath: /var/k8s/demo-csi-local-path
             mountPropagation: Bidirectional
 
       driverRegistrar:
@@ -74,7 +74,7 @@ spec:
       extraVolumes:
         - name: local-hostpath
           hostPath:
-            path: /var/mnt/sata/demo-csi-local-path
+            path: /var/k8s/demo-csi-local-path
             type: DirectoryOrCreate
 
     driver:
