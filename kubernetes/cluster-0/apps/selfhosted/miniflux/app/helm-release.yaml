@@ -28,7 +28,7 @@ spec:
           main:
             image:
               repository: ghcr.io/miniflux/miniflux
-              tag: 2.0.50
+              tag: 2.0.51
             env:
               BASE_URL: https://miniflux.holthome.net
               CREATE_ADMIN: "0"
