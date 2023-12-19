@@ -1,6 +1,6 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: sabnzbd
@@ -10,12 +10,11 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.3
+      version: 2.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 2
   install:
     remediation:
       retries: 3
@@ -28,7 +27,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -45,6 +43,7 @@ spec:
                 sabnzbd.media.svc,
                 sabnzbd.media.svc.cluster,
                 sabnzbd.media.svc.cluster.local,
+                sab.holthome.net,
                 sabnzbd.holthome.net
             envFrom:
               - secretRef:
@@ -64,27 +63,24 @@ spec:
               readiness: *probes
               startup:
                 enabled: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 100m
+                cpu: 200m
                 memory: 2Gi
               limits:
-                memory: 8Gi
+                memory: 12Gi
         pod:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [10000]
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 1Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /config
     service:
       main:
         ports:
@@ -101,11 +97,22 @@ spec:
                 service:
                   name: main
                   port: http
+          - host: &customHost sab.holthome.net
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-
+              - *customHost
     persistence:
+      config:
+        enabled: true
+        existingClaim: sabnzbd
+      tmp:
+        type: emptyDir
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:

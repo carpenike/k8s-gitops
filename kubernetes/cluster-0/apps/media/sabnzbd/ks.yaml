@@ -15,3 +15,8 @@ spec:
   dependsOn:
     - name: cluster-apps-external-secrets-stores
     - name: cluster-apps-rook-ceph-cluster
+  postBuild:
+    substitute:
+      APP: *app
+      GATUS_SUBDOMAIN: sab
+      VOLSYNC_CAPACITY: 1Gi
