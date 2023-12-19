@@ -18,6 +18,7 @@ spec:
     - tcp
     - intr
     - hard
+    - nconnect=16
     - noatime
     - nodiratime
     - rsize=1048576
