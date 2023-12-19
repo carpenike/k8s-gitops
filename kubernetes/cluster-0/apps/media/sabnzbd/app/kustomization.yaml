@@ -8,4 +8,4 @@ resources:
   - ./gatus.yaml
   - helmrelease.yaml
   # - volsync.yaml
-  - ../../../../templates/volsync
+  # - ../../../../templates/volsync
