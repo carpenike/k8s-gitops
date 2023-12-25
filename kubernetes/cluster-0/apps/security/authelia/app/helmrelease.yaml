@@ -23,7 +23,7 @@ spec:
 
     image:
       repository: ghcr.io/authelia/authelia
-      tag: master@sha256:dc5034440bde0297b26961053837a23ddbfa9793ab93c1c7bb90d34160cc927a
+      tag: master@sha256:f568f392696305aa59d634927419bc42829d7a516f6453f428983f2bd17a7070
 
     args:
       [
