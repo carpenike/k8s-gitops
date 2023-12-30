@@ -26,24 +26,47 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    controller:
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: quay.io/minio/minio
-      tag: RELEASE.2023-01-25T00-19-54Z
-    env:
-      TZ: America/New_York
-      MINIO_UPDATE: "off"
-      MINIO_PROMETHEUS_URL: https://prometheus.holthome.net
-      MINIO_PROMETHEUS_JOB_ID: minio
-      MINIO_BROWSER_REDIRECT_URL: https://minio.holthome.net
-      MINIO_SERVER_URL: https://minio-s3.holthome.net
-      MINIO_API_CORS_ALLOW_ORIGIN: https://minio.holthome.net,https://minio-s3.holthome.net
-    envFrom:
-      - secretRef:
-          name: minio-secret
-    args: ["server", "/data", "--console-address", ":9001"]
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: quay.io/minio/minio
+              tag: RELEASE.2023-01-25T00-19-54Z
+            env:
+              TZ: America/New_York
+              MINIO_UPDATE: "off"
+              MINIO_PROMETHEUS_URL: https://prometheus.holthome.net
+              MINIO_PROMETHEUS_JOB_ID: minio
+              MINIO_BROWSER_REDIRECT_URL: https://minio.holthome.net
+              MINIO_SERVER_URL: https://minio-s3.holthome.net
+              MINIO_API_CORS_ALLOW_ORIGIN: https://minio.holthome.net,https://minio-s3.holthome.net
+            envFrom:
+              - secretRef:
+                  name: minio-secret
+            args: ["server", "/data", "--console-address", ":9001"]
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /minio/health/live
+                    port: 9000
+                  initialDelaySeconds: 5
+              readiness: *probe
+              startup:
+                enabled: false
+            podSecurityContext:
+              runAsUser: 568
+              runAsGroup: 568
+              fsGroup: 568
+              fsGroupChangePolicy: OnRootMismatch
+              supplementalGroups:
+                - 100
+
     service:
       main:
         enabled: true
@@ -55,41 +78,23 @@ spec:
             port: &api-port 9000
     serviceMonitor:
       main:
-        enabled: false
-        # endpoints:
-        #   - port: api
-        #     scheme: http
-        #     path: /minio/v2/metrics/cluster
-        #     interval: 1m
-        #     scrapeTimeout: 10s
-        #     bearerTokenSecret:
-        #       name: minio-secret
-        #       key: MINIO_PROMETHEUS_TOKEN
-    probes:
-      liveness: &probes
         enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /minio/health/live
-            port: *api-port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
+        endpoints:
+          - port: s3
+            scheme: http
+            path: /minio/v2/metrics/cluster
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
       main:
         enabled: true
-        ingressClassName: traefik
+        className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.tls: "true"
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
-          - host: &console-host "{{ .Release.Name }}.holthome.net"
+          - host: &console-host "minio.holthome.net"
             paths:
               - path: /
                 pathType: Prefix
@@ -117,20 +122,17 @@ spec:
           - hosts:
               - *api-host
             secretName: tls.minio-s3
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [100]
+
+
     persistence:
       data:
         enabled: true
         type: hostPath
         hostPath: /mnt/backup/minio/
         hostPathType: Directory
-        mountPath: /data
-        readOnly: false
+        globalMounts:
+          - path: /data
+
     resources:
       requests:
         memory: 100Mi
