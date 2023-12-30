@@ -92,7 +92,7 @@ spec:
         enabled: true
         className: internal-nginx
         hosts:
-          - host: &host minio.holthome.net"
+          - host: &host minio.holthome.net
             paths:
               - path: /
                 service:
