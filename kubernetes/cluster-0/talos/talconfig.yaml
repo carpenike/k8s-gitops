@@ -1,0 +1,216 @@
+---
+clusterName: ${clusterName}
+endpoint: "https://${clusterName}.${domainName}:6443"
+
+talosVersion: v1.6.0
+kubernetesVersion: 1.29.0
+
+cniConfig:
+  name: none
+
+additionalApiServerCertSans: &san
+  - ${clusterEndpointIP}
+  - ${clusterName}.${domainName}
+  - "127.0.0.1"
+
+additionalMachineCertSans: *san
+
+nodes:
+  - hostname: cp-0.holthome.net
+    controlPlane: true
+    # disableSearchDomain: true
+    ipAddress: 10.20.0.20
+    installDisk: /dev/vda
+
+  - hostname: node-0.holthome.net
+    controlPlane: true
+    # disableSearchDomain: true
+    ipAddress: 10.20.10.20
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - &vlan30
+            vlanId: 30
+            mtu: 1500
+            dhcp: true
+            dhcpOptions:
+              routeMetric: 4096
+
+  - hostname: node-1.holthome.net
+    controlPlane: true
+    # disableSearchDomain: true
+    ipAddress: 10.20.10.21
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - *vlan30
+
+  - hostname: node-2.holthome.net
+    controlPlane: true
+    # disableSearchDomain: true
+    ipAddress: 10.20.10.22
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - *vlan30
+
+  - hostname: node-3.holthome.net
+    controlPlane: true
+    # disableSearchDomain: true
+    ipAddress: 10.20.10.23
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eth2
+        dhcp: true
+        vlans:
+          - *vlan30
+
+controlPlane:
+  patches:
+    # Disable search domain everywhere
+    - |-
+      machine:
+        network:
+          disableSearchDomain: true
+
+    # Force nameserver
+    - |-
+      machine:
+        network:
+          nameservers:
+            - 10.6.0.4
+
+    # Configure NTP
+    - |-
+      machine:
+        time:
+          disabled: false
+          servers:
+            - 10.20.0.1
+
+    # Enable KubePrism
+    - |-
+      machine:
+        features:
+          kubePrism:
+            enabled: true
+            port: 7445
+
+    # Configure cluster loopback
+    - |-
+      machine:
+        network:
+          extraHostEntries:
+            - ip: ${clusterEndpointIP}
+              aliases:
+                - ${clusterName}.${domainName}
+
+    # Configure pull through cache
+    - |-
+      machine:
+        registries:
+          mirrors:
+            docker.io:
+              endpoints:
+                - https://zot.holthome.net/v2/docker.io
+              overridePath: true
+            ghcr.io:
+              endpoints:
+                - https://zot.holthome.net/v2/ghcr.io
+              overridePath: true
+            quay.io:
+              endpoints:
+                - https://zot.holthome.net/v2/quay.io
+              overridePath: true
+            gcr.io:
+              endpoints:
+                - https://zot.holthome.net/v2/gcr.io
+              overridePath: true
+            registry.k8s.io:
+              endpoints:
+                - https://zot.holthome.net/v2/registry.k8s.io
+              overridePath: true
+            public.ecr.aws:
+              endpoints:
+                - https://zot.holthome.net/v2/public.ecr.aws
+              overridePath: true
+
+    # Cluster configuration
+    - |-
+      cluster:
+        allowSchedulingOnMasters: true
+        proxy:
+          disabled: true
+
+    # ETCD configuration
+    - |-
+      cluster:
+        etcd:
+          advertisedSubnets:
+            - 10.20.0.0/16
+
+    # Configure containerd
+    - |-
+      machine:
+        files:
+          - op: create
+            path: /etc/cri/conf.d/20-customization.part
+            content: |
+              [plugins]
+                [plugins."io.containerd.grpc.v1.cri"]
+                  enable_unprivileged_ports = true
+                  enable_unprivileged_icmp = true
+
+    # Configure nfs mount options
+    - |-
+      machine:
+        files:
+          - op: overwrite
+            path: /etc/nfsmount.conf
+            permissions: 0o644
+            content: |
+              [ NFSMount_Global_Options ]
+              nfsvers=4.2
+              hard=True
+              noatime=True
+              nodiratime=True
+              rsize=131072
+              wsize=131072
+              nconnect=8
+
+    # Disable default API server admission plugins.
+    - |-
+      - op: remove
+        path: /cluster/apiServer/admissionControl
+
+    # Kubelet configuration
+    - |-
+      machine:
+        kubelet:
+          extraArgs:
+            feature-gates: GracefulNodeShutdown=true,NewVolumeManagerReconstruction=false
+            rotate-server-certificates: "true"
+          extraConfig:
+            maxPods: 150
+          nodeIP:
+            validSubnets:
+                - 10.20.0.0/16
+
+        network:
+          extraHostEntries:
+            - ip: ${clusterEndpointIP}
+              aliases:
+                - ${clusterName}.${domainName}
+
+    # Custom sysctls
+    - |-
+      machine:
+        sysctls:
+          fs.inotify.max_user_watches: "1048576"
+          fs.inotify.max_user_instances: "8192"
