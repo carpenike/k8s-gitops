@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "packageRules": [
+    {
+      "description": "Separate PRs for cluster-0 cluster",
+      "matchFileNames": [
+        "**/kubernetes/cluster-0/**",
+        "**/ansible/cluster-0/**",
+        "**/terraform/cluster-0/**"
+      ],
+      "additionalBranchPrefix": "cluster-0-"
+    },
+    {
+      "description": "Separate PRs for nas-1 cluster",
+      "matchFileNames": [
+        "**/kubernetes/nas-1/**",
+        "**/ansible/nas-1/**",
+        "**/terraform/nas-1/**"
+      ],
+      "additionalBranchPrefix": "nas-1-"
+    }
+  ]
+}
