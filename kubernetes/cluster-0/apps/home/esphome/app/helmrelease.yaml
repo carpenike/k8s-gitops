@@ -74,6 +74,13 @@ spec:
               - *host
 
     persistence:
+      config:
+        enabled: true
+        existingClaim: "${VOLSYNC_CLAIM}"
+        advancedMounts:
+          main:
+            main:
+              - path: /config
       secrets:
         type: secret
         name: esphome-secrets
