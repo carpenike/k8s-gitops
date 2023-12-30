@@ -7,6 +7,3 @@ resources:
   # - ./networkattachmentdefinition.yaml
   - ./externalsecret.yaml
   - ../../../../templates/volsync
-commonLabels:
-  app.kubernetes.io/name: esphome
-  app.kubernetes.io/instance: esphome

@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.1
+      version: 2.4.0
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -23,15 +23,14 @@ spec:
         annotations:
           secret.reloader.stakater.com/reload: esphome-secrets,esphome-deploykey
 
-        # statefulset:
-        #   volumeClaimTemplates:
-        #     - name: config
-        #       accessMode: ReadWriteOnce
-        #       size: 5Gi
-        #       storageClass: ceph-block
-        #       globalMounts:
-        #         - path: /config
-
+        pod:
+          annotations:
+            k8s.v1.cni.cncf.io/networks: |
+              [{
+                "name":"multus-wireless",
+                "namespace": "network",
+                "ips": ["10.30.10.16/16"]
+              }]
         containers:
           main:
             image:
@@ -49,7 +48,7 @@ spec:
                 cpu: 5m
                 memory: 1374M
               limits:
-                memory: 10Gi
+                memory: 2Gi
 
     service:
       main:
@@ -62,7 +61,7 @@ spec:
         enabled: true
         className: "internal-nginx"
         hosts:
-          - host: &host "esphome.holthome.net"
+          - host: "${HOSTNAME}"
             paths:
               - path: /
                 service:
@@ -70,7 +69,7 @@ spec:
                   port: http
         tls:
           - hosts:
-              - *host
+              - "${HOSTNAME}"
 
     persistence:
       config:
