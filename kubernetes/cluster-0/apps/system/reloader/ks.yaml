@@ -12,5 +12,5 @@ spec:
     kind: GitRepository
     name: k8s-gitops-kubernetes
   dependsOn:
-    - name: cluster-apps-snapshot-controller
+    - name: snapshot-controller
   wait: false # no flux ks dependents
