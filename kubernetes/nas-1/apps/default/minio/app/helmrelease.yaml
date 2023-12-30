@@ -72,10 +72,11 @@ spec:
         enabled: true
         ports:
           http:
-            port: &console-port 9001
-          api:
+            port: 9001
+          s3:
             enabled: true
-            port: &api-port 9000
+            port: 9000
+
     serviceMonitor:
       main:
         enabled: true
@@ -85,44 +86,24 @@ spec:
             path: /minio/v2/metrics/cluster
             interval: 1m
             scrapeTimeout: 10s
+
     ingress:
       main:
         enabled: true
-        className: traefik
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.tls: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-production
+        className: internal-nginx
         hosts:
-          - host: &console-host "minio.holthome.net"
+          - host: &host minio.holthome.net"
             paths:
               - path: /
-                pathType: Prefix
                 service:
-                  port: *console-port
-        tls:
-          - hosts:
-              - *console-host
-            secretName: tls.minio
-      s3:
-        enabled: true
-        ingressClassName: traefik
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.tls: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-production
-        hosts:
-          - host: &api-host minio-s3.holthome.net
+                  name: main
+                  port: http
+          - host: &host2 minio-s3.holthome.net
             paths:
               - path: /
-                pathType: Prefix
                 service:
-                  port: *api-port
-        tls:
-          - hosts:
-              - *api-host
-            secretName: tls.minio-s3
-
+                  name: main
+                  port: s3
 
     persistence:
       data:
