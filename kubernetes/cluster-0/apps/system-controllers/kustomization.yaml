@@ -6,3 +6,4 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./k8s-ycl/ks.yaml
+  - ./snapshot-controller/ks.yaml
