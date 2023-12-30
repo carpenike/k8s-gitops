@@ -84,7 +84,7 @@ spec:
             readOnly: true
       registry:
         type: hostPath
-        hostPath: /tank/Apps/zot
+        hostPath: /mnt/backup/k8s/zot
         hostPathType: Directory
         globalMounts:
           - path: /var/lib/registry
