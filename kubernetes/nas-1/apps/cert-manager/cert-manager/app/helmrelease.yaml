@@ -1,12 +1,11 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: cert-manager
   namespace: cert-manager
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: cert-manager
@@ -15,29 +14,28 @@ spec:
         kind: HelmRepository
         name: jetstack
         namespace: flux-system
-  maxHistory: 2
+      interval: 30m
+
   install:
-    createNamespace: true
-    remediation:
-      retries: 3
+    crds: CreateReplace
   upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
+    crds: CreateReplace
+
   values:
     installCRDs: true
+
+    webhook:
+      enabled: true
+
     extraArgs:
       - --dns01-recursive-nameservers=1.1.1.1:53,9.9.9.9:53
       - --dns01-recursive-nameservers-only
-    podDnsPolicy: None
+      - --enable-certificate-owner-ref
+
+    replicaCount: 1
+
+    podDnsPolicy: "None"
     podDnsConfig:
       nameservers:
         - "1.1.1.1"
         - "9.9.9.9"
-    prometheus:
-      enabled: false
-      servicemonitor:
-        enabled: false
-        prometheusInstance: monitoring
