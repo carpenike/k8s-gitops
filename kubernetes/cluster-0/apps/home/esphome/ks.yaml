@@ -6,6 +6,10 @@ metadata:
   name: &appname esphome
   namespace: flux-system
 spec:
+  targetNamespace: home
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *appname
   interval: 10m
   path: "./kubernetes/cluster-0/apps/home/esphome/app"
   prune: true
