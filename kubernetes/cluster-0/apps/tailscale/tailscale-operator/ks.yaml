@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *appname
   interval: 10m
-  path: "./kubernetes/main/apps/tailscale/tailscale-operator/app"
+  path: "./kubernetes/cluster-0/apps/tailscale/tailscale-operator/app"
   prune: true
   sourceRef:
     kind: GitRepository
