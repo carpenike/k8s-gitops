@@ -5,4 +5,4 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
-  - ./tailscale-oeprator/ks.yaml
+  - ./tailscale-operator/ks.yaml
