@@ -19,3 +19,4 @@ spec:
   values:
     operatorConfig:
       hostname: "tailscale-operator"
+    apiServerProxyConfig.mode: "true"
