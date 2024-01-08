@@ -839,4 +839,4 @@ config:
 
     vector:
       # renovate: docker-image
-      image: docker.io/timberio/vector:0.34.1-debian
+      image: docker.io/timberio/vector:0.35.0-debian
