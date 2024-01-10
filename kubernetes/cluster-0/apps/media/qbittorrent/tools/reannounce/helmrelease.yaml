@@ -35,7 +35,7 @@ spec:
           main:
             image:
               repository: ghcr.io/buroa/qbtools
-              tag: v0.10.2
+              tag: v0.13.0
             args:
               [
                 "reannounce",
