@@ -2,8 +2,8 @@
 clusterName: ${clusterName}
 endpoint: "https://${clusterName}.${domainName}:6443"
 
-talosVersion: v1.6.0
-kubernetesVersion: 1.28.2
+talosVersion: v1.6.1
+kubernetesVersion: 1.29.0
 
 cniConfig:
   name: none
@@ -214,3 +214,14 @@ controlPlane:
         sysctls:
           fs.inotify.max_user_watches: "1048576"
           fs.inotify.max_user_instances: "8192"
+
+    # Tailscale config
+    - |- 
+      machine:
+        files:
+          - content: |
+              TS_AUTHKEY=${tailscaleAuthkey}
+              TS_ROUTES=10.96.0.0/12
+            permissions: 0o644
+            path: /var/etc/tailscale/auth.env
+            op: create
