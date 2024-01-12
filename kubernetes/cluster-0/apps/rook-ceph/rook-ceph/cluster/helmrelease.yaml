@@ -148,7 +148,7 @@ spec:
       enabled: true
       name: csi-ceph-blockpool
       isDefault: false
-      deletionPolicy: 
+      deletionPolicy: Delete
 
     cephFileSystems:
       - name: ceph-filesystem
