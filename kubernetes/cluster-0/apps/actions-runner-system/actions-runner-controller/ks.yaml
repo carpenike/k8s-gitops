@@ -24,7 +24,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cluster-apps-actions-runner-controller
+    - name: actions-runner-controller
   path: ./kubernetes/cluster-0/apps/actions-runner-system/actions-runner-controller/runners
   prune: true
   sourceRef:
