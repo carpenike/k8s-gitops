@@ -1,10 +1,15 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-rook-ceph
+  name: $appname rook-ceph
   namespace: flux-system
 spec:
+  targetNamespace: rook-ceph
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *appname
   interval: 10m
   path: "./kubernetes/cluster-0/apps/rook-ceph/rook-ceph/operator"
   prune: true
@@ -12,9 +17,8 @@ spec:
     kind: GitRepository
     name: k8s-gitops-kubernetes
   wait: true
-  dependsOn:
-    - name: cluster-apps-csi-addons-controller-manager
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -29,20 +33,4 @@ spec:
     name: k8s-gitops-kubernetes
   wait: true
   dependsOn:
-    - name: cluster-apps-rook-ceph
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cluster-apps-rook-ceph-addons
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: "./kubernetes/cluster-0/apps/rook-ceph/rook-ceph/add-ons"
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: k8s-gitops-kubernetes
-  wait: false
-  dependsOn:
-    - name: cluster-apps-rook-ceph-cluster
+    - name: rook-ceph
