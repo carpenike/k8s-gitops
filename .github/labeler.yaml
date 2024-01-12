@@ -1,15 +1,15 @@
 ---
-area/ansible:
-  - "ansible/**/*"
-area/github:
-  - ".github/**/*"
-area/cluster:
-  - "cluster/**/*"
-area/hack:
-  - "hack/**/*"
-area/infrastructure:
-  - "infrastructure/**/*"
+# Area
 area/ci:
-  - ".github/**/*"
+  - changed-files:
+      - any-glob-to-any-file: ".github/**/*"
 area/kubernetes:
-  - "kubernetes/**/*"
+  - changed-files:
+      - any-glob-to-any-file: "kubernetes/**/*"
+# Cluster
+cluster/main:
+  - changed-files:
+      - any-glob-to-any-file: kubernetes/cluster-0/**/*
+cluster/nas-1:
+  - changed-files:
+      - any-glob-to-any-file: kubernetes/nas-1/**/*
