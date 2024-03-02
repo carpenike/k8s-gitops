@@ -25,8 +25,8 @@ jobs:
     strategy:
       matrix:
         cluster:
-          - main
-          - nas
+          - cluster-0
+          - nas-1
     steps:
       - name: Install Flux
         uses: fluxcd/flux2/action@main
