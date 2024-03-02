@@ -33,7 +33,7 @@ spec:
 
     image:
       repository: ghcr.io/autobrr/omegabrr
-      tag: v1.10.0
+      tag: v1.12.1
 
     env:
       TZ: "America/New_York"
