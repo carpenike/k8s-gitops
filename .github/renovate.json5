@@ -3,7 +3,6 @@
   extends: [
     "github>carpenike/renovate-config",
     "github>carpenike/renovate-config:automerge-github-actions",
-    "github>carpenike/k8s-gitops//.github/renovate/allowedVersions.json5",
     "github>carpenike/k8s-gitops//.github/renovate/autoMerge.json5",
     "github>carpenike/k8s-gitops//.github/renovate/versioning.json5",
     "github>carpenike/k8s-gitops//.github/renovate/groups.json5",
