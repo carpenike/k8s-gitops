@@ -21,7 +21,7 @@ spec:
     - name: multus-config
     - name: cluster-apps-rook-ceph-cluster
     - name: volsync
-    - name: external-secrets-stores
+    - name: cluster-apps-external-secrets-stores
   postBuild:
     substitute:
       APP: *appname
