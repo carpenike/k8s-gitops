@@ -11,6 +11,6 @@ resources:
   - ./ingress-nginx/ks.yaml
   # - ./kubernetes-schemas/ks.yaml
   - ./multus/ks.yaml
-  - ./omada-controller/ks.yaml
+  # - ./omada-controller/ks.yaml
   # Standard Resources
   # - ./external-services
