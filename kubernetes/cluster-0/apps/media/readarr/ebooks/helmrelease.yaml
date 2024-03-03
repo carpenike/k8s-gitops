@@ -46,7 +46,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/readarr-develop
-              tag: 0.3.10.2287@sha256:ff5f0db30fd5e0461a43a5b97556bea46e1f6f84b9c6d94028f636a14a158c24
+              tag: 0.3.18.2411@sha256:a1d9eb2001d499322e00876106a675c36b6f750cd253843595bb8e022a54f37a
             env:
               READARR__INSTANCE_NAME: Ebooks
               READARR__PORT: &port 80
