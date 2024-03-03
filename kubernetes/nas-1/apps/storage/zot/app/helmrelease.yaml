@@ -35,7 +35,7 @@ spec:
           main:
             image:
               repository: ghcr.io/project-zot/zot-linux-amd64
-              tag: v2.0.0
+              tag: v2.0.1
             probes:
               liveness: &probe
                 enabled: true
