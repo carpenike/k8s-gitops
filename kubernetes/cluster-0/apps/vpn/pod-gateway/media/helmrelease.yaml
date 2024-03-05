@@ -109,7 +109,7 @@ spec:
       gatewayLabel: setGateway
       image:
         repository: ghcr.io/angelnu/gateway-admision-controller
-        tag: v3.7.0@sha256:985eb60fd0017f657d5e66707f7e9b3f764f3337a87a379d26cd15e950bd79ad
+        tag: v3.10.0@sha256:a8ed630613de277244dfe203cd11d05905d7eeba8d8c41e399b02ee9a847b2f5
 
   valuesFrom:
     - kind: Secret
