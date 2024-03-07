@@ -44,7 +44,7 @@ spec:
           main:
             image:
               repository: ghcr.io/koush/scrypted
-              tag: 18-jammy-full-v0.94.4
+              tag: 18-jammy-full-v0.94.5
             resources:
               requests:
                 cpu: 136m
