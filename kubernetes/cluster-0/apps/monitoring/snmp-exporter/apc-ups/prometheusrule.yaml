@@ -1,9 +1,9 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: snmp-exporter-apc-ups
-  namespace: monitoring
+  name: snmp-exporter-apc-ups-rules
 spec:
   groups:
     - name: snmp-exporter-apc-ups.rules

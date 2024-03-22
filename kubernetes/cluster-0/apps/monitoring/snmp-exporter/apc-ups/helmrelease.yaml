@@ -1,11 +1,12 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app snmp-exporter-apc-ups
   namespace: monitoring
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: prometheus-snmp-exporter
@@ -15,35 +16,34 @@ spec:
         name: prometheus-community
         namespace: flux-system
   install:
-    createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
+    cleanupOnFail: true
     remediation:
-      retries: 5
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: kube-prometheus-stack
+      namespace: monitoring
   values:
     fullnameOverride: *app
-    image:
-      repository: quay.io/prometheus/snmp-exporter
-    extraArgs:
-      - "--config.file=/config/snmp.yaml"
+    extraArgs: ["--config.file=/config/snmp.yaml"]
     extraConfigmapMounts:
-      - name: *app
+      - name: &name apc-ups-snmp-configmap
         mountPath: /config/snmp.yaml
         subPath: snmp.yaml
-        configMap: *app
+        configMap: *name
         readOnly: true
         defaultMode: 420
     serviceMonitor:
       enabled: true
-      namespace: monitoring
       params:
-        - name: apc-ups
-          module:
-            - apcups
-          target: apc-ups.holthome.net
+        - name: apc-ups-0
+          module: ["apcups"]
+          target: apc-ups-0
+          auth: ["public_v1"]
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
+        - { sourceLabels: ["__param_target"], targetLabel: instance }

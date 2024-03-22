@@ -1055,8 +1055,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "192.168.1.160",
-          "value": "192.168.1.160"
+          "text": "apc-ups.holthome.net",
+          "value": "apc-ups.holthome.net"
         },
         "datasource": "Prometheus",
         "definition": "label_values(upsCommStatus,instance)",
