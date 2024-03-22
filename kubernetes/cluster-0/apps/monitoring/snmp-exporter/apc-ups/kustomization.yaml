@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
+namespace: monitoring
 configMapGenerator:
   - name: apc-ups-dashboard
     files:
