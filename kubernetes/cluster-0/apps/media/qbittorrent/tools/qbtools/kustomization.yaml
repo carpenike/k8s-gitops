@@ -9,3 +9,5 @@ configMapGenerator:
   - name: qbtools-configmap
     files:
       - config.yaml=./config/config.yaml
+generatorOptions:
+  disableNameSuffixHash: true
