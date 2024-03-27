@@ -54,7 +54,7 @@ spec:
                 valueFrom:
                   secretKeyRef:
                     name: sonarr-secret
-                    key: api_key
+                    key: SONARR_APIKEY
             probes:
               liveness:
                 enabled: true
