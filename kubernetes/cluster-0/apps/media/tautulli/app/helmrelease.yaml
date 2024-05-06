@@ -47,7 +47,7 @@ spec:
           jbops:
             image:
               repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.2.1
+              tag: v4.2.3
             env:
               GITSYNC_REPO: https://github.com/blacktwin/JBOPS
               GITSYNC_REF: master
