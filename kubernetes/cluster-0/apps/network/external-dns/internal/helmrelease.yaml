@@ -27,7 +27,7 @@ spec:
       - name: EXTERNAL_DNS_RFC2136_HOST
         value: "10.30.0.116"
       - name: EXTERNAL_DNS_RFC2136_PORT
-        value: "53"
+        value: "5391"
       - name: EXTERNAL_DNS_RFC2136_ZONE
         value: "holthome.net"
       - name: EXTERNAL_DNS_RFC2136_TSIG_AXFR
