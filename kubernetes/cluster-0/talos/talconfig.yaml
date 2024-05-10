@@ -84,7 +84,7 @@ controlPlane:
       machine:
         network:
           nameservers:
-            - 10.6.0.4
+            - 10.30.0.116
 
     # Configure NTP
     - |-
@@ -92,7 +92,7 @@ controlPlane:
         time:
           disabled: false
           servers:
-            - 10.20.0.1
+            - 0.us.pool.ntp.org
 
     # Enable KubePrism
     - |-

@@ -1,5 +1,5 @@
 domainName: ENC[AES256_GCM,data:+yvYSmR9kpXJtbtA,iv:zjApncHfZH4XmElSKIPVCafTuRzETrN0Y3EHu3WY/PQ=,tag:OH/Zw4C0HUdcbFWhNYPcgw==,type:str]
-clusterEndpointIP: ENC[AES256_GCM,data:xF1NeKcTFUU=,iv:1cyY1zY+Wk3ydNwyF80Qa04X3Xm2mk2tzf5rJO07sgg=,tag:oStNQxPMzKoS/wStf7EYxw==,type:str]
+clusterEndpointIP: ENC[AES256_GCM,data:aj/NpHgodRI3Uaw=,iv:jm14G5aReqdpIAxvl8frW3n99UYS7FmcKp39ASBZEn4=,tag:l1NFSJqKekYk1Cz6hCnWhA==,type:str]
 clusterName: ENC[AES256_GCM,data:Tei67bzGM5wO,iv:FPb7BeeXCa2z3ii3x4Sq8X+WY4MR8V/Ol+JwAIZdFYA=,tag:aqhMOaJnL1OGlCm0XNMjsg==,type:str]
 tailscaleAuthkey: ENC[AES256_GCM,data:cGROtqRqJOuKLM4qc9/GehdJQf9xh00cgLuQhPpX4F+Gu7fAUmbAF4aU4RtFOaGpy7vs+T9xFRCI,iv:+zHQ33wycw3UA0VAiACf8by9znQ1j3C7nqp+OgZZDW8=,tag:wePPFfAIm5yQj8E/oqD+dg==,type:str]
 sops:
@@ -17,8 +17,8 @@ sops:
             TmZ1SnJud3VTWGVtS2d0NG9ubU1FT1kKYErO5hcoF+G20fQRlLXlwSV/kY2Oyogb
             51Xtm7h1hbh9mjmQfpxz7FbYyP9T56DlwfFnNBZjzRSCoGPfHHUoKg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-01-01T00:09:59Z"
-    mac: ENC[AES256_GCM,data:FCC46pHDPAtY7ZkQlnHXa7R65sAPBixkrY65g4uZVCB2Xw/Yg57IvCU804KQFYF6e6klNTmOUebqUCup4KwYEi3qMLQU3OSEF5Aj0Saar5xexxBC5tY3a6gM96fu4VedIx/XzGBC6cP4xP2ftabFsGmYtLf6lsea7D7Y3vQQAFw=,iv:7nPqYqAeowC/J8T6WTTbHk2gI7n0HyYzgk0hrMGS2nY=,tag:Yz28KT7kPHaL0fOFnPC7fg==,type:str]
+    lastmodified: "2024-05-10T02:20:27Z"
+    mac: ENC[AES256_GCM,data:f7lf4bPQBQ1NE2ARZRh5M5VqFMWHlsUhWRKC1cDHfFHRNQocMmaTRrrookVnOBgem2sSPUfj+QBoGyqazjPcDTmJOE5678T7TijNdcimwEWA3qEw0XOgPlELOtBIVIR5OZLBCQmYTE/hEpMeeJPyoToRuh1MejYeshMiVjwz9FQ=,iv:iEORjTpdf/3yL+luBFzvWLmNNATsXN8wSp4mZQO/CHc=,tag:MR9ELQ+IFOtiNHQWxzltsg==,type:str]
     pgp:
         - created_at: "2024-01-01T00:09:01Z"
           enc: |-
