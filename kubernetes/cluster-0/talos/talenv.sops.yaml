@@ -1,5 +1,5 @@
 domainName: ENC[AES256_GCM,data:+yvYSmR9kpXJtbtA,iv:zjApncHfZH4XmElSKIPVCafTuRzETrN0Y3EHu3WY/PQ=,tag:OH/Zw4C0HUdcbFWhNYPcgw==,type:str]
-clusterEndpointIP: ENC[AES256_GCM,data:aj/NpHgodRI3Uaw=,iv:jm14G5aReqdpIAxvl8frW3n99UYS7FmcKp39ASBZEn4=,tag:l1NFSJqKekYk1Cz6hCnWhA==,type:str]
+clusterEndpointIP: ENC[AES256_GCM,data:vgKkQPeMZAuMrw==,iv:wLkilja4L2Ytd8iGVih4Ipq0K2l8GX60YRA0RZvQwww=,tag:iGi+4J/wo8NIL+lsZE62tA==,type:str]
 clusterName: ENC[AES256_GCM,data:Tei67bzGM5wO,iv:FPb7BeeXCa2z3ii3x4Sq8X+WY4MR8V/Ol+JwAIZdFYA=,tag:aqhMOaJnL1OGlCm0XNMjsg==,type:str]
 tailscaleAuthkey: ENC[AES256_GCM,data:cGROtqRqJOuKLM4qc9/GehdJQf9xh00cgLuQhPpX4F+Gu7fAUmbAF4aU4RtFOaGpy7vs+T9xFRCI,iv:+zHQ33wycw3UA0VAiACf8by9znQ1j3C7nqp+OgZZDW8=,tag:wePPFfAIm5yQj8E/oqD+dg==,type:str]
 sops:
@@ -17,8 +17,8 @@ sops:
             TmZ1SnJud3VTWGVtS2d0NG9ubU1FT1kKYErO5hcoF+G20fQRlLXlwSV/kY2Oyogb
             51Xtm7h1hbh9mjmQfpxz7FbYyP9T56DlwfFnNBZjzRSCoGPfHHUoKg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-05-10T02:20:27Z"
-    mac: ENC[AES256_GCM,data:f7lf4bPQBQ1NE2ARZRh5M5VqFMWHlsUhWRKC1cDHfFHRNQocMmaTRrrookVnOBgem2sSPUfj+QBoGyqazjPcDTmJOE5678T7TijNdcimwEWA3qEw0XOgPlELOtBIVIR5OZLBCQmYTE/hEpMeeJPyoToRuh1MejYeshMiVjwz9FQ=,iv:iEORjTpdf/3yL+luBFzvWLmNNATsXN8wSp4mZQO/CHc=,tag:MR9ELQ+IFOtiNHQWxzltsg==,type:str]
+    lastmodified: "2024-05-10T14:56:38Z"
+    mac: ENC[AES256_GCM,data:z7yfKs7JGQcnDxVXR0TLvjzasbyFeMkRerZw24wMli85nLi1eQmBtLLGqOMb3mrega8LZw9GXRCthYjbgncjsMwxNiiYJJcCnBjTrkbC2NU+MjRYYrZ/NPI39uMGm+cdA5SpRHIngy1NCKeZwmszSpPOVIXmRS297VvbITKzRcU=,iv:Tai8WJkYTrHPdgfs8WyGKGKXm28P2IZDh4H7cIhN1nw=,tag:e1eosHUb+t3ySN9EAVM4iA==,type:str]
     pgp:
         - created_at: "2024-01-01T00:09:01Z"
           enc: |-
