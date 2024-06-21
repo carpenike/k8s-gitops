@@ -46,7 +46,7 @@ spec:
           main:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2024.3.3@sha256:48773146b3b7f7d4811426a33044a322e8e4fcda97b9ed9a6b37d7e5b649af0b
+              tag: 2024.6.4@sha256:17d159928122e6f374bd39b0e75904522bc7d7c2a64e88b248948734e4c4d444
 
             envFrom:
               - secretRef:
