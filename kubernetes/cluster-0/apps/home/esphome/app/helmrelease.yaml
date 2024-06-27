@@ -35,7 +35,7 @@ spec:
           main:
             image:
               repository: ghcr.io/esphome/esphome
-              tag: 2024.3.0@sha256:db74f27ff4396962ec17be06805709c118789a4e8870070f5c32b5004caa0d5b
+              tag: 2024.6.4@sha256:94d6a32d6982e315ed36eaba81a02accc66812ee814259912158f17a00aa84ae
             probes:
               liveness:
                 enabled: false
