@@ -2,9 +2,17 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: home
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ./volsync.yaml
-  - ./gatus.yaml
+  - ../../../../templates/gatus/guarded
+  - ../../../../templates/volsync
+configMapGenerator:
+  - name: zigbee2mqtt-loki-rules
+    files:
+      - zigbee2mqtt.yaml=./resources/lokirule.yaml
+    options:
+      labels:
+        loki_rule: "true"
+generatorOptions:
+  disableNameSuffixHash: true
