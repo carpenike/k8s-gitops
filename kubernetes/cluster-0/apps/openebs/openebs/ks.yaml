@@ -11,9 +11,9 @@ spec:
     labels:
       app.kubernetes.io/name: *appname
   interval: 10m
-  path: "./kubernetes/main/apps/openebs/openebs/app"
+  path: "./kubernetes/cluster-0/apps/openebs/openebs/app"
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops-kubernetes
+    name: k8s-gitops-kubernetes
   wait: true
