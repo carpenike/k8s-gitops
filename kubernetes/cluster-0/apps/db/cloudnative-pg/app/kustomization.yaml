@@ -5,4 +5,4 @@ kind: Kustomization
 namespace: db
 resources:
   - ./externalsecret.yaml
-  - ./helm-release.yaml
+  - ./helmrelease.yaml
