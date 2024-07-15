@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -20,6 +21,7 @@ resources:
   - kubernetes-sigs-external-dns.yaml
   - kubernetes-sigs-metrics-server.yaml
   - kubernetes-sigs-nfd.yaml
+  - openebs.yaml
   - piraeus.yaml
   - postfinance.yaml
   - prometheus-community.yaml
