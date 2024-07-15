@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/ocirepository-source-v1beta2.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: OCIRepository
 metadata:
@@ -9,9 +9,9 @@ spec:
   interval: 10m
   url: oci://ghcr.io/fluxcd/flux-manifests
   ref:
-    tag: v2.2.3
+    tag: v2.3.0
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -26,6 +26,7 @@ spec:
     kind: OCIRepository
     name: flux-manifests
   patches:
+    # Remove the network policies that does not work with k3s
     - patch: |
         $patch: delete
         apiVersion: networking.k8s.io/v1
@@ -34,10 +35,9 @@ spec:
           name: not-used
       target:
         group: networking.k8s.io
-        version: v1
         kind: NetworkPolicy
     # Increase the number of reconciliations that can be performed in parallel and bump the resources limits
-    # https://fluxcd.io/flux/cheatsheets/bootstrap/#increase-the-number-of-workers
+    # Ref: https://fluxcd.io/flux/cheatsheets/bootstrap/#increase-the-number-of-workers
     - patch: |
         - op: add
           path: /spec/template/spec/containers/0/args/-
@@ -53,7 +53,7 @@ spec:
           value: --requeue-dependency=5s
       target:
         kind: Deployment
-        name: "(kustomize-controller|helm-controller|source-controller)"
+        name: (kustomize-controller|helm-controller|source-controller)
     - patch: |
         apiVersion: apps/v1
         kind: Deployment
@@ -69,9 +69,9 @@ spec:
                       memory: 2Gi
       target:
         kind: Deployment
-        name: "(kustomize-controller|helm-controller|source-controller)"
+        name: (kustomize-controller|helm-controller|source-controller)
     # Enable in-memory-kustomize builds
-    # https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-in-memory-kustomize-builds
+    # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-in-memory-kustomize-builds
     - patch: |
         - op: replace
           path: /spec/template/spec/volumes/0
@@ -81,21 +81,9 @@ spec:
               medium: Memory
       target:
         kind: Deployment
-        name: "kustomize-controller"
-    # Enable drift detection for HelmReleases and set the log level to debug
-    # https://fluxcd.io/flux/components/helm/helmreleases/#drift-detection
-    - patch: |
-        - op: add
-          path: /spec/template/spec/containers/0/args/-
-          value: --feature-gates=DetectDrift=true,CorrectDrift=false
-        - op: add
-          path: /spec/template/spec/containers/0/args/-
-          value: --log-level=debug
-      target:
-        kind: Deployment
-        name: helm-controller
+        name: kustomize-controller
     # Enable Helm near OOM detection
-    # https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-helm-near-oom-detection
+    # Ref: https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-helm-near-oom-detection
     - patch: |
         - op: add
           path: /spec/template/spec/containers/0/args/-
@@ -109,29 +97,3 @@ spec:
       target:
         kind: Deployment
         name: helm-controller
-    # Enable notifications for 3rd party Flux controllers such as tf-controller
-    # https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-notifications-for-third-party-controllers
-    - patch: |
-        - op: add
-          path: /spec/versions/2/schema/openAPIV3Schema/properties/spec/properties/eventSources/items/properties/kind/enum/-
-          value: Terraform
-      target:
-        kind: CustomResourceDefinition
-        name: alerts.notification.toolkit.fluxcd.io
-    - patch: |
-        - op: add
-          path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/resources/items/properties/kind/enum/-
-          value: Terraform
-      target:
-        kind: CustomResourceDefinition
-        name: receivers.notification.toolkit.fluxcd.io
-    - patch: |
-        - op: add
-          path: /rules/-
-          value:
-            apiGroups: ["infra.contrib.fluxcd.io"]
-            resources: ["*"]
-            verbs: ["*"]
-      target:
-        kind: ClusterRole
-        name: crd-controller-flux-system

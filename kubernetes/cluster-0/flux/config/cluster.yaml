@@ -13,7 +13,7 @@ spec:
     # exclude all
     /*
     # include gitops dirs
-    !/kubernetes
+    !/kubernetes/cluster-0
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
