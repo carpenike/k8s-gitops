@@ -1,16 +1,15 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: alertmanager
-  namespace: monitoring
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.2.1
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -33,7 +32,7 @@ spec:
                 - path: /alertmanager
 
         containers:
-          app:
+          alertmanager:
             image:
               repository: quay.io/prometheus/alertmanager
               tag: v0.27.0
@@ -67,16 +66,15 @@ spec:
     ingress:
       app:
         className: internal-nginx
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
         hosts:
-          - host: &host alertmanager.holthome.net
+          - host: alertmanager.holthome.net
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
 
     persistence:
       config:
