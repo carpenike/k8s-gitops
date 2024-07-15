@@ -128,7 +128,5 @@ spec:
 
       nfs-nas-media:
         existingClaim: media-nfs-share-pvc
-        advancedMounts:
-          main:
-            main:
-              - path: /data
+        globalMounts:
+          - path: /data
