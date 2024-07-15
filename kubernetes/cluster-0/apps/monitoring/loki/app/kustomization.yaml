@@ -7,9 +7,3 @@ resources:
   - gatus.yaml
   - helmrelease.yaml
   - prometheus-rule.yaml
-configMapGenerator:
-  - name: loki-alerting-rules
-    files:
-      - loki-alerting-rules.yaml=./rules/loki-alerting-rules.yaml
-generatorOptions:
-  disableNameSuffixHash: true
