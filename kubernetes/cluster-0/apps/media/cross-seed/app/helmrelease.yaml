@@ -1,78 +1,91 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cross-seed
-  namespace: media
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.2.1
+      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 2
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   dependsOn:
     - name: qbittorrent
       namespace: media
   values:
     controllers:
-      main:
+      cross-seed:
         annotations:
+          confimap.reloader.stakater.com/reload: cross-seed-configmap
           secret.reloader.stakater.com/reload: cross-seed-secret
+
+        pod:
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+            runAsNonRoot: true
+            fsGroup: 2000
+            fsGroupChangePolicy: "OnRootMismatch"
+
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/cross-seed/cross-seed
               tag: 5.9.2
+            args:
+              - daemon
             env:
-              TZ: America/New_York
-            args: ["daemon"]
+              CROSSSEED_PORT: &port 2468
+            envFrom:
+              - secretRef:
+                  name: cross-seed-secret
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
             resources:
               requests:
                 cpu: 10m
                 memory: 128Mi
               limits:
-                memory: 512Mi
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups: [10000]
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
     service:
-      main:
+      app:
+        controller: cross-seed
         ports:
           http:
-            port: 2468
+            port: *port
+
     persistence:
       config:
-        enabled: true
-        existingClaim: qbittorrent-config
-        globalMounts:
-          - path: /config
+        type: emptyDir
       config-file:
-        type: secret
-        name: cross-seed-secret
+        type: configMap
+        name: cross-seed-configmap
         globalMounts:
           - path: /config/config.js
             subPath: config.js
             readOnly: true
-      media:
-        existingClaim: media-nfs-share-pvc
+      qbittorrent:
+        existingClaim: qbittorrent-config
         globalMounts:
-          - path: /media
+          - path: /qbittorrent
