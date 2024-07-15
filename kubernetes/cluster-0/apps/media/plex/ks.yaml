@@ -10,8 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
+  # dependsOn:
+  #   - name: external-secrets-stores
   path: ./kubernetes/cluster-0/apps/media/plex/app
   prune: true
   sourceRef:
