@@ -1,0 +1,136 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: oauth2-proxy
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      oauth2-proxy:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: quay.io/oauth2-proxy/oauth2-proxy
+              tag: v7.4.0
+            env:
+              OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
+              OAUTH2_PROXY_METRICS_ADDRESS: 0.0.0.0:44180
+        
+              OAUTH2_PROXY_COOKIE_DOMAINS: holthome.net
+              OAUTH2_PROXY_COOKIE_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth2-proxy-secrets
+                    key: cookie-secret
+              OAUTH2_PROXY_COOKIE_SECURE: true
+              OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+              OAUTH2_PROXY_SCOPE: "openid profile email"
+        
+              OAUTH2_PROXY_PROVIDER: oidc
+              OAUTH2_PROXY_OIDC_ISSUER_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth2-proxy-secrets
+                    key: oidc-issuer-url
+              OAUTH2_PROXY_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth2-proxy-secrets
+                    key: client-id
+              OAUTH2_PROXY_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth2-proxy-secrets
+                    key: client-secret
+        
+              OAUTH2_PROXY_SESSION_STORE_TYPE: redis
+              OAUTH2_PROXY_REDIS_CONNECTION_URL: redis://oauth2-proxy-redis.security.svc.cluster.local:6379
+              OAUTH2_PROXY_REDIS_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth2-proxy-secrets
+                    key: redis-password
+        
+              OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: true
+              OAUTH2_PROXY_PASS_ACCESS_TOKEN: true
+              OAUTH2_PROXY_PASS_USER_HEADERS: true
+              OAUTH2_PROXY_PREFER_EMAIL_TO_USER: true
+              OAUTH2_PROXY_SET_AUTHORIZATION-HEADER: true
+              OAUTH2_PROXY_SET_XAUTHREQUEST: true
+              OAUTH2_PROXY_REVERSE_PROXY: true
+              OAUTH2_PROXY_WHITELIST_DOMAINS: .ryho.lt
+
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ping
+                    port: 4180
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ready
+                    port: 4180
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 1Gi
+
+    service:
+      app:
+        controller: oauth2-proxy
+        ports:
+          http:
+            port: 4180
+
+    ingress:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.holthome.net
+        className: external-nginx
+        hosts:
+          - host: "auth.holthome.net"
+            paths:
+              - path: /oauth2
+                service:
+                  identifier: app
+                  port: http
