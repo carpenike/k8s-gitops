@@ -120,6 +120,10 @@ spec:
           external-dns.alpha.kubernetes.io/target: internal.holthome.net
           nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
           nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
+          nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            auth_request_set $user $upstream_http_x_auth_request_user;
+            proxy_set_header remote-user $user;
         hosts:
           - host: paperless.holthome.net
             paths:
