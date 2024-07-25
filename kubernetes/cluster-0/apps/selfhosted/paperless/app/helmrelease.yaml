@@ -117,6 +117,8 @@ spec:
         className: "internal-nginx"
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.holthome.net
+          nginx.ingress.kubernetes.io/auth-url: "https://auth.holthome.net/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://auth.holthome.net/oauth2/start?rd=$escaped_request_uri"
         hosts:
           - host: paperless.holthome.net
             paths:
