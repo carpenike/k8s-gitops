@@ -17,7 +17,6 @@ spec:
     name: k8s-gitops-kubernetes
   dependsOn:
     - name: oauth2-proxy-redis
-      namespace: security
   wait: false
   interval: 30m
   retryInterval: 1m
