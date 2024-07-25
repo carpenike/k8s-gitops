@@ -70,6 +70,7 @@ spec:
                   secretKeyRef:
                     name: paperless-secret
                     key: PAPERLESS_ADMIN_PASSWORD
+              PAPERLESS_ENABLE_HTTP_REMOTE_USER: "true"
             probes:
               liveness:
                 enabled: true
