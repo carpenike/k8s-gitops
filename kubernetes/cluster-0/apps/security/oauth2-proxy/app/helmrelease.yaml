@@ -33,6 +33,12 @@ spec:
               repository: quay.io/oauth2-proxy/oauth2-proxy
               tag: v7.4.0
             env:
+              OAUTH2_PROXY_AZURE_TENANT:
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth2-proxy-secrets
+                    key: azure-tenant
+
               OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
               OAUTH2_PROXY_METRICS_ADDRESS: 0.0.0.0:44180
         
