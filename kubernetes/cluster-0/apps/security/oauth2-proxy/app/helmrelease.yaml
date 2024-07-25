@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: quay.io/oauth2-proxy/oauth2-proxy
-              tag: v7.4.0
+              tag: v7.6.0
             env:
               OAUTH2_PROXY_AZURE_TENANT:
                 valueFrom:
