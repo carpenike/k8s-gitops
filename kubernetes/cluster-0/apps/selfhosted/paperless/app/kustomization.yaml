@@ -5,10 +5,4 @@ namespace: selfhosted
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ./pvc.yaml
-  - ./volsync.yaml
-labels:
-  - pairs:
-      app.kubernetes.io/name: paperless
-      app.kubernetes.io/instance: paperless
-      app.kubernetes.io/part-of: paperless
+  - ../../../../templates/volsync
