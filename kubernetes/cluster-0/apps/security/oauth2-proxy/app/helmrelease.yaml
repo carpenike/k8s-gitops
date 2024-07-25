@@ -78,6 +78,7 @@ spec:
                     key: redis-password
         
               OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: true
+              OAUTH2_PROXY_PASS_HOST_HEADER: true
               OAUTH2_PROXY_PASS_ACCESS_TOKEN: true
               OAUTH2_PROXY_PASS_USER_HEADERS: true
               OAUTH2_PROXY_PREFER_EMAIL_TO_USER: true
