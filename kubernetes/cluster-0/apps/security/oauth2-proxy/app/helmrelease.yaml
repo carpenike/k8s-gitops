@@ -52,7 +52,7 @@ spec:
               OAUTH2_PROXY_EMAIL_DOMAINS: "*"
               OAUTH2_PROXY_SCOPE: "openid profile email"
         
-              OAUTH2_PROXY_PROVIDER: oidc
+              OAUTH2_PROXY_PROVIDER: azure
               OAUTH2_PROXY_OIDC_ISSUER_URL:
                 valueFrom:
                   secretKeyRef:
