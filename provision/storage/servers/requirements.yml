@@ -3,7 +3,7 @@ collections:
   - name: ansible.posix
     version: 1.5.4
   - name: community.general
-    version: 8.5.0
+    version: 8.6.6
   - name: kubernetes.core
     version: 3.0.1
   - name: community.sops
