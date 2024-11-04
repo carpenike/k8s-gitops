@@ -58,6 +58,10 @@ spec:
                 cpu: 10m
               limits:
                 memory: 512Mi
+        pod:
+          nodeSelector:
+            aeotec.feature.node.kubernetes.io/zwave: "true"
+
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
