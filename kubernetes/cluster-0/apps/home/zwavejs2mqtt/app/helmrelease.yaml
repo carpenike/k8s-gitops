@@ -86,7 +86,7 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: zwave
+        existingClaim: zwavejs2mqtt
         globalMounts:
           - path: /usr/src/app/store
       cache:
