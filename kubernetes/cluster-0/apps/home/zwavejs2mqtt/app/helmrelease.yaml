@@ -1,43 +1,41 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: zwave-js-ui
-  namespace: home
+  name: zwave
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 2
   install:
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
     remediation:
+      strategy: rollback
       retries: 3
-  uninstall:
-    keepHistory: false
+
   values:
     controllers:
-      main:
-        type: statefulset
+      zwave:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/zwave-js/zwave-js-ui
-              tag: 9.9.1
+              tag: 9.26.0@sha256:dd945bf63aca8c31763d90addf36db1f0d809c232b806d193173c329c03a183f
             env:
               TZ: America/New_York
+              PORT: &port 80
             probes:
               liveness: &probes
                 enabled: true
@@ -45,61 +43,55 @@ spec:
                 spec:
                   httpGet:
                     path: /health
-                    port: &port 8091
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             securityContext:
-              privileged: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 50m
-                memory: 64Mi
+                cpu: 10m
               limits:
                 memory: 512Mi
-        pod:
-          nodeSelector:
-            aeotec.feature.node.kubernetes.io/zwave: "true"
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 1Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /usr/src/app/store
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
     service:
-      main:
+      app:
+        controller: zwave
         ports:
           http:
             port: *port
           websocket:
             port: 3000
-    serviceMonitor:
-      main:
-        enabled: true # requires https://github.com/kvaster/zwavejs-prom
     ingress:
-      main:
-        enabled: true
+      app:
         className: internal-nginx
         hosts:
-          - host: &host "zwave.holthome.net"
+          - host: "zwave.holthome.net"
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
     persistence:
-      usb:
-        type: hostPath
-        hostPath: /dev/serial/by-id/usb-0658_0200-if00
-        hostPathType: CharDevice
+      config:
+        existingClaim: zwave
         globalMounts:
-          - path: /dev/serial/by-id/usb-0658_0200-if00
+          - path: /usr/src/app/store
+      cache:
+        existingClaim: zwave-cache
+        globalMounts:
+          - path: /usr/src/app/store/.config-db
+      tmp:
+        type: emptyDir
