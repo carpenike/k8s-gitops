@@ -122,5 +122,5 @@ spec:
         name: esphome-deploykey
         defaultMode: 256
         globalMounts:
-          - path: /root/.ssh/id_ed25519
+          - path: /home/coder/.ssh/id_ed25519
             subPath: id_ed25519
