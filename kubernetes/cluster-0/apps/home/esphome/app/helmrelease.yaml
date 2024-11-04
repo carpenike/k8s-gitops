@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -19,7 +19,7 @@ spec:
 
   values:
     controllers:
-      main:
+      esphome:
         annotations:
           secret.reloader.stakater.com/reload: esphome-secrets,esphome-deploykey
 
@@ -32,10 +32,10 @@ spec:
                 "ips": ["10.30.10.16/16"]
               }]
         containers:
-          main:
+          app:
             image:
-              repository: ghcr.io/esphome/esphome
-              tag: 2024.3.0@sha256:db74f27ff4396962ec17be06805709c118789a4e8870070f5c32b5004caa0d5b
+              repository: ghcr.io/bjw-s-labs/esphome
+              tag: 2024.10.2@sha256:84a9a4e95c1f36be4885386170380342eccd03a1d19c77bdc10a4702eaba5779
             probes:
               liveness:
                 enabled: false
@@ -49,32 +49,60 @@ spec:
                 memory: 1374M
               limits:
                 memory: 2Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
+          code-server:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.93.1@sha256:c69e398d1b64589b3b77a7becfd03f4ec524982def20e6bffbb51b1b839e72ba
+            args: [
+              "--auth", "none",
+              "--disable-telemetry", "--disable-update-check",
+              "--user-data-dir", "/config/.code-server",
+              "--extensions-dir", "/config/.code-server",
+              "--port", "12321",
+              "/config"
+            ]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
 
     service:
-      main:
+      app:
+        controller: esphome
         ports:
           http:
             port: 6052
+          code-server:
+            port: 12321
 
     ingress:
-      main:
-        enabled: true
+      app:
         className: "internal-nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
         hosts:
-          - host: "${HOSTNAME}"
+          - host: esphome.holthome.net
             paths:
-              - path: /
+              - path: /(.*)
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - "${HOSTNAME}"
+              - path: /code/(.*)
+                service:
+                  identifier: app
+                  port: code-server
 
     persistence:
       config:
-        enabled: true
-        existingClaim: "${VOLSYNC_CLAIM}"
+        existingClaim: esphome-config
         advancedMounts:
           main:
             main:
@@ -88,7 +116,7 @@ spec:
       esphome-cache:
         type: emptyDir
         globalMounts:
-          - path: /config/.esphome
+          - path: /cache
       deploy-key:
         type: secret
         name: esphome-deploykey
