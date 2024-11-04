@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/cluster-0/apps/home/zwave/app
+  path: ./kubernetes/cluster-0/apps/home/zwavejs2mqtt/app
   prune: true
   sourceRef:
     kind: GitRepository
