@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -19,19 +19,10 @@ spec:
 
   values:
     controllers:
-      main:
+      home-assistant:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
-
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 1Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /config
 
         pod:
           annotations:
@@ -43,21 +34,15 @@ spec:
               }]
 
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2024.3.3@sha256:48773146b3b7f7d4811426a33044a322e8e4fcda97b9ed9a6b37d7e5b649af0b
+              tag: 2024.10.4@sha256:d788b59a4ee584f7cbeee7cff896e922faa8f0673c83187045e77e0fc77c8457
 
             envFrom:
               - secretRef:
                   name: home-assistant-secret
-            probes:
-              liveness:
-                enabled: false
-              readiness:
-                enabled: false
-              startup:
-                enabled: false
+
             resources:
               requests:
                 cpu: 47m
@@ -65,30 +50,76 @@ spec:
               limits:
                 memory: 1254M
 
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
+          code-server:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.93.1@sha256:c69e398d1b64589b3b77a7becfd03f4ec524982def20e6bffbb51b1b839e72ba
+            args: [
+              "--auth", "none",
+              "--disable-telemetry", "--disable-update-check",
+              "--user-data-dir", "/config/.code-server",
+              "--extensions-dir", "/config/.code-server",
+              "--port", "12321",
+              "/config"
+            ]
+            env:
+              HASS_SERVER: http://localhost:8123
+              HASS_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: home-assistant-secret
+                    key: VSCODE_TOKEN
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
+
     service:
-      main:
+      app:
         ports:
           http:
             port: 8123
+          code-server:
+            port: 12321
 
     ingress:
-      main:
+      app:
         enabled: true
         className: "external-nginx"
         annotations:
           external-dns.alpha.kubernetes.io/target: external.holthome.net
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
         hosts:
           - host: &host "ha.holthome.net"
             paths:
-              - path: /
+              - path: /(.*)
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
+              - path: /code/(.*)
+                service:
+                  identifier: app
+                  port: code-server
 
     persistence:
+      config:
+        existingClaim: home-assistant-config
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /config
+            code-server:
+              - path: /config
+      tmp:
+        type: emptyDir
       deploy-key:
         type: secret
         name: home-assistant-secret
