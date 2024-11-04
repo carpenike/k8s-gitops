@@ -52,6 +52,8 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
+            securityContext:
+              privileged: true
             # securityContext:
             #   allowPrivilegeEscalation: true
             #   readOnlyRootFilesystem: true
