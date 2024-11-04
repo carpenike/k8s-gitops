@@ -28,6 +28,9 @@ spec:
       zwave:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          nodeSelector:
+            aeotec.feature.node.kubernetes.io/zwave: "true"
         containers:
           app:
             image:
@@ -50,7 +53,7 @@ spec:
                   failureThreshold: 3
               readiness: *probes
             securityContext:
-              allowPrivilegeEscalation: false
+              allowPrivilegeEscalation: true
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
@@ -58,9 +61,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 512Mi
-        pod:
-          nodeSelector:
-            aeotec.feature.node.kubernetes.io/zwave: "true"
 
     defaultPodOptions:
       securityContext:
