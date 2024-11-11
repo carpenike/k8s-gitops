@@ -89,6 +89,35 @@ spec:
               limits:
                 memory: 512Mi
 
+          music-assistant:
+            image:
+              repository: ghcr.io/music-assistant/server
+              tag: 2.3.2@sha256:2e6f769f0a9863acea3a39d3207e41b39f325d3f36536851cc7e0509272d8a19
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 5m
+                memory: 1374M
+              limits:
+                memory: 2Gi
+            securityContext:
+              apparmor:
+                enabled: false # Disables apparmor
+              allowPrivilegeEscalation: true
+              readOnlyRootFilesystem: false
+              capabilities:
+                add:
+                  - SYS_ADMIN
+                  - DAC_READ_SEARCH
+                drop:
+                  - ALL
+
     service:
       app:
         controller: home-assistant
@@ -126,6 +155,8 @@ spec:
               - path: /config
             code-server:
               - path: /config
+            music-assistant:
+              - path: /data
       tmp:
         type: emptyDir
       deploy-key:
