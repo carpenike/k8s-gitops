@@ -1,0 +1,5 @@
+---
+log:
+  output: "stdout"
+
+#streams:
