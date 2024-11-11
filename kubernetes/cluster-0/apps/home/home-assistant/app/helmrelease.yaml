@@ -126,6 +126,8 @@ spec:
             port: 8123
           code-server:
             port: 12321
+          music-server:
+            port: 8095
 
     ingress:
       app:
@@ -145,6 +147,10 @@ spec:
                 service:
                   identifier: app
                   port: code-server
+              - path: /music/(.*)
+                service:
+                  identifier: app
+                  port: music-server
 
     persistence:
       config:
