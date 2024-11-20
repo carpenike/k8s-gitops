@@ -121,6 +121,7 @@ spec:
             image:
               repository: ghcr.io/carpenike/wyoming-microsoft-stt-noha
               tag: main@sha256:2e1ddad6a4e553ae6704cf11fc491311473468b3276b778b5c6eb89d0ecbe729
+            args: ["--debug"]
             env:
               AZURE_SERVICE_REGION: eastus
               AZURE_SUBSCRIPTION_KEY:
