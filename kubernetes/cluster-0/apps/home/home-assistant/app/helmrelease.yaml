@@ -120,7 +120,7 @@ spec:
           msft-stt:
             image:
               repository: ghcr.io/carpenike/wyoming-microsoft-stt-noha
-              tag: main@sha256:a60b6e68947deaf1edc89b1a5b7c8652a25a2bf31dedd08bb7196e4c9ba1e7d9
+              tag: main@sha256:67f64cc0dfd3211d0e306043492e4d7321303e34026597c4128d5cc2fc23166d
             args: ["--debug"]
             env:
               AZURE_SERVICE_REGION: eastus
