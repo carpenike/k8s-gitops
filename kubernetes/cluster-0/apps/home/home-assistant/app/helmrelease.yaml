@@ -138,6 +138,22 @@ spec:
               runAsUser: 1000
               runAsGroup: 1000
               fsGroup: 1000
+          openWakeWord:
+            image:
+              repository: rhasspy/wyoming-openwakeword
+              tag: 1.10.0@sha256:3165a5cd8aef84beb882e640aa1f5c01c97f8c0b1f50016164ecdf2ab65d033a
+            args: [
+              "--preload-model", "hey_jarvis"
+            ]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              fsGroup: 1000
 
     service:
       app:
@@ -151,6 +167,8 @@ spec:
             port: 8095
           msft-stt:
             port: 10300
+          openWakeWord:
+            port: 10400
 
     ingress:
       app:
