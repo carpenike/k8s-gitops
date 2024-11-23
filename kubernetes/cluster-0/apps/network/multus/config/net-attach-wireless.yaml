@@ -23,6 +23,10 @@ spec:
               { "dst": "10.20.0.0/16", "gw": "10.30.0.1" }
             ]
           }
+        },
+        {
+          "capabilities": { "mac": true },
+          "type": "tuning"
         }
       ]
     }
