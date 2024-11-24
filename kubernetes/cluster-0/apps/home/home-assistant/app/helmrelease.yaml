@@ -59,11 +59,11 @@ spec:
                 memory: 1254M
 
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
+              allowPrivilegeEscalation: true
+              readOnlyRootFilesystem: false
+              # capabilities:
+              #   drop:
+              #     - ALL
 
           code-server:
             image:
