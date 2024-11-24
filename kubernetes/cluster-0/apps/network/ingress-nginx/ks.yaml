@@ -46,19 +46,19 @@ spec:
   wait: false
   dependsOn:
     - name: cluster-apps-nginx-shared
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &appname nginx-tailscale
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: "./kubernetes/cluster-0/apps/network/ingress-nginx/tailscale"
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: k8s-gitops-kubernetes
-  wait: false
-  dependsOn:
-    - name: cluster-apps-nginx-shared
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: &appname nginx-tailscale
+#   namespace: flux-system
+# spec:
+#   interval: 10m
+#   path: "./kubernetes/cluster-0/apps/network/ingress-nginx/tailscale"
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: k8s-gitops-kubernetes
+#   wait: false
+#   dependsOn:
+#     - name: cluster-apps-nginx-shared
