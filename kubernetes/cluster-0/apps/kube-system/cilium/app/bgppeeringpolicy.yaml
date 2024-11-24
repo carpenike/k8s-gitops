@@ -27,10 +27,11 @@ spec:
           peerASN: 64512
 
 ---
-apiVersion: "cilium.io/v2alpha1"
+apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: main-pool
+  namespace: kube-system
 spec:
-  cidrs:
-    - cidr: 10.45.0.1/16
+  blocks:
+    - cidr: 10.45.0.0/16
