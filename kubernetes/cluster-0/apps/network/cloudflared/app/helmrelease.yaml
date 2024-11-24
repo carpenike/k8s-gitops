@@ -1,16 +1,15 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cloudflared
-  namespace: network
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -19,7 +18,7 @@ spec:
 
   values:
     controllers:
-      main:
+      cloudflared:
         replicas: 2
         strategy: RollingUpdate
 
@@ -36,10 +35,10 @@ spec:
                   app.kubernetes.io/name: cloudflared
 
         containers:
-          main:
+          app:
             image:
               repository: docker.io/cloudflare/cloudflared
-              tag: 2024.3.0
+              tag: 2024.11.1
             args:
               - tunnel
               - --config
@@ -50,12 +49,9 @@ spec:
               NO_AUTOUPDATE: "true"
               TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
               TUNNEL_METRICS: 0.0.0.0:8080
-              TUNNEL_TRANSPORT_PROTOCOL: auto
-              TUNNEL_ID:
-                valueFrom:
-                  secretKeyRef:
-                    name: cloudflared-secret
-                    key: TunnelID
+              TUNNEL_ORIGIN_ENABLE_HTTP2: true
+              TUNNEL_POST_QUANTUM: true
+              TUNNEL_TRANSPORT_PROTOCOL: quic
             probes:
               liveness:
                 enabled: true
@@ -96,14 +92,15 @@ spec:
                 memory: 105Mi
 
     service:
-      main:
+      app:
+        controller: cloudflared
         ports:
           http:
             port: 8080
 
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: cloudflared
         endpoints:
           - port: http
             scheme: http
@@ -113,7 +110,6 @@ spec:
 
     persistence:
       config:
-        enabled: true
         type: configMap
         name: cloudflared-configmap
         globalMounts:
