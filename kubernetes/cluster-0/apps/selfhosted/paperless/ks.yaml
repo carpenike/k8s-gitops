@@ -18,9 +18,9 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false
   dependsOn:
-    - name: cluster-apps-rook-ceph-cluster
+    - name: rook-ceph-cluster
     - name: volsync
-    - name: cluster-apps-external-secrets-stores
+    - name: external-secrets-stores
   postBuild:
     substitute:
       APP: *appname

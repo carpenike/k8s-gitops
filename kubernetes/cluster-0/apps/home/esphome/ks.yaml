@@ -19,8 +19,8 @@ spec:
   wait: false # no flux ks dependents
   dependsOn:
     # - name: cluster-apps-multus-config
-    - name: cluster-apps-external-secrets-stores
-    - name: cluster-apps-rook-ceph-cluster
+    - name: external-secrets-stores
+    - name: rook-ceph-cluster
   postBuild:
     substitute:
       APP: *appname

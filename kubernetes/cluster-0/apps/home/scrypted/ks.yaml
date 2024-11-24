@@ -19,9 +19,9 @@ spec:
   wait: false
   dependsOn:
     - name: multus-config
-    - name: cluster-apps-rook-ceph-cluster
+    - name: rook-ceph-cluster
     - name: volsync
-    - name: cluster-apps-external-secrets-stores
+    - name: external-secrets-stores
   postBuild:
     substitute:
       APP: *appname

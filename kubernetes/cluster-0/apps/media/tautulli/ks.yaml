@@ -18,4 +18,4 @@ spec:
   wait: false # no flux ks dependents
   dependsOn:
     - name: plex
-    - name: cluster-apps-rook-ceph-cluster
+    - name: rook-ceph-cluster

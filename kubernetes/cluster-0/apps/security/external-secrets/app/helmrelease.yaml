@@ -1,38 +1,36 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: external-secrets
-  namespace: security
 spec:
   interval: 30m
   chart:
     spec:
       chart: external-secrets
-      version: 0.9.13
+      version: 0.10.7
       interval: 30m
       sourceRef:
         kind: HelmRepository
         name: external-secrets
         namespace: flux-system
   values:
+    image:
+      repository: ghcr.io/external-secrets/external-secrets
     installCRDs: true
-    replicaCount: 3
-    leaderElect: true
-    grafana:
-      enabled: true
     serviceMonitor:
-      enabled: false
+      enabled: true
       interval: 1m
-    backgroundController:
+    certController:
+      image:
+        repository: ghcr.io/external-secrets/external-secrets
       serviceMonitor:
-        enabled: false
+        enabled: true
         interval: 1m
-    cleanupController:
+    webhook:
+      image:
+        repository: ghcr.io/external-secrets/external-secrets
       serviceMonitor:
-        enabled: false
-        interval: 1m
-    reportsController:
-      serviceMonitor:
-        enabled: false
+        enabled: true
         interval: 1m
