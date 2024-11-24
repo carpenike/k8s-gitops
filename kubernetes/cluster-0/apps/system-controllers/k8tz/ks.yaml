@@ -16,7 +16,7 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops-kubernetes
+    name: k8s-gitops-kubernetes
   wait: false
   dependsOn:
     - name: cert-manager
