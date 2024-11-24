@@ -1,9 +1,9 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cilium
-  namespace: kube-system
 spec:
   chart:
     spec:
@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: cilium
         namespace: flux-system
-      version: 1.14.3
+      version: 1.16.4
   interval: 30m
 
   valuesFrom:
@@ -27,10 +27,8 @@ spec:
 
       dashboards:
         enabled: true
-        label: grafana_dashboard
-        namespace: monitoring
-        labelValue: "1"
-        annotations: {}
+        annotations:
+          grafana_folder: Cilium
 
       relay:
         prometheus:
@@ -41,17 +39,28 @@ spec:
         ingress:
           enabled: true
           className: "internal-nginx"
+          annotations:
+            external-dns.alpha.kubernetes.io/target: internal.holthome.net
           hosts:
-            - &host hubble.holthome.net
-          tls:
-            - hosts:
-                - *host
-
-    prometheus:
-      serviceMonitor:
-        enabled: true
+            - hubble.holthome.net
 
     operator:
       prometheus:
+        enabled: true
         serviceMonitor:
           enabled: true
+      dashboards:
+        enabled: true
+        annotations:
+          grafana_folder: Cilium
+
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
+
+    dashboards:
+      enabled: true
+      annotations:
+        grafana_folder: Cilium
