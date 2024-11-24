@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cluster-apps-external-secrets-stores
+    - name: external-secrets-stores
   path: ./kubernetes/cluster-0/apps/actions-runner-system/actions-runner-controller/app
   prune: true
   sourceRef:
