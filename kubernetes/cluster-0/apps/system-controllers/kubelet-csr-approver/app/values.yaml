@@ -1,5 +1,4 @@
 ---
 providerRegex: |
   ^(cp-0|node-0|node1|node-2|node-3)$
-
 bypassDnsResolution: true
