@@ -1,0 +1,54 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: k8tz
+spec:
+  chart:
+    spec:
+      chart: k8tz
+      version: 0.17.1
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: k8tz
+        namespace: flux-system
+  interval: 30m
+  values:
+    namespace: system-controllers
+
+    replicaCount: 2
+
+    timezone: Europe/Amsterdam
+    cronJobTimeZone: true
+
+    webhook:
+      certManager:
+        enabled: true
+        issuerRef:
+          name: k8tz-webhook-selfsign
+          kind: Issuer
+
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: k8tz
+              topologyKey: kubernetes.io/hostname
+
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              version: v1
+              kind: Namespace
+            patch: |-
+              $patch: delete
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: not-used
