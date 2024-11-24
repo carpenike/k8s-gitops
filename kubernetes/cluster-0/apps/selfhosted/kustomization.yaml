@@ -10,7 +10,7 @@ resources:
   # - ./immich/ks.yaml
   - ./miniflux/ks.yaml
   # - ./node-red/ks.yaml
-  - ./obsidian-couchdb/ks.yaml
+  # - ./obsidian-couchdb/ks.yaml
   - ./teslamate/ks.yaml
   - ./thelounge/ks.yaml
   - ./paperless/ks.yaml
