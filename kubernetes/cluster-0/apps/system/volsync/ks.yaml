@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -9,7 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *appname
-  interval: 10m
+  interval: 30m
+  timeout: 5m
   path: "./kubernetes/cluster-0/apps/system/volsync/app"
   prune: true
   sourceRef:
@@ -17,5 +19,4 @@ spec:
     name: k8s-gitops-kubernetes
   dependsOn:
     - name: snapshot-controller
-  wait: false # no flux ks dependents
-  timeout: 2m
+  wait: false
