@@ -2,49 +2,61 @@
 version: "3"
 
 tasks:
-  mount:
-    desc: Mount a PersistentVolumeClaim to a pod temporarily
+  browse-pvc:
+    desc: Mount a PVC to an temp container [CLUSTER=cluster-0] [NS=default] [CLAIM=required]
     interactive: true
+    cmd: kubectl browse-pvc --namespace {{.NS}} --image docker.io/library/alpine:latest {{.CLAIM}}
     vars:
-      claim: '{{ or .claim (fail "PersistentVolumeClaim `claim` is required") }}'
-      namespace: '{{.namespace | default "default"}}'
-    cmds:
-      - |
-        kubectl run -n {{.namespace}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
-          {
-            "apiVersion": "v1",
-            "spec": {
-              "containers": [
-                {
-                  "name": "debug",
-                  "image": "ghcr.io/onedr0p/alpine:rolling",
-                  "command": [
-                    "/bin/bash"
-                  ],
-                  "stdin": true,
-                  "stdinOnce": true,
-                  "tty": true,
-                  "volumeMounts": [
-                    {
-                      "name": "config",
-                      "mountPath": "/data/config"
-                    }
-                  ]
-                }
-              ],
-              "volumes": [
-                {
-                  "name": "config",
-                  "persistentVolumeClaim": {
-                    "claimName": "{{.claim}}"
-                  }
-                }
-              ],
-              "restartPolicy": "Never"
-            }
-          }'
+      NS: '{{.NS | default "default"}}'
+    requires:
+      vars: [CLUSTER, CLAIM]
     preconditions:
-      - kubectl -n {{.namespace}} get pvc {{.claim}}
+      - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
+      - kubectl browse-pvc --version
+      - which kubectl
+  # mount:
+  #   desc: Mount a PersistentVolumeClaim to a pod temporarily
+  #   interactive: true
+  #   vars:
+  #     claim: '{{ or .claim (fail "PersistentVolumeClaim `claim` is required") }}'
+  #     namespace: '{{.namespace | default "default"}}'
+  #   cmds:
+  #     - |
+  #       kubectl run -n {{.namespace}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+  #         {
+  #           "apiVersion": "v1",
+  #           "spec": {
+  #             "containers": [
+  #               {
+  #                 "name": "debug",
+  #                 "image": "docker.io/library/alpine:latest",
+  #                 "command": [
+  #                   "/bin/bash"
+  #                 ],
+  #                 "stdin": true,
+  #                 "stdinOnce": true,
+  #                 "tty": true,
+  #                 "volumeMounts": [
+  #                   {
+  #                     "name": "config",
+  #                     "mountPath": "/data/config"
+  #                   }
+  #                 ]
+  #               }
+  #             ],
+  #             "volumes": [
+  #               {
+  #                 "name": "config",
+  #                 "persistentVolumeClaim": {
+  #                   "claimName": "{{.claim}}"
+  #                 }
+  #               }
+  #             ],
+  #             "restartPolicy": "Never"
+  #           }
+  #         }'
+  #   preconditions:
+  #     - kubectl -n {{.namespace}} get pvc {{.claim}}
 
   delete-failed-pods:
     desc: Deletes failed pods
