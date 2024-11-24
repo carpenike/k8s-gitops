@@ -22,7 +22,7 @@ spec:
       dashboard:
         ingressClassName: "internal-nginx"
         annotations:
-          external-dns.alpha.kubernetes.io/target: iingress.holthome.net
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
         host:
           name: rook.holthome.net
           path: "/"

@@ -1,11 +1,17 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-nginx-shared
+  name: &appname nginx-shared
   namespace: flux-system
 spec:
-  interval: 10m
+  targetNamespace: network
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *appname
+  interval: 30m
+  timeout: 5m
   path: "./kubernetes/cluster-0/apps/network/ingress-nginx/shared"
   prune: true
   sourceRef:
@@ -13,15 +19,21 @@ spec:
     name: k8s-gitops-kubernetes
   wait: true
   dependsOn:
-    - name: cluster-apps-cert-manager-issuers
+    - name: cert-manager-issuers
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-nginx-external
+  name: &appname nginx-external
   namespace: flux-system
 spec:
-  interval: 10m
+  targetNamespace: network
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *appname
+  interval: 30m
+  timeout: 5m
   path: "./kubernetes/cluster-0/apps/network/ingress-nginx/external"
   prune: true
   sourceRef:
@@ -29,15 +41,21 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false
   dependsOn:
-    - name: cluster-apps-nginx-shared
+    - name: nginx-shared
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-nginx-internal
+  name: &appname nginx-internal
   namespace: flux-system
 spec:
-  interval: 10m
+  targetNamespace: network
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *appname
+  interval: 30m
+  timeout: 5m
   path: "./kubernetes/cluster-0/apps/network/ingress-nginx/internal"
   prune: true
   sourceRef:
@@ -45,20 +63,4 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false
   dependsOn:
-    - name: cluster-apps-nginx-shared
-# ---
-# apiVersion: kustomize.toolkit.fluxcd.io/v1
-# kind: Kustomization
-# metadata:
-#   name: &appname nginx-tailscale
-#   namespace: flux-system
-# spec:
-#   interval: 10m
-#   path: "./kubernetes/cluster-0/apps/network/ingress-nginx/tailscale"
-#   prune: true
-#   sourceRef:
-#     kind: GitRepository
-#     name: k8s-gitops-kubernetes
-#   wait: false
-#   dependsOn:
-#     - name: cluster-apps-nginx-shared
+    - name: nginx-shared
