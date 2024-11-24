@@ -30,8 +30,7 @@ spec:
               [{
                 "name":"multus-wireless",
                 "namespace": "network",
-                "ips": ["10.30.10.15/16"],
-                "mac": "d7:e5:0a:01:6a:7b"
+                "ips": ["10.30.10.15/16"]
               }]
 
           securityContext:
@@ -59,11 +58,11 @@ spec:
                 memory: 1254M
 
             securityContext:
-              allowPrivilegeEscalation: true
-              readOnlyRootFilesystem: false
-              # capabilities:
-              #   drop:
-              #     - ALL
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
 
           code-server:
             image:
