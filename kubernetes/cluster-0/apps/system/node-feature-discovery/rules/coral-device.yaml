@@ -5,11 +5,11 @@ metadata:
   name: google-coral-device
 spec:
   rules:
-    - # Google Coral USB Accelerator
-      name: google.coral
+    - name: google.coral
       labels:
         google.feature.node.kubernetes.io/coral: "true"
       matchFeatures:
         - feature: usb.device
           matchExpressions:
-            vendor: { op: In, value: ["1a6e", "18d1"] }
+            vendor: { op: In, value: ["1ac1"] }
+            class: { op: In, value: ["0880"] }
