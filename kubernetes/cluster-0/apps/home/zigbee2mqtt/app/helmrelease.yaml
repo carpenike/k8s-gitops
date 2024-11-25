@@ -33,13 +33,13 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          annotations:
-            k8s.v1.cni.cncf.io/networks: |
-              [{
-                "name":"multus-wireless",
-                "namespace": "network",
-                "ips": ["10.30.10.16/16"]
-              }]
+          # annotations:
+          #   k8s.v1.cni.cncf.io/networks: |
+          #     [{
+          #       "name":"multus-wireless",
+          #       "namespace": "network",
+          #       "ips": ["10.30.10.16/16"]
+          #     }]
 
         containers:
           app:
