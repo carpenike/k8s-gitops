@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-unpackerr
+  name: unpackerr
   namespace: flux-system
 spec:
   path: ./kubernetes/cluster-0/apps/media/unpackerr/app
@@ -15,7 +15,7 @@ spec:
   retryInterval: 1m
   timeout: 5m
   dependsOn:
-    - name: cluster-apps-sonarr
-    - name: cluster-apps-radarr
-    - name: cluster-apps-media-pvs
-    - name: cluster-apps-external-secrets-stores
+    - name: sonarr
+    - name: radarr
+    - name: media-pvs
+    - name: external-secrets-stores
