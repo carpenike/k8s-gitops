@@ -29,7 +29,8 @@ spec:
               [{
                 "name":"multus-wireless",
                 "namespace": "network",
-                "ips": ["10.30.10.16/16"]
+                "ips": ["10.30.10.16/16"],
+                "mac": "da:31:09:f5:00:e0"
               }]
         containers:
           app:
