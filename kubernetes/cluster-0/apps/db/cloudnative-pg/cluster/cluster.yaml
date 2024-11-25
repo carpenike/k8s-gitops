@@ -13,20 +13,23 @@ spec:
     storageClass: local-hostpath
   superuserSecret:
     name: cloudnative-pg-secret
-  bootstrap:
-    recovery:
-      source: &previous-cluster postgres-v8
+  enableSuperuserAccess: true
   postgresql:
     parameters:
       max_connections: "300"
       shared_buffers: 512MB
       pg_stat_statements.max: "10000"
       pg_stat_statements.track: all
+  resources:
+    requests:
+      cpu: 500m
+    limits:
+      memory: 4Gi
   monitoring:
     enablePodMonitor: true
   backup:
     retentionPolicy: 30d
-    barmanObjectStore:
+    barmanObjectStore: &barmanObjectStore
       wal:
         compression: bzip2
         maxParallel: 8
@@ -40,19 +43,13 @@ spec:
         secretAccessKey:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
+  bootstrap:
+    recovery:
+      source: &previousCluster postgres-v8
+
   # Note: externalClusters is needed when recovering from an existing cnpg cluster
   externalClusters:
-    - name: *previous-cluster
+    - name: *previousCluster
       barmanObjectStore:
-        wal:
-          compression: bzip2
-          maxParallel: 8
-        destinationPath: s3://postgresql/
-        endpointURL: https://minio-s3.holthome.net
-        s3Credentials:
-          accessKeyId:
-            name: cloudnative-pg-secret
-            key: aws-access-key-id
-          secretAccessKey:
-            name: cloudnative-pg-secret
-            key: aws-secret-access-key
+        <<: *barmanObjectStore
+        serverName: *previousCluster

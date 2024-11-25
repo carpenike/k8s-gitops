@@ -1,11 +1,15 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cloudnative-pg
+  name: &app cloudnative-pg
   namespace: flux-system
 spec:
   targetNamespace: db
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/cluster-0/apps/db/cloudnative-pg/app
   prune: true
   sourceRef:
@@ -13,19 +17,21 @@ spec:
     name: k8s-gitops-kubernetes
   wait: true
   interval: 30m
-  retryInterval: 1m
   timeout: 5m
+  dependsOn:
+    - name: external-secrets-stores
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cloudnative-pg-cluster
+  name: &app cloudnative-pg-cluster
   namespace: flux-system
 spec:
   targetNamespace: db
-  dependsOn:
-    - name: cloudnative-pg
-    - name: external-secrets-stores
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/cluster-0/apps/db/cloudnative-pg/cluster
   prune: true
   sourceRef:
@@ -33,5 +39,6 @@ spec:
     name: k8s-gitops-kubernetes
   wait: true
   interval: 30m
-  retryInterval: 1m
   timeout: 5m
+  dependsOn:
+    - name: cloudnative-pg

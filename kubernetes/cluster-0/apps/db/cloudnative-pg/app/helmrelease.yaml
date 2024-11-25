@@ -1,14 +1,15 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cloudnative-pg
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: cloudnative-pg
-      version: 0.21.5
+      version: 0.22.1
       sourceRef:
         kind: HelmRepository
         name: cloudnative-pg
@@ -21,8 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  uninstall:
-    keepHistory: false
   values:
     crds:
       create: true

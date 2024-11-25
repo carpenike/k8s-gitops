@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/monitoring.coreos.com/prometheusrule_v1.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -31,10 +31,10 @@ spec:
             severity: warning
         - alert: PGDatabase
           annotations:
-            description: Over 150,000,000 transactions from frozen xid on pod {{ $labels.pod }}
+            description: Over 300,000,000 transactions from frozen xid on pod {{ $labels.pod }}
             summary: Number of transactions from the frozen XID to the current one
           expr: |-
-            cnpg_pg_database_xid_age > 150000000
+            cnpg_pg_database_xid_age > 300000000
           for: 1m
           labels:
             severity: warning
@@ -50,9 +50,9 @@ spec:
         - alert: LastFailedArchiveTime
           annotations:
             description: Archiving failed for {{ $labels.pod }}
-            summary: Checks the last time archiving failed. Will be -1 when it has not failed.
+            summary: Checks the last time archiving failed. Will be < 0 when it has not failed.
           expr: |-
-            delta(cnpg_pg_stat_archiver_last_failed_time[5m]) > 0
+            (cnpg_pg_stat_archiver_last_failed_time - cnpg_pg_stat_archiver_last_archived_time) > 1
           for: 1m
           labels:
             severity: warning
@@ -62,6 +62,15 @@ spec:
             summary: Checks the number of database conflicts
           expr: |-
             cnpg_pg_stat_database_deadlocks > 10
+          for: 1m
+          labels:
+            severity: warning
+        - alert: ReplicaFailingReplication
+          annotations:
+            description: Replica {{ $labels.pod }} is failing to replicate
+            summary: Checks if the replica is failing to replicate
+          expr: |-
+            cnpg_pg_replication_in_recovery > cnpg_pg_replication_is_wal_receiver_up
           for: 1m
           labels:
             severity: warning
