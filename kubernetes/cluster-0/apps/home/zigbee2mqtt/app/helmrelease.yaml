@@ -9,43 +9,31 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.2.1
+      version: 3.5.1
+      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
-    # - name: volsync
-    #   namespace: volsync-system
+
   values:
     controllers:
       zigbee2mqtt:
         annotations:
           reloader.stakater.com/auto: "true"
+
         pod:
-          # annotations:
-          #   k8s.v1.cni.cncf.io/networks: |
-          #     [{
-          #       "name":"multus-wireless",
-          #       "namespace": "network",
-          #       "ips": ["10.30.10.16/16"]
-          #     }]
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+            fsGroup: 2000
+            fsGroupChangePolicy: OnRootMismatch
 
         containers:
           app:
             image:
               repository: ghcr.io/koenkk/zigbee2mqtt
-              tag: 1.39.0@sha256:68e3cf365aee92e0cdc02cc537373cec380da544d187495f529d73d383a42205
+              tag: 1.41.0
             env:
               TZ: America/New_York
               ZIGBEE2MQTT_DATA: /config
@@ -92,36 +80,67 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities:
+                drop:
+                  - ALL
+          code-server:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.95.3@sha256:6d74583d68179cbb6ddadc2518b450d2ac3eaec2d342474fe1941e03371cd2cf
+            args:
+              - --auth
+              - none
+              - --disable-telemetry
+              - --disable-update-check
+              - --user-data-dir
+              - /data/.code-server
+              - --extensions-dir
+              - /data/.code-server
+              - --port
+              - "12321"
+              - /data
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 512Mi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
+
     service:
       app:
         controller: zigbee2mqtt
         ports:
           http:
-            port: *port
+            primary: true
+            port: 8080
+          metrics:
+            port: 9000
+          code-server:
+            port: 12321
+
     ingress:
       app:
         className: internal-nginx
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
         hosts:
-          - host: zigbee.holthome.net
+          - host: zigbee2mqtt.holthome.net
             paths:
-              - path: /
+              - path: /(.*)
                 service:
                   identifier: app
                   port: http
+              - path: /code/(.*)
+                service:
+                  identifier: app
+                  port: code-server
+
     persistence:
-      config:
+      data:
         existingClaim: zigbee2mqtt
+        advancedMounts:
+          zigbee2mqtt:
+            app:
+              - path: /config
+            code-server:
+              - path: /data
