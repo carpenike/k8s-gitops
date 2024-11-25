@@ -29,6 +29,14 @@ spec:
             fsGroup: 2000
             fsGroupChangePolicy: OnRootMismatch
 
+          annotations:
+            k8s.v1.cni.cncf.io/networks: |
+              [{
+                "name":"multus-wireless",
+                "namespace": "network",
+                "ips": ["10.30.10.16/16"]
+              }]
+
         containers:
           app:
             image:
