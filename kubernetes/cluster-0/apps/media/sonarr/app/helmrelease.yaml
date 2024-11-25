@@ -116,8 +116,6 @@ spec:
       tmp:
         type: emptyDir
       media:
-        type: nfs
-        server: expanse.internal
-        path: /mnt/eros/Media
+        existingClaim: media-nfs-share-pvc
         globalMounts:
-          - path: /media
+          - path: /data
