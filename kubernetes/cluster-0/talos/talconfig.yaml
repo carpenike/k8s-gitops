@@ -22,6 +22,14 @@ nodes:
     # disableSearchDomain: true
     ipAddress: 10.20.0.20
     installDisk: /dev/vda
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors:
+            - hardwareAddr: 52:54:00:bf:00:c3
+              driver: virtio_net
+        dhcp: true
 
   - hostname: node-0.holthome.net
     controlPlane: true
