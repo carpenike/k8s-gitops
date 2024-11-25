@@ -17,5 +17,5 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false # no flux ks dependents
   dependsOn:
-    - name: cluster-apps-kube-prometheus-stack
-    - name: cluster-apps-external-secrets-stores
+    - name: kube-prometheus-stack
+    - name: external-secrets-stores
