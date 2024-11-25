@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-frigate
+  name: frigate
   namespace: flux-system
 spec:
   path: ./kubernetes/cluster-0/apps/home/frigate/app
@@ -15,5 +15,5 @@ spec:
   retryInterval: 1m
   timeout: 5m
   dependsOn:
-    - name: cluster-apps-external-secrets-stores
-    - name: cluster-apps-node-feature-discovery-rules
+    - name: external-secrets-stores
+    - name: node-feature-discovery-rules
