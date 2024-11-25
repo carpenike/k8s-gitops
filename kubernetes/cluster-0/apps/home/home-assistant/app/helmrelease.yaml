@@ -119,8 +119,8 @@ spec:
                   - ALL
           msft-stt:
             image:
-              repository: ghcr.io/carpenike/wyoming-microsoft-stt-noha
-              tag: main@sha256:b168cc1f7c7e574d3eaf6cdd12076ea51d7a45800b0f6c19161c40669b146fcc
+              repository: ghcr.io/hugobloem/wyoming-microsoft-stt-noha
+              tag: 1.1.0@sha256:66c63638c2fc0f514ce9171781d0d54d1f7cfda202385dff82a8841c87b0bae0
             args: ["--debug"]
             env:
               AZURE_SERVICE_REGION: eastus
