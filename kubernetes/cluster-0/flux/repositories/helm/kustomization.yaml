@@ -12,6 +12,7 @@ resources:
   - cilium.yaml
   - cloudnative-pg.yaml
   - democratic-csi.yaml
+  - emqx.yaml
   - external-secrets.yaml
   - grafana.yaml
   - ingress-nginx.yaml
