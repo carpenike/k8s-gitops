@@ -1,10 +1,9 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: esphome
-  namespace: home
 spec:
   interval: 30m
   chart:
@@ -32,11 +31,17 @@ spec:
                 "ips": ["10.30.10.16/16"],
                 "mac": "da:31:09:f5:00:e0"
               }]
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+            fsGroup: 2000
+            fsGroupChangePolicy: OnRootMismatch
+
         containers:
           app:
             image:
               repository: ghcr.io/bjw-s-labs/esphome
-              tag: 2024.10.2@sha256:84a9a4e95c1f36be4885386170380342eccd03a1d19c77bdc10a4702eaba5779
+              tag: 2024.11.1@sha256:26aa7250ae7e7b81f951d77e6cbd45dba45240e5766715c41372d30b57ea42f3
             probes:
               liveness:
                 enabled: false
@@ -47,28 +52,31 @@ spec:
             resources:
               requests:
                 cpu: 5m
-                memory: 1374M
+                memory: 512Mi
               limits:
-                memory: 2Gi
+                memory: 3072Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
-
           code-server:
             image:
               repository: ghcr.io/coder/code-server
-              tag: 4.93.1@sha256:c69e398d1b64589b3b77a7becfd03f4ec524982def20e6bffbb51b1b839e72ba
-            args: [
-              "--auth", "none",
-              "--disable-telemetry", "--disable-update-check",
-              "--user-data-dir", "/config/.code-server",
-              "--extensions-dir", "/config/.code-server",
-              "--port", "12321",
-              "/config"
-            ]
+              tag: 4.95.3@sha256:6d74583d68179cbb6ddadc2518b450d2ac3eaec2d342474fe1941e03371cd2cf
+            args:
+              - --auth
+              - none
+              - --disable-telemetry
+              - --disable-update-check
+              - --user-data-dir
+              - /config/.code-server
+              - --extensions-dir
+              - /config/.code-server
+              - --port
+              - "12321"
+              - /config
             resources:
               requests:
                 cpu: 10m
@@ -88,6 +96,7 @@ spec:
       app:
         className: "internal-nginx"
         annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
           nginx.ingress.kubernetes.io/rewrite-target: /$1
         hosts:
           - host: esphome.holthome.net
@@ -105,8 +114,10 @@ spec:
       config:
         existingClaim: esphome-config
         advancedMounts:
-          main:
-            main:
+          esphome:
+            app:
+              - path: /config
+            code-server:
               - path: /config
       secrets:
         type: secret
@@ -114,14 +125,18 @@ spec:
         globalMounts:
           - path: /config/secrets.yaml
             subPath: secrets.yaml
-      esphome-cache:
+      cache:
         type: emptyDir
-        globalMounts:
-          - path: /cache
+        advancedMounts:
+          esphome:
+            app:
+              - path: /cache
       deploy-key:
         type: secret
         name: esphome-deploykey
         defaultMode: 256
-        globalMounts:
-          - path: /home/coder/.ssh/id_ed25519
-            subPath: id_ed25519
+        advancedMounts:
+          esphome:
+            code-server:
+              - path: /home/coder/.ssh/id_ed25519
+                subPath: id_ed25519
