@@ -22,7 +22,7 @@ cluster:
   name: cluster-0
 cni:
   exclusive: false
-#devices: bond+
+devices: bond+
 enableRuntimeDeviceDetection: true
 endpointRoutes:
   enabled: true
