@@ -15,7 +15,7 @@ spec:
     name: cloudnative-pg-secret
   bootstrap:
     recovery:
-      source: &previous-cluster postgres-v7
+      source: &previous-cluster postgres-v8
   postgresql:
     parameters:
       max_connections: "300"
@@ -32,7 +32,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://postgresql/
       endpointURL: https://minio-s3.holthome.net
-      serverName: postgres-v8
+      serverName: postgres-v9
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
