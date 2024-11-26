@@ -101,7 +101,7 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: qbittorrent
+        existingClaim: qb
       tmp:
         type: emptyDir
       scripts:
