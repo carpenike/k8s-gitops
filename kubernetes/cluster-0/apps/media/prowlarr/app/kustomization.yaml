@@ -1,11 +1,8 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - externalsecret.yaml
-  - ./gatus.yaml
-  - helmrelease.yaml
-  - volsync.yaml
-commonLabels:
-  app.kubernetes.io/name: prowlarr
-  app.kubernetes.io/instance: prowlarr
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/gatus/guarded

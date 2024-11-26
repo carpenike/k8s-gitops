@@ -1,56 +1,55 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: prowlarr
-  namespace: media
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 2
   install:
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
     remediation:
+      strategy: rollback
       retries: 3
-  uninstall:
-    keepHistory: false
   values:
     controllers:
-      main:
+      prowlarr:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          01-init-db:
+          init-db:
             image:
               repository: ghcr.io/onedr0p/postgres-init
-              tag: 16.2
-              pullPolicy: IfNotPresent
+              tag: 16
             envFrom: &envFrom
               - secretRef:
                   name: prowlarr-secret
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/prowlarr-develop
-              tag: 1.14.3.4333@sha256:60f146b93e846e543cac0e8d74412c45cd0112a0793ad48c8ae54125f6f990fe
+              tag: 1.27.0.4852@sha256:6e1041a558cceee6356efe74cc9a9138909f4a8bac5eb714a420a37e4b478c77
             env:
+              PROWLARR__APP__INSTANCENAME: Prowlarr
+              PROWLARR__APP__THEME: dark
+              PROWLARR__AUTH__METHOD: External
+              PROWLARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              PROWLARR__LOG__DBENABLED: "False"
+              PROWLARR__LOG__LEVEL: info
+              PROWLARR__SERVER__PORT: &port 80
+              PROWLARR__UPDATE__BRANCH: develop
               TZ: America/New_York
-              PROWLARR__INSTANCE_NAME: Prowlarr
-              PROWLARR__PORT: &port 80
-              PROWLARR__LOG_LEVEL: info
-              PROWLARR__AUTHENTICATION_METHOD: External
-              PROWLARR__THEME: dark
             envFrom: *envFrom
             probes:
               liveness: &probes
@@ -65,40 +64,43 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 10m
-                memory: 128M
+                cpu: 100m
               limits:
                 memory: 1Gi
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
     service:
-      main:
+      app:
+        controller: prowlarr
         ports:
           http:
             port: *port
     ingress:
-      main:
-        enabled: true
-        className: "internal-nginx"
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+        className: internal-nginx
         hosts:
-          - host: &host "prowlarr.holthome.net"
+          - host: prowlarr.holthome.net
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
     persistence:
       config:
-        enabled: true
+        type: emptyDir
+      tmp:
         type: emptyDir
