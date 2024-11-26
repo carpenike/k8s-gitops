@@ -1,0 +1,161 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: qbtools
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: qbittorrent
+      namespace: media
+  values:
+    controllers:
+      tagging:
+        type: cronjob
+        cronjob: &cronJobSpec
+          schedule: "@hourly"
+          timeZone: &timeZone America/New_York
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+        initContainers:
+          tag: &container
+            image:
+              repository: ghcr.io/buroa/qbtools
+              tag: v0.19.9@sha256:f5405e3c00256d7911d2abb839084a5147c108586adb281e97587cf93729c89b
+            env:
+              QBITTORRENT_HOST: qbittorrent.media.svc.cluster.local
+              QBITTORRENT_PORT: 80
+              SABNZBD_HOST: sabnzbd.media.svc.cluster.local
+              SABNZBD_PORT: 80
+              TZ: *timeZone
+            envFrom:
+              - secretRef:
+                  name: qbtools-secret
+            args:
+              [
+                "tagging",
+                "--added-on",
+                "--expired",
+                "--last-activity",
+                "--sites",
+                "--unregistered",
+              ]
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 25m
+              limits:
+                memory: 256M
+        containers:
+          unregistered:
+            <<: *container
+            args: [
+                "prune",
+                "--exclude-category",
+                "manual",
+                "--exclude-category",
+                "music",
+                "--exclude-tag",
+                "added:1d",
+                "--include-tag",
+                "unregistered",
+                "--with-data",
+                # "--dry-run"
+              ]
+          expired:
+            <<: *container
+            args: [
+                "prune",
+                "--exclude-category",
+                "manual",
+                "--exclude-category",
+                "music",
+                "--exclude-tag",
+                "added:1d",
+                "--include-tag",
+                "expired",
+                "--with-data",
+                # "--dry-run"
+              ]
+        pod:
+          restartPolicy: OnFailure
+      orphaned:
+        type: cronjob
+        cronjob:
+          <<: *cronJobSpec
+          schedule: "@weekly"
+          suspend: true
+        containers:
+          app:
+            <<: *container
+            args: [
+                "orphaned",
+                "--exclude-pattern",
+                "*_unpackerred*",
+                # "--dry-run"
+              ]
+        pod:
+          restartPolicy: OnFailure
+      reannounce:
+        containers:
+          app:
+            <<: *container
+            args: ["reannounce", "--process-seeding"]
+      limiter:
+        containers:
+          app:
+            <<: *container
+            args:
+              [
+                "limiter",
+                "--max-line-speed-mbps",
+                "100",
+                "--max-percent",
+                "0.8",
+                "--limit-percent",
+                "0.4",
+                "--interval",
+                "5",
+              ]
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        seccompProfile: { type: RuntimeDefault }
+    persistence:
+      secret-file:
+        type: secret
+        name: qbtools-config-secret
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      media:
+        existingClaim: media-nfs-share-pvc
+        advancedMounts:
+          orphaned:
+            app:
+              - path: /media/Downloads/qbittorrent
+                subPath: Downloads/qbittorrent
