@@ -17,6 +17,7 @@ resources:
   - grafana.yaml
   - ingress-nginx.yaml
   - jetstack.yaml
+  - k8tz.yaml
   - kyverno.yaml
   - kubernetes-sigs-descheduler.yaml
   - kubernetes-sigs-external-dns.yaml
