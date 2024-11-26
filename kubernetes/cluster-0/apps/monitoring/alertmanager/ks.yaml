@@ -1,15 +1,17 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app alertmanager
+  name: &appname alertmanager
   namespace: flux-system
 spec:
   targetNamespace: monitoring
   commonMetadata:
     labels:
-      app.kubernetes.io/name: *app
-  interval: 10m
+      app.kubernetes.io/name: *appname
+  interval: 30m
+  timeout: 5m
   path: "./kubernetes/cluster-0/apps/monitoring/alertmanager/app"
   prune: true
   sourceRef:

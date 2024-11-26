@@ -11,6 +11,7 @@ resources:
   - ./grafana/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./loki/ks.yaml
+  - ./prometheus-operator/ks.yaml
   # - ./node-exporter/ks.yaml
   # - ./snmp-exporter/ks.yaml
   # - ./thanos/ks.yaml
