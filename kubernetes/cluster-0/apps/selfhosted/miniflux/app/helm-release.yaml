@@ -1,86 +1,110 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: miniflux
-  namespace: selfhosted
+  name: &app miniflux
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
-      interval: 30m
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
   values:
     controllers:
-      main:
+      miniflux:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
-
-        containers:
-          main:
+        initContainers:
+          init-db:
             image:
-              repository: ghcr.io/miniflux/miniflux
-              tag: 2.0.50
-            env:
-              BASE_URL: https://miniflux.holthome.net
-              CREATE_ADMIN: "0"
-              DEBUG: "1"
-              LOG_DATE_TIME: "1"
-              OAUTH2_USER_CREATION: "1"
-              OAUTH2_PROVIDER: oidc
-              OAUTH2_REDIRECT_URL: https://miniflux.holthome.net/oauth2/oidc/callback
-              POLLING_SCHEDULER: "entry_frequency"
-              POLLING_FREQUENCY: "15"
-              RUN_MIGRATIONS: "1"
-            envFrom:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16
+            envFrom: &envFrom
               - secretRef:
                   name: miniflux-secret
+        containers:
+          app:
+            image:
+              repository: ghcr.io/miniflux/miniflux
+              tag: 2.2.3-distroless@sha256:6b778e125817592cf67b7eaf4a2fbb7a269d59ea82c82bfaae0c7daee4bc4ef6
+            env:
+              BASE_URL: https://miniflux.holthome.net
+              CREATE_ADMIN: "1"
+              # DEBUG: "1"
+              LOG_DATE_TIME: "1"
+              METRICS_ALLOWED_NETWORKS: 10.42.0.0/16
+              METRICS_COLLECTOR: "1"
+              POLLING_SCHEDULER: entry_frequency
+              POLLING_FREQUENCY: "15"
+              PORT: &port 80
+              RUN_MIGRATIONS: "1"
+            envFrom: *envFrom
             probes:
-              liveness:
+              liveness: &probes
                 enabled: true
                 custom: true
                 spec:
-                  initialDelaySeconds: 30
+                  httpGet:
+                    path: /healthcheck
+                    port: *port
+                  initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-                  httpGet:
-                    path: /healthcheck
-                    port: 8080
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 12m
-                memory: 64M
+                cpu: 10m
               limits:
-                memory: 256M
-
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: { type: RuntimeDefault }
     service:
-      main:
+      app:
+        controller: miniflux
         ports:
           http:
-            port: 8080
-
+            port: *port
+    serviceMonitor:
+      app:
+        serviceName: miniflux
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
-      main:
-        enabled: true
-        className: "external-nginx"
+      app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: "external.holthome.net"
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+        className: internal
         hosts:
-          - host: &host "miniflux.holthome.net"
+          - host: "miniflux.holthome.net"
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
