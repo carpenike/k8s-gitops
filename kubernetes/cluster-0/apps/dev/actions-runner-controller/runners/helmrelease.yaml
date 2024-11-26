@@ -51,4 +51,4 @@ spec:
             command: ["/home/runner/run.sh"]
     controllerServiceAccount:
       name: actions-runner-controller-gha-rs-controller
-      namespace: actions-runner-system
+      namespace: dev
