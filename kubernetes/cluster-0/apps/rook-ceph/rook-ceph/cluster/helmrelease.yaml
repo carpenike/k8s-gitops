@@ -27,7 +27,7 @@ spec:
           name: rook.holthome.net
           path: "/"
     toolbox:
-      enabled: false
+      enabled: true
     configOverride: |
       [global]
       bdev_enable_discard = true
