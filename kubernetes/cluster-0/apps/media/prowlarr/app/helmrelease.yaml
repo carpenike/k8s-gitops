@@ -43,7 +43,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/prowlarr-develop
-              tag: 1.14.3.4333@sha256:60f146b93e846e543cac0e8d74412c45cd0112a0793ad48c8ae54125f6f990fe
+              tag: 1.27.0.4852@sha256:6e1041a558cceee6356efe74cc9a9138909f4a8bac5eb714a420a37e4b478c77
             env:
               TZ: America/New_York
               PROWLARR__INSTANCE_NAME: Prowlarr
