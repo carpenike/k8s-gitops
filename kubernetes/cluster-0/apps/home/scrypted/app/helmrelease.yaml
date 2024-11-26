@@ -28,8 +28,7 @@ spec:
               [{
                 "name":"multus-wireless",
                 "namespace": "network",
-                "ips": ["10.30.10.17/16"],
-                "mac": "bb:8a:fb:3e:f5:c8",
+                "ips": ["10.30.10.17/16"]
               }]
           nodeSelector:
             google.feature.node.kubernetes.io/coral: "true"
