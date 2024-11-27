@@ -103,10 +103,10 @@ spec:
     persistence:
       add-ons:
         type: emptyDir
-      cache:
-        type: emptyDir
-        globalMounts:
-          - path: /config/cache
+      # cache:
+      #   type: emptyDir
+      #   globalMounts:
+      #     - path: /config/cache
       config:
         existingClaim: bazarr
       log:
