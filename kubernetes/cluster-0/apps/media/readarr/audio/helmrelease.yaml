@@ -33,8 +33,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/readarr-develop
-              tag: 0.3.32@sha256:1ffa6357a1e0f2dd9c608a1a2d4064e09b76d834059dda38414c734146cfa201
+              repository: ghcr.io/hotio/readarr
+              tag: nightly-0038b90@sha256:f95a25e25140783e047d0ed1e5a7f6fc16581483e4326b2c326a91fb83edd775
             env:
               READARR__INSTANCE_NAME: Audio
               READARR__PORT: &port 80
