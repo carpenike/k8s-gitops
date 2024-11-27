@@ -10,5 +10,5 @@ resources:
   - ./home-assistant/ks.yaml
   # - ./mosquitto/ks.yaml
   - ./scrypted/ks.yaml
-  # - ./zigbee2mqtt/ks.yaml
+  - ./zigbee2mqtt/ks.yaml
   - ./zwavejs2mqtt/ks.yaml
