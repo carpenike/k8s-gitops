@@ -111,3 +111,6 @@ spec:
           - readOnly: true
       media:
         existingClaim: media-nfs-share-pvc
+        globalMounts:
+          - path: /media/sabnzbd/downloads
+            subPath: sabnzbd/downloads
