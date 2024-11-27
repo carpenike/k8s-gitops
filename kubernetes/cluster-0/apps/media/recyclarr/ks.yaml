@@ -10,9 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
-    - name: volsync
   path: ./kubernetes/cluster-0/apps/media/recyclarr/app
   prune: true
   sourceRef:
@@ -25,3 +22,6 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 1Gi
+  dependsOn:
+    - name: external-secrets-stores
+    - name: volsync
