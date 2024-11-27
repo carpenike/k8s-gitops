@@ -4,13 +4,12 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: readarr-audio
-  namespace: media
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -19,19 +18,9 @@ spec:
 
   values:
     controllers:
-      main:
+      readarr:
         annotations:
           reloader.stakater.com/auto: "true"
-
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: "OnRootMismatch"
-            supplementalGroups:
-              - 65539
-
         initContainers:
           01-init-db:
             image:
@@ -41,9 +30,8 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: readarr-audio-secret
-
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/readarr-develop
               tag: 0.3.21.2475@sha256:dfee716eb4a45a7ccdb245ecc8a1ef669769375354db15f35e2af699e741d101
@@ -56,54 +44,69 @@ spec:
               READARR__LOG_LEVEL: info
               READARR__THEME: dark
             envFrom: *envFrom
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ping
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 14m
-                memory: 431M
+                cpu: 100m
               limits:
-                memory: 2Gi
+                memory: 4Gi
 
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
     service:
-      main:
+      app:
+        controller: readarr
         ports:
           http:
             port: *port
-
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /ping
-            port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
-
     ingress:
-      main:
-        enabled: true
-        className: "internal-nginx"
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+        className: internal-nginx
         hosts:
-          - host: &host audio.holthome.net
+          - host: audio.holthome.net
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
 
     persistence:
       config:
-        enabled: true
-        existingClaim: readarr-audio-config-pvc
+        existingClaim: readarr-audio
+      scripts:
+        type: configMap
+        name: readarr-audio-configmap
+        defaultMode: 0775
+        globalMounts:
+          - path: /scripts/pushover-notify.sh
+            subPath: pushover-notify.sh
+            readOnly: true
+      tmp:
+        type: emptyDir
       media:
         existingClaim: media-nfs-share-pvc
         globalMounts:

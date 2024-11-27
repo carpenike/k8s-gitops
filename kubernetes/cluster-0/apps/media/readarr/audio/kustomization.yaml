@@ -1,9 +1,17 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - externalsecret.yaml
-  - ./gatus.yaml
-  - helmrelease.yaml
-  - volsync.yaml
-  - pvc.yaml
+  - ./externalsecret.yaml
+  - ./pvc.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/gatus/guarded
+configMapGenerator:
+  - name: readarr-audio-configmap
+    files:
+      - pushover-notify.sh=./resources/pushover-notify.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

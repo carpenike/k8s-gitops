@@ -2,8 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: readarr-audio-config-pvc
-  namespace: media
+  name: readarr-audio
 spec:
   accessModes: ["ReadWriteMany"]
   resources:
