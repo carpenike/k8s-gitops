@@ -20,7 +20,7 @@ spec:
     runnerGroup: arc-carpenike
     runnerScaleSetName: arc-carpenike
 
-    githubConfigUrl: https://github.com/carpenike
+    githubConfigUrl: https://github.com/carpenike/k8s-gitops
 
     minRunners: 0
     maxRunners: 6
