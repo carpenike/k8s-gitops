@@ -16,4 +16,4 @@ spec:
     - name: external-secrets-stores
     - name: rook-ceph-cluster
     - name: cloudnative-pg-cluster
-    - name: mosquitto
+    - name: emqx

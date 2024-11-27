@@ -49,8 +49,7 @@ spec:
             env:
               TZ: "America/New_York"
               DISABLE_MQTT: "false"
-              MQTT_HOST: "mosquitto.home.svc.cluster.local"
-              MQTT_USERNAME: "teslamate"
+              MQTT_HOST: "emqx.db.svc.cluster.local"
             envFrom: *envFrom
 
     service:
