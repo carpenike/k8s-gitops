@@ -1,98 +1,119 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: bazarr
-  namespace: media
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  maxHistory: 2
   install:
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
     remediation:
+      strategy: rollback
       retries: 3
-  uninstall:
-    keepHistory: false
   values:
     controllers:
-      main:
+      bazarr:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16.2
-            envFrom: &envFrom
-              - secretRef:
-                  name: bazarr-secret
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/bazarr
-              tag: 1.4.2@sha256:113035f37f289f190781d9d728f2ebf56c895b972921820f5d30408427c837d9
+              tag: 1.4.5@sha256:c0bf91443c32f3978777b4ddd2732908f51b157bbe00cd3259b23f7716bb4af7
             env:
-              TZ: ${TIMEZONE}
-            envFrom: *envFrom
+              TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: bazarr-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 6767
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
-                memory: 256M
               limits:
-                memory: 1024M
+                memory: 1Gi
           subcleaner:
             image:
               repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.2.1
+              tag: v4.3.0@sha256:5813a7da0ccd58f6dfb9d5e48480e2877355e6bb3d7d81c8908eb1adc3a23b6e
             env:
               GITSYNC_REPO: https://github.com/KBlixt/subcleaner
               GITSYNC_REF: master
-              GITSYNC_PERIOD: 86400s # 1 day
+              GITSYNC_PERIOD: 24h
               GITSYNC_ROOT: /add-ons
             resources:
               requests:
                 cpu: 10m
-                memory: 10M
               limits:
-                memory: 128M
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups:
-              - 65536
+                memory: 128Mi
+            securityContext: *securityContext
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: bazarr
+        ports:
+          http:
+            port: *port
     ingress:
-      main:
-        enabled: true
-        className: internal-nginx
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+        className: internal
         hosts:
-          - host: &host bazarr.holthome.net
+          - host: bazarr.holthome.net
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
-        tls:
-          - hosts:
-              - *host
     persistence:
+      add-ons:
+        type: emptyDir
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /config/cache
       config:
-        enabled: true
-        existingClaim: bazarr-config-pvc
-      data:
+        existingClaim: bazarr
+      log:
+        type: emptyDir
+        globalMounts:
+          - path: /config/log
+      media:
         existingClaim: media-nfs-share-pvc
       scripts:
         type: configMap
@@ -100,10 +121,5 @@ spec:
         defaultMode: 0775
         globalMounts:
           - readOnly: true
-      add-ons:
+      tmp:
         type: emptyDir
-    service:
-      main:
-        ports:
-          http:
-            port: 6767
