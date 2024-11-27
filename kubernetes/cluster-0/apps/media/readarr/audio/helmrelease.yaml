@@ -34,7 +34,7 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/readarr-develop
-              tag: 0.3.21.2475@sha256:dfee716eb4a45a7ccdb245ecc8a1ef669769375354db15f35e2af699e741d101
+              tag: 0.3.32@sha256:1ffa6357a1e0f2dd9c608a1a2d4064e09b76d834059dda38414c734146cfa201
             env:
               READARR__INSTANCE_NAME: Audio
               READARR__PORT: &port 80
