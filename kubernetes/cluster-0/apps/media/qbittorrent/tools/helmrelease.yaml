@@ -157,5 +157,5 @@ spec:
         advancedMounts:
           orphaned:
             app:
-              - path: /media/Downloads/qbittorrent
-                subPath: Downloads/qbittorrent
+              - path: /media/qb/downloads
+                subPath: qb/downloads

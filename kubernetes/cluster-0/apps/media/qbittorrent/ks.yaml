@@ -10,9 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
-    - name: volsync
   path: ./kubernetes/cluster-0/apps/media/qbittorrent/app
   prune: true
   sourceRef:
@@ -30,25 +27,28 @@ spec:
       VOLSYNC_STORAGECLASS: ceph-filesystem
       VOLSYNC_SNAPSHOTCLASS: csi-ceph-filesystem
       VOLSYNC_SNAP_ACCESSMODES: ReadOnlyMany # CephFS shallow snapshot
-# ---
-# # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# apiVersion: kustomize.toolkit.fluxcd.io/v1
-# kind: Kustomization
-# metadata:
-#   name: &app qb-tools
-#   namespace: flux-system
-# spec:
-#   targetNamespace: media
-#   commonMetadata:
-#     labels:
-#       app.kubernetes.io/name: *app
-#   dependsOn:
-#     - name: external-secrets-stores
-#   path: ./kubernetes/cluster-0/apps/media/qbittorrent/tools
-#   prune: true
-#   sourceRef:
-#     kind: GitRepository
-#     name: k8s-gitops-kubernetes
-#   wait: false
-#   interval: 30m
-#   timeout: 5m
+  dependsOn:
+    - name: external-secrets-stores
+    - name: volsync
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app qb-tools
+  namespace: flux-system
+spec:
+  targetNamespace: media
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  path: ./kubernetes/cluster-0/apps/media/qbittorrent/tools
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+  wait: false
+  interval: 30m
+  timeout: 5m
+  dependsOn:
+    - name: external-secrets-stores
