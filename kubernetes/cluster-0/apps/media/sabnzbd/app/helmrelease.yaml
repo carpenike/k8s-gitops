@@ -1,16 +1,15 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: sabnzbd
-  namespace: media
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -21,19 +20,18 @@ spec:
   upgrade:
     cleanupOnFail: true
     remediation:
+      strategy: rollback
       retries: 3
-  uninstall:
-    keepHistory: false
   values:
     controllers:
-      main:
+      sabnzbd:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/sabnzbd
-              tag: 4.2.3@sha256:fa8ddea45e56b0e36454c3c0eb30ff5521d90aeb5b35301656ae9236680be3a9
+              tag: 4.3.3@sha256:86c645db93affcbf01cc2bce2560082bfde791009e1506dba68269b9c50bc341
             env:
               TZ: America/New_York
               SABNZBD__PORT: &port 80
@@ -43,8 +41,12 @@ spec:
                 sabnzbd.media.svc,
                 sabnzbd.media.svc.cluster,
                 sabnzbd.media.svc.cluster.local,
-                sab.holthome.net,
                 sabnzbd.holthome.net
+              CROSS_SEED_ENABLED: false
+              CROSS_SEED_HOST: cross-seed.media.svc.cluster.local
+              CROSS_SEED_PORT: 80
+              CROSS_SEED_SLEEP_INTERVAL: 30
+              PUSHOVER_ENABLED: true
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -61,59 +63,51 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 200m
-                memory: 2Gi
+                cpu: 100m
               limits:
-                memory: 12Gi
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            runAsNonRoot: true
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups: [10000]
+                memory: 8Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
     service:
-      main:
+      app:
+        controller: sabnzbd
         ports:
           http:
             port: *port
     ingress:
-      main:
-        enabled: true
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
         className: internal-nginx
         hosts:
-          - host: &host "sabnzbd.holthome.net"
+          - host: sabnzbd.holthome.net
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
-          - host: &customHost sab.holthome.net
-            paths:
-              - path: /
-                service:
-                  name: main
-                  port: http
-        tls:
-          - hosts:
-              - *host
-              - *customHost
     persistence:
       config:
-        enabled: true
-        existingClaim: config-sabnzbd-0
+        existingClaim: sabnzbd
       tmp:
         type: emptyDir
+      scripts:
+        type: configMap
+        name: sabnzbd-scripts
+        defaultMode: 0775
+        globalMounts:
+          - readOnly: true
       media:
         existingClaim: media-nfs-share-pvc
-        globalMounts:
-          - path: /data
