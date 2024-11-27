@@ -1,21 +1,22 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: unpackerr
+  name: &app unpackerr
   namespace: flux-system
 spec:
+  targetNamespace: media
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/cluster-0/apps/media/unpackerr/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: k8s-gitops-kubernetes
-  wait: true
+  wait: false
   interval: 30m
-  retryInterval: 1m
   timeout: 5m
   dependsOn:
-    - name: sonarr
-    - name: radarr
-    - name: media-pvs
     - name: external-secrets-stores
