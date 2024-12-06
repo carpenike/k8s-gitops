@@ -4,6 +4,9 @@ logger:
   # logs:
   #   frigate.record: debug
 
+auth:
+  enabled: False
+
 mqtt:
   host: emqx.db.svc.cluster.local
   topic_prefix: frigate
