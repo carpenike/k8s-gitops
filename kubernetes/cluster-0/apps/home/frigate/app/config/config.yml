@@ -7,6 +7,8 @@ logger:
 auth:
   enabled: false
   reset_admin_password: true
+  trusted_proxies:
+    - 10.244.0.0/16
 
 mqtt:
   host: emqx.db.svc.cluster.local
