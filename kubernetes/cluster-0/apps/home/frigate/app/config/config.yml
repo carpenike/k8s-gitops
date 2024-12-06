@@ -39,7 +39,7 @@ record:
   events:
     retain:
       default: 14
-      mode: active_objects
+      # mode: active_objects
 
 objects:
   track:
