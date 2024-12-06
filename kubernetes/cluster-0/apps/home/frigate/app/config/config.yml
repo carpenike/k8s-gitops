@@ -5,7 +5,8 @@ logger:
   #   frigate.record: debug
 
 auth:
-  enabled: False
+  enabled: false
+  reset_admin_password: true
 
 mqtt:
   host: emqx.db.svc.cluster.local
