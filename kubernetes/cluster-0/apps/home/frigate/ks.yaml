@@ -1,19 +1,30 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: frigate
+  name: &appname frigate
   namespace: flux-system
 spec:
+  targetNamespace: home
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *appname
+  interval: 30m
   path: ./kubernetes/cluster-0/apps/home/frigate/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: k8s-gitops-kubernetes
   wait: false
-  interval: 30m
-  retryInterval: 1m
-  timeout: 5m
   dependsOn:
     - name: external-secrets-stores
     - name: node-feature-discovery-rules
+  postBuild:
+    substitute:
+      APP: *appname
+      HOSTNAME: frigate.holthome.net
+      # APP_UID: "0"
+      # APP_GID: "0"
+      VOLSYNC_CLAIM: frigate-config
+      VOLSYNC_CAPACITY: 5Gi
