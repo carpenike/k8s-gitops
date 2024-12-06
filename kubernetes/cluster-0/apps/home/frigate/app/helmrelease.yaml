@@ -40,7 +40,7 @@ spec:
               tag: 0.13.0-beta3
             env:
               TZ: America/New_York
-              LIBVA_DRIVER_NAME: i965
+              # LIBVA_DRIVER_NAME: i965
             envFrom:
               - secretRef:
                   name: frigate-secret
