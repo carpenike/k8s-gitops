@@ -36,9 +36,9 @@ record:
   retain:
     days: 14
     mode: all
-  events:
-    retain:
-      default: 14
+  # events:
+  #   retain:
+  #     default: 14
       # mode: active_objects
 
 objects:
