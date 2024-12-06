@@ -89,6 +89,12 @@ spec:
                   port: http
 
     persistence:
+      config:
+        existingClaim: frigate-config
+        advancedMounts:
+          esphome:
+            app:
+              - path: /data
       config-file:
         type: configMap
         name: frigate-configmap
@@ -97,12 +103,11 @@ spec:
             subPath: config.yml
             readOnly: true
       cache:
-        enabled: true
         type: emptyDir
-        medium: Memory
-        sizeLimit: 6Gi
-        globalMounts:
-          - path: /dev/shm
+        advancedMounts:
+          esphome:
+            app:
+              - path: /dev/shm
       usb:
         enabled: true
         type: hostPath
