@@ -21,15 +21,6 @@ spec:
         annotations:
           secret.reloader.stakater.com/reload: frigate-secret
         pod:
-          affinity:
-            podAntiAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                      - key: app.kubernetes.io/name
-                        operator: In
-                        values: ["plex"]
-                  topologyKey: kubernetes.io/hostname
           nodeSelector:
             google.feature.node.kubernetes.io/coral: "true"
 
