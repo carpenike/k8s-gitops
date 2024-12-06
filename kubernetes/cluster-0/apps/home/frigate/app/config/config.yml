@@ -5,8 +5,7 @@ logger:
   #   frigate.record: debug
 
 auth:
-  enabled: false
-  reset_admin_password: true
+  enabled: False
   trusted_proxies:
     - 10.244.0.0/16
 
