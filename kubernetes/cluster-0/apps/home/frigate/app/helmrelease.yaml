@@ -37,7 +37,7 @@ spec:
                   name: frigate-secret
             probes:
               liveness: &probes
-                enabled: false
+                enabled: true
                 custom: true
                 spec:
                   httpGet:
@@ -45,7 +45,7 @@ spec:
                     port: &port 5000
                   initialDelaySeconds: 0
                   periodSeconds: 10
-                  timeoutSeconds: 10
+                  timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
               startup:
