@@ -96,7 +96,8 @@ spec:
 
     persistence:
       config:
-        existingClaim: readarr-audio
+        # existingClaim: readarr-audio
+        existingClaim: config-readarr-audio-0
       scripts:
         type: configMap
         name: readarr-audio-configmap
