@@ -38,8 +38,11 @@ spec:
             env:
               READARR__INSTANCE_NAME: Audio
               READARR__PORT: &port 80
-              # READARR__AUTHENTICATION_METHOD: External
+              READARR__AUTHENTICATION_METHOD: External
               READARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
+              READARR__APP__THEME: dark
+              READARR__AUTH__METHOD: External
+              READARR__AUTH__REQUIRED: DisabledForLocalAddresses
               READARR__APPLICATION_URL: "https://audio.holthome.net"
               READARR__LOG_LEVEL: info
               READARR__THEME: dark
