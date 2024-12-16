@@ -8,11 +8,11 @@ spec:
   trigger:
     manual: restore-once
   restic:
-    repository: {{ ENV.APP }}-volsync-secret
+    repository: {{ ENV.APP }}-volsync-minio
     destinationPVC: {{ ENV.CLAIM }}
     copyMethod: Direct
     storageClassName: {{ ENV.STORAGE_CLASS_NAME }}
-    accessModes: {{ ENV.ACCESS_MODES }}
+    #accessModes: {{ ENV.ACCESS_MODES }}
     previous: {{ ENV.PREVIOUS }}
     moverSecurityContext:
       runAsUser: {{ ENV.PUID }}

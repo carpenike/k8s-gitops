@@ -1,29 +1,34 @@
 ---
 version: "3"
 
+set:
+  - pipefail
+shopt:
+  - globstar
+
 vars:
+  CLUSTER: '{{.CLUSTER | default "cluster-0"}}'
+  CLUSTER_DIR: "{{.ROOT_DIR}}/kubernetes/{{.CLUSTER}}"
   PROJECT_DIR:
     sh: "git rev-parse --show-toplevel"
 
+env:
+  MINIJINJA_CONFIG_FILE: "{{.ROOT_DIR}}/.minijinja.toml"
+
 includes:
-  flux:
-    dir: .taskfiles/flux
-    taskfile: .taskfiles/flux
-  k8s:
-    taskfile: .taskfiles/k8s
-    dir: .taskfiles/k8s
-  externalsecrets:
-    taskfile: .taskfiles/externalsecrets
-    dir: .taskfiles/externalsecrets
-  rook:
-    taskfile: ".taskfiles/rook"
-    dir: .taskfiles/rook
-  volsync:
-    taskfile: ".taskfiles/volsync"
-    dir: .taskfiles/volsync
+  flux: .taskfiles/flux
+  k8s: .taskfiles/k8s
+  externalsecrets: .taskfiles/externalsecrets
+  rook: .taskfiles/rook
+  volsync: ".taskfiles/volsync"
 
 tasks:
   default:
     silent: true
     cmds:
       - task -l
+
+  noop:
+    internal: true
+    silent: true
+    cmd: noop() { :; }
