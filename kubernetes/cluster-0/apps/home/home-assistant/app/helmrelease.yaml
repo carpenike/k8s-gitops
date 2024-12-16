@@ -69,7 +69,7 @@ spec:
               "/config"
             ]
             env:
-              HASS_SERVER: http://localhost:8123
+              HASS_SERVER: http://home-assistant:8123
               HASS_TOKEN:
                 valueFrom:
                   secretKeyRef:
