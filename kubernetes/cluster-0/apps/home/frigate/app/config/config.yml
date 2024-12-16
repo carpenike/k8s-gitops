@@ -34,7 +34,7 @@ snapshots:
   timestamp: false
   bounding_box: true
   retain:
-    default: 14
+    default: 30
 
 record:
   enabled: true
@@ -51,11 +51,11 @@ objects:
     - person
     - car
     - dog
-  filters:
-    person:
-      min_area: 2500
-      max_area: 100000
-      threshold: 0.7
+  # filters:
+  #   person:
+  #     min_area: 2500
+  #     max_area: 100000
+  #     threshold: 0.7
 
 go2rtc:
   streams:
@@ -91,9 +91,9 @@ cameras:
           max_area: 100000
           threshold: 0.75
           min_score: 0.60
-    zones:
-      backyard:
-        coordinates: 640,0,640,360,0,360,0,0
+    motion:
+      mask:
+        - 0.045,0.066,0.318,0.068,0.319,0.103,0.044,0.101
 
   driveway:
     ffmpeg:
@@ -113,6 +113,14 @@ cameras:
           max_area: 100000
           threshold: 0.75
           min_score: 0.60
+    zones:
+      parking:
+        coordinates: 0.677,0.158,0.476,0.111,0.38,0.11,0.227,0.235,0.042,0.806,0.426,0.98,0.973,1,0.949,0.718,0.88,0.494
+      mail:
+        coordinates: 0.647,0.111,0.643,0,0.786,0,0.797,0.127,0.729,0.123
+    motion:
+      mask: 
+        - 0.042,0.067,0.321,0.06,0.323,0.103,0.041,0.104
 
   frontdoor:
     ffmpeg:
@@ -125,3 +133,11 @@ cameras:
       width: 720
       height: 576
       fps: 5
+
+    zones:
+      walkway:
+        coordinates: 0.598,0.266,0.229,0.269,0.154,0.998,0.851,1
+
+    motion:
+      mask:
+        - 0.767,0.002,0.996,0.001,0.994,0.037,0.767,0.038
