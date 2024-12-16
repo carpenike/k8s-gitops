@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: '3'
+version: "3"
 
 # Taskfile used to manage certain VolSync tasks for a given application, limitations are as followed.
 #   1. Fluxtomization, HelmRelease, PVC, ReplicationSource all have the same name (e.g. plex)
@@ -8,10 +8,9 @@ version: '3'
 #   3. Each application only has one PVC that is being replicated
 
 vars:
-  VOLSYNC_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/volsync/resources'
+  VOLSYNC_RESOURCES_DIR: "{{.ROOT_DIR}}/.taskfiles/volsync/resources"
 
 tasks:
-
   state-*:
     desc: Suspend or resume Volsync [CLUSTER=main]
     cmds:
@@ -19,12 +18,35 @@ tasks:
       - flux --namespace volsync-system {{.STATE}} helmrelease volsync
       - kubectl --namespace volsync-system scale deployment volsync --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
     vars:
-      STATE: '{{index .MATCH 0}}'
+      STATE: "{{index .MATCH 0}}"
     requires:
       vars: [CLUSTER]
     preconditions:
       - '[[ "{{.STATE}}" == "suspend" || "{{.STATE}}" == "resume" ]]'
       - which flux kubectl
+
+  list:
+    desc: List snapshots for an app [CLUSTER=main] [NS=default] [APP=required]
+    preconditions:
+      - which kubectl minijinja-cli
+      - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
+      - test -f "{{.VOLSYNC_RESOURCES_DIR}}/list-snapshots.yaml.j2"
+    requires:
+      vars:
+        - CLUSTER
+        - APP
+    vars:
+      NS: '{{.NS | default "default"}}'
+      JOB: "list-snapshots-{{ .APP }}"
+    env:
+      NS: "{{.NS}}"
+      APP: "{{.APP}}"
+    cmds:
+      - minijinja-cli {{.VOLSYNC_TASK_RESOURCES_DIR}}/list-snapshots.yaml.j2 | kubectl apply --server-side --filename -
+      - until kubectl --namespace {{.NS}} get job/{{ .JOB }} &>/dev/null; do sleep 5; done
+      - kubectl --namespace {{.NS}} wait job/{{ .JOB }} --for=condition=complete --timeout=5m
+      - stern --namespace {{.NS}} job/{{ .JOB }} --no-follow
+      - kubectl --namespace {{.NS}} delete job {{ .JOB }}
 
   unlock:
     desc: Unlock all restic source repos [CLUSTER=main]
@@ -77,9 +99,9 @@ tasks:
       CONTROLLER:
         sh: kubectl --namespace {{.NS}} get deployment {{.APP}} &>/dev/null && echo deployment || echo statefulset
     env:
-      NS: '{{.NS}}'
-      APP: '{{.APP}}'
-      PREVIOUS: '{{.PREVIOUS}}'
+      NS: "{{.NS}}"
+      APP: "{{.APP}}"
+      PREVIOUS: "{{.PREVIOUS}}"
       CLAIM:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.sourcePVC}"
       ACCESS_MODES:
@@ -107,8 +129,8 @@ tasks:
     vars:
       NS: '{{.NS | default "default"}}'
     env:
-      NS: '{{.NS}}'
-      APP: '{{.APP}}'
+      NS: "{{.NS}}"
+      APP: "{{.APP}}"
     requires:
       vars: [CLUSTER, APP]
     preconditions:
