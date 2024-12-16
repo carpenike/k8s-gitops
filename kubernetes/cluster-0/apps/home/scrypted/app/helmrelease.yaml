@@ -67,12 +67,12 @@ spec:
           http:
             port: 11080
             primary: true
-          rebroadcast:
-            port: 39800
-          # rebroadcast2:
-          #   port: 34136
-          # rebroadcast3:
-          #   port: 34137
+          rebroadcast1:
+            port: 39801
+          rebroadcast2:
+            port: 39802
+          rebroadcast3:
+            port: 39803
 
     ingress:
       app:
