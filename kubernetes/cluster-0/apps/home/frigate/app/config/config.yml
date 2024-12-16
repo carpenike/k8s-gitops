@@ -106,17 +106,21 @@ cameras:
       height: 360
       width: 640
       fps: 10
-    objects:
-      filters:
-        person:
-          min_area: 1500
-          max_area: 100000
-          threshold: 0.75
-          min_score: 0.60
+    # objects:
+    #   filters:
+    #     person:
+    #       min_area: 1500
+    #       max_area: 100000
+    #       threshold: 0.75
+    #       min_score: 0.60
     zones:
       parking:
+        objects:
+          - car
         coordinates: 0.677,0.158,0.476,0.111,0.38,0.11,0.227,0.235,0.042,0.806,0.426,0.98,0.973,1,0.949,0.718,0.88,0.494
       mail:
+        objects: 
+          - car
         coordinates: 0.647,0.111,0.643,0,0.786,0,0.797,0.127,0.729,0.123
     motion:
       mask: 
@@ -136,6 +140,9 @@ cameras:
 
     zones:
       walkway:
+        objects:
+          - person
+          - dog
         coordinates: 0.598,0.266,0.229,0.269,0.154,0.998,0.851,1
 
     motion:
