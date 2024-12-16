@@ -100,13 +100,14 @@ spec:
           frigate:
             app:
               - path: /dev/shm
-      usb:
-        enabled: true
+      dev-bus-usb:
         type: hostPath
         hostPath: /dev/bus/usb
         hostPathType: Directory
-        globalMounts:
-          - path: /dev/bus/usb
+      sys-bus-usb:
+        type: hostPath
+        hostPath: /sys/bus/usb
+        hostPathType: Directory
       media:
         enabled: true
         type: custom
