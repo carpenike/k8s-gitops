@@ -33,13 +33,6 @@ spec:
                 "ips": ["10.30.10.15/16"]
               }]
 
-          securityContext:
-            runAsUser: 2000
-            runAsGroup: 2000
-            fsGroup: 2000
-            fsGroupChangePolicy: OnRootMismatch
-
-
         containers:
           app:
             image:
@@ -151,6 +144,15 @@ spec:
               limits:
                 memory: 512Mi
 
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+
     service:
       app:
         controller: home-assistant
@@ -169,9 +171,9 @@ spec:
     ingress:
       app:
         enabled: true
-        className: "external-nginx"
+        className: "internal-nginx"
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.holthome.net
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
           nginx.ingress.kubernetes.io/rewrite-target: /$1
         hosts:
           - host: &host "ha.holthome.net"
@@ -200,8 +202,18 @@ spec:
               - path: /config
             music-assistant:
               - path: /data
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /config/logs
+      tts:
+        type: emptyDir
+        globalMounts:
+          - path: /config/tts
       tmp:
         type: emptyDir
+        globalMounts:
+          - path: /tmp
       deploy-key:
         type: secret
         name: home-assistant-secret
