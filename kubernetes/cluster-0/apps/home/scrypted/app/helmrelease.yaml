@@ -30,8 +30,7 @@ spec:
                 "namespace": "network",
                 "ips": ["10.30.10.17/16"]
               }]
-          nodeSelector:
-            google.feature.node.kubernetes.io/coral: "true"
+
           securityContext:
             supplementalGroups:
               - 65542 # gladius:external-services
@@ -102,14 +101,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /.npm
-      dev-bus-usb:
-        type: hostPath
-        hostPath: /dev/bus/usb
-        hostPathType: Directory
-      sys-bus-usb:
-        type: hostPath
-        hostPath: /sys/bus/usb
-        hostPathType: Directory
       recs:
         type: nfs
         server: nas.holthome.net
