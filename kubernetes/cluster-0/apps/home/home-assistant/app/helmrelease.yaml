@@ -220,12 +220,13 @@ spec:
           - path: /config/tts
       tmp:
         type: emptyDir
-        globalMounts:
-          - path: /tmp
-      deploy-key:
-        type: secret
-        name: home-assistant-secret
-        defaultMode: 256
-        globalMounts:
-          - path: /root/.ssh/id_rsa
-            subPath: GH_DEPLOY_KEY
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /tmp
+                subPath: hass-tmp
+            code-server:
+              - path: /tmp
+                subPath: code-server-tmp
+              - path: /nonexistent
+                subPath: nonexistent
