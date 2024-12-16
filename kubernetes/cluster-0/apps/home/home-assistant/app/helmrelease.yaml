@@ -171,9 +171,9 @@ spec:
     ingress:
       app:
         enabled: true
-        className: "internal-nginx"
+        className: "external-nginx"
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+          external-dns.alpha.kubernetes.io/target: external.holthome.net
           nginx.ingress.kubernetes.io/rewrite-target: /$1
         hosts:
           - host: &host "ha.holthome.net"
@@ -182,14 +182,23 @@ spec:
                 service:
                   identifier: app
                   port: http
-              - path: /code/(.*)
-                service:
-                  identifier: app
-                  port: code-server
               - path: /music/(.*)
                 service:
                   identifier: app
                   port: music-server
+      code-server:
+        enabled: true
+        className: "internal-nginx"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.holthome.net
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
+        hosts:
+          - host: "ha-code.holthome.net"
+            paths:
+              - path: /(.*)
+                service:
+                  identifier: app
+                  port: code-server
 
     persistence:
       config:
