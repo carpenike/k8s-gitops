@@ -62,15 +62,15 @@ go2rtc:
     # frigate_patio_hq: rtsp://{FRIGATE_CAMERA_PATIO_USER}:{FRIGATE_CAMERA_PATIO_PASSWORD}@{FRIGATE_CAMERA_PATIO_HOST}:554/Streaming/Channels/1
     # frigate_patio_lq: rtsp://{FRIGATE_CAMERA_PATIO_USER}:{FRIGATE_CAMERA_PATIO_PASSWORD}@{FRIGATE_CAMERA_PATIO_HOST}:554/Streaming/Channels/2
     frigate_patio:
-      - ffmpeg:rtsp://scrypted:39803/64e0e7d2df00d281
+      - rtsp://scrypted:39803/64e0e7d2df00d281
     # frigate_driveway_hq: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/1
     # frigate_driveway_lq: rtsp://{FRIGATE_CAMERA_DRIVEWAY_USER}:{FRIGATE_CAMERA_DRIVEWAY_PASSWORD}@{FRIGATE_CAMERA_DRIVEWAY_HOST}:554/Streaming/Channels/2
     frigate_driveway:
-      - ffmpeg:rtsp://scrypted:39801/b66f9286d035dfa4
+      - rtsp://scrypted:39801/b66f9286d035dfa4
     # frigate_frontdoor_lq: rtsp://{FRIGATE_CAMERA_DOORBELL_USER}:{FRIGATE_CAMERA_DOORBELL_PASSWORD}@{FRIGATE_CAMERA_DOORBELL_HOST}:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
     # frigate_frontdoor_hq: rtsp://{FRIGATE_CAMERA_DOORBELL_USER}:{FRIGATE_CAMERA_DOORBELL_PASSWORD}@{FRIGATE_CAMERA_DOORBELL_HOST}:554/cam/realmonitor?channel=1&subtype=0&authbasic=64
     frigate_frontdoor:
-      - ffmpeg:rtsp://scrypted:39802/8aeb874bb81c6e55
+      - rtsp://scrypted:39802/8aeb874bb81c6e55
 cameras:
   # --
   patio:
