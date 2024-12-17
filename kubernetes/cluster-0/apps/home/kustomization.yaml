@@ -10,5 +10,6 @@ resources:
   - ./home-assistant/ks.yaml
   # - ./mosquitto/ks.yaml
   - ./scrypted/ks.yaml
+  - ./signal-cli/ks.yaml
   - ./zigbee2mqtt/ks.yaml
   - ./zwavejs2mqtt/ks.yaml
