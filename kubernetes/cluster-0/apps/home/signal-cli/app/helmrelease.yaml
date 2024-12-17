@@ -31,11 +31,11 @@ spec:
                 "ips": ["10.30.10.99/16"]
               }]
 
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            fsGroup: 1000
-            fsGroupChangePolicy: OnRootMismatch
+          # securityContext:
+          #   runAsUser: 1000
+          #   runAsGroup: 1000
+          #   fsGroup: 1000
+          #   fsGroupChangePolicy: OnRootMismatch
 
         containers:
           app:
@@ -43,7 +43,7 @@ spec:
               repository: docker.io/bbernhard/signal-cli-rest-api
               tag: 0.89
             env:
-              MODE: native 
+              MODE: native
             resources:
               requests:
                 cpu: 10m
