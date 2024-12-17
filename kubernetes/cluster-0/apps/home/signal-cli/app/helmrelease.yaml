@@ -42,7 +42,7 @@ spec:
               repository: docker.io/bbernhard/signal-cli-rest-api
               tag: 0.89
             env:
-              MODE: native
+              MODE: json-rpc
             resources:
               requests:
                 cpu: 10m
