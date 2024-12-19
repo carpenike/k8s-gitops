@@ -36,7 +36,7 @@ spec:
               tag: main@sha256:ee76db7339ab326fb3822ca22fd5de9b81b165c270d465fbca8fca3b80471db0
             env:
               OPENAI_API_BASE: https://openrouter.ai/api/v1
-              CHROMA_DB_IMPL: postgres
+              # CHROMA_DB_IMPL: postgres
               CHROMA_USE_DEPRECATED_CLIENT: False
               WEBUI_URL: https://ai.holthome.net
               ADMIN_EMAIL: ryan@ryanholt.net
