@@ -37,7 +37,7 @@ spec:
             env:
               OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
               # CHROMA_DB_IMPL: postgres
-              CHROMA_USE_DEPRECATED_CLIENT: False
+              CHROMA_USE_DEPRECATED_CLIENT: false
               WEBUI_URL: https://ai.holthome.net
               ADMIN_EMAIL: ryan@ryanholt.net
               AUDIO_STT_ENGINE: openai
@@ -45,6 +45,9 @@ spec:
               ENABLE_IMAGE_GENERATION: true
               IMAGE_GENERATION_ENGINE: openai
               ENABLE_OLLAMA_API: false
+              ENABLE_RAG_WEB_SEARCH: true
+              ENABLE_SEARCH_QUERY: true
+              RAG_WEB_SEARCH_ENGINE: google_pse
               TZ: America/New_York
             envFrom: *envFrom
             probes:
