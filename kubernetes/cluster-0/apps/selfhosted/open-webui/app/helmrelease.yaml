@@ -44,6 +44,7 @@ spec:
               AUDIO_TTS_ENGINE: openai
               ENABLE_IMAGE_GENERATION: true
               IMAGE_GENERATION_ENGINE: openai
+              ENABLE_OLLAMA_API: false
               TZ: America/New_York
             envFrom: *envFrom
             probes:
