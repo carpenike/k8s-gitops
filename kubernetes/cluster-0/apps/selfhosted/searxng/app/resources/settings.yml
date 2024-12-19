@@ -39,7 +39,6 @@ categories_as_tabs:
 enabled_plugins:
   - Basic Calculator
   - Hash plugin
-  - Hostnames plugin
   - Open Access DOI rewrite
   - Self Informations
   - Tracker URL remover
