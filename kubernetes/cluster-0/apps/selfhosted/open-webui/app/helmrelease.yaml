@@ -48,7 +48,7 @@ spec:
               ENABLE_RAG_WEB_SEARCH: true
               ENABLE_SEARCH_QUERY: true
               RAG_WEB_SEARCH_ENGINE: searxng
-              SEARXNG_QUERY_URL: https://search.holthome.net/search?q=<query>
+              SEARXNG_QUERY_URL: http://searxng-app:8080/search?q==<query>
               TZ: America/New_York
             envFrom: *envFrom
             probes:
