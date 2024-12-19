@@ -15,6 +15,7 @@ resources:
   - ./teslamate/ks.yaml
   - ./thelounge/ks.yaml
   - ./paperless/ks.yaml
+  - ./searxng/ks.yaml
   # - ./radicale/ks.yaml
   # - ./theme-park/ks.yaml
   # - ./znc/ks.yaml
