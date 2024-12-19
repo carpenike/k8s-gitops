@@ -47,7 +47,8 @@ spec:
               ENABLE_OLLAMA_API: false
               ENABLE_RAG_WEB_SEARCH: true
               ENABLE_SEARCH_QUERY: true
-              RAG_WEB_SEARCH_ENGINE: google_pse
+              RAG_WEB_SEARCH_ENGINE: searxng
+              SEARXNG_QUERY_URL: https://search.holthome.net/search?q=<query>
               TZ: America/New_York
             envFrom: *envFrom
             probes:
