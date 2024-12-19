@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres16
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.6
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 100Gi
+    storageClass: local-hostpath
+  superuserSecret:
+    name: cloudnative-pg-secret
+  enableSuperuserAccess: true
+  postgresql:
+    parameters:
+      max_connections: "300"
+      shared_buffers: 512MB
+      pg_stat_statements.max: "10000"
+      pg_stat_statements.track: all
+  resources:
+    requests:
+      cpu: 500m
+    limits:
+      memory: 4Gi
+  monitoring:
+    enablePodMonitor: true
+  # backup:
+  #   retentionPolicy: 30d
+  #   barmanObjectStore: &barmanObjectStore
+  #     wal:
+  #       compression: bzip2
+  #       maxParallel: 8
+  #     destinationPath: s3://postgresql/
+  #     endpointURL: https://minio-s3.holthome.net
+  #     serverName: postgres-16-v1
+  #     s3Credentials:
+  #       accessKeyId:
+  #         name: cloudnative-pg-secret
+  #         key: aws-access-key-id
+  #       secretAccessKey:
+  #         name: cloudnative-pg-secret
+  #         key: aws-secret-access-key
+  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases: ["*"]
+        roles: ["*"]
+        source:
+          externalCluster: postgres-v9
+
+  # Note: externalClusters is needed when recovering from an existing cnpg cluster
+  externalClusters:
+    - name: postgres-v9
+      connectionParameters:
+        # Use the correct IP or host name for the source database
+        host: postgres-rw.db.svc.cluster.local
+        user: postgres
+        dbname: postgres
+        sslmode: require
+      password:
+        name: cloudnative-pg-secret
+        key: password
