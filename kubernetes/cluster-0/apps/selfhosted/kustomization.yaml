@@ -11,6 +11,7 @@ resources:
   - ./miniflux/ks.yaml
   # - ./node-red/ks.yaml
   # - ./obsidian-couchdb/ks.yaml
+  - ./open-webui/ks.yaml
   - ./teslamate/ks.yaml
   - ./thelounge/ks.yaml
   - ./paperless/ks.yaml
