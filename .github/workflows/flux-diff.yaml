@@ -72,7 +72,7 @@ jobs:
         uses: frenck/action-setup-yq@v1
 
       - name: Diff Resources
-        uses: allenporter/flux-local/action/diff@6.0.2
+        uses: allenporter/flux-local/action/diff@6.1.0
         id: diff
         with:
           sources: k8s-gitops-kubernetes
