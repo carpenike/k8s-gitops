@@ -113,4 +113,4 @@ spec:
         existingClaim: media-nfs-share-pvc
         globalMounts:
           - path: /media/soulseek
-            subPath: media/soulseek
+            subPath: soulseek
