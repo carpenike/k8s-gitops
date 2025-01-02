@@ -89,7 +89,7 @@ spec:
             protocol: TCP
     ingress:
       app:
-        className: internal
+        className: internal-nginx
         hosts:
           - host: "slskd.holthome.net"
             paths:
