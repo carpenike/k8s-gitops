@@ -1,19 +1,29 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: teslamate
+  name: &app teslamate
   namespace: flux-system
 spec:
-  interval: 10m
+  targetNamespace: selfhosted
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: "./kubernetes/cluster-0/apps/selfhosted/teslamate/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: k8s-gitops-kubernetes
   wait: false # no flux ks dependents
+  interval: 30m
+  timeout: 5m
   dependsOn:
     - name: external-secrets-stores
     - name: rook-ceph-cluster
     - name: cloudnative-pg-cluster
     - name: emqx-cluster
+  postBuild:
+    substitute:
+      APP: *app
+      HOSTNAME: teslamate.holthome.net

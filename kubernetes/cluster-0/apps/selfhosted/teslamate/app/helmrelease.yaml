@@ -10,12 +10,13 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.0.4
+      version: 3.5.1
+      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      interval: 15m
+
   maxHistory: 3
   install:
     createNamespace: true
@@ -27,11 +28,13 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+
   values:
     controllers:
-      main:
+      teslamate:
         annotations:
           reloader.stakater.com/auto: "true"
+        
         initContainers:
           init-db:
             image:
@@ -41,6 +44,7 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: teslamate-secret
+
         containers:
           main:
             image:
@@ -51,9 +55,16 @@ spec:
               DISABLE_MQTT: "false"
               MQTT_HOST: "emqx.db.svc.cluster.local"
             envFrom: *envFrom
+            resources:
+              requests:
+                memory: 250Mi
+                cpu: 50m
+              limits:
+                memory: 500Mi
 
     service:
       main:
+        controller: teslamate
         ports:
           http:
             port: 4000
@@ -67,15 +78,5 @@ spec:
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: main
                   port: http
-        tls:
-          - hosts:
-              - teslamate.holthome.net
-
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 50m
-      limits:
-        memory: 500Mi
