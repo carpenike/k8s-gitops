@@ -1,7 +1,7 @@
 ---
 directories:
-  downloads: /media/Downloads/soulseek/complete
-  incomplete: /media/Downloads/soulseek/incomplete
+  downloads: /media/soulseek/complete
+  incomplete: /media/soulseek/incomplete
 flags:
   no_version_check: true
 metrics:
@@ -15,7 +15,7 @@ permissions:
 remote_configuration: false
 shares:
   directories:
-    - /media/Downloads/soulseek/shared
+    - /media/soulseek/shared
   filters:
     - \.ini$
     - Thumbs.db$
