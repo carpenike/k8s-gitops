@@ -66,6 +66,8 @@ spec:
               repository: ghcr.io/coder/code-server
               tag: 4.95.3@sha256:6d74583d68179cbb6ddadc2518b450d2ac3eaec2d342474fe1941e03371cd2cf
             args:
+              - dashboard
+              - /config/dashboard.yaml
               - --auth
               - none
               - --disable-telemetry
