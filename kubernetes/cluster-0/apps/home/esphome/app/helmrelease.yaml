@@ -42,6 +42,8 @@ spec:
             image:
               repository: ghcr.io/bjw-s-labs/esphome
               tag: 2024.11.1@sha256:26aa7250ae7e7b81f951d77e6cbd45dba45240e5766715c41372d30b57ea42f3
+            command: ["dashboard"]
+            args: ["/config/dashboard.yaml"]
             probes:
               liveness:
                 enabled: false
@@ -66,8 +68,6 @@ spec:
               repository: ghcr.io/coder/code-server
               tag: 4.95.3@sha256:6d74583d68179cbb6ddadc2518b450d2ac3eaec2d342474fe1941e03371cd2cf
             args:
-              - dashboard
-              - /config/dashboard.yaml
               - --auth
               - none
               - --disable-telemetry
