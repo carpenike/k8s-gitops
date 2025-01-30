@@ -8,6 +8,7 @@ resources:
   - ./_pvs/ks.yaml
   - ./actual/ks.yaml
   # - ./immich/ks.yaml
+  - ./mealie/ks.yaml
   - ./miniflux/ks.yaml
   # - ./node-red/ks.yaml
   # - ./obsidian-couchdb/ks.yaml
