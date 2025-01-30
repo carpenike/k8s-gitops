@@ -46,7 +46,7 @@ spec:
                   name: mealie-secret
 
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/mealie-recipes/mealie
               tag: v2.5.0@sha256:0a9839f19e74d5c4a818161a5850b16d9608b240381691c317d3c23cd62e0c0f
@@ -63,14 +63,14 @@ spec:
                 memory: 500Mi
 
     service:
-      main:
+      app:
         controller: mealie
         ports:
           http:
             port: 9000
 
     ingress:
-      main:
+      app:
         enabled: true
         className: "internal-nginx"
         hosts:
@@ -85,7 +85,5 @@ spec:
       data:
         enabled: true
         existingClaim: mealie-pvc
-        advancedMounts:
-          main:
-            api:
-            - path: /app/data
+        globalMounts:
+          - path: /app/data
