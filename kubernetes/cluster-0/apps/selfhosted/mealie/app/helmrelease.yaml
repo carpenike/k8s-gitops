@@ -54,6 +54,12 @@ spec:
               TZ: "America/New_York"
               BASE_URL: https://mealie.holthome.net
               DB_ENGINE: postgres
+              SMTP_HOST: smtp.mailgun.org
+              SMTP_PORT: 587
+              SMTP_FROM_NAME: Mealie
+              SMTP_FROM_EMAIL: noreply@holthome.net
+              SMTP_AUTH_STRATEGY: TLS
+              SMTP_USER: mealie@holthome.net
             envFrom: *envFrom
             resources:
               requests:
