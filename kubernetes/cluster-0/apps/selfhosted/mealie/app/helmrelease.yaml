@@ -60,6 +60,7 @@ spec:
               SMTP_FROM_EMAIL: noreply@holthome.net
               SMTP_AUTH_STRATEGY: TLS
               SMTP_USER: mealie@holthome.net
+              OPENAI_BASE_URL: https://openrouter.ai/api/v1
             envFrom: *envFrom
             resources:
               requests:
