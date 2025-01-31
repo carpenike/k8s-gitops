@@ -53,7 +53,7 @@ spec:
             env:
               TZ: "America/New_York"
               DISABLE_MQTT: "false"
-              MQTT_HOST: "emqx.db.svc.cluster.local"
+              MQTT_HOST: "emqx-listeners.db.svc.cluster.local"
             envFrom: *envFrom
             resources:
               requests:
