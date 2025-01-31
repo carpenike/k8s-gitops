@@ -41,7 +41,7 @@ spec:
               tag: latest
             env:
               TZ: "America/New_York"
-              FB2MQTT_MQTT_URL: "mqtt://emqx.db.svc.cluster.local:1883"
+              FB2MQTT_MQTT_URL: "mqtt://emqx-listeners.db.svc.cluster.local:1883"
               FB2MQTT_FIREBOARD_ENABLE_DRIVE: "false"
             envFrom:
               - secretRef:
