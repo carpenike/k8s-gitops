@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: ghcr.io/cross-seed/cross-seed
-              tag: 6.0.0@sha256:58547efee5c8c14ed2cc1005abe90fd0f1c079599f4dbf9f353645f9c3f1e267
+              tag: 6.11.0@sha256:9993e11574d9b8723852482099e021de34134b0a1d7df6ecf3dad5948ce2464c
             env:
               TZ: America/New_York
             args: ["daemon"]
