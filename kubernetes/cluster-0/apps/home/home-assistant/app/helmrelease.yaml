@@ -36,7 +36,7 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/home-assistant
-              tag: 2025.1.0@sha256:a3e6b1301107c5ca4dd3e1e7fa25edd0618acc9f812c75674cce7481fb05c759
+              tag: 2025.3.1@sha256:a5377eae2e414adb58413dbcf29cf9b08350ad33d123dfdbc3eaa94b44f7443c
 
             envFrom:
               - secretRef:
@@ -112,7 +112,7 @@ spec:
           msft-stt:
             image:
               repository: ghcr.io/hugobloem/wyoming-microsoft-stt-noha
-              tag: 1.1.0@sha256:66c63638c2fc0f514ce9171781d0d54d1f7cfda202385dff82a8841c87b0bae0
+              tag: 1.2.1@sha256:e9937e47e07197f5d8f054c91e076337112f010925d917484e5fc054de941d9f
             args: ["--debug"]
             env:
               AZURE_SERVICE_REGION: eastus
