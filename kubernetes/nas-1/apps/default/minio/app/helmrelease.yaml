@@ -34,7 +34,7 @@ spec:
           main:
             image:
               repository: quay.io/minio/minio
-              tag: RELEASE.2024-03-21T23-13-43Z
+              tag: RELEASE.2025-03-12T18-04-18Z
             env:
               TZ: America/New_York
               MINIO_UPDATE: "off"
