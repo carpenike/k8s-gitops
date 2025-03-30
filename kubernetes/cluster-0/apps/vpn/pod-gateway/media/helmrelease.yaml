@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: ghcr.io/angelnu/pod-gateway
-      tag: v1.10.0@sha256:d728eac85f750b37c96a0dafd038561ea4b8035857802be1128ea9b19c61e181
+      tag: v1.12.0@sha256:8b35b9ebe2be4dfdce44934e298ab196bc59dd2a47ec5f62423e6b573ae94a6b
 
     DNS: 172.16.1.1
 
