@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/upgrade.cattle.io/plan_v1.json
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
@@ -23,6 +24,3 @@ spec:
       - --node=$(SYSTEM_UPGRADE_NODE_NAME)
       - --tag=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
       - --endpoints=$(SYSTEM_UPGRADE_NODE_NAME)
-    env:
-      - name: TALOSCONFIG
-        value: /var/run/secrets/talos.dev/config
