@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app pinchflat
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      pinchflat:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/kieraneglin/pinchflat
+              tag: v2025.3.17@sha256:1c5f79531c00529f525d16d926179ef260b9c0e27119f8c95867a62aba9267f8
+            env:
+              TZ: America/New_York
+              TZ_DATA_DIR: /tmp/elixir_tz_data
+              PORT: &port 80
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthcheck
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                gpu.intel.com/i915: 1
+                memory: 8Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [44]
+    service:
+      app:
+        controller: pinchflat
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+    persistence:
+      config:
+        existingClaim: pinchflat
+      yt-dlp:
+        type: emptyDir
+        globalMounts:
+          - path: /etc/yt-dlp
+      media:
+        type: nfs
+        server: expanse.internal
+        path: /mnt/eros/Media
+        advancedMounts:
+          pinchflat:
+            app:
+              - path: /downloads
+                subPath: Library/YouTube
+      tmp:
+        type: emptyDir
