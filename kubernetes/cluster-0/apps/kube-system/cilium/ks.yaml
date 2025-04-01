@@ -65,4 +65,4 @@ spec:
   wait: true
   dependsOn:
     - name: cert-manager-issuers
-      namespace: cert-manager
+      namespace: flux-system
