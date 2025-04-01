@@ -5,45 +5,20 @@ metadata:
   name: talos
 spec:
   version: ${TALOS_VERSION}
-  serviceAccountName: system-upgrade
-  secrets:
-    - name: talos
-      path: /var/run/secrets/talos.dev
-      ignoreUpdates: true
   concurrency: 1
+  postCompleteDelay: 2m
   exclusive: true
   nodeSelector:
     matchExpressions:
-      - key: feature.node.kubernetes.io/system-os_release.ID
-        operator: In
-        values:
-          - talos
-      - key: feature.node.kubernetes.io/system-os_release.VERSION_ID
-        operator: NotIn
-        values:
-          - ${TALOS_VERSION}
-  tolerations:
-    - key: CriticalAddonsOnly
-      operator: Exists
-    - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
-  prepare: &prepare
-    image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
-    envs:
-      - name: NODE_IP
-        valueFrom:
-          fieldRef:
-            fieldPath: status.hostIP
-    args:
-      - --nodes=$(NODE_IP)
-      - health
-      - --server=false
+      - key: kubernetes.io/hostname
+        operator: Exists
+  secrets:
+    - name: system-upgrade
+      path: /var/run/secrets/talos.dev
+      ignoreUpdates: true
+  serviceAccountName: system-upgrade-controller
   upgrade:
-    <<: *prepare
+    image: ghcr.io/jfroy/tnu:0.4.1
     args:
-      - --nodes=$(NODE_IP)
-      - upgrade
-      - --image=ghcr.io/siderolabs/installer:$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
-      - --preserve=true
-      - --wait=false
+      - --node=$(SYSTEM_UPGRADE_NODE_NAME)
+      - --tag=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
