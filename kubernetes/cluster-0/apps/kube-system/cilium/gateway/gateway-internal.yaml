@@ -5,7 +5,7 @@ kind: Gateway
 metadata:
   name: internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname ingress-int.holthome.net
+    external-dns.alpha.kubernetes.io/target: &hostname internal.holthome.net
 spec:
   gatewayClassName: cilium
   addresses:
