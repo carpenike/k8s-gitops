@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cilium.io/ciliumbgppeeringpolicy_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeeringPolicy
+metadata:
+  name: bgp-loadbalancer-ip-main
+  namespace: kube-system
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: "linux"
+  virtualRouters:
+    - localASN: 64512
+      exportPodCIDR: false
+      serviceSelector:
+        matchExpressions:
+          - {
+              key: thisFakeSelector,
+              operator: NotIn,
+              values: ["will-match-and-announce-all-services"],
+            }
+      neighbors:
+        - peerAddress: "10.20.0.1/32" # unlike bgp-config ConfigMap, peerAddress needs to be in CIDR notation
+          peerASN: 64512

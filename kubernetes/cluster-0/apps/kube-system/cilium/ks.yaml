@@ -18,4 +18,49 @@ spec:
     kind: GitRepository
     name: k8s-gitops-kubernetes
   wait: true
-
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cilium-config
+  namespace: &namespace kube-system
+spec:
+  targetNamespace: kube-system
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: cilium
+      app.kubernetes.io/component: config
+  interval: 30m
+  timeout: 5m
+  path: "./kubernetes/cluster-0/apps/kube-system/cilium/config"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+  wait: false
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cilium-gateway
+  namespace: &namespace kube-system
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: cilium
+      app.kubernetes.io/component: gateway
+  interval: 30m
+  timeout: 5m
+  path: "./kubernetes/cluster-0/apps/kube-system/cilium/gateway"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: k8s-gitops-kubernetes
+    namespace: flux-system
+  wait: true
+  dependsOn:
+    - name: cert-manager-issuers
+      namespace: cert-manager

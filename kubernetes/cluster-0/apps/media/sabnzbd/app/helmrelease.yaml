@@ -6,32 +6,33 @@ metadata:
   name: sabnzbd
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.5.1
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
   values:
     controllers:
       sabnzbd:
         annotations:
           reloader.stakater.com/auto: "true"
+
+        pod:
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+            runAsNonRoot: true
+            fsGroup: 2000
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups:
+              - 65542 # gladius:external-services
+
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/sabnzbd
-              tag: 4.3.3@sha256:86c645db93affcbf01cc2bce2560082bfde791009e1506dba68269b9c50bc341
+              repository: ghcr.io/home-operations/sabnzbd
+              tag: 4.5.0
+
             env:
               TZ: America/New_York
               SABNZBD__PORT: &port 80
@@ -42,10 +43,20 @@ spec:
                 sabnzbd.media.svc.cluster,
                 sabnzbd.media.svc.cluster.local,
                 sabnzbd.holthome.net
+              # SABNZBD__API_KEY:
+              #   valueFrom:
+              #     secretKeyRef:
+              #       name: sabnzbd-secret
+              #       key: SABNZBD__API_KEY
               CROSS_SEED_ENABLED: false
               CROSS_SEED_HOST: cross-seed.media.svc.cluster.local
               CROSS_SEED_PORT: 80
               CROSS_SEED_SLEEP_INTERVAL: 30
+              # CROSS_SEED_API_KEY:
+              #   valueFrom:
+              #     secretKeyRef:
+              #       name: sabnzbd-secret
+              #       key: CROSS_SEED_API_KEY
               PUSHOVER_ENABLED: true
             envFrom:
               - secretRef:
@@ -63,29 +74,69 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 100m
               limits:
                 memory: 8Gi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
     service:
       app:
         controller: sabnzbd
         ports:
           http:
             port: *port
+
+    persistence:
+      config:
+        existingClaim: sabnzbd
+        advancedMounts:
+          sabnzbd:
+            app:
+              - path: /config
+      media:
+        existingClaim: media-nfs-share-pvc
+        globalMounts:
+          - path: /media/sabnzbd/downloads
+            subPath: sabnzbd/downloads
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          sabnzbd:
+            app:
+              - path: /tmp
+      ephemeral:
+        type: custom
+        volumeSpec:
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: "openebs-hostpath"
+                resources:
+                  requests:
+                    storage: 100Gi
+        advancedMounts:
+          sabnzbd:
+            app:
+              - path: /incomplete
+                subPath: incomplete
+      scripts:
+        type: configMap
+        name: sabnzbd-scripts
+        defaultMode: 0775
+        advancedMounts:
+          sabnzbd:
+            app:
+              - path: /config/scripts
+
     ingress:
       app:
         annotations:
@@ -98,19 +149,16 @@ spec:
                 service:
                   identifier: app
                   port: http
-    persistence:
-      config:
-        existingClaim: sabnzbd
-      tmp:
-        type: emptyDir
-      scripts:
-        type: configMap
-        name: sabnzbd-scripts
-        defaultMode: 0775
-        globalMounts:
-          - readOnly: true
-      media:
-        existingClaim: media-nfs-share-pvc
-        globalMounts:
-          - path: /media/sabnzbd/downloads
-            subPath: sabnzbd/downloads
+
+    route:
+      app:
+        hostnames:
+          - sabnzbd.bjw-s.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: sabnzbd
+                port: *port

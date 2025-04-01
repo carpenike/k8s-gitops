@@ -1,16 +1,15 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: kube-system
 resources:
+  - ./helmrepository.yaml
   - ./helmrelease.yaml
-  - ./bgppeeringpolicy.yaml
+  - ./crds.yaml
 configMapGenerator:
   - name: cilium-values
     files:
       - values.yaml=./values.yaml
-generatorOptions:
-  disableNameSuffixHash: true
 
 configurations:
   - kustomizeconfig.yaml
