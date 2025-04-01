@@ -23,3 +23,4 @@ spec:
       - --nodes=$(SYSTEM_UPGRADE_NODE_NAME)
       - upgrade-k8s
       - --to=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
+      - --endpoints=$(SYSTEM_UPGRADE_NODE_NAME)

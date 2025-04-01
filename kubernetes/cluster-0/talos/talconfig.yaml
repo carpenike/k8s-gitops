@@ -3,18 +3,19 @@
 clusterName: &clusterName ${clusterName}
 endpoint: "https://${clusterName}.${domainName}:6443"
 
-talosVersion: v1.8.3
-kubernetesVersion: 1.31.3
-
-cniConfig:
-  name: none
+# renovate: depName=ghcr.io/siderolabs/installer datasource=docker
+talosVersion: v1.9.5
+# renovate: depName=ghcr.io/siderolabs/kubelet datasource=docker
+kubernetesVersion: 1.30.11
 
 additionalApiServerCertSans: &sans
   - &talosControlplaneVip ${clusterEndpointIP}
   - ${clusterName}.${domainName}
   - "127.0.0.1"
-
 additionalMachineCertSans: *sans
+
+cniConfig:
+  name: none
 
 nodes:
   - hostname: cp-0.holthome.net
@@ -108,9 +109,14 @@ controlPlane:
   schematic:
     customization:
       extraKernelArgs:
-        - intel_iommu=on
-        - iommu=pt
-        - net.ifnames=1
+        - apparmor=0 # Less security, more speed
+        - init_on_alloc=0 # Less security, more speed
+        - init_on_free=0 # Less security, more speed
+        - intel_iommu=on # PCI Passthrough
+        - iommu=pt # PCI Passthrough
+        - mitigations=off # Less security, more speed
+        - security=none # Less security, more speed
+        - net.ifnames=1 # Enable predictable NIC naming
       systemExtensions:
         officialExtensions:
           - siderolabs/gasket-driver
@@ -140,6 +146,15 @@ controlPlane:
         network:
           disableSearchDomain: true
 
+    # Enable host dns
+    - |-
+      machine:
+        features:
+          hostDNS:
+            enabled: true
+            resolveMemberNames: true
+            forwardKubeDNSToHost: false
+
     # Enable cluster discovery
     - |-
       cluster:
@@ -150,15 +165,6 @@ controlPlane:
               disabled: false
             service:
               disabled: true
-
-    # Disable Host DNS
-    - |-
-      machine:
-        features:
-          hostDNS:
-            enabled: true
-            resolveMemberNames: true
-            forwardKubeDNSToHost: false
 
     # Configure kubelet
     - |-
@@ -172,13 +178,37 @@ controlPlane:
             validSubnets:
                 - 10.20.0.0/16
 
-    # Enable KubePrism
+    # Enable MutatingAdmissionPolicy
     - |-
-      machine:
-        features:
-          kubePrism:
-            enabled: true
-            port: 7445
+      cluster:
+        apiServer:
+          extraArgs:
+            runtime-config: admissionregistration.k8s.io/v1alpha1=true
+            feature-gates: MutatingAdmissionPolicy=true
+
+
+    # Configure cluster
+    - |-
+      cluster:
+        allowSchedulingOnControlPlanes: true
+        coreDNS:
+            disabled: true
+        proxy:
+          disabled: true
+        scheduler:
+          config:
+            apiVersion: kubescheduler.config.k8s.io/v1
+            kind: KubeSchedulerConfiguration
+            profiles:
+              - schedulerName: default-scheduler
+                pluginConfig:
+                  - name: PodTopologySpread
+                    args:
+                      defaultingType: List
+                      defaultConstraints:
+                        - maxSkew: 1
+                          topologyKey: kubernetes.io/hostname
+                          whenUnsatisfiable: ScheduleAnyway
 
     # Configure cluster
     - |-
@@ -210,6 +240,20 @@ controlPlane:
           advertisedSubnets:
             - 10.20.0.0/16
 
+    # Configure NFS mount options
+    - |
+      machine:
+        files:
+          - op: overwrite
+            path: /etc/nfsmount.conf
+            permissions: 0o644
+            content: |
+              [ NFSMount_Global_Options ]
+              nfsvers=4.2
+              hard=True
+              noatime=True
+              nconnect=16
+
     # Configure nfs mount options
     - |-
       machine:
@@ -236,19 +280,14 @@ controlPlane:
               aliases:
                 - ${clusterName}.${domainName}
 
-    # Custom sysctls
+    # Configure custom sysctls
     - |-
       machine:
         sysctls:
-          fs.inotify.max_user_instances: 8192
-          fs.inotify.max_user_watches: 1048576
-          net.core.rmem_max: 67108864
-          net.core.wmem_max: 67108864
-          net.ipv4.tcp_rmem: 4096 87380 33554432
-          net.ipv4.tcp_wmem: 4096 65536 33554432
-          net.ipv4.tcp_tw_reuse: 1
-          net.ipv4.tcp_window_scaling: 1
-          net.ipv4.tcp_congestion_control: bbr
+          fs.inotify.max_user_instances: 8192    # Watchdog
+          fs.inotify.max_user_watches: 1048576   # Watchdog
+          net.core.rmem_max: 67108864            # Cloudflared / QUIC
+          net.core.wmem_max: 67108864            # Cloudflared / QUIC
 
     # Configure udev rules
     - |-
@@ -275,6 +314,7 @@ controlPlane:
             allowedRoles:
               - os:admin
             allowedKubernetesNamespaces:
+              - actions-runner-system
               - system-upgrade
 
     # Force nameserver

@@ -22,3 +22,4 @@ spec:
     args:
       - --node=$(SYSTEM_UPGRADE_NODE_NAME)
       - --tag=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
+      - --endpoints=$(SYSTEM_UPGRADE_NODE_NAME)
