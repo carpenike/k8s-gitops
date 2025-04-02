@@ -111,23 +111,23 @@ spec:
           sabnzbd:
             app:
               - path: /tmp
-      ephemeral:
-        type: custom
-        volumeSpec:
-          ephemeral:
-            volumeClaimTemplate:
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                storageClassName: "openebs-hostpath"
-                resources:
-                  requests:
-                    storage: 100Gi
-        advancedMounts:
-          sabnzbd:
-            app:
-              - path: /incomplete
-                subPath: incomplete
+      # ephemeral:
+      #   type: custom
+      #   volumeSpec:
+      #     ephemeral:
+      #       volumeClaimTemplate:
+      #         spec:
+      #           accessModes:
+      #             - ReadWriteOnce
+      #           storageClassName: "openebs-hostpath"
+      #           resources:
+      #             requests:
+      #               storage: 100Gi
+      #   advancedMounts:
+      #     sabnzbd:
+      #       app:
+      #         - path: /incomplete
+      #           subPath: incomplete
       scripts:
         type: configMap
         name: sabnzbd-scripts
