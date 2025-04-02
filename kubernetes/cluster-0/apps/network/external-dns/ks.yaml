@@ -1,23 +1,23 @@
----
+# ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &appname externaldns-shared
-  namespace: flux-system
-spec:
-  targetNamespace: network
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *appname
-  interval: 30m
-  timeout: 5m
-  path: "./kubernetes/cluster-0/apps/network/external-dns/shared"
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: k8s-gitops-kubernetes
-  wait: true
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: &appname externaldns-shared
+#   namespace: flux-system
+# spec:
+#   targetNamespace: network
+#   commonMetadata:
+#     labels:
+#       app.kubernetes.io/name: *appname
+#   interval: 30m
+#   timeout: 5m
+#   path: "./kubernetes/cluster-0/apps/network/external-dns/shared"
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: k8s-gitops-kubernetes
+#   wait: true
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -39,7 +39,7 @@ spec:
     name: k8s-gitops-kubernetes
   wait: true
   dependsOn:
-    - name: externaldns-shared
+    # - name: externaldns-shared
     - name: external-secrets-stores
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
@@ -62,5 +62,5 @@ spec:
     name: k8s-gitops-kubernetes
   wait: true
   dependsOn:
-    - name: externaldns-shared
+    # - name: externaldns-shared
     - name: external-secrets-stores
