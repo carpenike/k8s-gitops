@@ -1,11 +1,10 @@
 ---
+originRequest:
+  originServerName: external.holthome.net
+
 ingress:
-  - hostname: "holthome.net"
-    service: https://nginx-external-controller.network.svc.cluster.local:443
-    originRequest:
-      originServerName: external.holthome.net
+  - hostname: holthome.net
+    service: &svc https://cilium-gateway-external.kube-system.svc.cluster.local
   - hostname: "*.holthome.net"
-    service: https://nginx-external-controller.network.svc.cluster.local:443
-    originRequest:
-      originServerName: external.holthome.net
+    service: *svc
   - service: http_status:404

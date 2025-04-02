@@ -6,15 +6,10 @@ metadata:
   name: cloudflared
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.5.1
-      interval: 30m
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
 
   values:
     controllers:
@@ -26,19 +21,16 @@ spec:
           reloader.stakater.com/auto: "true"
 
         pod:
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: cloudflared
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 2000
+            runAsGroup: 2000
 
         containers:
           app:
             image:
               repository: docker.io/cloudflare/cloudflared
-              tag: 2024.11.1
+              tag: 2025.2.1
             args:
               - tunnel
               - --config
@@ -53,7 +45,7 @@ spec:
               TUNNEL_POST_QUANTUM: true
               TUNNEL_TRANSPORT_PROTOCOL: quic
             probes:
-              liveness:
+              liveness: &probes
                 enabled: true
                 custom: true
                 spec:
@@ -64,32 +56,36 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /ready
-                    port: 8080
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /ready
-                    port: 8080
-                  failureThreshold: 30
-                  periodSeconds: 10
+              readiness: *probes
+              startup: *probes
             resources:
               requests:
-                cpu: 6m
-                memory: 105Mi
+                cpu: 10m
+                memory: 128Mi
               limits:
-                memory: 105Mi
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
+    persistence:
+      config:
+        type: configMap
+        name: cloudflared-configmap
+        globalMounts:
+          - path: /etc/cloudflared/config/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      creds:
+        type: secret
+        name: cloudflared-secret
+        globalMounts:
+          - path: /etc/cloudflared/creds/credentials.json
+            subPath: credentials.json
+            readOnly: true
 
     service:
       app:
@@ -107,19 +103,3 @@ spec:
             path: /metrics
             interval: 1m
             scrapeTimeout: 30s
-
-    persistence:
-      config:
-        type: configMap
-        name: cloudflared-configmap
-        globalMounts:
-          - path: /etc/cloudflared/config/config.yaml
-            subPath: config.yaml
-            readOnly: true
-      creds:
-        type: secret
-        name: cloudflared-secret
-        globalMounts:
-          - path: /etc/cloudflared/creds/credentials.json
-            subPath: credentials.json
-            readOnly: true
