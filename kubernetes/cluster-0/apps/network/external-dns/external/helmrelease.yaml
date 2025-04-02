@@ -14,6 +14,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: kubernetes-sigs-external-dns
+        namespace: flux-system
       interval: 30m
   install:
     crds: CreateReplace
