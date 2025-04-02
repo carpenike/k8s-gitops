@@ -6,7 +6,7 @@ endpoint: "https://${clusterName}.${domainName}:6443"
 # renovate: depName=ghcr.io/siderolabs/installer datasource=docker
 talosVersion: v1.9.5
 # renovate: depName=ghcr.io/siderolabs/kubelet datasource=docker
-kubernetesVersion: 1.30.11
+kubernetesVersion: v1.30.11
 
 additionalApiServerCertSans: &sans
   - &talosControlplaneVip ${clusterEndpointIP}
@@ -191,29 +191,6 @@ controlPlane:
     - |-
       cluster:
         allowSchedulingOnControlPlanes: true
-        coreDNS:
-            disabled: true
-        proxy:
-          disabled: true
-        scheduler:
-          config:
-            apiVersion: kubescheduler.config.k8s.io/v1
-            kind: KubeSchedulerConfiguration
-            profiles:
-              - schedulerName: default-scheduler
-                pluginConfig:
-                  - name: PodTopologySpread
-                    args:
-                      defaultingType: List
-                      defaultConstraints:
-                        - maxSkew: 1
-                          topologyKey: kubernetes.io/hostname
-                          whenUnsatisfiable: ScheduleAnyway
-
-    # Configure cluster
-    - |-
-      cluster:
-        allowSchedulingOnMasters: true
         coreDNS:
             disabled: true
         proxy:
