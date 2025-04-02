@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: 1.14.3
+      version: 1.15.2
       sourceRef:
         kind: HelmRepository
         name: kubernetes-sigs-external-dns
@@ -62,6 +62,7 @@ spec:
       enabled: true
 
     sources:
+      - gateway-httproute
       - ingress
       - service
 
