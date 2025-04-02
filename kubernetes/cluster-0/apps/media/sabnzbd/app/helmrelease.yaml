@@ -137,23 +137,10 @@ spec:
             app:
               - path: /config/scripts
 
-    ingress:
-      app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.holthome.net
-        className: internal-nginx
-        hosts:
-          - host: sabnzbd.holthome.net
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-
     route:
       app:
         hostnames:
-          - sabnzbd.bjw-s.dev
+          - sabnzbd.holthome.net
         parentRefs:
           - name: internal
             namespace: kube-system
