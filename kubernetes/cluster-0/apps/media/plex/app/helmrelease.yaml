@@ -6,22 +6,10 @@ metadata:
   name: plex
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.2.1
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -30,17 +18,27 @@ spec:
   values:
     controllers:
       plex:
+        pod:
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+            fsGroup: 2000
+            fsGroupChangePolicy: "OnRootMismatch"
+            supplementalGroups:
+              - 44
+              - 109
+              - 65542 # gladius:external-services
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/plex
-              tag: 1.41.4.9463-630c9f557@sha256:7e169d17670c8f34bcb1f40500747b1b689c1c2ef7b80e604b968b5375e62022
+              repository: ghcr.io/home-operations/plex
+              tag: 1.41.5.9522
             env:
               TZ: America/New_York
               PLEX_ADVERTISE_URL: https://plex.holthome.net:443
-              PLEX_NO_AUTH_NETWORKS: 10.30.0.0/16
+              PLEX_NO_AUTH_NETWORKS: 10.30.0.0/16,10.244.0.0/16
             probes:
               liveness: &probes
                 enabled: true
@@ -62,68 +60,67 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities:
+                drop:
+                  - ALL
             resources:
               requests:
                 cpu: 100m
               limits:
                 memory: 16Gi
 
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [44, 10000]
-        seccompProfile: { type: RuntimeDefault }
-
     service:
       app:
         controller: plex
         ports:
           http:
-            port: 32400
-
-    ingress:
-      app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.holthome.net
-          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        className: external-nginx
-        hosts:
-          - host: "{{ .Release.Name }}.holthome.net"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+            port: &port 32400
 
     persistence:
       config:
         existingClaim: plex
-        # TODO: If setting up Plex for the first time, you'll want to add the globalMounts section
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server
+        advancedMounts:
+          plex:
+            app:
+              - path: /config/Library/Application Support/Plex Media Server
       # Separate PVC for cache to avoid backing up cache files
-      cache:
+      plex-cache:
         existingClaim: plex-cache
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server/Cache
+        advancedMounts:
+          plex:
+            app:
+              - path: /config/Library/Application Support/Plex Media Server/Cache
 
       logs:
         type: emptyDir
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server/Logs
-
-      tmp:
-        type: emptyDir
-
-      transcode:
-        type: emptyDir
+        advancedMounts:
+          plex:
+            app:
+              - path: /config/Library/Application Support/Plex Media Server/Logs
 
       nfs-nas-media:
         existingClaim: media-nfs-share-pvc
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          plex:
+            app:
+              - path: /data
+
+      transcode:
+        type: emptyDir
+        advancedMounts:
+          plex:
+            app:
+              - path: /transcode
+
+    route:
+      app:
+        hostnames:
+          - plex.holthome.net
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: plex
+                port: *port

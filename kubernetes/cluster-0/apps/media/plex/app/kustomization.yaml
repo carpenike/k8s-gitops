@@ -5,14 +5,3 @@ kind: Kustomization
 resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
-  - ../../../../components/gatus/external
-  - ../../../../components/volsync
-configMapGenerator:
-  - name: plex-loki-rules
-    files:
-      - plex.yaml=./resources/lokirule.yaml
-    options:
-      labels:
-        loki_rule: "true"
-generatorOptions:
-  disableNameSuffixHash: true

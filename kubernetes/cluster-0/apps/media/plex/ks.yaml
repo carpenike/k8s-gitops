@@ -18,6 +18,11 @@ spec:
     kind: GitRepository
     name: k8s-gitops-kubernetes
   wait: false
+  # dependsOn:
+  #   - name: onepassword-stores
+  #   - name: volsync
+  components:
+    - ../../../../components/volsync
   interval: 30m
   retryInterval: 1m
   timeout: 5m
@@ -25,27 +30,62 @@ spec:
     substitute:
       APP: *app
       GATUS_PATH: /web/index.html
+      VOLSYNC_CLAIM: plex
       VOLSYNC_CAPACITY: 75Gi
----
-# # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# ---
+# # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 # apiVersion: kustomize.toolkit.fluxcd.io/v1
 # kind: Kustomization
 # metadata:
-#   name: &app plex-tools
+#   name: &appname plex-trakt-sync
 #   namespace: flux-system
 # spec:
+#   targetNamespace: media
 #   commonMetadata:
 #     labels:
-#       app.kubernetes.io/name: *app
-#   targetNamespace: media
-#   dependsOn:
-#     - name: external-secrets-stores
-#   path: ./kubernetes/cluster-0/apps/media/plex/tools
+#       app.kubernetes.io/name: *appname
+#   interval: 30m
+#   timeout: 5m
+#   path: "./kubernetes/cluster-0/apps/media/plex/trakt-sync"
 #   prune: true
 #   sourceRef:
 #     kind: GitRepository
 #     name: k8s-gitops-kubernetes
 #   wait: false
+#   dependsOn:
+#     - name: onepassword-store
+#     - name: volsync
+#   components:
+#     - ../../../../components/volsync
+#   postBuild:
+#     substitute:
+#       APP: *appname
+#       APP_UID: "1000"
+#       APP_GID: "1000"
+#       VOLSYNC_CLAIM: plex-trakt-sync-config
+# ---
+# # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: &appname plex-image-cleanup
+#   namespace: flux-system
+# spec:
+#   targetNamespace: media
+#   commonMetadata:
+#     labels:
+#       app.kubernetes.io/name: *appname
 #   interval: 30m
-#   retryInterval: 1m
 #   timeout: 5m
+#   path: "./kubernetes/cluster-0/apps/media/plex/plex-image-cleanup"
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: k8s-gitops-kubernetes
+#   wait: false
+#   dependsOn:
+#     - name: onepassword-store
+#       namespace: external-secrets
+#   postBuild:
+#     substitute:
+#       APP: *appname
