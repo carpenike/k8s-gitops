@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: rook-ceph-cluster
-      version: v1.16.3
+      version: v1.16.5
       sourceRef:
         kind: HelmRepository
         name: rook-ceph
@@ -18,22 +18,22 @@ spec:
     monitoring:
       enabled: true
       createPrometheusRules: true
-    ingress:
-      dashboard:
-        ingressClassName: "internal-nginx"
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.holthome.net
-        host:
-          name: rook.holthome.net
-          path: "/"
     toolbox:
       enabled: true
-    configOverride: |
-      [global]
-      bdev_enable_discard = true
-      bdev_async_discard = true
-      osd_class_update_on_start = false
+    # configOverride: |
+    #   [global]
+    #   bdev_enable_discard = true
+    #   bdev_async_discard = true
+    #   osd_class_update_on_start = false
     cephClusterSpec:
+      cephConfig:
+        global:
+          bdev_enable_discard: "true" # quote
+          bdev_async_discard_threads: "1" # quote
+          osd_class_update_on_start: "false" # quote
+          device_failure_prediction_mode: local # requires mgr module
+        mgr:
+          mgr/crash/warn_recent_interval: "7200" # 2h
       crashCollector:
         disable: false
       dashboard:
@@ -43,7 +43,13 @@ spec:
         prometheusEndpoint: http://prometheus-operated.monitoring.svc.cluster.local:9090
       mgr:
         modules:
+          - name: diskprediction_local
+            enabled: true
+          - name: insights
+            enabled: true
           - name: pg_autoscaler
+            enabled: true
+          - name: rook
             enabled: true
       network:
         provider: host
