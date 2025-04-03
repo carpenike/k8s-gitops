@@ -4,4 +4,4 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - ./helmrelease.yaml
-  - ./pki.yaml
+  # - ./pki.yaml
