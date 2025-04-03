@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -7,16 +7,10 @@ metadata:
   namespace: home
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.5.1
-      interval: 30m
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
   values:
     controllers:
       home-assistant:
@@ -31,24 +25,28 @@ spec:
                 "namespace": "network",
                 "ips": ["10.30.10.15/16"]
               }]
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65533
+            fsGroup: 65533
+            fsGroupChangePolicy: OnRootMismatch
 
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/home-assistant
-              tag: 2025.3.1@sha256:a5377eae2e414adb58413dbcf29cf9b08350ad33d123dfdbc3eaa94b44f7443c
-
+              repository: ghcr.io/home-operations/home-assistant
+              tag: 2025.4.0
+            env:
+              VENV_FOLDER: /venv
             envFrom:
               - secretRef:
                   name: home-assistant-secret
-
             resources:
               requests:
                 cpu: 47m
                 memory: 1254M
               limits:
                 memory: 1254M
-
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -59,7 +57,7 @@ spec:
           code-server:
             image:
               repository: ghcr.io/coder/code-server
-              tag: 4.93.1@sha256:c69e398d1b64589b3b77a7becfd03f4ec524982def20e6bffbb51b1b839e72ba
+              tag: 4.98.2@sha256:9ed588a05d4e81aa464e753a409bc3b2b93267323d1c3975fbddf6f9aef84c26
             args: [
               "--auth", "none",
               "--disable-telemetry", "--disable-update-check",
@@ -69,7 +67,7 @@ spec:
               "/config"
             ]
             env:
-              HASS_SERVER: http://home-assistant:8123
+              HASS_SERVER: http://localhost:8123
               HASS_TOKEN:
                 valueFrom:
                   secretKeyRef:
@@ -143,21 +141,13 @@ spec:
               limits:
                 memory: 512Mi
 
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
-
     service:
       app:
         controller: home-assistant
         ports:
           http:
             port: 8123
+            primary: true
           code-server:
             port: 12321
           music-server:
@@ -166,6 +156,45 @@ spec:
             port: 10300
           openwakeword:
             port: 10400
+
+    persistence:
+      config:
+        existingClaim: home-assistant-config
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /config
+            code-server:
+              - path: /config
+            music-assistant:
+              - path: /data
+      hass-cache:
+        existingClaim: hass-cache
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /venv
+                subPath: hass-venv
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /config/logs
+      tts:
+        type: emptyDir
+        globalMounts:
+          - path: /config/tts
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /tmp
+                subPath: hass-tmp
+            code-server:
+              - path: /tmp
+                subPath: code-server-tmp
+              - path: /nonexistent
+                subPath: nonexistent
 
     ingress:
       app:
@@ -199,34 +228,39 @@ spec:
                   identifier: app
                   port: code-server
 
-    persistence:
-      config:
-        existingClaim: home-assistant-config
-        advancedMounts:
-          home-assistant:
-            app:
-              - path: /config
-            code-server:
-              - path: /config
-            music-assistant:
-              - path: /data
-      logs:
-        type: emptyDir
-        globalMounts:
-          - path: /config/logs
-      tts:
-        type: emptyDir
-        globalMounts:
-          - path: /config/tts
-      tmp:
-        type: emptyDir
-        advancedMounts:
-          home-assistant:
-            app:
-              - path: /tmp
-                subPath: hass-tmp
-            code-server:
-              - path: /tmp
-                subPath: code-server-tmp
-              - path: /nonexistent
-                subPath: nonexistent
+    route:
+      app:
+        hostnames:
+          - ha.holthome.net
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /music/
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+            backendRefs:
+              - name: home-assistant
+                port: 8095
+          - backendRefs:
+              - name: home-assistant
+                port: 8123
+      code-server:
+        hostnames:
+          - ha-code.holthome.net
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: home-assistant
+                port: 12321

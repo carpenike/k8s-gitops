@@ -23,10 +23,12 @@ spec:
     - name: rook-ceph-cluster
     - name: volsync
     - name: external-secrets-stores
+  components:
+    - ../../../../components/volsync
   postBuild:
     substitute:
       APP: *appname
-      APP_UID: "0"
-      APP_GID: "0"
+      APP_UID: "65534"
+      APP_GID: "65534"
       VOLSYNC_CLAIM: home-assistant-config
       VOLSYNC_CAPACITY: 5Gi
