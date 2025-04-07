@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sct/overseerr
-              tag: develop@sha256:568f126f69663cf764d12bf19ba5a250be2246cca49852e556f363d0acac2603
+              tag: develop@sha256:94c0a376d07ce969a5f14cb17dd68395d6cd17895ec2eaf048dc1bcd052305bf
             env:
               TZ: America/New_York
               LOG_LEVEL: "info"
