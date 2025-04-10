@@ -82,7 +82,7 @@ spec:
           music-assistant:
             image:
               repository: ghcr.io/music-assistant/server
-              tag: 2.3.2@sha256:2e6f769f0a9863acea3a39d3207e41b39f325d3f36536851cc7e0509272d8a19
+              tag: 2.5.1@sha256:e59cf4118e72e1fe9e822eb1c043ee4dd43343d2bd588f59d5194183f0a54d7d
             probes:
               liveness:
                 enabled: false
