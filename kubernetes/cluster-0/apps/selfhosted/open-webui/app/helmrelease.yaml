@@ -33,7 +33,7 @@ spec:
           app:
             image:
               repository: ghcr.io/open-webui/open-webui
-              tag: main@sha256:f3d3d5c1358f1cd511e59ac951be032e4ef8f853f37cb7af33a800b976be6dc2
+              tag: main@sha256:3039364e82311729e0737bf9bdd877e6b0aa84a02a7b4f220506b28c8d3181cb
             env:
               OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
               # CHROMA_DB_IMPL: postgres
