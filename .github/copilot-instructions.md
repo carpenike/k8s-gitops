@@ -14,6 +14,7 @@ This repository maintains modular instruction files for different aspects of the
 - [`external-secrets.instructions.md`](instructions/external-secrets.instructions.md): External Secrets with 1Password
 - [`externaldns.instructions.md`](instructions/externaldns.instructions.md): ExternalDNS with Cloudflare and Bind
 - [`yaml-schemas.instructions.md`](instructions/yaml-schemas.instructions.md): YAML Schema Validation Guidelines
+- [`volsync.instructions.md`](instructions/volsync.instructions.md): VolSync integration for persistent storage
 
 > **Note**: The guidance from these files is incorporated into the sections below. When working with specific components, refer to the relevant sections in this file.
 
@@ -28,6 +29,7 @@ The following sections contain file-specific guidance. When helping with code in
 - **For Secret Management**: Apply the secret management practices when working with any secret-related files.
 - **For External Secrets**: Apply the External Secrets with 1Password practices when working with `externalsecret.yaml` files.
 - **For DNS Management**: Apply the ExternalDNS practices when working with Cloudflare (external) and Bind (internal) DNS configuration.
+- **For Persistent Storage**: Apply the VolSync integration practices when working with applications that need persistent storage.
 
 ## Component-Specific Guidelines
 

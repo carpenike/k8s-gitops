@@ -10,24 +10,53 @@ These instructions should be applied when working with Kubernetes application ma
 
 ## Application Structure
 
-1. Place each application in its own directory under `/kubernetes/<cluster>/apps/<namespace>/<app-name>/`.
-
-2. Create a kustomization.yaml file for each application:
-   ```yaml
-   apiVersion: kustomize.config.k8s.io/v1beta1
-   kind: Kustomization
-   resources:
-     - helm-release.yaml  # Or other resource files
+1. Place each application in its own directory under `/kubernetes/<cluster>/apps/<namespace>/<app-name>/`:
+   ```
+   kubernetes/<cluster>/apps/<namespace>/<app-name>/
+   ├── app/                   # Directory containing application resources
+   │   ├── externalsecret.yaml  # If using secrets
+   │   ├── helmrelease.yaml     # The main Helm release definition
+   │   ├── kustomization.yaml   # References all resources and templates
+   │   └── pvc.yaml             # If using additional persistent storage
+   └── ks.yaml                  # Flux Kustomization resource
    ```
 
-3. Include the application in the namespace kustomization.yaml:
+2. The app directory's kustomization.yaml should include all resources and templates:
    ```yaml
    apiVersion: kustomize.config.k8s.io/v1beta1
    kind: Kustomization
    resources:
-     - namespace.yaml
-     - app1/
-     - app2/
+     - ./helmrelease.yaml
+     - ./pvc.yaml             # If using additional volumes
+     - ./externalsecret.yaml  # If using secrets
+     - ../../../../templates/volsync  # If using volsync for backups
+     - ../../../../templates/gatus/guarded  # If using monitoring
+   ```
+
+3. Create a Flux Kustomization (ks.yaml) to reference the app directory:
+   ```yaml
+   apiVersion: kustomize.toolkit.fluxcd.io/v1
+   kind: Kustomization
+   metadata:
+     name: app-name
+     namespace: flux-system
+   spec:
+     targetNamespace: namespace-name
+     commonMetadata:
+       labels:
+         app.kubernetes.io/name: app-name
+     path: ./kubernetes/cluster-0/apps/namespace-name/app-name/app
+     prune: true
+     sourceRef:
+       kind: GitRepository
+       name: k8s-gitops-kubernetes
+     dependsOn:
+       - name: rook-ceph-cluster  # For storage
+       - name: volsync           # For backups
+     postBuild:
+       substitute:
+         APP: app-name
+         VOLSYNC_CAPACITY: 10Gi
    ```
 
 ## Common Application Patterns

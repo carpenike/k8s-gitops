@@ -140,3 +140,19 @@ These instructions should be applied when working with HelmRelease resources, in
          nginx.ingress.kubernetes.io/auth-url: https://auth.${SECRET_DOMAIN}/oauth2/auth?allowed_groups=admin
          nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start?rd=$scheme://$best_http_host$request_uri
    ```
+
+## Schema Validation
+
+Always include a schema reference at the top of the HelmRelease file for validation and improved editor support:
+
+For bjw-s app-template charts:
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+```
+
+For standard HelmRelease resources:
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta2.json
+```
+
+This schema validation helps catch errors early and provides documentation about available options directly in your editor.
