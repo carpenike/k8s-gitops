@@ -22,7 +22,7 @@ spec:
 
   values:
     controllers:
-      main:
+      authentik-redis:
         annotations:
           secret.reloader.stakater.com/reload: authentik-redis-secret
 
@@ -30,7 +30,7 @@ spec:
           automountServiceAccountToken: false
 
         containers:
-          main:
+          app:
             image:
               repository: public.ecr.aws/docker/library/redis
               tag: 7.2.4
@@ -50,15 +50,17 @@ spec:
             resources:
               requests:
                 cpu: 5m
-                memory: 128M
+                memory: 128Mi
               limits:
-                memory: 256M
+                memory: 256Mi
 
     service:
-      main:
+      authentik-redis:
+        controller: authentik-redis
         ports:
           http:
             enabled: false
+            port: 80
           redis:
             enabled: true
             port: *port
