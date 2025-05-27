@@ -35,7 +35,7 @@ These instructions should be applied when working with any YAML configuration fi
 
    - **For standard Kustomization files**:
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/openapi/kustomization_schema.json
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1beta1.json
      ```
 
    - **For FluxCD Kustomization resources (ks.yaml):**
@@ -248,7 +248,7 @@ spec:
 #### Kustomization Example
 ```yaml
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/openapi/kustomization_schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1beta1.json
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:  # Schema validates this is required
