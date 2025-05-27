@@ -5,7 +5,7 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../templates/volsync
+  - ../../../../components/volsync
   - ../../../../templates/gatus/guarded
 configMapGenerator:
   - name: frigate-configmap
