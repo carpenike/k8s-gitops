@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/volsync
   path: ./kubernetes/cluster-0/apps/media/bazarr/app
   prune: true
   sourceRef:
