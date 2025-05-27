@@ -1,5 +1,13 @@
 # GitHub Copilot Instructions for k8s-gitops Repository
 
+> **YAML Schema Validation Guidance:**
+> For authoritative schema URLs and best practices on schema validation, see [.github/instructions/yaml-schemas.instructions.md](instructions/yaml-schemas.instructions.md). This file is the single source of truth for schema references and validation patterns. Always follow its guidance when working with YAML manifests in this repository.
+
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Always use the latest authoritative schema URLs for each manifest type (see YAML Schema Validation section).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file for best IDE compatibility.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## Modular Instruction Files
 
 This repository maintains modular instruction files for different aspects of the GitOps workflow in `.github/instructions/`. These files serve as detailed reference documentation for humans, while this main file contains all the critical information that GitHub Copilot needs.
@@ -191,70 +199,6 @@ When working with ExternalDNS:
 - Use YAML anchors for consistent hostname patterns
 - For Cloudflare, configure `--cloudflare-proxied` when appropriate
 - For Bind, configure proper TSIG authentication for secure updates
-
-## YAML Schema Validation
-
-When creating or modifying YAML configuration files in this repository, always include appropriate schema validation references:
-
-1. **For bjw-s app-template HelmRelease resources**:
-   ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-   ```
-
-2. **For standard FluxCD HelmRelease resources**:
-   ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta2.json
-   ```
-
-3. **For standard Kustomization files**:
-   ```yaml
-   # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-   ```
-
-4. **For FluxCD Kustomization resources (ks.yaml)**:
-   ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
-   ```
-
-5. **For Namespace resources**:
-   ```yaml
-   # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/namespace.json
-   ```
-
-6. **For ExternalSecret resources**:
-   ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/external-secrets.io/externalsecret_v1beta1.json
-   ```
-
-Always place schema references after the `---` document separator at the top of the file and before any other content.
-
-### Validating Schema Compliance
-
-When generating or modifying YAML files, always validate that the content adheres to the schema:
-
-1. **Ensure mandatory fields are provided**:
-   - Always include required fields with appropriate values
-   - For HelmRelease resources, always pin chart versions (e.g., `version: "1.2.3"`)
-   - For Kustomization resources, always specify required resources
-
-2. **Use correct types for values**:
-   - Numbers should be unquoted: `replicas: 3` (not `replicas: "3"`)
-   - Booleans should be literal `true` or `false` (not strings)
-   - Resource quantities should use Kubernetes format: `memory: 256Mi`
-
-3. **Fix validation errors systematically**:
-   - Address structural errors first (missing required fields)
-   - Then fix type errors (incorrect data types)
-   - Finally, resolve semantic errors (invalid values)
-
-4. **Follow schema-specific patterns**:
-   - For HelmRelease resources, use the proper chart reference structure
-   - For Kustomization resources, use valid path and sourceRef configurations
-   - For ExternalSecrets, provide proper secretStoreRef and target fields
-
-5. **Verify with additional tools**:
-   - Use `flux validate` for FluxCD resources
-   - Use `kubectl apply --dry-run=server` for Kubernetes resources
 
 ## Repository Overview
 

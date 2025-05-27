@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for Flux Configuration
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see YAML Schema Validation Guidelines).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with FluxCD configuration files, including:
@@ -70,3 +75,14 @@ These instructions should be applied when working with FluxCD configuration file
    - Place sources in `/kubernetes/<cluster>/flux/repositories/`
    - Place kustomizations in `/kubernetes/<cluster>/flux/`
    - Group repositories by type (helm, git, oci)
+
+## YAML Schema Validation Guidelines
+
+- **Flux Kustomization (ks.yaml):**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/kustomize-controller/main/config/crd/bases/kustomize.toolkit.fluxcd.io_kustomizations.yaml
+  ```
+- **HelmRelease:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
+  ```

@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for External Secrets with 1Password
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with external secrets management, including:
@@ -12,6 +17,7 @@ These instructions should be applied when working with external secrets manageme
 
 1. Use the correct API version:
    ```yaml
+   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
    apiVersion: external-secrets.io/v1beta1
    kind: ExternalSecret
    ```
@@ -102,6 +108,7 @@ spec:
 
 1. For application secrets:
    ```yaml
+   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
    apiVersion: external-secrets.io/v1beta1
    kind: ExternalSecret
    metadata:
@@ -121,6 +128,7 @@ spec:
 
 2. For database credentials:
    ```yaml
+   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
    apiVersion: external-secrets.io/v1beta1
    kind: ExternalSecret
    metadata:
@@ -147,6 +155,7 @@ spec:
 
 3. For API tokens and keys:
    ```yaml
+   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
    apiVersion: external-secrets.io/v1beta1
    kind: ExternalSecret
    metadata:
@@ -166,3 +175,10 @@ spec:
          remoteRef:
            key: op://API-Keys/app-name/api-secret
    ```
+
+## YAML Schema Validation Guidelines
+
+- **ExternalSecret:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
+  ```

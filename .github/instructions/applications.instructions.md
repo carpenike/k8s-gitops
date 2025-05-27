@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for Kubernetes Applications
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with Kubernetes application manifests, including:
@@ -63,6 +68,7 @@ These instructions should be applied when working with Kubernetes application ma
 
 1. For namespaces, follow this pattern:
    ```yaml
+   # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.Namespace
    apiVersion: v1
    kind: Namespace
    metadata:
@@ -73,6 +79,7 @@ These instructions should be applied when working with Kubernetes application ma
 
 2. For PersistentVolumeClaims:
    ```yaml
+   # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.PersistentVolumeClaim
    apiVersion: v1
    kind: PersistentVolumeClaim
    metadata:
@@ -205,3 +212,14 @@ These instructions should be applied when working with Kubernetes application ma
          initialDelaySeconds: 10
          periodSeconds: 10
    ```
+
+## YAML Schema Validation Guidelines
+
+- **Namespace:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.Namespace
+  ```
+- **PersistentVolumeClaim:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.PersistentVolumeClaim
+  ```

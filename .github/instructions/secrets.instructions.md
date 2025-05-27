@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for Secrets Management
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with secrets and sensitive data, including:
@@ -142,3 +147,14 @@ These instructions should be applied when working with secrets and sensitive dat
            name: app-secret
            key: password
    ```
+
+## YAML Schema Validation Guidelines
+
+- **Secret:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.Secret
+  ```
+- **ExternalSecret:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
+  ```

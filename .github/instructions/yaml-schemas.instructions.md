@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for YAML Schema Validation
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with any YAML configuration files in the repository, including:
@@ -20,32 +25,67 @@ These instructions should be applied when working with any YAML configuration fi
 
    - **For bjw-s app-template HelmRelease resources**:
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/library/common/crds/helmrelease.yaml
      ```
 
    - **For standard FluxCD HelmRelease resources**:
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta2.json
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
      ```
 
    - **For standard Kustomization files**:
      ```yaml
-     # yaml-language-server: $schema=https://json.schemastore.org/kustomization
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/openapi/kustomization_schema.json
      ```
 
-   - **For FluxCD Kustomization resources (ks.yaml)**:
+   - **For FluxCD Kustomization resources (ks.yaml):**
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/kustomize-controller/main/config/crd/bases/kustomize.toolkit.fluxcd.io_kustomizations.yaml
      ```
 
    - **For Namespace resources**:
      ```yaml
-     # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/namespace.json
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.Namespace
      ```
 
    - **For ExternalSecret resources**:
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/external-secrets.io/externalsecret_v1beta1.json
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
+     ```
+
+   - **For Secret resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.Secret
+     ```
+
+   - **For PersistentVolumeClaim resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.PersistentVolumeClaim
+     ```
+
+   - **For ServiceMonitor resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+     ```
+
+   - **For ConfigMap resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.ConfigMap
+     ```
+
+   - **For NetworkPolicy resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/networking/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.networking.v1.NetworkPolicy
+     ```
+
+   - **For Role resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/rbac/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.rbac.v1.Role
+     ```
+
+   - **For RoleBinding resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/rbac/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.rbac.v1.RoleBinding
      ```
 
 3. Schema placement:
@@ -149,7 +189,7 @@ When working with schema-validated YAML files:
 For a bjw-s app-template HelmRelease:
 ```yaml
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/library/common/crds/helmrelease.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -164,7 +204,7 @@ spec:
 #### HelmRelease Example
 ```yaml
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/library/common/crds/helmrelease.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -208,7 +248,7 @@ spec:
 #### Kustomization Example
 ```yaml
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/openapi/kustomization_schema.json
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:  # Schema validates this is required
@@ -221,7 +261,7 @@ namespace: app-namespace  # Schema validates this field
 #### ExternalSecret Example
 ```yaml
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/external-secrets.io/externalsecret_v1beta1.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -244,7 +284,7 @@ spec:
 For a standard Kustomization:
 ```yaml
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/openapi/kustomization_schema.json
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for HelmRelease Resources
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with HelmRelease resources, including:
@@ -140,6 +145,17 @@ These instructions should be applied when working with HelmRelease resources, in
          nginx.ingress.kubernetes.io/auth-url: https://auth.${SECRET_DOMAIN}/oauth2/auth?allowed_groups=admin
          nginx.ingress.kubernetes.io/auth-signin: https://auth.${SECRET_DOMAIN}/oauth2/start?rd=$scheme://$best_http_host$request_uri
    ```
+
+## YAML Schema Validation Guidelines
+
+- **HelmRelease (bjw-s app-template):**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/library/common/crds/helmrelease.yaml
+  ```
+- **HelmRelease (standard/other charts):**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
+  ```
 
 ## Schema Validation
 

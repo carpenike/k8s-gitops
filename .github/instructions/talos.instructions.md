@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for Talos Configuration
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with Talos OS configuration files, including:
@@ -115,3 +120,10 @@ These instructions should be applied when working with Talos OS configuration fi
        value: value
        effect: NoSchedule|NoExecute|PreferNoSchedule
    ```
+
+## YAML Schema Validation Guidelines
+
+- **Talos Config:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+  ```

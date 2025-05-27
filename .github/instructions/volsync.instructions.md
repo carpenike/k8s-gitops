@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for VolSync Integration
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with persistent storage in applications, including:
@@ -83,6 +88,7 @@ When an application needs multiple PVCs:
 
 ```yaml
 # In app/pvc.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -127,3 +133,10 @@ persistence:
 4. Use `ceph-block` and ReadWriteOnce for most application config volumes
 5. Use `ceph-filesystem` and ReadWriteMany for volumes that need shared access
 6. Always include VolSync in the dependsOn list for applications with persistent storage
+
+## YAML Schema Validation Guidelines
+
+- **PersistentVolumeClaim:**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/kubernetes/api/master/core/v1/openapi-spec/swagger.json#/definitions/io.k8s.api.core.v1.PersistentVolumeClaim
+  ```

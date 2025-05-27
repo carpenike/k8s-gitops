@@ -1,5 +1,10 @@
 # GitHub Copilot Instructions for ExternalDNS with Cloudflare and Bind
 
+> **Schema Reference Best Practice (last updated: 2025-05-27):**
+> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Place schema references as a comment before the document separator (---) at the top of each YAML file.
+> - Review and update schema URLs regularly as upstream projects change.
+
 ## When to Apply These Instructions
 
 These instructions should be applied when working with ExternalDNS configuration, including:
