@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -18,8 +18,14 @@ spec:
       interval: 30m
   install:
     crds: Skip
+    remediation:
+      retries: 3
   upgrade:
     crds: Skip
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
   values:
     crds:
       enabled: false
