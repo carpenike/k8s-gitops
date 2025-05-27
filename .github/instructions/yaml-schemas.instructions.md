@@ -25,7 +25,7 @@ These instructions should be applied when working with any YAML configuration fi
 
    - **For bjw-s app-template HelmRelease resources**:
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/library/common/crds/helmrelease.yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
      ```
 
    - **For standard FluxCD HelmRelease resources**:
@@ -33,15 +33,17 @@ These instructions should be applied when working with any YAML configuration fi
      # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
      ```
 
-   - **For standard Kustomization files**:
+   - **For standard Kustomization files** (native kustomize configuration):
      ```yaml
      # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1beta1.json
      ```
+     > **Note:** These files should always use `apiVersion: kustomize.config.k8s.io/v1beta1`
 
-   - **For FluxCD Kustomization resources (ks.yaml):**
+   - **For FluxCD Kustomization resources** (Flux CRD, usually in ks.yaml files):
      ```yaml
      # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/kustomize-controller/main/config/crd/bases/kustomize.toolkit.fluxcd.io_kustomizations.yaml
      ```
+     > **Note:** These files should always use `apiVersion: kustomize.toolkit.fluxcd.io/v1`
 
    - **For Namespace resources**:
      ```yaml
@@ -66,6 +68,16 @@ These instructions should be applied when working with any YAML configuration fi
    - **For ServiceMonitor resources**:
      ```yaml
      # yaml-language-server: $schema=https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+     ```
+
+   - **For PrometheusRule resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+     ```
+
+   - **For ScrapeConfig resources**:
+     ```yaml
+     # yaml-language-server: $schema=https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
      ```
 
    - **For ConfigMap resources**:
@@ -181,6 +193,55 @@ When working with schema-validated YAML files:
 | Pattern error | `should match pattern...` | Ensure formats match requirements, e.g., semantic versions like `1.2.3` |
 | Format error | `should match format "hostname"` | Ensure hostnames follow RFC 1123 format |
 | Array item error | `should have required property` | Ensure each array item has all required fields |
+
+## Schema Validation Challenges and Solutions
+
+When working with YAML schemas in Kubernetes manifests, you may encounter some specific challenges:
+
+1. **App-template Schema vs. Standard HelmRelease Schema**:
+   - The app-template specific schema is more restrictive than the standard HelmRelease schema
+   - When using complex app-template patterns with YAML anchors, you might encounter validation errors
+   - If you encounter schema validation errors with the app-template schema, consider:
+     - Updating ingress definitions to use `service.identifier` instead of `service.name`
+     - Adding required `pathType` fields to ingress paths
+     - Avoiding YAML anchors in certain contexts or replacing them with direct values
+     - In some cases, switching to the standard HelmRelease schema if app-template patterns cause validation issues
+
+2. **HelmRelease with OCIRepository Validation**:
+   - When converting from HelmRepository to OCIRepository for app-template HelmReleases:
+     - Remove the `chart.spec` section and replace with `chartRef`
+     - Use `kind: OCIRepository` in the chartRef
+     - Remove the chart version as it's specified in the OCIRepository resource
+     ```yaml
+     # From:
+     chart:
+       spec:
+         chart: app-template
+         version: 3.5.1
+         sourceRef:
+           kind: HelmRepository
+           name: bjw-s
+           namespace: flux-system
+
+     # To:
+     chartRef:
+       kind: OCIRepository
+       name: app-template
+       namespace: flux-system
+     ```
+
+3. **Remediation Settings for Reliability**:
+   - Always include remediation settings for better reliability:
+     ```yaml
+     install:
+       remediation:
+         retries: 3
+     upgrade:
+       cleanupOnFail: true
+       remediation:
+         strategy: rollback
+         retries: 3
+     ```
 
 ## Example Usage
 

@@ -17,8 +17,8 @@ These instructions should be applied when working with external secrets manageme
 
 1. Use the correct API version:
    ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
-   apiVersion: external-secrets.io/v1beta1
+   # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+   apiVersion: external-secrets.io/v1
    kind: ExternalSecret
    ```
 
@@ -108,8 +108,8 @@ spec:
 
 1. For application secrets:
    ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
-   apiVersion: external-secrets.io/v1beta1
+   # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+   apiVersion: external-secrets.io/v1
    kind: ExternalSecret
    metadata:
      name: app-name
@@ -128,8 +128,8 @@ spec:
 
 2. For database credentials:
    ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
-   apiVersion: external-secrets.io/v1beta1
+   # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+   apiVersion: external-secrets.io/v1
    kind: ExternalSecret
    metadata:
      name: app-db
@@ -155,8 +155,8 @@ spec:
 
 3. For API tokens and keys:
    ```yaml
-   # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
-   apiVersion: external-secrets.io/v1beta1
+   # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+   apiVersion: external-secrets.io/v1
    kind: ExternalSecret
    metadata:
      name: app-api
@@ -180,5 +180,5 @@ spec:
 
 - **ExternalSecret:**
   ```yaml
-  # yaml-language-server: $schema=https://raw.githubusercontent.com/external-secrets/external-secrets/main/config/crds/bases/external-secrets.io_externalsecrets.yaml
+  # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
   ```

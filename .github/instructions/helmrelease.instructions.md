@@ -1,7 +1,16 @@
 # GitHub Copilot Instructions for HelmRelease Resources
 
 > **Schema Reference Best Practice (last updated: 2025-05-27):**
-> - Use the latest authoritative schema URLs for each manifest type (see below).
+> - Use the latest authoritative schema URLs fo## YAML Schema Validation Guidelines
+
+- **HelmRelease (bjw-s app-template):**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+  ```
+- **HelmRelease (standard/other charts):**
+  ```yaml
+  # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
+  ```ifest type (see below).
 > - Place schema references as a comment before the document separator (---) at the top of each YAML file.
 > - Review and update schema URLs regularly as upstream projects change.
 
@@ -46,6 +55,27 @@ These instructions should be applied when working with HelmRelease resources, in
      upgrade:
        remediation:
          retries: 5
+     values:
+       # Application values
+   ```
+
+4. For app-template charts using OCIRepository (preferred modern approach):
+   ```yaml
+   spec:
+     interval: 15m
+     chartRef:
+       kind: OCIRepository
+       name: app-template
+       namespace: flux-system
+     install:
+       createNamespace: true
+       remediation:
+         retries: 3
+     upgrade:
+       cleanupOnFail: true
+       remediation:
+         strategy: rollback
+         retries: 3
      values:
        # Application values
    ```

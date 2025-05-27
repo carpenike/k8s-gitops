@@ -4,6 +4,11 @@
 > - Use the latest authoritative schema URLs for each manifest type (see YAML Schema Validation Guidelines).
 > - Place schema references as a comment before the document separator (---) at the top of each YAML file.
 > - Review and update schema URLs regularly as upstream projects change.
+> 
+> **API Version Update (May 2025):**
+> - Source controller resources (GitRepository, HelmRepository, OCIRepository) should use `source.toolkit.fluxcd.io/v1`
+> - HelmRelease resources should continue using `helm.toolkit.fluxcd.io/v2beta2` (v2 GA not yet released)
+> - Prometheus monitoring resources (PrometheusRule, ScrapeConfig) should use `monitoring.coreos.com/v1`
 
 ## When to Apply These Instructions
 
@@ -15,10 +20,17 @@ These instructions should be applied when working with FluxCD configuration file
 
 ## Flux Configuration Best Practices
 
-1. Use the correct API versions:
-   - `kustomize.toolkit.fluxcd.io/v1` for Kustomization resources
-   - `helm.toolkit.fluxcd.io/v2beta2` for HelmRelease resources
-   - `source.toolkit.fluxcd.io/v1` for source controller resources
+1. Use the correct API versions (Updated May 2025):
+   - `kustomize.toolkit.fluxcd.io/v1` for Flux Kustomization CRD resources
+   - `helm.toolkit.fluxcd.io/v2beta2` for HelmRelease resources (v2beta2 is current stable, v2 GA not yet released)
+   - `source.toolkit.fluxcd.io/v1` for source controller resources (GitRepository, HelmRepository, OCIRepository)
+
+   > **IMPORTANT: Flux Kustomization vs Native Kustomize**
+   > - Files with `kind: Kustomization` and `apiVersion: kustomize.toolkit.fluxcd.io/v1` are Flux Kustomization CRDs
+   > - Files named `kustomization.yaml` with no `kind` field or with `kind: Kustomization` and `apiVersion: kustomize.config.k8s.io/v1beta1` are native kustomize files
+   > - Do not confuse these two types; they serve different purposes and require different API versions
+   > - Flux Kustomization CRDs tell Flux what to reconcile
+   > - Native kustomization.yaml files tell kustomize how to build manifests
 
 2. Always specify reconciliation intervals:
    - 10m for cluster-level Kustomizations
