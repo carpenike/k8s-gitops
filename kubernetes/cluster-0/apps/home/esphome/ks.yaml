@@ -11,6 +11,8 @@ spec:
     labels:
       app.kubernetes.io/name: *appname
   interval: 10m
+  components:
+    - ../../../../components/volsync
   path: "./kubernetes/cluster-0/apps/home/esphome/app"
   prune: true
   sourceRef:

@@ -5,4 +5,3 @@ namespace: home
 resources:
   - ./helmrelease.yaml
   - ./externalsecret.yaml
-  - ../../../../components/volsync

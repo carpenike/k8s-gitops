@@ -11,6 +11,8 @@ spec:
     labels:
       app.kubernetes.io/name: *appname
   interval: 30m
+  components:
+    - ../../../../components/volsync
   path: ./kubernetes/cluster-0/apps/home/frigate/app
   prune: true
   sourceRef:

@@ -12,6 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: volsync
+  components:
+    - ../../../../components/volsync
   path: ./kubernetes/cluster-0/apps/media/overseerr/app
   prune: true
   sourceRef:

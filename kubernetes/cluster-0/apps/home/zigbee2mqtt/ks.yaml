@@ -12,6 +12,8 @@ spec:
       app.kubernetes.io/name: *appname
   interval: 30m
   timeout: 5m
+  components:
+    - ../../../../components/volsync
   path: "./kubernetes/cluster-0/apps/home/zigbee2mqtt/app"
   prune: true
   sourceRef:
