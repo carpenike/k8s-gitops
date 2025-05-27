@@ -1,5 +1,5 @@
 ---
-apiVersion: monitoring.coreos.com/v1alpha1
+apiVersion: monitoring.coreos.com/v1
 kind: ScrapeConfig
 metadata:
   name: &name node-exporter
