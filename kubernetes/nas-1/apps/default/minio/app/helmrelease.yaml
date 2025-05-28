@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -30,6 +31,14 @@ spec:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups:
+              - 100
         containers:
           main:
             image:
@@ -59,17 +68,10 @@ spec:
               readiness: *probe
               startup:
                 enabled: false
-            podSecurityContext:
-              runAsUser: 568
-              runAsGroup: 568
-              fsGroup: 568
-              fsGroupChangePolicy: OnRootMismatch
-              supplementalGroups:
-                - 100
 
     service:
       main:
-        enabled: true
+        controller: main
         ports:
           http:
             port: 9001
@@ -79,7 +81,7 @@ spec:
 
     serviceMonitor:
       main:
-        enabled: true
+        serviceName: main
         endpoints:
           - port: s3
             scheme: http
@@ -96,14 +98,14 @@ spec:
             paths:
               - path: /
                 service:
-                  name: main
-                  port: http
+                  identifier: main
+                  port: 9001
           - host: &host2 minio-s3.holthome.net
             paths:
               - path: /
                 service:
-                  name: main
-                  port: s3
+                  identifier: main
+                  port: 9000
 
     persistence:
       data:
