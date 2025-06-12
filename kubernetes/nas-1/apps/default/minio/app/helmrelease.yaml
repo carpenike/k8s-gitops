@@ -83,7 +83,7 @@ spec:
     serviceMonitor:
       main:
         enabled: true
-        serviceName: main
+        serviceName: minio
         endpoints:
           - port: s3
             scheme: http
@@ -101,15 +101,15 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
-                  port: 9001
+                  identifier: main
+                  port: http
           - host: &host2 minio-s3.holthome.net
             paths:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
-                  port: 9000
+                  identifier: main
+                  port: s3
 
     persistence:
       data:
