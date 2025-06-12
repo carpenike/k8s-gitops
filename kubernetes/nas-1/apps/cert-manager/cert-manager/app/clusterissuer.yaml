@@ -13,7 +13,7 @@ spec:
       - dns01:
           cloudflare:
             apiTokenSecretRef:
-              name: cloudflare-issuer-secret
+              name: cloudflare-api-token
               key: CLOUDFLARE_DNS_TOKEN
         selector:
           dnsZones: ["holthome.net"]
