@@ -30,5 +30,5 @@ spec:
     kind: GitRepository
     name: k8s-gitops-kubernetes
     namespace: flux-system
-  targetNamespace: *namespace
+  # targetNamespace: *namespace
   timeout: 5m
