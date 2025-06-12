@@ -30,6 +30,6 @@ spec:
     kind: GitRepository
     name: k8s-gitops-kubernetes
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: cert-manager
   timeout: 5m
   wait: true
