@@ -18,4 +18,4 @@ spec:
     name: k8s-gitops-kubernetes
   wait: false
   dependsOn:
-    - name: cluster-apps-cert-manager-issuers
+    - name: cert-manager
