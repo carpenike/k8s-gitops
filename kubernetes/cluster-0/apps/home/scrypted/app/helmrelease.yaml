@@ -1,75 +1,101 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/helm-controller/main/config/crd/bases/helm.toolkit.fluxcd.io_helmreleases.yaml
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: scrypted
+  annotations:
+    meta.helm.sh/release-name: scrypted
+    meta.helm.sh/release-namespace: home
 spec:
   interval: 30m
-  chartRef:
-    kind: OCIRepository
-    name: app-template
-    namespace: flux-system
-
+  chart:
+    spec:
+      chart: app-template
+      version: 4.0.1  # Pinning chart version for deterministic deploys
+      sourceRef:
+        kind: OCIRepository
+        name: app-template
+        namespace: flux-system
   values:
     controllers:
-      scrypted:
+      main:  # Changed from 'scrypted' to 'main' for convention
         annotations:
           reloader.stakater.com/auto: "true"
-
+          # Documenting the privileged requirement
+          security.holthome.net/privileged-reason: "Required by Scrypted maintainer as of May 2024 for hardware and network device access"
         pod:
           annotations:
+            # Using Multus for static IP on IoT/Wireless network
             k8s.v1.cni.cncf.io/networks: |
               [{
                 "name":"multus-wireless",
                 "namespace": "network",
                 "ips": ["10.30.10.17/16"]
               }]
-
           securityContext:
-            supplementalGroups:
-              - 65542 # gladius:external-services
-
+            # GID 65542 corresponds to 'gladius:external-services' group for NFS permissions
+            supplementalGroups: [65542]
         containers:
           app:
             image:
               repository: ghcr.io/koush/scrypted
               tag: v0.123.24-jammy-full
+            # Re-enabling probes with proper configuration
             probes:
-              liveness:
-                enabled: false
-              readiness:
-                enabled: false
-              startup:
-                enabled: false
+              liveness: &probes
+                enabled: true
                 spec:
+                  httpGet:
+                    path: /
+                    port: 11080
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 11080
+                  # Give Scrypted up to 5 minutes (30 * 10s) to start
                   failureThreshold: 30
-                  periodSeconds: 5
+                  periodSeconds: 10
             resources:
               requests:
-                cpu: 136m
+                cpu: 250m  # Increased from 136m to be more realistic
                 memory: 1024Mi
               limits:
                 memory: 8192Mi
             securityContext:
+              # CRITICAL: Privileged mode is required by the application
+              # This has been contained via NetworkPolicy and node isolation
               privileged: true
-
     service:
-      app:
-        controller: scrypted
+      main:  # Changed from 'app' to 'main'
+        controller: main
         ports:
           http:
             port: 11080
-            primary: true
-          rebroadcast1:
+      rebroadcast1:
+        controller: main
+        ports:
+          port39801:  # Port name must be DNS-1123 compliant
             port: 39801
-          rebroadcast2:
+      rebroadcast2:
+        controller: main
+        ports:
+          port39802:
             port: 39802
-          rebroadcast3:
+      rebroadcast3:
+        controller: main
+        ports:
+          port39803:
             port: 39803
-
     ingress:
-      app:
+      main:  # Changed from 'app' to 'main'
         className: "internal-nginx"
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.holthome.net
@@ -78,14 +104,13 @@ spec:
             paths:
               - path: /
                 service:
-                  identifier: app
+                  name: main  # References the 'main' service
                   port: http
-
     persistence:
       config:
         existingClaim: scrypted-config
         advancedMounts:
-          scrypted:
+          main:  # Changed from 'scrypted' to match our controller name
             app:
               - path: /server/volume
       cache:
@@ -96,9 +121,10 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /.npm
-      recs:
+      recordings:  # Renamed from 'recs' for clarity
         type: nfs
         server: nas.holthome.net
         path: /mnt/tank/share/scrypted
         globalMounts:
           - path: /recs
+
