@@ -39,9 +39,15 @@ These instructions should be applied when working with any YAML configuration fi
      ```
      > **Note:** These files should always use `apiVersion: kustomize.config.k8s.io/v1beta1`
 
+   - **For Kustomize Component files**:
+     ```yaml
+     # yaml-language-server: $schema=https://json.schemastore.org/kustomization
+     ```
+     > **Note:** These files should always use `apiVersion: kustomize.config.k8s.io/v1alpha1` and `kind: Component`
+
    - **For FluxCD Kustomization resources** (Flux CRD, usually in ks.yaml files):
      ```yaml
-     # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd/kustomize-controller/main/config/crd/bases/kustomize.toolkit.fluxcd.io_kustomizations.yaml
+     # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
      ```
      > **Note:** These files should always use `apiVersion: kustomize.toolkit.fluxcd.io/v1`
 
@@ -193,6 +199,7 @@ When working with schema-validated YAML files:
 | Pattern error | `should match pattern...` | Ensure formats match requirements, e.g., semantic versions like `1.2.3` |
 | Format error | `should match format "hostname"` | Ensure hostnames follow RFC 1123 format |
 | Array item error | `should have required property` | Ensure each array item has all required fields |
+| API version error | `kustomize build failed: accumulating resources...` | For Component files, ensure using `apiVersion: kustomize.config.k8s.io/v1alpha1` with `kind: Component` |
 
 ## Schema Validation Challenges and Solutions
 
