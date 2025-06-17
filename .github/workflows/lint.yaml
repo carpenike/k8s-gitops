@@ -44,7 +44,7 @@ jobs:
                     "ACTION_ACTIONLINT",
                     "ANSIBLE_ANSIBLE_LINT",
                     "COPYPASTE_JSCPD",
-                    "KUBERNETES_KUBEVAL",
+                    "KUBERNETES_KUBECONFORM",
                     "MARKDOWN_MARKDOWNLINT",
                     "PYTHON_FLAKE8",
                     "PYTHON_PYLINT",
@@ -60,8 +60,8 @@ jobs:
             }}
           COPYPASTE_JSCPD_CONFIG_FILE: .ci/jscpd/jscpd.json
           KUBERNETES_DIRECTORY: k8s
-          KUBERNETES_KUBEVAL_ARGUMENTS: --ignore-missing-schemas
-          KUBERNETES_KUBEVAL_FILTER_REGEX_INCLUDE: "(kubernetes)"
+          KUBERNETES_KUBECONFORM_CONFIG_FILE: .kubeconform.yaml
+          KUBERNETES_KUBECONFORM_FILTER_REGEX_INCLUDE: "(kubernetes)"
           MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .github/linters/markdownlint.config.yaml
           MARKDOWN_MARKDOWNLINT_RULES_PATH: .github/
           PYTHON_FLAKE8_CONFIG_FILE: .github/linters/.flake8
