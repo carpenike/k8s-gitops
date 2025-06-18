@@ -7,7 +7,7 @@ k3s_registration_address: 10.20.0.11
 k3s_control_node: true
 k3s_server:
   node-ip: "{{ ansible_host }}"
-  pause-image: registry.k8s.io/pause:3.9
+  pause-image: registry.k8s.io/pause:3.10
   flannel-iface: br0
   tls-san:
     - "{{ k3s_registration_address }}"
