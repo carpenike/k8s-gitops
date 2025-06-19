@@ -17,6 +17,8 @@ spec:
         type: daemonset
         annotations:
           reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: multus
         pod:
           hostNetwork: true
         initContainers:
@@ -93,4 +95,5 @@ spec:
             - identifier: multus
 
     serviceAccount:
-      multus: {}
+      multus:
+        enabled: true
