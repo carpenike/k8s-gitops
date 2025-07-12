@@ -31,7 +31,7 @@ spec:
           init-config:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.18
+              tag: 2.0.22
               pullPolicy: IfNotPresent
             command: ["/bin/sh", "-c"]
             args:
@@ -42,7 +42,7 @@ spec:
           main:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.18
+              tag: 2.0.22
             resources:
               requests:
                 cpu: 5m
