@@ -36,7 +36,7 @@ spec:
           01-init-db:
             image:
               repository: ghcr.io/onedr0p/postgres-init
-              tag: 16.2
+              tag: 17.4
               pullPolicy: IfNotPresent
             envFrom: &envFrom
               - secretRef:
