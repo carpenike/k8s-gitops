@@ -10,7 +10,7 @@ spec:
   url: https://github.com/kubernetes-sigs/gateway-api
   ref:
     # renovate: depName=kubernetes-sigs/gateway-api datasource=github-releases
-    tag: v1.2.1
+    tag: v1.4.0
   ignore: |
     # exclude
     /*
