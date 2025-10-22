@@ -72,7 +72,7 @@ spec:
           redis:
             image:
               repository: docker.io/valkey/valkey
-              tag: 8.0.1
+              tag: 9.0.0
             args:
               - --save
               - ""
