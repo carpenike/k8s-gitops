@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: prometheus-snmp-exporter
-      version: 5.1.0
+      version: 9.8.2
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
