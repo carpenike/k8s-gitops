@@ -30,7 +30,7 @@ spec:
           main:
             image:
               repository: ghcr.io/thelounge/thelounge
-              tag: 4.4.1
+              tag: 4.4.3
             env:
               # https://github.com/thelounge/thelounge/issues/2656
               THELOUNGE_HOME: /config
