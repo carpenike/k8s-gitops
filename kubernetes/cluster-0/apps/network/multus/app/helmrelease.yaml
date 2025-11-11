@@ -25,7 +25,7 @@ spec:
           cni-plugins:
             image:
               repository: ghcr.io/angelnu/cni-plugins
-              tag: 1.5.1
+              tag: 1.8.0
             resources:
               requests:
                 cpu: "10m"
