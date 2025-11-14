@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: ghcr.io/mealie-recipes/mealie
-              tag: v2.7.1@sha256:708e9ffb843bafdcebf46ee35bb45d1b003518e8c204483a1da039b4076ef980
+              tag: v3.5.0@sha256:7f776bbb5457db7f58951c11e3aa881f0167675a78459d7a7f2cd5e42d181fa5
             env:
               TZ: "America/New_York"
               BASE_URL: https://mealie.holthome.net
