@@ -33,7 +33,7 @@ spec:
           app:
             image:
               repository: public.ecr.aws/docker/library/redis
-              tag: 7.2.4
+              tag: 7.4.7
             command:
               - sh
             args:
