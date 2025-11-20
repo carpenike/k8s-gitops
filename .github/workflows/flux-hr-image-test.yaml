@@ -19,7 +19,7 @@ jobs:
       matrix: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -53,13 +53,13 @@ jobs:
       matrix: ${{ steps.extract-images.outputs.images }}
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
       - name: Checkout Pull Request branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: pull
 
