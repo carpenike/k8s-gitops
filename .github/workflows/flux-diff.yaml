@@ -19,7 +19,7 @@ jobs:
       matrix: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -61,7 +61,7 @@ jobs:
           private-key: ${{ secrets.CARPENIKE_APP_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Flux
         uses: fluxcd/flux2/action@main
