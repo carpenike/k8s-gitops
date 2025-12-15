@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         id: app-token
         with:
