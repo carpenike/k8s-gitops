@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: ghcr.io/blakeblackshear/frigate
-              tag: 0.15.0-beta2@sha256:e30431570cdeb1f1b5e258e29cb87e01fcf2e94f3efabe5c5576f413f9a76b1a
+              tag: 0.17.0-beta2@sha256:413bdc3a9da269ac8ac8d42cde4ee7f453d69ae57b28852fc48bbe939e9e30b3
             env:
               TZ: America/New_York
               # LIBVA_DRIVER_NAME: i965
