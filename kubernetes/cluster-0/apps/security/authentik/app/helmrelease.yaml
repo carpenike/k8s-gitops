@@ -29,7 +29,7 @@ spec:
       secret.reloader.stakater.com/reload: authentik-secret,authentik-redis-secret
     initContainers:
       init-db:
-        image: ghcr.io/onedr0p/postgres-init:16.2
+        image: ghcr.io/onedr0p/postgres-init:16.8
         envFrom: &envFrom
           - secretRef:
               name: authentik-secret
