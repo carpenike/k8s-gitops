@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: grafana
         namespace: flux-system
-      version: 8.6.2
+      version: 10.5.15
   interval: 30m
   timeout: 20m
   install:
