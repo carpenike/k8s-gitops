@@ -39,7 +39,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/sabnzbd
-              tag: 4.5.0
+              tag: 4.5.5
 
             env:
               TZ: America/New_York
