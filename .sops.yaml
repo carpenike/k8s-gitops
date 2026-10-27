@@ -20,16 +20,16 @@ creation_rules:
     key_groups:
       - pgp:
           - *user_ryan
-          # age:
-          #   - AGE_RECIPIENT_PLACEHOLDER
+        age:
+          - age1ea86d2m34zdq4efckuc4mdez0q7hgw7x8rjw9up5msnhvxwje5esgc074h
   - path_regex: .+\.sops\.ya?ml$
     encrypted_regex: ^(data|stringData)$
     mac_only_encrypted: true
     key_groups:
       - pgp:
           - *user_ryan
-          # age:
-          #   - AGE_RECIPIENT_PLACEHOLDER
+        age:
+          - age1ea86d2m34zdq4efckuc4mdez0q7hgw7x8rjw9up5msnhvxwje5esgc074h
 stores:
   yaml:
     indent: 2
