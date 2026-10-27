@@ -1,5 +1,8 @@
 ---
 # LAN resolver is the router. Search is the cluster zone only.
+# Kubelet copies this search list into every pod. CoreDNS answers
+# <name>.holthome.net.holthome.net with NXDOMAIN so c-ares does not
+# stop on a router SERVFAIL for that doubled name.
 apiVersion: v1alpha1
 kind: ResolverConfig
 nameservers:

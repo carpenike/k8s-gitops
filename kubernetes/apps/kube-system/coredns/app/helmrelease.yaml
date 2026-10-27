@@ -20,6 +20,22 @@ spec:
     replicaCount: 2
     priorityClassName: system-cluster-critical
     servers:
+      # Pods inherit search holthome.net (Talos ResolverConfig) and ndots:5.
+      # c-ares, which curlimages/curl uses, asks am.holthome.net.holthome.net
+      # before the real name and aborts the search if that answer is SERVFAIL
+      # or REFUSED. The router does that for a name it does not have. NXDOMAIN
+      # is a miss, so curl continues and resolves the real name. Short names
+      # such as forge still search to forge.holthome.net.
+      - zones:
+          - zone: holthome.net.holthome.net.
+            scheme: dns://
+        port: 53
+        plugins:
+          - name: errors
+          - name: template
+            parameters: ANY ANY
+            configBlock: |-
+              rcode NXDOMAIN
       - zones:
           - zone: .
             scheme: dns://
