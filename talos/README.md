@@ -43,7 +43,14 @@ SOPS secret `nut-credentials`, not an environment variable and not a
 `topf apply` from `talos/` resolves `data.upsmonPassword` in `topf.yaml`.
 That needs `sops` and `vals` on PATH, and either `age.key` or the YubiKey.
 Until the DaemonSet is up, `upsmon` retries the connection. That gap is
-accepted. ADR 0005.
+accepted. ADR 0005. The every-node patch is `all/80-nut-client.yaml.tpl`.
+
+## Talos API for tuppr
+
+`control-plane/10-talos-api.yaml` grants `os:admin` to Kubernetes service
+accounts in `system-upgrade`. tuppr's chart asks for that role. Apply that
+document to each control plane (`sled-0`, `sled-1`, `sled-2`). Workers do
+not serve the aggregated API.
 
 ## Apply
 

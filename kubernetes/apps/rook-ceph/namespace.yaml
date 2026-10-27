@@ -1,5 +1,10 @@
 ---
+# Mon, OSD, and CSI pods use privileged hostPath volumes.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: rook-ceph
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
