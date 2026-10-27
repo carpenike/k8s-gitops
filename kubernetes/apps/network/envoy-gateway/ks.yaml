@@ -30,6 +30,38 @@ spec:
   targetNamespace: network
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. A missing Pocket ID client leaves this
+# Kustomization unready and leaves the gateways serving without the login
+# policy. envoy-gateway, DNS, the tunnel, and echo do not wait on it.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-auth
+spec:
+  dependsOn:
+    - name: envoy-gateway
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: pocket-id-gateway
+      namespace: network
+  interval: 1h
+  path: ./kubernetes/apps/network/envoy-gateway/auth
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Nothing depends on this. A certificate that cannot be issued stays here
 # and does not block envoy-gateway, DNS, or the tunnel.
 apiVersion: kustomize.toolkit.fluxcd.io/v1

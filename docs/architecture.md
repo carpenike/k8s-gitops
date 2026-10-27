@@ -93,6 +93,13 @@ Each of those has an apex name and a wildcard certificate. The tunnel
 sends them all to `envoy-external`, and checks the origin certificate as
 `external.holthome.net`.
 
+HTTPS on both gateways requires a Pocket ID login
+(`https://id.holthome.net`) unless the HTTPRoute opts out. Echo is the
+first route behind that login. The client secret is Kustomization
+`envoy-gateway-auth`, which nothing else waits on. The label, the path
+bypass, and the Pocket ID client settings are in
+[gateway-auth.md](gateway-auth.md).
+
 ## Data
 
 Rook `useAllDevices` stays false. `devicePathFilter` matches the three
