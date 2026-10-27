@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rook-ceph
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: rook-ceph
+  interval: 1h
+  values:
+    image:
+      repository: ghcr.io/rook/ceph
+    monitoring:
+      enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits: {}

@@ -1,0 +1,12 @@
+---
+# nut-client talks to a NUT server, not to SNMP.
+# Host, username, and password are placeholders. Fill them from 1Password
+# at apply time. Do not commit the real MONITOR line.
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: nut-client
+configFiles:
+  - content: |
+      MONITOR ups@nut.example.invalid 1 upsmon secondary
+      SHUTDOWNCMD "/sbin/poweroff"
+    mountPath: /usr/local/etc/nut/upsmon.conf

@@ -1,0 +1,92 @@
+# Copy to cluster.toml (gitignored) only if a generator is added later.
+# The manifests in kubernetes/ and talos/ currently mirror these placeholders.
+# Every address is RFC 5737 TEST-NET-1. The domain is RFC 2606.
+
+[network]
+node_cidr = "192.0.2.0/24"
+dns_servers = ["1.1.1.1", "1.0.0.1"]
+default_gateway = "192.0.2.1"
+
+[kubernetes]
+pod_cidr = "10.42.0.0/16"
+svc_cidr = "10.43.0.0/16"
+coredns_addr = "10.43.0.10"
+
+[kubernetes.api]
+addr = "192.0.2.10"
+
+[gateways]
+internal = "192.0.2.20"
+external = "192.0.2.21"
+# No separate DNS VIP. Internal records are written to the router by the
+# MikroTik external-dns webhook. See docs/deviations.md.
+
+[repository]
+url = "https://github.com/carpenike/k8s-gitops.git"
+branch = "rebuild"
+webhook_provider = "github"
+
+[domain]
+name = "example.com"
+
+[dns]
+provider = "cloudflare"
+# Token lives in 1Password. Leave this empty in git.
+token = ""
+
+[ingress]
+mode = "cloudflare-tunnel"
+
+[cilium]
+loadbalancer_mode = "dsr"
+
+[cilium.bgp]
+# Same ASN on both sides: iBGP to RouterOS 7. Replace before use.
+router_addr = "192.0.2.1"
+router_asn = "64512"
+node_asn = "64512"
+
+[talos]
+# 64 zeros. Replace with the Image Factory id for a schematic that includes
+# siderolabs/nut-client (and CPU microcode when chosen).
+schematic_id = "0000000000000000000000000000000000000000000000000000000000000000"
+
+[[nodes]]
+name = "sled-1"
+address = "192.0.2.11"
+controller = true
+disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
+mac_addr = "02:00:00:00:00:01"
+mtu = 1500
+secureboot = false
+encrypt_disk = false
+
+[[nodes]]
+name = "sled-2"
+address = "192.0.2.12"
+controller = true
+disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
+mac_addr = "02:00:00:00:00:02"
+mtu = 1500
+secureboot = false
+encrypt_disk = false
+
+[[nodes]]
+name = "sled-3"
+address = "192.0.2.13"
+controller = true
+disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
+mac_addr = "02:00:00:00:00:03"
+mtu = 1500
+secureboot = false
+encrypt_disk = false
+
+[[nodes]]
+name = "sled-4"
+address = "192.0.2.14"
+controller = false
+disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
+mac_addr = "02:00:00:00:00:04"
+mtu = 1500
+secureboot = false
+encrypt_disk = false

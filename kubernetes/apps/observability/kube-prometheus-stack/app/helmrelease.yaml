@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kube-prometheus-stack
+  interval: 1h
+  values:
+    crds:
+      enabled: true
+    alertmanager:
+      enabled: false
+    grafana:
+      enabled: false
+    prometheus:
+      prometheusSpec:
+        retention: 7d
+        replicas: 2
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 50Gi
+        additionalAlertManagerConfigs:
+          - scheme: http
+            static_configs:
+              - targets:
+                  - alertmanager.example.invalid:9093

@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: coredns
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: coredns
+  interval: 1h
+  values:
+    fullnameOverride: coredns
+    image:
+      repository: mirror.gcr.io/coredns/coredns
+    k8sAppLabelOverride: kube-dns
+    service:
+      name: kube-dns
+      clusterIP: 10.43.0.10
+    replicaCount: 2
+    priorityClassName: system-cluster-critical
+    servers:
+      - zones:
+          - zone: .
+            scheme: dns://
+            use_tcp: true
+        port: 53
+        plugins:
+          - name: errors
+          - name: health
+            configBlock: |-
+              lameduck 5s
+          - name: ready
+          - name: kubernetes
+            parameters: cluster.local in-addr.arpa ip6.arpa
+            configBlock: |-
+              pods verified
+              fallthrough in-addr.arpa ip6.arpa
+          - name: autopath
+            parameters: "@kubernetes"
+          - name: forward
+            parameters: . /etc/resolv.conf
+          - name: cache
+            configBlock: |-
+              prefetch 20
+              serve_stale
+              servfail 0
+          - name: loop
+          - name: reload
+          - name: loadbalance
+          - name: prometheus
+            parameters: 0.0.0.0:9153
+          - name: log
+            configBlock: |-
+              class error
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+    tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule

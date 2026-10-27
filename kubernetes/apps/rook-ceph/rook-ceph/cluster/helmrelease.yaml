@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rook-ceph-cluster
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: rook-ceph-cluster
+  interval: 1h
+  values:
+    cephClusterSpec:
+      cleanupPolicy:
+        wipeDevicesFromOtherClusters: true
+      storage:
+        # REPLACE with the by-id pattern of the OSD SSDs only.
+        # useAllDevices stays false so a boot disk is never claimed.
+        useAllDevices: false
+        devicePathFilter: /dev/disk/by-id/example-osd-REPLACE_ME
+      resources:
+        osd:
+          limits:
+            memory: 8Gi
+    monitoring:
+      enabled: true
+    toolbox:
+      enabled: true
+    cephBlockPools:
+      - name: ceph-block
+        spec:
+          failureDomain: host
+          replicated:
+            size: 3
+        storageClass:
+          enabled: true
+          name: ceph-block
+          isDefault: true
+          parameters:
+            imageFeatures: layering
+            csi.storage.k8s.io/fstype: ext4

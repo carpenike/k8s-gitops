@@ -1,0 +1,58 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["github>home-operations/renovate-presets#10.0.1"],
+  schedule: ["every weekend"],
+  // Plan pin for the Renovate release that opened this config: 44.188.2.
+  // The GitHub App version is selected in GitHub, not in this file.
+  packageRules: [
+    {
+      description: "GitHub Actions Group",
+      matchManagers: ["github-actions"],
+      groupName: "github-actions",
+      minimumReleaseAge: "3 days",
+    },
+    {
+      description: "Mise Tools Group",
+      matchManagers: ["mise"],
+      groupName: "mise tools",
+      minimumReleaseAge: "3 days",
+    },
+    {
+      description: "Talos Group",
+      groupName: "talos",
+      matchPackageNames: ["siderolabs/talos"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+      minimumReleaseAge: "3 days",
+      overrideDatasource: "github-releases",
+    },
+    {
+      description: "Flux Operator Group",
+      groupName: "flux-operator",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/flux-operator/", "/flux-instance/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      matchUpdateTypes: ["major"],
+      addLabels: ["type/major"],
+    },
+    {
+      matchUpdateTypes: ["minor"],
+      addLabels: ["type/minor"],
+    },
+    {
+      matchUpdateTypes: ["patch"],
+      addLabels: ["type/patch"],
+    },
+    {
+      matchUpdateTypes: ["digest"],
+      addLabels: ["type/digest"],
+    },
+  ],
+}
