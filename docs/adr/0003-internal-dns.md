@@ -34,7 +34,10 @@ Its own README says it is not yet proven at large scale, so the API user
 should be limited to DNS and the domain filter should be the cluster zone.
 
 Public records are a second external-dns release pointed at Cloudflare and
-at `envoy-external` only.
+at `envoy-external` only. That release's domain filter is `holthome.net`
+plus the public service zones `warwed.com`, `ryanholt.net`,
+`whiskeywhiskeywhiskey.org`, and `stefanieholt.com`. The MikroTik release
+stays on `holthome.net`, so the router does not answer for those zones.
 
 The fallback, if the webhook misbehaves, is a static wildcard on the router
 aimed at the internal gateway address.

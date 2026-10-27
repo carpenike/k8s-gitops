@@ -53,6 +53,7 @@ spec:
     registry: txt
     txtPrefix: k8s.
     txtOwnerId: cluster
+    # Home zone only. warwed.com and the other public zones are Cloudflare.
     domainFilters:
       - ${SECRET_DOMAIN}
     serviceMonitor:

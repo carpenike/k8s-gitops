@@ -75,6 +75,46 @@ spec:
                   http2Origin: true
                   originServerName: external.${SECRET_DOMAIN}
                 service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: warwed.com
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: "*.warwed.com"
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: ryanholt.net
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: "*.ryanholt.net"
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: whiskeywhiskeywhiskey.org
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: "*.whiskeywhiskeywhiskey.org"
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: stefanieholt.com
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
+              - hostname: "*.stefanieholt.com"
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.network.svc.cluster.local:443
               - service: http_status:404
     persistence:
       config-file:

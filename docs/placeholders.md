@@ -2,8 +2,10 @@
 
 Nothing in this list is a secret value. Tokens and private keys go to
 1Password or stay on the YubiKey. The node LAN and the LoadBalancer range
-are already filled in from v1. Hostnames, MACs, disk ids, the domain, and BMC addresses
-stay as placeholders. BMC addresses in git are RFC 5737 TEST-NET-2.
+are already filled in from v1. Server names are `sled-N.holthome.net`.
+The cluster zone and the public service zones are filled in. MACs, disk
+ids, and BMC addresses stay as placeholders. BMC addresses in git are
+RFC 5737 TEST-NET-2.
 
 | Placeholder | Where | Replace with |
 | --- | --- | --- |
@@ -11,8 +13,7 @@ stay as placeholders. BMC addresses in git are RFC 5737 TEST-NET-2.
 | Sled addresses `10.20.10.20`–`.23` | `talos/topf.yaml` | Confirm the four sleds still own these v1 bare-metal addresses |
 | `/16` mask on `bond0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
 | `10.42.0.0/16`, `10.43.0.0/16`, `10.43.0.10` | Talos network patch, Cilium, CoreDNS | Cluster overlays. They do not overlap `10.20.0.0/16` or `10.45.0.0/16` |
-| `example.com` and `${SECRET_DOMAIN}` | `kubernetes/components/sops/cluster-secrets.yaml` and any manifest that uses the substitution | The public zone, via the encrypted secret, not a plaintext edit of every file |
-| `sled-1` … `sled-4` | `talos/topf.yaml` | Hostnames you are willing to publish, or rename only in the uncommitted `cluster.toml` |
+| `sled-1.holthome.net` … `sled-4.holthome.net` | `talos/topf.yaml` | Confirm these are the names to publish. The zone is `holthome.net` |
 | `02:00:00:00:00:0N` | `talos/topf.yaml` | NIC MACs from maintenance mode |
 | `/dev/disk/by-id/example-boot-REPLACE_ME` | `talos/topf.yaml` | Boot disk by-id. Not an OSD |
 | `/dev/disk/by-id/example-osd-REPLACE_ME` | Rook cluster HelmRelease | OSD by-id filter for the four data SSDs per sled. `useAllDevices` stays false |

@@ -32,7 +32,12 @@ spec:
       - gateway-httproute
     txtPrefix: k8s.
     txtOwnerId: default
+    # Cluster zone plus the public service zones. Internal names stay on MikroTik.
     domainFilters:
       - ${SECRET_DOMAIN}
+      - warwed.com
+      - ryanholt.net
+      - whiskeywhiskeywhiskey.org
+      - stefanieholt.com
     serviceMonitor:
       enabled: true

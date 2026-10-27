@@ -17,3 +17,7 @@ spec:
         selector:
           dnsZones:
             - ${SECRET_DOMAIN}
+            - warwed.com
+            - ryanholt.net
+            - whiskeywhiskeywhiskey.org
+            - stefanieholt.com

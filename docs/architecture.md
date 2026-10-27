@@ -1,6 +1,7 @@
 # Architecture
 
-Four Talos nodes in one chassis. `sled-1` through `sled-3` are control
+Four Talos nodes in one chassis. Their names are `sled-1.holthome.net`
+through `sled-4.holthome.net`. `sled-1` through `sled-3` are control
 planes with the control-plane taint removed, so they run workloads. `sled-4`
 is a worker. All four are Ceph hosts. A single chassis is one failure
 domain: a sled can fail, the chassis cannot. Backups leave the chassis.
@@ -62,6 +63,25 @@ check.
 
 BGP is iBGP. ASN 64512 is on the nodes and on the router, matching v1.
 Optional TCP MD5, if used later, belongs in 1Password.
+
+## Names
+
+`holthome.net` is the cluster zone. Node names, `internal.holthome.net`,
+`external.holthome.net`, and the Flux webhook live there. The MikroTik
+external-dns release writes that zone only.
+
+Public apps also use these zones. Cloudflare DNS, the DNS-01 solver, the
+external gateway certificates, and the tunnel ingress list each of them.
+The home router does not:
+
+- `warwed.com`
+- `ryanholt.net`
+- `whiskeywhiskeywhiskey.org`
+- `stefanieholt.com`
+
+Each of those has an apex name and a wildcard certificate. The tunnel
+sends them all to `envoy-external`, and checks the origin certificate as
+`external.holthome.net`.
 
 ## Data
 

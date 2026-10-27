@@ -63,6 +63,14 @@ spec:
         certificateRefs:
           - kind: Secret
             name: ${SECRET_DOMAIN/./-}-production-tls
+          - kind: Secret
+            name: warwed-com-production-tls
+          - kind: Secret
+            name: ryanholt-net-production-tls
+          - kind: Secret
+            name: whiskeywhiskeywhiskey-org-production-tls
+          - kind: Secret
+            name: stefanieholt-com-production-tls
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway

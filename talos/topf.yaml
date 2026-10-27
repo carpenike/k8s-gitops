@@ -14,7 +14,7 @@ kubernetesVersion: v1.37.1
 secretsPath: secrets.sops.yaml
 
 nodes:
-  - host: sled-1
+  - host: sled-1.holthome.net
     ip: 10.20.10.20
     role: control-plane
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -25,7 +25,7 @@ nodes:
       mtu: 1500
       encryptDisk: false
       kernelModules: []
-  - host: sled-2
+  - host: sled-2.holthome.net
     ip: 10.20.10.21
     role: control-plane
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -36,7 +36,7 @@ nodes:
       mtu: 1500
       encryptDisk: false
       kernelModules: []
-  - host: sled-3
+  - host: sled-3.holthome.net
     ip: 10.20.10.22
     role: control-plane
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -47,7 +47,7 @@ nodes:
       mtu: 1500
       encryptDisk: false
       kernelModules: []
-  - host: sled-4
+  - host: sled-4.holthome.net
     ip: 10.20.10.23
     role: worker
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"

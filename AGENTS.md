@@ -33,7 +33,9 @@ updated in a pull request.
 - The GitHub repository is public. Do not commit secrets, tokens, age
   private keys, Talos secret bundles, kubeconfigs, tunnel credentials, or
   internal hostnames. The node LAN `10.20.0.0/16` and the LoadBalancer
-  range `10.45.0.0/16` are the recorded plan. BMC addresses stay on the
+  range `10.45.0.0/16` are the recorded plan. The cluster zone is
+  `holthome.net`. Public service zones are `warwed.com`, `ryanholt.net`,
+  `whiskeywhiskeywhiskey.org`, and `stefanieholt.com`. BMC addresses stay on the
   RFC 5737 placeholders in `cluster.example.toml`. See `docs/architecture.md`
   and ADR 0004.
 - SOPS personal access is the YubiKey fingerprint in `.sops.yaml`. Do not

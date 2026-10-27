@@ -1,6 +1,7 @@
 # Copy to cluster.toml (gitignored) only if a generator is added later.
 # The manifests in kubernetes/ and talos/ currently mirror these values.
-# Node and service ranges match archive/talos-v1. The domain is still RFC 2606.
+# Node and service ranges match archive/talos-v1.
+# Servers are on holthome.net. Other public zones are service domains only.
 
 [network]
 node_cidr = "10.20.0.0/16"
@@ -30,7 +31,14 @@ branch = "rebuild"
 webhook_provider = "github"
 
 [domain]
-name = "example.com"
+name = "holthome.net"
+# Public app zones. Cloudflare only. The MikroTik filter stays on holthome.net.
+service_domains = [
+  "warwed.com",
+  "ryanholt.net",
+  "whiskeywhiskeywhiskey.org",
+  "stefanieholt.com",
+]
 
 [dns]
 provider = "cloudflare"
@@ -63,7 +71,7 @@ gateway = "198.51.100.1"
 onepassword_item = "PLACEHOLDER_ITEM_BMC"
 
 [[nodes]]
-name = "sled-1"
+name = "sled-1.holthome.net"
 address = "10.20.10.20"
 bmc_address = "198.51.100.11"
 controller = true
@@ -74,7 +82,7 @@ secureboot = false
 encrypt_disk = false
 
 [[nodes]]
-name = "sled-2"
+name = "sled-2.holthome.net"
 address = "10.20.10.21"
 bmc_address = "198.51.100.12"
 controller = true
@@ -85,7 +93,7 @@ secureboot = false
 encrypt_disk = false
 
 [[nodes]]
-name = "sled-3"
+name = "sled-3.holthome.net"
 address = "10.20.10.22"
 bmc_address = "198.51.100.13"
 controller = true
@@ -96,7 +104,7 @@ secureboot = false
 encrypt_disk = false
 
 [[nodes]]
-name = "sled-4"
+name = "sled-4.holthome.net"
 address = "10.20.10.23"
 bmc_address = "198.51.100.14"
 controller = false
