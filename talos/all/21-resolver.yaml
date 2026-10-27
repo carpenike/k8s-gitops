@@ -1,0 +1,10 @@
+---
+# LAN resolver is the router. Search is the cluster zone only.
+apiVersion: v1alpha1
+kind: ResolverConfig
+nameservers:
+  - address: 10.20.0.1
+searchDomains:
+  domains:
+    - holthome.net
+  disableDefault: true

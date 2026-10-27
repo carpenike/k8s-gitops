@@ -11,4 +11,4 @@ spec:
     operation: copy
   ref:
     tag: 0.17.0
-  url: oci://ghcr.io/backube/helm-charts/volsync
+  url: oci://ghcr.io/home-operations/charts-mirror/volsync

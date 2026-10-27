@@ -8,13 +8,18 @@ the Flux Operator, and the Flux instance. Everything else reconciles from
 The helmfile reads chart URLs from each `ocirepository.yaml` and values from
 each `helmrelease.yaml`. It does not create secrets.
 
-Before the first `helmfile sync` (not run from this branch):
+The install sequence is `scripts/bootstrap-cluster.sh`. It refuses to run
+without `--yes`, and it was not run from this branch. mise tasks
+`bootstrap`, `bootstrap-talos`, and `bootstrap-apps` call it.
 
-1. Build a Talos schematic with `nut-client` and replace the placeholder
-   schematic id. Apply machine config with `topf` only after `docs/placeholders.md`
-   is filled in. Do not commit the generated secrets bundle.
-2. Create the Flux decryption secret and the 1Password token out of band.
-   Commands are below. The token value comes from 1Password, not from git.
+Order, matching cluster-template: `topf secrets`, `topf apply
+--auto-bootstrap`, talosconfig, kubeconfig, `sops-age` from `./age.key`,
+`onepassword-sdk` from `$ONEPASSWORD_SERVICE_ACCOUNT_TOKEN`, CRDs from
+`bootstrap/helmfile/crds.yaml`, then `helmfile sync` retried twice.
+
+`NUT_UPSMON_PASSWORD` must be set before apply. Generate `age.key` locally
+and uncomment the age recipient in `.sops.yaml` before encrypting the Talos
+secrets bundle. Do not commit either.
 
 ```sh
 # Age private key stays on the workstation and in the cluster secret.

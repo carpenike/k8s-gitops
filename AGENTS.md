@@ -35,9 +35,9 @@ updated in a pull request.
   internal hostnames. The node LAN `10.20.0.0/16` and the LoadBalancer
   range `10.45.0.0/16` are the recorded plan. The cluster zone is
   `holthome.net`. Public service zones are `warwed.com`, `ryanholt.net`,
-  `whiskeywhiskeywhiskey.org`, and `stefanieholt.com`. BMC addresses stay on the
-  RFC 5737 placeholders in `cluster.example.toml`. See `docs/architecture.md`
-  and ADR 0004.
+  `whiskeywhiskeywhiskey.org`, and `stefanieholt.com`. MACs, the BMC map,
+  and the boot-disk selector are the 27 Oct 2026 preflight. Passwords stay
+  out of git. See `docs/architecture.md` and ADR 0004.
 - SOPS personal access is the YubiKey fingerprint in `.sops.yaml`. Do not
   generate or commit an age private key. See `docs/sops.md`.
 - Site-specific values stay as the placeholders in `docs/placeholders.md`

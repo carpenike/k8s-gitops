@@ -89,9 +89,14 @@ sends them all to `envoy-external`, and checks the origin certificate as
 
 ## Data
 
-Rook is told `useAllDevices: false` and a device path that matches nothing
-real (`example-osd-REPLACE_ME`). Boot disks stay out of Ceph until the
-by-id filter is filled in from the sleds.
+Rook `useAllDevices` stays false. `devicePathFilter` matches the three
+960GB OSD SSDs on `ata6`–`ata8` of `pci-0000:00:1f.2`. The Samsung 870 boot
+disk is `ata5` and does not match. `wipeDevicesFromOtherClusters` stays
+true; the v1 Ceph data on those disks is wiped on install.
+
+STATE and EPHEMERAL are LUKS2 with a `nodeID` key. The chassis has no TPM
+module. sled-1's Talos dmesg on 27 Oct 2026 was `No TPM chip found` /
+`TPM device is not available`. Secure Boot stays off. See `talos/README.md`.
 
 Postgres clusters are not installed yet. `kubernetes/examples/cnpg-cluster.yaml`
 shows a two-instance cluster on `ceph-block` with WAL archiving through the
@@ -117,17 +122,18 @@ BMC hardware monitoring runs on Forge, outside this cluster. prometheus
 `ipmi_exporter` there scrapes each sled BMC for temperatures, fans, PSU
 status, and the hardware event log. Alerts land on Forge's Alertmanager.
 There is no in-cluster exporter. The BMCs sit on an isolated management
-network. `cluster.example.toml` records that network with RFC 5737
-TEST-NET-2 addresses (`198.51.100.0/24`, sleds `.11`–`.14`). Real
-addresses and credentials belong in the Forge repo and in 1Password.
-ADR 0004.
+network. The 27 Oct 2026 preflight mapped `10.9.18.20` through
+`10.9.18.23` to `sled-0` through `sled-3`. The `/24` mask is inferred.
+Credentials stay in 1Password. ADR 0004.
 
 ### Power
 
 NUT shutdown and the later power-on are a pair.
 
-Shutdown starts when the NUT primary (the host behind
-`nut.example.invalid`) sends FSD. Every sled runs the same `nut-client`
+Shutdown starts when Forge's NUT server (`forge.holthome.net`,
+`10.20.0.30`) sends FSD. That service is a nix-config change and is not
+done yet. The UPS name in the Talos patch is `apc` until the nix-config
+plan names it. Every sled runs the same `nut-client`
 patch: `upsmon` secondary, `SHUTDOWNCMD /sbin/poweroff`. That patch does
 not stagger the nodes. The order to configure on the primary is the
 reverse of power-on:
@@ -142,5 +148,5 @@ starts the next:
 1. `sled-0`, then `sled-1`, then `sled-2` (control planes, so etcd can form)
 2. `sled-3` (worker) last
 
-The waits and the 1Password item name for the BMC user live with Forge.
-This repo only records the order and the placeholder addresses.
+The waits live with Forge. The BMC user is 1Password item
+`PLACEHOLDER_ITEM_BMC`.

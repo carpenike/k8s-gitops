@@ -14,10 +14,10 @@ spec:
       cleanupPolicy:
         wipeDevicesFromOtherClusters: true
       storage:
-        # REPLACE with the by-id pattern of the OSD SSDs only.
-        # useAllDevices stays false so a boot disk is never claimed.
+        # Three 960GB OSD SSDs on ata6-ata8. Boot disk is ata5 (Samsung 870)
+        # and does not match. Ryan approved wiping v1 Ceph on these disks.
         useAllDevices: false
-        devicePathFilter: /dev/disk/by-id/example-osd-REPLACE_ME
+        devicePathFilter: '^/dev/disk/by-path/pci-0000:00:1f\.2-ata-[678](\.0)?$'
       resources:
         osd:
           limits:

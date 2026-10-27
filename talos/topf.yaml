@@ -1,8 +1,9 @@
 ---
-# Node inventory for topf. Addresses are the v1 bare-metal hosts on
-# 10.20.0.0/16. The API VIP 10.20.10.10 is new; the old VIP was encrypted.
-# Replace schematicId, disk, and MAC from maintenance mode before any apply.
-# Do not commit talos/secrets.sops.yaml from `topf secrets`.
+# Inventory from the 27 Oct 2026 preflight. Four SYS-2028TP-HTR sleds.
+# Boot disk is the Samsung SSD 870 500GB, selected by model and size in
+# all/00-install.yaml.tpl so sled-0 can install before its WWID is known.
+# sled-0 MAC is unverified (that node was dark). Do not commit
+# talos/secrets.sops.yaml from `topf secrets`.
 clusterName: kubernetes
 clusterEndpoint: https://10.20.10.10:6443
 
@@ -17,44 +18,48 @@ nodes:
   - host: sled-0.holthome.net
     ip: 10.20.10.20
     role: control-plane
-    schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
     data:
-      installDisk: /dev/disk/by-id/example-boot-REPLACE_ME
-      installDiskSerial: ""
-      macAddr: "02:00:00:00:00:01"
+      # WWID not observed. Node was dark during the preflight.
+      bootWwid: ""
+      macAddr: "0c:c4:7a:8e:90:f4" # unverified
+      macVerified: false
       mtu: 1500
-      encryptDisk: false
+      encryptDisk: true
       kernelModules: []
   - host: sled-1.holthome.net
     ip: 10.20.10.21
     role: control-plane
-    schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
     data:
-      installDisk: /dev/disk/by-id/example-boot-REPLACE_ME
-      installDiskSerial: ""
-      macAddr: "02:00:00:00:00:02"
+      # /dev/disk/by-id/wwn-0x5002538fc2b1a985
+      bootWwid: naa.5002538fc2b1a985
+      macAddr: "0c:c4:7a:8f:9f:f2"
+      macVerified: true
       mtu: 1500
-      encryptDisk: false
+      encryptDisk: true
       kernelModules: []
   - host: sled-2.holthome.net
     ip: 10.20.10.22
     role: control-plane
-    schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
     data:
-      installDisk: /dev/disk/by-id/example-boot-REPLACE_ME
-      installDiskSerial: ""
-      macAddr: "02:00:00:00:00:03"
+      # /dev/disk/by-id/wwn-0x5002538fc31245a6
+      bootWwid: naa.5002538fc31245a6
+      macAddr: "0c:c4:7a:8f:3e:04"
+      macVerified: true
       mtu: 1500
-      encryptDisk: false
+      encryptDisk: true
       kernelModules: []
   - host: sled-3.holthome.net
     ip: 10.20.10.23
     role: worker
-    schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
     data:
-      installDisk: /dev/disk/by-id/example-boot-REPLACE_ME
-      installDiskSerial: ""
-      macAddr: "02:00:00:00:00:04"
+      # /dev/disk/by-id/wwn-0x5002538fc31245a1
+      bootWwid: naa.5002538fc31245a1
+      macAddr: "0c:c4:7a:eb:21:fc"
+      macVerified: true
       mtu: 1500
-      encryptDisk: false
+      encryptDisk: true
       kernelModules: []

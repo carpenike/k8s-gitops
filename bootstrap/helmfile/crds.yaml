@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+# Render CRDs only. The bootstrap script applies them with kubectl before
+# helmfile sync, then retries the sync if the first pass races the CRDs.
+helmDefaults:
+  args:
+    - --include-crds
+    - --no-hooks
+
+bases:
+  - default.yaml
+
+releases:
+  - name: cilium
+    namespace: kube-system
+    inherit:
+      - template: default
+
+  - name: cert-manager
+    namespace: cert-manager
+    inherit:
+      - template: default
+
+  - name: envoy-gateway
+    namespace: network
+    inherit:
+      - template: default

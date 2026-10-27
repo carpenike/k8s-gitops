@@ -2,9 +2,16 @@
 # public id named user_ryan in archive/talos-v1:.sops.yaml. SOPS talks to
 # gpg-agent; the private key stays on the YubiKey.
 #
-# Flux cannot use a YubiKey. Generate a new age identity for the cluster,
-# add it in the same key_group, and re-encrypt. One group means either key
-# can decrypt. Do not reuse the v1 age recipient. See docs/sops.md.
+# Flux cannot use a YubiKey. Generate a new age identity locally.
+# Do not commit age.key, and do not reuse the v1 age recipient.
+#
+#   age-keygen -o age.key
+#   age-keygen -y age.key
+#
+# Uncomment the age list in both key groups and replace
+# AGE_RECIPIENT_PLACEHOLDER with the printed age1... recipient.
+# Re-encrypt any *.sops.yaml after that. One group means either key
+# can decrypt. See docs/sops.md.
 keys:
   - &user_ryan DA8002060402EC39B195451D5CED80362B5A4EF2
 creation_rules:
@@ -13,12 +20,16 @@ creation_rules:
     key_groups:
       - pgp:
           - *user_ryan
+          # age:
+          #   - AGE_RECIPIENT_PLACEHOLDER
   - path_regex: .+\.sops\.ya?ml$
     encrypted_regex: ^(data|stringData)$
     mac_only_encrypted: true
     key_groups:
       - pgp:
           - *user_ryan
+          # age:
+          #   - AGE_RECIPIENT_PLACEHOLDER
 stores:
   yaml:
     indent: 2

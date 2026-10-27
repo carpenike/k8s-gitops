@@ -29,3 +29,15 @@ run = "bash scripts/kubeconform.sh"
 [tasks.sops-check]
 description = "Reject unencrypted *.sops.yaml files"
 run = "bash scripts/check-sops-encrypted.sh"
+
+[tasks.bootstrap]
+description = "Full install sequence. Refuses without --yes. Not for CI."
+run = "bash scripts/bootstrap-cluster.sh all"
+
+[tasks.bootstrap-talos]
+description = "topf secrets, apply --auto-bootstrap, talosconfig, kubeconfig"
+run = "bash scripts/bootstrap-cluster.sh talos"
+
+[tasks.bootstrap-apps]
+description = "sops-age, onepassword-sdk, CRDs, helmfile sync with retry"
+run = "bash scripts/bootstrap-cluster.sh apps"

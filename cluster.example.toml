@@ -58,58 +58,58 @@ router_asn = "64512"
 node_asn = "64512"
 
 [talos]
-# 64 zeros. Replace with the Image Factory id for a schematic that includes
-# siderolabs/nut-client (and CPU microcode when chosen).
-schematic_id = "0000000000000000000000000000000000000000000000000000000000000000"
+# factory.talos.dev schematic: intel-ucode + nut-client. See talos/schematic.yaml.
+schematic_id = "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
 
 [bmc]
 # Isolated management network, scraped by ipmi_exporter on Forge.
-# Addresses are RFC 5737 TEST-NET-2. Do not replace them with the real
-# subnet in this repo. Credentials stay in 1Password. See docs/adr/0004-ipmi.md.
-cidr = "198.51.100.0/24"
-gateway = "198.51.100.1"
+# Hosts .20-.23 were read from the 27 Oct 2026 preflight. The /24 mask
+# is inferred from those addresses and was not confirmed. No gateway was
+# observed. Credentials stay in 1Password. See docs/adr/0004-ipmi.md.
+cidr = "10.9.18.0/24"
 onepassword_item = "PLACEHOLDER_ITEM_BMC"
 
 [[nodes]]
 name = "sled-0.holthome.net"
 address = "10.20.10.20"
-bmc_address = "198.51.100.11"
+bmc_address = "10.9.18.20"
 controller = true
-disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
-mac_addr = "02:00:00:00:00:01"
+# Model+size selector. WWID was not observed; this node was dark.
+boot_wwid = ""
+mac_addr = "0c:c4:7a:8e:90:f4" # unverified
 mtu = 1500
 secureboot = false
-encrypt_disk = false
+encrypt_disk = true
 
 [[nodes]]
 name = "sled-1.holthome.net"
 address = "10.20.10.21"
-bmc_address = "198.51.100.12"
+bmc_address = "10.9.18.21"
 controller = true
-disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
-mac_addr = "02:00:00:00:00:02"
+boot_wwid = "naa.5002538fc2b1a985"
+mac_addr = "0c:c4:7a:8f:9f:f2"
 mtu = 1500
 secureboot = false
-encrypt_disk = false
+encrypt_disk = true
 
 [[nodes]]
 name = "sled-2.holthome.net"
 address = "10.20.10.22"
-bmc_address = "198.51.100.13"
+bmc_address = "10.9.18.22"
 controller = true
-disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
-mac_addr = "02:00:00:00:00:03"
+boot_wwid = "naa.5002538fc31245a6"
+mac_addr = "0c:c4:7a:8f:3e:04"
 mtu = 1500
 secureboot = false
-encrypt_disk = false
+encrypt_disk = true
 
 [[nodes]]
 name = "sled-3.holthome.net"
 address = "10.20.10.23"
-bmc_address = "198.51.100.14"
+bmc_address = "10.9.18.23"
 controller = false
-disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
-mac_addr = "02:00:00:00:00:04"
+boot_wwid = "naa.5002538fc31245a1"
+mac_addr = "0c:c4:7a:eb:21:fc"
 mtu = 1500
 secureboot = false
-encrypt_disk = false
+encrypt_disk = true

@@ -36,11 +36,13 @@ has no `#:schema` line.
 | `gateways.dns` VIP for k8s_gateway | Removed | The router is the internal resolver |
 | Full Flux controller patch set | A shorter set: HelmRelease defaults, concurrency, in-memory kustomize, sops-age secret | The longer flag list was not re-checked against Flux 2.10 |
 | spegel, reloader, metrics-server, CoreDNS, echo | Kept | They are part of the template's running cluster, and the plan calls the template the base |
+| v1 `bond0.30` at `10.30.10.2x/16` | Not configured | That VLAN is not part of this install. The sleds use `bond0` on `10.20.0.0/16` only |
+| VolSync chart `oci://ghcr.io/backube/helm-charts/volsync:0.17.0` | `oci://ghcr.io/home-operations/charts-mirror/volsync:0.17.0` | The backube chart tag does not exist |
 
 ## Deliberately not done
 
 - `mise run configure`, `topf secrets`, `topf render`, and `helmfile sync` were not run. They create secrets or need a cluster.
 - `.sops.yaml` lists the YubiKey fingerprint only. No age recipient is committed, and no `*.sops.yaml` ciphertext is committed.
 - Gateway API YAML is not copied into git. The Envoy Gateway chart is the CRD source. The plan's Gateway API version is v1.6.3; the chart is expected to carry the channel it was built for.
-- The VolSync OCI tag `0.17.0` matches the app release. The registry was not queried from this environment (GHCR token requests returned 403), so the tag still needs a confirmation on first install.
-- Taskfile from v1 is gone. The template uses mise. `mise.toml` has validate tasks and does not wrap bootstrap.
+- `scripts/bootstrap-cluster.sh` is the install sequence and was not executed. It refuses to run without `--yes`.
+- Taskfile from v1 is gone. Bootstrap is a mise task that shells out to that script.
