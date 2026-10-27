@@ -46,10 +46,13 @@ spec:
           - name: SERVER_PORT
             value: "8888"
     extraArgs:
-      - --source=gateway-httproute
       - --gateway-name=envoy-internal
       - --managed-record-types=A
       - --managed-record-types=TXT
+    # sources, not extraArgs, is what the chart turns into ClusterRole rules.
+    # gateway-httproute grants namespaces, gateways, and httproutes.
+    sources:
+      - gateway-httproute
     policy: sync
     registry: txt
     txtPrefix: k8s.
