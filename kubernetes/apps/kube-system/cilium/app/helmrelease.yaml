@@ -21,12 +21,13 @@ spec:
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
-    # lan0 is the Talos alias for the single 10G port. Multus is not installed,
+    # The single 10G port is ens1f0 on every sled (Talos v1.14.5). Its Talos alias
+    # lan0 is not a kernel interface name, so Cilium cannot use it. Multus is not installed,
     # so Cilium owns the CNI configuration (cluster-template sets exclusive: false
     # only because that template pairs with Multus).
     cni:
       exclusive: true
-    devices: lan0
+    devices: ens1f0
     dashboards:
       enabled: true
     endpointRoutes:
