@@ -1,7 +1,6 @@
 ---
-# snmp_version is v2c. If the APC card only answers v1, change that one
-# line. The community string is not in this file. It is the
-# snmp-community key of secret nut-credentials.
+# snmp_version is v2c. The APC card answers v2c. The community string
+# is the snmp-community key of secret nut-credentials.
 apiVersion: v1
 kind: ConfigMap
 metadata:

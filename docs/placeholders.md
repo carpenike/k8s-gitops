@@ -34,13 +34,18 @@ are not created yet.
 | --- | --- | --- | --- |
 | `PLACEHOLDER_ITEM_mikrotik-dns` | `mikrotik` | `baseurl`, `username`, `password` | v1 internal DNS was item `bind`, fields `externaldns_algorithm` and `externaldns_secret`. That is RFC2136, not the MikroTik webhook |
 | `PLACEHOLDER_ITEM_flux-webhook` | `flux-webhook` | `token` | v1 had no Flux Receiver. Item `actions-runner-controller` field `ACTION_RUNNER_CONTROLLER_GITHUB_WEBHOOK_SECRET_TOKEN` is a different webhook and is not used |
-| `PLACEHOLDER_ITEM_BMC` | `bmc` | `username`, `password` | No BMC item in the v1 manifests. Forge `ipmi_exporter` reads it. Not an ExternalSecret |
 
 The External Secrets service-account token is also unmatched. v1 stored a
 Connect token in the SOPS secret `onepassword-connect-token`, key `token`.
 The SDK token is new. The bootstrap script writes it to `onepassword-sdk`
 in `external-secrets` from `ONEPASSWORD_SERVICE_ACCOUNT_TOKEN`. It is not
 a vault item and it is not committed.
+
+## BMC
+
+Item `bmc` is a LOGIN item in vault `k8s-secrets`. Fields are `username`
+and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
+`cluster.example.toml` records the item name. The values are not in git.
 
 ## Still to confirm or generate
 
@@ -51,8 +56,6 @@ a vault item and it is not committed.
 | sled-0 boot WWID | `talos/topf.yaml` `bootWwid` | Read it when the node is up. Install does not wait on it; the Samsung 870 model and size selector covers all four |
 | sled-0 MAC `0c:c4:7a:8e:90:f4` | `talos/topf.yaml` | Unverified. The node was dark during the preflight |
 | BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
-| SNMP community | `nut-credentials` key `snmp-community` | The encrypted value is the placeholder `public`. Verify it on the APC card at `10.9.18.245` and re-encrypt if the card uses something else |
-| SNMP version | `nut-upsd` ConfigMap `snmp_version` | `v2c`. Set `v1` if the card does not answer v2c |
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Media NFS server, when a PV is actually added |
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
 | `alertmanager.example.invalid:9093` | kube-prometheus-stack values | Forge Alertmanager address |
