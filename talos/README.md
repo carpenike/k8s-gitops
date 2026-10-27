@@ -35,8 +35,9 @@ reinstalling.
 
 `upsmon` is a secondary of `apc@forge.holthome.net` (10.20.0.30). The UPS
 name `apc` is the stand-in until the nix-config plan names it. Forge's NUT
-server is a nix-config change and is not done yet. Set
-`NUT_UPSMON_PASSWORD` from 1Password item `PLACEHOLDER_ITEM_nut` before
+server is a nix-config change and is not done yet. v1 had no NUT item.
+The placeholder is `PLACEHOLDER_ITEM_nut`. The proposed item is `nut`,
+field `password`. Set `NUT_UPSMON_PASSWORD` from that field before
 `topf apply`. The password is not in this repo.
 
 ## Apply
@@ -44,4 +45,4 @@ server is a nix-config change and is not done yet. Set
 `scripts/bootstrap-cluster.sh` is the install sequence. It refuses to run
 without `--yes`. Do not run it from CI. `topf secrets` writes
 `talos/secrets.sops.yaml`, which is gitignored. Encrypt that bundle with
-sops once the age recipient in `.sops.yaml` is filled in.
+sops. The age recipient is already in `.sops.yaml`. Do not commit `age.key`.

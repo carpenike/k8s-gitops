@@ -59,7 +59,7 @@ require() {
 talos_stage() {
   require topf
   if [[ -z "${NUT_UPSMON_PASSWORD:-}" ]]; then
-    echo "NUT_UPSMON_PASSWORD is empty. Read it from 1Password item PLACEHOLDER_ITEM_nut." >&2
+    echo "NUT_UPSMON_PASSWORD is empty. Read it from 1Password. Proposed item nut, field password (placeholder PLACEHOLDER_ITEM_nut)." >&2
     exit 1
   fi
   (

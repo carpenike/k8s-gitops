@@ -67,6 +67,7 @@ schematic_id = "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c
 # is inferred from those addresses and was not confirmed. No gateway was
 # observed. Credentials stay in 1Password. See docs/adr/0004-ipmi.md.
 cidr = "10.9.18.0/24"
+# No v1 item. Proposed item name is bmc, fields username and password.
 onepassword_item = "PLACEHOLDER_ITEM_BMC"
 
 [[nodes]]

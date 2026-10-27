@@ -148,5 +148,6 @@ starts the next:
 1. `sled-0`, then `sled-1`, then `sled-2` (control planes, so etcd can form)
 2. `sled-3` (worker) last
 
-The waits live with Forge. The BMC user is 1Password item
-`PLACEHOLDER_ITEM_BMC`.
+The waits live with Forge. The BMC user has no v1 item. The placeholder
+is `PLACEHOLDER_ITEM_BMC`. The proposed item is `bmc`, fields `username`
+and `password`.

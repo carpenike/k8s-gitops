@@ -17,9 +17,9 @@ Order, matching cluster-template: `topf secrets`, `topf apply
 `onepassword-sdk` from `$ONEPASSWORD_SERVICE_ACCOUNT_TOKEN`, CRDs from
 `bootstrap/helmfile/crds.yaml`, then `helmfile sync` retried twice.
 
-`NUT_UPSMON_PASSWORD` must be set before apply. Generate `age.key` locally
-and uncomment the age recipient in `.sops.yaml` before encrypting the Talos
-secrets bundle. Do not commit either.
+`NUT_UPSMON_PASSWORD` must be set before apply. The age recipient is
+already in `.sops.yaml`. Keep `age.key` off the repo and encrypt the Talos
+secrets bundle with sops before committing it.
 
 ```sh
 # Age private key stays on the workstation and in the cluster secret.

@@ -22,15 +22,21 @@ spec:
               # renovate: datasource=docker depName=docker.io/cloudflare/cloudflared
               tag: 2026.10.3
             env:
-              NO_AUTOUPDATE: true
+              NO_AUTOUPDATE: "true"
+              TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
               TUNNEL_METRICS: 0.0.0.0:8080
               TUNNEL_TRANSPORT_PROTOCOL: quic
-            envFrom:
-              - secretRef:
-                  name: cloudflare-tunnel-secret
+              TUNNEL_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: cloudflare-tunnel-secret
+                    key: TunnelID
             args:
               - tunnel
+              - --config
+              - /etc/cloudflared/config.yaml
               - run
+              - "$(TUNNEL_ID)"
             probes:
               liveness: &probes
                 enabled: true
@@ -123,3 +129,10 @@ spec:
         globalMounts:
           - path: /etc/cloudflared/config.yaml
             subPath: config.yaml
+      creds:
+        type: secret
+        name: cloudflare-tunnel-secret
+        globalMounts:
+          - path: /etc/cloudflared/creds/credentials.json
+            subPath: credentials.json
+            readOnly: true
