@@ -25,17 +25,22 @@ with `cloudflare_`. The template there reads `cloudflare_tunnel_account_tag`,
 are the names without that prefix. This branch asks for those three fields
 by name and builds the same `credentials.json`.
 
+## Confirmed in k8s-secrets
+
+| Item | Fields | Consumer |
+| --- | --- | --- |
+| `mikrotik` | `username`, `password`, `baseurl` (`https://10.20.0.1`) | external-dns MikroTik webhook. Secret keys `MIKROTIK_USERNAME`, `MIKROTIK_PASSWORD`, `MIKROTIK_BASEURL` |
+| `flux-webhook` | `token` | Flux Receiver secret `flux-webhook-token`, key `token` |
+
+v1 internal DNS was item `bind` (`externaldns_algorithm`, `externaldns_secret`). That is RFC2136, not this webhook. The MikroTik item is new.
+
+## BGP
+
+Confirmed on RouterOS. iBGP, ASN `64512` on both sides, router `10.20.0.1`. The router already peers `10.20.10.20` through `10.20.10.23` (`sled-0` through `sled-3`). Cilium advertises the LoadBalancer pool `10.45.0.0/16`.
+
 ## No v1 equivalent
 
-These stay as `PLACEHOLDER_ITEM_*` in the manifests. The proposed names
-are not created yet.
-
-| Placeholder | Proposed item | Proposed fields | Why it is unmatched |
-| --- | --- | --- | --- |
-| `PLACEHOLDER_ITEM_mikrotik-dns` | `mikrotik` | `baseurl`, `username`, `password` | v1 internal DNS was item `bind`, fields `externaldns_algorithm` and `externaldns_secret`. That is RFC2136, not the MikroTik webhook |
-| `PLACEHOLDER_ITEM_flux-webhook` | `flux-webhook` | `token` | v1 had no Flux Receiver. Item `actions-runner-controller` field `ACTION_RUNNER_CONTROLLER_GITHUB_WEBHOOK_SECRET_TOKEN` is a different webhook and is not used |
-
-The External Secrets service-account token is also unmatched. v1 stored a
+The External Secrets service-account token is unmatched. v1 stored a
 Connect token in the SOPS secret `onepassword-connect-token`, key `token`.
 The SDK token is new. The bootstrap script writes it to `onepassword-sdk`
 in `external-secrets` from `ONEPASSWORD_SERVICE_ACCOUNT_TOKEN`. It is not
@@ -61,6 +66,5 @@ and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 | `alertmanager.example.invalid:9093` | kube-prometheus-stack values | Forge Alertmanager address |
 | `refs/heads/rebuild` | flux-instance HelmRelease | `refs/heads/main` at cutover |
 | Second X520 port | `talos/all/20-network.yaml.tpl` has one link, the active `ens1f0` | The other port's MAC, if the bond should have two members |
-| ASN `64512` | Cilium BGP | Matches v1. Confirm RouterOS still uses it |
 
 `kubernetes/examples/` is not applied by Flux.

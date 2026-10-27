@@ -66,7 +66,10 @@ addresses: internal `10.45.10.50`, external `10.45.10.51`. The API VIP
 VIP was SOPS-encrypted, so this one is new and still needs a free-address
 check.
 
-BGP is iBGP. ASN 64512 is on the nodes and on the router, matching v1.
+BGP is iBGP. ASN 64512 is on the nodes and on the router at `10.20.0.1`.
+RouterOS already peers `10.20.10.20` through `10.20.10.23` (`sled-0`
+through `sled-3`). The LoadBalancer pool `10.45.0.0/16` is the range
+those peers advertise.
 Optional TCP MD5, if used later, belongs in 1Password.
 
 ## Names

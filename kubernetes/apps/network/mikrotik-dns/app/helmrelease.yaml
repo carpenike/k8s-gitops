@@ -36,8 +36,9 @@ spec:
               secretKeyRef:
                 name: mikrotik-credentials
                 key: MIKROTIK_PASSWORD
+          # Router www-ssl cert is self-signed, CN=10.30.0.1, and has no SAN.
           - name: MIKROTIK_SKIP_TLS_VERIFY
-            value: "false"
+            value: "true"
           - name: DOMAIN_FILTER
             value: ${SECRET_DOMAIN}
           - name: SERVER_HOST
