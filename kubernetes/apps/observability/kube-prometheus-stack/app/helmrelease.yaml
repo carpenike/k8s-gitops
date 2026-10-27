@@ -22,6 +22,22 @@ spec:
       enabled: false
     grafana:
       enabled: false
+    # Cilium kubeProxyReplacement is on and KubeProxyConfig is disabled.
+    # The chart's ServiceMonitor and KubeProxyDown rules follow this flag.
+    kubeProxy:
+      enabled: false
+    # Talos 1.14 serves etcd HTTP metrics on 2383 with client mTLS
+    # (listen-client-http-urls). etcd is a Talos service, not a pod labeled
+    # component=etcd, and this repo has no etcd client cert for Prometheus.
+    # The chart's default is HTTP :2381 with that selector, so it cannot scrape.
+    kubeEtcd:
+      enabled: false
+    # kube-controller-manager and kube-scheduler stay on. Talos static pods
+    # are hostNetwork and labeled component=kube-controller-manager and
+    # component=kube-scheduler, which is the chart's selector. They listen
+    # on 0.0.0.0:10257 and :10259 because talos/control-plane/00-cluster.yaml
+    # sets bind-address. The chart scrapes those HTTPS ports with its
+    # Prometheus token and insecureSkipVerify.
     prometheus:
       prometheusSpec:
         externalLabels:
