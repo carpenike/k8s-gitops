@@ -95,9 +95,11 @@ sends them all to `envoy-external`, and checks the origin certificate as
 
 HTTPS on both gateways requires a Pocket ID login
 (`https://id.holthome.net`) unless the HTTPRoute opts out. Echo is the
-first route behind that login. The client secret is Kustomization
-`envoy-gateway-auth`, which nothing else waits on. The label, the path
-bypass, and the Pocket ID client settings are in
+first route behind that login. `flux-webhook` is labeled public and
+keeps its Receiver token. The client secret is Kustomization
+`envoy-gateway-auth`, which nothing else waits on. While that secret is
+missing, Envoy Gateway answers the protected routes with 500. The label,
+the path bypass, and the Pocket ID client settings are in
 [gateway-auth.md](gateway-auth.md).
 
 ## Data

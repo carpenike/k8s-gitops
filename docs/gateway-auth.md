@@ -21,15 +21,35 @@ and `modules/nixos/services/caddy/default.nix`.
 | Client id `caddy-security` on Forge | A new confidential client. The id and secret are 1Password item `pocket-id-gateway` |
 
 The client secret is Kustomization `envoy-gateway-auth`. Nothing depends
-on it. Until item `pocket-id-gateway` exists, the ExternalSecret stays
-unready, Envoy Gateway does not program the OIDC filter, and the
-gateways keep serving. `envoy-gateway`, DNS, the tunnel, and echo do not
-wait on this Kustomization.
+on it. `envoy-gateway`, DNS, the tunnel, and echo do not wait on this
+Kustomization.
 
-`flux-webhook.holthome.net` is an HTTPRoute on `envoy-external` and has
-no auth label. Once `pocket-id` is accepted, GitHub's push hook is sent
-through the same login. Add the public label to that route before push
-delivery needs to succeed.
+A missing or empty client secret, or any other failure while building
+the OIDC filter, is fail-closed on the listeners this policy targets.
+Envoy Gateway 1.9.3 sets an HTTP 500 direct response on every HTTP route
+on that listener that does not already have a more specific
+SecurityPolicy, and the xDS route uses that direct response instead of
+forwarding. The comment in the translator is "return a 500 direct
+response to avoid unauthorized access." The same path returns 500 when
+the secret's `client-secret` key is empty, when OIDC discovery fails, or
+when the controller's HMAC secret is absent. `failOpen` exists only for
+`extAuth`, and only when that is the sole error. This policy does not
+set `extAuth`.
+
+Source, tag `v1.9.3`:
+
+- `internal/gatewayapi/securitypolicy.go`, `buildOIDC` (`secret %s/%s does not exist`, `client secret not found in secret`) and `translateSecurityPolicyForListeners` (the 500 direct response).
+- `internal/gatewayapi/validate.go`, `validateSecretRef`.
+- `internal/xds/translator/route.go`, `Route_DirectResponse`.
+
+Echo has no route policy, so `https://echo.holthome.net` returns 500
+until `pocket-id` translates. A route that already has its own
+SecurityPolicy is left as that policy programmed it. `flux-webhook` is
+one of those routes.
+
+A SecurityPolicy the API server rejects is not attached, so it cannot
+install this 500. The manifests in this repo pass the 1.9.3 CRD.
+`scripts/validate.sh` checks them.
 
 ## Opt out
 
@@ -65,8 +85,11 @@ spec:
       kind: HTTPRoute
 ```
 
-No route on this branch carries the label. Echo stays behind the gateway
-policy.
+`flux-webhook` in namespace `flux-system` is labeled `public`. GitHub
+authenticates that hook with the Receiver token. Its ReferenceGrant
+`flux-webhook-gateway-auth` allows `SecurityPolicy` from namespace
+`network` to select HTTPRoute `flux-webhook`. Echo stays behind the
+gateway policy.
 
 Two policies must not select the same route. The oldest attached policy
 wins. A route uses the label or its own SecurityPolicy, and only one of

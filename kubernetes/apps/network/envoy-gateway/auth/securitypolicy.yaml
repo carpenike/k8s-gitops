@@ -36,7 +36,7 @@ spec:
       sameSite: Lax
 ---
 # Routes that carry gateway.holthome.net/auth=public or =native replace the
-# gateway policy. No such route exists yet. A labeled route in another
+# gateway policy. flux-webhook is public. A labeled route in another
 # namespace also needs a ReferenceGrant. See docs/gateway-auth.md.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy

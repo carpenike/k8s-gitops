@@ -31,8 +31,9 @@ spec:
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Nothing depends on this. A missing Pocket ID client leaves this
-# Kustomization unready and leaves the gateways serving without the login
-# policy. envoy-gateway, DNS, the tunnel, and echo do not wait on it.
+# Kustomization unready. Envoy Gateway then answers the protected HTTPS
+# routes with 500 instead of forwarding them. envoy-gateway, DNS, the
+# tunnel, and echo do not wait on it. See docs/gateway-auth.md.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
