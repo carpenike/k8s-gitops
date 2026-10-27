@@ -14,10 +14,11 @@ spec:
       cleanupPolicy:
         wipeDevicesFromOtherClusters: true
       storage:
-        # Three 960GB OSD SSDs on ata6-ata8. Boot disk is ata5 (Samsung 870)
+        # Three OSD SSDs on ata2-ata4 (Talos v1.14.5 by-path names, read from all four
+        # sleds on 27 Oct 2026). Boot disk is ata1 (Samsung 870)
         # and does not match. Ryan approved wiping v1 Ceph on these disks.
         useAllDevices: false
-        devicePathFilter: '^/dev/disk/by-path/pci-0000:00:1f\.2-ata-[678](\.0)?$'
+        devicePathFilter: '^/dev/disk/by-path/pci-0000:00:1f\.2-ata-[234](\.0)?$'
       resources:
         osd:
           limits:
