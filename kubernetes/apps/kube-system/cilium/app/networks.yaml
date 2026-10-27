@@ -1,6 +1,7 @@
 ---
-# LoadBalancer pool is a slice of RFC 5737 TEST-NET-1, outside the placeholder
-# node addresses. Replace the CIDR before bootstrap. Do not advertise pod CIDRs.
+# LoadBalancer pool is the v1 CiliumLoadBalancerIPPool: 10.45.0.0/16.
+# It does not overlap the node LAN 10.20.0.0/16. Advertise LoadBalancer
+# IPs only, not pod CIDRs.
 apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
@@ -8,7 +9,7 @@ metadata:
 spec:
   allowFirstLastIPs: "No"
   blocks:
-    - cidr: 192.0.2.16/28
+    - cidr: 10.45.0.0/16
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
@@ -50,7 +51,7 @@ spec:
         matchLabels:
           advertise: bgp
 ---
-# iBGP: local ASN equals the router ASN. Both values are placeholders.
+# iBGP: local ASN equals the router ASN. Both match v1 (64512, peer 10.20.0.1).
 apiVersion: cilium.io/v2alpha1
 kind: CiliumBGPClusterConfig
 metadata:
@@ -65,6 +66,6 @@ spec:
       peers:
         - name: peer-64512-v4
           peerASN: 64512
-          peerAddress: 192.0.2.1
+          peerAddress: 10.20.0.1
           peerConfigRef:
             name: bgp-peer-config-v4

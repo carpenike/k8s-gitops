@@ -1,5 +1,6 @@
-# topf renders the Go templates in this file. The gateway and prefix are
-# RFC 5737 placeholders, matching cluster.example.toml.
+# topf renders the Go templates in this file. The LAN is 10.20.0.0/16, so
+# the gateway 10.20.0.1 is on-link. v1 handed these addresses out by DHCP
+# and did not record the mask.
 ---
 apiVersion: v1alpha1
 kind: LinkAliasConfig
@@ -15,13 +16,13 @@ links:
 bondMode: active-backup
 mtu: {{ .Node.Data.mtu }}
 addresses:
-  - address: "{{ .Node.IP }}/24"
+  - address: "{{ .Node.IP }}/16"
 routes:
-  - gateway: "192.0.2.1"
+  - gateway: "10.20.0.1"
 {{- if eq .Node.Role "control-plane" }}
 ---
 apiVersion: v1alpha1
 kind: Layer2VIPConfig
 link: bond0
-name: "192.0.2.10"
+name: "10.20.10.10"
 {{- end }}

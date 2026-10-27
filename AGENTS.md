@@ -31,8 +31,11 @@ updated in a pull request.
 ## Hard rules
 
 - The GitHub repository is public. Do not commit secrets, tokens, age
-  private keys, Talos secret bundles, kubeconfigs, tunnel credentials, home
-  or private addresses, or internal hostnames.
+  private keys, Talos secret bundles, kubeconfigs, tunnel credentials, or
+  internal hostnames. The node LAN `10.20.0.0/16` and the LoadBalancer
+  range `10.45.0.0/16` are the recorded plan. See `docs/architecture.md`.
+- SOPS personal access is the YubiKey fingerprint in `.sops.yaml`. Do not
+  generate or commit an age private key. See `docs/sops.md`.
 - Site-specific values stay as the placeholders in `docs/placeholders.md`
   and `cluster.example.toml`.
 - Do not generate an age key, a deploy key, or a webhook token and commit

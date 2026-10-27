@@ -1,11 +1,11 @@
 # Copy to cluster.toml (gitignored) only if a generator is added later.
-# The manifests in kubernetes/ and talos/ currently mirror these placeholders.
-# Every address is RFC 5737 TEST-NET-1. The domain is RFC 2606.
+# The manifests in kubernetes/ and talos/ currently mirror these values.
+# Node and service ranges match archive/talos-v1. The domain is still RFC 2606.
 
 [network]
-node_cidr = "192.0.2.0/24"
+node_cidr = "10.20.0.0/16"
 dns_servers = ["1.1.1.1", "1.0.0.1"]
-default_gateway = "192.0.2.1"
+default_gateway = "10.20.0.1"
 
 [kubernetes]
 pod_cidr = "10.42.0.0/16"
@@ -13,11 +13,14 @@ svc_cidr = "10.43.0.0/16"
 coredns_addr = "10.43.0.10"
 
 [kubernetes.api]
-addr = "192.0.2.10"
+# New Layer 2 VIP. The v1 VIP was encrypted and was not copied.
+# Confirm 10.20.10.10 is free before install.
+addr = "10.20.10.10"
 
 [gateways]
-internal = "192.0.2.20"
-external = "192.0.2.21"
+# v1 Cilium Gateway addresses, inside the 10.45.0.0/16 LoadBalancer pool.
+internal = "10.45.10.50"
+external = "10.45.10.51"
 # No separate DNS VIP. Internal records are written to the router by the
 # MikroTik external-dns webhook. See docs/deviations.md.
 
@@ -41,8 +44,8 @@ mode = "cloudflare-tunnel"
 loadbalancer_mode = "dsr"
 
 [cilium.bgp]
-# Same ASN on both sides: iBGP to RouterOS 7. Replace before use.
-router_addr = "192.0.2.1"
+# Same ASN on both sides: iBGP to RouterOS 7. Both values match v1.
+router_addr = "10.20.0.1"
 router_asn = "64512"
 node_asn = "64512"
 
@@ -53,7 +56,7 @@ schematic_id = "0000000000000000000000000000000000000000000000000000000000000000
 
 [[nodes]]
 name = "sled-1"
-address = "192.0.2.11"
+address = "10.20.10.20"
 controller = true
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:01"
@@ -63,7 +66,7 @@ encrypt_disk = false
 
 [[nodes]]
 name = "sled-2"
-address = "192.0.2.12"
+address = "10.20.10.21"
 controller = true
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:02"
@@ -73,7 +76,7 @@ encrypt_disk = false
 
 [[nodes]]
 name = "sled-3"
-address = "192.0.2.13"
+address = "10.20.10.22"
 controller = true
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:03"
@@ -83,7 +86,7 @@ encrypt_disk = false
 
 [[nodes]]
 name = "sled-4"
-address = "192.0.2.14"
+address = "10.20.10.23"
 controller = false
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:04"

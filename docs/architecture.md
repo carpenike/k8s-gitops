@@ -42,16 +42,25 @@ are the current pins from onedr0p/cluster-template or the chart repo as of
 ## Networks
 
 Pod CIDR `10.42.0.0/16` and service CIDR `10.43.0.0/16` are the
-cluster-template defaults. They are cluster-internal overlays. They must
-not overlap the LAN. The LAN itself is not stored in git. Placeholder node
-and gateway addresses are RFC 5737 TEST-NET-1 (`192.0.2.0/24`).
+cluster-template defaults. They do not overlap the node LAN or the
+LoadBalancer range.
 
-Cilium advertises LoadBalancer IPs only. The pool is `192.0.2.16/28`, which
-covers the internal gateway `192.0.2.20` and the external gateway
-`192.0.2.21`. The API VIP `192.0.2.10` is a Talos Layer 2 VIP, not a
-Cilium pool address.
+The node LAN is `10.20.0.0/16`, gateway `10.20.0.1`. v1 already used that
+prefix for kubelet `validSubnets`, etcd `advertisedSubnets`, and the BGP
+peer (`10.20.0.1/32` in `CiliumBGPPeeringPolicy`). The four sleds reuse the
+v1 bare-metal addresses `10.20.10.20` through `10.20.10.23`. The old VM
+control plane at `10.20.0.20` is not carried forward. Static config uses a
+`/16` mask so the gateway is on-link. v1 used DHCP and did not record the
+mask.
 
-BGP is iBGP: the placeholder ASN is 64512 on the nodes and on the router.
+Cilium advertises LoadBalancer IPs only. The pool is `10.45.0.0/16`, the
+same `CiliumLoadBalancerIPPool` block as v1. Envoy reuses the v1 gateway
+addresses: internal `10.45.10.50`, external `10.45.10.51`. The API VIP
+`10.20.10.10` is a Talos Layer 2 VIP, not a Cilium pool address. The v1
+VIP was SOPS-encrypted, so this one is new and still needs a free-address
+check.
+
+BGP is iBGP. ASN 64512 is on the nodes and on the router, matching v1.
 Optional TCP MD5, if used later, belongs in 1Password.
 
 ## Data

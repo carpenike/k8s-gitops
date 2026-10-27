@@ -18,7 +18,10 @@ Before the first `helmfile sync` (not run from this branch):
 
 ```sh
 # Age private key stays on the workstation and in the cluster secret.
-# Generate it locally. Do not commit age.key.
+# Generate a new one. Do not commit age.key, and do not reuse the v1 age key.
+# Add the public recipient to the .sops.yaml key group next to the YubiKey
+# fingerprint, then re-encrypt. Ryan's own decrypt path is the YubiKey.
+# See docs/sops.md.
 kubectl --namespace flux-system create secret generic sops-age \
   --from-file=age.agekey=./age.key
 

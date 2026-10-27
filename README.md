@@ -42,5 +42,6 @@ Needs `yamllint`, `kustomize`, `kubeconform`, and `gitleaks` on `PATH`.
 ## Not in git
 
 Age keys, Talos secrets, the 1Password service-account token, Cloudflare
-tokens, the tunnel token, MikroTik credentials, real addresses, and real
-hostnames. The list of blanks to fill is `docs/placeholders.md`.
+tokens, the tunnel token, MikroTik credentials, and real hostnames.
+Node and LoadBalancer ranges are recorded in `docs/architecture.md`.
+The list of blanks to fill is `docs/placeholders.md`.

@@ -6,8 +6,8 @@ topf Go templates; topf renders those per node.
 
 This branch does not run `topf secrets` or `topf apply`. Generating a secrets
 bundle writes a real Talos secret set, and applying it would touch hardware.
-`secretsPath` points at `secrets.sops.yaml`, which is gitignored until an age
-key exists and the bundle is encrypted.
+`secretsPath` points at `secrets.sops.yaml`, which is gitignored. Encrypt
+that bundle with `sops` so the YubiKey can open it. See `docs/sops.md`.
 
 The Image Factory schematic must include `siderolabs/nut-client`. The
 `schematicId` in `topf.yaml` is 64 zeros on purpose. Build the schematic,

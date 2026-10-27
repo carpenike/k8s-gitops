@@ -11,4 +11,3 @@ talos/secrets.yaml
 .private/
 *.decrypted~*
 .DS_Store
-.sops.yaml

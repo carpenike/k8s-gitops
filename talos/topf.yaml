@@ -1,9 +1,10 @@
 ---
-# Placeholder inventory for topf. Every address is RFC 5737 TEST-NET-1.
-# Replace schematicId, disk, MAC, and addresses from a maintenance-mode node
-# before any apply. Do not commit talos/secrets.sops.yaml from `topf secrets`.
+# Node inventory for topf. Addresses are the v1 bare-metal hosts on
+# 10.20.0.0/16. The API VIP 10.20.10.10 is new; the old VIP was encrypted.
+# Replace schematicId, disk, and MAC from maintenance mode before any apply.
+# Do not commit talos/secrets.sops.yaml from `topf secrets`.
 clusterName: kubernetes
-clusterEndpoint: https://192.0.2.10:6443
+clusterEndpoint: https://10.20.10.10:6443
 
 # renovate: datasource=github-releases depName=siderolabs/talos
 talosVersion: v1.14.5
@@ -14,7 +15,7 @@ secretsPath: secrets.sops.yaml
 
 nodes:
   - host: sled-1
-    ip: 192.0.2.11
+    ip: 10.20.10.20
     role: control-plane
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
     data:
@@ -25,7 +26,7 @@ nodes:
       encryptDisk: false
       kernelModules: []
   - host: sled-2
-    ip: 192.0.2.12
+    ip: 10.20.10.21
     role: control-plane
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
     data:
@@ -36,7 +37,7 @@ nodes:
       encryptDisk: false
       kernelModules: []
   - host: sled-3
-    ip: 192.0.2.13
+    ip: 10.20.10.22
     role: control-plane
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
     data:
@@ -47,7 +48,7 @@ nodes:
       encryptDisk: false
       kernelModules: []
   - host: sled-4
-    ip: 192.0.2.14
+    ip: 10.20.10.23
     role: worker
     schematicId: "0000000000000000000000000000000000000000000000000000000000000000"
     data:

@@ -33,8 +33,12 @@ need a Connect pod. The age private key and that token are created by hand
 and are not committed. App credentials are ExternalSecret resources whose
 item names are placeholders until a vault exists.
 
-The age recipient from the archived tree is not reused. `.sops.yaml.example`
-contains a marker, not a key. This branch does not generate a replacement.
+Personal decryption reuses the YubiKey OpenPGP fingerprint from
+`archive/talos-v1:.sops.yaml` (`user_ryan`). That file put the fingerprint
+and the cluster age recipient in one SOPS key group, so either key could
+decrypt. `.sops.yaml` keeps the fingerprint and leaves the age slot empty.
+The v1 age recipient is not reused. This branch does not generate a
+replacement. See `docs/sops.md`.
 
 ### Consequences
 
