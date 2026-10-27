@@ -40,13 +40,16 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Image pull cache | spegel | 0.8.0 |
 | Dependency updates | Renovate | 44.188.2 |
 | Actions runners | ARC scale set, private `sam-tracker` only | chart 0.15.1 |
+| Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
 
 Chart tags that the plan did not name (spegel, CoreDNS, metrics-server,
 reloader, echo, app-template, tuppr, kube-prometheus-stack, cloudflared)
 are the current pins from onedr0p/cluster-template or the chart repo as of
 27 Oct 2026. Renovate is expected to move them. The Actions runner
 policy, the GitHub App, and `runs-on: sam-tracker-k8s` are in
-[actions-runners.md](actions-runners.md).
+[actions-runners.md](actions-runners.md). Headlamp's URL, read-only
+ServiceAccount, and how to grant write later are in
+[headlamp.md](headlamp.md).
 
 ## Networks
 

@@ -1,0 +1,91 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: headlamp
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: headlamp
+      version: 0.46.0
+      sourceRef:
+        kind: HelmRepository
+        name: headlamp
+      interval: 15m
+  values:
+    replicaCount: 1
+    # Image tag follows the chart appVersion when empty. Chart 0.46.0
+    # ships appVersion 0.46.0.
+    serviceAccount:
+      create: true
+      name: headlamp
+    # The chart names this binding <release>-admin. The role is view.
+    clusterRoleBinding:
+      create: true
+      clusterRoleName: view
+    automountServiceAccountToken: true
+    config:
+      inCluster: true
+      # Pocket ID on envoy-internal is the auth proxy. This flag is how the
+      # chart makes every logged-in user use the pod ServiceAccount token,
+      # so nobody pastes a kubeconfig. Headlamp's own OIDC is left off.
+      unsafeUseServiceAccountToken: true
+      enableHelm: false
+      watchPlugins: true
+      oidc:
+        secret:
+          create: false
+    # No gateway.holthome.net/auth label, so the gateway Pocket ID policy
+    # applies. parentRefs is only envoy-internal: mikrotik-dns publishes
+    # routes on that gateway, and cloudflare-dns publishes envoy-external.
+    httpRoute:
+      enabled: true
+      hostnames:
+        - headlamp.${SECRET_DOMAIN}
+      parentRefs:
+        - name: envoy-internal
+          namespace: network
+    pluginsManager:
+      enabled: true
+      # pluginctl release that matches the install command in chart 0.46.0.
+      version: "0.1.1"
+      baseImage: node:22.22-alpine3.24
+      configContent: |
+        plugins:
+          - name: headlamp_flux
+            source: https://artifacthub.io/packages/headlamp/headlamp-plugins/headlamp_flux
+            version: 0.7.0
+        installOptions:
+          parallel: false
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+    securityContext:
+      privileged: false
+      runAsNonRoot: true
+      runAsUser: 100
+      runAsGroup: 101
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
