@@ -2,8 +2,8 @@
 
 Nothing in this list is a secret value. Tokens and private keys go to
 1Password or stay on the YubiKey. The node LAN and the LoadBalancer range
-are already filled in from v1. Hostnames, MACs, disk ids, and the domain
-stay as placeholders.
+are already filled in from v1. Hostnames, MACs, disk ids, the domain, and BMC addresses
+stay as placeholders. BMC addresses in git are RFC 5737 TEST-NET-2.
 
 | Placeholder | Where | Replace with |
 | --- | --- | --- |
@@ -22,7 +22,9 @@ stay as placeholders.
 | `PLACEHOLDER_ITEM_*` | ExternalSecrets | 1Password item and field names |
 | `onepassword-sdk` secret | not in git | `kubectl create secret` from `bootstrap/README.md` |
 | Cluster age recipient | `.sops.yaml` key group, next to the YubiKey fingerprint | A new age public recipient. Not the v1 age key. Private key stays in `age.key` and in the `sops-age` Secret |
-| `nut.example.invalid` and `upsmon` | `talos/all/80-nut-client.yaml` | NUT server and credentials from 1Password, applied with the machine config, not committed |
+| `nut.example.invalid` and `upsmon` | `talos/all/80-nut-client.yaml` | NUT server and credentials from 1Password, applied with the machine config, not committed. Shutdown order is in `docs/architecture.md` |
+| `198.51.100.0/24`, gateway `.1`, sleds `.11`–`.14` | `cluster.example.toml` `[bmc]` and `bmc_address` | Real BMC addresses, written in the Forge repo. This public repo keeps RFC 5737 TEST-NET-2 |
+| `PLACEHOLDER_ITEM_BMC` | `cluster.example.toml` `[bmc].onepassword_item` | 1Password item for the BMC user. Username and password never go in git |
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Media NFS server, when a PV is actually added |
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names, credentials via ExternalSecret |
 | `alertmanager.example.invalid:9093` | kube-prometheus-stack values | Forge Alertmanager address |

@@ -82,7 +82,41 @@ in for Forge.
 
 ## What stays off the cluster
 
-Plex, transcode, home automation, USB radios, cameras, Pocket ID, and the
-out-of-band metrics stack stay on Forge. The NAS boxes serve files and
-backups. They are not Kubernetes nodes. Garage on the backup NAS is a
-NixOS change, not a manifest in this repo.
+Plex, transcode, home automation, USB radios, cameras, and Pocket ID stay
+on Forge. The NAS boxes serve files and backups. They are not Kubernetes
+nodes. Garage on the backup NAS is a NixOS change, not a manifest in this
+repo.
+
+## Out of band
+
+BMC hardware monitoring runs on Forge, outside this cluster. prometheus
+`ipmi_exporter` there scrapes each sled BMC for temperatures, fans, PSU
+status, and the hardware event log. Alerts land on Forge's Alertmanager.
+There is no in-cluster exporter. The BMCs sit on an isolated management
+network. `cluster.example.toml` records that network with RFC 5737
+TEST-NET-2 addresses (`198.51.100.0/24`, sleds `.11`–`.14`). Real
+addresses and credentials belong in the Forge repo and in 1Password.
+ADR 0004.
+
+### Power
+
+NUT shutdown and the later power-on are a pair.
+
+Shutdown starts when the NUT primary (the host behind
+`nut.example.invalid`) sends FSD. Every sled runs the same `nut-client`
+patch: `upsmon` secondary, `SHUTDOWNCMD /sbin/poweroff`. That patch does
+not stagger the nodes. The order to configure on the primary is the
+reverse of power-on:
+
+1. `sled-4` (worker)
+2. `sled-3`, then `sled-2`, then `sled-1` (control planes, last member last)
+
+Power-on is Forge's job, after the UPS reports the battery has recovered.
+Forge uses IPMI or Redfish, waits until the previous sled is on, then
+starts the next:
+
+1. `sled-1`, then `sled-2`, then `sled-3` (control planes, so etcd can form)
+2. `sled-4` (worker) last
+
+The waits and the 1Password item name for the BMC user live with Forge.
+This repo only records the order and the placeholder addresses.

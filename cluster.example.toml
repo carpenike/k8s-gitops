@@ -54,9 +54,18 @@ node_asn = "64512"
 # siderolabs/nut-client (and CPU microcode when chosen).
 schematic_id = "0000000000000000000000000000000000000000000000000000000000000000"
 
+[bmc]
+# Isolated management network, scraped by ipmi_exporter on Forge.
+# Addresses are RFC 5737 TEST-NET-2. Do not replace them with the real
+# subnet in this repo. Credentials stay in 1Password. See docs/adr/0004-ipmi.md.
+cidr = "198.51.100.0/24"
+gateway = "198.51.100.1"
+onepassword_item = "PLACEHOLDER_ITEM_BMC"
+
 [[nodes]]
 name = "sled-1"
 address = "10.20.10.20"
+bmc_address = "198.51.100.11"
 controller = true
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:01"
@@ -67,6 +76,7 @@ encrypt_disk = false
 [[nodes]]
 name = "sled-2"
 address = "10.20.10.21"
+bmc_address = "198.51.100.12"
 controller = true
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:02"
@@ -77,6 +87,7 @@ encrypt_disk = false
 [[nodes]]
 name = "sled-3"
 address = "10.20.10.22"
+bmc_address = "198.51.100.13"
 controller = true
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:03"
@@ -87,6 +98,7 @@ encrypt_disk = false
 [[nodes]]
 name = "sled-4"
 address = "10.20.10.23"
+bmc_address = "198.51.100.14"
 controller = false
 disk = "/dev/disk/by-id/example-boot-REPLACE_ME"
 mac_addr = "02:00:00:00:00:04"
