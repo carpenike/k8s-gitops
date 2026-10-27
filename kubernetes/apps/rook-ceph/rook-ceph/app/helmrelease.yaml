@@ -14,6 +14,11 @@ spec:
       repository: ghcr.io/rook/ceph
     monitoring:
       enabled: true
+    csi:
+      # Rook 1.21 always writes this key. An unset value renders empty,
+      # and the operator then skips CephConnection and ClientProfile.
+      # The code default is true. Driver CRs are the ceph-csi-drivers chart.
+      createCsiOperatorResources: true
     resources:
       requests:
         cpu: 100m

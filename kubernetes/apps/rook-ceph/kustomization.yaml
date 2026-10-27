@@ -8,3 +8,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./rook-ceph/ks.yaml
+  - ./ceph-csi-drivers/ks.yaml

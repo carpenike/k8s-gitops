@@ -40,3 +40,9 @@ spec:
           parameters:
             imageFeatures: layering
             csi.storage.k8s.io/fstype: ext4
+    # The chart default leaves this off. ceph-block is the default class.
+    cephBlockPoolsVolumeSnapshotClass:
+      enabled: true
+      name: csi-ceph-block
+      isDefault: true
+      deletionPolicy: Delete

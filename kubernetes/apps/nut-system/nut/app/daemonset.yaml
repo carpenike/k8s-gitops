@@ -53,11 +53,23 @@ spec:
               port: nut
             periodSeconds: 5
             failureThreshold: 24
+          # The image entrypoint (instantlinux/docker-tools
+          # images/nut-upsd/entrypoint.sh) starts as root, chowns the
+          # runtime directory to the nut user, then upsdrvctl/upsd drop
+          # to that user. Dropping every capability makes that chown
+          # return EPERM. These five are the ones that script uses, and
+          # they are in the default capability set.
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+                - SETGID
+                - SETUID
             readOnlyRootFilesystem: false
             runAsNonRoot: false
             runAsUser: 0

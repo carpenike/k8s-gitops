@@ -110,6 +110,15 @@ Barman Cloud plugin. Object storage endpoints are `s3.example.invalid` and
 are not live. The same pattern is the intent for a second copy in R2.
 
 VolSync is installed. ReplicationSource objects are examples only.
+It waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
+snapshotter v8.7.0). That chart also carries the VolumeSnapshot CRDs.
+`ceph-block` has VolumeSnapshotClass `csi-ceph-block`.
+
+Rook 1.21 installs the ceph-csi-operator and creates CephConnection only
+when `csi.createCsiOperatorResources` is true. The RBD and CephFS Driver
+CRs come from the `ceph-csi-drivers` chart, not from the operator chart.
+The provisioner names are `rook-ceph.rbd.csi.ceph.com` and
+`rook-ceph.cephfs.csi.ceph.com`.
 
 Prometheus Operator CRDs come from `prometheus-operator-crds` 32.0.2.
 Bootstrap applies them once. The Flux HelmRelease of that chart is the

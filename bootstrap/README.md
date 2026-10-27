@@ -9,7 +9,8 @@ The helmfile reads chart URLs from each `ocirepository.yaml` and values from
 each `helmrelease.yaml`. It does not create secrets.
 
 `crds.yaml` seeds the Prometheus Operator CRDs from
-`prometheus-operator-crds` 32.0.2 once, before Cilium. That chart is
+`prometheus-operator-crds` 32.0.2 once, before Cilium, and the external
+snapshotter CRDs from `snapshot-controller` 0.1.2. The Prometheus chart is
 operator v0.94.2, the same operator as kube-prometheus-stack 92.14.0. It
 renders the CRDs as templates. Day-2 upgrades belong only to the Flux
 HelmRelease `prometheus-operator-crds`, which sets `install.crds` and

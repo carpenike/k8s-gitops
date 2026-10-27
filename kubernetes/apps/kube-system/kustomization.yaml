@@ -12,3 +12,4 @@ resources:
   - ./spegel/ks.yaml
   - ./metrics-server/ks.yaml
   - ./reloader/ks.yaml
+  - ./snapshot-controller/ks.yaml

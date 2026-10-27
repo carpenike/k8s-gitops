@@ -32,3 +32,10 @@ releases:
     namespace: network
     inherit:
       - template: default
+
+  # Volume snapshot CRDs ship in the snapshot-controller chart's crds/
+  # directory. Seed them once. The Flux HelmRelease owns later upgrades.
+  - name: snapshot-controller
+    namespace: kube-system
+    inherit:
+      - template: default
