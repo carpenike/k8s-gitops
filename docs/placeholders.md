@@ -63,7 +63,6 @@ and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 | BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Media NFS server, when a PV is actually added |
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
-| `alertmanager.example.invalid:9093` | kube-prometheus-stack values | Forge Alertmanager address |
 | `refs/heads/rebuild` | flux-instance HelmRelease | `refs/heads/main` at cutover |
 
 `kubernetes/examples/` is not applied by Flux.

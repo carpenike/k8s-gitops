@@ -112,8 +112,13 @@ are not live. The same pattern is the intent for a second copy in R2.
 VolSync is installed. ReplicationSource objects are examples only.
 
 kube-prometheus-stack runs Prometheus and not Alertmanager or Grafana.
-Alerts are forwarded to `alertmanager.example.invalid:9093`, which stands
-in for Forge.
+Prometheus labels every series and alert `cluster=k8s-holthome` and sends
+alerts to `https://am.holthome.net:443`. That name is Forge's Caddy vhost
+(`hosts/forge/infrastructure/monitoring-ui.nix`). Its A record is
+`10.20.0.30`, which is on `10.20.0.0/16`. The Alertmanager process listens
+on `127.0.0.1:9093` only. Caddy requires a Pocket ID admin session and has
+no API key, so the cluster's `POST /api/v2/alerts` is refused until Forge
+allows that path from the sleds.
 
 ## What stays off the cluster
 

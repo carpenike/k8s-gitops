@@ -18,6 +18,8 @@ spec:
       enabled: false
     prometheus:
       prometheusSpec:
+        externalLabels:
+          cluster: k8s-holthome
         retention: 7d
         replicas: 2
         storageSpec:
@@ -29,8 +31,12 @@ spec:
               resources:
                 requests:
                   storage: 50Gi
+        # Forge Alertmanager is http://127.0.0.1:9093. Caddy publishes it as
+        # https://am.holthome.net (A 10.20.0.30). Pocket ID still gates that
+        # vhost; see docs/architecture.md.
         additionalAlertManagerConfigs:
-          - scheme: http
+          - scheme: https
+            api_version: v2
             static_configs:
               - targets:
-                  - alertmanager.example.invalid:9093
+                  - am.holthome.net:443
