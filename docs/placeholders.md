@@ -32,6 +32,7 @@ by name and builds the same `credentials.json`.
 | `mikrotik` | `username`, `password`, `baseurl` (`https://10.20.0.1`) | external-dns MikroTik webhook. Secret keys `MIKROTIK_USERNAME`, `MIKROTIK_PASSWORD`, `MIKROTIK_BASEURL` |
 | `flux-webhook` | `token` | Flux Receiver secret `flux-webhook-token`, key `token` |
 | `pocket-id-gateway` | `client_id`, `client_secret` | Envoy Gateway OIDC secret `pocket-id-gateway`, keys `client-id` and `client-secret`. The Pocket ID client is still to be created. Settings are in [gateway-auth.md](gateway-auth.md) |
+| `actions-runner-controller` | `github_app_id`, `github_app_installation_id`, `github_app_private_key` | Actions runner scale set secret `actions-runner-controller`, same key names. The GitHub App is still to be created. Settings are in [actions-runners.md](actions-runners.md) |
 
 v1 internal DNS was item `bind` (`externaldns_algorithm`, `externaldns_secret`). That is RFC2136, not this webhook. The MikroTik item is new.
 

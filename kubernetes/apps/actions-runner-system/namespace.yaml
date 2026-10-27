@@ -1,0 +1,6 @@
+# Baseline is the cluster default. Runners are the stock actions-runner
+# container, not Docker-in-Docker, so this namespace is not privileged.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actions-runner-system
