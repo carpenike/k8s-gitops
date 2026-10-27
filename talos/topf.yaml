@@ -14,6 +14,12 @@ kubernetesVersion: v1.37.1
 
 secretsPath: secrets.sops.yaml
 
+# upsmon password. One ciphertext, in the nut-credentials Secret.
+# topf resolves this vals ref when it loads topf.yaml. Run topf from talos/
+# so the relative path hits that file. .tpl patches are not vals-evaluated.
+data:
+  upsmonPassword: "ref+sops://../kubernetes/apps/nut-system/nut/app/secret.sops.yaml#/stringData/upsmon-password"
+
 nodes:
   - host: sled-0.holthome.net
     ip: 10.20.10.20

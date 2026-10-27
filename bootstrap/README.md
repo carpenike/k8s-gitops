@@ -17,9 +17,12 @@ Order, matching cluster-template: `topf secrets`, `topf apply
 `onepassword-sdk` from `$ONEPASSWORD_SERVICE_ACCOUNT_TOKEN`, CRDs from
 `bootstrap/helmfile/crds.yaml`, then `helmfile sync` retried twice.
 
-`NUT_UPSMON_PASSWORD` must be set before apply. The age recipient is
-already in `.sops.yaml`. Keep `age.key` off the repo and encrypt the Talos
-secrets bundle with sops before committing it.
+`topf apply` decrypts the upsmon password from
+`kubernetes/apps/nut-system/nut/app/secret.sops.yaml` through vals. `sops`
+and `vals` have to be on PATH, and the run is from `talos/` so the relative
+ref resolves. The age recipient is already in `.sops.yaml`. Keep `age.key`
+off the repo and encrypt the Talos secrets bundle with sops before
+committing it.
 
 ```sh
 # Age private key stays on the workstation and in the cluster secret.

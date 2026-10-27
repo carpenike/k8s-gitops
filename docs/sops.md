@@ -41,5 +41,8 @@ Flux still needs the age identity that matches the recipient in
 a recipient change so both keys wrap the data key. The cluster secret is
 the one in `bootstrap/README.md`
 (`sops-age` in `flux-system`, key `age.agekey`). App credentials stay in
-1Password. SOPS is for the bootstrap files Flux must read before External
-Secrets is up, and for the Talos secrets bundle.
+1Password, except the upsmon password. That password is generated once
+and stored in `kubernetes/apps/nut-system/nut/app/secret.sops.yaml`. Flux
+decrypts it for the DaemonSet. `topf` reads the same file through vals.
+SOPS is for that secret, for the bootstrap files Flux must read before
+External Secrets is up, and for the Talos secrets bundle.

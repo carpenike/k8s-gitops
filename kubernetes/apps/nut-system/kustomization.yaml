@@ -1,0 +1,7 @@
+# No namespace transformer. The Flux Kustomization below stays in
+# flux-system so it can read the sops-age secret. It targets nut-system.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./namespace.yaml
+  - ./nut/ks.yaml

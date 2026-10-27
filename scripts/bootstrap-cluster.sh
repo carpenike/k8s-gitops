@@ -38,8 +38,9 @@ apps:
   8. onepassword-sdk secret from $ONEPASSWORD_SERVICE_ACCOUNT_TOKEN
   9. apply CRDs from bootstrap/helmfile/crds.yaml
   10. helmfile sync, retried twice
-NUT_UPSMON_PASSWORD must be set before step 2. It is not stored in git.
-Forge's NUT server is a separate nix-config change and is not done yet.
+topf reads the upsmon password from the SOPS secret. sops and vals must
+be on PATH. If ./age.key exists it is exported as SOPS_AGE_KEY_FILE.
+Until the nut-upsd DaemonSet is running, upsmon retries.
 EOF
 }
 
@@ -58,9 +59,10 @@ require() {
 
 talos_stage() {
   require topf
-  if [[ -z "${NUT_UPSMON_PASSWORD:-}" ]]; then
-    echo "NUT_UPSMON_PASSWORD is empty. Read it from 1Password. Proposed item nut, field password (placeholder PLACEHOLDER_ITEM_nut)." >&2
-    exit 1
+  require sops
+  require vals
+  if [[ -f "${ROOT}/age.key" ]]; then
+    export SOPS_AGE_KEY_FILE="${ROOT}/age.key"
   fi
   (
     cd "${ROOT}/talos"

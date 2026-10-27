@@ -1,0 +1,78 @@
+---
+# One upsd on every sled, including the control planes. hostNetwork makes
+# 127.0.0.1 the host loopback, which is where the Talos nut-client
+# extension connects. The port is not published on the node IP.
+# snmp-ups polls the APC card at 10.9.18.245. The sleds can reach
+# 10.9.18.0/24 from the host network.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nut-upsd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nut-upsd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nut-upsd
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: upsd
+          # renovate: datasource=docker depName=docker.io/instantlinux/nut-upsd
+          image: docker.io/instantlinux/nut-upsd:2.8.5-r1
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "/usr/local/nut/start.sh"]
+          env:
+            - name: SNMP_COMMUNITY
+              valueFrom:
+                secretKeyRef:
+                  name: nut-credentials
+                  key: snmp-community
+            - name: UPSMON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nut-credentials
+                  key: upsmon-password
+          ports:
+            - name: nut
+              containerPort: 3493
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              host: 127.0.0.1
+              port: nut
+            periodSeconds: 10
+          startupProbe:
+            tcpSocket:
+              host: 127.0.0.1
+              port: nut
+            periodSeconds: 5
+            failureThreshold: 24
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: false
+            runAsUser: 0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: start
+              mountPath: /usr/local/nut
+              readOnly: true
+      volumes:
+        - name: start
+          configMap:
+            name: nut-upsd
+            defaultMode: 0555

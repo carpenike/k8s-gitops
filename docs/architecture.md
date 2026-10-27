@@ -19,6 +19,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Layer | Choice | Pin |
 | --- | --- | --- |
 | Node OS | Talos, Image Factory, UEFI, `nut-client` | v1.14.5 |
+| UPS | `upsd` DaemonSet on every sled, Talos `upsmon` on localhost | instantlinux/nut-upsd 2.8.5-r1 |
 | Kubernetes | Talos-managed | v1.37.1 |
 | GitOps | Flux Operator and Flux instance | chart 0.62.1, Flux 2.10.0 |
 | CNI | Cilium, kube-proxy replacement, BGP | 1.20.4 |
@@ -128,18 +129,16 @@ Credentials stay in 1Password. ADR 0004.
 
 ### Power
 
-NUT shutdown and the later power-on are a pair.
+Shutdown and power-on are different jobs. ADR 0005.
 
-Shutdown starts when Forge's NUT server (`forge.holthome.net`,
-`10.20.0.30`) sends FSD. That service is a nix-config change and is not
-done yet. The UPS name in the Talos patch is `apc` until the nix-config
-plan names it. Every sled runs the same `nut-client`
-patch: `upsmon` secondary, `SHUTDOWNCMD /sbin/poweroff`. That patch does
-not stagger the nodes. The order to configure on the primary is the
-reverse of power-on:
+Each sled runs `upsd` (`snmp-ups` against the APC card at `10.9.18.245`)
+and its own `upsmon`, a secondary of `apc@127.0.0.1`. On low battery or
+FSD, default `upsmon` runs `SHUTDOWNCMD /sbin/poweroff`. There is no
+primary and no stagger. `sled-0` through `sled-3` shut themselves down
+independently when each one sees the flag. Forge is not a client of this
+`upsd`. If Forge shuts down on the same UPS, that is Forge's own config.
 
-1. `sled-3` (worker)
-2. `sled-2`, then `sled-1`, then `sled-0` (control planes, last member last)
+Until the DaemonSet is running, `upsmon` retries. The nodes still boot.
 
 Power-on is Forge's job, after the UPS reports the battery has recovered.
 Forge uses IPMI or Redfish, waits until the previous sled is on, then

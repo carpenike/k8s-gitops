@@ -1,0 +1,42 @@
+---
+# snmp_version is v2c. If the APC card only answers v1, change that one
+# line. The community string is not in this file. It is the
+# snmp-community key of secret nut-credentials.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nut-upsd
+data:
+  start.sh: |
+    #!/bin/sh
+    set -eu
+    if [ -z "${SNMP_COMMUNITY:-}" ] || [ -z "${UPSMON_PASSWORD:-}" ]; then
+      echo "nut credentials are empty" >&2
+      exit 1
+    fi
+    mkdir -p /etc/nut /var/lib/nut /run/nut /var/state/ups
+    cat > /etc/nut/ups.conf <<EOF
+    pollinterval = 30
+
+    [apc]
+        driver = snmp-ups
+        port = 10.9.18.245
+        desc = "APC network management card"
+        community = ${SNMP_COMMUNITY}
+        snmp_version = v2c
+        pollfreq = 30
+    EOF
+    cat > /etc/nut/upsd.conf <<EOF
+    LISTEN 127.0.0.1 3493
+    MAXAGE 25
+    EOF
+    cat > /etc/nut/upsd.users <<EOF
+    [upsmon]
+        password = ${UPSMON_PASSWORD}
+        upsmon secondary
+    EOF
+    chgrp nut /etc/nut/ups.conf /etc/nut/upsd.conf /etc/nut/upsd.users
+    chmod 640 /etc/nut/ups.conf /etc/nut/upsd.conf /etc/nut/upsd.users
+    chown nut:nut /var/lib/nut /run/nut /var/state/ups
+    /usr/sbin/upsdrvctl -u root start
+    exec /usr/sbin/upsd -F -u nut

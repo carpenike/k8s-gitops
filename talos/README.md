@@ -33,12 +33,16 @@ reinstalling.
 
 ## NUT
 
-`upsmon` is a secondary of `apc@forge.holthome.net` (10.20.0.30). The UPS
-name `apc` is the stand-in until the nix-config plan names it. Forge's NUT
-server is a nix-config change and is not done yet. v1 had no NUT item.
-The placeholder is `PLACEHOLDER_ITEM_nut`. The proposed item is `nut`,
-field `password`. Set `NUT_UPSMON_PASSWORD` from that field before
-`topf apply`. The password is not in this repo.
+Each sled runs `upsd` in the `nut-upsd` DaemonSet and polls the APC card
+at `10.9.18.245` with `snmp-ups`. `upsmon` on that same host is a
+secondary of `apc@127.0.0.1`. The UPS name is `apc`. The password is the
+SOPS secret `nut-credentials`, not an environment variable and not a
+1Password item.
+
+`topf apply` from `talos/` resolves `data.upsmonPassword` in `topf.yaml`.
+That needs `sops` and `vals` on PATH, and either `age.key` or the YubiKey.
+Until the DaemonSet is up, `upsmon` retries the connection. That gap is
+accepted. ADR 0005.
 
 ## Apply
 
