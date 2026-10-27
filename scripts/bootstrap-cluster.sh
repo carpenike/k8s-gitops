@@ -113,6 +113,7 @@ apps_stage() {
     --dry-run=client -o yaml \
     | kubectl apply --server-side --filename - >/dev/null
 
+  # Server-side apply: these CRDs are larger than the last-applied annotation.
   helmfile --file "${ROOT}/bootstrap/helmfile/crds.yaml" template --quiet \
     | yq eval-all 'select(.kind == "CustomResourceDefinition")' \
     | kubectl apply --server-side --force-conflicts --filename - >/dev/null

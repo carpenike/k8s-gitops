@@ -111,7 +111,11 @@ are not live. The same pattern is the intent for a second copy in R2.
 
 VolSync is installed. ReplicationSource objects are examples only.
 
-kube-prometheus-stack runs Prometheus and not Alertmanager or Grafana.
+Prometheus Operator CRDs come from `prometheus-operator-crds` 32.0.2.
+Bootstrap applies them once. The Flux HelmRelease of that chart is the
+only day-2 owner (`install.crds` and `upgrade.crds` are `CreateReplace`).
+kube-prometheus-stack does not manage CRDs. kube-prometheus-stack runs
+Prometheus and not Alertmanager or Grafana.
 Prometheus labels every series and alert `cluster=k8s-holthome` and sends
 alerts to `https://am.holthome.net:443`. That name is Forge's Caddy vhost
 (`hosts/forge/infrastructure/monitoring-ui.nix`). Its A record is

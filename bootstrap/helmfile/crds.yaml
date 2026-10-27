@@ -11,6 +11,13 @@ bases:
   - default.yaml
 
 releases:
+  # Seed once, before Cilium's ServiceMonitors. The Flux HelmRelease
+  # prometheus-operator-crds owns later upgrades.
+  - name: prometheus-operator-crds
+    namespace: observability
+    inherit:
+      - template: default
+
   - name: cilium
     namespace: kube-system
     inherit:

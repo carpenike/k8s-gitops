@@ -8,6 +8,18 @@ the Flux Operator, and the Flux instance. Everything else reconciles from
 The helmfile reads chart URLs from each `ocirepository.yaml` and values from
 each `helmrelease.yaml`. It does not create secrets.
 
+`crds.yaml` seeds the Prometheus Operator CRDs from
+`prometheus-operator-crds` 32.0.2 once, before Cilium. That chart is
+operator v0.94.2, the same operator as kube-prometheus-stack 92.14.0. It
+renders the CRDs as templates. Day-2 upgrades belong only to the Flux
+HelmRelease `prometheus-operator-crds`, which sets `install.crds` and
+`upgrade.crds` to `CreateReplace` and therefore also replaces anything the
+chart places in a `crds/` directory. kube-prometheus-stack sets
+`crds.enabled: false` and `install.crds` / `upgrade.crds: Skip`. Renovate
+groups the two chart tags and waits until both have an update. The CRD
+chart appVersion has to match the operator appVersion in
+kube-prometheus-stack before that PR is merged.
+
 The install sequence is `scripts/bootstrap-cluster.sh`. It refuses to run
 without `--yes`, and it was not run from this branch. mise tasks
 `bootstrap`, `bootstrap-talos`, and `bootstrap-apps` call it.

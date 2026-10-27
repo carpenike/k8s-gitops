@@ -10,6 +10,8 @@ spec:
       namespace: kube-system
     - name: cert-manager
       namespace: cert-manager
+    - name: prometheus-operator-crds
+      namespace: observability
   interval: 1h
   path: ./kubernetes/apps/observability/kube-prometheus-stack/app
   postBuild:

@@ -9,9 +9,15 @@ spec:
     kind: OCIRepository
     name: kube-prometheus-stack
   interval: 1h
+  # CRDs belong to prometheus-operator-crds. This release must not install
+  # or replace them.
+  install:
+    crds: Skip
+  upgrade:
+    crds: Skip
   values:
     crds:
-      enabled: true
+      enabled: false
     alertmanager:
       enabled: false
     grafana:

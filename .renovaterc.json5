@@ -29,6 +29,16 @@
       overrideDatasource: "github-releases",
     },
     {
+      description: "Prometheus Operator CRDs move with kube-prometheus-stack. The CRD chart appVersion must match the operator appVersion in kube-prometheus-stack before merging.",
+      groupName: "kube-prometheus-stack",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/prometheus-operator-crds/", "/kube-prometheus-stack/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
       description: "Flux Operator Group",
       groupName: "flux-operator",
       matchDatasources: ["docker"],
