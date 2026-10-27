@@ -8,6 +8,9 @@ spec:
   dependsOn:
     - name: cert-manager
       namespace: cert-manager
+  # Certificates are a separate Kustomization. wait would also hold this
+  # one on Gateway readiness, and a Gateway with a missing TLS secret is
+  # not Ready. The HelmRelease is the dependency DNS and the tunnel need.
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
@@ -25,4 +28,48 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: network
-  wait: true
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. A certificate that cannot be issued stays here
+# and does not block envoy-gateway, DNS, or the tunnel.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-certs
+spec:
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  healthChecks:
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: holthome-net-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: ryanholt-net-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: stefanieholt-com-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: warwed-com-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: whiskeywhiskeywhiskey-org-production
+      namespace: network
+  interval: 1h
+  path: ./kubernetes/apps/network/envoy-gateway/certs
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network
