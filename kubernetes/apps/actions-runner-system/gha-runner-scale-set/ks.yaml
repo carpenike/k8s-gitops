@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Nothing depends on this. The 1Password item actions-runner-controller
-# does not exist until the GitHub App is created. Until the ExternalSecret
-# is Ready, this Kustomization stays unready. The controller does not wait
-# on it. See docs/actions-runners.md.
+# Nothing depends on this. Both scale sets read ExternalSecret
+# actions-runner-controller. Until that secret is Ready, this
+# Kustomization stays unready. The controller does not wait on it.
+# See docs/actions-runners.md.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -21,6 +21,10 @@ spec:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
       name: sam-tracker
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: sam-tracker-app-k8s
       namespace: actions-runner-system
   interval: 1h
   path: ./kubernetes/apps/actions-runner-system/gha-runner-scale-set/app

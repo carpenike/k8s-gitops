@@ -1,22 +1,21 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Repo-scoped scale set for the personal account repository
-# carpenike/sam-tracker. Workflows opt in with runs-on: sam-tracker-k8s.
-# Scale-set runners are ephemeral: one job, then the pod is removed.
-# containerMode dind: tests.yml starts a postgres service container.
-# The chart adds a privileged docker:dind sidecar. See docs/actions-runners.md.
+# Shared scale-set values. Each overlay sets metadata.name, githubConfigUrl,
+# and runnerScaleSetName. Runners are ephemeral: one job, then the pod is
+# removed. containerMode dind adds a privileged docker:dind sidecar.
+# See docs/actions-runners.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: sam-tracker
+  name: scale-set
 spec:
   chartRef:
     kind: OCIRepository
     name: gha-runner-scale-set
   interval: 1h
   values:
-    githubConfigUrl: https://github.com/carpenike/sam-tracker
+    githubConfigUrl: https://github.com/carpenike/REPLACE
     githubConfigSecret: actions-runner-controller
-    runnerScaleSetName: sam-tracker-k8s
+    runnerScaleSetName: replace
     minRunners: 0
     maxRunners: 3
     containerMode:

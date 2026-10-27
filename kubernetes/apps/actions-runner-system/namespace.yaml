@@ -1,6 +1,6 @@
-# sam-tracker tests run a postgres service container, so the scale set
-# uses Docker-in-Docker. That sidecar is privileged. Baseline is the
-# cluster default, and this namespace opts into privileged.
+# The scale sets use Docker-in-Docker so service containers work. That
+# sidecar is privileged. Baseline is the cluster default, and this
+# namespace opts into privileged.
 apiVersion: v1
 kind: Namespace
 metadata:
