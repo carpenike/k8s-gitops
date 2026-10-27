@@ -1,6 +1,6 @@
 # Samsung SSD 870, 500GB class. Excludes the three 960GB OSD SSDs and any
 # ~128GB disk. Serials are empty under Talos, so this does not match on serial.
-# Known WWIDs are comments in topf.yaml. sled-0's WWID was not observed.
+# Known WWIDs are comments in topf.yaml.
 apiVersion: v1alpha1
 kind: UnattendedInstallConfig
 installer:

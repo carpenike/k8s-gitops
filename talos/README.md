@@ -16,9 +16,8 @@ factory.talos.dev/metal-iso/a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd1033
 ```
 
 The ISO installs onto the Samsung SSD 870 (500GB class). The three 960GB
-SSDs are Ceph disks and are not install targets. `sled-0`'s boot WWID was
-not observed; the model and size selector covers it. Known WWIDs for the
-other sleds are in `topf.yaml`.
+SSDs are Ceph disks and are not install targets. The boot WWIDs for all four sleds are
+in `topf.yaml`.
 
 ## Disk encryption
 

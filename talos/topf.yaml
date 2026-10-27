@@ -2,7 +2,7 @@
 # Inventory from the 27 Oct 2026 preflight. Four SYS-2028TP-HTR sleds.
 # Boot disk is the Samsung SSD 870 500GB, selected by model and size in
 # all/00-install.yaml.tpl so sled-0 can install before its WWID is known.
-# sled-0 MAC is unverified (that node was dark). Do not commit
+# sled-0 MAC and WWID were read from the live node on 27 Oct 2026. Do not commit
 # talos/secrets.sops.yaml from `topf secrets`.
 clusterName: kubernetes
 clusterEndpoint: https://10.20.10.10:6443
@@ -26,10 +26,10 @@ nodes:
     role: control-plane
     schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
     data:
-      # WWID not observed. Node was dark during the preflight.
-      bootWwid: ""
-      macAddr: "0c:c4:7a:8e:90:f4" # unverified
-      macVerified: false
+      # /dev/disk/by-id/wwn-0x5002538fc31245ac (read from Talos on 27 Oct 2026)
+      bootWwid: naa.5002538fc31245ac
+      macAddr: "0c:c4:7a:8e:90:f4" # ens1f0, UniFi USXG port 4, DHCP lease
+      macVerified: true
       mtu: 1500
       encryptDisk: true
       kernelModules: []

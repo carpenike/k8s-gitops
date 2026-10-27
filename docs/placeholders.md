@@ -1,7 +1,7 @@
 # Placeholders still open
 
-Hardware from the 27 Oct 2026 preflight is filled in: MACs (sled-0
-unverified), boot-disk selector, schematic id, BMC host addresses, and
+Hardware from the 27 Oct 2026 preflight is filled in: MACs (all four
+verified against UniFi ports and Talos), boot-disk selector, schematic id, BMC host addresses, and
 node names. Passwords, tokens, and the age private key stay out of git.
 
 The 1Password vault is `k8s-secrets`, id `h3aojtbptukuxixo5ysdco7r6u`.
@@ -58,8 +58,6 @@ and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 | --- | --- | --- |
 | API VIP `10.20.10.10` | `talos/topf.yaml`, `talos/all/20-network.yaml.tpl` | Confirm it is free. The v1 VIP was encrypted and was not copied |
 | `/16` mask on `lan0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
-| sled-0 boot WWID | `talos/topf.yaml` `bootWwid` | Read it when the node is up. Install does not wait on it; the Samsung 870 model and size selector covers all four |
-| sled-0 MAC `0c:c4:7a:8e:90:f4` | `talos/topf.yaml` | Unverified. The node was dark during the preflight |
 | BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Media NFS server, when a PV is actually added |
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
