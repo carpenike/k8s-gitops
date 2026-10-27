@@ -1,10 +1,14 @@
 # Architecture
 
-Four Talos nodes in one chassis. Their names are `sled-1.holthome.net`
-through `sled-4.holthome.net`. `sled-1` through `sled-3` are control
-planes with the control-plane taint removed, so they run workloads. `sled-4`
-is a worker. All four are Ceph hosts. A single chassis is one failure
-domain: a sled can fail, the chassis cannot. Backups leave the chassis.
+Four Talos nodes in one chassis. Their names are `sled-0.holthome.net`
+through `sled-3.holthome.net`. The index matches the old bare-metal
+`node-0` through `node-3` addresses. `sled` is the hostname because these
+are the chassis sleds. Control plane and worker are labels, so a later
+machine that is not a sled does not have to join this series. `sled-0`
+through `sled-2` are control planes with the control-plane taint removed,
+so they run workloads. `sled-3` is a worker. All four are Ceph hosts. A
+single chassis is one failure domain: a sled can fail, the chassis
+cannot. Backups leave the chassis.
 Workloads that must outlive it stay on Forge.
 
 Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
@@ -128,15 +132,15 @@ patch: `upsmon` secondary, `SHUTDOWNCMD /sbin/poweroff`. That patch does
 not stagger the nodes. The order to configure on the primary is the
 reverse of power-on:
 
-1. `sled-4` (worker)
-2. `sled-3`, then `sled-2`, then `sled-1` (control planes, last member last)
+1. `sled-3` (worker)
+2. `sled-2`, then `sled-1`, then `sled-0` (control planes, last member last)
 
 Power-on is Forge's job, after the UPS reports the battery has recovered.
 Forge uses IPMI or Redfish, waits until the previous sled is on, then
 starts the next:
 
-1. `sled-1`, then `sled-2`, then `sled-3` (control planes, so etcd can form)
-2. `sled-4` (worker) last
+1. `sled-0`, then `sled-1`, then `sled-2` (control planes, so etcd can form)
+2. `sled-3` (worker) last
 
 The waits and the 1Password item name for the BMC user live with Forge.
 This repo only records the order and the placeholder addresses.

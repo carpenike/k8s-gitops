@@ -71,7 +71,7 @@ gateway = "198.51.100.1"
 onepassword_item = "PLACEHOLDER_ITEM_BMC"
 
 [[nodes]]
-name = "sled-1.holthome.net"
+name = "sled-0.holthome.net"
 address = "10.20.10.20"
 bmc_address = "198.51.100.11"
 controller = true
@@ -82,7 +82,7 @@ secureboot = false
 encrypt_disk = false
 
 [[nodes]]
-name = "sled-2.holthome.net"
+name = "sled-1.holthome.net"
 address = "10.20.10.21"
 bmc_address = "198.51.100.12"
 controller = true
@@ -93,7 +93,7 @@ secureboot = false
 encrypt_disk = false
 
 [[nodes]]
-name = "sled-3.holthome.net"
+name = "sled-2.holthome.net"
 address = "10.20.10.22"
 bmc_address = "198.51.100.13"
 controller = true
@@ -104,7 +104,7 @@ secureboot = false
 encrypt_disk = false
 
 [[nodes]]
-name = "sled-4.holthome.net"
+name = "sled-3.holthome.net"
 address = "10.20.10.23"
 bmc_address = "198.51.100.14"
 controller = false

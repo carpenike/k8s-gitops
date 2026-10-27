@@ -13,7 +13,7 @@ RFC 5737 TEST-NET-2.
 | Sled addresses `10.20.10.20`–`.23` | `talos/topf.yaml` | Confirm the four sleds still own these v1 bare-metal addresses |
 | `/16` mask on `bond0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
 | `10.42.0.0/16`, `10.43.0.0/16`, `10.43.0.10` | Talos network patch, Cilium, CoreDNS | Cluster overlays. They do not overlap `10.20.0.0/16` or `10.45.0.0/16` |
-| `sled-1.holthome.net` … `sled-4.holthome.net` | `talos/topf.yaml` | Confirm these are the names to publish. The zone is `holthome.net` |
+| `sled-0.holthome.net` … `sled-3.holthome.net` | `talos/topf.yaml` | Confirm these are the names to publish. The zone is `holthome.net` |
 | `02:00:00:00:00:0N` | `talos/topf.yaml` | NIC MACs from maintenance mode |
 | `/dev/disk/by-id/example-boot-REPLACE_ME` | `talos/topf.yaml` | Boot disk by-id. Not an OSD |
 | `/dev/disk/by-id/example-osd-REPLACE_ME` | Rook cluster HelmRelease | OSD by-id filter for the four data SSDs per sled. `useAllDevices` stays false |

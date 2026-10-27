@@ -1,5 +1,5 @@
 ---
-# Schedulable control planes. Workers are optional in this layout; sled-4 is one.
+# Schedulable control planes. Workers are optional in this layout; sled-3 is one.
 apiVersion: v1alpha1
 kind: KubeNodeConfig
 taints:
