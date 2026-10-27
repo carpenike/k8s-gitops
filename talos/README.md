@@ -21,14 +21,16 @@ in `topf.yaml`.
 
 ## Disk encryption
 
-STATE and EPHEMERAL use a LUKS2 `nodeID` key. There is no TPM. On 27 Oct
-2026, Talos on sled-1 logged `No TPM chip found` and `TPM device is not
-available`. The chassis is SYS-2028TP-HTR (X10DRT-P) and the optional
-AOM-TPM module is not installed. Secure Boot stays off.
-
-`nodeID` is kept in the unencrypted META partition. A reinstall that wipes
-META cannot unlock the old volumes. Changing the key type later also means
-reinstalling.
+`encryptDisk` is `false` for all four sleds. The planned LUKS2 `nodeID` key
+does not work on these boards. There is no TPM (`No TPM chip found` on
+sled-1, 27 Oct 2026). Worse, the SMBIOS machine UUID is
+`00000000-0000-0000-0000-<BMC-MAC-ish>` (for example
+`00000000-0000-0000-0000-0cc47ac6b500`), and Talos refuses to derive a
+`nodeID` key from it: `machine UUID ... entropy check failed`. STATE then
+never formats and the node never leaves boot. Encrypting needs a different
+key provider (KMS, or a static key kept out of git), which is a decision for
+the owner. Switching later means reinstalling. `all/60-encryption.yaml.tpl`
+stays in the tree and is skipped while `encryptDisk` is false.
 
 ## NUT
 

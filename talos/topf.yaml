@@ -4,6 +4,8 @@
 # all/00-install.yaml.tpl so sled-0 can install before its WWID is known.
 # sled-0 MAC and WWID were read from the live node on 27 Oct 2026. Do not commit
 # talos/secrets.sops.yaml from `topf secrets`.
+# encryptDisk is false: the nodeID key fails the UUID entropy check on these
+# boards. See talos/README.md.
 clusterName: kubernetes
 clusterEndpoint: https://10.20.10.10:6443
 
@@ -31,7 +33,7 @@ nodes:
       macAddr: "0c:c4:7a:8e:90:f4" # ens1f0, UniFi USXG port 4, DHCP lease
       macVerified: true
       mtu: 1500
-      encryptDisk: true
+      encryptDisk: false
       kernelModules: []
   - host: sled-1.holthome.net
     ip: 10.20.10.21
@@ -43,7 +45,7 @@ nodes:
       macAddr: "0c:c4:7a:8f:9f:f2"
       macVerified: true
       mtu: 1500
-      encryptDisk: true
+      encryptDisk: false
       kernelModules: []
   - host: sled-2.holthome.net
     ip: 10.20.10.22
@@ -55,7 +57,7 @@ nodes:
       macAddr: "0c:c4:7a:8f:3e:04"
       macVerified: true
       mtu: 1500
-      encryptDisk: true
+      encryptDisk: false
       kernelModules: []
   - host: sled-3.holthome.net
     ip: 10.20.10.23
@@ -67,5 +69,5 @@ nodes:
       macAddr: "0c:c4:7a:eb:21:fc"
       macVerified: true
       mtu: 1500
-      encryptDisk: true
+      encryptDisk: false
       kernelModules: []
