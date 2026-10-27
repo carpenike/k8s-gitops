@@ -2,8 +2,8 @@
 # Repo-scoped scale set for the personal account repository
 # carpenike/sam-tracker. Workflows opt in with runs-on: sam-tracker-k8s.
 # Scale-set runners are ephemeral: one job, then the pod is removed.
-# containerMode is unset, so the pod is the stock runner image and has
-# no Docker daemon. See docs/actions-runners.md.
+# containerMode dind: tests.yml starts a postgres service container.
+# The chart adds a privileged docker:dind sidecar. See docs/actions-runners.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -19,6 +19,8 @@ spec:
     runnerScaleSetName: sam-tracker-k8s
     minRunners: 0
     maxRunners: 3
+    containerMode:
+      type: dind
     controllerServiceAccount:
       namespace: actions-runner-system
       name: gha-rs-controller
@@ -45,4 +47,4 @@ spec:
                 memory: 1Gi
               limits:
                 cpu: "2"
-                memory: 2Gi
+                memory: 4Gi

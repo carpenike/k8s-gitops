@@ -36,25 +36,21 @@ scale set is repo-scoped. `githubConfigUrl` is
 
 ## Container mode
 
-The scale set does not set `containerMode`. The runner pod is
-`ghcr.io/actions/actions-runner:2.338.2` and `/home/runner/run.sh`. There
-is no Docker daemon in the pod.
+`containerMode.type` is `dind`. `sam-tracker` `.github/workflows/tests.yml`
+starts a `postgres:17` service container, and that needs a Docker daemon
+in the runner pod. The chart adds a privileged `docker:dind` sidecar
+(on Kubernetes 1.29 and newer it is an init container with
+`restartPolicy: Always`) and sets `DOCKER_HOST` on the runner. The
+runner image stays `ghcr.io/actions/actions-runner:2.338.2`.
 
-This environment's GitHub credential cannot read
-`carpenike/sam-tracker` (the API returns 404), so
-`.github/workflows/tests.yml`, `deploy-functions.yml`, and
-`main_ryholt-sam-appservice.yml` were not opened from here.
-`main_<app>.yml` is the file Azure App Service Deployment Center writes
-for a code publish, and a Functions deploy of that name publishes a
-package with the Azure Functions action. Neither starts Docker.
-`services:`, `docker build`, and `docker/build-push-action` need a
-daemon. If `tests.yml` uses those, set `containerMode.type` to `dind` and
-label this namespace `pod-security.kubernetes.io/enforce: privileged`
-(and the audit and warn labels). Baseline is the cluster default, and
-the namespace is unlabeled while dind is off.
+The namespace `actions-runner-system` is labeled
+`pod-security.kubernetes.io/enforce: privileged`, and the same value for
+audit and warn. Baseline is the cluster default. The dind sidecar is
+why this namespace is privileged.
 
-Requests and limits: runner `500m` / `1Gi` up to `2` CPU / `2Gi`. The
-listener is `50m` / `64Mi` up to `200m` / `256Mi`. The controller is
+Requests and limits: runner `500m` / `1Gi` up to `2` CPU / `4Gi`. The
+memory limit is `4Gi` so the runner and a Postgres service container fit.
+The listener is `50m` / `64Mi` up to `200m` / `256Mi`. The controller is
 `50m` / `128Mi` up to `200m` / `256Mi`.
 
 ## GitHub App
@@ -78,7 +74,8 @@ A PAT is not used.
 ## 1Password
 
 Vault `k8s-secrets`, id `h3aojtbptukuxixo5ysdco7r6u`. Item
-`actions-runner-controller`. The item does not exist yet.
+`actions-runner-controller`. The item is in the vault. An older 2023
+duplicate was renamed, and the private key was rewrapped.
 
 | 1Password field | Secret key | Value |
 | --- | --- | --- |

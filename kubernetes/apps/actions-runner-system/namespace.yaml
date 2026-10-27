@@ -1,6 +1,11 @@
-# Baseline is the cluster default. Runners are the stock actions-runner
-# container, not Docker-in-Docker, so this namespace is not privileged.
+# sam-tracker tests run a postgres service container, so the scale set
+# uses Docker-in-Docker. That sidecar is privileged. Baseline is the
+# cluster default, and this namespace opts into privileged.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: actions-runner-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
