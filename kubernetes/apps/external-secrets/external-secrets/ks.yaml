@@ -26,3 +26,24 @@ spec:
     namespace: flux-system
   targetNamespace: external-secrets
   wait: true
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# The ClusterSecretStore needs the CRDs the external-secrets HelmRelease installs, so it
+# is its own Kustomization. In one Kustomization the dry-run fails and the chart never installs.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets-store
+spec:
+  dependsOn:
+    - name: external-secrets
+      namespace: external-secrets
+  interval: 1h
+  path: ./kubernetes/apps/external-secrets/external-secrets/store
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: external-secrets
+  wait: true
