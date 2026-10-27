@@ -21,12 +21,12 @@ spec:
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
-    # Bond name comes from talos/all/20-network.yaml.tpl. Multus is not installed,
+    # lan0 is the Talos alias for the single 10G port. Multus is not installed,
     # so Cilium owns the CNI configuration (cluster-template sets exclusive: false
     # only because that template pairs with Multus).
     cni:
       exclusive: true
-    devices: bond0+
+    devices: lan0
     dashboards:
       enabled: true
     endpointRoutes:

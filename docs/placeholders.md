@@ -57,7 +57,7 @@ and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 | Placeholder | Where | Replace with |
 | --- | --- | --- |
 | API VIP `10.20.10.10` | `talos/topf.yaml`, `talos/all/20-network.yaml.tpl` | Confirm it is free. The v1 VIP was encrypted and was not copied |
-| `/16` mask on `bond0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
+| `/16` mask on `lan0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
 | sled-0 boot WWID | `talos/topf.yaml` `bootWwid` | Read it when the node is up. Install does not wait on it; the Samsung 870 model and size selector covers all four |
 | sled-0 MAC `0c:c4:7a:8e:90:f4` | `talos/topf.yaml` | Unverified. The node was dark during the preflight |
 | BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
@@ -65,6 +65,5 @@ and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
 | `alertmanager.example.invalid:9093` | kube-prometheus-stack values | Forge Alertmanager address |
 | `refs/heads/rebuild` | flux-instance HelmRelease | `refs/heads/main` at cutover |
-| Second X520 port | `talos/all/20-network.yaml.tpl` has one link, the active `ens1f0` | The other port's MAC, if the bond should have two members |
 
 `kubernetes/examples/` is not applied by Flux.

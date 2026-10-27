@@ -36,7 +36,7 @@ has no `#:schema` line.
 | `gateways.dns` VIP for k8s_gateway | Removed | The router is the internal resolver |
 | Full Flux controller patch set | A shorter set: HelmRelease defaults, concurrency, in-memory kustomize, sops-age secret | The longer flag list was not re-checked against Flux 2.10 |
 | spegel, reloader, metrics-server, CoreDNS, echo | Kept | They are part of the template's running cluster, and the plan calls the template the base |
-| v1 `bond0.30` at `10.30.10.2x/16` | Not configured | That VLAN is not part of this install. The sleds use `bond0` on `10.20.0.0/16` only |
+| v1 `bond0.30` at `10.30.10.2x/16` | Not configured | That VLAN is not part of this install. One 10G switch, so each sled uses a single port on `10.20.0.0/16` and there is no bond |
 | VolSync chart `oci://ghcr.io/backube/helm-charts/volsync:0.17.0` | `oci://ghcr.io/home-operations/charts-mirror/volsync:0.17.0` | The backube chart tag does not exist |
 
 ## Deliberately not done

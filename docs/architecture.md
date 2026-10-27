@@ -51,7 +51,9 @@ Pod CIDR `10.42.0.0/16` and service CIDR `10.43.0.0/16` are the
 cluster-template defaults. They do not overlap the node LAN or the
 LoadBalancer range.
 
-The node LAN is `10.20.0.0/16`, gateway `10.20.0.1`. v1 already used that
+Each sled has one 10G port on the one switch. Talos aliases that port to
+`lan0` by its MAC. The node LAN is `10.20.0.0/16`,
+gateway `10.20.0.1`. v1 already used that
 prefix for kubelet `validSubnets`, etcd `advertisedSubnets`, and the BGP
 peer (`10.20.0.1/32` in `CiliumBGPPeeringPolicy`). The four sleds reuse the
 v1 bare-metal addresses `10.20.10.20` through `10.20.10.23`. The old VM

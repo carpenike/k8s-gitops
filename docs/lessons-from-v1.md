@@ -29,7 +29,7 @@ created by hand, and it is not committed.
 One control-plane node was a VM: virtio disk and NIC. The others were bare
 metal with `ixgbe`. Install disks and NIC drivers differed. The rebuild is
 four of the same sled, three of them schedulable control planes, one
-worker. All four use the same install and bond pattern.
+worker. All four use the same install and a single 10G NIC.
 
 ## Internal DNS that wanted the whole zone
 
