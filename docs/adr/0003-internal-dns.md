@@ -48,6 +48,13 @@ aimed at the internal gateway address.
 - Bad, because two external-dns releases must not both manage the same names
 - The internal release is filtered to `envoy-internal`. The public release is
   filtered to `envoy-external`
+- `envoy-external` annotates `external-dns.kubernetes.io/target` with
+  `external.holthome.net`. `cloudflare-dns` publishes a proxied record, so
+  `echo.holthome.net` resolves to Cloudflare anycast from the LAN as well as
+  from the internet. The router does not shadow it. `10.45.10.51` is that
+  gateway's LoadBalancer address, not `envoy-internal` (`10.45.10.50`)
+- `envoy-internal` targets `10.45.10.50`. The MikroTik release manages A and
+  TXT only, so a hostname target would be a CNAME and would not be written
 
 ## Pros and Cons of the Options
 

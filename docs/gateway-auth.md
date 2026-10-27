@@ -20,9 +20,11 @@ and `modules/nixos/services/caddy/default.nix`.
 | Callback path `/caddy-security/oauth2/forge-pocketid` | Envoy Gateway's default callback `https://<host>/oauth2/callback`. Logout path `/logout` |
 | Client id `caddy-security` on Forge | A new confidential client. The id and secret are 1Password item `pocket-id-gateway` |
 
-The client secret is Kustomization `envoy-gateway-auth`. Nothing depends
-on it. `envoy-gateway`, DNS, the tunnel, and echo do not wait on this
-Kustomization.
+The client secret is Kustomization `envoy-gateway-auth` in namespace
+`network`. `kubernetes/apps/network` sets that namespace, so
+`flux get ks -n flux-system` does not list it. Nothing depends on it.
+`envoy-gateway`, DNS, the tunnel, and echo do not wait on this
+Kustomization. Its health check is ExternalSecret `pocket-id-gateway`.
 
 A missing or empty client secret, or any other failure while building
 the OIDC filter, is fail-closed on the listeners this policy targets.

@@ -5,9 +5,9 @@ from the official chart on
 `https://kubernetes-sigs.github.io/headlamp/`, chart `0.46.0`.
 
 Open it at `https://headlamp.holthome.net`. The HTTPRoute's only parent is
-`envoy-internal`. `mikrotik-dns` publishes routes on that gateway.
-`cloudflare-dns` publishes `envoy-external` only, so this name stays off
-Cloudflare.
+`envoy-internal`. `mikrotik-dns` publishes that name as an A record for
+`10.45.10.50`. `cloudflare-dns` publishes `envoy-external` only, so this
+name stays off Cloudflare.
 
 ## Who can open it
 

@@ -38,6 +38,9 @@ kind: Gateway
 metadata:
   name: envoy-external
   annotations:
+    # Hostname, so cloudflare-dns publishes a proxied CNAME. A LAN resolver
+    # that has no static override, including the router forwarding upstream,
+    # returns Cloudflare's addresses. mikrotik-dns does not watch this gateway.
     external-dns.kubernetes.io/target: external.${SECRET_DOMAIN}
 spec:
   gatewayClassName: envoy
@@ -77,7 +80,10 @@ kind: Gateway
 metadata:
   name: envoy-internal
   annotations:
-    external-dns.kubernetes.io/target: internal.${SECRET_DOMAIN}
+    # mikrotik-dns manages A and TXT only. A hostname target is a CNAME, and
+    # that release drops it, so no static record is written. This is the
+    # gateway LoadBalancer address.
+    external-dns.kubernetes.io/target: "10.45.10.50"
 spec:
   gatewayClassName: envoy
   infrastructure:

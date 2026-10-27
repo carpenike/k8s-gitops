@@ -84,7 +84,10 @@ Optional TCP MD5, if used later, belongs in 1Password.
 
 `holthome.net` is the cluster zone. Node names, `internal.holthome.net`,
 `external.holthome.net`, and the Flux webhook live there. The MikroTik
-external-dns release writes that zone only.
+release writes A records for HTTPRoutes on `envoy-internal` only, aimed at
+`10.45.10.50`. Routes on `envoy-external`, including echo and the Flux
+webhook, are Cloudflare proxied names aimed at `external.holthome.net`.
+There is no public wildcard: a name with no route is NODATA at `1.1.1.1`.
 
 Public apps also use these zones. Cloudflare DNS, the DNS-01 solver, the
 external gateway certificates, and the tunnel ingress list each of them.
@@ -103,7 +106,7 @@ HTTPS on both gateways requires a Pocket ID login
 (`https://id.holthome.net`) unless the HTTPRoute opts out. Echo is the
 first route behind that login. `flux-webhook` is labeled public and
 keeps its Receiver token. The client secret is Kustomization
-`envoy-gateway-auth`, which nothing else waits on. While that secret is
+`envoy-gateway-auth` in namespace `network`, which nothing else waits on. While that secret is
 missing, Envoy Gateway answers the protected routes with 500. The label,
 the path bypass, and the Pocket ID client settings are in
 [gateway-auth.md](gateway-auth.md).
