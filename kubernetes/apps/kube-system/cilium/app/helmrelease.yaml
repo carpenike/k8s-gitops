@@ -22,11 +22,12 @@ spec:
         enabled: false
       hostRoot: /sys/fs/cgroup
     # The single 10G port is ens1f0 on every sled (Talos v1.14.5). Its Talos alias
-    # lan0 is not a kernel interface name, so Cilium cannot use it. Multus is not installed,
-    # so Cilium owns the CNI configuration (cluster-template sets exclusive: false
-    # only because that template pairs with Multus).
+    # lan0 is not a kernel interface name, so Cilium cannot use it.
+    # exclusive is false so Cilium leaves Multus's 00-multus.conf in place.
+    # With true, Cilium renames that file to 00-multus.conf.cilium_bak.
+    # devices stays ens1f0. A macvlan master has to be a different kernel link.
     cni:
-      exclusive: true
+      exclusive: false
     devices: ens1f0
     dashboards:
       enabled: true

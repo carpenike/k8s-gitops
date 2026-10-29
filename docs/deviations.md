@@ -21,7 +21,7 @@ has no `#:schema` line.
 | k8s_gateway for internal DNS | external-dns and the MikroTik webhook | A zone forward would capture static router records. ADR 0003 |
 | SOPS/age for app secrets | External Secrets, 1Password SDK; SOPS only for bootstrap. Personal decrypt is the v1 YubiKey PGP fingerprint | ADR 0002 and `docs/sops.md` |
 | BGP optional, eBGP (different ASNs) | BGP required, same ASN on both sides | Plan: iBGP to RouterOS 7 |
-| Cilium `cni.exclusive: false` | `true` | That flag exists in the template for Multus. Multus is not installed |
+| Cilium `cni.exclusive: false` | `false` | Matches the template. Multus is installed (ADR 0006). This tree previously set `true` because Multus was absent |
 | LoadBalancer pool = the whole node CIDR | Pool is `10.45.0.0/16`, separate from the node LAN | v1 already advertised services from that range. Nodes stay on `10.20.0.0/16` |
 | Storage left as a follow-up | Rook-Ceph, static NFS class, VolSync | Plan |
 | Postgres left as a follow-up | CloudNativePG operator and Barman Cloud plugin; no Cluster is reconciled | Plan. The example Cluster is under `kubernetes/examples/` |

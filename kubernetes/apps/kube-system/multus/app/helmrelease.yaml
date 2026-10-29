@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: multus
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: multus
+  interval: 1h
+  values:
+    # home-operations chart 0.1.1 deploys the thin plugin. The DaemonSet
+    # copies the Multus binary and writes the CNI config. containerd invokes
+    # that binary on the host, so the thick plugin's /run/netns hostPath is
+    # not used. These are the Talos paths. /opt/cni/bin is a writable overlay.
+    # No machine-config change and no reboot.
+    cni:
+      binDir: /opt/cni/bin
+      netDir: /etc/cni/net.d
+    # Talos ships bridge, firewall, flannel, host-local, loopback, and
+    # portmap. macvlan, static, and sbr come from the chart's init container
+    # (ghcr.io/home-operations/cni-plugins, tag pinned in the chart).
+    cniPlugins:
+      enabled: true
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 512Mi
+    # Helm replaces the chart toleration list. operator Exists keeps the
+    # DaemonSet on every node, including one that later has a NoSchedule taint.
+    # The chart default is only CriticalAddonsOnly.
+    tolerations:
+      - operator: Exists

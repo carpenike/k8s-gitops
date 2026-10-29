@@ -23,6 +23,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Kubernetes | Talos-managed | v1.37.1 |
 | GitOps | Flux Operator and Flux instance | chart 0.62.1, Flux 2.10.0 |
 | CNI | Cilium, kube-proxy replacement, BGP | 1.20.4 |
+| VLAN interfaces | Multus thin plugin in front of Cilium, NAD `iot` | chart 0.1.1 |
 | Ingress | Envoy Gateway, `envoy-internal` and `envoy-external` | 1.9.3 |
 | Gateway API | CRDs from the Envoy Gateway chart | 1.6.3 is the plan's standard channel |
 | Certificates | cert-manager, Cloudflare DNS-01 wildcard | v1.21.3 |
@@ -67,6 +68,14 @@ v1 bare-metal addresses `10.20.10.20` through `10.20.10.23`. The old VM
 control plane at `10.20.0.20` is not carried forward. Static config uses a
 `/16` mask so the gateway is on-link. v1 used DHCP and did not record the
 mask.
+
+Multus (chart 0.1.1) is the meta-plugin in front of Cilium. A pod opts in
+to a second interface with the `k8s.v1.cni.cncf.io/networks` annotation.
+The shared attachment is `NetworkAttachmentDefinition/iot` in
+`kube-system` (macvlan, bridge mode, static IPAM). No VLAN link is
+declared in `talos/`, so `master` is `TODO` until it is the kernel name
+of the camera or IoT VLAN. Cilium `cni.exclusive` is false and `devices`
+stays `ens1f0`. See [multus.md](multus.md) and ADR 0006.
 
 Cilium advertises LoadBalancer IPs only. The pool is `10.45.0.0/16`, the
 same `CiliumLoadBalancerIPPool` block as v1. Envoy reuses the v1 gateway

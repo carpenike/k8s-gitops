@@ -60,6 +60,7 @@ and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 | --- | --- | --- |
 | API VIP `10.20.10.10` | `talos/topf.yaml`, `talos/all/20-network.yaml.tpl` | Confirm it is free. The v1 VIP was encrypted and was not copied |
 | `/16` mask on `lan0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
+| Camera/IoT VLAN master and gateway | `kubernetes/apps/kube-system/multus/networks/iot.yaml` | `master` is `TODO`. No VLAN link is in `talos/`. Set the kernel interface name and, when known, the `ipam.routes` gateway. See [multus.md](multus.md) |
 | BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Media NFS server, when a PV is actually added |
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
