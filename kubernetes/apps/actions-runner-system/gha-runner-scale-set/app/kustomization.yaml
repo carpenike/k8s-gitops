@@ -6,3 +6,4 @@ resources:
   - ./ocirepository.yaml
   - ./sam-tracker
   - ./sam-tracker-app-k8s
+  - ./va-acr-app-k8s
