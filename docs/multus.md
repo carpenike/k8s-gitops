@@ -1,10 +1,15 @@
 # Multus
 
 Multus is the CNI meta-plugin in front of Cilium. Cilium remains the pod
-network (`eth0`). A pod that needs a second interface on a LAN VLAN, for
-mDNS or to reach cameras, attaches a NetworkAttachmentDefinition. Scrypted
-is the first expected consumer. No app is attached in this change.
+network (`eth0`). A pod that needs a second interface on the node LAN, for
+mDNS or to reach cameras, attaches `NetworkAttachmentDefinition/lan`.
+Scrypted is the first expected consumer. No app is attached in this change.
 ADR 0006.
+
+Each sled has one NIC. Talos aliases it to `lan0`. The kernel name is
+`ens1f0`. Cameras and other IoT devices are on that same network,
+`10.20.0.0/16`, gateway `10.20.0.1`. There is no VLAN subinterface and no
+Talos `VLANConfig`.
 
 The chart is `oci://ghcr.io/home-operations/charts/multus` tag `0.1.1`,
 the chart onedr0p/home-ops pins. At that tag the chart's appVersion is
@@ -21,7 +26,7 @@ not part of this chart.
 
 `cni.exclusive` is `false`. With `true`, Cilium removes other CNI config
 and renames `00-multus.conf` to `00-multus.conf.cilium_bak`. `devices`
-stays `ens1f0`. A macvlan master has to be a different kernel link.
+stays `ens1f0`, which is also the macvlan master.
 
 `dependsOn` waits until the Cilium HelmRelease is Ready. On an already
 running cluster that Ready condition is from the previous reconcile, so
@@ -40,51 +45,41 @@ reference plugins into `/opt/cni/bin`. That directory is a writable
 overlay. This change does not edit Talos machine config and does not
 require a reboot. After a reboot the DaemonSet writes the plugins again.
 
-## The `iot` attachment
+## The `lan` attachment
 
-`NetworkAttachmentDefinition/iot` in `kube-system` is macvlan, bridge
-mode, static IPAM, plus `sbr`. `sbr` keeps return traffic for the
-macvlan address on that interface. Cluster traffic stays on `eth0`. Leave
-`default-route` off the annotation unless the pod should egress through
-the VLAN.
+`NetworkAttachmentDefinition/lan` in `kube-system` is macvlan, bridge
+mode, master `ens1f0`, static IPAM, plus `sbr`. The static route is
+`0.0.0.0/0` via `10.20.0.1`. `sbr` keeps that route on traffic sourced
+from the macvlan address. Cluster traffic stays on `eth0`. Leave
+`default-route` off the annotation.
 
-The `ips` capability is set so the address in the annotation is handed to
-the static plugin.
+The annotation address uses prefix `/16`, so `10.20.0.0/16` is on-link
+and the gateway is only for destinations outside that prefix. The `ips`
+capability is set so the address in the annotation is handed to the
+static plugin.
 
-### TODO
-
-`master` is the string `TODO`. `talos/` declares no VLAN link. Do not
-attach a pod until `master` is the kernel name from `ip link`. The Talos
-alias `lan0` is not a kernel name.
-
-| Candidate | Where it is recorded | Why it is not `master` |
-| --- | --- | --- |
-| `ens1f0` (alias `lan0`), `10.20.0.0/16`, gateway `10.20.0.1` | `talos/all/20-network.yaml.tpl`, Cilium `devices` | Node LAN. Cilium's device. Not a VLAN subinterface |
-| `10.9.18.0/24` | BMC, [architecture.md](architecture.md) | Isolated management network. No node interface in the Talos patches |
-| v1 `bond0.30` at `10.30.10.2x/16` | [deviations.md](deviations.md) | Not part of this install. There is no bond. `CN=10.30.0.1` on the MikroTik webhook is the router certificate, not a node interface |
-
-Adding that link later is a Talos `VLANConfig` (link `lan0`, `name` set to
-the kernel name the NAD will use) and a machine-config apply. Do that
-apply before any app references `iot`. A network apply can reboot a node.
-Confirm the diff before applying.
-
-`ipam.routes` has no gateway. Same-VLAN destinations are reachable from
-the prefix in the annotation. Add a route once the VLAN gateway is known.
-`sbr` keeps that route off Cilium's default table.
+A macvlan interface cannot reach the host address of the parent it is
+enslaved to. A pod cannot reach its own node's `ens1f0` address
+(`10.20.10.20` through `10.20.10.23`, whichever node it landed on) over
+`net1`. Other nodes, the gateway `10.20.0.1`, and the rest of
+`10.20.0.0/16` are reachable. Traffic to that same node still works over
+the Cilium interface.
 
 ## Annotation
 
 The attachment lives in `kube-system`. An app in another namespace names
-that namespace. Replace the address. Pick one that is free on the VLAN,
-outside any DHCP pool.
+that namespace. Pick a free address on `10.20.0.0/16`. Stay off the
+gateway `10.20.0.1`, the API VIP `10.20.10.10`, and the node addresses
+`10.20.10.20` through `10.20.10.23`. `10.20.10.50/16` below is an example
+shape, not a reserved address.
 
 ```yaml
 annotations:
   k8s.v1.cni.cncf.io/networks: |-
     [{
-      "name": "iot",
+      "name": "lan",
       "namespace": "kube-system",
-      "ips": ["<address>/<prefix>"]
+      "ips": ["10.20.10.50/16"]
     }]
 ```
 

@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/k8s.cni.cncf.io/networkattachmentdefinition_v1.json
+# Macvlan on the node LAN. Each sled has one NIC, ens1f0 (Talos alias
+# lan0). Cameras and other IoT devices are on 10.20.0.0/16 with that port.
+# Apps set their own address from that prefix. See docs/multus.md.
+#
+# A macvlan child cannot reach its own node's address on ens1f0. Other
+# nodes, 10.20.0.1, and the rest of 10.20.0.0/16 are reachable. sbr keeps
+# the gateway route on the macvlan source, so Cilium stays the default
+# route for the pod address.
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: lan
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "lan",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "capabilities": {"ips": true},
+          "master": "ens1f0",
+          "mode": "bridge",
+          "ipam": {
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/0", "gw": "10.20.0.1"}
+            ]
+          }
+        },
+        {
+          "type": "sbr"
+        }
+      ]
+    }

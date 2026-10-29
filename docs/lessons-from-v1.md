@@ -17,7 +17,8 @@ real need shows up. Identity for public apps stays Pocket ID on Forge, not
 a second IdP in the cluster.
 
 Multus was added later, as a meta-plugin in front of Cilium, for pods that
-need a VLAN interface (ADR 0006). Cilium is still the pod network.
+need an interface on the node LAN (ADR 0006). Cilium is still the pod
+network.
 
 ## A secret store that was itself a workload
 
