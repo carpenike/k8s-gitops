@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Runner pods run workflow code. They may reach cluster DNS and public IPv4,
+# and nothing else: not the node LAN, the router, the LoadBalancer pool, other
+# pods, or the Kubernetes API. Listeners and the controller need the API, and
+# this selector does not match them. ARC sets actions-ephemeral-runner on runner
+# pods only (resourcebuilder.go, chart 0.15.1). See docs/actions-runners.md.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: runner-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      actions-ephemeral-runner: "True"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16
