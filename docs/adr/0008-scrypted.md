@@ -22,8 +22,8 @@ record is the exception.
 - One replica, because there is one address and one HomeKit identity
 - Recordings stay on the NFS export Forge already writes
 - Plugin state and the HomeKit identity move with `/server/volume`
-- The Coral is USB on Forge. This cluster has no Coral label and no
-  gasket extension
+- The Coral is USB. Node Feature Discovery labels the sled that has it.
+  There is no gasket extension and no PCIe Coral
 - The repository stays public. No Scrypted password is committed
 
 ## Considered Options
@@ -44,17 +44,18 @@ The chart is `app-template` 5.3.0. The image is
 The pod attaches `kube-system/vlan30` at `10.30.0.31/16`. An init
 container adds a route for `10.50.0.0/16` via `10.30.0.1` with source
 `10.30.0.31`. Avahi listens on `net1` only. The deployment strategy is
-`Recreate` and the replica count is 1.
+`Recreate`. The replica count ships at 0 so an empty volume cannot
+start a new HomeKit bridge.
 
 Recordings are a static NFS volume,
 `10.20.0.10:/mnt/tank/share/scrypted`, class `nfs-media`, mounted at
 `/nvr`. Config and plugins are a `ceph-block` PVC mounted at
 `/server/volume`. The UI is an HTTPRoute on `envoy-internal` only.
 
-The node selector `holthome.net/coral=true` matches nothing today.
-Talos ships no Coral device plugin and no gasket driver. The pod mounts
-`/dev/bus/usb`, which is how Forge exposes the USB Coral. A PCIe Coral
-is not wired.
+The node selector is `feature.node.kubernetes.io/coral-tpu=true`. Node
+Feature Discovery sets it from USB vendor `1a6e`, or from `18d1:9302`
+after the runtime reloads the device. The pod mounts `/dev/bus/usb`.
+There is no PCIe Coral.
 
 ### Consequences
 
@@ -63,8 +64,8 @@ is not wired.
 - Good, because a sled failure is not a Forge failure for cameras that
   have moved, and Forge stops spending memory on this process after
   cutover
-- Bad, because the pod stays Pending until a person moves the USB Coral
-  onto a sled and labels that node
+- Bad, because the replica count stays 0 until a person copies the Forge
+  volume and sets it to 1. Starting on an empty volume is a new bridge
 - Bad, because a chassis failure takes the NVR down with the cluster.
   Recordings remain on the NAS
 - Bad, because cameras cannot open connections to `10.30.0.31`. Pull
@@ -99,5 +100,5 @@ is not wired.
 - Good, because the NFS export and the Ceph class already exist
 - Bad, because outbound camera traffic needs a source route the shared
   attachment does not install
-- Bad, because the Coral label and, if the device is PCIe, the gasket
-  driver are still owner work
+- Bad, because the replica count is a manual edit at cutover. Flux
+  would revert a one-off scale

@@ -70,48 +70,50 @@ inside the export's `10.20.0.0/16` client prefix.
 The cameras cannot open connections toward VLAN 30. RTSP and ONVIF
 polling work. A camera that pushes an event to Scrypted does not.
 
-## Coral
+## Scheduling
 
-No node has `holthome.net/coral=true`. `talos/schematic.yaml` installs
-`intel-ucode` and `nut-client` only. Nothing in this tree runs Node
-Feature Discovery or a Coral device plugin, and nothing loads the
-gasket driver, so `/dev/apex_0` will not appear.
+Node Feature Discovery chart 0.20.1 runs a master and a worker in
+`kube-system`. The worker reads PCI and USB. Two NodeFeatureRules:
 
-The selector is required. Until a node is labeled, the Deployment stays
-Pending and does not advertise a second HomeKit bridge. The volume
-mounted for detection is `/dev/bus/usb`, matching Forge's USB Coral.
-The Intel iGPU is not mounted. Decode is on CPU.
+| Label | Match |
+| --- | --- |
+| `feature.node.kubernetes.io/coral-tpu=true` | USB vendor `1a6e`, or vendor `18d1` and product `9302` |
+| `feature.node.kubernetes.io/intel-gpu=true` | PCI vendor `8086` and class `0300` |
+
+`1a6e` is the unflashed Coral (Global Unichip). After libedgetpu loads,
+the same device is `18d1:9302`. sled-1 (`10.20.10.21`) and sled-3
+(`10.20.10.23`) have that USB device. sled-0 and sled-2 do not. There
+is no PCIe Coral. The Intel rule can match zero nodes.
+
+Scrypted selects `feature.node.kubernetes.io/coral-tpu=true` and mounts
+`/dev/bus/usb`. The Deployment ships at `replicas: 0`. NFD will label
+the Coral sleds as soon as it runs. That must not start Scrypted. An
+empty `scrypted-data` volume is a new HomeKit identity.
+
+The Intel iGPU Forge uses is not mounted. Decode is CPU.
+`feature.node.kubernetes.io/intel-gpu` is only a way to find `/dev/dri`
+later.
 
 ## Cutover
 
 Do this from a workstation. This repository does not stop Forge and
 does not edit `carpenike/nix-config`.
 
-The missing Coral label is what keeps the pod Pending. Suspending the
-HelmRelease does not scale the Deployment. Scale it to 0 before the
-label exists, or the scheduler will start an empty volume and Scrypted
-will mint a new HomeKit identity.
+`replicas: 0` is the gate. A `kubectl scale` does not stick: the next
+reconcile puts the Deployment back to whatever git says.
 
 1. Trunk VLAN 30 on the sled switch ports and apply the Talos machine
    config so `ens1f0.30` exists, if that is not done yet. See
    [multus.md](multus.md). Confirm `10.30.0.31` answers nothing else.
-2. After Flux has created the HelmRelease, stop reconciliation and
-   scale the Deployment to 0 before any node is labeled:
+2. Let Flux reconcile Node Feature Discovery. Confirm the label on the
+   two Coral sleds, and nowhere else:
 
    ```sh
-   flux suspend helmrelease scrypted -n scrypted
-   kubectl -n scrypted scale deploy/scrypted --replicas=0
-   kubectl -n scrypted delete pod -l app.kubernetes.io/name=scrypted --wait=true
+   kubectl get nodes -L feature.node.kubernetes.io/coral-tpu
    ```
 
-3. Move the USB Coral from Forge to one sled. It cannot be plugged into
-   both. On that sled, confirm `/dev/bus/usb` exists. Then:
-
-   ```sh
-   kubectl label node <sled> holthome.net/coral=true
-   ```
-
-4. Stop Scrypted on Forge so only one process owns the HomeKit identity
+   Leave `replicas` at 0.
+3. Stop Scrypted on Forge so only one process owns the HomeKit identity
    and the recordings directory:
 
    ```sh
@@ -119,10 +121,12 @@ will mint a new HomeKit identity.
    ```
 
    Leave the NixOS unit in place until the cluster copy is accepted.
-5. Copy `/var/lib/scrypted` into PVC `scrypted-data`. Do not copy
+4. Copy `/var/lib/scrypted` into PVC `scrypted-data`. Do not copy
    `/mnt/data/scrypted`. That directory is the NFS export this pod
-   mounts at `/nvr`. Run the copy pod on the labeled sled so a
-   WaitForFirstConsumer volume is not pinned to a different node:
+   mounts at `/nvr`. The HelmRelease creates the claim at 0 replicas.
+   Run the copy pod on a Coral node so a WaitForFirstConsumer volume is
+   not pinned to sled-0 or sled-2. sled-1 and sled-3 both match; pick
+   one with `nodeName` if the volume must stay there.
 
    ```sh
    kubectl -n scrypted apply -f - <<'EOF'
@@ -134,7 +138,7 @@ will mint a new HomeKit identity.
    spec:
      restartPolicy: Never
      nodeSelector:
-       holthome.net/coral: "true"
+       feature.node.kubernetes.io/coral-tpu: "true"
      containers:
        - name: copy
          image: ghcr.io/koush/scrypted:v0.147.0-noble-full
@@ -153,46 +157,38 @@ will mint a new HomeKit identity.
    kubectl -n scrypted delete pod scrypted-data-copy --wait=true
    ```
 
-   The HelmRelease creates `scrypted-data` on first install, including
-   while the pod is Pending. If the claim is missing, resume only with
-   the Deployment still at 0 replicas and with no Coral label, wait
-   until the PVC exists, then suspend and scale to 0 again before
-   labeling a node.
-6. If `scrypted.holthome.net` is a static DNS record aimed at Forge,
+5. If `scrypted.holthome.net` is a static DNS record aimed at Forge,
    delete it. `mikrotik-dns` only updates records it owns (TXT prefix
    `k8s.`, owner `cluster`) and publishes `envoy-internal` at
    `10.45.10.50`. Stop Forge's Caddy vhost for that name in the same
    window, or clients keep reaching Forge.
-7. Start the cluster copy:
+6. Set `replicas: 1` in
+   `kubernetes/apps/scrypted/scrypted/app/helmrelease.yaml` and let Flux
+   reconcile. Do not only scale the live Deployment. Then:
 
    ```sh
-   flux resume helmrelease scrypted -n scrypted
    kubectl -n scrypted rollout status deploy/scrypted
    ```
 
-8. HomeKit. The pairing keys are in the copied volume. Phones on VLAN
+7. HomeKit. The pairing keys are in the copied volume. Phones on VLAN
    30 discover `10.30.0.31` over mDNS. If a bridge stays at
    "No Response", remove that bridge in the Home app and add it again.
    Do not delete `scrypted-data` to retry. That throws away the keys.
-9. Verify. Open `https://scrypted.holthome.net` from the LAN. Confirm
+8. Verify. Open `https://scrypted.holthome.net` from the LAN. Confirm
    each camera streams (the pod pulls RTSP/ONVIF; the camera cannot
    connect inbound). Confirm new files show up under
    `/mnt/tank/share/scrypted` on `10.20.0.10`. Confirm the pod address
    on `net1` is `10.30.0.31/16`.
-10. In the Scrypted MQTT plugin, replace `mqtt://127.0.0.1:1883` with a
-    broker the pod can reach. The copied volume still has Forge's
-    loopback address. Do not commit the password.
+9. In the Scrypted MQTT plugin, replace `mqtt://127.0.0.1:1883` with a
+   broker the pod can reach. The copied volume still has Forge's
+   loopback address. Do not commit the password.
 
 ## Owner to-dos
 
-- Label `holthome.net/coral=true` on the sled that has the USB Coral,
-  after the device is moved off Forge.
-- If that Coral is PCIe rather than USB, add a gasket system extension
-  to `talos/schematic.yaml` and replace the `/dev/bus/usb` mount with
-  `/dev/apex_0`. Neither exists today.
-- Forge's Intel iGPU (`LIBVA_DRIVER_NAME=iHD`, `/dev/dri/renderD129`)
-  is not mounted. Decode is CPU. Add a GPU device only after the sled's
-  DRM node is known.
+- Set `replicas` from 0 to 1 only after `/var/lib/scrypted` is in
+  `scrypted-data`.
+- Forge's Intel iGPU is not mounted. Decode is CPU. Use
+  `feature.node.kubernetes.io/intel-gpu` when a sled DRM node is known.
 - VolSync is installed and unused. Recordings are the NAS copy. The
   config PVC is not in a ReplicationSource. Add one when a restic
   repository is chosen. Do not point it at the example in

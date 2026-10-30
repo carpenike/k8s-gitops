@@ -37,6 +37,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Postgres backup | Barman Cloud plugin | chart 0.8.1, app v0.15.1 |
 | PVC backup | VolSync restic | chart 0.17.0 |
 | Metrics | kube-prometheus-stack, in-cluster Alertmanager off | chart 92.14.0 |
+| Node features | Node Feature Discovery, master and worker | chart 0.20.1 |
 | Node upgrades | tuppr | chart 0.5.10 |
 | Image pull cache | spegel | 0.8.0 |
 | Dependency updates | Renovate | 44.188.2 |

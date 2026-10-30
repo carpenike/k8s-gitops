@@ -8,6 +8,10 @@ spec:
   dependsOn:
     - name: multus-networks
       namespace: kube-system
+    - name: node-feature-discovery
+      namespace: kube-system
+    - name: node-feature-discovery-rules
+      namespace: kube-system
     - name: nfs-media
       namespace: storage
     - name: rook-ceph-cluster

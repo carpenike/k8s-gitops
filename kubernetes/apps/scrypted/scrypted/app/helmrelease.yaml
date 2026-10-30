@@ -1,8 +1,10 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# One replica, Recreate. VLAN 30 has one address and HomeKit has one
-# identity. hostNetwork stays off: HomeKit and mDNS have to come from
-# 10.30.0.31, not from the sled address on VLAN 20. ADR 0007 and ADR 0008.
+# Recreate, because VLAN 30 has one address and HomeKit has one identity.
+# replicas is 0 until /server/volume is copied from Forge. An empty volume
+# is a new HomeKit identity. hostNetwork stays off: HomeKit and mDNS have
+# to come from 10.30.0.31, not from the sled address on VLAN 20.
+# ADR 0007 and ADR 0008.
 #
 # The image tag is the digest Forge pins as latest in
 # modules/nixos/services/scrypted/default.nix. That digest is
@@ -21,7 +23,7 @@ spec:
   values:
     controllers:
       scrypted:
-        replicas: 1
+        replicas: 0
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -135,16 +137,12 @@ spec:
                 memory: 12Gi
     defaultPodOptions:
       hostNetwork: false
-      # OWNER TODO: no Coral label exists. Talos schematic.yaml ships
-      # intel-ucode and nut-client only. There is no Node Feature
-      # Discovery, no Coral device plugin, and no gasket extension, so
-      # nothing advertises /dev/apex_0. The pod stays Pending until:
-      #   kubectl label node <sled> holthome.net/coral=true
-      # Do not add that label until scrypted-data has been copied from
-      # Forge. An empty volume is a new HomeKit identity. See
+      # NFD rule coral-tpu. USB vendor 1a6e, or 18d1:9302 after the
+      # runtime reloads the device. sled-1 and sled-3 match. Do not raise
+      # replicas above 0 until scrypted-data has been copied. See
       # docs/scrypted.md.
       nodeSelector:
-        holthome.net/coral: "true"
+        feature.node.kubernetes.io/coral-tpu: "true"
       annotations:
         k8s.v1.cni.cncf.io/networks: '[{"name":"vlan30","namespace":"kube-system","ips":["10.30.0.31/16"]}]'
       securityContext:
@@ -207,9 +205,8 @@ spec:
         existingClaim: scrypted-nvr
         globalMounts:
           - path: /nvr
-      # OWNER TODO: this is Forge's USB Coral passthrough
-      # (/dev/bus/usb). A PCIe Coral needs the gasket extension on Talos
-      # and a mount of /dev/apex_0, which this pod does not have.
+      # USB Coral on sled-1 and sled-3. There is no PCIe Coral, so this
+      # is /dev/bus/usb and not /dev/apex_0.
       usb:
         type: hostPath
         hostPath: /dev/bus/usb
