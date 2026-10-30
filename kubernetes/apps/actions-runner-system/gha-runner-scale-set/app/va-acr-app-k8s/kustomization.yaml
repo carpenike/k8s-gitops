@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Repo-scoped scale set for carpenike/va-acr-app.
+# Same GitHub App installation as sam-tracker. Workflows opt in with
+# runs-on: va-acr-app-k8s.
+# Its CI starts no service containers, so this overlay drops dind and the
+# runner pod is not privileged. pytest -n auto sees the node's CPUs, not the
+# 2 CPU limit, so PYTEST_XDIST_AUTO_NUM_WORKERS pins it to 2 workers.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: va-acr-app-k8s
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/va-acr-app
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: va-acr-app-k8s
+      - op: remove
+        path: /spec/values/containerMode
+      - op: add
+        path: /spec/values/template/spec/containers/0/env
+        value:
+          - name: PYTEST_XDIST_AUTO_NUM_WORKERS
+            value: "2"

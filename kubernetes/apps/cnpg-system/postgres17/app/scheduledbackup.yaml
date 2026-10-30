@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/scheduledbackup_v1.json
+# 03:00 UTC. Online snapshot of the primary. These snapshots do not leave
+# the chassis. Six-field cron includes seconds.
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgres17-daily
+spec:
+  schedule: "0 0 3 * * *"
+  immediate: false
+  backupOwnerReference: cluster
+  method: volumeSnapshot
+  online: true
+  onlineConfiguration:
+    waitForArchive: false
+  cluster:
+    name: postgres17

@@ -40,7 +40,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Node upgrades | tuppr | chart 0.5.10 |
 | Image pull cache | spegel | 0.8.0 |
 | Dependency updates | Renovate | 44.188.2 |
-| Actions runners | ARC scale sets, private `sam-tracker` and `sam-tracker-app` | chart 0.15.1 |
+| Actions runners | ARC scale sets, private `sam-tracker`, `sam-tracker-app` and `va-acr-app` | chart 0.15.1 |
 | Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
 
 Chart tags that the plan did not name (spegel, CoreDNS, metrics-server,
@@ -48,7 +48,7 @@ reloader, echo, app-template, tuppr, kube-prometheus-stack, cloudflared)
 are the current pins from onedr0p/cluster-template or the chart repo as of
 27 Oct 2026. Renovate is expected to move them. The Actions runner
 policy, the GitHub App, and `runs-on: sam-tracker-k8s` /
-`sam-tracker-app-k8s` are in
+`sam-tracker-app-k8s` / `va-acr-app-k8s` are in
 [actions-runners.md](actions-runners.md). Headlamp's URL, read-only
 ServiceAccount, and how to grant write later are in
 [headlamp.md](headlamp.md).
@@ -134,10 +134,14 @@ STATE and EPHEMERAL are LUKS2 with a `nodeID` key. The chassis has no TPM
 module. sled-1's Talos dmesg on 27 Oct 2026 was `No TPM chip found` /
 `TPM device is not available`. Secure Boot stays off. See `talos/README.md`.
 
-Postgres clusters are not installed yet. `kubernetes/examples/cnpg-cluster.yaml`
-shows a two-instance cluster on `ceph-block` with WAL archiving through the
-Barman Cloud plugin. Object storage endpoints are `s3.example.invalid` and
-are not live. The same pattern is the intent for a second copy in R2.
+Cluster `postgres17` in `cnpg-system` is the shared PostgreSQL 17 database
+(`ghcr.io/cloudnative-pg/postgresql:17.9`, two instances, `ceph-block`).
+LiteLLM's database is the first one on it. ADR 0006 and
+[litellm.md](litellm.md). `ScheduledBackup` `postgres17-daily` takes an
+online volume snapshot through `csi-ceph-block`. Those snapshots stay on
+Ceph. `kubernetes/examples/cnpg-cluster.yaml` is still the Barman shape for
+a copy that leaves the chassis. Its endpoint is `s3.example.invalid` and
+is not attached. The same pattern is the intent for a second copy in R2.
 
 VolSync is installed. ReplicationSource objects are examples only.
 It waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
