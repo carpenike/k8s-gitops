@@ -24,7 +24,7 @@ has no `#:schema` line.
 | Cilium `cni.exclusive: false` | `true` | That flag exists in the template for Multus. Multus is not installed |
 | LoadBalancer pool = the whole node CIDR | Pool is `10.45.0.0/16`, separate from the node LAN | v1 already advertised services from that range. Nodes stay on `10.20.0.0/16` |
 | Storage left as a follow-up | Rook-Ceph, static NFS class, VolSync | Plan |
-| Postgres left as a follow-up | CloudNativePG operator and Barman Cloud plugin; no Cluster is reconciled | Plan. The example Cluster is under `kubernetes/examples/` |
+| Postgres left as a follow-up | CloudNativePG operator, Barman Cloud plugin, and Cluster `postgres17` | LiteLLM needs a database. Barman stays unattached while the example endpoint is fake. ADR 0006 |
 | No metrics stack | kube-prometheus-stack, Alertmanager and Grafana disabled | Alerts go to Forge. Forge already runs Grafana |
 | No tuppr | tuppr plus TalosUpgrade and KubernetesUpgrade | Plan. Health checks watch Ceph only, not kopiur |
 | Talos tool pin v1.14.4 in `.mise/config.toml` | v1.14.5 in `mise.toml` and `topf.yaml` | Plan pin. Template checkout was one patch behind |
