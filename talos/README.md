@@ -52,6 +52,19 @@ accounts in `system-upgrade`. tuppr's chart asks for that role. Apply that
 document to each control plane (`sled-0`, `sled-1`, `sled-2`). Workers do
 not serve the aggregated API.
 
+## VLAN 30
+
+`all/20-network.yaml.tpl` adds `VLANConfig` `ens1f0.30` on the `lan0`
+alias (kernel parent `ens1f0`). VLAN id 30, no address. That is the
+wireless client network `10.30.0.0/16`, and it is the macvlan master for
+`NetworkAttachmentDefinition/vlan30`. The port's untagged network stays
+the server LAN. See `docs/multus.md`.
+
+The owner applies this machine config to each sled. If `ens1f0.30` does
+not come up, reboot that sled. Each sled's switch port has to carry VLAN
+30 tagged. Leave the native VLAN on the server LAN. This repo does not
+change the switch.
+
 ## Apply
 
 `scripts/bootstrap-cluster.sh` is the install sequence. It refuses to run

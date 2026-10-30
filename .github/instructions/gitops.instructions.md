@@ -14,4 +14,4 @@ applyTo: "kubernetes/**/*.yaml,kubernetes/**/*.yml,bootstrap/**/*.yaml"
 - `kubernetes/apps` has no root `kustomization.yaml`. Flux generates one and includes each child directory that has its own file. That is the cluster-template behavior.
 - `kubernetes/examples/` is not on the Flux path. Do not point a Kustomization at it.
 - Gateway API routes for public apps use `envoy-external`. Everything else uses `envoy-internal`.
-- Do not add a second ingress controller, a second CNI, or a second secrets operator.
+- Cilium is the primary CNI. Multus (`kube-system/multus`) is the meta-plugin in front of it for a second interface (ADR 0007). Do not add another primary CNI, a second ingress controller, or a second secrets operator.

@@ -18,6 +18,22 @@ addresses:
   - address: "{{ .Node.IP }}/16"
 routes:
   - gateway: "10.20.0.1"
+---
+# VLAN 30 is the wireless client network, 10.30.0.0/16. The physical port
+# stays untagged on the server LAN (VLAN 20). This subinterface has no
+# address. A macvlan child does not need a parent address, and a node
+# address would put every sled on the client VLAN. The kernel name is
+# ens1f0.30. parent is the Talos alias lan0. Multicast stays on so mDNS
+# from a macvlan child can leave the port.
+apiVersion: v1alpha1
+kind: VLANConfig
+name: ens1f0.30
+vlanID: 30
+vlanMode: 802.1q
+parent: lan0
+up: true
+multicast: true
+mtu: {{ .Node.Data.mtu }}
 {{- if eq .Node.Role "control-plane" }}
 ---
 apiVersion: v1alpha1

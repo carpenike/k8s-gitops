@@ -48,9 +48,11 @@ updated in a pull request.
 - Do not point Flux at a live cluster from CI. Workflows install nothing
   and use no GitHub secrets.
 - Pin image and chart tags. Renovate is the updater. Do not use `latest`.
-- One CNI (Cilium), one HTTP gateway (Envoy Gateway), one block store
-  (Rook-Ceph), one secrets operator (External Secrets). Do not add the
-  overlapping pieces called out in `docs/lessons-from-v1.md`.
+- Cilium is the primary CNI. Multus is the meta-plugin in front of it
+  for a second interface (ADR 0007). Do not add another primary CNI.
+  One HTTP gateway (Envoy Gateway), one block store (Rook-Ceph), one
+  secrets operator (External Secrets). Do not add the overlapping
+  pieces called out in `docs/lessons-from-v1.md`.
 
 ## Layout
 
