@@ -11,7 +11,7 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Controller | HelmRelease `gha-runner-scale-set-controller` | Installs the scale-set CRDs and the controller. Service account `gha-rs-controller` |
 | Scale set | HelmRelease `sam-tracker` | Repo `https://github.com/carpenike/sam-tracker`. `runs-on` name `sam-tracker-k8s`. `minRunners` 0, `maxRunners` 3 |
 | Scale set | HelmRelease `sam-tracker-app-k8s` | Repo `https://github.com/carpenike/sam-tracker-app`. `runs-on` name `sam-tracker-app-k8s`. Same limits and mode as `sam-tracker` |
-| Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Same limits as `sam-tracker`, no container mode (see below) |
+| Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Runner `1` CPU / `2Gi` up to `8` CPU / `16Gi`, no container mode (see below) |
 | Secret | ExternalSecret `actions-runner-controller` | One GitHub App credential, read by every scale set |
 
 Runners are ephemeral. A pod takes one job and is deleted. That is the
@@ -72,8 +72,8 @@ install` needs `sudo apt-get update` first. The `va-acr-app` opt-in pull
 request makes those two changes.
 
 `va-acr-app` runs `pytest -n auto`. pytest-xdist counts the node's CPUs,
-not the pod's `2` CPU limit, so the overlay sets
-`PYTEST_XDIST_AUTO_NUM_WORKERS=2` on the runner container.
+not the pod's `8` CPU limit, so the overlay sets
+`PYTEST_XDIST_AUTO_NUM_WORKERS=8` on the runner container.
 `python-windows` in that repository runs on `windows-latest` and stays on
 GitHub-hosted runners.
 
@@ -82,9 +82,11 @@ The namespace `actions-runner-system` is labeled
 audit and warn. Baseline is the cluster default. The dind sidecar is
 why this namespace is privileged.
 
-Requests and limits: runner `500m` / `1Gi` up to `2` CPU / `4Gi`. The
-memory limit is `4Gi` so the runner and a Postgres service container fit.
-The listener is `50m` / `64Mi` up to `200m` / `256Mi`. The controller is
+Requests and limits: `sam-tracker` and `sam-tracker-app` runner `500m` /
+`1Gi` up to `2` CPU / `4Gi`. The memory limit is `4Gi` so the runner and a
+Postgres service container fit. `va-acr-app-k8s` requests `1` CPU / `2Gi`
+and limits `8` CPU / `16Gi`, enough for eight pytest-xdist workers. The
+listener is `50m` / `64Mi` up to `200m` / `256Mi`. The controller is
 `50m` / `128Mi` up to `200m` / `256Mi`.
 
 ## GitHub App

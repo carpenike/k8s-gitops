@@ -4,7 +4,8 @@
 # runs-on: va-acr-app-k8s.
 # Its CI starts no service containers, so this overlay drops dind and the
 # runner pod is not privileged. pytest -n auto sees the node's CPUs, not the
-# 2 CPU limit, so PYTEST_XDIST_AUTO_NUM_WORKERS pins it to 2 workers.
+# 8 CPU limit, so PYTEST_XDIST_AUTO_NUM_WORKERS pins it to 8 workers.
+# Requests stay 1 CPU / 2Gi. Limits are 8 CPU / 16Gi. Runners scale to 0.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 components:
@@ -27,8 +28,20 @@ patches:
         value: va-acr-app-k8s
       - op: remove
         path: /spec/values/containerMode
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/cpu
+        value: "1"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/memory
+        value: 2Gi
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/cpu
+        value: "8"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/memory
+        value: 16Gi
       - op: add
         path: /spec/values/template/spec/containers/0/env
         value:
           - name: PYTEST_XDIST_AUTO_NUM_WORKERS
-            value: "2"
+            value: "8"
