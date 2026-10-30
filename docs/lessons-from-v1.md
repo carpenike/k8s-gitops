@@ -16,8 +16,8 @@ media, Envoy Gateway for HTTP, and no policy engine or extra CNI until a
 real need shows up. Identity for public apps stays Pocket ID on Forge, not
 a second IdP in the cluster.
 
-Multus was added later, as a meta-plugin in front of Cilium, for pods that
-need an interface on the node LAN (ADR 0006). Cilium is still the pod
+Multus was added later, as a meta-plugin in front of Cilium, for a pod
+interface on the wireless client VLAN (ADR 0007). Cilium is still the pod
 network.
 
 ## A secret store that was itself a workload

@@ -21,7 +21,7 @@ has no `#:schema` line.
 | k8s_gateway for internal DNS | external-dns and the MikroTik webhook | A zone forward would capture static router records. ADR 0003 |
 | SOPS/age for app secrets | External Secrets, 1Password SDK; SOPS only for bootstrap. Personal decrypt is the v1 YubiKey PGP fingerprint | ADR 0002 and `docs/sops.md` |
 | BGP optional, eBGP (different ASNs) | BGP required, same ASN on both sides | Plan: iBGP to RouterOS 7 |
-| Cilium `cni.exclusive: false` | `false` | Matches the template. Multus is installed (ADR 0006). This tree previously set `true` because Multus was absent |
+| Cilium `cni.exclusive: false` | `false` | Matches the template. Multus is installed (ADR 0007). This tree previously set `true` because Multus was absent |
 | LoadBalancer pool = the whole node CIDR | Pool is `10.45.0.0/16`, separate from the node LAN | v1 already advertised services from that range. Nodes stay on `10.20.0.0/16` |
 | Storage left as a follow-up | Rook-Ceph, static NFS class, VolSync | Plan |
 | Postgres left as a follow-up | CloudNativePG operator, Barman Cloud plugin, and Cluster `postgres17` | LiteLLM needs a database. Barman stays unattached while the example endpoint is fake. ADR 0006 |
@@ -36,7 +36,7 @@ has no `#:schema` line.
 | `gateways.dns` VIP for k8s_gateway | Removed | The router is the internal resolver |
 | Full Flux controller patch set | A shorter set: HelmRelease defaults, concurrency, in-memory kustomize, sops-age secret | The longer flag list was not re-checked against Flux 2.10 |
 | spegel, reloader, metrics-server, CoreDNS, echo | Kept | They are part of the template's running cluster, and the plan calls the template the base |
-| v1 `bond0.30` at `10.30.10.2x/16` | Not configured | That VLAN is not part of this install. One 10G switch, so each sled uses a single port on `10.20.0.0/16` and there is no bond |
+| v1 `bond0.30` at `10.30.10.2x/16` | `ens1f0.30` with no node address | One 10G port, so there is no bond. VLAN 30 is the macvlan master for Multus. The sleds do not take an address on `10.30.0.0/16`. ADR 0007 |
 | VolSync chart `oci://ghcr.io/backube/helm-charts/volsync:0.17.0` | `oci://ghcr.io/home-operations/charts-mirror/volsync:0.17.0` | The backube chart tag does not exist |
 
 ## Deliberately not done

@@ -1,15 +1,31 @@
 # Multus
 
 Multus is the CNI meta-plugin in front of Cilium. Cilium remains the pod
-network (`eth0`). A pod that needs a second interface on the node LAN, for
-mDNS or to reach cameras, attaches `NetworkAttachmentDefinition/lan`.
-Scrypted is the first expected consumer. No app is attached in this change.
-ADR 0006.
+network (`eth0`). A pod that needs a second interface on the wireless
+client VLAN attaches `NetworkAttachmentDefinition/vlan30`. Scrypted is
+the expected consumer, when it moves off Forge onto a Coral node. This
+change does not deploy Scrypted and does not add a node selector. No
+Coral label exists yet. ADR 0007.
+
+VLAN 30 is wireless clients, `10.30.0.0/16`. The phones are on that
+VLAN. HomeKit and mDNS have to be on it. VLAN 50 is cameras,
+`10.50.0.0/16`. Scrypted reaches the cameras by routed unicast from the
+VLAN 30 address. There is no VLAN 50 subinterface and no VLAN 50
+attachment. The untagged server LAN does not have an attachment either.
+The node already has that network on `ens1f0`.
 
 Each sled has one NIC. Talos aliases it to `lan0`. The kernel name is
-`ens1f0`. Cameras and other IoT devices are on that same network,
-`10.20.0.0/16`, gateway `10.20.0.1`. There is no VLAN subinterface and no
-Talos `VLANConfig`.
+`ens1f0`. The switch port's native VLAN is the server LAN, VLAN 20,
+`10.20.0.0/16`, gateway `10.20.0.1`. `talos/all/20-network.yaml.tpl`
+adds `VLANConfig` `ens1f0.30` on `lan0`: VLAN id 30, 802.1q, up,
+multicast on, MTU from the node, and no address. A macvlan child does
+not need a parent address. Leaving the address off keeps the sleds off
+the client VLAN.
+
+The owner applies that machine config. If `ens1f0.30` does not appear,
+reboot the sled. The switch port for each sled has to carry VLAN 30
+tagged, with the native VLAN left on the server LAN. This repo does not
+change the switch.
 
 The chart is `oci://ghcr.io/home-operations/charts/multus` tag `0.1.1`,
 the chart onedr0p/home-ops pins. At that tag the chart's appVersion is
@@ -26,7 +42,7 @@ not part of this chart.
 
 `cni.exclusive` is `false`. With `true`, Cilium removes other CNI config
 and renames `00-multus.conf` to `00-multus.conf.cilium_bak`. `devices`
-stays `ens1f0`, which is also the macvlan master.
+stays `ens1f0`. The macvlan master is `ens1f0.30`.
 
 `dependsOn` waits until the Cilium HelmRelease is Ready. On an already
 running cluster that Ready condition is from the previous reconcile, so
@@ -42,47 +58,59 @@ Talos v1.14 ships `bridge`, `firewall`, `flannel`, `host-local`,
 `loopback`, and `portmap`. It does not ship `macvlan`, `static`, or `sbr`.
 `cniPlugins.enabled` is `true`, so the chart's init container copies the
 reference plugins into `/opt/cni/bin`. That directory is a writable
-overlay. This change does not edit Talos machine config and does not
-require a reboot. After a reboot the DaemonSet writes the plugins again.
+overlay. After a reboot the DaemonSet writes the plugins again. No system
+extension.
 
-## The `lan` attachment
+## The `vlan30` attachment
 
-`NetworkAttachmentDefinition/lan` in `kube-system` is macvlan, bridge
-mode, master `ens1f0`, static IPAM, plus `sbr`. The static route is
-`0.0.0.0/0` via `10.20.0.1`. `sbr` keeps that route on traffic sourced
-from the macvlan address. Cluster traffic stays on `eth0`. Leave
-`default-route` off the annotation.
+`NetworkAttachmentDefinition/vlan30` in `kube-system` is macvlan, bridge
+mode, master `ens1f0.30`, static IPAM, plus `sbr`. The static route is
+`0.0.0.0/0` via `PLACEHOLDER_VLAN30_GATEWAY`. That token is not an
+address. This repo does not record the VLAN 30 gateway, and
+`carpenike/network-config` was not found. Replace the token before any
+pod attaches. `sbr` keeps that route on traffic sourced from the macvlan
+address. Cluster traffic stays on `eth0`. Leave `default-route` off the
+annotation.
 
-The annotation address uses prefix `/16`, so `10.20.0.0/16` is on-link
-and the gateway is only for destinations outside that prefix. The `ips`
-capability is set so the address in the annotation is handed to the
-static plugin.
+The annotation address uses prefix `/16`, so `10.30.0.0/16` is on-link
+and the gateway is for destinations outside that prefix, including the
+cameras on `10.50.0.0/16`. The `ips` capability is set so the address in
+the annotation is handed to the static plugin.
 
-A macvlan interface cannot reach the host address of the parent it is
-enslaved to. A pod cannot reach its own node's `ens1f0` address
-(`10.20.10.20` through `10.20.10.23`, whichever node it landed on) over
-`net1`. Other nodes, the gateway `10.20.0.1`, and the rest of
-`10.20.0.0/16` are reachable. Traffic to that same node still works over
-the Cilium interface.
+HomeKit, mDNS, and camera connections have to be sourced from the VLAN 30
+address. Traffic sourced from the pod address uses Cilium and leaves the
+node on VLAN 20.
+
+`ens1f0.30` has no host address. There is no node address on VLAN 30 for
+the macvlan child to miss. Traffic to the node still uses the Cilium
+interface.
 
 ## Annotation
 
 The attachment lives in `kube-system`. An app in another namespace names
-that namespace. Pick a free address on `10.20.0.0/16`. Stay off the
-gateway `10.20.0.1`, the API VIP `10.20.10.10`, and the node addresses
-`10.20.10.20` through `10.20.10.23`. `10.20.10.50/16` below is an example
-shape, not a reserved address.
+that namespace. `PLACEHOLDER_SCRYPTED_VLAN30_IP` is not an address. Pick
+a free address on `10.30.0.0/16` and keep it out of the wireless DHCP
+pool with a reservation or an exclusion.
 
 ```yaml
 annotations:
   k8s.v1.cni.cncf.io/networks: |-
     [{
-      "name": "lan",
+      "name": "vlan30",
       "namespace": "kube-system",
-      "ips": ["10.20.10.50/16"]
+      "ips": ["PLACEHOLDER_SCRYPTED_VLAN30_IP/16"]
     }]
 ```
 
 `mac` is optional. A HelmRelease that uses the app-template chart sets the
 same annotation under `defaultPodOptions.annotations`, which is where
 onedr0p/home-ops puts it for Home Assistant.
+
+## Before a pod attaches
+
+- Replace `PLACEHOLDER_VLAN30_GATEWAY` in the attachment
+- Choose `PLACEHOLDER_SCRYPTED_VLAN30_IP` and reserve it in DHCP
+- Trunk VLAN 30, tagged, on each sled's switch port
+- Apply the Talos machine config so `ens1f0.30` exists
+- If the router restricts inter-VLAN traffic, allow that VLAN 30 address
+  to reach `10.50.0.0/16`

@@ -14,7 +14,8 @@ spec:
     # copies the Multus binary and writes the CNI config. containerd invokes
     # that binary on the host, so the thick plugin's /run/netns hostPath is
     # not used. These are the Talos paths. /opt/cni/bin is a writable overlay.
-    # No machine-config change and no reboot.
+    # The VLAN 30 subinterface is Talos machine config (ens1f0.30). The
+    # owner applies that. These plugin paths do not need a system extension.
     cni:
       binDir: /opt/cni/bin
       netDir: /etc/cni/net.d
