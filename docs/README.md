@@ -8,6 +8,7 @@
 | [headlamp.md](headlamp.md) | Read-only Kubernetes UI on the internal gateway |
 | [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, and the Forge cutover |
 | [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
+| [scrypted.md](scrypted.md) | Scrypted NVR on VLAN 30, and the Forge cutover |
 | [deviations.md](deviations.md) | Where this tree leaves onedr0p/cluster-template |
 | [lessons-from-v1.md](lessons-from-v1.md) | What the archived tree taught us |
 | [placeholders.md](placeholders.md) | Values a person still has to fill in |
