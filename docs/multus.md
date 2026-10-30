@@ -65,12 +65,9 @@ extension.
 
 `NetworkAttachmentDefinition/vlan30` in `kube-system` is macvlan, bridge
 mode, master `ens1f0.30`, static IPAM, plus `sbr`. The static route is
-`0.0.0.0/0` via `PLACEHOLDER_VLAN30_GATEWAY`. That token is not an
-address. This repo does not record the VLAN 30 gateway, and
-`carpenike/network-config` was not found. Replace the token before any
-pod attaches. `sbr` keeps that route on traffic sourced from the macvlan
-address. Cluster traffic stays on `eth0`. Leave `default-route` off the
-annotation.
+`0.0.0.0/0` via `10.30.0.1`. `sbr` keeps that route on traffic sourced
+from the macvlan address. Cluster traffic stays on `eth0`. Leave
+`default-route` off the annotation.
 
 The annotation address uses prefix `/16`, so `10.30.0.0/16` is on-link
 and the gateway is for destinations outside that prefix, including the
@@ -108,7 +105,6 @@ onedr0p/home-ops puts it for Home Assistant.
 
 ## Before a pod attaches
 
-- Replace `PLACEHOLDER_VLAN30_GATEWAY` in the attachment
 - Choose `PLACEHOLDER_SCRYPTED_VLAN30_IP` and reserve it in DHCP
 - Trunk VLAN 30, tagged, on each sled's switch port
 - Apply the Talos machine config so `ens1f0.30` exists

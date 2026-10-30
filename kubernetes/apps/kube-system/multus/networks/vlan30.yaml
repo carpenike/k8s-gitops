@@ -7,9 +7,7 @@
 # and are reached by routed unicast from this address. There is no VLAN 50
 # attachment and no untagged-LAN attachment.
 #
-# PLACEHOLDER_VLAN30_GATEWAY is not an address. This repo does not record
-# the VLAN 30 gateway, and carpenike/network-config was not found. Replace
-# it before any pod attaches. sbr keeps the route on traffic sourced from
+# The gateway is 10.30.0.1. sbr keeps that route on traffic sourced from
 # the macvlan address, so Cilium stays the default route for the pod
 # address. HomeKit and camera connections have to be sourced from the
 # VLAN 30 address.
@@ -34,7 +32,7 @@ spec:
           "ipam": {
             "type": "static",
             "routes": [
-              {"dst": "0.0.0.0/0", "gw": "PLACEHOLDER_VLAN30_GATEWAY"}
+              {"dst": "0.0.0.0/0", "gw": "10.30.0.1"}
             ]
           }
         },

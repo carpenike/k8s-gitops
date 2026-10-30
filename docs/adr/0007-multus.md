@@ -57,8 +57,7 @@ The chart is `oci://ghcr.io/home-operations/charts/multus` tag `0.1.1`.
 the reference CNI plugins, including `macvlan`, `static`, and `sbr`, into
 `/opt/cni/bin`. `NetworkAttachmentDefinition/vlan30` in `kube-system` is
 the shared attachment. Its master is `ens1f0.30`. Addresses come from
-`10.30.0.0/16`. The static route gateway is the placeholder
-`PLACEHOLDER_VLAN30_GATEWAY`. This repo does not record that gateway.
+`10.30.0.0/16`. The static route gateway is `10.30.0.1`.
 Each app sets its own address in the annotation. Scrypted is not
 deployed in this change.
 
@@ -74,8 +73,7 @@ This record is 0007. Rebuild already used 0006 for LiteLLM.
 - Good, because HomeKit and mDNS are on the same VLAN as the phones
 - Bad, because the owner has to apply the Talos machine config, and the
   switch ports for the sleds have to carry VLAN 30 tagged
-- Bad, because a pod must not attach until the gateway placeholder is
-  replaced, and camera reachability depends on the router forwarding
+- Bad, because camera reachability depends on the router forwarding
   from that VLAN 30 address to `10.50.0.0/16`
 - Cilium `devices` stays `ens1f0`. The macvlan master is `ens1f0.30`
 
@@ -102,8 +100,7 @@ This record is 0007. Rebuild already used 0006 for LiteLLM.
   its address from `10.30.0.0/16`
 - Bad, because Cilium must keep `cni.exclusive` false or it removes
   `00-multus.conf`
-- Bad, because the gateway is still a placeholder, and the owner has to
-  trunk VLAN 30 and apply Talos config
+- Bad, because the owner has to trunk VLAN 30 and apply Talos config
 
 ### Multus thin plugin on a VLAN 50 subinterface
 

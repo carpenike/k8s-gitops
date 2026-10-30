@@ -77,7 +77,7 @@ from `10.30.0.0/16`. VLAN 30 is the wireless client network. Talos adds
 `ens1f0.30` on `lan0` with no address, so the sleds do not join that
 VLAN themselves. The phones are on VLAN 30. Cameras are on VLAN 50
 (`10.50.0.0/16`) and are reached by routed unicast. The VLAN 30 gateway
-is still `PLACEHOLDER_VLAN30_GATEWAY`. Cilium `cni.exclusive` is false
+is `10.30.0.1`. Cilium `cni.exclusive` is false
 and `devices` stays `ens1f0`. See [multus.md](multus.md) and ADR 0007.
 
 Cilium advertises LoadBalancer IPs only. The pool is `10.45.0.0/16`, the
