@@ -1,0 +1,238 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# One replica. The process runs Prisma migrations on startup. A second
+# replica needs a separate migration job. The image tag is the digest Forge
+# qualified for Atrium (nix-config hosts/forge/services/litellm.nix). The
+# in-process Atrium admission hook is not mounted here. See docs/litellm.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: litellm
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: litellm
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      litellm:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/berriai/litellm
+              # renovate: datasource=docker depName=ghcr.io/berriai/litellm
+              tag: v1.100.1@sha256:a3715fa7ad8387941ab697259bd2881d68931657247a41984f90fae6d11c62bf
+            args:
+              - --config
+              - /app/config.yaml
+              - --host
+              - 0.0.0.0
+              - --port
+              - "4000"
+            env:
+              LITELLM_MODE: PRODUCTION
+              LITELLM_CONFIG_PATH: /app/config.yaml
+              GENERIC_CLIENT_ID: litellm
+              GENERIC_AUTHORIZATION_ENDPOINT: https://id.${SECRET_DOMAIN}/authorize
+              GENERIC_TOKEN_ENDPOINT: https://id.${SECRET_DOMAIN}/api/oidc/token
+              GENERIC_USERINFO_ENDPOINT: https://id.${SECRET_DOMAIN}/api/oidc/userinfo
+              GENERIC_SCOPE: openid profile email
+              PROXY_BASE_URL: https://litellm.${SECRET_DOMAIN}
+              PROXY_ADMIN_ID: ryan
+            envFrom:
+              - secretRef:
+                  name: litellm-env
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/liveliness
+                    port: 4000
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/liveliness
+                    port: 4000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/readiness
+                    port: 4000
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                cpu: "1"
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+    service:
+      app:
+        ports:
+          http:
+            port: 4000
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics
+            interval: 60s
+            authorization:
+              credentials:
+                name: litellm-env
+                key: LITELLM_MASTER_KEY
+    configMaps:
+      config:
+        data:
+          config.yaml: |-
+            model_list:
+              - model_name: copilot/*
+                litellm_params:
+                  model: anthropic/*
+                  api_base: https://copilot.${SECRET_DOMAIN}
+                  api_key: os.environ/COPILOT_API_KEY
+              - model_name: copilot-oai/*
+                litellm_params:
+                  model: openai/*
+                  api_base: https://copilot.${SECRET_DOMAIN}/v1
+                  api_key: os.environ/COPILOT_API_KEY
+              - model_name: gpt-4o
+                litellm_params:
+                  model: azure/gpt-4o
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+              - model_name: gpt-5
+                litellm_params:
+                  model: azure/gpt-5
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+              - model_name: gpt-5-chat
+                litellm_params:
+                  model: azure/gpt-5-chat
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+              - model_name: gpt-5-codex
+                litellm_params:
+                  model: azure/gpt-5-codex
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+              - model_name: gpt-5-pro
+                litellm_params:
+                  model: azure/gpt-5-pro
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+              - model_name: gpt-5.1
+                litellm_params:
+                  model: azure/gpt-5.1
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+              - model_name: gpt-5.1-codex
+                litellm_params:
+                  model: azure/gpt-5.1-codex
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2025-04-01-preview"
+              - model_name: o3-mini
+                litellm_params:
+                  model: azure/o3-mini
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2025-01-01-preview"
+              - model_name: text-embedding-3-small
+                litellm_params:
+                  model: azure/text-embedding-3-small
+                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
+                  api_key: os.environ/AZURE_API_KEY
+                  api_version: "2024-12-01-preview"
+                model_info:
+                  mode: embedding
+              - model_name: anthropic/*
+                litellm_params:
+                  model: anthropic/*
+                  api_key: os.environ/ANTHROPIC_API_KEY
+              - model_name: gemini/*
+                litellm_params:
+                  model: gemini/*
+                  api_key: os.environ/GOOGLE_API_KEY
+              - model_name: openai/*
+                litellm_params:
+                  model: openai/*
+                  api_key: os.environ/OPENAI_API_KEY
+              - model_name: claude-opus
+                litellm_params:
+                  model: anthropic/claude-opus-5
+                  api_key: os.environ/ANTHROPIC_API_KEY
+              - model_name: claude-sonnet
+                litellm_params:
+                  model: anthropic/claude-sonnet-5
+                  api_key: os.environ/ANTHROPIC_API_KEY
+              - model_name: claude-haiku
+                litellm_params:
+                  model: anthropic/claude-haiku-4-5-20251001
+                  api_key: os.environ/ANTHROPIC_API_KEY
+            router_settings:
+              routing_strategy: simple-shuffle
+              num_retries: 0
+              timeout: 600
+              max_fallbacks: 0
+              fallbacks: []
+              context_window_fallbacks: []
+              content_policy_fallbacks: []
+            litellm_settings:
+              drop_params: true
+              set_verbose: false
+              json_logs: true
+              request_timeout: 600
+              turn_off_message_logging: true
+            general_settings:
+              master_key: os.environ/LITELLM_MASTER_KEY
+              ui_access_mode: all
+              store_model_in_db: true
+              proxy_batch_write_at: 60
+              disable_error_logs: true
+              database_connection_pool_limit: 10
+    persistence:
+      config-file:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true

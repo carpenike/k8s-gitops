@@ -1,0 +1,40 @@
+---
+# Bearer keys cannot complete the gateway Pocket ID login. The Admin UI
+# has its own Pocket ID client, so the whole route is native. See
+# docs/gateway-auth.md and docs/litellm.md. The ReferenceGrant is what
+# lets pocket-id-exempt in namespace network select this route.
+# parentRefs is only envoy-internal. mikrotik-dns publishes that gateway.
+# Timeouts match the proxy request_timeout of 600 seconds.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: litellm
+  labels:
+    gateway.holthome.net/auth: native
+spec:
+  hostnames:
+    - litellm.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    - timeouts:
+        request: 600s
+        backendRequest: 600s
+      backendRefs:
+        - name: litellm
+          port: 4000
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: litellm-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: litellm

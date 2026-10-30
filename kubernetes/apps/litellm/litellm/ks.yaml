@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: litellm
+spec:
+  dependsOn:
+    - name: postgres17
+      namespace: cnpg-system
+    - name: envoy-gateway
+      namespace: network
+    - name: mikrotik-dns
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+    - name: prometheus-operator-crds
+      namespace: observability
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: litellm-env
+      namespace: litellm
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: litellm
+      namespace: litellm
+  interval: 1h
+  path: ./kubernetes/apps/litellm/litellm/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: litellm
+  timeout: 10m

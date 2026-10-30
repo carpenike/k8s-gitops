@@ -54,6 +54,15 @@ Item `bmc` is a LOGIN item in vault `k8s-secrets`. Fields are `username`
 and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
 `cluster.example.toml` records the item name. The values are not in git.
 
+## LiteLLM
+
+Create item `litellm` in vault `k8s-secrets`. The cluster token can read it
+and cannot create it. Fields: `master_key`, `salt_key`, `database_password`,
+`anthropic_api_key`, `openai_api_key`, `google_api_key`, `azure_api_key`,
+`copilot_api_key`, `oidc_client_secret`. Where each value is copied from is
+in [litellm.md](litellm.md). The salt field has to be the existing Forge
+salt. A new salt does not decrypt stored credentials.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

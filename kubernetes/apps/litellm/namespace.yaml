@@ -1,0 +1,7 @@
+---
+# Baseline is the cluster default. The proxy process runs as root because
+# the qualified image writes its Prisma tree at startup. See docs/litellm.md.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: litellm
