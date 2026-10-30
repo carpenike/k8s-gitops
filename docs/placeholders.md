@@ -73,6 +73,5 @@ salt. A new salt does not decrypt stored credentials.
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Media NFS server, when a PV is actually added |
 | `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
 | `refs/heads/rebuild` | flux-instance HelmRelease | `refs/heads/main` at cutover |
-| `PLACEHOLDER_SCRYPTED_VLAN30_IP` | `docs/multus.md` | A free address on `10.30.0.0/16` for Scrypted. Reserve or exclude it in the wireless DHCP pool |
 
 `kubernetes/examples/` is not applied by Flux.

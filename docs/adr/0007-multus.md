@@ -58,8 +58,9 @@ the reference CNI plugins, including `macvlan`, `static`, and `sbr`, into
 `/opt/cni/bin`. `NetworkAttachmentDefinition/vlan30` in `kube-system` is
 the shared attachment. Its master is `ens1f0.30`. Addresses come from
 `10.30.0.0/16`. The static route gateway is `10.30.0.1`.
-Each app sets its own address in the annotation. Scrypted is not
-deployed in this change.
+Each app sets its own address in the annotation. Scrypted's address is
+`10.30.0.31/16`, outside the wireless DHCP pool `10.30.100.0/24`.
+Scrypted is not deployed in this change.
 
 The untagged `lan` attachment is removed. Nothing needs a second
 interface on the server LAN. There is no VLAN 50 attachment.

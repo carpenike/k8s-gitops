@@ -85,9 +85,11 @@ interface.
 ## Annotation
 
 The attachment lives in `kube-system`. An app in another namespace names
-that namespace. `PLACEHOLDER_SCRYPTED_VLAN30_IP` is not an address. Pick
-a free address on `10.30.0.0/16` and keep it out of the wireless DHCP
-pool with a reservation or an exclusion.
+that namespace. Scrypted uses `10.30.0.31/16`. The VLAN 30 DHCP pool
+`wireless_pool` is `10.30.100.1`–`10.30.100.254`, so `10.30.0.31` is
+outside it and needs no reservation. That address has to stay outside
+`10.30.100.0/24`. `10.30.0.30` and `10.30.0.116` are already static on
+this VLAN.
 
 ```yaml
 annotations:
@@ -95,7 +97,7 @@ annotations:
     [{
       "name": "vlan30",
       "namespace": "kube-system",
-      "ips": ["PLACEHOLDER_SCRYPTED_VLAN30_IP/16"]
+      "ips": ["10.30.0.31/16"]
     }]
 ```
 
@@ -105,7 +107,6 @@ onedr0p/home-ops puts it for Home Assistant.
 
 ## Before a pod attaches
 
-- Choose `PLACEHOLDER_SCRYPTED_VLAN30_IP` and reserve it in DHCP
 - Trunk VLAN 30, tagged, on each sled's switch port
 - Apply the Talos machine config so `ens1f0.30` exists
 - If the router restricts inter-VLAN traffic, allow that VLAN 30 address
