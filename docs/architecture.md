@@ -159,6 +159,15 @@ CRs come from the `ceph-csi-drivers` chart, not from the operator chart.
 The provisioner names are `rook-ceph.rbd.csi.ceph.com` and
 `rook-ceph.cephfs.csi.ceph.com`.
 
+Ceph itself is the rook-ceph-cluster chart default,
+`quay.io/ceph/ceph:v20.2.4`. CSI CephX users are generation 2
+`aes256k` keys (`spec.security.cephx.csi`). `keepPriorKeyCountMax: 1`
+leaves the generation-1 `aes` keys in place so an existing volume mount
+keeps authenticating until the pod is rescheduled.
+`spec.security.cephx.allowedCiphers` stays unset while any `aes` key
+remains. Talos v1.14.5 is kernel 6.18.58 with the libceph aes256k
+backport from siderolabs/pkgs `84c1b87`.
+
 Prometheus Operator CRDs come from `prometheus-operator-crds` 32.0.2.
 Bootstrap applies them once. The Flux HelmRelease of that chart is the
 only day-2 owner (`install.crds` and `upgrade.crds` are `CreateReplace`).
