@@ -161,12 +161,14 @@ The provisioner names are `rook-ceph.rbd.csi.ceph.com` and
 
 Ceph itself is the rook-ceph-cluster chart default,
 `quay.io/ceph/ceph:v20.2.4`. CSI CephX users are generation 2
-`aes256k` keys (`spec.security.cephx.csi`). `keepPriorKeyCountMax: 1`
-leaves the generation-1 `aes` keys in place so an existing volume mount
-keeps authenticating until the pod is rescheduled.
-`spec.security.cephx.allowedCiphers` stays unset while any `aes` key
-remains. Talos v1.14.5 is kernel 6.18.58 with the libceph aes256k
-backport from siderolabs/pkgs `84c1b87`.
+`aes256k` keys (`spec.security.cephx.csi`). `keepPriorKeyCountMax: 0`
+deletes the generation-1 `aes` keys. That deletion is safe only after
+every pod which mounts `ceph-block` has been rescheduled, because an
+existing mount keeps using the generation-1 key until then.
+`spec.security.cephx.allowedCiphers` stays unset until
+`ceph auth dump-keys` shows no `aes` key. Talos v1.14.5 is kernel
+6.18.58 with the libceph aes256k backport from siderolabs/pkgs
+`84c1b87`.
 
 Prometheus Operator CRDs come from `prometheus-operator-crds` 32.0.2.
 Bootstrap applies them once. The Flux HelmRelease of that chart is the
