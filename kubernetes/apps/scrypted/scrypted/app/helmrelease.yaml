@@ -48,6 +48,10 @@ spec:
                 set -eu
                 command -v ip
                 ip -o addr show dev net1 | grep -q '10.30.0.31/'
+                # The sbr CNI plugin moves the connected route into policy
+                # table 100 and leaves main without it, so the gateway is
+                # unreachable from main until the connected route is back.
+                ip route replace 10.30.0.0/16 dev net1 src 10.30.0.31
                 ip route replace 10.50.0.0/16 via 10.30.0.1 dev net1 src 10.30.0.31
             securityContext:
               allowPrivilegeEscalation: false
