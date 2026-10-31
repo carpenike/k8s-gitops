@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Default login for every HTTPS route on both gateways. A route-level
+# SecurityPolicy with no mergeType replaces this one. See docs/gateway-auth.md.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: pocket-id
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-external
+      sectionName: https
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-internal
+      sectionName: https
+  oidc:
+    provider:
+      issuer: https://id.${SECRET_DOMAIN}
+    clientIDRef:
+      name: pocket-id-gateway
+    clientSecret:
+      name: pocket-id-gateway
+    scopes:
+      - openid
+      - profile
+      - email
+      - groups
+    # Host-only cookies. Forge does the same: no cookie domain, so a token
+    # issued for one hostname is not presented to another.
+    cookieNames:
+      accessToken: EG_HOST_ACCESS_TOKEN
+      idToken: EG_HOST_ID_TOKEN
+    cookieConfig:
+      sameSite: Lax
+---
+# Routes that carry gateway.holthome.net/auth=public or =native replace the
+# gateway policy. flux-webhook is public. A labeled route in another
+# namespace also needs a ReferenceGrant. See docs/gateway-auth.md.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: pocket-id-exempt
+spec:
+  targetSelectors:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      matchExpressions:
+        - key: gateway.holthome.net/auth
+          operator: In
+          values:
+            - public
+            - native
+      namespaces:
+        from: All
+  authorization:
+    defaultAction: Allow

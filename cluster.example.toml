@@ -1,0 +1,117 @@
+# Copy to cluster.toml (gitignored) only if a generator is added later.
+# The manifests in kubernetes/ and talos/ currently mirror these values.
+# Node and service ranges match archive/talos-v1.
+# Servers are on holthome.net. Other public zones are service domains only.
+
+[network]
+node_cidr = "10.20.0.0/16"
+dns_servers = ["1.1.1.1", "1.0.0.1"]
+default_gateway = "10.20.0.1"
+
+[kubernetes]
+pod_cidr = "10.42.0.0/16"
+svc_cidr = "10.43.0.0/16"
+coredns_addr = "10.43.0.10"
+
+[kubernetes.api]
+# New Layer 2 VIP. The v1 VIP was encrypted and was not copied.
+# Confirm 10.20.10.10 is free before install.
+addr = "10.20.10.10"
+
+[gateways]
+# v1 Cilium Gateway addresses, inside the 10.45.0.0/16 LoadBalancer pool.
+internal = "10.45.10.50"
+external = "10.45.10.51"
+# No separate DNS VIP. Internal records are written to the router by the
+# MikroTik external-dns webhook. See docs/deviations.md.
+
+[repository]
+url = "https://github.com/carpenike/k8s-gitops.git"
+branch = "rebuild"
+webhook_provider = "github"
+
+[domain]
+name = "holthome.net"
+# Public app zones. Cloudflare only. The MikroTik filter stays on holthome.net.
+service_domains = [
+  "warwed.com",
+  "ryanholt.net",
+  "whiskeywhiskeywhiskey.org",
+  "stefanieholt.com",
+]
+
+[dns]
+provider = "cloudflare"
+# Token lives in 1Password. Leave this empty in git.
+token = ""
+
+[ingress]
+mode = "cloudflare-tunnel"
+
+[cilium]
+loadbalancer_mode = "dsr"
+
+[cilium.bgp]
+# Same ASN on both sides: iBGP to RouterOS 7. Both values match v1.
+router_addr = "10.20.0.1"
+router_asn = "64512"
+node_asn = "64512"
+
+[talos]
+# factory.talos.dev schematic: intel-ucode + nut-client. See talos/schematic.yaml.
+schematic_id = "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
+
+[bmc]
+# Isolated management network, scraped by ipmi_exporter on Forge.
+# Hosts .20-.23 were read from the 27 Oct 2026 preflight. The /24 mask
+# is inferred from those addresses and was not confirmed. No gateway was
+# observed. Credentials stay in 1Password. See docs/adr/0004-ipmi.md.
+cidr = "10.9.18.0/24"
+# LOGIN item bmc in vault k8s-secrets. Fields username and password.
+# The values are not in git.
+onepassword_item = "bmc"
+
+[[nodes]]
+name = "sled-0.holthome.net"
+address = "10.20.10.20"
+bmc_address = "10.9.18.20"
+controller = true
+# Model+size selector. WWID was not observed; this node was dark.
+boot_wwid = ""
+mac_addr = "0c:c4:7a:8e:90:f4" # unverified
+mtu = 1500
+secureboot = false
+encrypt_disk = true
+
+[[nodes]]
+name = "sled-1.holthome.net"
+address = "10.20.10.21"
+bmc_address = "10.9.18.21"
+controller = true
+boot_wwid = "naa.5002538fc2b1a985"
+mac_addr = "0c:c4:7a:8f:9f:f2"
+mtu = 1500
+secureboot = false
+encrypt_disk = true
+
+[[nodes]]
+name = "sled-2.holthome.net"
+address = "10.20.10.22"
+bmc_address = "10.9.18.22"
+controller = true
+boot_wwid = "naa.5002538fc31245a6"
+mac_addr = "0c:c4:7a:8f:3e:04"
+mtu = 1500
+secureboot = false
+encrypt_disk = true
+
+[[nodes]]
+name = "sled-3.holthome.net"
+address = "10.20.10.23"
+bmc_address = "10.9.18.23"
+controller = false
+boot_wwid = "naa.5002538fc31245a1"
+mac_addr = "0c:c4:7a:eb:21:fc"
+mtu = 1500
+secureboot = false
+encrypt_disk = true

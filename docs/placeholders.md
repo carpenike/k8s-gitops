@@ -1,0 +1,77 @@
+# Placeholders still open
+
+Hardware from the 27 Oct 2026 preflight is filled in: MACs (all four
+verified against UniFi ports and Talos), boot-disk selector, schematic id, BMC host addresses, and
+node names. Passwords, tokens, and the age private key stay out of git.
+
+The 1Password vault is `k8s-secrets`, id `h3aojtbptukuxixo5ysdco7r6u`.
+That is the vault the v1 Connect ClusterSecretStore selected by name.
+The SDK store uses the id.
+
+## Matched to archive/talos-v1
+
+Same item and the same fields. Kubernetes secret keys stay what the
+charts and the ClusterIssuer already read.
+
+| Consumer | Item | 1Password field | Secret key |
+| --- | --- | --- | --- |
+| cert-manager ClusterIssuer | `Cloudflare` | `cert-manager` | `api-token` |
+| external-dns Cloudflare | `Cloudflare` | `external-dns` | `api-token` |
+| cloudflared | `Cloudflare` | `tunnel_account_tag`, `tunnel_secret`, `tunnel_id` | `credentials.json` and `TunnelID` |
+
+v1 cloudflared pulled the whole `Cloudflare` item and prefixed each field
+with `cloudflare_`. The template there reads `cloudflare_tunnel_account_tag`,
+`cloudflare_tunnel_secret`, and `cloudflare_tunnel_id`, so the item fields
+are the names without that prefix. This branch asks for those three fields
+by name and builds the same `credentials.json`.
+
+## Confirmed in k8s-secrets
+
+| Item | Fields | Consumer |
+| --- | --- | --- |
+| `mikrotik` | `username`, `password`, `baseurl` (`https://10.20.0.1`) | external-dns MikroTik webhook. Secret keys `MIKROTIK_USERNAME`, `MIKROTIK_PASSWORD`, `MIKROTIK_BASEURL` |
+| `flux-webhook` | `token` | Flux Receiver secret `flux-webhook-token`, key `token` |
+| `pocket-id-gateway` | `client_id`, `client_secret` | Envoy Gateway OIDC secret `pocket-id-gateway`, keys `client-id` and `client-secret`. The Pocket ID client is still to be created. Settings are in [gateway-auth.md](gateway-auth.md) |
+| `actions-runner-controller` | `github_app_id`, `github_app_installation_id`, `github_app_private_key` | Actions runner scale set secret `actions-runner-controller`, same key names. The GitHub App is still to be created. Settings are in [actions-runners.md](actions-runners.md) |
+
+v1 internal DNS was item `bind` (`externaldns_algorithm`, `externaldns_secret`). That is RFC2136, not this webhook. The MikroTik item is new.
+
+## BGP
+
+Confirmed on RouterOS. iBGP, ASN `64512` on both sides, router `10.20.0.1`. The router already peers `10.20.10.20` through `10.20.10.23` (`sled-0` through `sled-3`). Cilium advertises the LoadBalancer pool `10.45.0.0/16`.
+
+## No v1 equivalent
+
+The External Secrets service-account token is unmatched. v1 stored a
+Connect token in the SOPS secret `onepassword-connect-token`, key `token`.
+The SDK token is new. The bootstrap script writes it to `onepassword-sdk`
+in `external-secrets` from `ONEPASSWORD_SERVICE_ACCOUNT_TOKEN`. It is not
+a vault item and it is not committed.
+
+## BMC
+
+Item `bmc` is a LOGIN item in vault `k8s-secrets`. Fields are `username`
+and `password`. Forge `ipmi_exporter` reads it. It is not an ExternalSecret.
+`cluster.example.toml` records the item name. The values are not in git.
+
+## LiteLLM
+
+Create item `litellm` in vault `k8s-secrets`. The cluster token can read it
+and cannot create it. Fields: `master_key`, `salt_key`, `database_password`,
+`anthropic_api_key`, `openai_api_key`, `google_api_key`, `azure_api_key`,
+`copilot_api_key`, `oidc_client_secret`. Where each value is copied from is
+in [litellm.md](litellm.md). The salt field has to be the existing Forge
+salt. A new salt does not decrypt stored credentials.
+
+## Still to confirm or generate
+
+| Placeholder | Where | Replace with |
+| --- | --- | --- |
+| API VIP `10.20.10.10` | `talos/topf.yaml`, `talos/all/20-network.yaml.tpl` | Confirm it is free. The v1 VIP was encrypted and was not copied |
+| `/16` mask on `lan0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
+| BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
+| `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Example only. The Scrypted recordings PV uses `10.20.0.10` and `/mnt/tank/share/scrypted` |
+| `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
+| `refs/heads/rebuild` | flux-instance HelmRelease | `refs/heads/main` at cutover |
+
+`kubernetes/examples/` is not applied by Flux.

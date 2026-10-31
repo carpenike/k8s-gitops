@@ -1,0 +1,20 @@
+---
+# Not reconciled. restic repository URL and credentials come from 1Password.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: example
+  namespace: default
+spec:
+  sourcePVC: example
+  trigger:
+    schedule: "0 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: example-restic
+    pruneIntervalDays: 7
+    cacheCapacity: 2Gi
+    volumeSnapshotClassName: ceph-block
+    retain:
+      daily: 7
+      weekly: 4

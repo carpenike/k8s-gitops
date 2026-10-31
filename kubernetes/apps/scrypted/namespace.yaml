@@ -1,0 +1,11 @@
+# The init container adds NET_ADMIN so camera traffic to 10.50.0.0/16 is
+# sourced from the VLAN 30 address. The USB Coral is a hostPath under
+# /dev/bus/usb. Baseline forbids NET_ADMIN, so this namespace is privileged.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scrypted
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged

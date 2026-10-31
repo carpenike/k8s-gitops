@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+
+helmDefaults:
+  cleanupOnFail: true
+  forceConflicts: true
+  wait: true
+  waitForJobs: true
+
+bases:
+  - default.yaml
+
+releases:
+  - name: cilium
+    namespace: kube-system
+    inherit:
+      - template: default
+
+  - name: coredns
+    namespace: kube-system
+    inherit:
+      - template: default
+    needs: ["kube-system/cilium"]
+
+  - name: spegel
+    namespace: kube-system
+    inherit:
+      - template: default
+    needs: ["kube-system/coredns"]
+
+  - name: cert-manager
+    namespace: cert-manager
+    inherit:
+      - template: default
+    needs: ["kube-system/spegel"]
+
+  - name: flux-operator
+    namespace: flux-system
+    inherit:
+      - template: default
+    needs: ["cert-manager/cert-manager"]
+
+  - name: flux-instance
+    namespace: flux-system
+    inherit:
+      - template: default
+    needs: ["flux-system/flux-operator"]

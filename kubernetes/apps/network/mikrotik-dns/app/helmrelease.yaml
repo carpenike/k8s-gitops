@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mikrotik-dns
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: mikrotik-dns
+  interval: 1h
+  values:
+    fullnameOverride: mikrotik-dns
+    image:
+      repository: registry.k8s.io/external-dns/external-dns
+      tag: v0.24.0
+    provider:
+      name: webhook
+      webhook:
+        image:
+          repository: ghcr.io/mirceanton/external-dns-provider-mikrotik
+          tag: v1.6.3
+        env:
+          - name: MIKROTIK_BASEURL
+            valueFrom:
+              secretKeyRef:
+                name: mikrotik-credentials
+                key: MIKROTIK_BASEURL
+          - name: MIKROTIK_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mikrotik-credentials
+                key: MIKROTIK_USERNAME
+          - name: MIKROTIK_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mikrotik-credentials
+                key: MIKROTIK_PASSWORD
+          # Router www-ssl cert is self-signed, CN=10.30.0.1, and has no SAN.
+          - name: MIKROTIK_SKIP_TLS_VERIFY
+            value: "true"
+          - name: DOMAIN_FILTER
+            value: ${SECRET_DOMAIN}
+          - name: SERVER_HOST
+            value: "0.0.0.0"
+          - name: SERVER_PORT
+            value: "8888"
+    extraArgs:
+      - --gateway-name=envoy-internal
+      - --managed-record-types=A
+      - --managed-record-types=TXT
+    # sources, not extraArgs, is what the chart turns into ClusterRole rules.
+    # gateway-httproute grants namespaces, gateways, and httproutes.
+    sources:
+      - gateway-httproute
+    policy: sync
+    registry: txt
+    txtPrefix: k8s.
+    txtOwnerId: cluster
+    # Home zone only. warwed.com and the other public zones are Cloudflare.
+    domainFilters:
+      - ${SECRET_DOMAIN}
+    serviceMonitor:
+      enabled: true
