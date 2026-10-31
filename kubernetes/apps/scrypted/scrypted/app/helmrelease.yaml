@@ -1,0 +1,232 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Recreate, because VLAN 30 has one address and HomeKit has one identity.
+# replicas is 0 until /server/volume is copied from Forge. An empty volume
+# is a new HomeKit identity. hostNetwork stays off: HomeKit and mDNS have
+# to come from 10.30.0.31, not from the sled address on VLAN 20.
+# ADR 0007 and ADR 0008.
+#
+# The image tag is the digest Forge pins as latest in
+# modules/nixos/services/scrypted/default.nix. That digest is
+# v0.147.0-noble-full. The full image ships libedgetpu1-std. Forge passes
+# the USB bus through for a USB Coral. This pod does the same.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: scrypted
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: scrypted
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      scrypted:
+        replicas: 0
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          vlan30-route:
+            image: &image
+              repository: ghcr.io/koush/scrypted
+              # renovate: datasource=docker depName=ghcr.io/koush/scrypted
+              tag: v0.147.0-noble-full@sha256:e78b4fcecdd6c61acaaf22b50ccef303c738da58cc0be57afdb116521df52296
+            # Connected route 10.30.0.0/16 is on net1, so phones on VLAN 30
+            # are already sourced from 10.30.0.31. Cameras are 10.50.0.0/16.
+            # Without this route the kernel uses eth0, and Cilium masquerades
+            # that to the sled on VLAN 20. sbr then keeps packets that are
+            # already sourced from 10.30.0.31 on the macvlan. net1 is the
+            # name Multus gives the first extra interface.
+            command:
+              - /bin/bash
+              - -c
+              - |
+                set -euo pipefail
+                command -v ip
+                ip -o addr show dev net1 | grep -q '10.30.0.31/'
+                ip route replace 10.50.0.0/16 via 10.30.0.1 dev net1 src 10.30.0.31
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - NET_ADMIN
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                cpu: 200m
+                memory: 128Mi
+        containers:
+          app:
+            image: *image
+            env:
+              TZ: America/New_York
+              SCRYPTED_NVR_VOLUME: /nvr
+              # Avahi in the pod, limited to net1 by the mounted config.
+              # Forge sets the same variable and also uses hostNetwork.
+              # hostNetwork is not set here.
+              SCRYPTED_DOCKER_AVAHI: "true"
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 11080
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 36
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - AUDIT_WRITE
+                  - CHOWN
+                  - DAC_OVERRIDE
+                  - FOWNER
+                  - FSETID
+                  - KILL
+                  - MKNOD
+                  - NET_BIND_SERVICE
+                  - NET_RAW
+                  - SETFCAP
+                  - SETGID
+                  - SETPCAP
+                  - SETUID
+                  - SYS_CHROOT
+            resources:
+              requests:
+                cpu: "1"
+                memory: 2Gi
+              limits:
+                cpu: "8"
+                memory: 12Gi
+    defaultPodOptions:
+      hostNetwork: false
+      # NFD rule coral-tpu. USB vendor 1a6e, or 18d1:9302 after the
+      # runtime reloads the device. sled-1 and sled-3 match. Do not raise
+      # replicas above 0 until scrypted-data has been copied. See
+      # docs/scrypted.md.
+      nodeSelector:
+        feature.node.kubernetes.io/coral-tpu: "true"
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[{"name":"vlan30","namespace":"kube-system","ips":["10.30.0.31/16"]}]'
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        kind: HTTPRoute
+        hostnames:
+          - scrypted.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    configMaps:
+      avahi:
+        data:
+          avahi-daemon.conf: |-
+            [server]
+            use-ipv4=yes
+            use-ipv6=no
+            allow-interfaces=net1
+            deny-interfaces=eth0
+            enable-dbus=yes
+            ratelimit-interval-usec=1000000
+            ratelimit-burst=1000
+            #host-name=
+            [wide-area]
+            enable-wide-area=no
+            [publish]
+            publish-aaaa-on-ipv4=no
+            publish-a-on-ipv6=no
+            [rlimits]
+            rlimit-core=0
+            rlimit-data=4194304
+            rlimit-fsize=0
+            rlimit-nofile=768
+            rlimit-stack=4194304
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 50Gi
+        storageClass: ceph-block
+        retain: true
+        forceRename: scrypted-data
+        globalMounts:
+          - path: /server/volume
+      nvr:
+        type: persistentVolumeClaim
+        existingClaim: scrypted-nvr
+        globalMounts:
+          - path: /nvr
+      # USB Coral on sled-1 and sled-3. There is no PCIe Coral, so this
+      # is /dev/bus/usb and not /dev/apex_0.
+      usb:
+        type: hostPath
+        hostPath: /dev/bus/usb
+        hostPathType: Directory
+        globalMounts:
+          - path: /dev/bus/usb
+      # Forge passes --shm-size=1024m. emptyDir memory counts against the
+      # container memory limit.
+      shm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /dev/shm
+      avahi:
+        type: configMap
+        identifier: avahi
+        advancedMounts:
+          scrypted:
+            app:
+              - path: /etc/avahi/avahi-daemon.conf
+                subPath: avahi-daemon.conf
+                readOnly: true

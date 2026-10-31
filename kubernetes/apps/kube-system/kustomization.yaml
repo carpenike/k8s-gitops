@@ -12,5 +12,6 @@ resources:
   - ./coredns/ks.yaml
   - ./spegel/ks.yaml
   - ./metrics-server/ks.yaml
+  - ./node-feature-discovery/ks.yaml
   - ./reloader/ks.yaml
   - ./snapshot-controller/ks.yaml

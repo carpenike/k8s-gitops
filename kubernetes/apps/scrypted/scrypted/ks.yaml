@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: scrypted
+spec:
+  dependsOn:
+    - name: multus-networks
+      namespace: kube-system
+    - name: node-feature-discovery
+      namespace: kube-system
+    - name: node-feature-discovery-rules
+      namespace: kube-system
+    - name: nfs-media
+      namespace: storage
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: ceph-csi-drivers
+      namespace: rook-ceph
+    - name: envoy-gateway
+      namespace: network
+    - name: mikrotik-dns
+      namespace: network
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: scrypted
+      namespace: scrypted
+  interval: 1h
+  path: ./kubernetes/apps/scrypted/scrypted/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: scrypted
+  timeout: 10m

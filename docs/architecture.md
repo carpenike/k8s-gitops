@@ -37,6 +37,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Postgres backup | Barman Cloud plugin | chart 0.8.1, app v0.15.1 |
 | PVC backup | VolSync restic | chart 0.17.0 |
 | Metrics | kube-prometheus-stack, in-cluster Alertmanager off | chart 92.14.0 |
+| Node features | Node Feature Discovery, master and worker | chart 0.20.1 |
 | Node upgrades | tuppr | chart 0.5.10 |
 | Image pull cache | spegel | 0.8.0 |
 | Dependency updates | Renovate | 44.188.2 |
@@ -78,7 +79,9 @@ from `10.30.0.0/16`. VLAN 30 is the wireless client network. Talos adds
 VLAN themselves. The phones are on VLAN 30. Cameras are on VLAN 50
 (`10.50.0.0/16`) and are reached by routed unicast. The VLAN 30 gateway
 is `10.30.0.1`. Scrypted's address is `10.30.0.31/16`, which has to stay
-outside the wireless DHCP pool `10.30.100.0/24`. Cilium `cni.exclusive` is false
+outside the wireless DHCP pool `10.30.100.0/24`. The app is
+`kubernetes/apps/scrypted`. ADR 0008 and [scrypted.md](scrypted.md).
+Cilium `cni.exclusive` is false
 and `devices` stays `ens1f0`. See [multus.md](multus.md) and ADR 0007.
 
 Cilium advertises LoadBalancer IPs only. The pool is `10.45.0.0/16`, the
@@ -171,10 +174,11 @@ allows that path from the sleds.
 
 ## What stays off the cluster
 
-Plex, transcode, home automation, USB radios, cameras, and Pocket ID stay
-on Forge. The NAS boxes serve files and backups. They are not Kubernetes
-nodes. Garage on the backup NAS is a NixOS change, not a manifest in this
-repo.
+Plex, transcode, home automation, USB radios, and Pocket ID stay on
+Forge. Scrypted runs here and reaches the cameras on VLAN 50 from its
+VLAN 30 address. ADR 0008. The NAS boxes serve files and backups. They
+are not Kubernetes nodes. Garage on the backup NAS is a NixOS change,
+not a manifest in this repo.
 
 ## Out of band
 

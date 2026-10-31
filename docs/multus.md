@@ -3,9 +3,9 @@
 Multus is the CNI meta-plugin in front of Cilium. Cilium remains the pod
 network (`eth0`). A pod that needs a second interface on the wireless
 client VLAN attaches `NetworkAttachmentDefinition/vlan30`. Scrypted is
-the expected consumer, when it moves off Forge onto a Coral node. This
-change does not deploy Scrypted and does not add a node selector. No
-Coral label exists yet. ADR 0007.
+the consumer. The app is `kubernetes/apps/scrypted` (ADR 0008). It
+schedules on `feature.node.kubernetes.io/coral-tpu`, which Node Feature
+Discovery sets from the USB device. ADR 0007.
 
 VLAN 30 is wireless clients, `10.30.0.0/16`. The phones are on that
 VLAN. HomeKit and mDNS have to be on it. VLAN 50 is cameras,
