@@ -29,10 +29,12 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           vlan30-route:
-            image: &image
-              repository: ghcr.io/koush/scrypted
-              # renovate: datasource=docker depName=ghcr.io/koush/scrypted
-              tag: v0.147.0-noble-full@sha256:e78b4fcecdd6c61acaaf22b50ccef303c738da58cc0be57afdb116521df52296
+            # The scrypted image has no iproute2 (no `ip` binary), so the
+            # init container uses busybox, whose `ip` applet is enough.
+            image:
+              repository: docker.io/library/busybox
+              # renovate: datasource=docker depName=docker.io/library/busybox
+              tag: "1.37"
             # Connected route 10.30.0.0/16 is on net1, so phones on VLAN 30
             # are already sourced from 10.30.0.31. Cameras are 10.50.0.0/16.
             # Without this route the kernel uses eth0, and Cilium masquerades
@@ -40,10 +42,10 @@ spec:
             # already sourced from 10.30.0.31 on the macvlan. net1 is the
             # name Multus gives the first extra interface.
             command:
-              - /bin/bash
+              - /bin/sh
               - -c
               - |
-                set -euo pipefail
+                set -eu
                 command -v ip
                 ip -o addr show dev net1 | grep -q '10.30.0.31/'
                 ip route replace 10.50.0.0/16 via 10.30.0.1 dev net1 src 10.30.0.31
@@ -66,7 +68,10 @@ spec:
                 memory: 128Mi
         containers:
           app:
-            image: *image
+            image:
+              repository: ghcr.io/koush/scrypted
+              # renovate: datasource=docker depName=ghcr.io/koush/scrypted
+              tag: v0.147.0-noble-full@sha256:e78b4fcecdd6c61acaaf22b50ccef303c738da58cc0be57afdb116521df52296
             env:
               TZ: America/New_York
               SCRYPTED_NVR_VOLUME: /nvr
