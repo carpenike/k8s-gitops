@@ -17,14 +17,16 @@ spec:
       # AUTH_INSECURE_CLIENT_KEY_TYPE on the chart's Ceph v20.2.4.
       # keyGeneration above the current generation, plus a keyType change,
       # is how Rook 1.21 rotates them. keepPriorKeyCountMax 0 deletes the
-      # generation-1 aes keys. Apply this only after every ceph-block mount
-      # has been rescheduled onto the generation-2 key. allowedCiphers stays
-      # unset until ceph auth dump-keys shows no aes key. Talos v1.14.5 is
-      # kernel 6.18.58 with the libceph aes256k backport (siderolabs/pkgs
-      # 84c1b87). Rook's generic note says kernel 7.0 because that is where
-      # the patches landed upstream.
+      # generation-1 aes keys. allowedCiphers aes256k is what stops the mons
+      # allowing and creating aes keys. Set it only after ceph auth dump-keys
+      # shows no aes key, including daemon keys. Talos v1.14.5 is kernel
+      # 6.18.58 with the libceph aes256k backport (siderolabs/pkgs 84c1b87).
+      # Rook's generic note says kernel 7.0 because that is where the patches
+      # landed upstream.
       security:
         cephx:
+          allowedCiphers:
+            - aes256k
           csi:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2

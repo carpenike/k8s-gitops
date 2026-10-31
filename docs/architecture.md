@@ -161,12 +161,10 @@ The provisioner names are `rook-ceph.rbd.csi.ceph.com` and
 
 Ceph itself is the rook-ceph-cluster chart default,
 `quay.io/ceph/ceph:v20.2.4`. CSI CephX users are generation 2
-`aes256k` keys (`spec.security.cephx.csi`). `keepPriorKeyCountMax: 0`
-deletes the generation-1 `aes` keys. That deletion is safe only after
-every pod which mounts `ceph-block` has been rescheduled, because an
-existing mount keeps using the generation-1 key until then.
-`spec.security.cephx.allowedCiphers` stays unset until
-`ceph auth dump-keys` shows no `aes` key. Talos v1.14.5 is kernel
+`aes256k` keys (`spec.security.cephx.csi`, `keepPriorKeyCountMax: 0`).
+`spec.security.cephx.allowedCiphers` is `aes256k` only, which stops the
+mons authenticating or creating `aes` keys. That restriction lands only
+after `ceph auth dump-keys` shows no `aes` key. Talos v1.14.5 is kernel
 6.18.58 with the libceph aes256k backport from siderolabs/pkgs
 `84c1b87`.
 
