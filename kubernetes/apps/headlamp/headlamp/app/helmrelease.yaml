@@ -14,6 +14,25 @@ spec:
         kind: HelmRepository
         name: headlamp
       interval: 15m
+  # The plugin manager container is node:alpine (musl). Pods inherit search
+  # holthome.net and ndots:5, so registry.npmjs.org is first tried as
+  # registry.npmjs.org.holthome.net. The router answers that with NOERROR and
+  # no address, which musl treats as the final answer (ENOTFOUND), so npm
+  # never reaches the registry and the pod crash-loops. ndots:1 makes names
+  # with a dot resolve as absolute first. Service short names still search.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: headlamp
+            patch: |-
+              - op: add
+                path: /spec/template/spec/dnsConfig
+                value:
+                  options:
+                    - name: ndots
+                      value: "1"
   values:
     replicaCount: 1
     # Image tag follows the chart appVersion when empty. Chart 0.46.0
