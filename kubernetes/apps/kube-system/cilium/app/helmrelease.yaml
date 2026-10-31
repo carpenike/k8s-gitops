@@ -17,6 +17,11 @@ spec:
       masquerade: true
       # https://github.com/siderolabs/talos/issues/10002
       hostLegacyRouting: true
+      # Cilium drops VLAN-tagged frames on devices unless the VLAN ID is allowed.
+      # Allow only VLAN 30 so Scrypted's Multus macvlan on ens1f0.30 receives
+      # traffic. Do not use [0]; that allows every VLAN ID.
+      vlanBypass:
+        - 30
     cgroup:
       autoMount:
         enabled: false
