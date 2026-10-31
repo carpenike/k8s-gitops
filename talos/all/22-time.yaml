@@ -1,0 +1,7 @@
+---
+# Talos's own default NTP name, set explicitly. The router is DNS, not NTP.
+apiVersion: v1alpha1
+kind: TimeSyncConfig
+ntp:
+  servers:
+    - time.cloudflare.com

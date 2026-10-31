@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. Every scale set reads ExternalSecret
+# actions-runner-controller. Until that secret is Ready, this
+# Kustomization stays unready. The controller does not wait on it.
+# See docs/actions-runners.md.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gha-runner-scale-set
+spec:
+  dependsOn:
+    - name: gha-runner-scale-set-controller
+      namespace: actions-runner-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: actions-runner-controller
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: sam-tracker
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: sam-tracker-app-k8s
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: va-acr-app-k8s
+      namespace: actions-runner-system
+  interval: 1h
+  path: ./kubernetes/apps/actions-runner-system/gha-runner-scale-set/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: actions-runner-system

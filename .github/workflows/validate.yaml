@@ -1,0 +1,75 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - rebuild
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-manifests:
+    name: yamllint, kubeconform, sops check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install yamllint
+        run: pip install --user yamllint
+
+      - name: Install kustomize and kubeconform
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/kustomize_v5.8.3_linux_amd64.tar.gz" | tar -xz
+          sudo install -m 0755 kustomize /usr/local/bin/kustomize
+          curl -fsSL -o kubeconform.tgz "https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz"
+          tar -xzf kubeconform.tgz
+          sudo install -m 0755 kubeconform /usr/local/bin/kubeconform
+
+      - name: yamllint
+        run: yamllint -c .yamllint.yml .
+
+      - name: Reject unencrypted sops files
+        run: bash scripts/check-sops-encrypted.sh
+
+      - name: kubeconform
+        run: bash scripts/kubeconform.sh
+
+  secrets:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          curl -fsSL -o gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v8.30.0/gitleaks_8.30.0_linux_x64.tar.gz"
+          tar -xzf gitleaks.tgz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+
+      # Working tree only. Full history still contains the archived v1 tree
+      # and is not rewritten. See docs/lessons-from-v1.md.
+      - name: Scan the working tree
+        run: gitleaks detect --no-git --redact --config .gitleaks.toml --source .
+
+  renovate:
+    name: renovate config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate Renovate config
+        run: npx --yes --package renovate@44.188.2 renovate-config-validator --strict

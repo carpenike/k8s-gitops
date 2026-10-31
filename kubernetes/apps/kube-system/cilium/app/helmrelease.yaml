@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: cilium
+  interval: 1h
+  values:
+    autoDirectNodeRoutes: true
+    bgpControlPlane:
+      enabled: true
+    bpf:
+      masquerade: true
+      # https://github.com/siderolabs/talos/issues/10002
+      hostLegacyRouting: true
+      # Cilium drops VLAN-tagged frames on devices unless the VLAN ID is allowed.
+      # Allow only VLAN 30 so Scrypted's Multus macvlan on ens1f0.30 receives
+      # traffic. Do not use [0]; that allows every VLAN ID.
+      vlanBypass:
+        - 30
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    # The single 10G port is ens1f0 on every sled (Talos v1.14.5). Its Talos alias
+    # lan0 is not a kernel interface name, so Cilium cannot use it.
+    # exclusive is false so Cilium leaves Multus's 00-multus.conf in place.
+    # With true, Cilium renames that file to 00-multus.conf.cilium_bak.
+    # devices stays ens1f0. The VLAN 30 macvlan master is ens1f0.30.
+    cni:
+      exclusive: false
+    devices: ens1f0
+    dashboards:
+      enabled: true
+    endpointRoutes:
+      enabled: true
+    envoy:
+      enabled: false
+    hubble:
+      enabled: false
+    ipam:
+      mode: kubernetes
+    ipv4NativeRoutingCIDR: 10.42.0.0/16
+    k8sServiceHost: 127.0.0.1
+    k8sServicePort: 7445
+    kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    l2announcements:
+      enabled: true
+    loadBalancer:
+      algorithm: maglev
+      mode: dsr
+      serviceTopology: true
+    localRedirectPolicies:
+      enabled: true
+    operator:
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+      replicas: 2
+      rollOutPods: true
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
+    rollOutCiliumPods: true
+    routingMode: native
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - PERFMON
+          - BPF
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    socketLB:
+      enabled: true

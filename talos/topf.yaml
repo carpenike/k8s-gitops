@@ -1,0 +1,73 @@
+---
+# Inventory from the 27 Oct 2026 preflight. Four SYS-2028TP-HTR sleds.
+# Boot disk is the Samsung SSD 870 500GB, selected by model and size in
+# all/00-install.yaml.tpl so sled-0 can install before its WWID is known.
+# sled-0 MAC and WWID were read from the live node on 27 Oct 2026. Do not commit
+# talos/secrets.sops.yaml from `topf secrets`.
+# encryptDisk is false: the nodeID key fails the UUID entropy check on these
+# boards. See talos/README.md.
+clusterName: kubernetes
+clusterEndpoint: https://10.20.10.10:6443
+
+# renovate: datasource=github-releases depName=siderolabs/talos
+talosVersion: v1.14.5
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+kubernetesVersion: v1.37.1
+
+secretsPath: secrets.sops.yaml
+
+# upsmon password. One ciphertext, in the nut-credentials Secret.
+# topf resolves this vals ref when it loads topf.yaml. Run topf from talos/
+# so the relative path hits that file. .tpl patches are not vals-evaluated.
+data:
+  upsmonPassword: "ref+sops://../kubernetes/apps/nut-system/nut/app/secret.sops.yaml#/stringData/upsmon-password"
+
+nodes:
+  - host: sled-0.holthome.net
+    ip: 10.20.10.20
+    role: control-plane
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
+    data:
+      # /dev/disk/by-id/wwn-0x5002538fc31245ac (read from Talos on 27 Oct 2026)
+      bootWwid: naa.5002538fc31245ac
+      macAddr: "0c:c4:7a:8e:90:f4" # ens1f0, UniFi USXG port 4, DHCP lease
+      macVerified: true
+      mtu: 1500
+      encryptDisk: false
+      kernelModules: []
+  - host: sled-1.holthome.net
+    ip: 10.20.10.21
+    role: control-plane
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
+    data:
+      # /dev/disk/by-id/wwn-0x5002538fc2b1a985
+      bootWwid: naa.5002538fc2b1a985
+      macAddr: "0c:c4:7a:8f:9f:f2"
+      macVerified: true
+      mtu: 1500
+      encryptDisk: false
+      kernelModules: []
+  - host: sled-2.holthome.net
+    ip: 10.20.10.22
+    role: control-plane
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
+    data:
+      # /dev/disk/by-id/wwn-0x5002538fc31245a6
+      bootWwid: naa.5002538fc31245a6
+      macAddr: "0c:c4:7a:8f:3e:04"
+      macVerified: true
+      mtu: 1500
+      encryptDisk: false
+      kernelModules: []
+  - host: sled-3.holthome.net
+    ip: 10.20.10.23
+    role: worker
+    schematicId: "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
+    data:
+      # /dev/disk/by-id/wwn-0x5002538fc31245a1
+      bootWwid: naa.5002538fc31245a1
+      macAddr: "0c:c4:7a:eb:21:fc"
+      macVerified: true
+      mtu: 1500
+      encryptDisk: false
+      kernelModules: []

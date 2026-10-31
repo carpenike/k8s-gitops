@@ -1,0 +1,110 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: envoy
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyDeployment:
+        replicas: 2
+        container:
+          imageRepository: mirror.gcr.io/envoyproxy/envoy
+          resources:
+            requests:
+              cpu: 100m
+            limits:
+              memory: 1Gi
+      envoyService:
+        externalTrafficPolicy: Cluster
+  shutdown:
+    drainTimeout: 180s
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: envoy
+    namespace: network
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-external
+  annotations:
+    # Hostname, so cloudflare-dns publishes a proxied CNAME. A LAN resolver
+    # that has no static override, including the router forwarding upstream,
+    # returns Cloudflare's addresses. mikrotik-dns does not watch this gateway.
+    external-dns.kubernetes.io/target: external.${SECRET_DOMAIN}
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.kubernetes.io/hostname: external.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "10.45.10.51"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: ${SECRET_DOMAIN/./-}-production-tls
+          - kind: Secret
+            name: warwed-com-production-tls
+          - kind: Secret
+            name: ryanholt-net-production-tls
+          - kind: Secret
+            name: whiskeywhiskeywhiskey-org-production-tls
+          - kind: Secret
+            name: stefanieholt-com-production-tls
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-internal
+  annotations:
+    # mikrotik-dns manages A and TXT only. A hostname target is a CNAME, and
+    # that release drops it, so no static record is written. This is the
+    # gateway LoadBalancer address.
+    external-dns.kubernetes.io/target: "10.45.10.50"
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.kubernetes.io/hostname: internal.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "10.45.10.50"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: ${SECRET_DOMAIN/./-}-production-tls

@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/cluster_v1.json
+# Shared PostgreSQL 17. Forge's LiteLLM database is PostgreSQL 17, so a
+# custom-format dump from that server restores into this image.
+# The bootstrap database is `app`. LiteLLM uses the Database below.
+# Barman Cloud stays unattached: kubernetes/examples/cnpg-cluster.yaml still
+# points at s3.example.invalid. Snapshots use VolumeSnapshotClass csi-ceph-block
+# and remain on Ceph. waitForArchive is false because WAL is not archived.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres17
+spec:
+  instances: 2
+  # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.9
+  storage:
+    storageClass: ceph-block
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  backup:
+    volumeSnapshot:
+      className: csi-ceph-block
+      online: true
+      onlineConfiguration:
+        waitForArchive: false
+  managed:
+    roles:
+      - name: litellm
+        ensure: present
+        login: true
+        comment: LiteLLM proxy
+        passwordSecret:
+          name: litellm-db
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: litellm
+spec:
+  cluster:
+    name: postgres17
+  name: litellm
+  owner: litellm
+  databaseReclaimPolicy: retain

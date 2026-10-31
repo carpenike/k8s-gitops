@@ -1,39 +1,13 @@
-.env
-setup/cluster/.DS_Store
-setup/keyvault.env
-master.key
-auth
-*.snap
-setup/cluster/*cluster.yml
-*.rkestate
-helm_repos
-generated
-IGNORE_ME.yaml
-ansible/kubeadm/playbooks/output/k8s-config.yaml
-.decrypted~*
-
-# Saved backups
-ignore/
-rebuild/
-# Trash
-.DS_Store
-Thumbs.db
-bin/
-*.iso
-
-# Other files
+cluster.toml
+age.key
+deploy.key
+deploy.key.pub
+flux-webhook-token.txt
+cloudflare-tunnel.json
 kubeconfig
-
-# Talos clusterconfigs
-infrastructure/talos/**/clusterconfig
-
-# Terraform
-## Local .terraform directories
-**/.terraform/*
-
-## .tfstate files
-*.tfstate
-*.tfstate.*
-
-## terraform plan output
-*tfplan*
+talos/talosconfig
+talos/secrets.sops.yaml
+talos/secrets.yaml
+.private/
+*.decrypted~*
+.DS_Store

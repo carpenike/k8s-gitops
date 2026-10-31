@@ -1,0 +1,10 @@
+# Posted to https://factory.talos.dev/schematics on 27 Oct 2026.
+# id: a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c
+# Image: factory.talos.dev/metal-installer/<id>:v1.14.5
+# The plan asks for nut-client. intel-ucode is the bare-metal microcode
+# extension for these boards. Nothing else from the plan belongs in the image.
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/intel-ucode
+      - siderolabs/nut-client

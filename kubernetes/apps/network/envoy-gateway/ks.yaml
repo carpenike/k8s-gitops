@@ -1,0 +1,108 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway
+spec:
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  # Certificates are a separate Kustomization. wait would also hold this
+  # one on Gateway readiness, and a Gateway with a missing TLS secret is
+  # not Ready. The HelmRelease is the dependency DNS and the tunnel need.
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: envoy-gateway
+      namespace: network
+  interval: 1h
+  path: ./kubernetes/apps/network/envoy-gateway/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. A missing Pocket ID client leaves this
+# Kustomization unready. Envoy Gateway then answers the protected HTTPS
+# routes with 500 instead of forwarding them. envoy-gateway, DNS, the
+# tunnel, and echo do not wait on it. See docs/gateway-auth.md.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-auth
+spec:
+  dependsOn:
+    - name: envoy-gateway
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: pocket-id-gateway
+      namespace: network
+  interval: 1h
+  path: ./kubernetes/apps/network/envoy-gateway/auth
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. A certificate that cannot be issued stays here
+# and does not block envoy-gateway, DNS, or the tunnel.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-certs
+spec:
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  healthChecks:
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: holthome-net-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: ryanholt-net-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: stefanieholt-com-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: warwed-com-production
+      namespace: network
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: whiskeywhiskeywhiskey-org-production
+      namespace: network
+  interval: 1h
+  path: ./kubernetes/apps/network/envoy-gateway/certs
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network

@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rook-ceph-cluster
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: rook-ceph-cluster
+  interval: 1h
+  values:
+    cephClusterSpec:
+      cleanupPolicy:
+        wipeDevicesFromOtherClusters: true
+      # The four client.csi-*.1 users are key type aes, which is
+      # AUTH_INSECURE_CLIENT_KEY_TYPE on the chart's Ceph v20.2.4.
+      # keyGeneration above the current generation, plus a keyType change,
+      # is how Rook 1.21 rotates them. keepPriorKeyCountMax 0 deletes the
+      # generation-1 aes keys. allowedCiphers aes256k is what stops the mons
+      # allowing and creating aes keys. Set it only after ceph auth dump-keys
+      # shows no aes key, including daemon keys. Talos v1.14.5 is kernel
+      # 6.18.58 with the libceph aes256k backport (siderolabs/pkgs 84c1b87).
+      # Rook's generic note says kernel 7.0 because that is where the patches
+      # landed upstream.
+      security:
+        cephx:
+          allowedCiphers:
+            - aes256k
+          csi:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+            keepPriorKeyCountMax: 0
+            keyType: aes256k
+      storage:
+        # Three OSD SSDs on ata2-ata4 (Talos v1.14.5 by-path names, read from all four
+        # sleds on 27 Oct 2026). Boot disk is ata1 (Samsung 870)
+        # and does not match. Ryan approved wiping v1 Ceph on these disks.
+        useAllDevices: false
+        devicePathFilter: '^/dev/disk/by-path/pci-0000:00:1f\.2-ata-[234](\.0)?$'
+      resources:
+        osd:
+          limits:
+            memory: 8Gi
+    monitoring:
+      enabled: true
+    toolbox:
+      enabled: true
+    cephBlockPools:
+      - name: ceph-block
+        spec:
+          failureDomain: host
+          replicated:
+            size: 3
+        storageClass:
+          enabled: true
+          name: ceph-block
+          isDefault: true
+          parameters:
+            imageFeatures: layering
+            csi.storage.k8s.io/fstype: ext4
+            # Overriding cephBlockPools replaces the chart default list, which
+            # is where Rook 1.21 puts these. There is no separate toggle.
+            # Home-ops sets the same four pairs. The chart default also sets
+            # controller-modify and node-publish.
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-publish-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-publish-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+            csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/node-publish-secret-name: rook-csi-rbd-node
+            csi.storage.k8s.io/node-publish-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-modify-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-modify-secret-namespace: "{{ .Release.Namespace }}"
+    # The chart default leaves this off. ceph-block is the default class.
+    cephBlockPoolsVolumeSnapshotClass:
+      enabled: true
+      name: csi-ceph-block
+      isDefault: true
+      deletionPolicy: Delete

@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Shared scale-set values. Each overlay sets metadata.name, githubConfigUrl,
+# and runnerScaleSetName. Runners are ephemeral: one job, then the pod is
+# removed. containerMode dind adds a privileged docker:dind sidecar.
+# See docs/actions-runners.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: scale-set
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set
+  interval: 1h
+  values:
+    githubConfigUrl: https://github.com/carpenike/REPLACE
+    githubConfigSecret: actions-runner-controller
+    runnerScaleSetName: replace
+    minRunners: 0
+    maxRunners: 3
+    containerMode:
+      type: dind
+    controllerServiceAccount:
+      namespace: actions-runner-system
+      name: gha-rs-controller
+    listenerTemplate:
+      spec:
+        containers:
+          - name: listener
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 200m
+                memory: 256Mi
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/actions/actions-runner:2.338.2
+            command: ["/home/runner/run.sh"]
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: "2"
+                memory: 4Gi
