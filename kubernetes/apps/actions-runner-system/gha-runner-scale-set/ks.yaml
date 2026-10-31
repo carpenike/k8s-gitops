@@ -30,6 +30,26 @@ spec:
       kind: HelmRelease
       name: va-acr-app-k8s
       namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: atrium-k8s
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: mcp-k8s
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: network-config-k8s
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: schoolhouse-k8s
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: whiskey-k8s
+      namespace: actions-runner-system
   interval: 1h
   path: ./kubernetes/apps/actions-runner-system/gha-runner-scale-set/app
   postBuild:

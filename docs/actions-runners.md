@@ -12,6 +12,11 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Scale set | HelmRelease `sam-tracker` | Repo `https://github.com/carpenike/sam-tracker`. `runs-on` name `sam-tracker-k8s`. `minRunners` 0, `maxRunners` 3 |
 | Scale set | HelmRelease `sam-tracker-app-k8s` | Repo `https://github.com/carpenike/sam-tracker-app`. `runs-on` name `sam-tracker-app-k8s`. Same limits and mode as `sam-tracker` |
 | Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Runner `1` CPU / `2Gi` up to `8` CPU / `16Gi`, no container mode (see below) |
+| Scale set | HelmRelease `atrium-k8s` | Repo `https://github.com/carpenike/atrium`. `runs-on` name `atrium-k8s`. Non-Nix jobs, shared limits |
+| Scale set | HelmRelease `mcp-k8s` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s`. Non-Nix jobs. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
+| Scale set | HelmRelease `network-config-k8s` | Repo `https://github.com/carpenike/network-config`. `runs-on` name `network-config-k8s`. Runner `250m` / `512Mi` up to `1` CPU / `2Gi` |
+| Scale set | HelmRelease `schoolhouse-k8s` | Repo `https://github.com/carpenike/schoolhouse`. `runs-on` name `schoolhouse-k8s`. Shared limits |
+| Scale set | HelmRelease `whiskey-k8s` | Repo `https://github.com/carpenike/whiskey-whiskey-whiskey`. `runs-on` name `whiskey-k8s`. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
 | Secret | ExternalSecret `actions-runner-controller` | One GitHub App credential, read by every scale set |
 
 Runners are ephemeral. A pod takes one job and is deleted. That is the
@@ -39,12 +44,10 @@ repository gets its own scale set. It uses this GitHub App when the
 installation includes that repository.
 
 These repositories are on the personal account `carpenike`, not an
-organization. Each scale set is repo-scoped. Installation `175991169`
-includes `sam-tracker` and `sam-tracker-app`, and needs `va-acr-app`
-added before that scale set can register. `githubConfigUrl` is
-`https://github.com/carpenike/sam-tracker`,
-`https://github.com/carpenike/sam-tracker-app`, or
-`https://github.com/carpenike/va-acr-app`.
+organization. Each scale set is repo-scoped, so one cannot serve several
+repositories. Installation `175991169` must include a repository before
+its scale set can register. `githubConfigUrl` is that repository's URL, as
+in the table above.
 
 ## Container mode
 
@@ -56,12 +59,16 @@ the same mode. The chart adds a privileged `docker:dind` sidecar
 `restartPolicy: Always`) and sets `DOCKER_HOST` on the runner. The
 runner image stays `ghcr.io/actions/actions-runner:2.338.2`.
 
-`va-acr-app` has no container mode. Its overlay removes
-`containerMode`, so the chart adds no dind sidecar and the runner pod is
-not privileged. Its CI (`frontend` and `python-linux` in
-`.github/workflows/ci.yml`) starts no service containers or Docker
-builds. If a `va-acr-app` job later needs Docker, set
-`containerMode.type: dind` in that overlay.
+`va-acr-app`, `atrium-k8s`, `mcp-k8s`, `network-config-k8s`,
+`schoolhouse-k8s`, and `whiskey-k8s` have no container mode. Their overlays
+remove `containerMode`, so the chart adds no dind sidecar and the runner
+pod is not privileged. Their jobs start no service containers or Docker
+builds. If one later needs Docker, set `containerMode.type: dind` in that
+overlay.
+
+The Nix jobs in `atrium` and `mcp` have no scale set yet. What they need
+(a Nix install in the pod, build sandboxing, `/dev/kvm` for the NixOS VM
+test in `mcp`) sets their privilege level, so it is decided separately.
 
 The runner image is not the GitHub-hosted Ubuntu image. It has
 passwordless `sudo`, `git`, `curl`, `jq`, and the system `python3`, but
@@ -86,6 +93,7 @@ Requests and limits: `sam-tracker` and `sam-tracker-app` runner `500m` /
 `1Gi` up to `2` CPU / `4Gi`. The memory limit is `4Gi` so the runner and a
 Postgres service container fit. `va-acr-app-k8s` requests `1` CPU / `2Gi`
 and limits `8` CPU / `16Gi`, enough for eight pytest-xdist workers. The
+others are in the table above, or use the `sam-tracker` values. The
 listener is `50m` / `64Mi` up to `200m` / `256Mi`. The controller is
 `50m` / `128Mi` up to `200m` / `256Mi`.
 
@@ -103,7 +111,7 @@ GitHub Apps, New GitHub App.
 - On the app page, note the App ID
 - Generate a private key and download the `.pem` file. That file is the whole private key, including the `BEGIN` and `END` lines
 - Install App. Choose Only select repositories, and select the private repositories that will have a scale set
-- After install, the browser URL is `https://github.com/settings/installations/<installation id>`. The number at the end is the installation ID. This cluster uses installation `175991169`, which includes `sam-tracker` and `sam-tracker-app`
+- After install, the browser URL is `https://github.com/settings/installations/<installation id>`. The number at the end is the installation ID. This cluster uses installation `175991169`
 
 A PAT is not used.
 
@@ -137,7 +145,8 @@ On `sam-tracker-app`:
 runs-on: sam-tracker-app-k8s
 ```
 
-On `va-acr-app`:
+On any other repository, use its `runs-on` name from the table above,
+for example:
 
 ```yaml
 runs-on: va-acr-app-k8s
