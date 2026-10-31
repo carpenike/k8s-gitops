@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # Recreate, because VLAN 30 has one address and HomeKit has one identity.
-# replicas is 0: VLAN 30 L2 does not work from the sleds yet (ARP for 10.30.0.1 fails on sled-1 and sled-3); Scrypted stays on Forge. /server/volume was seeded from Forge on 2026-10-31 and is stale.
+# replicas is 1: VLAN 30 L2 works from the sleds (Cilium bpf.vlanBypass, #5653). /server/volume is copied from Forge at cutover on 2026-10-31.
 # is a new HomeKit identity. hostNetwork stays off: HomeKit and mDNS have
 # to come from 10.30.0.31, not from the sled address on VLAN 20.
 # ADR 0007 and ADR 0008.
@@ -23,7 +23,7 @@ spec:
   values:
     controllers:
       scrypted:
-        replicas: 0
+        replicas: 1
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
