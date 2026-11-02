@@ -127,62 +127,72 @@ spec:
                   model: openai/*
                   api_base: https://copilot.${SECRET_DOMAIN}/v1
                   api_key: os.environ/COPILOT_API_KEY
+              # Azure resource ryholt-simplechat-aifoundry. Deployment names
+              # match LiteLLM's cost map, so codex and pro are bridged to the
+              # Responses API, which needs api_version 2025-03-01-preview or later.
               - model_name: gpt-4o
-                litellm_params:
+                litellm_params: &azure-simplechat
                   model: azure/gpt-4o
                   api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
                   api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
+                  api_version: "2025-04-01-preview"
               - model_name: gpt-5
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/gpt-5
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
               - model_name: gpt-5-chat
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/gpt-5-chat
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
               - model_name: gpt-5-codex
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/gpt-5-codex
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
               - model_name: gpt-5-pro
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/gpt-5-pro
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
               - model_name: gpt-5.1
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/gpt-5.1
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
               - model_name: gpt-5.1-codex
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/gpt-5.1-codex
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2025-04-01-preview"
               - model_name: o3-mini
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/o3-mini
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2025-01-01-preview"
               - model_name: text-embedding-3-small
                 litellm_params:
+                  <<: *azure-simplechat
                   model: azure/text-embedding-3-small
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2024-12-01-preview"
                 model_info:
                   mode: embedding
+              # Azure resource ryholt-foundry, project proj-default, on the v1
+              # API. v1.100.1 has no gpt-6 entries, so gpt5_series/ forces the
+              # reasoning-model parameter mapping. Cost tracking reads $0 until
+              # the image knows these models. Microsoft-Decision-1 is not here:
+              # it speaks the Decisions API, not chat or responses.
+              - model_name: gpt-6.1-sol
+                litellm_params: &azure-foundry
+                  model: azure/gpt5_series/gpt-6.1-sol
+                  api_base: https://ryholt-foundry.openai.azure.com
+                  api_key: os.environ/AZURE_FOUNDRY_API_KEY
+                  api_version: v1
+              - model_name: gpt-6.1-terra
+                litellm_params:
+                  <<: *azure-foundry
+                  model: azure/gpt5_series/gpt-6.1-terra
+              - model_name: gpt-6-astra
+                litellm_params:
+                  <<: *azure-foundry
+                  model: azure/gpt5_series/gpt-6-astra
+              - model_name: gpt-6-luna
+                litellm_params:
+                  <<: *azure-foundry
+                  model: azure/gpt5_series/gpt-6-luna
               - model_name: anthropic/*
                 litellm_params:
                   model: anthropic/*
@@ -216,6 +226,8 @@ spec:
               context_window_fallbacks: []
               content_policy_fallbacks: []
             litellm_settings:
+              callbacks:
+                - prometheus
               drop_params: true
               set_verbose: false
               json_logs: true
