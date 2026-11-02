@@ -46,11 +46,21 @@ talks to Anthropic directly. Neither is a LiteLLM client.
 
 Namespace `litellm`, chart `app-template` 5.3.0, the same image digest.
 
-The model list matches Forge, with one address change: `copilot/*` and
+The model list started as Forge's, with one address change: `copilot/*` and
 `copilot-oai/*` use `https://copilot.holthome.net` and
 `https://copilot.holthome.net/v1`. `host.containers.internal` does not
 exist here. copilot-api's Caddy vhost is the LAN path, and it already
 requires the bearer key.
+
+The cluster adds models Forge does not have. `gpt-6.1-sol`,
+`gpt-6.1-terra`, `gpt-6-astra`, and `gpt-6-luna` are deployments on Azure
+resource `ryholt-foundry` (project `proj-default`, a different subscription
+from `ryholt-simplechat-aifoundry`), called on the v1 API with
+`AZURE_FOUNDRY_API_KEY`. The image predates GPT-6, so these use the
+`azure/gpt5_series/` route for reasoning parameters, and spend on them is
+not costed until the image is bumped. The `Microsoft-Decision-1` deployment
+on that resource is not in the model list. It serves the Decisions API at
+`/providers/microsoft/v1/systemone`, which LiteLLM does not route.
 
 The Atrium callback is absent. Importing it without the Nix-built package
 and the live publication files would crash the process. Atrium and Whiskey
@@ -72,7 +82,7 @@ Probes:
 `GET /health/liveness` is an alias of `liveliness`. `GET /health` is the
 model check. It needs a key and spends tokens. It is not a probe.
 
-`/metrics` needs the master key. The ServiceMonitor is labeled
+The `prometheus` callback serves `/metrics`. It needs the master key. The ServiceMonitor is labeled
 `release: kube-prometheus-stack` and sends `LITELLM_MASTER_KEY`.
 
 Resources match the cap Forge raised after Prisma OOM under 1G: request
@@ -113,6 +123,7 @@ One line per field, no surrounding quotes.
 | `openai_api_key` | `OPENAI_API_KEY` in that file | same env name |
 | `google_api_key` | `GOOGLE_API_KEY` in that file | same env name |
 | `azure_api_key` | `AZURE_API_KEY` in that file | same env name |
+| `azure_foundry_api_key` | Key 1 of Azure resource `ryholt-foundry` | `AZURE_FOUNDRY_API_KEY` |
 | `copilot_api_key` | first line of `/var/lib/copilot-api/api-key` | `COPILOT_API_KEY` |
 | `oidc_client_secret` | sops `litellm/oidc-client-secret` | `GENERIC_CLIENT_SECRET` |
 
