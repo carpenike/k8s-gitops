@@ -52,11 +52,13 @@ The model list started as Forge's, with one address change: `copilot/*` and
 exist here. copilot-api's Caddy vhost is the LAN path, and it already
 requires the bearer key.
 
-The cluster adds models Forge does not have. `gpt-6.1-sol`,
-`gpt-6.1-terra`, `gpt-6-astra`, and `gpt-6-luna` are deployments on Azure
-resource `ryholt-foundry` (project `proj-default`, a different subscription
-from `ryholt-simplechat-aifoundry`), called on the v1 API with
-`AZURE_FOUNDRY_API_KEY`. The image predates GPT-6, so these use the
+The Azure models differ from Forge. Forge's names (`gpt-4o`, `gpt-5*`,
+`o3-mini`, `text-embedding-3-small`) were deployments on the retired
+resource `ryholt-simplechat-aifoundry`, which rejected its key with a 401,
+and they are gone here. `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-astra`, and
+`gpt-6-luna` are deployments on Azure resource `ryholt-foundry` (project
+`proj-default`), called on the v1 API with `AZURE_FOUNDRY_API_KEY`. No
+Azure embedding model is served. The image predates GPT-6, so these use the
 `azure/gpt5_series/` route for reasoning parameters, and spend on them is
 not costed until the image is bumped. The `Microsoft-Decision-1` deployment
 on that resource is not in the model list. It serves the Decisions API at
@@ -122,7 +124,6 @@ One line per field, no surrounding quotes.
 | `anthropic_api_key` | `ANTHROPIC_API_KEY` in sops `litellm/provider-keys` | same env name |
 | `openai_api_key` | `OPENAI_API_KEY` in that file | same env name |
 | `google_api_key` | `GOOGLE_API_KEY` in that file | same env name |
-| `azure_api_key` | `AZURE_API_KEY` in that file | same env name |
 | `azure_foundry_api_key` | Key 1 of Azure resource `ryholt-foundry` | `AZURE_FOUNDRY_API_KEY` |
 | `copilot_api_key` | first line of `/var/lib/copilot-api/api-key` | `COPILOT_API_KEY` |
 | `oidc_client_secret` | sops `litellm/oidc-client-secret` | `GENERIC_CLIENT_SECRET` |
