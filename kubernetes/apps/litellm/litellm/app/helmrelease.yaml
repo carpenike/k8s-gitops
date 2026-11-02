@@ -127,49 +127,6 @@ spec:
                   model: openai/*
                   api_base: https://copilot.${SECRET_DOMAIN}/v1
                   api_key: os.environ/COPILOT_API_KEY
-              # Azure resource ryholt-simplechat-aifoundry. Deployment names
-              # match LiteLLM's cost map, so codex and pro are bridged to the
-              # Responses API, which needs api_version 2025-03-01-preview or later.
-              - model_name: gpt-4o
-                litellm_params: &azure-simplechat
-                  model: azure/gpt-4o
-                  api_base: https://ryholt-simplechat-aifoundry.cognitiveservices.azure.com
-                  api_key: os.environ/AZURE_API_KEY
-                  api_version: "2025-04-01-preview"
-              - model_name: gpt-5
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/gpt-5
-              - model_name: gpt-5-chat
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/gpt-5-chat
-              - model_name: gpt-5-codex
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/gpt-5-codex
-              - model_name: gpt-5-pro
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/gpt-5-pro
-              - model_name: gpt-5.1
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/gpt-5.1
-              - model_name: gpt-5.1-codex
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/gpt-5.1-codex
-              - model_name: o3-mini
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/o3-mini
-              - model_name: text-embedding-3-small
-                litellm_params:
-                  <<: *azure-simplechat
-                  model: azure/text-embedding-3-small
-                model_info:
-                  mode: embedding
               # Azure resource ryholt-foundry, project proj-default, on the v1
               # API. v1.100.1 has no gpt-6 entries, so gpt5_series/ forces the
               # reasoning-model parameter mapping. Cost tracking reads $0 until
