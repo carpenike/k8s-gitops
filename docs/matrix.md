@@ -110,6 +110,30 @@ Family accounts use the same token. Rotate it afterwards by editing the
 SOPS file (`sops kubernetes/apps/matrix/tuwunel/app/registration-token.sops.yaml`).
 The option is reloadable; the pod also restarts on the Secret change.
 
+## Encryption
+
+`encryption_enabled_by_default_for_room_type = "all"`. Every room created
+on this server starts with `m.room.encryption` (Megolm), whatever preset
+the client sends. Rooms created before the setting keep what they had;
+encryption cannot be turned off in a room once it is on. The server stores
+ciphertext for message bodies and E2EE media. Room membership, names,
+profiles, and timestamps are not end-to-end encrypted.
+
+| Layer | State |
+| --- | --- |
+| Client to Cloudflare, tunnel, Envoy | TLS |
+| Envoy to Tuwunel, between sleds | Plain HTTP on the pod network |
+| Message bodies and E2EE media | End-to-end encrypted by clients |
+| `tuwunel-data` on Ceph | Not encrypted at rest; the OSD disks are not LUKS |
+| Restic backups in R2 | Encrypted by restic |
+
+Bots read encrypted rooms only with `MATRIX_ENCRYPTION=true` and a
+persistent volume for the Hermes key store
+(`~/.hermes/platforms/matrix/store/`). If that store is lost, the bot
+cannot decrypt older messages and its device has to be verified again.
+Delete the bot's `HERMES_<NAME>` device from the admin room before
+provisioning it again, so the new keys are not mixed with the old ones.
+
 ## Bot accounts
 
 Appservice `hermes-bots`, file `hermes-bots.yaml` in Secret
