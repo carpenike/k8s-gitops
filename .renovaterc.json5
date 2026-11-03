@@ -1,0 +1,9 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  // main is retired; the cluster syncs the rebuild branch until cutover.
+  // Renovate reads repo config from the default branch only, so point it at
+  // rebuild and merge in rebuild's own .renovaterc.json5, which holds the
+  // real rules. useBaseBranchConfig needs the same file name on both branches.
+  baseBranchPatterns: ["rebuild"],
+  useBaseBranchConfig: "merge",
+}
