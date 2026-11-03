@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/clienttrafficpolicy_v1alpha1.json
+# Keep %2F in request paths as sent. Envoy Gateway 1.9.3 defaults to
+# UnescapeAndRedirect, which answers /a%2Fb with a 307 to /a/b. Matrix
+# clients percent-encode "/" inside path parameters (account data types,
+# SSSS key ids, state keys, transaction ids), and the redirect turns those
+# into paths Tuwunel does not route (M_UNRECOGNIZED). Chief's cross-signing
+# bootstrap failed that way: PUT .../account_data/m.secret_storage.key.<id>
+# with a "/" in the id. Matrix's reverse-proxy guidance is the same: do not
+# decode or normalize the URI.
+#
+# Only the external HTTPS listener, where matrix.ryanholt.net lives.
+# Backends there see the escaped path; no route on this listener makes an
+# authorization decision on a path that could hide a %2F. See
+# docs/gateway-auth.md before adding one.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: envoy-external-https
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-external
+      sectionName: https
+  path:
+    escapedSlashesAction: KeepUnchanged
