@@ -21,8 +21,8 @@ Pocket ID login.
 
 `cloudflare-dns` publishes `ryanholt.net` and `www.ryanholt.net` as
 proxied CNAMEs to `external.holthome.net`. The tunnel and the
-`ryanholt-net-production` certificate already cover both. The stale apex
-record and the mail records are covered in [matrix.md](matrix.md#names-and-dns).
+`ryanholt-net-production` certificate already cover both. The mail records
+that stay on the apex are covered in [matrix.md](matrix.md#names-and-dns).
 
 ## Changing the page
 

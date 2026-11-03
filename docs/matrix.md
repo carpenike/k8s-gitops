@@ -34,13 +34,13 @@ Its route in namespace `web` matches `/`; this one matches the longer
 prefix `/.well-known/matrix/`, and Gateway API picks the longest match
 across routes on the same host. The site never sees the Matrix paths.
 
-The apex already has a proxied record. On 3 Nov 2026 it answered
-Cloudflare error 1016 (origin DNS error), so nothing is served there now.
-external-dns only replaces a record whose `k8s.` TXT owner record is
-`default`. If the apex record is not owned that way, delete that one
-record in Cloudflare and let `cloudflare-dns` create it. Leave the MX and
-TXT records alone: Outlook mail for `ryanholt.net` uses them, and
-Cloudflare's apex CNAME flattening lets them stay next to the CNAME.
+As of 3 Nov 2026 the apex, `www`, and `matrix` have no address records
+at Cloudflare's authoritative servers, the public resolvers, or the
+MikroTik, and there are no `k8s.` ownership TXT records, so
+`cloudflare-dns` creates all three without a conflict. The apex keeps its
+MX, SPF, and Microsoft verification TXT records and `autodiscover`
+(Outlook mail). Cloudflare's apex CNAME flattening lets those sit next to
+the new CNAME; external-dns does not touch records it does not own.
 
 Delegation:
 
