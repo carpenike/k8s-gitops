@@ -81,8 +81,18 @@ bash scripts/validate.sh
 ```
 
 CI runs the same steps in `.github/workflows/validate.yaml`: yamllint,
-kubeconform, a check that any `*.sops.yaml` is encrypted, gitleaks on the
-working tree, and `renovate-config-validator` for Renovate 44.188.2.
+kubeconform, a check that any `*.sops.yaml` is encrypted, helm template,
+gitleaks on the working tree, and `renovate-config-validator` for Renovate
+44.188.2.
+
+kubeconform checks the HelmRelease objects, not their `spec.values`.
+`scripts/helm-template.sh` builds each Flux Kustomization, applies its
+postBuild substitution with the values in
+`kubernetes/components/sops/cluster-secrets.yaml` (`flux envsubst
+--strict`, so an undefined `${VAR}` fails), pulls each chart from its
+OCIRepository or HelmRepository, and runs `helm template` on the values. A
+value the chart's `values.schema.json` rejects fails here instead of at
+`helm upgrade` in the cluster.
 
 ## What was adopted from hve-core
 

@@ -20,12 +20,16 @@ talosctl = "1.14.5"
 yq = "4.54.1"
 
 [tasks.validate]
-description = "yamllint, sops check, kubeconform, gitleaks"
+description = "yamllint, sops check, kubeconform, helm template, gitleaks"
 run = "bash scripts/validate.sh"
 
 [tasks.kubeconform]
 description = "Build each Kustomize directory and run kubeconform"
 run = "bash scripts/kubeconform.sh"
+
+[tasks.helm-template]
+description = "Render each HelmRelease's values against its chart"
+run = "bash scripts/helm-template.sh"
 
 [tasks.sops-check]
 description = "Reject unencrypted *.sops.yaml files"
