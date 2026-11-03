@@ -8,3 +8,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./litellm/ks.yaml
+  - ./key-provisioner/ks.yaml

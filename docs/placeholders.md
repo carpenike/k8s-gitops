@@ -63,6 +63,12 @@ and cannot create it. Fields: `master_key`, `salt_key`, `database_password`,
 in [litellm.md](litellm.md). The salt field has to be the existing Forge
 salt. A new salt does not decrypt stored credentials.
 
+## Hermes
+
+After Chief's first boot, create item `hermes-chief` in vault
+`k8s-secrets` with field `matrix_recovery_key`. The LiteLLM key is
+provisioned in-cluster and has no 1Password item. See [hermes.md](hermes.md).
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

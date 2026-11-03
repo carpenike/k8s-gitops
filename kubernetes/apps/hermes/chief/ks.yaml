@@ -1,0 +1,101 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Matrix account @chief:ryanholt.net, from the shared provisioning template.
+# wait holds this Kustomization until the Job has written Secret
+# hermes-chief-matrix, so chief below starts with credentials. force
+# replaces the immutable Job when the template changes. chief must be in
+# the hermes-bots appservice namespace regex. See docs/matrix.md.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: chief-matrix
+spec:
+  dependsOn:
+    - name: hermes-bot-provisioner
+      namespace: flux-system
+  force: true
+  interval: 1h
+  path: ./kubernetes/apps/matrix/hermes-bot-provisioner/template
+  postBuild:
+    substitute:
+      BOT_NAME: chief
+      BOT_NAMESPACE: hermes
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  timeout: 15m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# LiteLLM virtual key hermes-chief in team hermes, from the shared key
+# template. Secret chief-litellm gets LITELLM_API_KEY. BUDGET is USD per
+# period; LiteLLM refuses requests past it. Changing a value here
+# replaces the Job (force), which updates the existing key in place.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: chief-litellm
+spec:
+  dependsOn:
+    - name: litellm-key-provisioner
+      namespace: litellm
+  force: true
+  interval: 1h
+  path: ./kubernetes/apps/litellm/key-provisioner/template
+  postBuild:
+    substitute:
+      KEY_ALIAS: hermes-chief
+      TEAM_ALIAS: hermes
+      MODELS: claude-sonnet
+      BUDGET: 25/30d
+      TARGET_NAMESPACE: hermes
+      SECRET_NAME: chief-litellm
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  timeout: 15m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# No postBuild substitution: the init script carries a literal
+# ${LITELLM_API_KEY} that Hermes expands at runtime.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: chief
+spec:
+  dependsOn:
+    - name: chief-matrix
+      namespace: hermes
+    - name: chief-litellm
+      namespace: hermes
+    - name: kata
+      namespace: kube-system
+    - name: litellm
+      namespace: litellm
+    - name: external-secrets
+      namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: ceph-csi-drivers
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: chief
+      namespace: hermes
+  interval: 1h
+  path: ./kubernetes/apps/hermes/chief/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: hermes
+  timeout: 15m

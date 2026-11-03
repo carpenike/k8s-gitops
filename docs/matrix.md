@@ -2,7 +2,7 @@
 
 Tuwunel v1.9.4 in namespace `matrix`, for Hermes bot accounts and family
 accounts. ADR 0010. Server name `ryanholt.net`, so user IDs are
-`@ryan:ryanholt.net` and `@hermes-<name>:ryanholt.net`. The server name
+`@ryan:ryanholt.net` and bot names like `@chief:ryanholt.net`. The server name
 cannot change without wiping the database.
 
 | Path | Purpose |
@@ -138,17 +138,34 @@ provisioning it again, so the new keys are not mixed with the old ones.
 
 Appservice `hermes-bots`, file `hermes-bots.yaml` in Secret
 `tuwunel-appservice-hermes-bots`, mounted as `appservice_dir`. The
-namespace is `^@hermes-.*:ryanholt\.net$`, exclusive, so a person cannot
-register a `hermes-` name. `rate_limited: false`. `url: null`: the
+namespace is an explicit list of bot names, today
+`^@(chief):ryanholt\.net$`, exclusive, so a person cannot register those
+names. Bot IDs have no prefix; with a handful of accounts on this server a
+reserved prefix buys nothing. `rate_limited: false`. `url: null`: the
 appservice receives no transactions. Its sender is `@_hermes`, outside
 the bot namespace.
 
-`as_token` can act as any `@hermes-*` user. It stays in namespace
-`matrix`. Bots get their own access token, not the `as_token`.
+`as_token` can act as any user the namespace matches, which is why the
+regex lists names instead of a pattern: a broad pattern would let it log in
+as `@ryan`. It stays in namespace `matrix`. Bots get their own access
+token, not the `as_token`.
+
+Adding a bot name means editing the regex inside the SOPS file, which
+needs the YubiKey:
+
+```sh
+sops kubernetes/apps/matrix/tuwunel/app/appservice-hermes-bots.sops.yaml
+# users regex: '^@(chief|newbot):ryanholt\.net$'
+```
+
+Tuwunel reads `appservice_dir` only at startup; Reloader restarts the pod
+on the Secret change.
 
 ### Provisioning a bot
 
-The template takes `BOT_NAME` and `BOT_NAMESPACE`. For `BOT_NAME: pilot`:
+The template takes `BOT_NAME` and `BOT_NAMESPACE`. The Matrix ID is
+`@<BOT_NAME>:ryanholt.net`; Kubernetes object names keep a `hermes-`
+prefix. For `BOT_NAME: pilot` (once `pilot` is in the namespace regex):
 
 - Flux creates an empty Secret `hermes-pilot-matrix` in `BOT_NAMESPACE`
   (`kustomize.toolkit.fluxcd.io/ssa: IfNotPresent`, so Flux never
@@ -156,7 +173,7 @@ The template takes `BOT_NAME` and `BOT_NAMESPACE`. For `BOT_NAME: pilot`:
   and a RoleBinding to ServiceAccount `matrix/hermes-provision-pilot`.
   RBAC cannot limit `create` by name, which is why Flux creates the
   object and the Job only patches it.
-- Job `matrix/hermes-provision-pilot` runs `provision.py`:
+- Job `matrix/hermes-provision-pilot` runs `provision.py` for `@pilot`:
   1. If the Secret already has a token that `/account/whoami` accepts,
      it exits.
   2. `POST /_matrix/client/v3/register` with `m.login.application_service`
@@ -165,7 +182,7 @@ The template takes `BOT_NAME` and `BOT_NAMESPACE`. For `BOT_NAME: pilot`:
      and a fixed device id `HERMES_PILOT`, so a re-run replaces that
      device's token instead of adding devices.
   4. Merge-patches `MATRIX_HOMESERVER` (`https://matrix.ryanholt.net`),
-     `MATRIX_USER_ID` (`@hermes-pilot:ryanholt.net`), and
+     `MATRIX_USER_ID` (`@pilot:ryanholt.net`), and
      `MATRIX_ACCESS_TOKEN` into the Secret.
 
 To wire a bot, copy `kubernetes/examples/hermes-bot-matrix.yaml` next to
@@ -180,7 +197,7 @@ The bots use the public URL.
 
 Removing the bot's Kustomization prunes the Secret and RBAC. The Matrix
 account stays; deactivate it from the admin room with
-`!admin users deactivate @hermes-pilot:ryanholt.net`.
+`!admin users deactivate @pilot:ryanholt.net`.
 
 ## Network policy
 

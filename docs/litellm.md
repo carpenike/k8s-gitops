@@ -318,3 +318,31 @@ Phase 7 rollback is the inverse Nix change: enable the module again, point
 the endpoints back at `https://llm.holthome.net`, and leave the dataset
 where it is. The salt file on the dataset is what a restored Forge
 container needs.
+
+## Virtual keys for cluster apps
+
+`kubernetes/apps/litellm/key-provisioner`. A consumer adds a Flux
+Kustomization on `template/` with `postBuild.substitute` (`KEY_ALIAS`,
+`TEAM_ALIAS`, `MODELS`, `BUDGET` as `<USD>/<duration>` such as `25/30d`,
+`TARGET_NAMESPACE`, `SECRET_NAME`); `hermes/chief/ks.yaml` is the first.
+The Job runs in `litellm` with `LITELLM_MASTER_KEY` from `litellm-env`, so
+the master key never leaves this namespace. It:
+
+1. finds the team by alias, or creates it (no model list on the team);
+2. if the consumer's Secret holds a key that `/key/info` knows under the
+   alias, updates its models and budget (`/key/update`) and stops;
+3. otherwise deletes any key with the alias (`/key/delete`), generates a
+   new one (`/key/generate`), and patches `LITELLM_API_KEY` into the
+   Secret.
+
+LiteLLM stores keys hashed, so a lost Secret means a new key, not a read
+back. Flux creates the Secret empty (`ssa: IfNotPresent`); the Job's Role
+has `get` and `patch` on that one name in the consumer's namespace. Its
+egress is DNS, the LiteLLM pod, and the Kubernetes API. Keys carry
+`metadata.managed_by: k8s-gitops`. Change models or budget in the
+consumer's Kustomization, not in the Admin UI: the next time the Job
+runs, it sets them back.
+
+Tested against v1.106.6 with Postgres: first run, re-run, a budget
+change applied in place, and a lost Secret replaced with exactly one key
+left under the alias.

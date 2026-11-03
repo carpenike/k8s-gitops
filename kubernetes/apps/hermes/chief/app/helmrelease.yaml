@@ -1,0 +1,132 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Chief: a Hermes agent on Matrix as @chief:ryanholt.net, model
+# claude-sonnet through the in-cluster LiteLLM proxy. One replica,
+# Recreate: the data volume is RWO and holds the Matrix crypto store,
+# sessions, and memories.
+#
+# The pod is a kata-qemu VM (ADR 0009). shareProcessNamespace makes the
+# pause container PID 1, so the image's entrypoint skips s6-overlay /init
+# and bootstraps directly; that path accepts the image's own hermes UID
+# (10000), so the container runs non-root with no capabilities and a
+# read-only root. docker/entrypoint-dispatch.sh and docker/stage2-hook.sh
+# at tag v0.22.6.
+#
+# Hermes owns $HERMES_HOME/config.yaml (it seeds it from its example and
+# migrates it). The init container sets only the keys this file owns, on
+# every start. Anything else changed from chat (/model and so on) persists
+# on the volume until it collides with one of these keys.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: chief
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: chief
+  interval: 1h
+  timeout: 15m
+  values:
+    controllers:
+      chief:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          config:
+            image: &image
+              repository: docker.io/nousresearch/hermes-agent
+              # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
+              tag: v0.22.6@sha256:d27689bc6e8581ec884a7227c9101fdaebf6c853cff8859020dac14f21452b4d
+            # The image's entrypoint bootstraps $HERMES_HOME, then runs an
+            # executable first argument as-is (docker/main-wrapper.sh).
+            args:
+              - sh
+              - -c
+              - |
+                set -eu
+                hermes config set model.provider custom
+                hermes config set model.default claude-sonnet
+                hermes config set model.base_url http://litellm.litellm.svc.cluster.local:4000/v1
+                # Stored as the literal reference; expanded at runtime.
+                hermes config set model.api_key '${LITELLM_API_KEY}'
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        containers:
+          app:
+            image: *image
+            args:
+              - gateway
+              - run
+            env:
+              TZ: America/New_York
+              # Device id the provisioning Job logged in with.
+              MATRIX_DEVICE_ID: HERMES_CHIEF
+              # Every room on this server is encrypted. required fails closed
+              # if the crypto extras are missing instead of joining
+              # unencrypted.
+              MATRIX_E2EE_MODE: required
+              MATRIX_ALLOWED_USERS: "@ryan:ryanholt.net"
+              # First boot bootstraps cross-signing and writes the recovery
+              # key here (mode 0600, never overwritten). Move it to
+              # 1Password; see docs/hermes.md.
+              MATRIX_RECOVERY_KEY_OUTPUT_FILE: /opt/data/matrix-recovery-key
+            envFrom:
+              # MATRIX_HOMESERVER, MATRIX_USER_ID, MATRIX_ACCESS_TOKEN
+              - secretRef:
+                  name: hermes-chief-matrix
+              # LITELLM_API_KEY, from Kustomization chief-litellm
+              - secretRef:
+                  name: chief-litellm
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+              limits:
+                cpu: "2"
+                memory: 4Gi
+    defaultPodOptions:
+      runtimeClassName: kata-qemu
+      shareProcessNamespace: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        retain: true
+        # Fixed name for VolSync. See ./replicationsource.yaml.
+        forceRename: chief-data
+        globalMounts:
+          - path: /opt/data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
