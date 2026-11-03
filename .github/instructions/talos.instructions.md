@@ -9,6 +9,6 @@ applyTo: "talos/**,cluster.example.toml"
 - Node addresses are the v1 bare-metal hosts on `10.20.0.0/16` (`10.20.10.20`–`10.20.10.23`). The API VIP `10.20.10.10` is new and must be confirmed free. Do not commit MACs, disk serials, or a Talos secrets bundle.
 - `ens1f0.30` is the VLAN 30 subinterface and the Multus macvlan master. Leave it without an address. Do not assign the sleds an address on `10.30.0.0/16`.
 - Control-plane nodes are schedulable. Do not put the control-plane taint back.
-- `schematicId` stays all zeros until an Image Factory build that includes `nut-client` exists.
+- `schematicId` in `topf.yaml` is the Image Factory id for `talos/schematic.yaml`. Do not replace it with zeros.
 - Do not run `topf secrets` and commit the result. The bundle is a cluster credential.
 - Do not copy kernel arguments that disable CPU mitigations or AppArmor from the archived tree.
