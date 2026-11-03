@@ -9,6 +9,7 @@ cd "${ROOT}"
 yamllint -c .yamllint.yml .
 bash scripts/check-sops-encrypted.sh
 bash scripts/kubeconform.sh
+bash scripts/helm-template.sh
 
 if command -v gitleaks >/dev/null 2>&1; then
   gitleaks detect --no-git --redact --config .gitleaks.toml --source .

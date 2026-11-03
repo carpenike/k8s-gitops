@@ -41,6 +41,32 @@ jobs:
       - name: kubeconform
         run: bash scripts/kubeconform.sh
 
+  helm-template:
+    name: helm template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Versions match mise.toml.
+      - name: Install kustomize, flux, helm and yq
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/kustomize_v5.8.3_linux_amd64.tar.gz" | tar -xz
+          sudo install -m 0755 kustomize /usr/local/bin/kustomize
+          curl -fsSL "https://github.com/fluxcd/flux2/releases/download/v2.10.0/flux_2.10.0_linux_amd64.tar.gz" | tar -xz flux
+          sudo install -m 0755 flux /usr/local/bin/flux
+          curl -fsSL "https://get.helm.sh/helm-v4.3.1-linux-amd64.tar.gz" | tar -xz linux-amd64/helm
+          sudo install -m 0755 linux-amd64/helm /usr/local/bin/helm
+          curl -fsSL -o yq "https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64"
+          sudo install -m 0755 yq /usr/local/bin/yq
+
+      # Pulls public charts anonymously. No cluster, no secrets.
+      - name: Render HelmRelease values against their charts
+        run: bash scripts/helm-template.sh
+
   secrets:
     name: gitleaks
     runs-on: ubuntu-latest
