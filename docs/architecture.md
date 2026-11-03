@@ -102,6 +102,14 @@ Optional TCP MD5, if used later, belongs in 1Password.
 
 ## Names
 
+Nodes and pods have no `holthome.net` search domain
+(`talos/all/21-resolver.yaml`). Write internal names in full, for example
+`forge.holthome.net`; a bare `forge` does not resolve. The zone is
+DNSSEC-signed on Cloudflare, which answers a missing name with NOERROR and
+no records, and musl (Alpine) stops a search list at that answer. With the
+zone in every pod's search list, Alpine pods could not resolve
+cross-namespace Service names or public names.
+
 `holthome.net` is the cluster zone. Node names, `internal.holthome.net`,
 `external.holthome.net`, and the Flux webhook live there. The MikroTik
 release writes A records for HTTPRoutes on `envoy-internal` only, aimed at
