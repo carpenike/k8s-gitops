@@ -37,9 +37,9 @@ spec:
   timeout: 10m
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Nothing depends on this. Until 1Password item volsync-restic exists the
-# ExternalSecret is not ready and no backup runs. The homeserver does not
-# wait on it. See docs/matrix.md.
+# Nothing depends on this. If 1Password item volsync-r2-template cannot be
+# read, this Kustomization stays unready and the homeserver does not wait
+# on it. See docs/matrix.md.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

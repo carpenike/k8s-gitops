@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Restic mover egress: cluster DNS and public IPv4. That covers R2. If the
-# repository is Garage on the backup NAS instead, add its /32 and port here;
-# the default-deny policy in ../app blocks the LAN otherwise.
+# Restic mover egress: cluster DNS and public IPv4, for Cloudflare R2. A LAN
+# repository (v1's volsync-restic-template MinIO, or Garage on the backup
+# NAS) would need its /32 and port here; default-deny in ../app blocks the
+# LAN otherwise.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

@@ -43,8 +43,8 @@ Secrets are SOPS, not External Secrets. The registration token,
 `as_token`, and `hs_token` are generated once, have no upstream source,
 and are read by nothing outside the cluster, the same case as the upsmon
 password in ADR 0005. This is an exception to ADR 0002. Restic
-credentials for the backup are shared with other VolSync sources and
-stay in 1Password.
+credentials for the backup are v1's shared 1Password item
+`volsync-r2-template`.
 
 ### Consequences
 
@@ -56,8 +56,9 @@ stay in 1Password.
 - Bad, because there is no horizontal scaling. Downtime on upgrade is the
   `Recreate` restart, longer when a database migration runs
 - Bad, because rotating a SOPS token is a commit
-- The apex `ryanholt.net` is routed to `envoy-external` for
-  `/.well-known/matrix/` only
+- The apex `ryanholt.net` moves to `envoy-external`. `/.well-known/matrix/`
+  goes to Tuwunel and every other path to the static site in namespace
+  `web`
 
 ## Pros and Cons of the Options
 

@@ -63,15 +63,6 @@ and cannot create it. Fields: `master_key`, `salt_key`, `database_password`,
 in [litellm.md](litellm.md). The salt field has to be the existing Forge
 salt. A new salt does not decrypt stored credentials.
 
-## Matrix backup
-
-Create item `volsync-restic` in vault `k8s-secrets`. Fields:
-`repository_base` (restic URL prefix, for example
-`s3:https://<endpoint>/<bucket>`; each VolSync source appends its own
-path), `restic_password`, `aws_access_key_id`, `aws_secret_access_key`.
-The first consumer is ExternalSecret `tuwunel-volsync` in `matrix`. See
-[matrix.md](matrix.md).
-
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

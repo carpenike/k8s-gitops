@@ -22,19 +22,25 @@ and homeservers sign requests; neither can complete the gateway login.
 | Name | Route | Serves |
 | --- | --- | --- |
 | `matrix.ryanholt.net` | `tuwunel` | Client and federation API, all paths |
-| `ryanholt.net` | `tuwunel-well-known` | `/.well-known/matrix/` only. Other apex paths are Envoy 404 |
+| `ryanholt.net` | `tuwunel-well-known` | `/.well-known/matrix/` only. Every other path is the website |
 
 `cloudflare-dns` publishes both as proxied CNAMEs to
 `external.holthome.net`. The tunnel already sends `ryanholt.net` and
 `*.ryanholt.net` to `envoy-external`, and the `ryanholt-net-production`
 certificate covers both names. No tunnel or certificate change is needed.
 
+The apex is also the `ryanholt.net` website ([website.md](website.md)).
+Its route in namespace `web` matches `/`; this one matches the longer
+prefix `/.well-known/matrix/`, and Gateway API picks the longest match
+across routes on the same host. The site never sees the Matrix paths.
+
 The apex already has a proxied record. On 3 Nov 2026 it answered
 Cloudflare error 1016 (origin DNS error), so nothing is served there now.
 external-dns only replaces a record whose `k8s.` TXT owner record is
-`default`. If the apex record is not owned that way, delete it in
-Cloudflare and let `cloudflare-dns` create it. Taking the apex this way
-means any later website on `ryanholt.net` has to share it with this route.
+`default`. If the apex record is not owned that way, delete that one
+record in Cloudflare and let `cloudflare-dns` create it. Leave the MX and
+TXT records alone: Outlook mail for `ryanholt.net` uses them, and
+Cloudflare's apex CNAME flattening lets them stay next to the CNAME.
 
 Delegation:
 
@@ -160,11 +166,11 @@ account stays; deactivate it from the admin room with
 | --- | --- | --- |
 | Tuwunel | `envoy-external` proxies in `network`, and the provisioning Job, on 8008 | Cluster DNS, public IPv4 on any port (federation) |
 | Provisioning Job | none | Cluster DNS, Tuwunel on 8008, `kube-apiserver` |
-| VolSync mover | none | Cluster DNS, public IPv4 |
+| VolSync mover | none | Cluster DNS, public IPv4 (R2) |
 
 RFC1918, CGNAT, and link-local are excluded from both public rules.
-Turning on Pocket ID needs an egress allow for `id.holthome.net`. A
-Garage repository on the backup NAS needs its address on the mover rule.
+Turning on Pocket ID needs an egress allow for `id.holthome.net`. A LAN
+restic repository would need its address on the mover rule.
 
 The namespace is Pod Security `restricted`. Tuwunel runs as 1000:1000,
 the Job as 65534, and the movers as 1000 with `seccompProfile: RuntimeDefault`
@@ -178,10 +184,15 @@ and media both live there. One replica, `Recreate`.
 ReplicationSource `tuwunel` snapshots it through `csi-ceph-block` at
 03:30 and sends it to restic, 7 daily and 4 weekly. The snapshot is crash
 consistent; RocksDB replays its WAL on restore. Credentials are
-ExternalSecret `tuwunel-volsync` from 1Password item `volsync-restic`,
-which does not exist yet (see [placeholders.md](placeholders.md)). Until
-it does, Kustomization `tuwunel-backup` is not ready and nothing waits on
-it.
+ExternalSecret `tuwunel-volsync` from 1Password item
+`volsync-r2-template`, the Cloudflare R2 item every v1 app used. The
+repository is `<REPOSITORY_TEMPLATE>/tuwunel`, v1's per-app path
+convention. Nothing waits on Kustomization `tuwunel-backup`.
+
+Restore, in short: scale `tuwunel` to 0, point a VolSync
+`ReplicationDestination` at the same repository with
+`copyMethod: Direct` and `destinationPVC: tuwunel-data`, then scale back
+to 1.
 
 ## Metrics
 
