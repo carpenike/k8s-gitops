@@ -93,6 +93,16 @@ spec:
               # LITELLM_API_KEY, from Kustomization chief-litellm
               - secretRef:
                   name: chief-litellm
+              # MATRIX_RECOVERY_KEY, from 1Password item hermes-chief once it
+              # exists. On every start Hermes loads the cross-signing keys
+              # from secret storage with it and signs the current device, so
+              # a lost crypto store comes back verified. optional: the pod
+              # starts without it, and Reloader restarts it when the Secret
+              # appears. (app-template's schema rejects optional on an env
+              # secretKeyRef, so this is envFrom.)
+              - secretRef:
+                  name: chief-matrix-recovery
+                  optional: true
             probes:
               liveness:
                 enabled: false

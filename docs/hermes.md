@@ -54,6 +54,8 @@ Matrix settings are environment variables:
 - `MATRIX_DEVICE_ID=HERMES_CHIEF`, the device the provisioning Job logged
   in with.
 - `MATRIX_RECOVERY_KEY_OUTPUT_FILE=/opt/data/matrix-recovery-key`.
+- `MATRIX_RECOVERY_KEY` from ExternalSecret `chief-matrix-recovery`
+  (1Password `hermes-chief/matrix_recovery_key`), an optional `envFrom`.
 
 Network: default deny in `hermes`. Chief has no ingress and no Service.
 Egress is cluster DNS, LiteLLM on 4000, and public IPv4. RFC1918, CGNAT,
@@ -73,14 +75,19 @@ cross-signing for `@chief` and writes a new recovery key to
 1Password and delete the file:
 
 ```sh
-kubectl -n hermes exec deploy/chief -- cat /opt/data/matrix-recovery-key
+kubectl -n hermes exec deploy/chief -c app -- cat /opt/data/matrix-recovery-key
 op item create --vault k8s-secrets --category "API Credential" \
   --title hermes-chief 'matrix_recovery_key[concealed]=<key>'
-kubectl -n hermes exec deploy/chief -- rm /opt/data/matrix-recovery-key
+kubectl -n hermes exec deploy/chief -c app -- rm /opt/data/matrix-recovery-key
 ```
 
-   With that key, a rebuilt crypto store can sign itself again
-   (`MATRIX_RECOVERY_KEY`). It is not wired into the pod yet.
+ExternalSecret `chief-matrix-recovery` reads that field into
+`MATRIX_RECOVERY_KEY`, and Reloader restarts the pod when the Secret
+appears (or within the 1h refresh). On every start Hermes then loads the
+cross-signing keys from secret storage and signs the current device, so a
+rebuilt or restored crypto store comes back verified instead of showing
+"not verified by its owner". The variable is optional: until the item
+exists, the pod starts without it and the ExternalSecret stays unready.
 
 Then DM `@chief:ryanholt.net` from Element.
 
