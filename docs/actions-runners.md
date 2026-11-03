@@ -46,6 +46,24 @@ added before that scale set can register. `githubConfigUrl` is
 `https://github.com/carpenike/sam-tracker-app`, or
 `https://github.com/carpenike/va-acr-app`.
 
+## Network policy
+
+CiliumNetworkPolicy `runner-egress` selects runner pods by the label
+`actions-ephemeral-runner: "True"`, which ARC sets on runner pods only.
+They may reach cluster DNS (`kube-dns`, port 53) and public IPv4. Egress
+to `10.0.0.0/8`, `100.64.0.0/10`, `169.254.0.0/16`, `172.16.0.0/12`, and
+`192.168.0.0/16` is denied. That covers the node LAN, the router's LAN
+address, the LoadBalancer pool, the pod and service networks, and the
+Kubernetes API. The cluster has IPv6 off.
+
+Listeners and the controller are not selected, so they keep Kubernetes API
+access. Service containers on a dind runner share the pod's network, so the
+same egress rule applies to them.
+
+A public address is still reachable. That includes this network's own
+WAN address and anything published through it. If a job needs something on
+the LAN, add a narrow rule to this policy for that address and port.
+
 ## Container mode
 
 `containerMode.type` is `dind` on `sam-tracker` and `sam-tracker-app`.
