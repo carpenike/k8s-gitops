@@ -1,0 +1,68 @@
+---
+# Client and federation traffic. Matrix clients send bearer tokens and
+# other homeservers sign requests, so neither can complete the gateway
+# Pocket ID login: both routes are public. Switch this one to native if
+# the identity_provider stub in helmrelease.yaml is turned on.
+# Federation uses 443 through the tunnel, as delegated by
+# /.well-known/matrix/server below. Nothing listens on 8448.
+# Timeouts cover /sync long-polls, which clients hold for about 30s.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: tuwunel
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - matrix.ryanholt.net
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    - timeouts:
+        request: 120s
+        backendRequest: 120s
+      backendRefs:
+        - name: tuwunel
+          port: 8008
+---
+# Delegation for server name ryanholt.net. Only /.well-known/matrix/ on the
+# apex is routed here; Tuwunel answers client and server from
+# [global.well_known]. Any other apex path gets Envoy's 404.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: tuwunel-well-known
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - ryanholt.net
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /.well-known/matrix/
+      backendRefs:
+        - name: tuwunel
+          port: 8008
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: tuwunel-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: tuwunel
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: tuwunel-well-known

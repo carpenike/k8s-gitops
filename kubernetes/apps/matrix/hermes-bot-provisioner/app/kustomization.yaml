@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# The script is shared by every bot. Each bot gets its own Job, RBAC, and
+# Secret from ../template. The name has no hash suffix because those Jobs
+# live in other Flux Kustomizations and refer to it by name.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ciliumnetworkpolicy.yaml
+configMapGenerator:
+  - name: hermes-bot-provisioner
+    files:
+      - ./provision.py
+generatorOptions:
+  disableNameSuffixHash: true

@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Per-bot template. Nothing in kubernetes/apps points at this directory
+# yet. A Flux Kustomization on this path sets postBuild.substitute
+# BOT_NAME (lowercase, digits, '-') and BOT_NAMESPACE (an existing
+# namespace). The Job and its ServiceAccount are in matrix, next to the
+# as_token. The Secret, Role, and RoleBinding are in BOT_NAMESPACE.
+# No namespace transformer: the objects name their own namespaces.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./secret.yaml
+  - ./rbac.yaml
+  - ./job.yaml

@@ -1,0 +1,62 @@
+---
+# The apex site. A public website cannot sit behind the gateway Pocket ID
+# login. /.well-known/matrix/ on this host is route tuwunel-well-known in
+# namespace matrix; Gateway API sends a request to the longest matching
+# path prefix across both routes, so that path never reaches nginx.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ryanholt-net
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - ryanholt.net
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: ryanholt-net
+          port: 8080
+---
+# www goes to the apex. No backend: Envoy answers the redirect itself.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ryanholt-net-www
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - www.ryanholt.net
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            hostname: ryanholt.net
+            statusCode: 301
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: ryanholt-net-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: ryanholt-net
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: ryanholt-net-www
