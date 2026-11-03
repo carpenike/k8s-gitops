@@ -7,6 +7,7 @@
 | [actions-runners.md](actions-runners.md) | Self-hosted Actions runners for private repos, and the GitHub App |
 | [headlamp.md](headlamp.md) | Read-only Kubernetes UI on the internal gateway |
 | [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, and the Forge cutover |
+| [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
 | [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
 | [scrypted.md](scrypted.md) | Scrypted NVR on VLAN 30, and the Forge cutover |
 | [deviations.md](deviations.md) | Where this tree leaves onedr0p/cluster-template |

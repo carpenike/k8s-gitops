@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hermes-provision-${BOT_NAME}
+  namespace: matrix
+  labels:
+    app.kubernetes.io/name: hermes-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+---
+# One Secret by name, get and patch only. No list, watch, create, delete,
+# or update, and nothing in any other namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hermes-provision-${BOT_NAME}
+  namespace: ${BOT_NAMESPACE}
+  labels:
+    app.kubernetes.io/name: hermes-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames:
+      - hermes-${BOT_NAME}-matrix
+    verbs:
+      - get
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hermes-provision-${BOT_NAME}
+  namespace: ${BOT_NAMESPACE}
+  labels:
+    app.kubernetes.io/name: hermes-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hermes-provision-${BOT_NAME}
+subjects:
+  - kind: ServiceAccount
+    name: hermes-provision-${BOT_NAME}
+    namespace: matrix

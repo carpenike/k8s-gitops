@@ -44,6 +44,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Dependency updates | Renovate | 44.188.2 |
 | Actions runners | ARC scale sets, one per private repo (see actions-runners.md) | chart 0.15.1 |
 | Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
+| Matrix | Tuwunel, `ryanholt.net`, external gateway (see matrix.md) | v1.9.4 |
 
 Chart tags that the plan did not name (spegel, CoreDNS, metrics-server,
 reloader, echo, app-template, tuppr, kube-prometheus-stack, cloudflared)
