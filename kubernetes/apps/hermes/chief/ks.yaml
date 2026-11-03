@@ -29,6 +29,38 @@ spec:
   timeout: 15m
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# LiteLLM virtual key hermes-chief in team hermes, from the shared key
+# template. Secret chief-litellm gets LITELLM_API_KEY. BUDGET is USD per
+# period; LiteLLM refuses requests past it. Changing a value here
+# replaces the Job (force), which updates the existing key in place.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: chief-litellm
+spec:
+  dependsOn:
+    - name: litellm-key-provisioner
+      namespace: litellm
+  force: true
+  interval: 1h
+  path: ./kubernetes/apps/litellm/key-provisioner/template
+  postBuild:
+    substitute:
+      KEY_ALIAS: hermes-chief
+      TEAM_ALIAS: hermes
+      MODELS: claude-sonnet
+      BUDGET: 25/30d
+      TARGET_NAMESPACE: hermes
+      SECRET_NAME: chief-litellm
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  timeout: 15m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # No postBuild substitution: the init script carries a literal
 # ${LITELLM_API_KEY} that Hermes expands at runtime.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -38,6 +70,8 @@ metadata:
 spec:
   dependsOn:
     - name: chief-matrix
+      namespace: hermes
+    - name: chief-litellm
       namespace: hermes
     - name: kata
       namespace: kube-system

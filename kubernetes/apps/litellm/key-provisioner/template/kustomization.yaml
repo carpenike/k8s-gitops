@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Per-key template. A Flux Kustomization on this path sets
+# postBuild.substitute:
+#   KEY_ALIAS         LiteLLM key alias, also used in object names
+#   TEAM_ALIAS        LiteLLM team that groups the spend (created if missing)
+#   MODELS            comma-separated model names the key may call
+#   BUDGET            <USD>/<duration>, for example 25/30d. Not a bare
+#                     number: Flux substitutes after kustomize build drops
+#                     quotes, and an int is not a valid env value.
+#   TARGET_NAMESPACE  an existing namespace
+#   SECRET_NAME       Secret there that receives LITELLM_API_KEY
+# The Job and its ServiceAccount are in litellm, next to the master key.
+# The Secret, Role, and RoleBinding are in TARGET_NAMESPACE.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./secret.yaml
+  - ./rbac.yaml
+  - ./job.yaml

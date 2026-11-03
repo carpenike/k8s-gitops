@@ -65,9 +65,9 @@ salt. A new salt does not decrypt stored credentials.
 
 ## Hermes
 
-Create item `hermes-chief` in vault `k8s-secrets`, field `litellm_api_key`
-(a LiteLLM virtual key for `claude-sonnet`). After Chief's first boot, add
-field `matrix_recovery_key`. See [hermes.md](hermes.md).
+After Chief's first boot, create item `hermes-chief` in vault
+`k8s-secrets` with field `matrix_recovery_key`. The LiteLLM key is
+provisioned in-cluster and has no 1Password item. See [hermes.md](hermes.md).
 
 ## Still to confirm or generate
 

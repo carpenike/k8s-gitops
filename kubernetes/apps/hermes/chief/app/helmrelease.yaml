@@ -86,7 +86,7 @@ spec:
               # MATRIX_HOMESERVER, MATRIX_USER_ID, MATRIX_ACCESS_TOKEN
               - secretRef:
                   name: hermes-chief-matrix
-              # LITELLM_API_KEY
+              # LITELLM_API_KEY, from Kustomization chief-litellm
               - secretRef:
                   name: chief-litellm
             probes:

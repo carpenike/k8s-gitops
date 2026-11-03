@@ -13,10 +13,14 @@ Matrix account on `ryanholt.net` ([matrix.md](matrix.md)).
 `kubernetes/apps/hermes/chief`. Two Flux Kustomizations, both in namespace
 `hermes`:
 
-- `chief-matrix` instantiates the provisioning template for `BOT_NAME:
-  chief`. It waits for the Job, so Secret `hermes-chief-matrix` has
-  `MATRIX_HOMESERVER`, `MATRIX_USER_ID`, and `MATRIX_ACCESS_TOKEN` before
-  the agent starts.
+- `chief-matrix` instantiates the Matrix provisioning template for
+  `BOT_NAME: chief`. It waits for the Job, so Secret `hermes-chief-matrix`
+  has `MATRIX_HOMESERVER`, `MATRIX_USER_ID`, and `MATRIX_ACCESS_TOKEN`
+  before the agent starts.
+- `chief-litellm` instantiates the LiteLLM key template
+  ([litellm.md](litellm.md#virtual-keys-for-cluster-apps)): key
+  `hermes-chief` in team `hermes`, model `claude-sonnet`, USD 25 per 30
+  days. Secret `chief-litellm` gets `LITELLM_API_KEY`.
 - `chief` is the HelmRelease (`app-template` 5.3.0): one replica,
   `Recreate`, `hermes gateway run`.
 
@@ -60,32 +64,20 @@ is mounted.
 Backup: VolSync restic to R2 (`volsync-r2-template`, path `hermes-chief`)
 at 03:45, 7 daily and 4 weekly.
 
-## What Ryan creates
+## What Ryan does
 
-1. **A LiteLLM virtual key.** In the LiteLLM Admin UI
-   (`https://litellm.holthome.net`), create a key named `hermes-chief`,
-   limited to model `claude-sonnet`. A budget is optional. Store it in
-   1Password:
+The Matrix account and the LiteLLM key are provisioned by Jobs. One step
+is manual: **the recovery key, after first boot.** Hermes sets up
+cross-signing for `@chief` and writes a new recovery key to
+`/opt/data/matrix-recovery-key` (mode 0600, never overwritten). Move it to
+1Password and delete the file:
 
-   ```sh
-   op item create --vault k8s-secrets --category "API Credential" \
-     --title hermes-chief 'litellm_api_key[concealed]=<key>'
-   ```
-
-   ExternalSecret `chief-litellm` reads `hermes-chief/litellm_api_key`.
-   Until the item exists the pod cannot start, and Kustomization `chief`
-   stays unready. Nothing else waits on it.
-
-2. **The recovery key, after first boot.** Hermes sets up cross-signing
-   for `@chief` and writes a new recovery key to
-   `/opt/data/matrix-recovery-key` (mode 0600, never overwritten). Move it
-   to the same item and delete the file:
-
-   ```sh
-   kubectl -n hermes exec deploy/chief -- cat /opt/data/matrix-recovery-key
-   op item edit hermes-chief --vault k8s-secrets 'matrix_recovery_key[concealed]=<key>'
-   kubectl -n hermes exec deploy/chief -- rm /opt/data/matrix-recovery-key
-   ```
+```sh
+kubectl -n hermes exec deploy/chief -- cat /opt/data/matrix-recovery-key
+op item create --vault k8s-secrets --category "API Credential" \
+  --title hermes-chief 'matrix_recovery_key[concealed]=<key>'
+kubectl -n hermes exec deploy/chief -- rm /opt/data/matrix-recovery-key
+```
 
    With that key, a rebuilt crypto store can sign itself again
    (`MATRIX_RECOVERY_KEY`). It is not wired into the pod yet.
@@ -96,9 +88,8 @@ Then DM `@chief:ryanholt.net` from Element.
 
 1. Add its name to the appservice regex ([matrix.md](matrix.md#bot-accounts)).
 2. Copy `kubernetes/apps/hermes/chief` to `kubernetes/apps/hermes/<name>`,
-   change `chief` throughout, and add its `ks.yaml` to
-   `kubernetes/apps/hermes/kustomization.yaml`.
-3. Create a LiteLLM key and a 1Password item `hermes-<name>`.
+   change `chief` throughout (including `KEY_ALIAS` and `SECRET_NAME`),
+   and add its `ks.yaml` to `kubernetes/apps/hermes/kustomization.yaml`.
 
 ## Tested before merge
 
@@ -110,4 +101,6 @@ uses (uid 10000, not PID 1, read-only root, no capabilities):
   bootstraps cross-signing, writes the recovery key, and auto-joins an
   encrypted DM from `@ryan`.
 
-A model reply was not tested; that needs the LiteLLM key.
+The key provisioner was tested against LiteLLM v1.106.6 with Postgres:
+first run, re-run, a budget change, and a lost Secret. A model reply from
+Chief was not tested locally.

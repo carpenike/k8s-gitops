@@ -11,3 +11,7 @@ talos/secrets.yaml
 .private/
 *.decrypted~*
 .DS_Store
+
+# Provisioning scripts are Python; local test runs leave bytecode behind.
+__pycache__/
+*.pyc
