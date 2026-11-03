@@ -81,3 +81,67 @@ spec:
       name: csi-ceph-block
       isDefault: true
       deletionPolicy: Delete
+    # Overriding cephFileSystems replaces the chart default list, same as
+    # cephBlockPools above. Pools, MDS resources, priority class, and the
+    # StorageClass are the rook-ceph-cluster 1.21.1 defaults. The addition
+    # is metadataServer.placement.
+    #
+    # Active and standby MDS must land on different nodes. Rook 1.21.1 labels
+    # those pods app=rook-ceph-mds (deploy/examples/filesystem.yaml).
+    # requiredDuringSchedulingIgnoredDuringExecution is satisfiable here:
+    # talos/control-plane/00-cluster.yaml deletes the control-plane taint, so
+    # sled-0 through sled-3 can all run MDS. No toleration is added. Nodes
+    # have no topology zone label, so the example's preferred zone
+    # anti-affinity is not copied.
+    cephFileSystems:
+      - name: ceph-filesystem
+        spec:
+          metadataPool:
+            replicated:
+              size: 3
+          dataPools:
+            - failureDomain: host
+              replicated:
+                size: 3
+              name: data0
+          metadataServer:
+            activeCount: 1
+            activeStandby: true
+            placement:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  - labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - rook-ceph-mds
+                    topologyKey: kubernetes.io/hostname
+            resources:
+              limits:
+                memory: "4Gi"
+              requests:
+                cpu: "1000m"
+                memory: "4Gi"
+            priorityClassName: system-cluster-critical
+        storageClass:
+          enabled: true
+          isDefault: false
+          name: ceph-filesystem
+          pool: data0
+          reclaimPolicy: Delete
+          allowVolumeExpansion: true
+          volumeBindingMode: "Immediate"
+          annotations: {}
+          labels: {}
+          mountOptions: []
+          parameters:
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-publish-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/controller-publish-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+            csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/fstype: ext4
