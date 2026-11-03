@@ -1,9 +1,10 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # One replica. The process runs Prisma migrations on startup. A second
-# replica needs a separate migration job. The image tag is the digest Forge
-# qualified for Atrium (nix-config hosts/forge/services/litellm.nix). The
-# in-process Atrium admission hook is not mounted here. See docs/litellm.md.
+# replica needs a separate migration job. The image is newer than the
+# v1.100.1 digest Forge qualified for Atrium, so Atrium cannot move here on
+# this tag. The in-process Atrium admission hook is not mounted here. See
+# docs/litellm.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -25,7 +26,7 @@ spec:
             image:
               repository: ghcr.io/berriai/litellm
               # renovate: datasource=docker depName=ghcr.io/berriai/litellm
-              tag: v1.100.1@sha256:a3715fa7ad8387941ab697259bd2881d68931657247a41984f90fae6d11c62bf
+              tag: v1.106.6@sha256:37e2dafb088a7723beb998590682957386dfc83ffea1848486f8e0e5cfac0b06
             args:
               - --config
               - /app/config.yaml
@@ -128,10 +129,9 @@ spec:
                   api_base: https://copilot.${SECRET_DOMAIN}/v1
                   api_key: os.environ/COPILOT_API_KEY
               # Azure resource ryholt-foundry, project proj-default, on the v1
-              # API. v1.100.1 has no gpt-6 entries, so gpt5_series/ forces the
-              # reasoning-model parameter mapping. Cost tracking reads $0 until
-              # the image knows these models. Microsoft-Decision-1 is not here:
-              # it speaks the Decisions API, not chat or responses.
+              # API. gpt5_series/ forces the reasoning-model parameter mapping
+              # for gpt-6.1-terra, which the v1.106.6 cost map does not list
+              # yet; cost tracking reads $0 for it.
               - model_name: gpt-6.1-sol
                 litellm_params: &azure-foundry
                   model: azure/gpt5_series/gpt-6.1-sol
@@ -150,6 +150,16 @@ spec:
                 litellm_params:
                   <<: *azure-foundry
                   model: azure/gpt5_series/gpt-6-luna
+              # Decisions API only: /v1/decisions and /v1/systemone, not chat.
+              # Azure will not name a deployment Microsoft-Decision-1, so
+              # base_model points cost tracking at the catalog price.
+              - model_name: decision-1
+                litellm_params:
+                  model: azure_ai/Decision-1
+                  api_base: https://ryholt-foundry.services.ai.azure.com
+                  api_key: os.environ/AZURE_FOUNDRY_API_KEY
+                model_info:
+                  base_model: azure_ai/Microsoft-Decision-1
               - model_name: anthropic/*
                 litellm_params:
                   model: anthropic/*
