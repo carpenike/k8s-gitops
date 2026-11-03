@@ -50,6 +50,11 @@ def request(method, url, token=None, body=None, content_type="application/json",
             return err.code, json.loads(raw or b"{}")
         except ValueError:
             return err.code, {"error": raw.decode(errors="replace")[:200]}
+    except (urllib.error.URLError, OSError) as err:
+        # DNS, refused, timeout: status 0, and the reason in the message.
+        reason = getattr(err, "reason", err)
+        host = urllib.parse.urlsplit(url).netloc
+        return 0, {"error": f"{host}: {reason}", "message": f"{host}: {reason}"}
 
 
 def error_text(body):
