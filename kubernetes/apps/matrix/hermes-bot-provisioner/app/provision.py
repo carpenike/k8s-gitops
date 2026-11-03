@@ -4,8 +4,9 @@ Run by the Job in ../template. Standard library only. Steps:
 
 1. If Secret BOT_NAMESPACE/hermes-<name>-matrix already holds a token that
    /account/whoami accepts for the same user, stop.
-2. Register @hermes-<name> with m.login.application_service. M_USER_IN_USE
-   means it already exists and is not an error.
+2. Register @<name> with m.login.application_service. M_USER_IN_USE
+   means it already exists and is not an error. The name has to be in the
+   hermes-bots appservice namespace, or Tuwunel answers M_EXCLUSIVE.
 3. Log in as that user with the as_token to get a per-user access token.
    The device id is fixed per bot, so a re-run replaces the token on the
    same device instead of adding devices.
@@ -63,7 +64,7 @@ def main():
     if not re.fullmatch(r"[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?", bot):
         sys.exit(f"invalid BOT_NAME {bot!r}: use lowercase letters, digits, and '-'")
 
-    localpart = f"hermes-{bot}"
+    localpart = bot
     user_id = f"@{localpart}:{server_name}"
     secret_name = f"hermes-{bot}-matrix"
     device_id = f"HERMES_{bot.upper().replace('-', '_')}"

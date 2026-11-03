@@ -1,8 +1,9 @@
 ---
 # Not reconciled. Copy next to a Hermes bot's own ks.yaml to give it a
-# Matrix account. BOT_NAME "pilot" makes @hermes-pilot:ryanholt.net and
+# Matrix account. BOT_NAME "pilot" makes @pilot:ryanholt.net and
 # Secret hermes-pilot-matrix in BOT_NAMESPACE, with keys MATRIX_HOMESERVER,
-# MATRIX_USER_ID, and MATRIX_ACCESS_TOKEN. Depend on the Kustomization that
+# MATRIX_USER_ID, and MATRIX_ACCESS_TOKEN. The name must first be added to
+# the hermes-bots appservice namespace. Depend on the Kustomization that
 # creates BOT_NAMESPACE. force replaces the immutable Job when the template
 # changes. See docs/matrix.md.
 apiVersion: kustomize.toolkit.fluxcd.io/v1

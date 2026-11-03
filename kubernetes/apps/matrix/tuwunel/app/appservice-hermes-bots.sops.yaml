@@ -1,50 +1,54 @@
 # Appservice registration for Hermes bot accounts. hermes-bots.yaml is the
 # only key Tuwunel mounts (appservice_dir). as_token is the same value as in
 # that YAML, kept as its own key for the provisioning Job's secretKeyRef.
-# Rotate both together. url is null: the appservice receives no traffic,
-# it only registers and logs in @hermes-* users.
+# Rotate both together. url is null: the appservice receives no transactions,
+# it only registers and logs in the bot users.
+#
+# The users regex is an explicit list of bot names, not a pattern: the
+# as_token can log in as anything it matches. Add a name with the YubiKey
+# (sops this file) before provisioning that bot. See docs/matrix.md.
 apiVersion: v1
 kind: Secret
 metadata:
   name: tuwunel-appservice-hermes-bots
 type: Opaque
 stringData:
-  as_token: ENC[AES256_GCM,data:F3ln/uxu7hdyVI/TQZRnY2Yn39Epq3Har7vBEPCrxwLfQz+7CHjG0E4dsVQKWxhiWAXzHzc+zRZ8+LNHJ/ABSg==,iv:dxhKRV7viK1efqddo37UrQ/K7esN4JnCQQpb5Ol6GG0=,tag:W2g5aaHhFACkIwbnSgGfRw==,type:str]
-  hermes-bots.yaml: ENC[AES256_GCM,data:lM1rBIjg1Rd41ukbX1XI5w5XXLJxknBM2mKktdS8FLkAbLcJ6+G/lJyci0uFsxw4hQVLsjkcTsurYMihse+RiYkiY6mBri4OuIU4QVA6P05be7dt333xXiTRCJXdSYcRlG/n8InVURNaMu6Ob2W3WeOizzksvsHivVXmLqu5kjJG1Feen+jHVOhM8D+6MyNnyuCQ1Q+53p8+bt5jhRZKMYO0f6/rZKa1zkKhIbX94+l8qMRQQPBypN+uoHAgSVo8BEeXFY9jFB473vdlWLGia8SaeP4Bz30wAo4E3YHKs1opWaL8RXJidjZ/vtXE9prh/Js3giKl/pGCLgQJeq5Qm6N3hq03t3UbfBHfpVI5qLn9nG7nhM4L0+MxQ4Hcxk1nWjacYD7GQgrw465qmoE/XoXwV6MD1c5XwSIy3MbVef05KtR+slVM/ieKNcrT,iv:vzHxdsHKS3JICrPWovhJjFYUJiGaH/Y5N+F45SE04t0=,tag:P1Ujo2wCTibaQuVqOh9vyA==,type:str]
+  as_token: ENC[AES256_GCM,data:PrgStWR1LvJf6Ia7XUDm+wNyZ/VSlx1/ivW4WTu85raFLkvU3ruBJRx10VZKIw8KlL6EXiiGlhGBFXs7S1tDHQ==,iv:bAFcAoOoH04YdALgviszXw0mX3ddIz/LeaoziKCvO9w=,tag:NUlW3eqPEmLLdhYjmtgseQ==,type:str]
+  hermes-bots.yaml: ENC[AES256_GCM,data:nOfPHChDgwU4i/as97qaGnTv5zzpBsDkG28tJ6rt0rJtyde7GiP/AMzgWZMJc7rHZR+98Bn43nBZN/yHO9FY3B8Vw9n9G62elSA8ByW3ThKO4br+UMvStZ/ognahRM+BilrWI2/QYel6HDXD1muCAxQhrLEV/7jvpt1QQpcQPUQuR0b/jBHKdjSEbpxulS+S7OfFrXSNhUaCDQAXlwYZ/gZdTs+cyHFwMctG5czGYKDbIzqrwI0Ryvm4EQ1xag7SLVb8EnlQk7tLT/94sjN0B3Lf1RLUSE92w4x9vIOl3l+zea3uNnVijvpZk8baUIbfjCjFeUkHQ/MPYL3PU72/tR2NK+wJKHIedXCHNUPILmkqSy5ThxHpyQQ2BbDhoi4TdpF9qExOwJ0sDnBOakPfz4LpfKwUBRLdMiTndGu5QHFxKgD0eETIB6zZmg==,iv:aL3qk9643VLQ1MQOHa1T+MH7sLOWPbBM6+T0D3nz5rE=,tag:fIud35nlGz4J8XyUkNUqcQ==,type:str]
 sops:
   age:
     - enc: |
         -----BEGIN AGE ENCRYPTED FILE-----
-        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAxRUV4TXc4ckg5R1hXQjB1
-        YWxKU2hqSDJKUGkrV2psUGhsd1krUFBYdzF3Cnp5a2tCbTl5Q1RlYU5COUZ2WGZU
-        eFBxVGx3d0lQZ0lrSFdRN3d1UW1yL00KLS0tIEVFQTdQN01sdTBIbUtXRUxCNDJy
-        dVowS0d3cjBBMUpoeE1iSjVhUVM1R2MKouCx1EytyFdnT0Ida2GrXRGQau8G4d6h
-        6d2D4VBP9loVcMfaODVAYeRVmwysWVxTaXqIk3y33BCPR0RUORDRZQ==
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBOVmd4bUUycjljOCtFcGhZ
+        NFdPeHV2UnVuYUNYQzdpZHNYaWNQK0UwK3dFCkRzYllwMmVXcDRxdStmRXRrU29t
+        Mjc3K3dJU3Rma3FCWDQ2S1doTlVNQlkKLS0tIFZBZFpobzYvQ01FSHk4U2F0T3NR
+        emwyNTR2QXlOS29XWnVaTHV1NFp6cTAK56qnY4xTCNMi+PyajYvJRKFjDlIVmk7G
+        afoP8I17NIszfrDTOSFj5szdgE/8PMh9FfoIYJyOzB3Ga0N9RVIJ7Q==
         -----END AGE ENCRYPTED FILE-----
       recipient: age1ea86d2m34zdq4efckuc4mdez0q7hgw7x8rjw9up5msnhvxwje5esgc074h
   encrypted_regex: ^(data|stringData)$
-  lastmodified: "2026-11-03T18:15:35Z"
-  mac: ENC[AES256_GCM,data:kIvwL+4lw522zSZOWiNK+b3pVGtD+jUq4sAoQ7ibQWAlzETq2YzMQh7hTrsPp6z3x21IauCo3yQQPYoai1GJAWu+WzERq55PcLrKH/uR3CvFIpUmPVMONvgzIoCagzbQW68KuxLzvDhC6sSusxFSoilaxq2gtSfVDSd4f2dfkgc=,iv:IaOWK0Z9FMGeYv3xTwB2HGL4nRbKXvyf2CElldUkvd8=,tag:PPSfIN7dibowZyxywkYUnA==,type:str]
+  lastmodified: "2026-11-03T22:17:20Z"
+  mac: ENC[AES256_GCM,data:hPfHy8hQzcvLEs4DbtPTuigae3LPBKGQSf9NyoLpLYO8HPsxlk+NOXrykKc0BnPrmHY9gnWC8gLWgPFD5ZygI5HN/P4TgoA6NPYvLBV5C8CKQunZMWxgbSg/abdkFmRqa4JApRa09/jVjZ/eIs4bSeIdGBSJFfPTx9yAlXZguWc=,iv:kJtax55W5KjBLY0ufnqefq/B6TIAcRFckpFGFBAxYqk=,tag:XpCsulz1y1jO6WrvBddYzg==,type:str]
   mac_only_encrypted: true
   pgp:
-    - created_at: "2026-11-03T18:15:35Z"
+    - created_at: "2026-11-03T22:17:20Z"
       enc: |-
         -----BEGIN PGP MESSAGE-----
 
-        hQIMA8oSIqtHvng8ARAAgVVNz0UHgx1kHF4bHf0tEIADLsjjQx5egr+wO4H11jCZ
-        dhUp8S7TCH70kJwQRNCew3FwxOydHVRq5y/JO1c5+DKoZnCrAr2v85yYFa8KNELN
-        H8XQmxMc47nj780gf8FVRShV/7GFsvilFxWEEj068ZjHD3uGDpX2mdLP9wXvMKFH
-        cv12mRZGGPgzuJsBEZkznMz/QBELtVwETSqTh0MD6L3LVmeA25Edj5MtPY2pJrCc
-        C7GcqwRqHm458ysyR3CvL13N21Cc+QTRr8CFehUJ35hC7LEukLDBdsUOAhJa+d9b
-        nVmLBPepIL0RhdFMHU3sXq1U/sG5jT71sPOCx4QmsgV83eLgG3SXrpJyyeYyvXw/
-        vAd5sa2bkWX6JepZEJiN8EjK3EjjzD1pZ/uej9TIuINEAjaD4CRCSZsUeamiAeTE
-        DH63b/6elu+VBMp2NUYIQdsR8tbM5lclwnO1o8vMSJmb+Ba/sEZJEeqSVwDh9jzG
-        SmmYQAymMVEZAZquRLT86+pB+eRk5tMPuUapz0kfHJxrYmQ6fTjHLPgvEUZfmuJ1
-        DXvN7ethyBgg0LJalFBysHEEAWaXhkL6MmMu7IBUaR8wGrBBDkKUZyG3UCpYTTnh
-        04Y9qzk0GzN4HjPBpV8+0USZgj+JNtXqSq2iLnkwgsp/fBCaxppbamZpvj+1YvzS
-        XgFmd3iUP37DCM7vkyVjOxgQt+E2iKeCCKw3QCexXRuTGcvJ6/Dck++NVJ3hhBkX
-        4Lk8KIQLWB0shE6AfmHImDOg9oM4F2EtGy0job2QVM1YBTfm+qlGGHkVNjRwDsg=
-        =BJCE
+        hQIMA8oSIqtHvng8AQ/9EOvDBic7OMQX/ypUNz36LqbpPWvI91K5u0fZVk3IRPVR
+        5qwhLp3fSlX3+TcCjC/YQlVsfEHNpbB5GeEMQdCzUL/Foi7JPQybglLu5RKO/pQD
+        qsmZOSsJemsoiaVQ8dtVYHYbDMNwf/3rv9mJxfDYoSLLySHIhvrIlqaDPdVqObWh
+        gRawVDsIu7wdv/44k0cQ2Fg+cnuKBnZHPKI2NL1CiNqA+2ANbWbiiddYayPIRNCI
+        uENjI91ymJ7QeT0dwDrkIQBCmepE/shjGayE3EyDgC5CBLCYyXAIvMVTIY2sFAN/
+        +wcLXFntvnhLUDqyNjmQvQsWoDvQnXzRAQ9vIMrQwspKqfFMyTUd5opfuj/KTHuu
+        8Fj+rMo6QGaKcDcewUiCpODI+DYDgWa7qQVzh/DP6gHOpCMfPGV1QoIQbg+gYnGZ
+        2vy6GNA7C7ti6JSonBhHsPi+mghtmgYopd5hd7DAWmS7vwiXF2Gb6Q65IpF9M7Kn
+        ufKHeo8UTKRNcMrKpiJ0Uc/OLA0oU3I6EeXdy5eHB/AwdADPWYGt4v3d48jgyhU3
+        GQJ+aWbwM+IwvSusoWB7FqhNAmoLj+hMQFEAWWUC9MJvpKMVqJGEyC6PsCVeScVb
+        UC6Wb3A1F1yrsGeKscRX7EKQ7fkZxI4uCOCLLPo6WUmnm5+JgeIAl9MV4UdEY+vS
+        XgF6velzjSKjyVgXqMcz5uU0epRmwVAF85RSCgve0lLg7nMY66ZNHDZLoVk+VQom
+        4lfb1VTu0V2fp4ClzyFUya0rq3c1jtmvUSGFZA2JJfe68oGNQEcobSAdlWM1KIk=
+        =hwc5
         -----END PGP MESSAGE-----
       fp: DA8002060402EC39B195451D5CED80362B5A4EF2
   version: 3.13.3
