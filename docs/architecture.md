@@ -18,7 +18,8 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 
 | Layer | Choice | Pin |
 | --- | --- | --- |
-| Node OS | Talos, Image Factory, UEFI, `nut-client` | v1.14.5 |
+| Node OS | Talos, Image Factory, UEFI, `nut-client`, `kata-containers` | v1.14.5 |
+| Sandbox | Kata Containers RuntimeClasses `kata-qemu` (QEMU) and `kata` (Cloud Hypervisor) | Talos extension for v1.14.5 |
 | UPS | `upsd` DaemonSet on every sled, Talos `upsmon` on localhost | instantlinux/nut-upsd 2.8.5-r1 |
 | Kubernetes | Talos-managed | v1.37.1 |
 | GitOps | Flux Operator and Flux instance | chart 0.62.1, Flux 2.10.0 |

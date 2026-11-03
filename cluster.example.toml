@@ -58,8 +58,9 @@ router_asn = "64512"
 node_asn = "64512"
 
 [talos]
-# factory.talos.dev schematic: intel-ucode + nut-client. See talos/schematic.yaml.
-schematic_id = "a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c"
+# factory.talos.dev schematic: intel-ucode + nut-client + kata-containers.
+# See talos/schematic.yaml.
+schematic_id = "546ddf49f4f92f44c15fbeff45e07c984cf7626a2d5d080fb14d0727ecf78ba4"
 
 [bmc]
 # Isolated management network, scraped by ipmi_exporter on Forge.

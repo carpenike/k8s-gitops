@@ -8,11 +8,12 @@ those per node.
 
 Redfish virtual media is unlicensed on these sleds, so the first boot is a
 USB stick or the iKVM virtual drive loaded with the metal ISO for schematic
-`a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c`
-(`talos/schematic.yaml`: `siderolabs/intel-ucode` and `siderolabs/nut-client`).
+`546ddf49f4f92f44c15fbeff45e07c984cf7626a2d5d080fb14d0727ecf78ba4`
+(`talos/schematic.yaml`: `siderolabs/intel-ucode`, `siderolabs/nut-client`,
+and `siderolabs/kata-containers`).
 
 ```text
-factory.talos.dev/metal-iso/a3ea39fe448d8d4f3bdfbfc4e662b30fa37e91e609b160bd103377e8f11bbd5c:v1.14.5
+factory.talos.dev/metal-iso/546ddf49f4f92f44c15fbeff45e07c984cf7626a2d5d080fb14d0727ecf78ba4:v1.14.5
 ```
 
 The ISO installs onto the Samsung SSD 870 (500GB class). The three 960GB
@@ -64,6 +65,26 @@ The owner applies this machine config to each sled. If `ens1f0.30` does
 not come up, reboot that sled. Each sled's switch port has to carry VLAN
 30 tagged. Leave the native VLAN on the server LAN. This repo does not
 change the switch.
+
+## Schematic changes
+
+`schematicId` is the Image Factory id baked into `machine.install.image`
+by `all/00-install.yaml.tpl`. tuppr's `TalosUpgrade` (chart 0.5.10) rolls
+a node only when its running Talos version differs from
+`spec.talos.version`. On that roll it keeps the schematic already
+running on the node. Changing this id in git does not reboot anything,
+and the next version bump will not pick up a new extension.
+
+Adding or removing an extension is a same-version upgrade, one node at
+a time, and each one reboots:
+
+```text
+talosctl upgrade --nodes <sled> --image factory.talos.dev/metal-installer/546ddf49f4f92f44c15fbeff45e07c984cf7626a2d5d080fb14d0727ecf78ba4:v1.14.5
+```
+
+`topf apply` updates the install image in machine config and does not
+boot it. Leave that image and the running schematic in agreement before
+the next tuppr version upgrade. tuppr refuses the roll when they differ.
 
 ## Apply
 
