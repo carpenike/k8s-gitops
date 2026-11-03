@@ -99,6 +99,14 @@ those.
 
 ## Path, method, and source bypass
 
+On `envoy-external` HTTPS, ClientTrafficPolicy `envoy-external-https` keeps
+`%2F` in paths as sent (`escapedSlashesAction: KeepUnchanged`); Matrix needs
+that. Envoy matches routes and policy rules on that escaped path, so a
+path rule there should be a `RegularExpression` that cannot be satisfied
+by an encoded `/`, or the route should reject `%2F` itself.
+`envoy-internal` keeps the Envoy Gateway default, `UnescapeAndRedirect`.
+
+
 Forge's Caddy module can skip the portal for a regex path
 (`bypassResources`), a path prefix (`bypassPaths`), and a source CIDR
 (`allowedNetworks`). Alertmanager's vhost

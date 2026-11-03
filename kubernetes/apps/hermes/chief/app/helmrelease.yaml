@@ -51,6 +51,10 @@ spec:
                 hermes config set model.base_url http://litellm.litellm.svc.cluster.local:4000/v1
                 # Stored as the literal reference; expanded at runtime.
                 hermes config set model.api_key '${LITELLM_API_KEY}'
+                # /opt/data is virtiofs inside the Kata VM, where SQLite's WAL
+                # shared memory is not coherent. Hermes falls back to DELETE
+                # on its own and warns per database; say so up front.
+                hermes config set database.journal_mode delete
             securityContext: &securityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
