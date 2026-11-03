@@ -117,7 +117,10 @@ spec:
             # Nobody is an admin by default. Promote a person with
             # admin_execute below, once, after they have registered.
             grant_admin_to_first_user = false
-            # admin_execute = ["users make-user-admin @ryan:ryanholt.net"]
+            # One-time promotion of @ryan. Remove both lines in the next
+            # pull request; see docs/matrix.md, "First admin account".
+            admin_execute = ["users make-user-admin @ryan:ryanholt.net"]
+            admin_execute_errors_ignore = true
 
             allow_federation = true
             trusted_servers = ["matrix.org"]
