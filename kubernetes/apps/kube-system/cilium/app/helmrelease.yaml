@@ -91,5 +91,10 @@ spec:
           - NET_ADMIN
           - SYS_ADMIN
           - SYS_RESOURCE
+    # kubeProxyReplacement is on, so socket LB is the service path.
+    # VM sandboxes (Kata) do not see the host cgroup hook, so keep socket
+    # LB in the host netns and let pod traffic use the tc load balancer.
+    # https://docs.cilium.io/en/v1.20/network/kubernetes/kubeproxy-free/#socket-loadbalancer-bypass-in-pod-namespace
     socketLB:
       enabled: true
+      hostNamespaceOnly: true
