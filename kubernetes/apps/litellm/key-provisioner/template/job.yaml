@@ -21,7 +21,9 @@ spec:
         app.kubernetes.io/instance: ${KEY_ALIAS}
     spec:
       serviceAccountName: litellm-key-${KEY_ALIAS}
-      restartPolicy: OnFailure
+      # Never, so each failed attempt keeps its pod and logs. With
+      # OnFailure the Job deletes the pod when it gives up.
+      restartPolicy: Never
       enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
@@ -31,7 +33,11 @@ spec:
           type: RuntimeDefault
       containers:
         - name: provision
-          image: docker.io/library/python:3.15.2-alpine3.24@sha256:20a82dbc2783112ddb91d1534603f802d222a3e63e593cd002eb2ac534e70211
+          # Debian (glibc), not Alpine. Pods search holthome.net last, and
+          # Cloudflare and the router answer NODATA for any name under it.
+          # musl stops at that NODATA, so an Alpine pod cannot resolve
+          # x.ns.svc.cluster.local or any public name; glibc keeps going.
+          image: docker.io/library/python:3.15.2-slim-trixie@sha256:8c13a3f37a6a5b71498228e902c4b9f51c1f7900d49fabf71f9a650c6120e0d0
           command:
             - python3
             - /opt/provision/provision-key.py
