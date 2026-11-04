@@ -23,5 +23,6 @@ configMapGenerator:
       # Ryan's personal Microsoft 365 mailbox, the only account the Outlook
       # MCP server may use.
       - OUTLOOK_MCP_EXPECTED_USERNAME=ryan@ryanholt.net
+      - HINDSIGHT_ENABLED=true
 generatorOptions:
   disableNameSuffixHash: true
