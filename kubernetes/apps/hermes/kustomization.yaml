@@ -1,10 +1,7 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 # One folder per bot (kubernetes/components/hermes-bot; docs/hermes.md).
-# legacy/ is the pre-component Chief in namespace hermes, scaled to zero
-# until the new Chief is verified, then removed in a follow-up.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./chief
-  - ./legacy
