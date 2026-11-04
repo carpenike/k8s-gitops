@@ -73,11 +73,12 @@ same resource, routed as `azure_ai/Decision-1` against
 points cost tracking at `azure_ai/Microsoft-Decision-1`, because Azure does
 not let a deployment carry that name.
 
-`gpt-image-2` is a deployment on a second resource,
-`ryholt-foundry-eastus2-resource` (project `ryholt-foundry-eastus2`), called
-on the v1 API with its own key, `AZURE_FOUNDRY_EASTUS2_API_KEY`. It answers
-only on `/v1/images/generations` and `/v1/images/edits`, and the cost map
-prices it as `azure/gpt-image-2`.
+`gpt-image-2`, `gpt-image-2.5-sunburst`, and `gpt-image-2.5-flare` are
+deployments on a second resource, `ryholt-foundry-eastus2-resource` (project
+`ryholt-foundry-eastus2`), called on the v1 API with its own key,
+`AZURE_FOUNDRY_EASTUS2_API_KEY`. They answer only on
+`/v1/images/generations` and `/v1/images/edits`, and the v1.106.6 cost map
+prices all three under their `azure/` names.
 
 The Atrium callback is absent. Importing it without the Nix-built package
 and the live publication files would crash the process. Atrium and Whiskey

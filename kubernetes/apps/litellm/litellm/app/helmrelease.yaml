@@ -164,13 +164,23 @@ spec:
               # ryholt-foundry-eastus2, on the v1 API with its own key.
               # Images only: /v1/images/generations and /v1/images/edits.
               - model_name: gpt-image-2
-                litellm_params:
+                litellm_params: &azure-foundry-eastus2
                   model: azure/gpt-image-2
                   api_base: https://ryholt-foundry-eastus2-resource.openai.azure.com
                   api_key: os.environ/AZURE_FOUNDRY_EASTUS2_API_KEY
                   api_version: v1
-                model_info:
+                model_info: &image-generation
                   mode: image_generation
+              - model_name: gpt-image-2.5-sunburst
+                litellm_params:
+                  <<: *azure-foundry-eastus2
+                  model: azure/gpt-image-2.5-sunburst
+                model_info: *image-generation
+              - model_name: gpt-image-2.5-flare
+                litellm_params:
+                  <<: *azure-foundry-eastus2
+                  model: azure/gpt-image-2.5-flare
+                model_info: *image-generation
               - model_name: anthropic/*
                 litellm_params:
                   model: anthropic/*
