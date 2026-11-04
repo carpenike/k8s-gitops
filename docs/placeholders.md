@@ -70,7 +70,13 @@ After a new bot's first boot, create item `hermes-<bot>` in vault
 when a crypto store has to be re-verified; no ExternalSecret reads it.
 A bot with `API_SERVER_ENABLED=true` also needs field `api_server_key`
 in the same item (a strong secret, e.g. `openssl rand -hex 32`);
-ExternalSecret `api-server` reads it. The Matrix token, LiteLLM key, and
+ExternalSecret `api-server` reads it. A bot with `OUTLOOK_MCP_ENABLED=true`
+needs fields `outlook_client_id` and `outlook_tenant_id` (its Entra app;
+see hermes.md, "Outlook"), and its inputs carry
+`OUTLOOK_MCP_EXPECTED_USERNAME`. For Chief that is still the placeholder
+`REPLACE_WITH_WORK_ADDRESS`, and the Outlook server refuses to start until
+it is set. This repository is public: the address becomes public once it
+is committed. The Matrix token, LiteLLM key, and
 ssh keys are provisioned in-cluster and have no 1Password items. See
 [hermes.md](hermes.md).
 

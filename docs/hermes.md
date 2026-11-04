@@ -37,6 +37,8 @@ spec later:
 | `AGENT_STORAGE_SIZE` | `10Gi` | Agent state PVC |
 | `WORKSPACE_STORAGE_SIZE` | `20Gi` | Shared workspace PVC |
 | `API_SERVER_ENABLED` | `true` | Optional, default `false`. The OpenAI-compatible API on envoy-internal ([API server](#api-server-opt-in)). `true` or `false` only |
+| `OUTLOOK_MCP_ENABLED` | `true` | Optional, default `false`. The Outlook MCP server ([Outlook](#outlook-opt-in)). `true` or `false` only |
+| `OUTLOOK_MCP_EXPECTED_USERNAME` | placeholder | With `OUTLOOK_MCP_ENABLED`: the one Microsoft account the server may use. Public repo; see [placeholders.md](placeholders.md) |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -255,7 +257,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22` |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
@@ -393,6 +395,235 @@ curl -s https://chief-api.<internal domain>/v1/chat/completions \
 
 Add `-H 'X-Hermes-Session-Key: <name>'` to keep one conversation going
 across requests.
+
+## Outlook (opt-in)
+
+An Outlook (Microsoft 365) MCP server for a bot, against Ryan's own M365
+tenant: read and search mail, drafts, send, move. **Off by default**: a
+bot turns it on with `OUTLOOK_MCP_ENABLED=true`. Today only Chief does.
+
+### What runs where
+
+- **Server and pin.** [Softeria/ms-365-mcp-server](https://github.com/Softeria/ms-365-mcp-server)
+  **0.178.0**, baked into `ghcr.io/carpenike/hermes-agent`
+  (`images/hermes-agent`). That image is upstream
+  `nousresearch/hermes-agent` v0.22.6 by digest, plus the server installed
+  by `npm ci` from a vendored `package-lock.json`, without optional
+  dependencies or install scripts. Nothing is fetched at runtime. Every
+  bot uses this image; the server only runs for a bot that turns it on.
+- **Process.** Hermes spawns it over stdio, in the agent pod only. The
+  screen pod renders identically with it on or off: no ids, no tokens, no
+  egress.
+- **Config.** The `config` init container runs `hermes-outlook-config
+  enable|disable` on every boot. `enable` writes `mcp_servers.outlook`:
+
+  | Key | Value |
+  | --- | --- |
+  | `command` | `/usr/local/bin/outlook-mcp` (the wrapper below) |
+  | `args` | `--enabled-tools-file /opt/outlook-mcp/enabled-tools.txt --allowed-scopes 'User.Read Mail.ReadWrite Mail.Send'` |
+  | `trust` | `untrusted`: every tool without `readOnlyHint` asks first |
+  | `tools.include` | the same allowlist; `resources`, `prompts` and `sampling` off |
+  | `env` | `MS365_MCP_CLIENT_ID`, `_TENANT_ID` and `_EXPECTED_USERNAME` from the gateway env (Secret `outlook-mcp`); `MS365_MCP_TOKEN_CACHE_PATH` and `_SELECTED_ACCOUNT_PATH` under `/opt/data/outlook/`; `MS365_MCP_LOG_DIR=/var/log/outlook-mcp` (emptyDir); `MS365_MCP_REQUIRE_CONFIRM=true`; `MS365_MCP_USE_KEYTAR=false` |
+
+  Hermes passes the child only that `env` plus its safe baseline
+  (`tools/mcp_tool_config.py`, `_build_safe_env`), so the Matrix and
+  LiteLLM keys never reach it.
+- **Secret `outlook-mcp`** (ExternalSecret, gated): 1Password item
+  `hermes-<bot>`, fields `outlook_client_id` and `outlook_tenant_id`, plus
+  `OUTLOOK_MCP_EXPECTED_USERNAME` from the inputs.
+- **Egress.** CNP `agent-outlook` lets the agent reach
+  `login.microsoftonline.com` and `graph.microsoft.com` on 443
+  (`toFQDNs`) and nothing else new. Its L7 DNS rule lets Cilium's DNS
+  proxy see the agent's lookups. This is the repo's first FQDN policy.
+
+**The wrapper** (`images/hermes-agent/outlook-mcp/outlook-mcp`) fails
+closed. It refuses to start when:
+
+- the client id is missing or is Softeria's shared default app (the
+  server would otherwise fall back to it, `src/secrets.ts`);
+- the tenant is missing or is `common`, `organizations` or `consumers`;
+- the expected username is missing or still `REPLACE_*`;
+- any flag would widen the server: org, work or app mode, HTTP,
+  discovery, presets, extra scopes, or a different tool filter or scope
+  list.
+
+It also unsets client-secret, certificate, managed-identity and
+`MS365_MCP_ORG_MODE` variables, and always passes the baked filter and
+scope list, so `--login` asks for exactly what the server uses.
+
+### Tools
+
+`images/hermes-agent/outlook-mcp/enabled-tools.txt` (anchored regexes,
+names from `src/endpoints.json` at v0.178.0), mirrored by
+`tools.include`:
+
+| Read (no approval) | Write (approval every time) |
+| --- | --- |
+| `list-mail-messages` (its `search` parameter is search), `list-mail-folder-messages`, `get-mail-message`, `list-mail-folders`, `list-mail-child-folders`, `list-mail-attachments`, `get-mail-attachment-content` | `create-draft-email`, `create-reply-draft`, `send-mail`, `move-mail-message` |
+
+There is no mark-read tool in 0.178.0. Marking read would mean
+`update-mail-message`, a general `PATCH` on the message, so it is
+excluded. Also excluded:
+
+- every `delete-*`, mail rules, mailbox settings and shared mailboxes;
+- calendar, contacts, OneDrive, Teams and SharePoint;
+- `send-draft-message`, so a draft can't be sent from the bot; Ryan
+  sends it from Outlook;
+- `reply-*` and `forward-*`, which send at once;
+- `download-bytes`.
+
+In stdio mode the server also registers its own auth tools (`login`,
+`logout`, `verify-login`, `list-accounts`, `select-account`,
+`remove-account`). `--enabled-tools` doesn't cover them
+(`src/server.ts`), so `tools.include` is what keeps them away from the
+model.
+
+`--list-permissions` on the pinned build with this filter reports
+effective permissions `Mail.ReadWrite` and `Mail.Send`, with `User.Read`
+allowed but unused by the tools. `--login` requests those two; MSAL adds
+`openid`, `profile` and `offline_access`. The login check calls
+`GET /me`, which needs `User.Read`: hence the admin consent below.
+
+**Not on the API server.** Hermes adds every enabled MCP server to every
+platform (`hermes_cli/tools_config.py`, `_merge_mcp_servers`).
+`hermes-outlook-config` therefore sets `platform_toolsets.api_server` to
+`hermes-api-server` plus `no_mcp`. Otherwise anyone with the API key
+could read the mailbox without approval, and `/v1/runs` callers answer
+their own approval prompts.
+
+### Approvals: what Ryan sees, and when nobody can answer
+
+From Hermes v0.22.6, `tools/mcp_tool_handlers.py` (`_trust_gate_check`,
+`_ask_for_call`, `_format_trust_gate_arguments`) and
+`tools/approval_prompt.py` (`request_elicitation_consent`).
+
+**The prompt** for a write tool such as `send-mail`, in the Matrix room:
+
+- the text "MCP tool 'send-mail' on UNTRUSTED server 'outlook' wants to
+  run … This tool is write-capable …";
+- then **"Arguments:"**: the call's arguments as JSON. For `send-mail`
+  that is `body` (the whole message: `subject`, `body.content`,
+  `toRecipients`, `ccRecipients`…) and `confirm`;
+- choices once, this session, always, or deny.
+
+Things that can hide the details:
+
+- Credential-named fields are masked and secret-shaped strings redacted.
+  Email addresses are not redacted.
+- The JSON is **cut at 1,200 characters** ("… [arguments truncated]"),
+  in whatever order the model wrote the keys. With a long body the
+  recipients can fall past the cut. **If the card says truncated and you
+  can't see `toRecipients`, deny.**
+
+**No human to approve** (a cron job, `hermes chat -q`, or an API request
+without a live approval callback): the prompt fails closed with
+"decline", and the tool returns "The user did not approve … The command
+was NOT run". A gateway session with no notifier also declines. A prompt
+nobody answers before the timeout counts as cancelled.
+
+**Never answer "Always" for `send-mail`.**
+
+- "Always" is stored in `command_allowlist` in `config.yaml` as
+  `mcp:outlook/send-mail`. Hermes checks that list process-wide
+  (`tools/approval.py`, `is_approved`), so after one "Always" every later
+  send skips the prompt, cron jobs included.
+- `hermes-outlook-config` deletes every `mcp:outlook/*` entry on each
+  boot, so a slip lasts until the next restart. A restart is the fix:
+  `kubectl -n hermes-<bot> rollout restart deploy/hermes-agent`.
+- "Session" is per chat and safe enough for a batch of drafts.
+- `/yolo` and `approvals.mode: off` bypass the prompt too; don't use them
+  on a bot with Outlook.
+
+`MS365_MCP_REQUIRE_CONFIRM=true` adds a second check in the server: a
+`send-mail`, draft or move call must carry `confirm: true`, which is
+visible in the prompt.
+
+### Entra app (once, in Ryan's tenant)
+
+1. Entra admin center → App registrations → New registration:
+   - name `hermes-<bot>-outlook`;
+   - **accounts in this organizational directory only** (single tenant);
+   - no redirect URI.
+2. Authentication → Advanced settings → **Allow public client flows:
+   Yes** (device code). Add no client secret or certificate.
+3. API permissions → Microsoft Graph → **Delegated**: `User.Read`,
+   `Mail.ReadWrite`, `Mail.Send`, `offline_access`. Remove anything else.
+   Then **Grant admin consent** for the tenant.
+4. Copy the Application (client) ID and Directory (tenant) ID into
+   1Password item `hermes-<bot>` (vault `k8s-secrets`), fields
+   `outlook_client_id` and `outlook_tenant_id`.
+5. Set `OUTLOOK_MCP_EXPECTED_USERNAME` in the bot's inputs.
+
+### One-time login
+
+The token cache starts empty. Until a login, the server refuses to start
+("Expected Microsoft account … not found in token cache", in
+`/opt/data/logs/mcp-stderr.log`), and the bot simply has no Outlook
+tools.
+
+`kubectl exec` runs as the Hermes user (uid 10000, `HOME=/opt/data`)
+with the agent container's environment, including Secret `outlook-mcp`.
+The wrapper adds the same paths and filter Hermes uses:
+
+```sh
+kubectl -n hermes-<bot> exec -it deploy/hermes-agent -c app -- outlook-mcp --login
+```
+
+It prints a code. Open https://microsoft.com/devicelogin on any device,
+enter it, and sign in as the expected account. The command ends with
+`{"success":true,…}`. Then restart, so the gateway reconnects at once:
+
+```sh
+kubectl -n hermes-<bot> rollout restart deploy/hermes-agent
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- outlook-mcp --verify-login
+```
+
+**Log in again** after:
+
+- about 90 days without use (the refresh token's inactivity limit);
+- a password change, or a sign-in policy change that revokes sessions;
+- an admin revokes the user's sessions or the app's consent;
+- `--logout`, or deleting `/opt/data/outlook/`.
+
+`--verify-login` shows whether it's still good.
+
+### Backups hold a mailbox credential
+
+`/opt/data/outlook/` holds the MSAL token cache: a refresh token for the
+mailbox, with `Mail.ReadWrite` and `Mail.Send`. Its encryption key
+(`.cache-key`) sits beside it (`src/token-cache-storage.ts`). Both are on
+`agent-data`, so every nightly R2 backup, and any restore, carries a
+working mailbox credential until it expires or is revoked.
+
+To kill it, revoke the user's sessions in Entra (or remove the app's
+consent), then run `outlook-mcp --logout`.
+
+### Upgrades and the pin
+
+The server version is pinned in `images/hermes-agent/outlook-mcp/package.json`
+and locked with integrity hashes in `package-lock.json`. The Hermes base
+is pinned by digest in the `Dockerfile`, and the HelmRelease pins the
+built image by digest. To upgrade:
+
+1. Bump the version, then regenerate the lockfile without running
+   scripts:
+
+   ```sh
+   cd images/hermes-agent/outlook-mcp && npm install --package-lock-only --ignore-scripts
+   ```
+
+2. Read the release notes and diff `src/endpoints.json`, `src/cli.ts`
+   and `src/auth-tools.ts` against the old tag. Look for renamed tools,
+   new auth tools, new flags or env vars the wrapper should refuse, and
+   default changes, especially the client id and confirm behaviour.
+3. Update `enabled-tools.txt` and `tools.include` together.
+4. Rebuild with `hermes-agent-image.yaml`, run `outlook-mcp
+   --list-permissions` against the new build, and check the scopes
+   haven't grown.
+5. Pin the new digest.
+
+Don't take an upgrade only because it exists. The pin moves when a fix or
+a needed tool lands.
 
 ## Matrix recovery key
 
