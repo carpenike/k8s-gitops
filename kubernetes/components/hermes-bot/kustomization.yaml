@@ -61,16 +61,6 @@ replacements:
   - source:
       kind: ConfigMap
       name: hermes-bot-inputs
-      fieldPath: data.LLM_MODEL
-    targets:
-      - select:
-          kind: ConfigMap
-          name: hermes-bot-derived
-        fieldPaths:
-          - data.MODELS
-  - source:
-      kind: ConfigMap
-      name: hermes-bot-inputs
       fieldPath: data.LLM_BUDGET_USD
     targets:
       - select:

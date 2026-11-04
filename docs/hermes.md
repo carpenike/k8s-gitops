@@ -33,7 +33,7 @@ spec later:
 | --- | --- | --- |
 | `BOT_NAME` | `chief` | Namespace `hermes-<BOT_NAME>`, object names, the R2 path, the LiteLLM key alias `hermes-<BOT_NAME>`. Lowercase letters, digits, `-` |
 | `MATRIX_USER` | `chief` | Bare localpart. `@<MATRIX_USER>:ryanholt.net`, device `HERMES_<MATRIX_USER>` |
-| `LLM_MODEL` | `claude-sonnet` | LiteLLM model name; also the key's only allowed model |
+| `LLM_MODEL` | `claude-sonnet` | LiteLLM model name for the main model. The key itself may call every model on the proxy ([LiteLLM key](#litellm-key)) |
 | `LLM_BUDGET_USD` | `25` | Key budget |
 | `LLM_BUDGET_DURATION` | `30d` | Budget reset period |
 | `MATRIX_ALLOWED_USERS` | `@ryan:ryanholt.net` | Comma-separated Matrix IDs the bot answers |
@@ -75,7 +75,7 @@ object:
 - The LiteLLM key template
   (`kubernetes/apps/litellm/key-provisioner/template`). Key
   `hermes-<bot>` in team `hermes`, written to Secret `litellm` as
-  `OPENAI_API_KEY`.
+  `OPENAI_API_KEY` ([LiteLLM key](#litellm-key)).
 - Job `hermes-ssh-keygen`, which writes Secrets `agent-ssh` (the agent's
   ed25519 key, plus a `known_hosts` line for the screen) and `screen-ssh`
   (the screen's host key, plus `authorized_keys` holding only the agent's
@@ -88,6 +88,30 @@ Secret empty with `ssa: IfNotPresent` and never reapplies it.
 
 `app` (`kubernetes/components/hermes-bot/app`) depends on `provision`, and
 contains the HelmRelease `hermes` (app-template 5.3.0) and VolSync.
+
+### LiteLLM key
+
+Each bot gets one LiteLLM virtual key, `hermes-<bot>`, with:
+
+- **Models:** `all-proxy-models`, LiteLLM's sentinel for every model on
+  the proxy. That covers the named models (`claude-*`, `gpt-6*`,
+  `decision-1`, the `gpt-image-*` models) and the wildcard routes
+  (`anthropic/*`, `openai/*`, `gemini/*`, `copilot/*`, `copilot-oai/*`),
+  so any upstream model those providers offer, at its price. Team
+  `hermes` sets no model list, so nothing narrows it.
+- **Budget:** `LLM_BUDGET_USD` per `LLM_BUDGET_DURATION`. This is the
+  only limit on spend, and the guard if a runaway or prompt-injected turn
+  calls an expensive model.
+
+`LLM_MODEL` is only the main model Hermes uses (`model.default`). Other
+models are for Hermes features that name one: `/model` in chat,
+`fallback_providers`, `delegation.model`, `auxiliary.<task>.model`, and
+`/moa` presets. All of them point at the same LiteLLM endpoint and key.
+
+The provisioner updates an existing key's models and budget in place
+(`/key/update`); the key value does not change. To narrow a bot again,
+set `MODELS` in `kubernetes/components/hermes-bot/derived.yaml` back to a
+comma-separated list. It applies to every bot.
 
 ## Two pods
 
