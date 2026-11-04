@@ -73,6 +73,12 @@ same resource, routed as `azure_ai/Decision-1` against
 points cost tracking at `azure_ai/Microsoft-Decision-1`, because Azure does
 not let a deployment carry that name.
 
+`gpt-image-2` is a deployment on a second resource,
+`ryholt-foundry-eastus2-resource` (project `ryholt-foundry-eastus2`), called
+on the v1 API with its own key, `AZURE_FOUNDRY_EASTUS2_API_KEY`. It answers
+only on `/v1/images/generations` and `/v1/images/edits`, and the cost map
+prices it as `azure/gpt-image-2`.
+
 The Atrium callback is absent. Importing it without the Nix-built package
 and the live publication files would crash the process. Atrium and Whiskey
 keep using Forge until that hook has a home.
@@ -134,6 +140,7 @@ One line per field, no surrounding quotes.
 | `openai_api_key` | `OPENAI_API_KEY` in that file | same env name |
 | `google_api_key` | `GOOGLE_API_KEY` in that file | same env name |
 | `azure_foundry_api_key` | Key 1 of Azure resource `ryholt-foundry` | `AZURE_FOUNDRY_API_KEY` |
+| `azure_foundry_eastus2_api_key` | Key 1 of Azure resource `ryholt-foundry-eastus2-resource` | `AZURE_FOUNDRY_EASTUS2_API_KEY` |
 | `copilot_api_key` | first line of `/var/lib/copilot-api/api-key` | `COPILOT_API_KEY` |
 | `oidc_client_secret` | sops `litellm/oidc-client-secret` | `GENERIC_CLIENT_SECRET` |
 
