@@ -12,7 +12,9 @@ configMapGenerator:
     literals:
       - BOT_NAME=chief
       - MATRIX_USER=chief
-      - LLM_MODEL=claude-sonnet
+      # Azure (monthly credits) first; Anthropic only when Azure fails.
+      - LLM_MODEL=gpt-6.1-terra
+      - LLM_FALLBACK_MODEL=claude-sonnet
       - LLM_BUDGET_USD=25
       - LLM_BUDGET_DURATION=30d
       - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
