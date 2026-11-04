@@ -93,6 +93,11 @@ authenticates that hook with the Receiver token. Its ReferenceGrant
 `network` to select HTTPRoute `flux-webhook`. Echo stays behind the
 gateway policy.
 
+A Hermes bot's API route, `agent-api` in `hermes-<bot>` on
+`envoy-internal` only, is also labelled `public`. Its clients send the
+bot's `API_SERVER_KEY` as a bearer token, and Hermes checks it. Its
+ReferenceGrant is `agent-api-gateway-auth` ([hermes.md](hermes.md)).
+
 Two policies must not select the same route. The oldest attached policy
 wins. A route uses the label or its own SecurityPolicy, and only one of
 those.

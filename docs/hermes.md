@@ -36,6 +36,7 @@ spec later:
 | `MATRIX_ALLOWED_USERS` | `@ryan:ryanholt.net` | Comma-separated Matrix IDs the bot answers |
 | `AGENT_STORAGE_SIZE` | `10Gi` | Agent state PVC |
 | `WORKSPACE_STORAGE_SIZE` | `20Gi` | Shared workspace PVC |
+| `API_SERVER_ENABLED` | `true` | Optional, default `false`. The OpenAI-compatible API on envoy-internal ([API server](#api-server-opt-in)). `true` or `false` only |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -254,13 +255,117 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22` |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22` |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
 
 Tuwunel's policy admits `app.kubernetes.io/controller: agent` from any
 namespace labelled `hermes.holthome.net/bot`.
+
+## API server (opt-in)
+
+Hermes' gateway can also serve an OpenAI-compatible API:
+
+- `/v1/chat/completions`, `/v1/responses`, `/v1/runs`, `/v1/models`;
+- `/health`, which needs no key.
+
+It is for Ryan's other assistant on the LAN to talk to a bot directly.
+**Off by default.** A bot turns it on with `API_SERVER_ENABLED=true` in its
+inputs; today only Chief does.
+
+When it is on, the component adds these, all gated in the HelmRelease by
+that one input:
+
+| Object | What |
+| --- | --- |
+| ExternalSecret / Secret `api-server` | `API_SERVER_KEY` from 1Password item `hermes-<bot>`, field `api_server_key`, plus `API_SERVER_ENABLED=true`, `API_SERVER_HOST=0.0.0.0`, `API_SERVER_PORT=8642`, `API_SERVER_MODEL_NAME=<bot>` |
+| Service `agent-api` | Port 8642 on the agent pod |
+| HTTPRoute `agent-api` | `https://<bot>-api.${SECRET_DOMAIN}`, **envoy-internal only**. Never envoy-external, never a cloudflared rule. Labelled `gateway.holthome.net/auth: public`: a bearer client cannot do the gateway login, and Hermes checks the key itself |
+| CiliumNetworkPolicy `agent-api` | Ingress to 8642 from the envoy-internal proxies only. Agent egress is unchanged |
+| ReferenceGrant `agent-api-gateway-auth` | Lets `pocket-id-exempt` select the route |
+
+The agent reads the Secret through an optional `envFrom`. A bot that is
+off has no Secret, so no `API_SERVER_*` variables and no listener. In
+v0.22.6 the key, not `API_SERVER_ENABLED`, is what starts the server:
+`gateway/config_env.py` `_api_server` enables it whenever
+`API_SERVER_KEY` is a usable secret (16+ characters, not a placeholder),
+and the adapter refuses to start otherwise. The screen pod gets neither
+the key nor the port. Hermes strips `API_SERVER_KEY` from child processes,
+as it does the other credentials. `API_SERVER_CORS_ORIGINS` is unset, so
+no browser origin is allowed.
+
+**The key is remote code execution.** An API turn has the same terminal,
+file, `execute_code`, browser, memory, and `session_search` tools as a
+Matrix turn (no `computer_use`), and they run in the screen pod. Anyone
+on the LAN who has the key can make the bot do anything it can do from
+Matrix.
+
+### What it shares with Matrix
+
+From the source at v0.22.6:
+
+- **One process.** The API server is a gateway platform adapter
+  (`gateway/platforms/api_server.py`). `hermes gateway run` connects every
+  enabled adapter concurrently in the same process
+  (`gateway/run_startup.py`, `_start_connect_pending`), so Matrix and the
+  API share one gateway, config, model key, and `$HERMES_HOME`.
+- **Matrix allowlists do not apply.** API requests run their own agent
+  loop (`_run_agent`, which "never passes through `TurnRunner`") and are
+  authorised only by the bearer key (`_check_auth`,
+  `hmac.compare_digest`). `matrix.allowed_users` and
+  `GATEWAY_ALLOWED_USERS` gate messaging platforms
+  (`gateway/authz_mixin.py`, `_is_user_authorized`). Nothing extra is
+  needed for API calls, and nothing extra stops them.
+- **Curated memory is shared; conversations are not.**
+  - `MEMORY.md` and `USER.md` live in `$HERMES_HOME/memories`
+    (`tools/memory_tool.py`, `get_memory_dir`), one set per bot. API and
+    Matrix turns read and write the same memory, which enters each
+    session's prompt as a snapshot at session start.
+  - Transcripts are separate sessions. API sessions have source
+    `api_server`, are keyed by `X-Hermes-Session-Id` /
+    `X-Hermes-Session-Key`, and never continue the Matrix DM.
+  - `session_search` covers every session that isn't kanban, subagent or
+    tool (`tools/session_search_tool.py`, `_HIDDEN_SESSION_SOURCES`). So
+    an API turn can search and read the Matrix DM's history, which is
+    stored decrypted in the session DB.
+
+### Turning it on for a bot
+
+1. In 1Password vault `k8s-secrets`, item `hermes-<bot>`, add field
+   `api_server_key` with a strong secret, e.g. `openssl rand -hex 32`.
+   Never commit it.
+2. Add `API_SERVER_ENABLED=true` to the bot's inputs.
+
+If the field is missing, ExternalSecret `api-server` stays unready, the
+Secret is never created, and the bot runs without an API server.
+
+### Rotating the key
+
+Change `api_server_key` in 1Password. External Secrets picks it up within
+the 1h refresh, or at once with:
+
+```sh
+kubectl -n hermes-<bot> annotate externalsecret api-server force-sync="$(date +%s)" --overwrite
+```
+
+Reloader restarts the agent when Secret `api-server` changes, and the old
+key stops working. Update the client's copy.
+
+### Example
+
+With the key in a file (mode 0600) on the client:
+
+```sh
+curl -s https://chief-api.<internal domain>/health
+curl -s https://chief-api.<internal domain>/v1/chat/completions \
+  -H "Authorization: Bearer $(cat ~/.config/hermes/chief-api-key)" \
+  -H 'Content-Type: application/json' \
+  -d '{"model": "chief", "messages": [{"role": "user", "content": "hostname?"}]}'
+```
+
+Add `-H 'X-Hermes-Session-Key: <name>'` to keep one conversation going
+across requests.
 
 ## Matrix recovery key
 

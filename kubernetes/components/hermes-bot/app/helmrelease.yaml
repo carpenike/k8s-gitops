@@ -122,6 +122,16 @@ spec:
               - secretRef:
                   name: matrix-recovery
                   optional: true
+              # API_SERVER_*, only for a bot with API_SERVER_ENABLED=true:
+              # ExternalSecret api-server below is the only thing that makes
+              # this Secret. Hermes v0.22.6 starts the API server whenever
+              # API_SERVER_KEY is set (gateway/config_env.py _api_server), so
+              # a bot without the Secret has no API server. app-template
+              # cannot drop an env entry by flag, hence a whole optional
+              # Secret.
+              - secretRef:
+                  name: api-server
+                  optional: true
             probes:
               liveness:
                 enabled: false
@@ -220,6 +230,104 @@ spec:
         ports:
           ssh:
             port: 22
+      # Opt-in OpenAI-compatible API (input API_SERVER_ENABLED; docs/hermes.md).
+      # Everything gated on it is off unless the bot sets it to true.
+      api:
+        enabled: ${API_SERVER_ENABLED:=false}
+        controller: agent
+        forceRename: agent-api
+        ports:
+          http:
+            port: 8642
+    # envoy-internal only: LAN clients, never the tunnel. Labelled public
+    # because API clients send a bearer key and cannot complete the gateway
+    # Pocket ID login; Hermes checks the key on every route but /health.
+    route:
+      api:
+        enabled: ${API_SERVER_ENABLED:=false}
+        kind: HTTPRoute
+        forceRename: agent-api
+        labels:
+          gateway.holthome.net/auth: public
+        hostnames:
+          - ${BOT_NAME}-api.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          # Agent turns can run for minutes; same ceiling as LiteLLM.
+          - timeouts:
+              request: 600s
+              backendRequest: 600s
+            backendRefs:
+              - identifier: api
+                port: 8642
+    # The chart writes target.template with toYaml, not tpl, so
+    # {{ .api_server_key }} reaches External Secrets unexpanded.
+    externalSecrets:
+      api-server:
+        enabled: ${API_SERVER_ENABLED:=false}
+        forceRename: api-server
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: api-server
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              API_SERVER_ENABLED: "true"
+              API_SERVER_HOST: 0.0.0.0
+              API_SERVER_PORT: "8642"
+              API_SERVER_MODEL_NAME: ${BOT_NAME}
+              API_SERVER_KEY: "{{ .api_server_key }}"
+        data:
+          - secretKey: api_server_key
+            remoteRef:
+              key: hermes-${BOT_NAME}/api_server_key
+    rawResources:
+      # Additive to provision/ciliumnetworkpolicy.yaml: 8642 from the
+      # envoy-internal proxies, nothing else. Agent egress is unchanged.
+      api-ingress:
+        enabled: ${API_SERVER_ENABLED:=false}
+        forceRename: agent-api
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "8642"
+                        protocol: TCP
+      # Lets pocket-id-exempt in network select the public route
+      # (docs/gateway-auth.md, "Opt out").
+      api-gateway-auth:
+        enabled: ${API_SERVER_ENABLED:=false}
+        forceRename: agent-api-gateway-auth
+        manifest:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          spec:
+            from:
+              - group: gateway.envoyproxy.io
+                kind: SecurityPolicy
+                namespace: network
+            to:
+              - group: gateway.networking.k8s.io
+                kind: HTTPRoute
+                name: agent-api
     persistence:
       data:
         type: persistentVolumeClaim

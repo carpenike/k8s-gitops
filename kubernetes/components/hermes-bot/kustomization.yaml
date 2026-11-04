@@ -13,6 +13,10 @@
 # input such as @ryan:ryanholt.net is not a valid plain YAML scalar.
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
+# cluster-secrets in the bot's namespace, as every app namespace has it:
+# the app Kustomization substitutes SECRET_DOMAIN from it.
+components:
+  - ../sops
 resources:
   - ./namespace.yaml
   - ./derived.yaml
