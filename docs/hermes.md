@@ -449,9 +449,17 @@ From `gateway/platforms/webhook.py` and `gateway/config_env.py`:
 - **Filters:** `subject` and `body` must exist in the JSON body. Anything
   else is answered `200 {"status": "ignored", "reason": "filter"}` and no
   turn runs.
-- **Idempotency:** the delivery id is `X-Request-ID` (a random one when
-  absent). A repeat of an admitted id gets `200 {"status": "duplicate"}`.
-  Send a fresh `X-Request-ID` per message, and the same one on retries.
+- **Idempotency: send `webhook-id`, not `X-Request-ID`.** Hermes takes
+  the delivery id from the first of `X-GitHub-Delivery`, `svix-id`,
+  `webhook-id` and `X-Request-ID` (`_header_delivery_id`), else a random
+  one. Envoy replaces a client's `X-Request-ID` with its own UUID at the
+  edge (no ClientTrafficPolicy here preserves it), so through the gateway
+  that header never dedupes. `webhook-id` passes through unchanged, and on
+  its own it does not switch Hermes to Svix/Standard Webhooks signing;
+  only a `webhook-signature` header would. A repeat of an admitted id gets
+  `200 {"status": "duplicate"}` and no second turn. Send a fresh
+  `webhook-id` per message, and the same one on retries. The id is not
+  covered by the signature.
 - **One session per delivery**, keyed on route and delivery id, so a
   webhook turn never continues the Matrix DM's session.
 - Rate limit 30/min per route, body cap 1 MB (Hermes defaults).
@@ -551,7 +559,7 @@ curl -sS https://chief-hooks.<internal domain>/webhooks/chief-engineer \
   -H 'Content-Type: application/json' \
   -H "X-Webhook-Timestamp: $ts" \
   -H "X-Webhook-Signature-V2: $sig" \
-  -H "X-Request-ID: $(uuidgen)" \
+  -H "webhook-id: $(uuidgen)" \
   --data-binary "$body"
 unset secret
 ```
