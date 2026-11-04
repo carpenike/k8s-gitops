@@ -7,6 +7,7 @@
 | [actions-runners.md](actions-runners.md) | Self-hosted Actions runners for private repos, and the GitHub App |
 | [headlamp.md](headlamp.md) | Read-only Kubernetes UI on the internal gateway |
 | [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, and the Forge cutover |
+| [postgres17.md](postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
 | [hermes.md](hermes.md) | Hermes agents in Kata VMs: Chief, and what to create for a new one |
 | [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
 | [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
