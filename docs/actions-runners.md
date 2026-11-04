@@ -96,6 +96,20 @@ runs `python3 -m pip install` on GitHub-hosted runners needs
 install` needs `sudo apt-get update` first. The `va-acr-app` opt-in pull
 request makes those two changes.
 
+The tool cache is at `/opt/hostedtoolcache`, as on GitHub-hosted runners.
+The shared `scale-set` component sets `RUNNER_TOOL_CACHE` to that path on
+the runner container and mounts an `emptyDir` there. The default would be
+`/home/runner/_work/_tool`. `actions/setup-python` interpreters have a
+RUNPATH of `/opt/hostedtoolcache/Python/<version>/x64/lib`, so from any
+other path they find `libpython` only through the `LD_LIBRARY_PATH` that
+setup-python exports. A subprocess started with a minimal environment
+then exits 127. `mcp` has several of those, in tests and in
+`scripts/atrium_artifacts.py`.
+
+Overlays that add runner environment variables append with
+`path: .../containers/0/env/-`. An `add` on `.../env` would replace the
+whole list and drop `RUNNER_TOOL_CACHE`.
+
 `va-acr-app` runs `pytest -n auto`. pytest-xdist counts the node's CPUs,
 not the pod's `8` CPU limit, so the overlay sets
 `PYTEST_XDIST_AUTO_NUM_WORKERS=8` on the runner container.

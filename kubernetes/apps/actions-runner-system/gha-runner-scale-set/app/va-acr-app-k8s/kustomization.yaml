@@ -41,7 +41,7 @@ patches:
         path: /spec/values/template/spec/containers/0/resources/limits/memory
         value: 16Gi
       - op: add
-        path: /spec/values/template/spec/containers/0/env
+        path: /spec/values/template/spec/containers/0/env/-
         value:
-          - name: PYTEST_XDIST_AUTO_NUM_WORKERS
-            value: "8"
+          name: PYTEST_XDIST_AUTO_NUM_WORKERS
+          value: "8"
