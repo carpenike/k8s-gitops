@@ -24,5 +24,9 @@ configMapGenerator:
       # MCP server may use.
       - OUTLOOK_MCP_EXPECTED_USERNAME=ryan@ryanholt.net
       - HINDSIGHT_ENABLED=true
+      - WEBHOOK_ENABLED=true
+      # Ryan's DM with @chief (Ryan and Chief its only members): where
+      # webhook turns are delivered and mirrored.
+      - WEBHOOK_DELIVER_CHAT_ID=!1NY-w--JkAFJpmKfLvzhpj2WWnVYBK2SWdy9HRKhY3Q
 generatorOptions:
   disableNameSuffixHash: true

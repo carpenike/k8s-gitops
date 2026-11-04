@@ -75,7 +75,11 @@ needs fields `outlook_client_id` and `outlook_tenant_id` (its Entra app;
 see hermes.md, "Outlook"), and its inputs carry
 `OUTLOOK_MCP_EXPECTED_USERNAME`: for Chief, Ryan's personal Microsoft 365
 mailbox, committed as-is. The Outlook server refuses to start on a
-`REPLACE_*` value. The Matrix token, LiteLLM key, and
+`REPLACE_*` value. A bot with `WEBHOOK_ENABLED=true` needs field
+`webhook_secret` (a strong secret, e.g. `openssl rand -hex 32`, shared
+with the sender, Chief Engineer); ExternalSecret `webhook` reads it, and
+its inputs carry `WEBHOOK_DELIVER_CHAT_ID`, the DM's room ID, committed
+as-is. The Matrix token, LiteLLM key, and
 ssh keys are provisioned in-cluster and have no 1Password items. See
 [hermes.md](hermes.md).
 

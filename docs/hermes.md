@@ -43,6 +43,8 @@ spec later:
 | `OUTLOOK_MCP_ENABLED` | `true` | Optional, default `false`. The Outlook MCP server ([Outlook](#outlook-opt-in)). `true` or `false` only |
 | `OUTLOOK_MCP_EXPECTED_USERNAME` | `ryan@ryanholt.net` | With `OUTLOOK_MCP_ENABLED`: the one Microsoft account the server may use. Committed as-is: this repo is public |
 | `HINDSIGHT_ENABLED` | `true` | Optional, default `false`. Long-term memory on the shared Hindsight server ([hermes-memory.md](hermes-memory.md)). `true` or `false` only |
+| `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
+| `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -261,7 +263,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`) |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
@@ -399,6 +401,179 @@ curl -s https://chief-api.<internal domain>/v1/chat/completions \
 
 Add `-H 'X-Hermes-Session-Key: <name>'` to keep one conversation going
 across requests.
+
+## Webhook (opt-in)
+
+A signed, asynchronous inbox for **Chief Engineer**, Ryan's homelab
+assistant on Grok Bot. Chief Engineer POSTs a request; Hermes answers
+`202` at once and runs the turn afterwards in its own session. When the
+turn ends, Chief DMs Ryan on Matrix: what came in, who sent it, and what
+he did or proposes. Ryan can reply in that DM, which has the delivered
+text in its history (`mirror_to_session`).
+
+**Off by default.** A bot turns it on with `WEBHOOK_ENABLED=true` and
+`WEBHOOK_DELIVER_CHAT_ID=<room id>` in its inputs; today only Chief does.
+
+When it is on, the component adds these, all gated in the HelmRelease by
+`WEBHOOK_ENABLED`:
+
+| Object | What |
+| --- | --- |
+| ExternalSecret / Secret `webhook` | `WEBHOOK_SECRET` from 1Password item `hermes-<bot>`, field `webhook_secret`, plus `WEBHOOK_ENABLED=true` and `WEBHOOK_PORT=8644` |
+| Service `agent-hooks` | Port 8644 (`webhook`) on the agent pod |
+| HTTPRoute `agent-hooks` | `https://<bot>-hooks.${SECRET_DOMAIN}`, **envoy-internal only**, path `/webhooks/chief-engineer` exactly; nothing else on 8644 (Hermes' `/health`, other routes) is reachable through it. Labelled `gateway.holthome.net/auth: public`: the sender signs each request and cannot do the gateway login |
+| CiliumNetworkPolicy `agent-hooks` | Ingress to 8644 from the envoy-internal proxies only. The screen pod cannot reach it |
+| ReferenceGrant `agent-hooks-gateway-auth` | Lets `pocket-id-exempt` select the route |
+| config.yaml route `chief-engineer` | Written by the `config` init container (below) |
+
+Like the API server, the hostname has no cloudflared rule and no public
+DNS record: cloudflare-dns publishes only envoy-external routes, and the
+tunnel's wildcard ends on envoy-external, which has no route for it.
+
+### How Hermes handles it (v0.22.6)
+
+From `gateway/platforms/webhook.py` and `gateway/config_env.py`:
+
+- `WEBHOOK_ENABLED=true` in the env enables the platform; `WEBHOOK_PORT`
+  and `WEBHOOK_SECRET` become `platforms.webhook.extra.port` and
+  `.secret`. The listener binds every interface.
+- **The secret stays out of config.yaml.** The route has no `secret` of
+  its own, so Hermes uses the global one (`route.get("secret",
+  self._global_secret)`) from `WEBHOOK_SECRET`. A route with no usable
+  secret fails startup, and `INSECURE_NO_AUTH` is never used.
+- **Signature: generic HMAC V2.** `X-Webhook-Signature-V2` is the hex
+  HMAC-SHA256 of `<timestamp>.<raw body>` with the secret, and
+  `X-Webhook-Timestamp` is Unix seconds within ±300 s. A V2 header never
+  falls back to the replayable body-only V1. Bad or missing signature:
+  `401`.
+- **Filters:** `subject` and `body` must exist in the JSON body. Anything
+  else is answered `200 {"status": "ignored", "reason": "filter"}` and no
+  turn runs.
+- **Idempotency:** the delivery id is `X-Request-ID` (a random one when
+  absent). A repeat of an admitted id gets `200 {"status": "duplicate"}`.
+  Send a fresh `X-Request-ID` per message, and the same one on retries.
+- **One session per delivery**, keyed on route and delivery id, so a
+  webhook turn never continues the Matrix DM's session.
+- Rate limit 30/min per route, body cap 1 MB (Hermes defaults).
+
+### The route
+
+The init container writes `platforms.webhook.extra.routes.chief-engineer`
+with Hermes' own `read_raw_config`/`save_config`, so the rest of
+config.yaml stays Hermes-managed. It writes the route only when the input
+is on, the Secret's `WEBHOOK_SECRET` reached the init container (the same
+optional `envFrom` as `api-server` and `hindsight`) and
+`WEBHOOK_DELIVER_CHAT_ID` is set; otherwise it removes it. A missing
+1Password field therefore means no Secret, no listener and no route
+(envoy answers `503`), not a gateway that fails to start. A missing room
+ID leaves the listener up with no route (`404`).
+
+- `prompt`: names the sender, states that the message is a request and
+  not Ryan's approval, and passes `{subject}`, `{priority}` and `{body}`.
+- `deliver: matrix`, `deliver_extra.chat_id`: `WEBHOOK_DELIVER_CHAT_ID`.
+- `mirror_to_session: true`.
+- `filters`: `subject` and `body` exist.
+- `toolsets` (below).
+
+### Tools on a webhook turn
+
+The default `hermes-webhook` toolset is `_HERMES_WEBHOOK_SAFE_TOOLS`:
+`web_search`, `web_extract`, `vision_analyze` and `clarify`. That is too
+little to look into a homelab question. Hermes also adds every enabled MCP
+server to it (`_merge_mcp_servers`), so on Chief the default would include
+the **Outlook** server.
+
+The route's `toolsets` replaces it with Chief's Matrix toolset minus
+everything that reaches people or services outside Matrix:
+
+| Kept | Dropped, and why |
+| --- | --- |
+| `terminal`, `file`, `code_execution` (in the screen pod, as on Matrix) | `no_mcp`: no Outlook, so no mail |
+| `web`, `vision`, `image_gen`, `tts` | `browser`, `computer_use`: they can submit forms and fill saved logins and cards (`browser_vault`) |
+| `memory`, `session_search`, `skills`, `todo`, `clarify` | `connections`: hosted connectors (Gmail, Notion, …) and account authorization |
+| | `cronjob`: a scheduled job runs later, unattended, and delivers anywhere |
+| | `delegation`: a subagent's toolset was not checked |
+
+The resolved set was checked in Chief's pod with Hermes' own
+`_get_platform_tools`: all twelve kept toolsets survive the webhook
+platform's filtering, and no MCP server is added.
+
+**Approvals deny.** Webhook sessions are unattended
+(`tools/approval_context.py`), and Chief's `approvals.unattended_mode` is
+`deny`. A command that would ask for approval on Matrix is refused during
+a webhook turn, so Chief can only propose it. Ryan approves by replying
+in the DM, where it runs as a normal Matrix turn.
+
+### Request, not approval
+
+A webhook message is a request from another bot, never Ryan's approval.
+Anything that sends, posts, spends, deletes, or changes systems needs
+Ryan's explicit yes in the Matrix DM. The prompt says so on every
+delivery, and the toolset and approval mode above enforce most of it. The
+`terminal` tool can still reach the internet from the screen pod, as it
+can on Matrix.
+
+### Payload
+
+```json
+{
+  "subject": "Disk on forge at 91%",
+  "body": "tank/services grew 40 GB overnight. Can you find what grew?",
+  "priority": "normal",
+  "sender": "chief-engineer"
+}
+```
+
+`subject` and `body` are required. `priority` is shown as written (a
+missing one renders as `{priority}`). `sender` is informational: the
+signature, not the field, is what identifies Chief Engineer.
+
+### Turning it on for a bot
+
+1. In 1Password vault `k8s-secrets`, item `hermes-<bot>`, add field
+   `webhook_secret` with a strong secret, e.g. `openssl rand -hex 32`.
+   Never commit it. Give the sender the same value.
+2. Add `WEBHOOK_ENABLED=true` and `WEBHOOK_DELIVER_CHAT_ID=<room id>` to
+   the bot's inputs. The room ID is Ryan's DM with the bot: the
+   `matrix:dm` entry in `/opt/data/sessions/sessions.json`, or the bot's
+   `joined_rooms` whose members are the bot and Ryan.
+
+### Signing a request
+
+The secret is read into a variable and never written to disk:
+
+```bash
+secret=$(op read "op://k8s-secrets/hermes-chief/webhook_secret")
+body='{"subject":"Test","body":"Reply with the date.","priority":"low","sender":"chief-engineer"}'
+ts=$(date +%s)
+sig=$(printf '%s.%s' "$ts" "$body" | openssl dgst -sha256 -hmac "$secret" | sed 's/^.* //')
+curl -sS https://chief-hooks.<internal domain>/webhooks/chief-engineer \
+  -H 'Content-Type: application/json' \
+  -H "X-Webhook-Timestamp: $ts" \
+  -H "X-Webhook-Signature-V2: $sig" \
+  -H "X-Request-ID: $(uuidgen)" \
+  --data-binary "$body"
+unset secret
+```
+
+Sign exactly the bytes sent (`--data-binary`, not `-d`, which can change
+them). Expect `202 {"status": "accepted", ...}`.
+
+### Rotating the secret
+
+Change `webhook_secret` in 1Password and give the sender the new value.
+External Secrets picks it up within the 1h refresh, or at once with:
+
+```sh
+kubectl -n hermes-<bot> annotate externalsecret webhook force-sync="$(date +%s)" --overwrite
+```
+
+Reloader restarts the agent when Secret `webhook` changes, and requests
+signed with the old secret get `401`. The init container strips any
+`^WEBHOOK_SECRET=`, `^WEBHOOK_ENABLED=` or `^WEBHOOK_PORT=` line from
+`/opt/data/.env` when the Secret is present, for the reason in [Why the
+init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
+loads `.env` with `override=True`, so a stale line would beat the Secret.
 
 ## Outlook (opt-in)
 
