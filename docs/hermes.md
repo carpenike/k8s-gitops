@@ -45,6 +45,7 @@ spec later:
 | `HINDSIGHT_ENABLED` | `true` | Optional, default `false`. Long-term memory on the shared Hindsight server ([hermes-memory.md](hermes-memory.md)). `true` or `false` only |
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
+| `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -216,9 +217,12 @@ From the Hermes source at v0.22.6:
 | `tools/bot_desktop/sandbox_host.py` | The desktop user is `pn`, so `ssh_user` is `pn` |
 
 `web_search` and `web_extract` run in the gateway through a search
-provider. None is configured, so the agent has no internet egress.
+provider. A bot with `TAVILY_ENABLED=true` uses Tavily, and its agent may
+reach `api.tavily.com` on 443 and nothing else on the internet ([Web
+search](#web-search-opt-in)). Otherwise none is configured.
 
-Keep it that way, or set those tools' own keys first. With no
+Keep agent egress to named hosts like that, or set those tools' own keys
+first. With no
 tool-specific key, the TTS, STT, live-voice, image-generation, and
 video-generation tools fall back to `OPENAI_API_KEY` and call
 `api.openai.com`:
@@ -263,7 +267,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`) |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
@@ -600,6 +604,83 @@ signed with the old secret get `401`. The init container strips any
 `/opt/data/.env` when the Secret is present, for the reason in [Why the
 init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
 loads `.env` with `override=True`, so a stale line would beat the Secret.
+
+## Web search (opt-in)
+
+`web_search` and `web_extract` through [Tavily](https://tavily.com).
+Before this, no web backend was configured and the agent could not reach
+the internet, so both tools failed.
+
+**Off by default.** A bot turns it on with `TAVILY_ENABLED=true` in its
+inputs; today only Chief does. When it is on, the component adds:
+
+| Object | What |
+| --- | --- |
+| ExternalSecret / Secret `tavily` | `TAVILY_API_KEY` from 1Password item `hermes-<bot>`, field `tavily_api_key` |
+| Optional `envFrom: tavily` | The agent's `app` container only. The web tools run in the gateway process; the screen pod never gets the key |
+| config.yaml, set by the `config` init container | `web.backend: tavily` and `web.keyless_fallback: false` |
+| CiliumNetworkPolicy `agent-tavily` | Agent egress to `api.tavily.com` on TCP 443 only, plus the L7 DNS rule `toFQDNs` needs |
+
+`TAVILY_BASE_URL` is unset, so requests go to `https://api.tavily.com`.
+
+### Strict backend, no fallback
+
+From Hermes v0.22.6 (`tools/web_tools.py`, `agent/web_search_registry.py`,
+`plugins/web/keyless_mcp.py`, `plugins/web/tavily/provider.py`):
+
+- A stored `web.backend` is used as-is: no availability probe, no switch
+  to another provider. Search and extract both resolve to `tavily`.
+- `web.keyless_fallback: false` turns off the three keyless paths:
+  - the anonymous free-tier ring (Exa, Parallel, Firecrawl, Keenable);
+  - the one-shot "keyless rescue" retry of a failed call on that ring;
+  - Tavily's own keyless mode, which its `auto` tier uses when no key is
+    set.
+- So **without the key** (field missing, ExternalSecret unready, Secret
+  never created) the bot still starts, and both tools return
+  `TAVILY_API_KEY is not set`. Nothing else is tried, and nothing could
+  get out anyway: the agent may reach only `api.tavily.com`.
+- A Tavily error (rate limit, plan limit, outage) reaches the model as the
+  error text, with no retry elsewhere.
+
+### No LLM in `web_extract`
+
+In v0.22.6 `web_extract` returns clean page content with **no LLM
+summarization** (`tools/web_tools.py`: "Extract clean page content (no
+LLM)"). Pages over `web.extract_char_limit` (15000) come back head and
+tail, with the full text saved to disk for `read_file`.
+`hermes_cli/config_defaults.py` says leftover `auxiliary.web_extract`
+blocks are ignored, so none is written. The bot's own model, through
+LiteLLM, reads the result like any other tool output. No auxiliary call
+can go to OpenRouter or Nous: the agent has no route to them, and other
+auxiliary tasks with provider `auto` inherit the main model.
+
+### Turning it on for a bot
+
+1. In 1Password vault `k8s-secrets`, item `hermes-<bot>`, add field
+   `tavily_api_key` with the bot's Tavily API key (app.tavily.com). Never
+   commit it.
+2. Add `TAVILY_ENABLED=true` to the bot's inputs.
+
+### Rotating the key
+
+Create a new key in Tavily, put it in `tavily_api_key`, then revoke the
+old one. External Secrets picks it up within the 1h refresh, or at once
+with:
+
+```sh
+kubectl -n hermes-<bot> annotate externalsecret tavily force-sync="$(date +%s)" --overwrite
+```
+
+Reloader restarts the agent when Secret `tavily` changes.
+
+### Turning it off
+
+Remove `TAVILY_ENABLED=true` from the bot's inputs (or set `false`).
+Flux removes the ExternalSecret, Secret and policy. On the next boot the
+init container unsets `web.backend` if it is still `tavily`.
+`web.keyless_fallback` stays `false`, so the bot has no web search at
+all rather than silently using the keyless ring, which its egress would
+block anyway. Delete the 1Password field if the key is no longer used.
 
 ## Outlook (opt-in)
 
