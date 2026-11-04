@@ -103,6 +103,28 @@ The workaround in the issue, running `hindsight-admin run-db-migration
 --schema public` before the server starts, does the same job without
 patching the extension. It isn't used here.
 
+### Updating the image
+
+`hindsight-image.yaml` tags each build `<version>-<sha>`. A build on
+`rebuild` also moves the floating `<version>` tag (`1.2.0`), which the
+HelmRelease pins by digest (`tag: 1.2.0@sha256:…`). The package is
+public, so Renovate reads it without credentials.
+
+- **Rebuilds** (a change under `images/hindsight`, or the weekly Friday
+  rebuild): Renovate's **self-built images** PR re-pins the digest, together
+  with the Hermes images. The weekly rebuild fires only once `rebuild` is
+  the default branch, because GitHub runs schedules only from there.
+- **A new Hindsight release**: Renovate's **hindsight** group moves the
+  chart, `ARG HINDSIGHT_IMAGE` and `HINDSIGHT_VERSION` in the workflow in
+  one PR. Before merging, re-vendor the tenant extension from the new
+  release commit, re-apply the [Base schema](#base-schema) change if
+  vectorize-io/hindsight#5400 is still open, and update the version in
+  the HelmRelease's header comment. After the merge, the self-built images PR moves the pin to the
+  new tag. Until it merges the new chart runs the old image. If the
+  release notes say the chart needs the new API, put the branch build's
+  digest in the group PR instead (`tag: <new>@sha256:<branch build>`).
+  Renovate corrects it to the `rebuild` build afterwards.
+
 ## Network
 
 Default deny in `hermes-memory`, both ways.

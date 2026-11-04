@@ -52,7 +52,7 @@
       minimumGroupSize: 2,
     },
     {
-      description: "Hindsight: the chart (kubernetes/apps/hermes-memory) and images/hindsight's base image move together. The built image ghcr.io/carpenike/hindsight is re-pinned by hand after hindsight-image.yaml builds it; see docs/hermes-memory.md.",
+      description: "Hindsight: the chart (kubernetes/apps/hermes-memory), images/hindsight's base image and HINDSIGHT_VERSION in hindsight-image.yaml move together. The built image ghcr.io/carpenike/hindsight follows in the self-built images PR once the merge has rebuilt it; see docs/hermes-memory.md.",
       groupName: "hindsight",
       matchDatasources: ["docker"],
       matchPackageNames: ["/vectorize-io\\/charts\\/hindsight$/", "/vectorize-io\\/hindsight-api$/"],
@@ -60,6 +60,38 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
       minimumGroupSize: 2,
+    },
+    {
+      description: "Hermes: images/hermes-agent's base image and HERMES_VERSION in both hermes-*-image.yaml workflows move together. The v2026.* tags are an older calendar scheme, not newer releases.",
+      groupName: "hermes",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/nousresearch\\/hermes-agent$/"],
+      allowedVersions: "/^v\\d{1,3}\\.\\d+\\.\\d+$/",
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+      minimumReleaseAge: "3 days",
+      prBodyNotes: [
+        "Before merging, re-vendor `images/hermes-screen/Dockerfile` from upstream `docker/sandbox-desktop.Dockerfile` at the new tag, keeping the `k8s-gitops:` changes, and read the release notes against docs/hermes.md (\"Updating the images\").",
+      ],
+    },
+    {
+      description: "Self-built images (images/, ghcr.io/carpenike): each workflow moves a floating version tag on rebuild, and the manifests pin it by digest. One PR re-pins all of them after a rebuild.",
+      groupName: "self-built images",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/^ghcr\\.io\\/carpenike\\//"],
+      group: {
+        commitMessageTopic: "{{{groupName}}}",
+      },
+    },
+    {
+      description: "cua-driver (images/hermes-screen): trycua/cua is a monorepo, so only cua-driver-rs-v<x.y.z> releases count. Upstream marks every one a prerelease, so ignoreUnstable is off.",
+      matchDatasources: ["github-releases"],
+      matchPackageNames: ["trycua/cua"],
+      extractVersion: "^cua-driver-rs-v(?<version>\\d+\\.\\d+\\.\\d+)$",
+      ignoreUnstable: false,
+      minimumReleaseAge: "3 days",
     },
     {
       description: "Flux Operator Group",

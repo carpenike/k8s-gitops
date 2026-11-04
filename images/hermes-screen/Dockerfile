@@ -31,8 +31,12 @@ ARG SANDBOX_BASE=docker.io/nikolaik/python-nodejs:python3.13-nodejs26@sha256:e41
 FROM ${SANDBOX_BASE}
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+# k8s-gitops: Renovate bumps both versions below (the annotations; the
+# trycua/cua tag format is handled in .renovaterc.json5).
+# renovate: datasource=github-releases depName=trycua/cua
 ARG CUA_DRIVER_VERSION=0.28.2
 # k8s-gitops: exact Playwright version instead of playwright@1.
+# renovate: datasource=npm depName=playwright
 ARG PLAYWRIGHT_VERSION=1.64.1
 ARG TARGETARCH
 

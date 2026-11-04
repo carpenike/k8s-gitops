@@ -376,6 +376,47 @@ calendar, documents) would then pass through Nous. Add an app the way
 Outlook was added instead: an MCP server in the image and egress to that
 one API.
 
+## Updating the images
+
+Both pod images are built here (`images/hermes-agent`,
+`images/hermes-screen`) and published to `ghcr.io/carpenike`. The packages
+are public, so Renovate's docker datasource reads them without
+credentials. Each build gets an immutable `<version>-<sha>` tag. A build
+on `rebuild` also moves the floating `<version>` tag, for example
+`v0.22.6`. The HelmRelease pins the floating tag by digest,
+`tag: v0.22.6@sha256:…`.
+
+| What changes | Who notices | What lands |
+| --- | --- | --- |
+| Anything under `images/hermes-*` merged to `rebuild` | The image workflow (push) | A new build; then Renovate's **self-built images** PR re-pins the digests |
+| Base OS and apt fixes | The weekly rebuild (Fridays), and Renovate digest PRs for the base images in the Dockerfiles | Same as above |
+| Playwright, cua-driver, Claude Code, gh | Renovate, from the `# renovate:` annotations in `images/hermes-screen/Dockerfile` | A version PR; merging it rebuilds the screen image |
+| Outlook MCP server | Nobody: bumped by hand ([Upgrades and the pin](#upgrades-and-the-pin)) | |
+| A new Hermes release | Renovate's **hermes** group | One PR: `ARG HERMES_AGENT_IMAGE` and `HERMES_VERSION` in both workflows |
+
+GitHub runs `schedule:` triggers only from the default branch. Until
+`rebuild` is the default branch, the weekly rebuild does not fire. Base
+image digest PRs still trigger a rebuild when merged.
+
+The digest PR is the review point. It replaces what the pods run, so read
+what was merged since the pinned build before merging it.
+
+### A new Hermes release
+
+The hermes group PR moves the agent's base image and both image tags,
+but not the screen recipe. Before merging it:
+
+1. Re-vendor `images/hermes-screen/Dockerfile` from upstream
+   `docker/sandbox-desktop.Dockerfile` at the new tag. Keep each
+   `k8s-gitops:` change, the `# renovate:` lines and the Claude Code
+   block, and update the version in the header.
+2. Read the release notes against this page. Sections marked with a
+   version, such as "How Hermes handles it (v0.22.6)", say what to
+   recheck. Check the Hindsight plugin commit in
+   `plugin-catalog/hindsight.yaml` against `images/hermes-agent/hindsight`.
+3. Merge. Both workflows build and push the new floating tag. Renovate
+   then opens the self-built images PR from `v0.22.6` to the new tag.
+
 ## Network
 
 Default deny in `hermes-<bot>` both ways. The allows:
@@ -1371,7 +1412,8 @@ built image by digest. To upgrade:
 4. Rebuild with `hermes-agent-image.yaml`, run `outlook-mcp
    --list-permissions` against the new build, and check the scopes
    haven't grown.
-5. Pin the new digest.
+5. Merge. Renovate's self-built images PR then re-pins the digest
+   ([Updating the images](#updating-the-images)).
 
 Don't take an upgrade only because it exists. The pin moves when a fix or
 a needed tool lands.
