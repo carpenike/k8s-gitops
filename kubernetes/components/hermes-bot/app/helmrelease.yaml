@@ -193,6 +193,85 @@ spec:
                   hermes config set webapp.enabled false
                   rm -rf /opt/data/skills/homelab/desktop-viewer
                 fi
+                # Claude Code coding sessions (input CLAUDE_CODE_ENABLED;
+                # docs/hermes.md, "Coding with Claude Code"). Claude Code, its
+                # subscription token and the GitHub token are in the screen pod; this skill tells the bot how to hold one
+                # resumable Claude Code session per task across Matrix turns.
+                if [ '${CLAUDE_CODE_ENABLED:=false}' = true ]; then
+                  install -d /opt/data/skills/homelab/coding-sessions
+                  cat > /opt/data/skills/homelab/coding-sessions/SKILL.md <<'SKILL'
+                ---
+                name: coding-sessions
+                description: "Code changes with Claude Code over several Matrix messages: start a task, continue it on follow-ups, finish with a draft pull request."
+                version: 1.0.0
+                author: k8s-gitops (hermes-bot component)
+                metadata:
+                  hermes:
+                    tags: [coding, code, claude-code, github, git, pull-request, repository, refactor, bug, fix]
+                ---
+
+                # Coding sessions with Claude Code
+
+                Use this whenever Ryan asks for a change in a code repository. It replaces the
+                install and login steps of the generic claude-code skill: in your terminal
+                `claude` is installed and already signed in to Ryan's Claude subscription, and
+                `git` and `gh` have a GitHub token for the repositories Ryan allowed.
+
+                ## One Claude Code session per task
+
+                A task is one piece of work Ryan asked for (a fix, a feature, a review). Keep
+                one Claude Code session for it, so follow-ups continue with everything Claude
+                Code already read and changed.
+
+                1. Pick a short slug for the task, e.g. `fix-login-timeout`.
+                2. Clone once into `/workspace/code/<repo>` (`gh repo clone <owner>/<repo>
+                   /workspace/code/<repo>`), or `git fetch` an existing clone.
+                3. Start the session in the background and tell Ryan it is running:
+
+                       terminal(
+                         command="claude -p '<task, with the repo, what done looks like, and: work on branch hermes/<slug>, never on the default branch>' --output-format json --permission-mode bypassPermissions --max-turns 60 > /workspace/.claude-code/runs/<slug>.json 2>&1",
+                         workdir="/workspace/code/<repo>", background=true, notify=true)
+
+                   Create `/workspace/.claude-code/runs` first if it is missing.
+                4. When it finishes, read the run file. Save its `session_id` in
+                   `/workspace/.claude-code/tasks/<slug>.json` together with the repo, the
+                   branch and the Matrix room or thread it belongs to.
+                5. Tell Ryan what Claude Code did (`result`), in your own words, and pass on
+                   any question it asked. Do not answer its questions yourself when they are
+                   Ryan's to decide.
+
+                ## Follow-ups
+
+                When Ryan replies about the task, look up its `session_id` and resume it in the
+                same workdir:
+
+                    claude -p --resume <session_id> '<the follow-up>' --output-format json --permission-mode bypassPermissions --max-turns 60 > /workspace/.claude-code/runs/<slug>.json 2>&1
+
+                Background again for anything that may take more than a minute. Keep the
+                session_id from each result. Several tasks can be open at once; never resume
+                one task's session for another.
+
+                ## Finishing
+
+                - When Ryan says it is ready (or the task is clearly done), resume the session
+                  and ask Claude Code to commit, push branch `hermes/<slug>` and open a draft
+                  pull request with `gh pr create --draft`. Send Ryan the PR link.
+                - Never merge, force-push, delete branches or change repository settings.
+                  Merging is Ryan's.
+                - Claude Code runs on Ryan's subscription, so it shares his usage limits. Keep
+                  runs focused (use --max-turns), and on a usage-limit or rate-limit error
+                  stop and tell Ryan when it resets instead of retrying.
+
+                ## When something fails
+
+                - "Not logged in" or 401 from `claude`: the subscription token is missing or
+                  expired. Tell Ryan; he renews it with `claude setup-token`.
+                - `git push` or `gh` answers 403 or 404: the GitHub token has no access to
+                  that repository. Tell Ryan which repository needs adding to the token.
+                SKILL
+                else
+                  rm -rf /opt/data/skills/homelab/coding-sessions
+                fi
                 hermes config set terminal.backend ssh
                 hermes config set terminal.ssh_host screen.hermes-${BOT_NAME}.svc.cluster.local
                 hermes config set terminal.ssh_user pn
@@ -483,7 +562,7 @@ spec:
             image:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
-              tag: v0.22.6-d9a4439@sha256:3bc3b1820e8b23be7a5fd12532939a999d267689ecf10aea299b579691e02df5
+              tag: v0.22.6-a4de4bf@sha256:e7f75a5c9ab34e2f69a1dacc636e474dae889e4b67c14e2ea1809cee907f8e9a
             env:
               TZ: America/New_York
             probes:
@@ -779,6 +858,55 @@ spec:
           - secretKey: webapp_oidc_client_id
             remoteRef:
               key: hermes-${BOT_NAME}/webapp_oidc_client_id
+      # Claude Code's sign-in (CLAUDE_CODE_ENABLED): a one-year token from
+      # `claude setup-token` on Ryan's Claude subscription. Mounted into the
+      # screen pod only (persistence claude-code). Missing field: stays
+      # unready and `claude` reports it is not logged in.
+      claude-code-auth:
+        enabled: ${CLAUDE_CODE_ENABLED:=false}
+        forceRename: claude-code-auth
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: claude-code-auth
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              oauth_token: "{{ .claude_code_oauth_token }}"
+        data:
+          - secretKey: claude_code_oauth_token
+            remoteRef:
+              key: hermes-${BOT_NAME}/claude_code_oauth_token
+      # Claude Code's GitHub access (CLAUDE_CODE_ENABLED): a fine-grained
+      # token limited to the repositories the bot may work on, plus the
+      # bot's commit identity. Mounted into the screen pod only (persistence
+      # claude-code). Missing field: stays unready and git/gh run without a
+      # token, nothing else breaks.
+      claude-code-github:
+        enabled: ${CLAUDE_CODE_ENABLED:=false}
+        forceRename: claude-code-github
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: claude-code-github
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              github_token: "{{ .github_token }}"
+              gitconfig: |
+                [user]
+                  name = ${BOT_NAME} (Hermes)
+                  email = ${BOT_NAME}@hermes.invalid
+        data:
+          - secretKey: github_token
+            remoteRef:
+              key: hermes-${BOT_NAME}/github_token
     rawResources:
       # Tavily for web_search/web_extract, only with TAVILY_ENABLED:
       # api.tavily.com on 443, nothing else. toFQDNs needs the DNS proxy to
@@ -1130,3 +1258,37 @@ spec:
           screen:
             app:
               - path: /dev/shm
+      # Claude Code's credentials, screen pod only, only with
+      # CLAUDE_CODE_ENABLED: the Claude subscription token (ExternalSecret
+      # claude-code-auth) and the GitHub token with the bot's git identity
+      # (ExternalSecret claude-code-github).
+      # Files, because ssh sessions do not inherit the pod's environment; the
+      # wrappers in images/hermes-screen/claude-code read them. Both sources
+      # optional, so a missing 1Password field never holds the sandbox in
+      # ContainerCreating; projected Secrets update in place.
+      claude-code:
+        enabled: ${CLAUDE_CODE_ENABLED:=false}
+        type: custom
+        volumeSpec:
+          projected:
+            defaultMode: 0440
+            sources:
+              - secret:
+                  name: claude-code-auth
+                  optional: true
+                  items:
+                    - key: oauth_token
+                      path: oauth_token
+              - secret:
+                  name: claude-code-github
+                  optional: true
+                  items:
+                    - key: github_token
+                      path: github_token
+                    - key: gitconfig
+                      path: gitconfig
+        advancedMounts:
+          screen:
+            app:
+              - path: /etc/hermes-claude-code
+                readOnly: true

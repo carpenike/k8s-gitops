@@ -84,7 +84,12 @@ Tavily API key); ExternalSecret `tavily` reads it. A bot with
 `WEBAPP_ENABLED=true` needs field `webapp_oidc_client_id`: the client ID of
 a public Pocket ID client whose callback is
 `https://<bot>-desktop.<domain>/auth/callback` and which admits only Ryan
-(hermes.md, "Watching the bot's desktop"). The Matrix token, LiteLLM key, and
+(hermes.md, "Watching the bot's desktop"). A bot with
+`CLAUDE_CODE_ENABLED=true` needs fields `claude_code_oauth_token` (from
+`claude setup-token` on Ryan's Claude subscription) and `github_token` (a
+fine-grained GitHub token limited to the repositories it may work on);
+ExternalSecrets `claude-code-auth` and `claude-code-github` read them
+(hermes.md, "Coding with Claude Code"). The Matrix token, LiteLLM key, and
 ssh keys are provisioned in-cluster and have no 1Password items. See
 [hermes.md](hermes.md).
 

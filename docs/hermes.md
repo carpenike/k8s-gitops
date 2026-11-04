@@ -50,6 +50,7 @@ spec later:
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
+| `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -268,7 +269,10 @@ host key is stable across restarts. The agent pre-seeds
 `StrictHostKeyChecking=accept-new`, so a changed host key is refused.
 
 The screen has no Matrix or LiteLLM credentials, no ServiceAccount token,
-and no route to LiteLLM, Tuwunel, the LAN, or the API server.
+and no route to LiteLLM, Tuwunel, the LAN, or the API server. The one
+exception is opt-in: with Claude Code, it gets a Claude subscription
+token and a GitHub token
+([Coding with Claude Code](#coding-with-claude-code-opt-in)).
 
 Chromium runs **without its own sandbox** in the screen. Both launches
 pass `--no-sandbox`:
@@ -413,6 +417,7 @@ until the next restart.
 | Images | `image_gen.provider`, `image_gen.openai.*` | `IMAGE_MODEL` |
 | Webapp | `webapp.*`, `dashboard.trusted_proxies`, skill `homelab/desktop-viewer` | `WEBAPP_ENABLED` |
 | Matrix profile | plugin `plugins/matrix-profile`, its entry in `plugins.enabled` | `MATRIX_PROFILE_TOOLS` |
+| Coding | skill `homelab/coding-sessions` | `CLAUDE_CODE_ENABLED` |
 
 Credentials never come from these files. They arrive as environment
 variables from Secrets that External Secrets builds from 1Password, and
@@ -814,6 +819,115 @@ signed with the old secret get `401`. The init container strips any
 `/opt/data/.env` when the Secret is present, for the reason in [Why the
 init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
 loads `.env` with `override=True`, so a stale line would beat the Secret.
+
+## Coding with Claude Code (opt-in)
+
+`CLAUDE_CODE_ENABLED=true` lets the bot hand code changes to
+[Claude Code](https://code.claude.com/docs) and keep **one Claude Code
+session per task across Matrix messages**. Ryan asks for a change, follows
+up in later messages ("also add tests", "why that approach?"), and gets a
+draft pull request at the end. Today only Chief has it.
+
+### Where it runs: the screen pod
+
+Claude Code runs whatever shell commands it decides on, inside
+repositories, install scripts and test suites nobody has vetted. So it
+runs where every other terminal command already runs: the screen pod, a
+Kata VM with no bot credentials. The agent pod holds the Matrix token,
+the LiteLLM key and the Outlook, Hindsight, webhook and Tavily secrets;
+none of them reach Claude Code.
+
+What the screen gets with it:
+
+| What | Where | Notes |
+| --- | --- | --- |
+| Claude Code CLI | `/opt/claude-code`, wrapper `/usr/local/bin/claude` | Pinned in `images/hermes-screen/Dockerfile` (Renovate, npm). Never updates itself |
+| GitHub CLI | `/opt/gh`, wrapper `/usr/local/bin/gh` | Pinned, checksum-verified. git's credential helper for github.com |
+| Claude sign-in | `/etc/hermes-claude-code/oauth_token` | ExternalSecret `claude-code-auth`, 1Password field `claude_code_oauth_token`: a one-year token from `claude setup-token` |
+| GitHub token | `/etc/hermes-claude-code/github_token` | ExternalSecret `claude-code-github`, 1Password field `github_token` |
+| Commit identity | `/etc/hermes-claude-code/gitconfig` | `<bot> (Hermes)`, `<bot>@hermes.invalid` |
+
+No network change: Anthropic, GitHub and npm go through the screen's
+existing public egress.
+
+They are files because ssh sessions start with a clean environment (no
+PAM, no `AcceptEnv`): the pod's environment never reaches a terminal
+command. The `claude` wrapper exports the token as
+`CLAUDE_CODE_OAUTH_TOKEN` and unsets `ANTHROPIC_API_KEY`,
+`ANTHROPIC_AUTH_TOKEN` and `ANTHROPIC_BASE_URL`, which would otherwise take
+precedence over it. `/etc/claude-code/managed-settings.json` turns off
+auto-update and nonessential traffic and holds the deny rules below.
+
+**Subscription, not LiteLLM.** Claude Code signs in with Ryan's Claude
+subscription, which only talks to Anthropic directly, so it bypasses
+LiteLLM: no LiteLLM key, budget or spend tracking. Its use counts against
+the subscription's usage limits, shared with Ryan's own Claude Code
+sessions.
+
+**Anything in the sandbox can read these files,** including code Claude
+Code runs. That is the accepted trade: scope the GitHub token tightly,
+and treat the Claude token as able to spend the subscription's usage
+until it expires or is replaced.
+
+### One session per task
+
+Skill `homelab/coding-sessions`, written by the `config` init container,
+tells the bot how:
+
+1. Start: `claude -p '<task>' --output-format json` in
+   `/workspace/code/<repo>`, as a background terminal process with
+   `notify`, its JSON written to `/workspace/.claude-code/runs/<slug>.json`.
+2. Save the result's `session_id` in
+   `/workspace/.claude-code/tasks/<slug>.json` with the repo, branch and
+   Matrix room.
+3. Follow-up: `claude -p --resume <session_id> '<follow-up>'`, which
+   continues with everything Claude Code already read and changed.
+4. Finish: Claude Code commits on branch `hermes/<slug>`, pushes, and
+   opens a draft PR with `gh pr create --draft`. The bot sends the link.
+   Merging is Ryan's.
+
+Sessions are stored in `CLAUDE_CONFIG_DIR=/workspace/.claude-code` (the
+wrapper sets it), so they survive a screen restart. The workspace is not
+backed up, so they do not survive losing the volume.
+
+The skill runs Claude Code with `--permission-mode bypassPermissions`:
+there is nobody to answer its prompts mid-run (managed settings record
+the acceptance, `skipDangerousModePermissionPrompt`). Managed settings
+deny `gh pr merge`, `gh repo delete`/`edit`, `gh secret` and force,
+mirror and delete pushes, and deny rules hold in every mode. They are
+pattern matches, a guard rail, not a boundary. The boundary is the Kata
+VM and the GitHub token's scope.
+
+### Turning it on for a bot
+
+1. On a machine signed in to Ryan's Claude account, run
+   `claude setup-token` and put the printed token in 1Password vault
+   `k8s-secrets`, item `hermes-<bot>`, field `claude_code_oauth_token`.
+2. Create a fine-grained GitHub token with **only the repositories the
+   bot may work on**. Permissions: Contents read/write, Pull requests
+   read/write (Metadata read comes with it). Leave out Administration,
+   Secrets and Workflows; without Workflows it cannot change
+   `.github/workflows`. Give it an expiry. Put it in the same item, field
+   `github_token`.
+3. Protect each repository's default branch with a ruleset that requires
+   a pull request, so the token's Contents write cannot push to it.
+4. Add `CLAUDE_CODE_ENABLED=true` to the bot's inputs.
+
+Each field is optional to the pod: without the Claude token `claude`
+reports it is not logged in; without the GitHub token Claude Code still
+works on local changes and public clones, and git or gh answer 401 on
+anything that needs it.
+
+To check it, run as `pn` in the screen pod:
+
+```sh
+kubectl -n hermes-<bot> exec deploy/hermes-screen -- claude -p 'Reply with OK' --output-format json
+kubectl -n hermes-<bot> exec deploy/hermes-screen -- gh auth status
+```
+
+Renew either token by replacing its 1Password field (the Claude token
+lasts a year). External Secrets refreshes within the hour and the
+projected volume updates in place, with no restart.
 
 ## Matrix profile (opt-in)
 
