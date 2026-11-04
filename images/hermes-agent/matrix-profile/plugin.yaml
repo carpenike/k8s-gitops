@@ -1,0 +1,11 @@
+name: matrix-profile
+version: 1.0.0
+description: "Let the bot read and change its own Matrix profile: display name and avatar. Uses the gateway's Matrix login (MATRIX_HOMESERVER, MATRIX_ACCESS_TOKEN, MATRIX_USER_ID); only from a Matrix conversation. Local to k8s-gitops (images/hermes-agent/matrix-profile)."
+author: k8s-gitops
+kind: standalone
+platforms:
+  - linux
+provides_tools:
+  - matrix_get_profile
+  - matrix_set_display_name
+  - matrix_set_avatar

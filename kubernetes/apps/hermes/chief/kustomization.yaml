@@ -20,6 +20,8 @@ configMapGenerator:
       # Desktop workspace at https://chief-desktop (envoy-internal, Pocket ID
       # sign-in), for watching or taking over the browser.
       - WEBAPP_ENABLED=true
+      # Chief may change its own Matrix display name and avatar when asked.
+      - MATRIX_PROFILE_TOOLS=true
       - LLM_BUDGET_USD=25
       - LLM_BUDGET_DURATION=30d
       - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net

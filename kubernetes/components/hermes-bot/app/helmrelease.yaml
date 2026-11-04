@@ -49,9 +49,10 @@ spec:
               repository: ghcr.io/carpenike/hermes-agent
               # Built from images/hermes-agent by hermes-agent-image.yaml:
               # nousresearch/hermes-agent v0.22.6 (pinned by digest in its
-              # Dockerfile) plus the Outlook MCP server and the Hindsight
-              # memory plugin, each inert unless its input is on.
-              tag: v0.22.6-33213e0@sha256:23b45b18a30c51361f57bf22860984c6885cb0a5f5430f9b9312cc30ad5a476f
+              # Dockerfile) plus the Outlook MCP server, the Hindsight memory
+              # plugin and the matrix-profile plugin, each inert unless its
+              # input is on.
+              tag: v0.22.6-85d9362@sha256:246be8eb3b4f935e674354f6e4077387a42b8706d6901772030954ce76be8c07
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -104,6 +105,47 @@ spec:
                   hermes config unset image_gen.openai
                   hermes config unset image_gen.provider
                 fi
+                # matrix-profile plugin (input MATRIX_PROFILE_TOOLS; docs/hermes.md,
+                # "Matrix profile"): the bot changes its own Matrix display name
+                # and avatar from a Matrix conversation. Copied fresh from the
+                # image each boot and listed in plugins.enabled (Hermes loads
+                # user plugins only from that list); off, both are removed.
+                if [ '${MATRIX_PROFILE_TOOLS:=false}' = true ]; then
+                  rm -rf /opt/data/plugins/matrix-profile
+                  install -d /opt/data/plugins
+                  cp -r /opt/hermes-plugins/matrix-profile /opt/data/plugins/matrix-profile
+                  matrix_profile=enable
+                else
+                  rm -rf /opt/data/plugins/matrix-profile
+                  matrix_profile=disable
+                fi
+                MATRIX_PROFILE="$matrix_profile" /opt/hermes/.venv/bin/python - <<'PY'
+                import os
+                import sys
+
+                sys.path.insert(0, "/opt/hermes")
+                from hermes_cli.config import read_raw_config, save_config
+
+                NAME = "matrix-profile"
+                cfg = read_raw_config()
+                plugins = cfg.get("plugins") if isinstance(cfg.get("plugins"), dict) else {}
+                enabled = plugins.get("enabled") if isinstance(plugins.get("enabled"), list) else None
+                want = os.environ["MATRIX_PROFILE"] == "enable"
+                if want:
+                    enabled = (enabled or []) + ([] if NAME in (enabled or []) else [NAME])
+                elif enabled is not None:
+                    enabled = [p for p in enabled if p != NAME]
+                if enabled:
+                    plugins["enabled"] = enabled
+                else:
+                    plugins.pop("enabled", None)
+                if plugins:
+                    cfg["plugins"] = plugins
+                else:
+                    cfg.pop("plugins", None)
+                save_config(cfg)
+                print(f"matrix-profile plugin: {'enabled' if want else 'disabled'}")
+                PY
                 # Webapp: the browser Desktop workspace, including the Bot
                 # Desktop viewer (Watch / Take over / Hand back) for the screen
                 # pod's browser (input WEBAPP_ENABLED; docs/hermes.md, "Watching

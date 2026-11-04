@@ -37,6 +37,7 @@ spec later:
 | `LLM_FALLBACK_MODEL` | `claude-sonnet` | Optional. LiteLLM model Hermes falls back to when the main model fails ([LiteLLM key](#litellm-key)) |
 | `IMAGE_MODEL` | `gpt-image-2.5-flare` | Optional. Model for the `image_generate` tool, through LiteLLM ([Image generation](#image-generation)) |
 | `WEBAPP_ENABLED` | `true` | Optional, default `false`. The browser Desktop workspace at `https://<bot>-desktop` on envoy-internal, with Pocket ID sign-in, for watching or taking over the bot's browser ([Watching the bot's desktop](#watching-the-bots-desktop-opt-in)). `true` or `false` only |
+| `MATRIX_PROFILE_TOOLS` | `true` | Optional, default `false`. The bot can read and change its own Matrix display name and avatar when asked in Matrix ([Matrix profile](#matrix-profile-opt-in)). `true` or `false` only |
 | `LLM_BUDGET_USD` | `25` | Key budget |
 | `LLM_BUDGET_DURATION` | `30d` | Budget reset period |
 | `MATRIX_ALLOWED_USERS` | `@ryan:ryanholt.net` | Comma-separated Matrix IDs the bot answers |
@@ -682,6 +683,51 @@ signed with the old secret get `401`. The init container strips any
 `/opt/data/.env` when the Secret is present, for the reason in [Why the
 init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
 loads `.env` with `override=True`, so a stale line would beat the Secret.
+
+## Matrix profile (opt-in)
+
+`MATRIX_PROFILE_TOOLS=true` lets the bot manage its own Matrix profile:
+its display name and avatar. Today only Chief has it. Hermes v0.22.6 has
+no tool for this; its Matrix adapter only reads other members' names. So
+this is a small local plugin, `images/hermes-agent/matrix-profile`, baked
+into the agent image at `/opt/hermes-plugins/matrix-profile`.
+
+| Tool | What |
+| --- | --- |
+| `matrix_get_profile` | The bot's user ID, display name and avatar (`mxc://` URL) |
+| `matrix_set_display_name` | A new display name, 1-64 characters, no control or formatting characters |
+| `matrix_set_avatar` | A new avatar from a local PNG, JPEG, WebP or GIF of at most 5 MiB under `/workspace` or `$HERMES_HOME/cache`. It is uploaded to Tuwunel's media repository, then set as `avatar_url` |
+
+### How it works
+
+- **Same login as the gateway.** The tools use the gateway's Matrix login
+  (`MATRIX_HOMESERVER`, `MATRIX_ACCESS_TOKEN`, `MATRIX_USER_ID`, read
+  through Hermes' scoped secret reader). Matrix lets any user set their
+  own `displayname` and `avatar_url`. There is no new credential or
+  egress: the agent already reaches Tuwunel.
+- **Matrix conversations only.** The handlers refuse unless the session's
+  platform is `matrix`. So the API server, the Chief Engineer webhook,
+  cron and the CLI can't change the bot's identity, and on Matrix only
+  `MATRIX_ALLOWED_USERS` can ask. Matrix still shows the bot's user ID
+  next to any name it picks, and the tool description tells it never to
+  take a real person's name.
+- **No URLs for avatars.** The agent has no general internet egress, and
+  a fetched file would be unvetted. An avatar is a file the bot made with
+  `image_generate` (saved under `$HERMES_HOME/cache`) or one placed in the
+  shared `/workspace`.
+- **Loading.** Hermes loads user plugins only when they are listed in
+  `plugins.enabled`. The `config` init container copies the plugin into
+  `$HERMES_HOME/plugins/matrix-profile` on every boot and adds
+  `matrix-profile` to that list. Off, it removes both. Bundled plugins are
+  unaffected: 55 stay enabled with or without the list (checked on the
+  image).
+- **Image build check.** The image build fails if discovery doesn't load
+  the plugin or its three tools don't register.
+
+Checked on 4 Nov 2026 against Tuwunel from Chief's agent pod:
+`matrix_get_profile` returned `@chief:ryanholt.net`, display name `chief`,
+no avatar. Setting the display name to that same value succeeded. The
+name and path guards refused bad input.
 
 ## Watching the bot's desktop (opt-in)
 
