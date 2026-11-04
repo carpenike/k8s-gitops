@@ -565,7 +565,7 @@ spec:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
               # Floating tag, digest re-pinned by Renovate (docs/hermes.md).
-              tag: v0.22.6@sha256:e7f75a5c9ab34e2f69a1dacc636e474dae889e4b67c14e2ea1809cee907f8e9a
+              tag: v0.22.6@sha256:59a8c0d41470088d1ca113597fb422be7219c94911f59ceb0edff2de2e8ff953
             env:
               TZ: America/New_York
             probes:
