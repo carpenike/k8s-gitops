@@ -18,5 +18,6 @@ configMapGenerator:
       - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
       - AGENT_STORAGE_SIZE=10Gi
       - WORKSPACE_STORAGE_SIZE=20Gi
+      - API_SERVER_ENABLED=true
 generatorOptions:
   disableNameSuffixHash: true

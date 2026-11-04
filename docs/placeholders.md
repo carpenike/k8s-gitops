@@ -68,8 +68,11 @@ salt. A new salt does not decrypt stored credentials.
 After a new bot's first boot, create item `hermes-<bot>` in vault
 `k8s-secrets` with field `matrix_recovery_key`. It is read by hand only
 when a crypto store has to be re-verified; no ExternalSecret reads it.
-The Matrix token, LiteLLM key, and ssh keys are provisioned in-cluster
-and have no 1Password items. See [hermes.md](hermes.md).
+A bot with `API_SERVER_ENABLED=true` also needs field `api_server_key`
+in the same item (a strong secret, e.g. `openssl rand -hex 32`);
+ExternalSecret `api-server` reads it. The Matrix token, LiteLLM key, and
+ssh keys are provisioned in-cluster and have no 1Password items. See
+[hermes.md](hermes.md).
 
 ## Still to confirm or generate
 
