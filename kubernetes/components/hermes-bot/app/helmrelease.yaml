@@ -75,6 +75,22 @@ spec:
                 install -d -m 0700 /opt/data/.ssh
                 install -m 0644 /etc/hermes-ssh-src/known_hosts /opt/data/.ssh/known_hosts
                 install -d /opt/data/skills
+                # With the api-server Secret, its key must be the one Hermes
+                # uses. Hermes loads $HERMES_HOME/.env with override=True, and
+                # docker/stage2-hook.sh writes a generated API_SERVER_KEY there
+                # on any boot whose env has none (older boots did), so a
+                # leftover line would shadow the Secret's key: every client
+                # gets 401. stage2 skips generation when the env has a key,
+                # which is why this container has the same envFrom.
+                if [ -n "$${API_SERVER_KEY:-}" ] && [ -f /opt/data/.env ] && [ ! -L /opt/data/.env ]; then
+                  sed -i '/^API_SERVER_KEY=/d' /opt/data/.env
+                fi
+            # Only api-server: stage2 reads API_SERVER_KEY (above). The
+            # gateway's credentials stay in the app container.
+            envFrom:
+              - secretRef:
+                  name: api-server
+                  optional: true
             securityContext: &restricted
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -124,9 +140,10 @@ spec:
                   optional: true
               # API_SERVER_*, only for a bot with API_SERVER_ENABLED=true:
               # ExternalSecret api-server below is the only thing that makes
-              # this Secret. Hermes v0.22.6 starts the API server whenever
-              # API_SERVER_KEY is set (gateway/config_env.py _api_server), so
-              # a bot without the Secret has no API server. app-template
+              # this Secret. Without it, Hermes still runs its own
+              # loopback-only listener (127.0.0.1:8642) on a key stage2
+              # generates into .env; nothing outside the pod can reach that.
+              # With it, the listener binds 0.0.0.0 on this key. app-template
               # cannot drop an env entry by flag, hence a whole optional
               # Secret.
               - secretRef:

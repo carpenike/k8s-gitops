@@ -285,13 +285,20 @@ that one input:
 | CiliumNetworkPolicy `agent-api` | Ingress to 8642 from the envoy-internal proxies only. Agent egress is unchanged |
 | ReferenceGrant `agent-api-gateway-auth` | Lets `pocket-id-exempt` select the route |
 
-The agent reads the Secret through an optional `envFrom`. A bot that is
-off has no Secret, so no `API_SERVER_*` variables and no listener. In
-v0.22.6 the key, not `API_SERVER_ENABLED`, is what starts the server:
+The agent reads the Secret through an optional `envFrom`. In v0.22.6 the
+key, not `API_SERVER_ENABLED`, is what starts the server:
 `gateway/config_env.py` `_api_server` enables it whenever
 `API_SERVER_KEY` is a usable secret (16+ characters, not a placeholder),
-and the adapter refuses to start otherwise. The screen pod gets neither
-the key nor the port. Hermes strips `API_SERVER_KEY` from child processes,
+and the adapter refuses to start otherwise.
+
+A bot that is off still runs Hermes' own **loopback-only** listener. On
+any boot whose env has no `API_SERVER_KEY`, `docker/stage2-hook.sh`
+generates one into `$HERMES_HOME/.env`. Upstream uses it as a control
+plane for cron fires. It binds the default `127.0.0.1:8642`, so nothing
+outside the agent pod can reach it. Turning the API on changes the bind
+to `0.0.0.0` and the key to the Secret's.
+
+The screen pod gets neither the key nor the port. Hermes strips `API_SERVER_KEY` from child processes,
 as it does the other credentials. `API_SERVER_CORS_ORIGINS` is unset, so
 no browser origin is allowed.
 
@@ -351,6 +358,26 @@ kubectl -n hermes-<bot> annotate externalsecret api-server force-sync="$(date +%
 
 Reloader restarts the agent when Secret `api-server` changes, and the old
 key stops working. Update the client's copy.
+
+### Why the init container cleans `.env`
+
+Hermes loads `$HERMES_HOME/.env` with `override=True`, so an
+`API_SERVER_KEY` line there beats the Secret's env var. stage2 says so in
+the log: "the .env value wins at runtime". The volume of a bot that ran
+before the API was on, like Chief, already has such a line: its own
+generated key. Clients holding the 1Password key then get 401 ("Invalid
+gateway API key").
+
+The `config` init container therefore:
+
+- gets the same optional `envFrom` on `api-server`, so its stage2 run
+  sees the key and skips generation. Without it, the init container
+  would write a fresh key into `.env` on every boot;
+- deletes any `^API_SERVER_KEY=` line from `/opt/data/.env` when that env
+  key is present. Bots that are off are untouched.
+
+Removing the line by hand without this would not last. The next start's
+init container would generate another one.
 
 ### Example
 
