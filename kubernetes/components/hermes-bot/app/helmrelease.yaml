@@ -104,6 +104,53 @@ spec:
                   hermes config unset image_gen.openai
                   hermes config unset image_gen.provider
                 fi
+                # Webapp: the browser Desktop workspace, including the Bot
+                # Desktop viewer (Watch / Take over / Hand back) for the screen
+                # pod's browser (input WEBAPP_ENABLED; docs/hermes.md, "Watching
+                # the bot's desktop"). Served at https://<bot>-desktop on
+                # envoy-internal. A non-loopback bind engages Hermes' sign-in
+                # gate, here Pocket ID through the self-hosted OIDC provider
+                # (Secret webapp); public_url pins the /auth/callback, and
+                # trusted_proxies (the pod network; CNP agent-desktop admits only
+                # envoy-internal) lets Envoy's X-Forwarded-Proto mark cookies
+                # Secure. A skill tells the bot its own viewer address.
+                if [ '${WEBAPP_ENABLED:=false}' = true ]; then
+                  hermes config set webapp.enabled true
+                  hermes config set webapp.host 0.0.0.0
+                  hermes config set webapp.port 9120
+                  hermes config set webapp.public_url 'https://${BOT_NAME}-desktop.${SECRET_DOMAIN}'
+                  hermes config set dashboard.trusted_proxies '[10.42.0.0/16]'
+                  install -d /opt/data/skills/homelab/desktop-viewer
+                  cat > /opt/data/skills/homelab/desktop-viewer/SKILL.md <<'SKILL'
+                ---
+                name: desktop-viewer
+                description: "Give Ryan the link to watch or take over this bot's desktop and browser."
+                version: 1.0.0
+                author: k8s-gitops (hermes-bot component)
+                metadata:
+                  hermes:
+                    tags: [desktop, browser, screen, watch, takeover, link, url]
+                ---
+
+                # Desktop viewer link
+
+                When Ryan asks to see what you are doing, to watch your screen or browser, or
+                to take over (to log in, solve a CAPTCHA or approve something), give him this
+                link:
+
+                https://${BOT_NAME}-desktop.${SECRET_DOMAIN}
+
+                - It works on the home network or over the VPN, not from the open internet.
+                - He signs in with Pocket ID, opens the bot screen, then chooses Watch or
+                  Take over, and Hand back when done.
+                - While he holds Take over, your browser and computer_use tools are paused.
+                  Wait for him to hand back before using them again.
+                - The link is the same every time. Never send it to anyone else.
+                SKILL
+                elif [ "$(hermes config get webapp.enabled 2>/dev/null)" = true ]; then
+                  hermes config set webapp.enabled false
+                  rm -rf /opt/data/skills/homelab/desktop-viewer
+                fi
                 hermes config set terminal.backend ssh
                 hermes config set terminal.ssh_host screen.hermes-${BOT_NAME}.svc.cluster.local
                 hermes config set terminal.ssh_user pn
@@ -339,6 +386,13 @@ spec:
               - secretRef:
                   name: tavily
                   optional: true
+              # HERMES_DASHBOARD_OIDC_ISSUER / _CLIENT_ID for the Webapp's
+              # Pocket ID sign-in, only with WEBAPP_ENABLED=true (ExternalSecret
+              # webapp). Without it no sign-in provider registers and the gated
+              # Webapp stays off.
+              - secretRef:
+                  name: webapp
+                  optional: true
             probes:
               liveness:
                 enabled: false
@@ -454,6 +508,14 @@ spec:
         ports:
           webhook:
             port: 8644
+      # Opt-in desktop viewer / Webapp (input WEBAPP_ENABLED; docs/hermes.md).
+      desktop:
+        enabled: ${WEBAPP_ENABLED:=false}
+        controller: agent
+        forceRename: agent-desktop
+        ports:
+          http:
+            port: 9120
     # envoy-internal only: LAN clients, never the tunnel. Labelled public
     # because API clients send a bearer key and cannot complete the gateway
     # Pocket ID login; Hermes checks the key on every route but /health.
@@ -506,6 +568,28 @@ spec:
             backendRefs:
               - identifier: hooks
                 port: 8644
+      # The Webapp (desktop viewer): envoy-internal only, LAN or VPN, never
+      # the tunnel. Labelled native: Hermes signs the browser in with its own
+      # Pocket ID client (self-hosted OIDC), so the gateway login is skipped.
+      # No timeout: the viewer and the workspace hold WebSockets open.
+      desktop:
+        enabled: ${WEBAPP_ENABLED:=false}
+        kind: HTTPRoute
+        forceRename: agent-desktop
+        labels:
+          gateway.holthome.net/auth: native
+        hostnames:
+          - ${BOT_NAME}-desktop.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - timeouts:
+              request: 0s
+            backendRefs:
+              - identifier: desktop
+                port: 9120
     # The chart writes target.template with toYaml, not tpl, so
     # {{ .api_server_key }} reaches External Secrets unexpanded.
     externalSecrets:
@@ -627,6 +711,27 @@ spec:
           - secretKey: tavily_api_key
             remoteRef:
               key: hermes-${BOT_NAME}/tavily_api_key
+      # The Webapp's Pocket ID sign-in (Hermes self-hosted OIDC provider): a
+      # public client with PKCE, so only its id; Pocket ID's issuer is fixed.
+      webapp:
+        enabled: ${WEBAPP_ENABLED:=false}
+        forceRename: webapp
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: webapp
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              HERMES_DASHBOARD_OIDC_ISSUER: https://id.${SECRET_DOMAIN}
+              HERMES_DASHBOARD_OIDC_CLIENT_ID: "{{ .webapp_oidc_client_id }}"
+        data:
+          - secretKey: webapp_oidc_client_id
+            remoteRef:
+              key: hermes-${BOT_NAME}/webapp_oidc_client_id
     rawResources:
       # Tavily for web_search/web_extract, only with TAVILY_ENABLED:
       # api.tavily.com on 443, nothing else. toFQDNs needs the DNS proxy to
@@ -796,6 +901,46 @@ spec:
               - group: gateway.networking.k8s.io
                 kind: HTTPRoute
                 name: agent-hooks
+      # Additive: 9120 (the Webapp) from the envoy-internal proxies only. The
+      # screen pod, and every other pod, stays out; that is also why
+      # dashboard.trusted_proxies may name the whole pod network.
+      desktop-ingress:
+        enabled: ${WEBAPP_ENABLED:=false}
+        forceRename: agent-desktop
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "9120"
+                        protocol: TCP
+      # Lets pocket-id-exempt in network select the native route
+      # (docs/gateway-auth.md, "Opt out").
+      desktop-gateway-auth:
+        enabled: ${WEBAPP_ENABLED:=false}
+        forceRename: agent-desktop-gateway-auth
+        manifest:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          spec:
+            from:
+              - group: gateway.envoyproxy.io
+                kind: SecurityPolicy
+                namespace: network
+            to:
+              - group: gateway.networking.k8s.io
+                kind: HTTPRoute
+                name: agent-desktop
     persistence:
       data:
         type: persistentVolumeClaim

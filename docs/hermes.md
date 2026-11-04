@@ -36,6 +36,7 @@ spec later:
 | `LLM_MODEL` | `gpt-6.1-terra` | LiteLLM model name for the main model. The key itself may call every model on the proxy ([LiteLLM key](#litellm-key)) |
 | `LLM_FALLBACK_MODEL` | `claude-sonnet` | Optional. LiteLLM model Hermes falls back to when the main model fails ([LiteLLM key](#litellm-key)) |
 | `IMAGE_MODEL` | `gpt-image-2.5-flare` | Optional. Model for the `image_generate` tool, through LiteLLM ([Image generation](#image-generation)) |
+| `WEBAPP_ENABLED` | `true` | Optional, default `false`. The browser Desktop workspace at `https://<bot>-desktop` on envoy-internal, with Pocket ID sign-in, for watching or taking over the bot's browser ([Watching the bot's desktop](#watching-the-bots-desktop-opt-in)). `true` or `false` only |
 | `LLM_BUDGET_USD` | `25` | Key budget |
 | `LLM_BUDGET_DURATION` | `30d` | Budget reset period |
 | `MATRIX_ALLOWED_USERS` | `@ryan:ryanholt.net` | Comma-separated Matrix IDs the bot answers |
@@ -344,7 +345,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN) |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`); with `WEBAPP_ENABLED`, the `envoy-internal` proxies on 9120 (CNP `agent-desktop`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
@@ -681,6 +682,97 @@ signed with the old secret get `401`. The init container strips any
 `/opt/data/.env` when the Secret is present, for the reason in [Why the
 init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
 loads `.env` with `override=True`, so a stale line would beat the Secret.
+
+## Watching the bot's desktop (opt-in)
+
+The screen pod runs the bot's desktop: Xvnc, Xfce and the headed Chromium
+its browser tools drive. Hermes' Webapp, the browser build of Hermes
+Desktop, shows that screen at `https://<bot>-desktop.${SECRET_DOMAIN}`.
+That address works on the LAN or over the VPN, and from a phone. It has
+three modes:
+
+- **Watch:** see what the bot is doing.
+- **Take over:** drive it yourself, for example to log in, solve a
+  CAPTCHA or approve a prompt.
+- **Hand back:** return control to the bot.
+
+**Off by default.** `WEBAPP_ENABLED=true` turns it on; today only Chief
+has it. When it is on, the component adds:
+
+| Object | What |
+| --- | --- |
+| config.yaml, set by the `config` init container | `webapp.enabled: true`, `webapp.host: 0.0.0.0`, `webapp.port: 9120`, `webapp.public_url: https://<bot>-desktop.${SECRET_DOMAIN}`, `dashboard.trusted_proxies: [10.42.0.0/16]` |
+| ExternalSecret / Secret `webapp` | `HERMES_DASHBOARD_OIDC_ISSUER=https://id.${SECRET_DOMAIN}` (Pocket ID) and `HERMES_DASHBOARD_OIDC_CLIENT_ID` from 1Password item `hermes-<bot>`, field `webapp_oidc_client_id`. Optional `envFrom` on the agent's `app` container only |
+| Service `agent-desktop` | Port 9120 on the agent pod |
+| HTTPRoute `agent-desktop` | `<bot>-desktop.${SECRET_DOMAIN}`, **envoy-internal only**: never envoy-external, never a cloudflared rule. Labelled `gateway.holthome.net/auth: native`. No request timeout, because the viewer and workspace hold WebSockets open |
+| CiliumNetworkPolicy `agent-desktop` | Ingress to 9120 from the envoy-internal proxies only. The screen pod cannot reach it |
+| ReferenceGrant `agent-desktop-gateway-auth` | Lets `pocket-id-exempt` select the native route |
+| Skill `homelab/desktop-viewer` | Written into the bot's skills by the init container. It tells the bot its viewer address, so asking "let me see what you're doing" gets you the link |
+
+Off, the init container sets `webapp.enabled: false` and removes the
+skill. Kubernetes objects go with the input.
+
+### Sign-in
+
+- **Why there's no gateway login.** Bound to anything but loopback, the
+  Webapp requires a registered dashboard sign-in provider. Hermes ships
+  `plugins/dashboard_auth/self_hosted`, a generic OpenID Connect client
+  (authorization code with PKCE). It registers when
+  `HERMES_DASHBOARD_OIDC_ISSUER` and `_CLIENT_ID` are set, and here it
+  points at Pocket ID. So the route is `native`, like LiteLLM's: the app
+  runs its own Pocket ID login, and the gateway's is skipped.
+- **The callback** is `webapp.public_url` plus `/auth/callback`
+  (`hermes_cli/dashboard_auth/routes.py`).
+- **Secure cookies.** Hermes marks cookies Secure only when it trusts the
+  proxy's `X-Forwarded-Proto: https`. `dashboard.trusted_proxies` names the
+  pod network; that is safe because CNP `agent-desktop` lets only the
+  envoy-internal proxies connect.
+- **Hermes doesn't check who signed in.** Anyone the Pocket ID client
+  admits gets the whole workspace. **Restrict the client to Ryan** in
+  Pocket ID (allowed user groups).
+- **Without the 1Password field** no provider registers. The gated Webapp
+  then stays off and the rest of the bot runs normally.
+
+### How it works (v0.22.6)
+
+- **The viewer path.** The viewer is `/api/display/ws`
+  (`hermes_cli/web_routers/display.py`). The page gets a single-use,
+  30-second ticket on its signed-in connection, and the bridge splices the
+  desktop's RFB stream into a WebSocket. With the desktop inside the
+  terminal backend, as here, that stream is an `ssh` relay to the screen
+  pod. No VNC port is opened anywhere.
+- **Control is a lease** (`tools/bot_desktop/lease.py`): the agent, or
+  exactly one human viewer.
+  - Input from viewers that don't hold it is dropped at the byte level
+    (`rfb_filter.py`).
+  - While a person holds it, `computer_use` and the browser tools refuse
+    to act, screenshots included.
+  - The lease fences tools, not the X server. A command the agent runs in
+    its terminal against `DISPLAY` is not stopped by it.
+- **One browser.** The dock's browser and the agent's Chromium are the
+  same binary with the same profile. A login you complete during Take over
+  is the one the bot then uses (`tools/bot_desktop/browser.py`).
+- **What the URL exposes.** It's the whole workspace: chat, sessions and
+  settings, as well as the screen. That's why it's LAN/VPN only and why
+  the Pocket ID client must admit only Ryan.
+
+### Turning it on for a bot
+
+1. In Pocket ID, create an OIDC client:
+   - name `hermes-<bot>-desktop`;
+   - **public client** (PKCE, no secret);
+   - callback URL `https://<bot>-desktop.${SECRET_DOMAIN}/auth/callback`;
+   - allowed user groups limited to Ryan.
+2. Put its client ID in 1Password vault `k8s-secrets`, item `hermes-<bot>`,
+   field `webapp_oidc_client_id`.
+3. Add `WEBAPP_ENABLED=true` to the bot's inputs.
+
+Then open `https://<bot>-desktop.<domain>`, or ask the bot for the link.
+Sign in with Pocket ID, open the bot's screen, and choose Watch or Take
+over.
+
+`kubectl exec … hermes webapp --sign-out` ends every open session.
+Rotate by replacing the Pocket ID client and the 1Password field.
 
 ## Web search (opt-in)
 

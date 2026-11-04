@@ -17,6 +17,9 @@ configMapGenerator:
       - LLM_FALLBACK_MODEL=claude-sonnet
       # Azure gpt-image deployment through LiteLLM; the fast, everyday tier.
       - IMAGE_MODEL=gpt-image-2.5-flare
+      # Desktop workspace at https://chief-desktop (envoy-internal, Pocket ID
+      # sign-in), for watching or taking over the browser.
+      - WEBAPP_ENABLED=true
       - LLM_BUDGET_USD=25
       - LLM_BUDGET_DURATION=30d
       - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
