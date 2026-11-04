@@ -28,5 +28,6 @@ configMapGenerator:
       # Ryan's DM with @chief (Ryan and Chief its only members): where
       # webhook turns are delivered and mirrored.
       - WEBHOOK_DELIVER_CHAT_ID=!1NY-w--JkAFJpmKfLvzhpj2WWnVYBK2SWdy9HRKhY3Q
+      - TAVILY_ENABLED=true
 generatorOptions:
   disableNameSuffixHash: true

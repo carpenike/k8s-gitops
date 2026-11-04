@@ -191,6 +191,18 @@ spec:
                 save_config(cfg)
                 print(f"webhook route {NAME}: {'written' if os.environ['WEBHOOK_ROUTE'] == 'write' else 'removed'}")
                 PY
+                # Tavily web search and extract (input TAVILY_ENABLED;
+                # docs/hermes.md, "Web search (opt-in)"). A stored web.backend
+                # is strict: no probe, no fallback. keyless_fallback false
+                # turns off the anonymous third-party ring, keyless rescue,
+                # and keyless Tavily, so a missing key is an error, not a
+                # silent switch. Off: the backend is removed if it is ours.
+                if [ '${TAVILY_ENABLED:=false}' = true ]; then
+                  hermes config set web.backend tavily
+                  hermes config set web.keyless_fallback false
+                elif [ "$(hermes config get web.backend 2>/dev/null)" = tavily ]; then
+                  hermes config unset web.backend
+                fi
             # api-server: stage2 reads API_SERVER_KEY (above). hindsight and
             # webhook: the steps above check for their keys. The gateway's
             # other credentials stay in the app container.
@@ -281,6 +293,12 @@ spec:
               # only: the screen never gets the secret or the port.
               - secretRef:
                   name: webhook
+                  optional: true
+              # TAVILY_API_KEY, only for a bot with TAVILY_ENABLED=true
+              # (ExternalSecret tavily). Web tools run in this process; the
+              # screen never gets the key.
+              - secretRef:
+                  name: tavily
                   optional: true
             probes:
               liveness:
@@ -550,7 +568,59 @@ spec:
           - secretKey: webhook_secret
             remoteRef:
               key: hermes-${BOT_NAME}/webhook_secret
+      # Tavily web search/extract key. Missing field: this stays unready,
+      # Secret tavily is never created, and web tools answer "not set".
+      tavily:
+        enabled: ${TAVILY_ENABLED:=false}
+        forceRename: tavily
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: tavily
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              TAVILY_API_KEY: "{{ .tavily_api_key }}"
+        data:
+          - secretKey: tavily_api_key
+            remoteRef:
+              key: hermes-${BOT_NAME}/tavily_api_key
     rawResources:
+      # Tavily for web_search/web_extract, only with TAVILY_ENABLED:
+      # api.tavily.com on 443, nothing else. toFQDNs needs the DNS proxy to
+      # see the agent's lookups, hence the L7 DNS rule (as agent-outlook).
+      tavily-egress:
+        enabled: ${TAVILY_ENABLED:=false}
+        forceRename: agent-tavily
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: api.tavily.com
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
       # The agent's route to the shared memory server: hermes-memory's
       # Hindsight pods on 8888, nothing else. Hindsight's own policy admits
       # only agent pods from bot-labelled namespaces.
@@ -575,7 +645,7 @@ spec:
                   - ports:
                       - port: "8888"
                         protocol: TCP
-      # The agent's only internet egress, and only with OUTLOOK_MCP_ENABLED:
+      # Internet egress for the agent, only with OUTLOOK_MCP_ENABLED:
       # Entra sign-in and Microsoft Graph on 443. toFQDNs needs the DNS
       # proxy to see the agent's lookups, hence the L7 DNS rule (all names
       # still resolve; only these two may be connected to).

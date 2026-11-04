@@ -79,7 +79,8 @@ mailbox, committed as-is. The Outlook server refuses to start on a
 `webhook_secret` (a strong secret, e.g. `openssl rand -hex 32`, shared
 with the sender, Chief Engineer); ExternalSecret `webhook` reads it, and
 its inputs carry `WEBHOOK_DELIVER_CHAT_ID`, the DM's room ID, committed
-as-is. The Matrix token, LiteLLM key, and
+as-is. A bot with `TAVILY_ENABLED=true` needs field `tavily_api_key` (its
+Tavily API key); ExternalSecret `tavily` reads it. The Matrix token, LiteLLM key, and
 ssh keys are provisioned in-cluster and have no 1Password items. See
 [hermes.md](hermes.md).
 
