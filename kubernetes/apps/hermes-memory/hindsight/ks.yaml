@@ -49,11 +49,21 @@ spec:
       namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
+  # The CNPG Database is checked here, not on postgres17: a missing
+  # 1Password item for hindsight must not make LiteLLM's chain unhealthy.
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
       name: hindsight
       namespace: hermes-memory
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      name: hindsight
+      namespace: cnpg-system
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      current: has(status.applied) && status.applied
   interval: 1h
   path: ./kubernetes/apps/hermes-memory/hindsight/app
   postBuild:

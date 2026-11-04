@@ -34,12 +34,23 @@ spec:
               limits:
                 cpu: 200m
                 memory: 256Mi
+    # The tool cache sits where GitHub-hosted runners keep it. setup-python's
+    # interpreters carry a RUNPATH of /opt/hostedtoolcache/..., so anywhere
+    # else they load libpython only through LD_LIBRARY_PATH, and a subprocess
+    # started with a minimal environment exits 127. Overlays append to env
+    # with /env/-, never replace it.
     template:
       spec:
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:2.338.2
             command: ["/home/runner/run.sh"]
+            env:
+              - name: RUNNER_TOOL_CACHE
+                value: /opt/hostedtoolcache
+            volumeMounts:
+              - name: tool-cache
+                mountPath: /opt/hostedtoolcache
             resources:
               requests:
                 cpu: 500m
@@ -47,3 +58,6 @@ spec:
               limits:
                 cpu: "2"
                 memory: 4Gi
+        volumes:
+          - name: tool-cache
+            emptyDir: {}

@@ -39,6 +39,15 @@ spec:
       strategy:
         type: Recreate
       automountServiceAccountToken: false
+      # Loading both models and running migrations takes a while on a cold
+      # start; liveness and readiness wait until /health/live answers
+      # (up to 10 minutes).
+      startupProbe:
+        httpGet:
+          path: /health/live
+          port: http
+        periodSeconds: 10
+        failureThreshold: 60
       image:
         repository: ghcr.io/carpenike/hindsight
         # Built from images/hindsight by hindsight-image.yaml.
