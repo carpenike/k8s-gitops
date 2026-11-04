@@ -144,10 +144,10 @@ Cluster `postgres17` in `cnpg-system`, image
 `litellm-db`.
 
 `ScheduledBackup` `postgres17-daily` takes an online volume snapshot at
-03:00 UTC through `csi-ceph-block`. `waitForArchive` is false because WAL
-is not shipped off the chassis. Snapshots accumulate on Ceph. Barman Cloud
-is the off-chassis copy and stays unattached while its endpoint is
-`s3.example.invalid`.
+03:00 UTC through `csi-ceph-block`. Snapshots accumulate on Ceph. The
+off-chassis copy is Barman Cloud to R2: WAL continuously, a base backup
+daily at 08:30 UTC, 30 days kept. Backups, alerts and the restore drill are
+in [postgres17.md](postgres17.md).
 
 ## 1Password
 

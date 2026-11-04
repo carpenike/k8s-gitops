@@ -155,9 +155,10 @@ Cluster `postgres17` in `cnpg-system` is the shared PostgreSQL 17 database
 LiteLLM's database is the first one on it. ADR 0006 and
 [litellm.md](litellm.md). `ScheduledBackup` `postgres17-daily` takes an
 online volume snapshot through `csi-ceph-block`. Those snapshots stay on
-Ceph. `kubernetes/examples/cnpg-cluster.yaml` is still the Barman shape for
-a copy that leaves the chassis. Its endpoint is `s3.example.invalid` and
-is not attached. The same pattern is the intent for a second copy in R2.
+Ceph. The copy that leaves the chassis is the Barman Cloud plugin to
+Cloudflare R2: continuous WAL archiving plus a daily base backup
+(`postgres17-r2-daily`), 30-day recovery window. See
+[postgres17.md](postgres17.md).
 
 VolSync is installed. ReplicationSource objects are examples only.
 It waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
