@@ -14,6 +14,14 @@
 # Kustomizations without postBuild are not substituted, which keeps literal
 # ${VAR} strings that apps expand at runtime.
 #
+# Flux Kustomizations can also come from a Kustomize Component: a directory
+# under kubernetes/apps whose kustomization.yaml uses a component other than
+# sops (for example kubernetes/apps/hermes/<bot> with
+# kubernetes/components/hermes-bot). That directory is built, and the Flux
+# Kustomizations in the result are handled like ks.yaml entries. There,
+# substituteFrom ConfigMap/<name> resolves from the ConfigMap of that name in
+# the same build.
+#
 # Chart sources, looked up by name in the same build:
 #   spec.chartRef OCIRepository   ref.tag or ref.digest (ref.semver is skipped)
 #   spec.chart.spec HelmRepository  default or oci type
@@ -72,10 +80,36 @@ status=0
 rendered=0
 skipped=0
 
-while IFS= read -r -d '' ks_file; do
+# Flux Kustomization sources: every ks.yaml, then the build of every
+# directory that uses a non-sops component.
+ks_sources=()
+while IFS= read -r -d '' f; do
+  ks_sources+=("${f}")
+done < <(find kubernetes/apps -type f -name ks.yaml -print0 | sort -z)
+mkdir -p "${work}/components"
+while IFS= read -r -d '' f; do
+  yq -N -e '.components // [] | .[] | select(test("components/") and (test("components/sops$") | not))' \
+    "${f}" >/dev/null 2>&1 || continue
+  dir="$(dirname "${f}")"
+  out="${work}/components/$(printf '%s' "${dir}" | tr '/' '_').yaml"
+  if ! kustomize build "${dir}" --load-restrictor LoadRestrictionsNone >"${out}"; then
+    echo "${dir}: kustomize build failed" >&2
+    status=1
+    continue
+  fi
+  ks_sources+=("${out}")
+done < <(find kubernetes/apps -type f -name kustomization.yaml -print0 | sort -z)
+
+for ks_file in "${ks_sources[@]}"; do
+  ks_label="${ks_file}"
+  if [[ "${ks_file}" == "${work}/components/"* ]]; then
+    ks_label="$(basename "${ks_file}" .yaml | tr '_' '/') (built)"
+  fi
   while IFS=$'\t' read -r ks_name ks_path ks_target has_post; do
+    # yq prints an empty row for each non-matching document in a build.
+    [[ -n "${ks_name}" ]] || continue
     ks_path="${ks_path#./}"
-    label="${ks_file} (${ks_name})"
+    label="${ks_label} (${ks_name})"
     if [[ ! -f "${ks_path}/kustomization.yaml" ]]; then
       echo "=== ${label}: ${ks_path} has no kustomization.yaml, skipped ==="
       continue
@@ -92,6 +126,18 @@ while IFS= read -r -d '' ks_file; do
       while IFS= read -r ref; do
         case "${ref}" in
           Secret/cluster-secrets/*) vars+=("${secret_vars[@]}") ;;
+          ConfigMap/*)
+            cm="${ref#ConfigMap/}"
+            cm="${cm%/*}"
+            mapfile -t cm_vars < <(yq -N "select(.kind == \"ConfigMap\" and .metadata.name == \"${cm}\")
+              | .data // {} | to_entries | .[] | .key + \"=\" + (.value | tostring)" "${ks_file}")
+            if [[ ${#cm_vars[@]} -eq 0 ]]; then
+              echo "${label}: substituteFrom ConfigMap ${cm} is not in the same build" >&2
+              status=1
+              continue 2
+            fi
+            vars+=("${cm_vars[@]}")
+            ;;
           */true) ;;
           *)
             echo "${label}: substituteFrom ${ref%/*} is not supported here" >&2
@@ -190,7 +236,7 @@ while IFS= read -r -d '' ks_file; do
   done < <(yq -N 'select(.kind == "Kustomization" and .apiVersion == "kustomize.toolkit.fluxcd.io/v1")
     | [.metadata.name, .spec.path, .spec.targetNamespace // "", (.spec.postBuild != null | tostring)]
     | @tsv' "${ks_file}")
-done < <(find kubernetes/apps -type f -name ks.yaml -print0 | sort -z)
+done
 
 echo "helm template: ${rendered} rendered, ${skipped} skipped"
 exit "${status}"

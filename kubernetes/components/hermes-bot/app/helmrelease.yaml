@@ -95,6 +95,11 @@ spec:
               - run
             env:
               TZ: America/New_York
+              # Defence in depth for terminal.backend ssh: the env var the
+              # terminal tool reads (hermes_cli/config.py
+              # TERMINAL_CONFIG_ENV_MAP), so the backend stays ssh even if
+              # config.yaml loses the key. Hermes' default is local.
+              TERMINAL_ENV: ssh
               # Every room on this server is encrypted.
               MATRIX_E2EE_MODE: required
               # A new bot's first boot bootstraps cross-signing and writes the
@@ -160,7 +165,7 @@ spec:
             image:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
-              tag: v0.22.6-62f5410@sha256:d698e12279a6aa7c8ea30d7379c256b2be43cad3962999b92df72c21de63827f
+              tag: v0.22.6-d9a4439@sha256:3bc3b1820e8b23be7a5fd12532939a999d267689ecf10aea299b579691e02df5
             env:
               TZ: America/New_York
             probes:

@@ -109,6 +109,14 @@ including the shared `https` listener on `envoy-external` and all of
 A path rule on `https-matrix` should be a `RegularExpression` that an
 encoded `/` cannot satisfy.
 
+The two `envoy-external` HTTPS listeners share port 443 and certificate
+`ryanholt-net-production-tls`, so Envoy Gateway marks both
+`OverlappingTLSConfig` and would advertise only `http/1.1`. ClientTrafficPolicies
+`envoy-external-matrix` and `envoy-external-https` set ALPN back to `h2`,
+`http/1.1` explicitly, which keeps cloudflared's `http2Origin`. The
+reasoning for why that is safe is in `clienttrafficpolicy.yaml`. The
+listener status still shows the condition; that is expected.
+
 
 Forge's Caddy module can skip the portal for a regex path
 (`bypassResources`), a path prefix (`bypassPaths`), and a source CIDR
