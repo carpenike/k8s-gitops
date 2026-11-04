@@ -305,142 +305,122 @@ the Namespace deletes the data. R2 still has the agent's backups. Then
 deactivate the Matrix account from the admin room and remove the name
 from the appservice regex.
 
-## Chief's migration from namespace `hermes`
+## Backups and restores
 
-Chief's new PVC restores from the same R2 path (`hermes-chief`) the old
-`chief` ReplicationSource wrote to, so Chief keeps its Matrix crypto
-store and device `HERMES_CHIEF`.
+### A backup you can rely on
 
-`kubernetes/apps/hermes/legacy` keeps the old HelmRelease at zero
-replicas, its Namespace, its CNP, and PVC `chief-data`. It is **not a
-rollback point**. The merge itself:
-
-- prunes Kustomizations `chief-matrix` and `chief-litellm`, with Secrets
-  `hermes/hermes-chief-matrix` and `hermes/chief-litellm`;
-- prunes the old ReplicationSource `chief`, so nothing backs up
-  `chief-data` any more;
-- logs `@chief` in again on device `HERMES_CHIEF`. The new token
-  replaces the one the old Secret held;
-- deletes LiteLLM key `hermes-chief` and issues a new one, so the key's
-  spend and budget window start again at zero. Team `hermes` keeps its
-  spend.
-
-### Before merge: a backup that has data in it
-
-The old ReplicationSource's only sync so far logged "Directory is empty
-skipping backup" and still reported success. R2 may have no snapshot.
-`lastManualSync` and a successful result do not prove a snapshot was
-written. Only the restic "snapshot … saved" line does.
+`lastManualSync` and a `Successful` result do not prove a snapshot was
+written. A source whose directory is empty logs "Directory is empty
+skipping backup" and still succeeds. Only restic's "snapshot … saved" line
+proves it. Stop the agent first, so the snapshot is of a volume nothing
+is writing:
 
 ```sh
-flux -n hermes suspend helmrelease chief
-kubectl -n hermes scale deploy/chief --replicas 0
-kubectl -n hermes wait --for=delete pod -l app.kubernetes.io/name=chief --timeout=5m
-kubectl -n hermes get pods -l app.kubernetes.io/name=chief   # No resources found
-kubectl -n hermes patch replicationsource chief --type merge \
-  -p '{"spec":{"trigger":{"manual":"pre-migration-1"}}}'
-kubectl -n hermes get replicationsource chief -o jsonpath='{.status.lastManualSync}{"\n"}'
-# Gate: this must print a "snapshot <id> saved" line.
-kubectl -n hermes get replicationsource chief \
+flux -n hermes-<bot> suspend helmrelease hermes
+kubectl -n hermes-<bot> scale deploy/hermes-agent --replicas 0
+kubectl -n hermes-<bot> wait --for=delete pod -l app.kubernetes.io/controller=agent --timeout=5m
+kubectl -n hermes-<bot> patch replicationsource agent-data --type merge \
+  -p '{"spec":{"trigger":{"manual":"<label>"}}}'
+kubectl -n hermes-<bot> get replicationsource agent-data -o jsonpath='{.status.lastManualSync}{"\n"}'   # = <label>
+kubectl -n hermes-<bot> get replicationsource agent-data \
   -o jsonpath='{.status.latestMoverStatus.logs}' | grep -E 'snapshot [0-9a-f]+ saved'
 ```
 
-Wait until no `chief` pod exists before triggering, so the snapshot is
-of a volume nothing is writing. If the gate prints nothing, do not
-merge. Look at what is on `chief-data` first
-(`task k8s:browse-pvc NS=hermes CLAIM=chief-data`).
+Resume with `flux -n hermes-<bot> resume helmrelease hermes`, which scales
+the agent back up.
 
-### After merge: check the restore before trusting Chief
+### Check the first restore before trusting a bot
+
+A new `agent-data` PVC is filled once from the latest snapshot in R2. Check
+which snapshot it used:
 
 ```sh
-kubectl -n hermes-chief get replicationdestination agent-data-restore \
-  -o jsonpath='{.status.latestMoverStatus.logs}' | grep -E 'Selected restic snapshot|No eligible snapshots found'
+kubectl -n hermes-<bot> get replicationdestination agent-data-restore \
+  -o jsonpath='{.status.latestMoverStatus.logs}' | grep -E 'restoring snapshot|No eligible snapshots found'
 ```
 
-- `Selected restic snapshot`: the volume was restored. Carry on with the
-  post-deploy checks.
-- `No eligible snapshots found`: Chief started on an empty volume. Stop
-  it at once, before it uploads a fresh device identity for
-  `HERMES_CHIEF`:
+`latestMoverStatus.logs` holds only the lines VolSync's filter keeps
+(`internal/controller/mover/restic/logfilter.go`, v0.17.0). That is restic's
+own `restoring snapshot <id> of [/data] …`, not the mover script's
+`Selected restic snapshot` line.
+
+- `restoring snapshot <id>`: the volume was restored from `<id>`.
+- `No eligible snapshots found`: the bot started on an empty volume. Stop
+  it before it uploads a fresh device identity:
 
   ```sh
-  flux -n hermes-chief suspend helmrelease hermes
-  kubectl -n hermes-chief scale deploy/hermes-agent --replicas 0
+  flux -n hermes-<bot> suspend helmrelease hermes
+  kubectl -n hermes-<bot> scale deploy/hermes-agent --replicas 0
   ```
 
-  Then either restore from `chief-data` (see Rollback, with the
-  directions swapped) or go the "Fresh crypto store" way above.
+  Then restore into the volume (below), or take the "Fresh crypto store"
+  path above.
 
-Restored state can include `/opt/data/matrix-recovery-key`, if it was
-never deleted after Chief's first boot. Check and delete it:
-
-```sh
-kubectl -n hermes-chief exec deploy/hermes-agent -c app -- sh -c 'test -e /opt/data/matrix-recovery-key && echo present || echo absent'
-kubectl -n hermes-chief exec deploy/hermes-agent -c app -- rm -f /opt/data/matrix-recovery-key
-```
-
-### Rollback
-
-Reverting the PR alone does not give back the old Chief as it was:
-
-- `chief-data` holds the state from before the merge. The crypto store
-  on it is older than the one Chief has been using since.
-- The revert re-creates `chief-matrix` and `chief-litellm`, so the token
-  and the LiteLLM key rotate again, and the key's spend resets again.
-
-A real rollback carries the current state back:
-
-1. Stop the new agent and back it up, with the same gate as above:
-   ```sh
-   flux -n hermes-chief suspend helmrelease hermes
-   kubectl -n hermes-chief scale deploy/hermes-agent --replicas 0
-   kubectl -n hermes-chief wait --for=delete pod -l app.kubernetes.io/controller=agent --timeout=5m
-   kubectl -n hermes-chief patch replicationsource agent-data --type merge \
-     -p '{"spec":{"trigger":{"manual":"rollback-1"}}}'
-   kubectl -n hermes-chief get replicationsource agent-data \
-     -o jsonpath='{.status.latestMoverStatus.logs}' | grep -E 'snapshot [0-9a-f]+ saved'
-   ```
-2. Revert the PR. Flux re-creates the old Kustomizations, which
-   re-provision the Matrix token and LiteLLM key in `hermes`, and the old
-   `chief` HelmRelease at one replica. Scale `deploy/chief` to 0 as soon
-   as it appears.
-3. Restore `chief-data` from R2 with a one-off ReplicationDestination.
-   It reads the same `hermes-chief` path, which now has the newest
-   snapshot:
-   ```yaml
-   apiVersion: volsync.backube/v1alpha1
-   kind: ReplicationDestination
-   metadata:
-     name: chief-rollback
-     namespace: hermes
-   spec:
-     trigger:
-       manual: rollback-1
-     restic:
-       repository: chief-volsync
-       destinationPVC: chief-data
-       copyMethod: Direct
-       moverSecurityContext:
-         runAsNonRoot: true
-         runAsUser: 10000
-         runAsGroup: 10000
-         fsGroup: 10000
-         seccompProfile:
-           type: RuntimeDefault
-   ```
-   Check its `latestMoverStatus.logs` for `Selected restic snapshot`,
-   delete it, then scale `deploy/chief` back to 1.
-
-### Cleanup, after Chief answers `@ryan` in an encrypted room from `hermes-chief`
-
-A follow-up PR deletes `kubernetes/apps/hermes/legacy`. PV `chief-data`
-has reclaim policy `Delete`, so deleting Namespace `hermes` would delete
-the old volume with it. Keep it until you're sure:
+A restore can bring back `/opt/data/matrix-recovery-key` if it was never
+deleted after first boot:
 
 ```sh
-kubectl patch pv "$(kubectl -n hermes get pvc chief-data -o jsonpath='{.spec.volumeName}')" \
-  -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
-kubectl delete namespace hermes
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- sh -c 'test -e /opt/data/matrix-recovery-key && echo present || echo absent'
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- rm -f /opt/data/matrix-recovery-key
 ```
 
-Delete the released PV by hand later.
+### Restoring into an existing volume
+
+`agent-data-restore` runs only when the PVC is created. To roll a running
+bot back to a snapshot, stop the agent as above, then apply a one-off
+ReplicationDestination. Without `restoreAsOf` it picks the latest
+snapshot:
+
+```yaml
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: agent-data-rollback
+  namespace: hermes-<bot>
+spec:
+  trigger:
+    manual: rollback-1
+  restic:
+    repository: agent-volsync
+    destinationPVC: agent-data
+    copyMethod: Direct
+    enableFileDeletion: true
+    moverPodLabels:
+      app.kubernetes.io/name: hermes-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 10000
+      runAsGroup: 10000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+```
+
+`moverPodLabels` matters: the namespace's CNP allows R2 egress only for
+`hermes-volsync`. Check for `restoring snapshot`, delete the object, then
+resume the HelmRelease. Restoring an older crypto store can leave the bot
+unable to decrypt messages sent after that snapshot.
+
+## Chief's migration (4 Nov 2026)
+
+Chief moved from the single-pod deployment in namespace `hermes` to
+`hermes-chief`. The path used was the **R2 restore**, not a fresh store:
+
+- Pre-merge backup: snapshot `c65cd916`, 388 files. This was the first
+  real one, because the old source's earlier sync had skipped an "empty"
+  directory.
+- `agent-data-restore` restored `c65cd916`. Chief came up on its existing
+  crypto store and device `HERMES_CHIEF` and answered `@ryan` in an
+  encrypted room.
+
+The cleanup removed `kubernetes/apps/hermes/legacy`, so Flux pruned
+Namespace `hermes`. The old volume's PV, `pvc-5e863780-3f91-4043-9158-47f7bf687927`,
+was set to `Retain` first. It survives as `Released` with the
+pre-migration state. Deleting a `Retain` PV object leaves the Ceph RBD
+image behind. To free the space, set the policy back to `Delete` and let
+the CSI driver remove the image:
+
+```sh
+kubectl patch pv pvc-5e863780-3f91-4043-9158-47f7bf687927 \
+  -p '{"spec":{"persistentVolumeReclaimPolicy":"Delete"}}'
+```
