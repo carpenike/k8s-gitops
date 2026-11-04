@@ -84,9 +84,24 @@ The vendored `list_tenants()` therefore returns the base schema first,
 then the users, as Hindsight's built-in extensions do. Startup migrates
 `public` too, and the routines land there once. The worker also polls
 `public` for tasks; it holds none. No API key maps to `public`
-(user schemas are always `user_<id>`), so no request can reach it. Drop
-the change if upstream adopts it; until then, re-apply it when
-re-vendoring the extension.
+(user schemas are always `user_<id>`), so no request can reach it.
+
+Upstream tracks this as
+[vectorize-io/hindsight#5400](https://github.com/vectorize-io/hindsight/issues/5400)
+(open; reported on 0.10.1, confirmed on 1.1.0 and, with this fix, on
+1.2.0). Upstream doesn't accept outside pull requests, so the fix has to
+come from them. When re-vendoring the extension or upgrading Hindsight,
+check that issue:
+
+- **Fixed in the extension** (`list_tenants()` returns the base schema):
+  take upstream's version and drop the local change.
+- **Fixed in the engine** (startup migrates the base schema itself): drop
+  the local change. Upstream's extension is then fine as it is.
+- **Still open:** re-apply the change.
+
+The workaround in the issue, running `hindsight-admin run-db-migration
+--schema public` before the server starts, does the same job without
+patching the extension. It isn't used here.
 
 ## Network
 
