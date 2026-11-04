@@ -33,7 +33,8 @@ it.
   `isWALArchiver: true` and `barmanObjectName: postgres17-r2`.
 - `postgres17/app/scheduledbackup.yaml`: `postgres17-r2-daily`,
   `method: plugin`, `immediate: true` (one base backup as soon as it is
-  created). It runs on the standby when one is in sync.
+  created; see "First check after merge" if that one fails). It runs on the
+  standby when one is in sync.
 - `postgres17/r2/externalsecret.yaml`: Kustomization `postgres17-r2` makes
   Secret `postgres17-r2` (keys `ACCESS_KEY_ID`, `ACCESS_SECRET_KEY`) and
   Secret `postgres17-r2-vars` (`CNPG_R2_ENDPOINT`, `CNPG_R2_BUCKET`). The R2
@@ -83,9 +84,12 @@ urgent.
 
 ### First check after merge
 
-Wait for both Kustomizations and the instance rollout. Adding the plugin
-restarts the standby, then switches over and restarts the old primary;
-LiteLLM and Hindsight see one brief reconnect.
+Wait for both Kustomizations and the instance rollout. Adding or removing
+the plugin restarts the standby, then restarts the primary in place: the
+Cluster uses `primaryUpdateMethod: restart`, so there is no switchover.
+LiteLLM and Hindsight lose the database until the primary is back. On
+2026-11-04 that took about three and a half minutes. Both reconnected on
+their own; neither pod restarted.
 
 ```sh
 flux -n cnpg-system get kustomizations | grep -E '^(NAME|postgres17)'
@@ -116,7 +120,33 @@ kubectl -n cnpg-system get objectstore postgres17-r2 \
 ```
 
 The `Backup` should reach `completed`, and the recovery window should show
-`firstRecoverabilityPoint` and `lastSuccessfulBackupTime`. Then list the
+`firstRecoverabilityPoint` and `lastSuccessfulBackupTime`.
+
+The immediate backup can fail with `requested plugin is not available:
+barman-cloud.cloudnative-pg.io`. That means it was created before the
+instances restarted with the plugin sidecar; it happened on the first
+rollout. WAL archiving is unaffected, but R2 has no base backup until the
+next 08:30 UTC run. Take one by hand once both pods list
+`plugin-barman-cloud`:
+
+```sh
+cat <<EOF | kubectl create -f -
+apiVersion: postgresql.cnpg.io/v1
+kind: Backup
+metadata:
+  name: postgres17-r2-manual-$(date -u +%Y%m%d%H%M)
+  namespace: cnpg-system
+spec:
+  cluster:
+    name: postgres17
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+EOF
+kubectl -n cnpg-system get backup -w
+```
+
+The first one took about 15 seconds. Then list the
 objects in R2 from a workstation. The values stay in the shell:
 
 ```sh
