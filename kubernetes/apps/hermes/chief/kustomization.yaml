@@ -7,6 +7,8 @@ kind: Kustomization
 namespace: hermes-chief
 components:
   - ../../../components/hermes-bot
+  # Multi-turn coding sessions with Claude Code in the screen pod.
+  - ../../../components/hermes-bot/claude-code
 configMapGenerator:
   - name: hermes-bot-inputs
     literals:
@@ -38,5 +40,8 @@ configMapGenerator:
       # webhook turns are delivered and mirrored.
       - WEBHOOK_DELIVER_CHAT_ID=!1NY-w--JkAFJpmKfLvzhpj2WWnVYBK2SWdy9HRKhY3Q
       - TAVILY_ENABLED=true
+      # Claude Code's own LiteLLM key (Claude models only), per
+      # LLM_BUDGET_DURATION, on top of the bot's budget.
+      - CLAUDE_CODE_BUDGET_USD=20
 generatorOptions:
   disableNameSuffixHash: true

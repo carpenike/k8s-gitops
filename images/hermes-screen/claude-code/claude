@@ -1,0 +1,9 @@
+#!/bin/sh
+# k8s-gitops: Claude Code in the Hermes screen pod (docs/hermes.md, "Coding
+# with Claude Code"). Sessions, settings and history live on the shared
+# workspace, so `claude -p --resume <session_id>` picks a conversation up
+# again on a later Matrix turn and after the screen pod restarts. Gateway,
+# models and the key helper come from /etc/claude-code/managed-settings.json.
+export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-/workspace/.claude-code}"
+mkdir -p "$CLAUDE_CONFIG_DIR"
+exec /opt/claude-code/bin/claude "$@"

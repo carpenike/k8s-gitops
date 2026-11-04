@@ -1,0 +1,74 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Opt-in Claude Code for one Hermes bot (docs/hermes.md, "Coding with Claude
+# Code"). A bot folder lists it after ../../../components/hermes-bot:
+#
+#   components:
+#     - ../../../components/hermes-bot
+#     - ../../../components/hermes-bot/claude-code
+#
+# and sets input CLAUDE_CODE_BUDGET_USD. It adds:
+#   - input CLAUDE_CODE_ENABLED=true, which the app turns into the screen
+#     pod's mounts, its LiteLLM route, the GitHub token's ExternalSecret and
+#     the agent's skill (kubernetes/components/hermes-bot/app)
+#   - Flux Kustomization claude-code-key: a LiteLLM key of its own for the
+#     screen pod (alias hermes-<bot>-claude-code, Claude models only, budget
+#     CLAUDE_CODE_BUDGET_USD per LLM_BUDGET_DURATION), so the agent's key
+#     never enters the sandbox
+# One switch for both, so a bot cannot end up with half of it.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./flux.yaml
+patches:
+  - target:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+    patch: |-
+      - op: add
+        path: /data/CLAUDE_CODE_ENABLED
+        value: "true"
+replacements:
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.BOT_NAME
+    targets:
+      - select:
+          group: kustomize.toolkit.fluxcd.io
+          kind: Kustomization
+          name: claude-code-key
+        fieldPaths:
+          - spec.postBuild.substitute.KEY_ALIAS
+          - spec.postBuild.substitute.TARGET_NAMESPACE
+        options:
+          delimiter: "-"
+          index: 1
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.CLAUDE_CODE_BUDGET_USD
+    targets:
+      - select:
+          group: kustomize.toolkit.fluxcd.io
+          kind: Kustomization
+          name: claude-code-key
+        fieldPaths:
+          - spec.postBuild.substitute.BUDGET
+        options:
+          delimiter: /
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.LLM_BUDGET_DURATION
+    targets:
+      - select:
+          group: kustomize.toolkit.fluxcd.io
+          kind: Kustomization
+          name: claude-code-key
+        fieldPaths:
+          - spec.postBuild.substitute.BUDGET
+        options:
+          delimiter: /
+          index: 1

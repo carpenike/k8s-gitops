@@ -50,6 +50,7 @@ spec later:
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
+| `CLAUDE_CODE_BUDGET_USD` | `20` | Required with component `hermes-bot/claude-code`: budget of Claude Code's own LiteLLM key, per `LLM_BUDGET_DURATION` ([Coding with Claude Code](#coding-with-claude-code-opt-in)). That component also sets `CLAUDE_CODE_ENABLED=true`; never set it by hand |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -95,7 +96,10 @@ contains the HelmRelease `hermes` (app-template 5.3.0) and VolSync.
 
 ### LiteLLM key
 
-Each bot gets one LiteLLM virtual key, `hermes-<bot>`, with:
+Each bot gets one LiteLLM virtual key, `hermes-<bot>`, with the settings
+below. A bot with Claude Code also gets a second, smaller key for the
+screen pod ([Coding with Claude Code](#coding-with-claude-code-opt-in)).
+The agent's key:
 
 - **Models:** `all-proxy-models`, LiteLLM's sentinel for every model on
   the proxy. That covers the named models (`claude-*`, `gpt-6*`,
@@ -268,7 +272,10 @@ host key is stable across restarts. The agent pre-seeds
 `StrictHostKeyChecking=accept-new`, so a changed host key is refused.
 
 The screen has no Matrix or LiteLLM credentials, no ServiceAccount token,
-and no route to LiteLLM, Tuwunel, the LAN, or the API server.
+and no route to LiteLLM, Tuwunel, the LAN, or the API server. The one
+exception is opt-in: with Claude Code, it gets Claude Code's own LiteLLM
+key, a GitHub token, and a route to LiteLLM only
+([Coding with Claude Code](#coding-with-claude-code-opt-in)).
 
 Chromium runs **without its own sandbox** in the screen. Both launches
 pass `--no-sandbox`:
@@ -379,7 +386,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 | Pod | Ingress | Egress |
 | --- | --- | --- |
 | agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`); with `WEBAPP_ENABLED`, the `envoy-internal` proxies on 9120 (CNP `agent-desktop`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN); with `WEBAPP_ENABLED`, `id.${SECRET_DOMAIN}` (Pocket ID) on 443 (CNP `agent-desktop-oidc`, FQDN) |
-| screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
+| screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local; with Claude Code, `litellm/litellm:4000` (CNP `screen-litellm`) |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
 
@@ -413,6 +420,7 @@ until the next restart.
 | Images | `image_gen.provider`, `image_gen.openai.*` | `IMAGE_MODEL` |
 | Webapp | `webapp.*`, `dashboard.trusted_proxies`, skill `homelab/desktop-viewer` | `WEBAPP_ENABLED` |
 | Matrix profile | plugin `plugins/matrix-profile`, its entry in `plugins.enabled` | `MATRIX_PROFILE_TOOLS` |
+| Coding | skill `homelab/coding-sessions` | `CLAUDE_CODE_ENABLED` (component `hermes-bot/claude-code`) |
 
 Credentials never come from these files. They arrive as environment
 variables from Secrets that External Secrets builds from 1Password, and
@@ -814,6 +822,116 @@ signed with the old secret get `401`. The init container strips any
 `/opt/data/.env` when the Secret is present, for the reason in [Why the
 init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
 loads `.env` with `override=True`, so a stale line would beat the Secret.
+
+## Coding with Claude Code (opt-in)
+
+The bot hands code changes to [Claude Code](https://code.claude.com/docs)
+and keeps **one Claude Code session per task across Matrix messages**.
+Ryan asks for a change, follows up in later messages ("also add tests",
+"why that approach?"), and gets a draft pull request at the end. Today
+only Chief has it.
+
+A bot opts in with a second component and a budget:
+
+```yaml
+components:
+  - ../../../components/hermes-bot
+  - ../../../components/hermes-bot/claude-code
+```
+
+plus input `CLAUDE_CODE_BUDGET_USD`. The component sets
+`CLAUDE_CODE_ENABLED=true` in the bot's inputs and adds Claude Code's
+LiteLLM key, so a bot never has one without the other.
+
+### Where it runs: the screen pod
+
+Claude Code runs whatever shell commands it decides on, inside
+repositories, install scripts and test suites nobody has vetted. So it
+runs where every other terminal command already runs: the screen pod, a
+Kata VM with no bot credentials. The agent pod holds the Matrix token,
+the agent's LiteLLM key and the Outlook, Hindsight, webhook and Tavily
+secrets; none of them reach Claude Code.
+
+What the screen gets with it:
+
+| What | Where | Notes |
+| --- | --- | --- |
+| Claude Code CLI | `/opt/claude-code`, wrapper `/usr/local/bin/claude` | Pinned in `images/hermes-screen/Dockerfile` (Renovate, npm). Never updates itself |
+| GitHub CLI | `/opt/gh`, wrapper `/usr/local/bin/gh` | Pinned, checksum-verified. git's credential helper for github.com |
+| LiteLLM key | `/etc/hermes-claude-code/litellm_key` | Secret `claude-code-litellm` from Flux Kustomization `claude-code-key`: alias `hermes-<bot>-claude-code`, team `hermes`, models `claude-opus`, `claude-sonnet`, `claude-haiku` only, budget `CLAUDE_CODE_BUDGET_USD` per `LLM_BUDGET_DURATION`. Not the agent's key |
+| GitHub token | `/etc/hermes-claude-code/github_token` | ExternalSecret `claude-code-github`, 1Password field `github_token` |
+| Commit identity | `/etc/hermes-claude-code/gitconfig` | `<bot> (Hermes)`, `<bot>@hermes.invalid` |
+| Network | CNP `screen-litellm` | `litellm/litellm:4000`. GitHub and npm go through the screen's existing public egress |
+
+They are files because ssh sessions start with a clean environment (no
+PAM, no `AcceptEnv`): the pod's environment never reaches a terminal
+command. `/etc/claude-code/managed-settings.json` points Claude Code at
+LiteLLM (`ANTHROPIC_BASE_URL`), maps its opus, sonnet and haiku aliases
+to the proxy's `claude-*` routes, reads the key through `apiKeyHelper`
+`/usr/local/bin/hermes-litellm-key`, and turns off auto-update and
+nonessential traffic. Claude Code runs on the Anthropic models, so it is
+paid from the Anthropic key, not Azure credits.
+
+**Anything in the sandbox can read these files,** including code Claude
+Code runs. That is the accepted trade: the LiteLLM key is capped by its
+own budget and model list, and the GitHub token can do only what it was
+granted. Scope the token tightly.
+
+### One session per task
+
+Skill `homelab/coding-sessions`, written by the `config` init container,
+tells the bot how:
+
+1. Start: `claude -p '<task>' --output-format json` in
+   `/workspace/code/<repo>`, as a background terminal process with
+   `notify`, its JSON written to `/workspace/.claude-code/runs/<slug>.json`.
+2. Save the result's `session_id` in
+   `/workspace/.claude-code/tasks/<slug>.json` with the repo, branch and
+   Matrix room.
+3. Follow-up: `claude -p --resume <session_id> '<follow-up>'`, which
+   continues with everything Claude Code already read and changed.
+4. Finish: Claude Code commits on branch `hermes/<slug>`, pushes, and
+   opens a draft PR with `gh pr create --draft`. The bot sends the link.
+   Merging is Ryan's.
+
+Sessions are stored in `CLAUDE_CONFIG_DIR=/workspace/.claude-code` (the
+wrapper sets it), so they survive a screen restart. The workspace is not
+backed up, so they do not survive losing the volume.
+
+The skill runs Claude Code with `--permission-mode bypassPermissions`:
+there is nobody to answer its prompts mid-run. Managed settings deny
+`gh pr merge`, `gh repo delete`/`edit`, `gh secret` and force, mirror and
+delete pushes, and deny rules hold in every mode. They are pattern
+matches, a guard rail, not a boundary. The boundary is the Kata VM and
+the token's scope.
+
+### Turning it on for a bot
+
+1. Create a fine-grained GitHub token with **only the repositories the
+   bot may work on**. Permissions: Contents read/write, Pull requests
+   read/write (Metadata read comes with it). Leave out Administration,
+   Secrets and Workflows; without Workflows it cannot change
+   `.github/workflows`. Give it an expiry.
+2. Protect each repository's default branch with a ruleset that requires
+   a pull request, so the token's Contents write cannot push to it.
+3. Put the token in 1Password vault `k8s-secrets`, item `hermes-<bot>`,
+   field `github_token`.
+4. Add the component and `CLAUDE_CODE_BUDGET_USD` to the bot's
+   kustomization.
+
+Without the field, Claude Code still works (local changes, public
+clones), and git or gh answer 401 on anything that needs the token.
+
+To check it, run as `pn` in the screen pod:
+
+```sh
+kubectl -n hermes-<bot> exec deploy/hermes-screen -- claude -p 'Reply with OK' --output-format json
+kubectl -n hermes-<bot> exec deploy/hermes-screen -- gh auth status
+```
+
+Rotate the GitHub token by replacing the 1Password field; External
+Secrets refreshes it within the hour and the projected volume updates in
+place.
 
 ## Matrix profile (opt-in)
 
