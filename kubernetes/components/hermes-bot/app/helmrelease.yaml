@@ -202,6 +202,11 @@ spec:
                 hermes config set bot_desktop.placement terminal
                 hermes config set matrix.allowed_users '${MATRIX_ALLOWED_USERS}'
                 hermes config set database.journal_mode wal
+                # No hosted connectors (Nous tool gateway, docs/hermes.md "Tool
+                # search"): the agent has no route to it, so every tool_search
+                # waited ~45 s for the blocked call. Local tool search (built-in,
+                # plugin and MCP tools) is unaffected.
+                hermes config set tools.connectors.enabled false
                 install -m 0600 /etc/hermes-ssh-src/id_ed25519 /etc/hermes-ssh/id_ed25519
                 install -d -m 0700 /opt/data/.ssh
                 install -m 0644 /etc/hermes-ssh-src/known_hosts /opt/data/.ssh/known_hosts

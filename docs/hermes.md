@@ -340,6 +340,38 @@ Both pods use `fsGroup: 1000`, which is `pn`'s group, so files keep one
 group. It is scratch: there is no VolSync for it. Anything worth keeping
 belongs in Matrix or a skill.
 
+### Tool search
+
+Hermes keeps the less-used tools out of each prompt and offers
+`tool_search` to find them (`tools/tool_search.py`; 21 of Chief's tools
+were deferred on 4 Nov 2026, the `matrix-profile` tools among them). A
+search has two parts:
+
+1. **Local.** It covers the bot's own installed tools: built-in, plugin
+   and MCP server tools (Outlook) and the memory tools. This runs in the
+   gateway in about 0.1 s.
+2. **Hosted connectors.** These are Gmail-, Calendar- and Notion-style
+   apps that Nous Research runs behind its tool gateway,
+   `connector-gateway.nousresearch.com`. The bot counts as an anonymous
+   Nous "guest", so Hermes treats them as available and queries the
+   gateway on every search. The agent has no route there, so each search
+   waited about 45 s for the blocked call: 13 searches on 4 Nov took
+   45-49 s each, and a one-tool question took 105 s.
+
+The `config` init container therefore sets `tools.connectors.enabled:
+false`. With that, `connectors_available()` returns false before any
+request, the connector part of a search returns empty at once, and
+`manage_connections` drops out of the tool list
+(`tools/connectors/gateway/config.py`, `tools/connectors/gateway/bridge.py`).
+Local search is unchanged, so newly installed plugins, MCP servers and
+skills are still found.
+
+Using hosted connectors would mean allowing egress to the Nous gateway
+and signing the bot in to a Nous account. Those apps' data (mail,
+calendar, documents) would then pass through Nous. Add an app the way
+Outlook was added instead: an MCP server in the image and egress to that
+one API.
+
 ## Network
 
 Default deny in `hermes-<bot>` both ways. The allows:
