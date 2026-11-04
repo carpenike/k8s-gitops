@@ -10,6 +10,9 @@ component `kubernetes/components/hermes-bot/`, in its own namespace
 | --- | --- | --- | --- | --- |
 | `chief` | `hermes-chief` | `@chief:ryanholt.net` | `claude-sonnet` via LiteLLM | `@ryan:ryanholt.net` |
 
+Long-term memory (Hindsight, shared, one schema per bot) is in
+[hermes-memory.md](hermes-memory.md).
+
 ## Adding a bot
 
 1. Add the Matrix name to the appservice regex
