@@ -20,7 +20,8 @@ configMapGenerator:
       - WORKSPACE_STORAGE_SIZE=20Gi
       - API_SERVER_ENABLED=true
       - OUTLOOK_MCP_ENABLED=true
-      # Ryan's work address. This repo is public; see docs/placeholders.md.
-      - OUTLOOK_MCP_EXPECTED_USERNAME=REPLACE_WITH_WORK_ADDRESS
+      # Ryan's personal Microsoft 365 mailbox, the only account the Outlook
+      # MCP server may use.
+      - OUTLOOK_MCP_EXPECTED_USERNAME=ryan@ryanholt.net
 generatorOptions:
   disableNameSuffixHash: true

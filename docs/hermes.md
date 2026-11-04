@@ -38,7 +38,7 @@ spec later:
 | `WORKSPACE_STORAGE_SIZE` | `20Gi` | Shared workspace PVC |
 | `API_SERVER_ENABLED` | `true` | Optional, default `false`. The OpenAI-compatible API on envoy-internal ([API server](#api-server-opt-in)). `true` or `false` only |
 | `OUTLOOK_MCP_ENABLED` | `true` | Optional, default `false`. The Outlook MCP server ([Outlook](#outlook-opt-in)). `true` or `false` only |
-| `OUTLOOK_MCP_EXPECTED_USERNAME` | placeholder | With `OUTLOOK_MCP_ENABLED`: the one Microsoft account the server may use. Public repo; see [placeholders.md](placeholders.md) |
+| `OUTLOOK_MCP_EXPECTED_USERNAME` | `ryan@ryanholt.net` | With `OUTLOOK_MCP_ENABLED`: the one Microsoft account the server may use. Committed as-is: this repo is public |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
