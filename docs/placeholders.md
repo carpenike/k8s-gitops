@@ -65,10 +65,11 @@ salt. A new salt does not decrypt stored credentials.
 
 ## Hermes
 
-After Chief's first boot, create item `hermes-chief` in vault
-`k8s-secrets` with field `matrix_recovery_key`. ExternalSecret
-`chief-matrix-recovery` reads it into `MATRIX_RECOVERY_KEY`. The LiteLLM key is
-provisioned in-cluster and has no 1Password item. See [hermes.md](hermes.md).
+After a new bot's first boot, create item `hermes-<bot>` in vault
+`k8s-secrets` with field `matrix_recovery_key`. It is read by hand only
+when a crypto store has to be re-verified; no ExternalSecret reads it.
+The Matrix token, LiteLLM key, and ssh keys are provisioned in-cluster
+and have no 1Password items. See [hermes.md](hermes.md).
 
 ## Still to confirm or generate
 

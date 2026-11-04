@@ -1,0 +1,192 @@
+---
+# ssh key material for this bot, generated once in-cluster:
+#   agent-ssh  (agent pod only): id_ed25519, id_ed25519.pub, known_hosts
+#   screen-ssh (screen pod only): ssh_host_ed25519_key(.pub), authorized_keys
+# Same pattern as the Matrix and LiteLLM provisioners: Flux creates both
+# Secrets empty and labeled (IfNotPresent), the Job may only get and patch
+# those two names, and it refuses a Secret without its labels. Nothing is
+# written to git or 1Password. If either Secret loses its keys, the Job makes
+# a new pair for both and the pods restart (Reloader).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agent-ssh
+  namespace: hermes-${BOT_NAME}
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+  labels:
+    app.kubernetes.io/name: hermes-ssh-keygen
+    app.kubernetes.io/instance: ${BOT_NAME}
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: screen-ssh
+  namespace: hermes-${BOT_NAME}
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+  labels:
+    app.kubernetes.io/name: hermes-ssh-keygen
+    app.kubernetes.io/instance: ${BOT_NAME}
+type: Opaque
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hermes-ssh-keygen
+  namespace: hermes-${BOT_NAME}
+  labels:
+    app.kubernetes.io/name: hermes-ssh-keygen
+    app.kubernetes.io/instance: ${BOT_NAME}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hermes-ssh-keygen
+  namespace: hermes-${BOT_NAME}
+  labels:
+    app.kubernetes.io/name: hermes-ssh-keygen
+    app.kubernetes.io/instance: ${BOT_NAME}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames:
+      - agent-ssh
+      - screen-ssh
+    verbs:
+      - get
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hermes-ssh-keygen
+  namespace: hermes-${BOT_NAME}
+  labels:
+    app.kubernetes.io/name: hermes-ssh-keygen
+    app.kubernetes.io/instance: ${BOT_NAME}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hermes-ssh-keygen
+subjects:
+  - kind: ServiceAccount
+    name: hermes-ssh-keygen
+    namespace: hermes-${BOT_NAME}
+---
+# Runs on the Hermes agent image: it already has ssh-keygen and Python, and
+# is cached on the nodes. Entry point bypassed; this is a plain script.
+# The script contains no "$" so Flux substitution leaves it alone.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hermes-ssh-keygen
+  namespace: hermes-${BOT_NAME}
+  labels:
+    app.kubernetes.io/name: hermes-ssh-keygen
+    app.kubernetes.io/instance: ${BOT_NAME}
+spec:
+  backoffLimit: 4
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hermes-ssh-keygen
+        app.kubernetes.io/instance: ${BOT_NAME}
+    spec:
+      serviceAccountName: hermes-ssh-keygen
+      restartPolicy: Never
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: keygen
+          image: docker.io/nousresearch/hermes-agent:v0.22.6@sha256:d27689bc6e8581ec884a7227c9101fdaebf6c853cff8859020dac14f21452b4d
+          command:
+            - /usr/local/bin/python3
+            - -c
+            - |
+              import base64, json, os, ssl, subprocess, sys, tempfile, urllib.error, urllib.request
+              bot = os.environ["BOT_NAME"]
+              ns = "hermes-" + bot
+              host = "screen." + ns + ".svc.cluster.local"
+              sa = "/var/run/secrets/kubernetes.io/serviceaccount"
+              token = open(sa + "/token").read().strip()
+              ctx = ssl.create_default_context(cafile=sa + "/ca.crt")
+              api = "https://kubernetes.default.svc/api/v1/namespaces/" + ns + "/secrets/"
+              def call(method, name, body=None):
+                  req = urllib.request.Request(api + name, method=method,
+                                               data=None if body is None else json.dumps(body).encode())
+                  req.add_header("Authorization", "Bearer " + token)
+                  if body is not None:
+                      req.add_header("Content-Type", "application/merge-patch+json")
+                  try:
+                      with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
+                          return resp.status, json.loads(resp.read())
+                  except urllib.error.HTTPError as err:
+                      return err.code, {}
+                  except (urllib.error.URLError, OSError) as err:
+                      return 0, {"message": str(getattr(err, "reason", err))}
+              want = {"agent-ssh": ("id_ed25519", "id_ed25519.pub", "known_hosts"),
+                      "screen-ssh": ("ssh_host_ed25519_key", "ssh_host_ed25519_key.pub", "authorized_keys")}
+              have = {}
+              for name in want:
+                  status, secret = call("GET", name)
+                  if status != 200:
+                      sys.exit("GET " + ns + "/" + name + ": HTTP " + str(status) + " " + secret.get("message", ""))
+                  labels = secret.get("metadata", {}).get("labels") or {}
+                  if labels.get("app.kubernetes.io/name") != "hermes-ssh-keygen" or labels.get("app.kubernetes.io/instance") != bot:
+                      sys.exit("refusing to write " + ns + "/" + name + ": it lacks the hermes-ssh-keygen labels")
+                  have[name] = secret.get("data") or {}
+              if all(key in have[name] for name, keys in want.items() for key in keys):
+                  print("ssh keys already present in " + ns + ", nothing to do")
+                  sys.exit(0)
+              work = tempfile.mkdtemp()
+              for path, comment in (("agent", "hermes-" + bot + "-agent"), ("host", host)):
+                  subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", comment,
+                                  "-f", os.path.join(work, path)], check=True)
+              def read(path):
+                  return open(os.path.join(work, path)).read()
+              host_pub = " ".join(read("host.pub").split()[:2])
+              data = {"agent-ssh": {"id_ed25519": read("agent"), "id_ed25519.pub": read("agent.pub"),
+                                    "known_hosts": host + " " + host_pub + "\n"},
+                      "screen-ssh": {"ssh_host_ed25519_key": read("host"), "ssh_host_ed25519_key.pub": read("host.pub"),
+                                     "authorized_keys": read("agent.pub")}}
+              for name, fields in data.items():
+                  status, _ = call("PATCH", name, {"data": {k: base64.b64encode(v.encode()).decode() for k, v in fields.items()}})
+                  if status != 200:
+                      sys.exit("PATCH " + ns + "/" + name + ": HTTP " + str(status))
+              print("generated ssh keys for " + ns + " (both Secrets replaced)")
+          env:
+            - name: BOT_NAME
+              value: ${BOT_NAME}
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 8Mi

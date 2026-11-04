@@ -54,6 +54,8 @@ spec:
               value: ${TARGET_NAMESPACE}
             - name: SECRET_NAME
               value: ${SECRET_NAME}
+            - name: SECRET_KEY_NAME
+              value: ${SECRET_KEY_NAME:=LITELLM_API_KEY}
             - name: LITELLM_URL
               value: http://litellm.litellm.svc.cluster.local:4000
             - name: PYTHONDONTWRITEBYTECODE

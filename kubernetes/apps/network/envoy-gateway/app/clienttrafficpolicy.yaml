@@ -1,18 +1,53 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/clienttrafficpolicy_v1alpha1.json
-# Keep %2F in request paths as sent. Envoy Gateway 1.9.3 defaults to
-# UnescapeAndRedirect, which answers /a%2Fb with a 307 to /a/b. Matrix
-# clients percent-encode "/" inside path parameters (account data types,
-# SSSS key ids, state keys, transaction ids), and the redirect turns those
-# into paths Tuwunel does not route (M_UNRECOGNIZED). Chief's cross-signing
-# bootstrap failed that way: PUT .../account_data/m.secret_storage.key.<id>
-# with a "/" in the id. Matrix's reverse-proxy guidance is the same: do not
-# decode or normalize the URI.
+# Keep %2F in request paths as sent, on the matrix.ryanholt.net listener only.
+# Envoy Gateway 1.9.3 defaults to UnescapeAndRedirect, which answers /a%2Fb
+# with a 307 to /a/b. Matrix clients percent-encode "/" inside path
+# parameters (account data types, SSSS key ids, state keys, transaction ids),
+# and the redirect turns those into paths Tuwunel does not route
+# (M_UNRECOGNIZED); Chief's first cross-signing bootstrap failed that way.
+# Matrix's reverse-proxy guidance is the same: do not decode the URI.
 #
-# Only the external HTTPS listener, where matrix.ryanholt.net lives.
-# Backends there see the escaped path; no route on this listener makes an
-# authorization decision on a path that could hide a %2F. See
-# docs/gateway-auth.md before adding one.
+# Scoped to listener https-matrix (envoy.yaml), so every other route on
+# envoy-external keeps the default. ClientTrafficPolicy can target a Gateway
+# or a listener, not a route. See docs/gateway-auth.md.
+#
+# ALPN: see envoy-external-https below.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: envoy-external-matrix
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-external
+      sectionName: https-matrix
+  path:
+    escapedSlashesAction: KeepUnchanged
+  tls:
+    alpnProtocols:
+      - h2
+      - http/1.1
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/clienttrafficpolicy_v1alpha1.json
+# https and https-matrix share port 443 and certificate
+# ryanholt-net-production-tls (*.ryanholt.net covers matrix.ryanholt.net).
+# Envoy Gateway 1.9.3 then sets TLSOverlaps on both listeners and, unless ALPN
+# is set explicitly, advertises only http/1.1, to stop browsers coalescing
+# HTTP/2 connections across listeners (GEP-3567;
+# internal/gatewayapi/listener.go checkOverlappingCertificates,
+# internal/xds/translator/listener.go). That would drop cloudflared's
+# http2Origin to HTTP/1.1 for every external host.
+#
+# Setting the default list back explicitly is safe here because the only
+# client is cloudflared, which keeps one HTTP transport per ingress rule with
+# that rule's originServerName as SNI (cloudflared 2026.10.3,
+# ingress/origin_service.go newHTTPTransport), so a matrix.ryanholt.net
+# request never rides a connection that was opened to the other listener.
+# A browser reaching envoy-external directly over HTTP/2 could coalesce
+# ryanholt.net hosts onto one listener; nothing on the LAN resolves these
+# names to the gateway today (envoy.yaml).
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: ClientTrafficPolicy
 metadata:
@@ -23,5 +58,7 @@ spec:
       kind: Gateway
       name: envoy-external
       sectionName: https
-  path:
-    escapedSlashesAction: KeepUnchanged
+  tls:
+    alpnProtocols:
+      - h2
+      - http/1.1

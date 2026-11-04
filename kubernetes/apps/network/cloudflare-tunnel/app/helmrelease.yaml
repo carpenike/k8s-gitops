@@ -91,6 +91,13 @@ spec:
                   http2Origin: true
                   originServerName: external.${SECRET_DOMAIN}
                 service: https://envoy-external.network.svc.cluster.local:443
+              # Matrix has its own envoy-external listener (https-matrix, which
+              # keeps %2F in paths); this SNI selects it.
+              - hostname: matrix.ryanholt.net
+                originRequest:
+                  http2Origin: true
+                  originServerName: matrix.ryanholt.net
+                service: https://envoy-external.network.svc.cluster.local:443
               - hostname: ryanholt.net
                 originRequest:
                   http2Origin: true

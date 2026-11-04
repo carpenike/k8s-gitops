@@ -3,6 +3,10 @@
 Run by the Job in ../template, in namespace litellm, with the proxy's
 master key from Secret litellm-env. Standard library only. Steps:
 
+0. Refuse unless Secret TARGET_NAMESPACE/SECRET_NAME carries this
+   provisioner's labels (app.kubernetes.io/name=litellm-key-provisioner,
+   app.kubernetes.io/instance=KEY_ALIAS), so a mistyped name never writes
+   into some other Secret.
 1. Find team TEAM_ALIAS, or create it. The team groups spend for every key
    in it; it sets no model list, so each key's own list applies.
 2. If Secret TARGET_NAMESPACE/SECRET_NAME already holds a key that
@@ -10,7 +14,8 @@ master key from Secret litellm-env. Standard library only. Steps:
    match and stop. The key value does not change.
 3. Otherwise delete any key with alias KEY_ALIAS (LiteLLM stores only a
    hash, so a lost Secret cannot be read back), generate a new one, and
-   merge-patch it into the Secret as LITELLM_API_KEY. RBAC allows get and
+   merge-patch it into the Secret under SECRET_KEY_NAME (default
+   LITELLM_API_KEY). RBAC allows get and
    patch on that one Secret and nothing else.
 
 Keys are never printed.
@@ -27,7 +32,7 @@ import urllib.request
 
 SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
 KUBE_API = "https://kubernetes.default.svc"
-SECRET_KEY = "LITELLM_API_KEY"
+LABEL_NAME = "litellm-key-provisioner"
 
 
 def log(msg):
@@ -82,6 +87,7 @@ def main():
     secret_name = os.environ["SECRET_NAME"]
     base = os.environ["LITELLM_URL"].rstrip("/")
     master = os.environ["LITELLM_MASTER_KEY"].strip()
+    secret_key = os.environ.get("SECRET_KEY_NAME", "").strip() or "LITELLM_API_KEY"
 
     with open(f"{SA_DIR}/token") as f:
         kube_token = f.read().strip()
@@ -91,7 +97,11 @@ def main():
     status, secret = request("GET", secret_url, token=kube_token, context=kube_ctx)
     if status != 200:
         sys.exit(f"GET secret {namespace}/{secret_name}: HTTP {status} {secret.get('message', '')}")
-    stored = base64.b64decode((secret.get("data") or {}).get(SECRET_KEY, "")).decode()
+    labels = (secret.get("metadata") or {}).get("labels") or {}
+    if labels.get("app.kubernetes.io/name") != LABEL_NAME or labels.get("app.kubernetes.io/instance") != alias:
+        sys.exit(f"refusing to write {namespace}/{secret_name}: it lacks the labels "
+                 f"app.kubernetes.io/name={LABEL_NAME}, app.kubernetes.io/instance={alias}")
+    stored = base64.b64decode((secret.get("data") or {}).get(secret_key, "")).decode()
 
     status, teams = request("GET", f"{base}/team/list", token=master)
     if status != 200:
@@ -142,7 +152,7 @@ def main():
         token=kube_token,
         context=kube_ctx,
         content_type="application/merge-patch+json",
-        body={"data": {SECRET_KEY: base64.b64encode(body["key"].encode()).decode()}},
+        body={"data": {secret_key: base64.b64encode(body["key"].encode()).decode()}},
     )
     if status != 200:
         sys.exit(f"PATCH secret {namespace}/{secret_name}: HTTP {status} {patched.get('message', '')}")

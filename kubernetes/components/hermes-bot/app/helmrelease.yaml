@@ -1,0 +1,320 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# One Hermes bot as two pods (docs/hermes.md):
+#
+#   agent   runc. `hermes gateway run`: Matrix, the model, memory, skills.
+#           The only pod with the Matrix token and the LiteLLM key. Runs no
+#           user commands: terminal.backend is ssh.
+#   screen  kata-qemu. sshd as pn; everything the agent does to a computer
+#           runs here over ssh: terminal, file tools, execute_code, the
+#           browser and computer_use. No credentials.
+#
+# Hermes v0.22.6 behaviour this relies on (source paths at that tag):
+#   tools/terminal_tool_backends.py  ssh backend from terminal.ssh_host,
+#     ssh_user, ssh_port, ssh_key; a failed connection raises
+#     EnvironmentConnectionError, it never falls back to local
+#   tools/file_tools.py, tools/code_execution_tool.py  file tools and
+#     execute_code run through the same terminal environment
+#   tools/bot_desktop/placement.py  with an ssh backend the desktop, browser
+#     and cua-driver run INSIDE that backend; placement: terminal refuses
+#     rather than fall back to the gateway host
+#   tools/environments/ssh.py, file_sync.py  ~/.hermes/{skills,credentials,
+#     cache} are pushed to the screen and, on teardown, changed or new files
+#     are pulled back (credentials are upload-only). The app container mounts
+#     skills read-only, so a sync-back that tries to change a skill fails
+#     (logged, non-fatal) instead of writing into the agent.
+#
+# Postbuild substitution: ${...} below are bot inputs; $${...} is a literal
+# for Hermes to expand at runtime.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hermes
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: hermes
+  interval: 1h
+  timeout: 15m
+  values:
+    controllers:
+      agent:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          config:
+            image: &agentImage
+              repository: docker.io/nousresearch/hermes-agent
+              # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
+              tag: v0.22.6@sha256:d27689bc6e8581ec884a7227c9101fdaebf6c853cff8859020dac14f21452b4d
+            # The image's entrypoint bootstraps $HERMES_HOME (seeding config
+            # and bundled skills), then runs an executable first argument
+            # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
+            # the rest of config.yaml stays Hermes-managed.
+            args:
+              - sh
+              - -c
+              - |
+                set -eu
+                hermes config set model.provider custom
+                hermes config set model.default '${LLM_MODEL}'
+                hermes config set model.base_url http://litellm.litellm.svc.cluster.local:4000/v1
+                hermes config set model.api_key '$${OPENAI_API_KEY}'
+                hermes config set terminal.backend ssh
+                hermes config set terminal.ssh_host screen.hermes-${BOT_NAME}.svc.cluster.local
+                hermes config set terminal.ssh_user pn
+                hermes config set terminal.ssh_port 22
+                hermes config set terminal.ssh_key /etc/hermes-ssh/id_ed25519
+                hermes config set terminal.cwd /workspace
+                hermes config set bot_desktop.placement terminal
+                hermes config set matrix.allowed_users '${MATRIX_ALLOWED_USERS}'
+                hermes config set database.journal_mode wal
+                install -m 0600 /etc/hermes-ssh-src/id_ed25519 /etc/hermes-ssh/id_ed25519
+                install -d -m 0700 /opt/data/.ssh
+                install -m 0644 /etc/hermes-ssh-src/known_hosts /opt/data/.ssh/known_hosts
+                install -d /opt/data/skills
+            securityContext: &restricted
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        containers:
+          app:
+            image: *agentImage
+            args:
+              - gateway
+              - run
+            env:
+              TZ: America/New_York
+              # Defence in depth for terminal.backend ssh: the env var the
+              # terminal tool reads (hermes_cli/config.py
+              # TERMINAL_CONFIG_ENV_MAP), so the backend stays ssh even if
+              # config.yaml loses the key. Hermes' default is local.
+              TERMINAL_ENV: ssh
+              # Every room on this server is encrypted.
+              MATRIX_E2EE_MODE: required
+              # A new bot's first boot bootstraps cross-signing and writes the
+              # recovery key here once (0600). Move it to 1Password; it is
+              # deliberately not in this pod's steady-state environment.
+              MATRIX_RECOVERY_KEY_OUTPUT_FILE: /opt/data/matrix-recovery-key
+            envFrom:
+              # MATRIX_HOMESERVER (in-cluster), MATRIX_USER_ID,
+              # MATRIX_DEVICE_ID, MATRIX_ACCESS_TOKEN
+              - secretRef:
+                  name: hermes-${BOT_NAME}-matrix
+              # OPENAI_API_KEY: the LiteLLM virtual key, under a name Hermes
+              # scrubs from child processes.
+              - secretRef:
+                  name: litellm
+              # MATRIX_RECOVERY_KEY, only while re-verifying a fresh crypto
+              # store. Nothing in git creates this Secret: it is made by hand
+              # from 1Password for one boot and deleted afterwards
+              # (docs/hermes.md), so the key is not in the steady-state env.
+              - secretRef:
+                  name: matrix-recovery
+                  optional: true
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            securityContext: *restricted
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+              limits:
+                cpu: "2"
+                memory: 4Gi
+        pod:
+          # The entrypoint starts s6-overlay only as PID 1, and s6 cannot drop
+          # supplementary groups as non-root ("s6-applyuidgid: unable to set
+          # supplementary group list"). With the pause container as PID 1 it
+          # takes the direct bootstrap path instead
+          # (docker/entrypoint-dispatch.sh), which runs non-root on a
+          # read-only root. The gateway is the only long-running process.
+          shareProcessNamespace: true
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
+            # 1000 is pn's group in the screen image. Both pods use it, so the
+            # shared workspace never flips group between them.
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+      screen:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/carpenike/hermes-screen
+              # Built from images/hermes-screen by hermes-screen-image.yaml.
+              tag: v0.22.6-d9a4439@sha256:3bc3b1820e8b23be7a5fd12532939a999d267689ecf10aea299b579691e02df5
+            env:
+              TZ: America/New_York
+            probes:
+              liveness: &sshProbe
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 22
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *sshProbe
+              startup:
+                enabled: false
+            # Writable root: this is the sandbox the agent works in (it
+            # installs into ~, Chromium and Xfce write their profiles). It
+            # runs as pn, with no capabilities and no privilege escalation,
+            # inside a Kata VM.
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 500m
+                memory: 2Gi
+              limits:
+                cpu: "2"
+                memory: 6Gi
+        pod:
+          runtimeClassName: kata-qemu
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+            # sshd binds 22 as pn without NET_BIND_SERVICE. A namespaced,
+            # "safe" sysctl, so Pod Security restricted allows it.
+            sysctls:
+              - name: net.ipv4.ip_unprivileged_port_start
+                value: "22"
+    service:
+      screen:
+        controller: screen
+        forceRename: screen
+        ports:
+          ssh:
+            port: 22
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: ${AGENT_STORAGE_SIZE}
+        storageClass: ceph-block
+        retain: true
+        forceRename: agent-data
+        # First creation restores the latest R2 backup of this bot (VolSync
+        # volume populator). An empty repository gives an empty volume.
+        dataSourceRef:
+          apiGroup: volsync.backube
+          kind: ReplicationDestination
+          name: agent-data-restore
+        advancedMounts:
+          agent:
+            config:
+              - path: /opt/data
+            app:
+              - path: /opt/data
+              - path: /opt/data/skills
+                subPath: skills
+                readOnly: true
+      workspace:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteMany
+        size: ${WORKSPACE_STORAGE_SIZE}
+        storageClass: ceph-filesystem
+        retain: true
+        forceRename: workspace
+        advancedMounts:
+          agent:
+            app:
+              - path: /workspace
+          screen:
+            app:
+              - path: /workspace
+      # Writable /run and /tmp under a read-only root, as in
+      # jyje/hermes-agent-helm values-hardened.yaml.
+      run:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 16Mi
+        advancedMounts:
+          agent:
+            config:
+              - path: /run
+            app:
+              - path: /run
+      # Disk-backed: ssh ControlMaster sockets and sync-back tars land here.
+      tmp:
+        type: emptyDir
+        sizeLimit: 2Gi
+        advancedMounts:
+          agent:
+            config:
+              - path: /tmp
+            app:
+              - path: /tmp
+      agent-ssh-src:
+        type: secret
+        name: agent-ssh
+        defaultMode: 0440
+        advancedMounts:
+          agent:
+            config:
+              - path: /etc/hermes-ssh-src
+                readOnly: true
+      # The agent's private key, copied to 0600 by the init container (ssh
+      # ignores a group-readable key). Memory-backed, pod-private.
+      agent-ssh:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Mi
+        advancedMounts:
+          agent:
+            config:
+              - path: /etc/hermes-ssh
+            app:
+              - path: /etc/hermes-ssh
+                readOnly: true
+      screen-ssh:
+        type: secret
+        name: screen-ssh
+        defaultMode: 0440
+        advancedMounts:
+          screen:
+            app:
+              - path: /etc/hermes-ssh
+                readOnly: true
+      shm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Gi
+        advancedMounts:
+          screen:
+            app:
+              - path: /dev/shm

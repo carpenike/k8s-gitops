@@ -324,16 +324,21 @@ container needs.
 `kubernetes/apps/litellm/key-provisioner`. A consumer adds a Flux
 Kustomization on `template/` with `postBuild.substitute` (`KEY_ALIAS`,
 `TEAM_ALIAS`, `MODELS`, `BUDGET` as `<USD>/<duration>` such as `25/30d`,
-`TARGET_NAMESPACE`, `SECRET_NAME`); `hermes/chief/ks.yaml` is the first.
+`TARGET_NAMESPACE`, `SECRET_NAME`, and optionally `SECRET_KEY_NAME`,
+default `LITELLM_API_KEY`). The hermes-bot component is the first
+consumer (`kubernetes/components/hermes-bot/provision`, [hermes.md](hermes.md)),
+and writes the key as `OPENAI_API_KEY`.
 The Job runs in `litellm` with `LITELLM_MASTER_KEY` from `litellm-env`, so
 the master key never leaves this namespace. It:
 
+0. refuses unless the Secret carries `app.kubernetes.io/name:
+   litellm-key-provisioner` and `app.kubernetes.io/instance: <KEY_ALIAS>`;
 1. finds the team by alias, or creates it (no model list on the team);
 2. if the consumer's Secret holds a key that `/key/info` knows under the
    alias, updates its models and budget (`/key/update`) and stops;
 3. otherwise deletes any key with the alias (`/key/delete`), generates a
-   new one (`/key/generate`), and patches `LITELLM_API_KEY` into the
-   Secret.
+   new one (`/key/generate`), and patches it into the Secret under
+   `SECRET_KEY_NAME`.
 
 LiteLLM stores keys hashed, so a lost Secret means a new key, not a read
 back. Flux creates the Secret empty (`ssa: IfNotPresent`); the Job's Role

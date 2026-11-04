@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Pre-component Chief: namespace hermes, its PVC chief-data (PV reclaim
+# policy Delete), and the HelmRelease at replicas 0. Not a rollback point on
+# its own: its provisioning Kustomizations and its ReplicationSource are gone
+# (the component now owns the same Job names, and a stale backup into
+# hermes-chief would become the "latest" snapshot), so its Matrix token and
+# LiteLLM key no longer exist. Rollback and cleanup are in docs/hermes.md,
+# "Chief's migration".
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hermes
+components:
+  - ../../../components/sops
+resources:
+  - ./namespace.yaml
+  - ./ks.yaml

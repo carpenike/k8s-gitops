@@ -1,0 +1,36 @@
+# sshd for the Hermes screen pod. Runs as the unprivileged desktop user pn
+# (uid 1000), not root: one login user, no privilege separation, no PAM.
+# Port 22 binds because the pod sets net.ipv4.ip_unprivileged_port_start=22.
+Port 22
+ListenAddress 0.0.0.0
+HostKey /home/pn/.sshd/ssh_host_ed25519_key
+PidFile /home/pn/.sshd/sshd.pid
+AuthorizedKeysFile /home/pn/.sshd/authorized_keys
+AllowUsers pn
+PermitRootLogin no
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+UsePAM no
+StrictModes yes
+PermitUserEnvironment no
+# Upstream puts these in /etc/environment for pam_env; with UsePAM no that
+# file is never read, so sshd sets them for every session itself. Same values
+# as the Dockerfile ENV lines (XDG_RUNTIME_DIR for dbus/Xvnc, the Playwright
+# browser location for Chromium launched over ssh).
+SetEnv XDG_RUNTIME_DIR=/tmp/hermes-runtime PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+# No AcceptEnv: Hermes forwards only skill required_environment_variables and
+# terminal.env_passthrough over SendEnv (tools/environments/ssh.py _run_bash at
+# v0.22.6), and this deployment sets neither.
+AllowTcpForwarding no
+AllowStreamLocalForwarding no
+AllowAgentForwarding no
+X11Forwarding no
+PermitTunnel no
+GatewayPorts no
+# scp in OpenSSH 9+ speaks SFTP; Hermes uploads single files with scp.
+Subsystem sftp internal-sftp
+ClientAliveInterval 60
+LogLevel INFO

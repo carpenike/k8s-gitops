@@ -29,7 +29,9 @@ spec:
   values:
     controllers:
       chief:
-        replicas: 1
+        # Legacy: stopped. The component's Chief in hermes-chief owns the
+        # Matrix device now; two gateways on one device would both answer.
+        replicas: 0
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"

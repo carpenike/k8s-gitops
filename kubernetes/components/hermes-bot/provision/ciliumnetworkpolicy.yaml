@@ -1,0 +1,170 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in hermes-<bot>, both directions. Applied by
+# `provision`, so it exists before any pod starts.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: hermes-${BOT_NAME}
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Agent (runc; holds the Matrix token and the LiteLLM key). No ingress.
+# Egress: cluster DNS, LiteLLM :4000, Tuwunel :8008 in-cluster, and this
+# bot's screen pod :22. No public internet: browsing runs in the screen pod
+# (Bot Desktop placement follows the ssh backend), and web_search /
+# web_extract need a provider (Firecrawl, Exa, SearXNG...) that is not
+# configured. Add a /32 here if one is. See docs/hermes.md.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: agent
+  namespace: hermes-${BOT_NAME}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+      app.kubernetes.io/controller: agent
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+            app.kubernetes.io/name: litellm
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: matrix
+            app.kubernetes.io/name: tuwunel
+            app.kubernetes.io/controller: tuwunel
+      toPorts:
+        - ports:
+            - port: "8008"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: screen
+      toPorts:
+        - ports:
+            - port: "22"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Screen (kata-qemu; runs whatever the agent asks: terminal, files,
+# execute_code, browser, computer_use). Ingress: this bot's agent on 22 only.
+# Egress: cluster DNS and public IPv4 for browsing. Not RFC1918, CGNAT, or
+# link-local, so not LiteLLM, Tuwunel, the node LAN, or the kube-apiserver
+# (node addresses); in-cluster pods match no CIDR rule at all.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: screen
+  namespace: hermes-${BOT_NAME}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+      app.kubernetes.io/controller: screen
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+      toPorts:
+        - ports:
+            - port: "22"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# ssh keygen Job: cluster DNS and the Kubernetes API, to patch its two
+# Secrets. Nothing else.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hermes-ssh-keygen
+  namespace: hermes-${BOT_NAME}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-ssh-keygen
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEntities:
+        - kube-apiserver
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# VolSync restic movers (backup and the one-time restore): cluster DNS and
+# public IPv4 for Cloudflare R2.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hermes-volsync
+  namespace: hermes-${BOT_NAME}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-volsync
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16

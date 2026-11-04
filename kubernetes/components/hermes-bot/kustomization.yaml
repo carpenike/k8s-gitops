@@ -1,0 +1,92 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# One Hermes bot: namespace hermes-<BOT_NAME>, an agent pod (runc) and a
+# screen pod (kata-qemu), its Matrix account, its LiteLLM key, its ssh keys.
+#
+# A bot is a folder under kubernetes/apps/hermes/<bot>/ whose kustomization
+# sets `namespace: hermes-<bot>`, includes this component, and generates
+# ConfigMap hermes-bot-inputs (the input contract; docs/hermes.md). The
+# replacements below derive names from it; the two Flux Kustomizations in
+# flux.yaml build ./provision and ./app with postBuild.substituteFrom those
+# ConfigMaps. Replacements, not substitution, fill the objects here, because
+# Flux substitution runs after kustomize build has dropped quotes and an
+# input such as @ryan:ryanholt.net is not a valid plain YAML scalar.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./namespace.yaml
+  - ./derived.yaml
+  - ./flux.yaml
+replacements:
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.BOT_NAME
+    targets:
+      - select:
+          kind: Namespace
+        fieldPaths:
+          - metadata.name
+        options:
+          delimiter: "-"
+          index: 1
+      - select:
+          kind: Namespace
+        fieldPaths:
+          - metadata.labels.[hermes.holthome.net/bot]
+      - select:
+          kind: ConfigMap
+          name: hermes-bot-derived
+        fieldPaths:
+          - data.BOT_NAMESPACE
+          - data.KEY_ALIAS
+          - data.TARGET_NAMESPACE
+        options:
+          delimiter: "-"
+          index: 1
+      - select:
+          group: kustomize.toolkit.fluxcd.io
+          kind: Kustomization
+          name: app
+        fieldPaths:
+          - spec.targetNamespace
+          - spec.healthChecks.0.namespace
+        options:
+          delimiter: "-"
+          index: 1
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.LLM_MODEL
+    targets:
+      - select:
+          kind: ConfigMap
+          name: hermes-bot-derived
+        fieldPaths:
+          - data.MODELS
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.LLM_BUDGET_USD
+    targets:
+      - select:
+          kind: ConfigMap
+          name: hermes-bot-derived
+        fieldPaths:
+          - data.BUDGET
+        options:
+          delimiter: /
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: hermes-bot-inputs
+      fieldPath: data.LLM_BUDGET_DURATION
+    targets:
+      - select:
+          kind: ConfigMap
+          name: hermes-bot-derived
+        fieldPaths:
+          - data.BUDGET
+        options:
+          delimiter: /
+          index: 1

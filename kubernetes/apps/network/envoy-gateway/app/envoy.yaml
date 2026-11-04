@@ -74,6 +74,23 @@ spec:
             name: whiskeywhiskeywhiskey-org-production-tls
           - kind: Secret
             name: stefanieholt-com-production-tls
+    # matrix.ryanholt.net only, so ClientTrafficPolicy envoy-external-matrix
+    # can keep %2F in paths for Matrix without changing every other external
+    # route. cloudflared reaches it with SNI matrix.ryanholt.net (its own
+    # ingress rule in cloudflare-tunnel); every other hostname still arrives
+    # with SNI external.holthome.net on the listener above.
+    - name: https-matrix
+      protocol: HTTPS
+      port: 443
+      hostname: matrix.ryanholt.net
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: ryanholt-net-production-tls
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
