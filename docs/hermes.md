@@ -345,7 +345,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`); with `WEBAPP_ENABLED`, the `envoy-internal` proxies on 9120 (CNP `agent-desktop`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN) |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`); with `WEBAPP_ENABLED`, the `envoy-internal` proxies on 9120 (CNP `agent-desktop`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN); with `WEBAPP_ENABLED`, `id.${SECRET_DOMAIN}` (Pocket ID) on 443 (CNP `agent-desktop-oidc`, FQDN) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
@@ -706,6 +706,7 @@ has it. When it is on, the component adds:
 | Service `agent-desktop` | Port 9120 on the agent pod |
 | HTTPRoute `agent-desktop` | `<bot>-desktop.${SECRET_DOMAIN}`, **envoy-internal only**: never envoy-external, never a cloudflared rule. Labelled `gateway.holthome.net/auth: native`. No request timeout, because the viewer and workspace hold WebSockets open |
 | CiliumNetworkPolicy `agent-desktop` | Ingress to 9120 from the envoy-internal proxies only. The screen pod cannot reach it |
+| CiliumNetworkPolicy `agent-desktop-oidc` | Agent egress to the Pocket ID issuer, `id.${SECRET_DOMAIN}`, on 443 (FQDN, with the L7 DNS rule). Hermes does OIDC discovery, fetches the keys and exchanges the login code from the agent itself. Pocket ID runs on Forge, outside the cluster |
 | ReferenceGrant `agent-desktop-gateway-auth` | Lets `pocket-id-exempt` select the native route |
 | Skill `homelab/desktop-viewer` | Written into the bot's skills by the init container. It tells the bot its viewer address, so asking "let me see what you're doing" gets you the link |
 
