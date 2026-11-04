@@ -430,6 +430,24 @@ Like the API server, the hostname has no cloudflared rule and no public
 DNS record: cloudflare-dns publishes only envoy-external routes, and the
 tunnel's wildcard ends on envoy-external, which has no route for it.
 
+### How the sender reaches it
+
+The route is on envoy-internal only, and Chief Engineer runs off the
+LAN. It has to POST from a host on the LAN that resolves
+`<bot>-hooks.<internal domain>`. Which host relays, and what that
+host's tunnel may reach, belongs to the network configuration, not to
+this repo.
+
+A relay that is down or away fails before the request reaches Hermes.
+Chief never hears of it and nothing reaches the DM, so the sender has to
+notice and report a failed POST itself. Prefer a relay that is always on
+the LAN.
+
+The signature is the sender's identity: anyone holding `webhook_secret`
+is "Chief Engineer" to Chief, from any host. Keep it only on the
+sender's side (and `op read` for Ryan's own tests), and rotate it if it
+leaks ([Rotating the secret](#rotating-the-secret)).
+
 ### How Hermes handles it (v0.22.6)
 
 From `gateway/platforms/webhook.py` and `gateway/config_env.py`:
