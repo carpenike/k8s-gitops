@@ -29,7 +29,7 @@ Settings worth knowing:
   upstream `hindsight-api:1.2.0`, the full API image the chart deploys, by
   digest. It adds the static-keys tenant extension, vendored from the
   v1.2.0 release commit, and the build fails if the extension doesn't
-  import.
+  import. **One local change** (see [Base schema](#base-schema)).
 - **Models, in-process, baked into the image:** embeddings
   `BAAI/bge-small-en-v1.5` (384 dimensions) and reranker
   `hindsight-ai/hs-rerank-1`. `HF_HUB_OFFLINE=1`. **The embedding model is
@@ -55,6 +55,38 @@ Settings worth knowing:
 - **Sizing:** idle with both models loaded, the pod uses about 1.6 GiB
   (measured on 1.2.0, amd64). Embedding and reranking run on its CPU.
   Limit 4 GiB and 2 CPUs; request 2 GiB.
+
+### Base schema
+
+Hindsight migrates, at startup, exactly the schemas the tenant extension's
+`list_tenants()` returns (`engine/memory_engine.py`). Its database-wide
+maintenance routines (`banks_needing_consolidation()`,
+`schemas_with_expired_rows(...)`, `mental_models_with_cron()`) are
+installed only by the run that targets the configured base schema,
+`public` (alembic `b6d2f8a4c1e7`; the loop calls them through
+`engine/schema.py` `fq_routine`).
+
+Upstream's static-keys extension returns only the user schemas, at v1.2.0
+and on `main` as of 4 Nov 2026. `public` was never migrated, and every
+maintenance cycle logged:
+
+```
+Consolidation reconcile discovery failed: function public.banks_needing_consolidation() does not exist
+Scheduled mental model refresh discovery failed: function public.mental_models_with_cron() does not exist
+```
+
+Consolidation itself still ran, because each retain queues it. What was
+missing is the reconcile pass that reschedules consolidation that was
+never queued (after a crash, for example), and the cron mental-model
+refresh, which nothing uses yet.
+
+The vendored `list_tenants()` therefore returns the base schema first,
+then the users, as Hindsight's built-in extensions do. Startup migrates
+`public` too, and the routines land there once. The worker also polls
+`public` for tasks; it holds none. No API key maps to `public`
+(user schemas are always `user_<id>`), so no request can reach it. Drop
+the change if upstream adopts it; until then, re-apply it when
+re-vendoring the extension.
 
 ## Network
 
