@@ -14,7 +14,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: hermes-provision-${BOT_NAME}
-  namespace: ${BOT_NAMESPACE}
+  namespace: hermes-${BOT_NAME}
   labels:
     app.kubernetes.io/name: hermes-bot-provisioner
     app.kubernetes.io/instance: ${BOT_NAME}
@@ -33,7 +33,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: hermes-provision-${BOT_NAME}
-  namespace: ${BOT_NAMESPACE}
+  namespace: hermes-${BOT_NAME}
   labels:
     app.kubernetes.io/name: hermes-bot-provisioner
     app.kubernetes.io/instance: ${BOT_NAME}

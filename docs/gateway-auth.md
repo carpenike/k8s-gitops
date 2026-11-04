@@ -99,12 +99,15 @@ those.
 
 ## Path, method, and source bypass
 
-On `envoy-external` HTTPS, ClientTrafficPolicy `envoy-external-https` keeps
-`%2F` in paths as sent (`escapedSlashesAction: KeepUnchanged`); Matrix needs
-that. Envoy matches routes and policy rules on that escaped path, so a
-path rule there should be a `RegularExpression` that cannot be satisfied
-by an encoded `/`, or the route should reject `%2F` itself.
-`envoy-internal` keeps the Envoy Gateway default, `UnescapeAndRedirect`.
+`matrix.ryanholt.net` has its own `envoy-external` listener,
+`https-matrix`. ClientTrafficPolicy `envoy-external-matrix` keeps `%2F` in
+paths as sent on that listener only (`escapedSlashesAction:
+KeepUnchanged`); Matrix needs it. cloudflared selects that listener with
+SNI `matrix.ryanholt.net` (its own ingress rule). Every other listener,
+including the shared `https` listener on `envoy-external` and all of
+`envoy-internal`, keeps the Envoy Gateway default, `UnescapeAndRedirect`.
+A path rule on `https-matrix` should be a `RegularExpression` that an
+encoded `/` cannot satisfy.
 
 
 Forge's Caddy module can skip the portal for a regex path

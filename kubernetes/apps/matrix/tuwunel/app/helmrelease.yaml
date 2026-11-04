@@ -126,7 +126,10 @@ spec:
             encryption_enabled_by_default_for_room_type = "all"
 
             allow_federation = true
-            trusted_servers = ["matrix.org"]
+            # No notary: fetch each server's signing keys from that server.
+            # matrix.org would otherwise learn which servers this one talks
+            # to, and be trusted for their keys.
+            trusted_servers = []
 
             appservice_dir = "/etc/tuwunel/appservices"
 

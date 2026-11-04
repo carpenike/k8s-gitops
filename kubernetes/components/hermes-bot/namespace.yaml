@@ -1,0 +1,17 @@
+---
+# hermes-<BOT_NAME> (name and label set by replacements). One namespace per
+# bot, so nothing here can be owned by two bots. Pod Security restricted:
+# the agent runs as 10000 and the screen as pn (1000), both with every
+# capability dropped. Not pruned: deleting a bot's folder must not delete
+# its data volumes; remove the namespace by hand.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hermes-BOT_NAME
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+  labels:
+    hermes.holthome.net/bot: BOT_NAME
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

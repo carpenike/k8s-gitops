@@ -6,4 +6,3 @@ resources:
   - ./cnpg-cluster.yaml
   - ./volsync-source.yaml
   - ./nfs-pv.yaml
-  - ./hermes-bot-matrix.yaml

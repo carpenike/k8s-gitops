@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Chief: @chief:ryanholt.net. The whole bot is these inputs; everything else
+# is kubernetes/components/hermes-bot. See docs/hermes.md.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hermes-chief
+components:
+  - ../../../components/hermes-bot
+configMapGenerator:
+  - name: hermes-bot-inputs
+    literals:
+      - BOT_NAME=chief
+      - MATRIX_USER=chief
+      - LLM_MODEL=claude-sonnet
+      - LLM_BUDGET_USD=25
+      - LLM_BUDGET_DURATION=30d
+      - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
+      - AGENT_STORAGE_SIZE=10Gi
+      - WORKSPACE_STORAGE_SIZE=20Gi
+generatorOptions:
+  disableNameSuffixHash: true

@@ -1,0 +1,103 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/external-secrets.io/externalsecret_v1.json
+# Cloudflare R2, same item and per-app path convention as matrix/tuwunel.
+# The path is hermes-<bot>, which is also where the pre-component Chief
+# backed up, so Chief's restore reads its old snapshots.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: agent-volsync
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: agent-volsync
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        RESTIC_REPOSITORY: "{{ .REPOSITORY_TEMPLATE }}/hermes-${BOT_NAME}"
+        RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
+        AWS_ACCESS_KEY_ID: "{{ .AWS_ACCESS_KEY_ID }}"
+        AWS_SECRET_ACCESS_KEY: "{{ .AWS_SECRET_ACCESS_KEY }}"
+  data:
+    - secretKey: REPOSITORY_TEMPLATE
+      remoteRef:
+        key: volsync-r2-template/REPOSITORY_TEMPLATE
+    - secretKey: RESTIC_PASSWORD
+      remoteRef:
+        key: volsync-r2-template/RESTIC_PASSWORD
+    - secretKey: AWS_ACCESS_KEY_ID
+      remoteRef:
+        key: volsync-r2-template/AWS_ACCESS_KEY_ID
+    - secretKey: AWS_SECRET_ACCESS_KEY
+      remoteRef:
+        key: volsync-r2-template/AWS_SECRET_ACCESS_KEY
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# Agent state: config, sessions, memories, skills, and the Matrix crypto
+# store. The workspace is scratch and is not backed up.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: agent-data
+spec:
+  sourcePVC: agent-data
+  trigger:
+    schedule: "45 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: agent-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 2Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: hermes-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 10000
+      runAsGroup: 10000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationdestination_v1alpha1.json
+# Populates PVC agent-data the first time it is created (dataSourceRef in
+# the HelmRelease): the latest snapshot in hermes-<bot>, or an empty volume
+# when the repository has none. Runs once (manual trigger); later backups do
+# not touch it.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: agent-data-restore
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    repository: agent-volsync
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    cacheStorageClassName: ceph-block
+    accessModes:
+      - ReadWriteOnce
+    capacity: ${AGENT_STORAGE_SIZE}
+    cacheCapacity: 2Gi
+    cleanupCachePVC: true
+    cleanupTempPVC: true
+    enableFileDeletion: true
+    moverPodLabels:
+      app.kubernetes.io/name: hermes-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 10000
+      runAsGroup: 10000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault

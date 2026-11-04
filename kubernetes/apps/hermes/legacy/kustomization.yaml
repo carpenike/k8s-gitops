@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Pre-component Chief, kept only as a rollback point: namespace hermes, its
+# PVC chief-data, and the HelmRelease at replicas 0. Its provisioning
+# Kustomizations and its ReplicationSource are gone (the component now owns
+# the same Job names, and a stale backup into hermes-chief would become the
+# "latest" snapshot). Delete this folder and the namespace after the new
+# Chief answers in an encrypted room. docs/hermes.md, "Migration".
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hermes
+components:
+  - ../../../components/sops
+resources:
+  - ./namespace.yaml
+  - ./ks.yaml

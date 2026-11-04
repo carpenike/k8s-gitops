@@ -2,7 +2,8 @@
 # Idempotent: a re-run with a valid stored token changes nothing. Jobs are
 # immutable, so the bot's Flux Kustomization sets force: true to replace
 # this one when the template changes. The pod talks to Tuwunel on the
-# cluster Service; MATRIX_HOMESERVER written for the bot is the public URL.
+# cluster Service, and so does the bot: MATRIX_HOMESERVER written for it is
+# the in-cluster URL.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -45,13 +46,15 @@ spec:
             - name: BOT_NAME
               value: ${BOT_NAME}
             - name: BOT_NAMESPACE
-              value: ${BOT_NAMESPACE}
+              value: hermes-${BOT_NAME}
+            - name: MATRIX_USER
+              value: ${MATRIX_USER}
             - name: SERVER_NAME
               value: ryanholt.net
             - name: HOMESERVER_URL
               value: http://tuwunel.matrix.svc.cluster.local:8008
-            - name: PUBLIC_HOMESERVER_URL
-              value: https://matrix.ryanholt.net
+            - name: BOT_HOMESERVER_URL
+              value: http://tuwunel.matrix.svc.cluster.local:8008
             - name: PYTHONDONTWRITEBYTECODE
               value: "1"
             - name: AS_TOKEN

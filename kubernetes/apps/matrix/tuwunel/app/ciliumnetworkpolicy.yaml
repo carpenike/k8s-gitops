@@ -38,6 +38,18 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: matrix
             app.kubernetes.io/name: hermes-bot-provisioner
+        # Each Hermes bot's agent pod, in its own hermes-<bot> namespace
+        # (labelled hermes.holthome.net/bot by kubernetes/components/hermes-bot).
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            # Without a namespace key Cilium scopes the selector to this
+            # policy's namespace; Exists plus the label spans hermes-*.
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
       toPorts:
         - ports:
             - port: "8008"

@@ -18,6 +18,8 @@ spec:
   parentRefs:
     - name: envoy-external
       namespace: network
+      # matrix.ryanholt.net's own listener: %2F kept as sent (Matrix).
+      sectionName: https-matrix
   rules:
     - timeouts:
         request: 120s

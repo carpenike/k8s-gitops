@@ -10,8 +10,7 @@ cannot change without wiping the database.
 | `kubernetes/apps/matrix/tuwunel/app` | Homeserver, routes, network policy, SOPS secrets |
 | `kubernetes/apps/matrix/tuwunel/backup` | VolSync restic source for the data volume |
 | `kubernetes/apps/matrix/hermes-bot-provisioner/app` | Shared provisioning script and its network policy |
-| `kubernetes/apps/matrix/hermes-bot-provisioner/template` | Per-bot Job, RBAC, and Secret. Not wired to a bot |
-| `kubernetes/examples/hermes-bot-matrix.yaml` | The Flux Kustomization a bot adds |
+| `kubernetes/apps/matrix/hermes-bot-provisioner/template` | Per-bot Job, RBAC, and Secret, instantiated by `kubernetes/components/hermes-bot` ([hermes.md](hermes.md)) |
 
 ## Names and DNS
 
@@ -25,9 +24,21 @@ and homeservers sign requests; neither can complete the gateway login.
 | `ryanholt.net` | `tuwunel-well-known` | `/.well-known/matrix/` only. Every other path is the website |
 
 `cloudflare-dns` publishes both as proxied CNAMEs to
-`external.holthome.net`. The tunnel already sends `ryanholt.net` and
+`external.holthome.net`. The tunnel sends `ryanholt.net` and
 `*.ryanholt.net` to `envoy-external`, and the `ryanholt-net-production`
-certificate covers both names. No tunnel or certificate change is needed.
+certificate covers both names.
+
+`matrix.ryanholt.net` has its own listener on `envoy-external`,
+`https-matrix`. The `tuwunel` route attaches to it by `sectionName`, and
+ClientTrafficPolicy `envoy-external-matrix` sets
+`escapedSlashesAction: KeepUnchanged` on that listener alone. Matrix paths
+carry `%2F` inside one segment, for example a cross-signing upload with the
+key id in the path. The default would redirect those requests and break
+them. Every other `envoy-external` host keeps the default. Listeners on one
+port are chosen by SNI, so the tunnel's `matrix.ryanholt.net` rule sets
+`originServerName: matrix.ryanholt.net`. Without it, cloudflared sends
+`external.holthome.net` and lands on the shared listener. See
+[gateway-auth.md](gateway-auth.md).
 
 The apex is also the `ryanholt.net` website ([website.md](website.md)).
 Its route in namespace `web` matches `/`; this one matches the longer
@@ -49,6 +60,10 @@ Delegation:
 
 Federation arrives on 443 through Cloudflare. Nothing listens on 8448,
 and no SRV record is needed.
+
+`trusted_servers = []`: there is no notary. Tuwunel fetches each server's
+signing keys from that server, so `matrix.org` neither learns which
+servers this one talks to nor vouches for their keys.
 
 Checks once Flux has reconciled:
 
@@ -127,8 +142,8 @@ profiles, and timestamps are not end-to-end encrypted.
 | `tuwunel-data` on Ceph | Not encrypted at rest; the OSD disks are not LUKS |
 | Restic backups in R2 | Encrypted by restic |
 
-Bots read encrypted rooms only with `MATRIX_ENCRYPTION=true` and a
-persistent volume for the Hermes key store
+Bots read encrypted rooms only with E2EE on (`MATRIX_E2EE_MODE=required`
+for Hermes) and a persistent volume for the Hermes key store
 (`~/.hermes/platforms/matrix/store/`). If that store is lost, the bot
 cannot decrypt older messages and its device has to be verified again.
 Delete the bot's `HERMES_<NAME>` device from the admin room before
@@ -163,40 +178,40 @@ on the Secret change.
 
 ### Provisioning a bot
 
-The template takes `BOT_NAME` and `BOT_NAMESPACE`. The Matrix ID is
-`@<BOT_NAME>:ryanholt.net`; Kubernetes object names keep a `hermes-`
-prefix. For `BOT_NAME: pilot` (once `pilot` is in the namespace regex):
+The template takes `BOT_NAME` and `MATRIX_USER` from the hermes-bot
+component ([hermes.md](hermes.md)). The bot's namespace is always
+`hermes-<BOT_NAME>`; `provision.py` refuses any other. For `BOT_NAME:
+pilot`, `MATRIX_USER: pilot` (once `pilot` is in the namespace regex):
 
-- Flux creates an empty Secret `hermes-pilot-matrix` in `BOT_NAMESPACE`
+- Flux creates an empty Secret `hermes-pilot-matrix` in `hermes-pilot`
   (`kustomize.toolkit.fluxcd.io/ssa: IfNotPresent`, so Flux never
   reapplies it), a Role there with `get` and `patch` on that one name,
   and a RoleBinding to ServiceAccount `matrix/hermes-provision-pilot`.
   RBAC cannot limit `create` by name, which is why Flux creates the
   object and the Job only patches it.
 - Job `matrix/hermes-provision-pilot` runs `provision.py` for `@pilot`:
+  0. It refuses unless the Secret carries labels
+     `app.kubernetes.io/name: hermes-bot-provisioner` and
+     `app.kubernetes.io/instance: pilot`.
   1. If the Secret already has a token that `/account/whoami` accepts,
-     it exits.
+     it refreshes the non-secret fields and exits.
   2. `POST /_matrix/client/v3/register` with `m.login.application_service`
      and `inhibit_login`. `M_USER_IN_USE` is treated as success.
   3. `POST /_matrix/client/v3/login` with `m.login.application_service`
      and a fixed device id `HERMES_PILOT`, so a re-run replaces that
-     device's token instead of adding devices.
-  4. Merge-patches `MATRIX_HOMESERVER` (`https://matrix.ryanholt.net`),
-     `MATRIX_USER_ID` (`@pilot:ryanholt.net`), and
+     device's token instead of adding devices, and a restored crypto store
+     still matches.
+  4. Merge-patches `MATRIX_HOMESERVER`
+     (`http://tuwunel.matrix.svc.cluster.local:8008`), `MATRIX_USER_ID`
+     (`@pilot:ryanholt.net`), `MATRIX_DEVICE_ID`, and
      `MATRIX_ACCESS_TOKEN` into the Secret.
 
-To wire a bot, copy `kubernetes/examples/hermes-bot-matrix.yaml` next to
-the bot's own `ks.yaml`, set the two substitutions, and add a `dependsOn`
-on the Kustomization that creates `BOT_NAMESPACE`. The bot reads the
-Secret with `envFrom`. Hermes accepts `MATRIX_HOMESERVER` plus
-`MATRIX_ACCESS_TOKEN`; `MATRIX_USER_ID` is there too.
-
 `BOT_NAME` is lowercase letters, digits, and `-`, at most 40 characters.
-The Job's pod talks to `http://tuwunel.matrix.svc.cluster.local:8008`.
-The bots use the public URL.
+The Job and the bots both talk to Tuwunel in-cluster; the bots never go
+through Cloudflare.
 
-Removing the bot's Kustomization prunes the Secret and RBAC. The Matrix
-account stays; deactivate it from the admin room with
+Removing the bot prunes the Secret and RBAC. The Matrix account stays;
+deactivate it from the admin room with
 `!admin users deactivate @pilot:ryanholt.net`.
 
 ## Network policy
@@ -205,7 +220,7 @@ account stays; deactivate it from the admin room with
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| Tuwunel | `envoy-external` proxies in `network`, and the provisioning Job, on 8008 | Cluster DNS, public IPv4 on any port (federation) |
+| Tuwunel | `envoy-external` proxies in `network`, the provisioning Job, and Hermes agent pods in namespaces labelled `hermes.holthome.net/bot`, on 8008 | Cluster DNS, public IPv4 on any port (federation) |
 | Provisioning Job | none | Cluster DNS, Tuwunel on 8008, `kube-apiserver` |
 | VolSync mover | none | Cluster DNS, public IPv4 (R2) |
 
