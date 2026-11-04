@@ -142,9 +142,15 @@ RUN set -eu; \
     tar -xzf "${tarball}"; mv "gh_${ver}_linux_${arch}" /opt/gh; rm -f "${tarball}"; \
     /opt/gh/bin/gh --version
 COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
+# The directory first: BuildKit gives a directory that COPY --chmod creates
+# the same mode as the file (0644, not traversable), and Claude Code then
+# runs without its managed settings (EACCES, policies not in effect).
+RUN install -d -m 0755 /etc/claude-code
 COPY --chmod=0644 claude-code/managed-settings.json /etc/claude-code/managed-settings.json
 COPY --chmod=0644 claude-code/gitconfig /etc/gitconfig
 USER pn
+# As pn: managed settings and git config must be readable by the login user.
+RUN cat /etc/claude-code/managed-settings.json /etc/gitconfig > /dev/null
 WORKDIR /home/pn
 EXPOSE 22
 CMD ["/usr/local/bin/hermes-screen-entrypoint"]
