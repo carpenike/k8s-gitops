@@ -36,6 +36,7 @@ spec later:
 | `LLM_MODEL` | `gpt-6.1-terra` | LiteLLM model name for the main model. The key itself may call every model on the proxy ([LiteLLM key](#litellm-key)) |
 | `LLM_FALLBACK_MODEL` | `claude-sonnet` | Optional. LiteLLM model Hermes falls back to when the main model fails ([LiteLLM key](#litellm-key)) |
 | `IMAGE_MODEL` | `gpt-image-2.5-flare` | Optional. Model for the `image_generate` tool, through LiteLLM ([Image generation](#image-generation)) |
+| `WEBAPP_ENABLED` | `true` | Optional, default `false`. The browser Desktop workspace on the agent's loopback, for watching or taking over the bot's browser ([Watching the bot's desktop](#watching-the-bots-desktop)). `true` or `false` only |
 | `LLM_BUDGET_USD` | `25` | Key budget |
 | `LLM_BUDGET_DURATION` | `30d` | Budget reset period |
 | `MATRIX_ALLOWED_USERS` | `@ryan:ryanholt.net` | Comma-separated Matrix IDs the bot answers |
@@ -681,6 +682,83 @@ signed with the old secret get `401`. The init container strips any
 `/opt/data/.env` when the Secret is present, for the reason in [Why the
 init container cleans `.env`](#why-the-init-container-cleans-env): Hermes
 loads `.env` with `override=True`, so a stale line would beat the Secret.
+
+## Watching the bot's desktop (opt-in)
+
+The screen pod runs the bot's desktop: Xvnc, Xfce and the headed Chromium
+its browser tools drive. Hermes' Webapp, the browser build of Hermes
+Desktop, shows that screen. It has three modes:
+
+- **Watch:** see what the bot is doing.
+- **Take over:** drive it yourself, for example to log in, solve a
+  CAPTCHA or approve a prompt.
+- **Hand back:** return control to the bot.
+
+**Off by default.** `WEBAPP_ENABLED=true` turns it on; today only Chief
+has it. The `config` init container sets `webapp.enabled: true`,
+`webapp.host: 127.0.0.1` and `webapp.port: 9120`. The gateway then serves
+the bundle that ships in the image (`apps/desktop/dist-webapp`, built for
+this Hermes release). Off, it sets `webapp.enabled: false` again.
+
+### How it works (v0.22.6)
+
+- **The viewer path.** The viewer is `/api/display/ws`
+  (`hermes_cli/web_routers/display.py`). The page gets a single-use,
+  30-second ticket on its signed-in connection, and the bridge splices the
+  desktop's RFB stream into a WebSocket. With the desktop inside the
+  terminal backend, as here, that stream is an `ssh` relay to the screen
+  pod. No VNC port is opened anywhere.
+- **Control is a lease** (`tools/bot_desktop/lease.py`): the agent, or
+  exactly one human viewer.
+  - Input from viewers that don't hold it is dropped at the byte level
+    (`rfb_filter.py`), not just greyed out in noVNC.
+  - While a person holds it, `computer_use` and the browser tools refuse
+    to act, screenshots included, because the person may be typing a
+    password.
+  - The lease fences tools, not the X server. A command the agent runs in
+    its terminal against `DISPLAY` is not stopped by it (Hermes'
+    bot-screen threat model).
+- **One browser.** The dock's browser and the agent's Chromium are the
+  same binary with the same profile. A login you complete during Take
+  over is the one the bot then uses (`tools/bot_desktop/browser.py`).
+
+### Why loopback and port-forward
+
+- **A wider bind needs a Nous Research account.** Bound to `127.0.0.1`,
+  the Webapp needs no extra sign-in. Bound to anything else, or with
+  `webapp.public_url` set, Hermes requires a Nous Research account sign-in
+  (`hermes_cli/webapp_access.py`). That is an outside identity provider on
+  top of Pocket ID.
+- **It exposes more than the screen.** The Webapp is the whole Desktop
+  workspace: chat, sessions and settings.
+- **So nothing in the cluster reaches it.** There is no Service,
+  HTTPRoute or policy for it. Only someone with kubectl access to
+  `hermes-<bot>` can open it.
+
+### Opening it
+
+1. Forward the port, and leave it running:
+
+   ```sh
+   kubectl -n hermes-chief port-forward deploy/hermes-agent 9120:9120
+   ```
+
+2. Get a one-use sign-in link and open it in your browser at
+   `http://127.0.0.1:9120`:
+
+   ```sh
+   kubectl -n hermes-chief exec deploy/hermes-agent -c app -- hermes webapp --no-open --skip-build
+   ```
+
+   `--skip-build` uses the bundle in the image. A rebuild needs npm and
+   network access the agent pod doesn't have.
+
+3. Open the bot's screen and choose Watch or Take over. Hand back when
+   done.
+
+The sign-in token lives in the agent's volume (`webapp/session-token`).
+Open tabs survive a restart. `hermes webapp --sign-out` (via `kubectl
+exec`) ends every tab.
 
 ## Web search (opt-in)
 

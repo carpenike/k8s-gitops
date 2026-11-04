@@ -104,6 +104,19 @@ spec:
                   hermes config unset image_gen.openai
                   hermes config unset image_gen.provider
                 fi
+                # Webapp: the browser Desktop workspace, including the Bot
+                # Desktop viewer (Watch / Take over / Hand back) for the screen
+                # pod's browser (input WEBAPP_ENABLED; docs/hermes.md, "Watching
+                # the bot's desktop"). Loopback only: no Service, route or policy
+                # reaches it, and a loopback bind needs no Nous sign-in. Opened
+                # with kubectl port-forward and a one-use link.
+                if [ '${WEBAPP_ENABLED:=false}' = true ]; then
+                  hermes config set webapp.enabled true
+                  hermes config set webapp.host 127.0.0.1
+                  hermes config set webapp.port 9120
+                elif [ "$(hermes config get webapp.enabled 2>/dev/null)" = true ]; then
+                  hermes config set webapp.enabled false
+                fi
                 hermes config set terminal.backend ssh
                 hermes config set terminal.ssh_host screen.hermes-${BOT_NAME}.svc.cluster.local
                 hermes config set terminal.ssh_user pn
