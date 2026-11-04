@@ -60,6 +60,8 @@ spec:
                 - -c
                 - |
                   set -eu
+                  # Leftovers from an interrupted run.
+                  rm -f /dumps/*.partial
                   stamp=$(date -u +%Y%m%dT%H%M%SZ)
                   out=/dumps/hindsight-$stamp.dump
                   pg_dump -Fc -h postgres17-rw.cnpg-system.svc.cluster.local -U hindsight -d hindsight -f "$out.partial"
@@ -67,7 +69,6 @@ spec:
                   mv "$out.partial" "$out"
                   echo "wrote $out ($(du -h "$out" | cut -f1))"
                   ls -1t /dumps/hindsight-*.dump | tail -n +8 | xargs -r rm -f --
-                  rm -f /dumps/*.partial
               env:
                 - name: PGPASSWORD
                   valueFrom:
@@ -106,6 +107,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: hindsight-dumps
+  annotations:
+    # Never pruned with the app: it holds the only local copies of the dumps.
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   accessModes:
     - ReadWriteOnce

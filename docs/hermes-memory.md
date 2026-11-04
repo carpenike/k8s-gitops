@@ -95,7 +95,7 @@ keys at startup**. So the overlap has to keep old and new different:
    in a PR, add it to the tenants ExternalSecret. The `ne` keeps a single
    entry once both fields hold the same value:
    ```yaml
-   HINDSIGHT_API_TENANT_USERS: "chief:{{ .chief }}{{ if ne .chief .chief_next }},chief:{{ .chief_next }}{{ end }}"
+   HINDSIGHT_API_TENANT_USERS: "chief:{{ .chief }}{{ if and .chief_next (ne .chief .chief_next) }},chief:{{ .chief_next }}{{ end }}"
    ```
    ```yaml
    - secretKey: chief_next
@@ -103,6 +103,9 @@ keys at startup**. So the overlap has to keep old and new different:
        key: hermes-chief/hindsight_api_key_next
    ```
    After merge, Reloader restarts Hindsight, which now accepts both keys.
+   The `and .chief_next` guard matters. An empty `_next` field would render
+   `,chief:`, the extension refuses that at startup, and under `Recreate`
+   that is an outage until the template is fixed.
 2. **Roll:** copy the new key into `hindsight_api_key`. Force-sync the bot
    first, then the server:
    ```sh
@@ -199,13 +202,12 @@ existing volume").
 ## Deleting memory
 
 - **One bank, using the bot's own key** (bank `hermes` is everything that
-  bot remembers):
+  bot remembers). Run it in the bot's agent pod, the only place allowed to
+  reach 8888, which already has the key in `$HINDSIGHT_API_KEY`:
   ```sh
-  curl -X DELETE -H "Authorization: Bearer $(cat <key file>)" \
-    http://hindsight.hermes-memory.svc.cluster.local:8888/v1/default/banks/hermes
+  kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- sh -c \
+    'curl -sS -X DELETE -H "Authorization: Bearer $HINDSIGHT_API_KEY" "$HINDSIGHT_API_URL/v1/default/banks/hermes"'
   ```
-  Run it from the bot's agent pod: it's the only place allowed to reach
-  8888.
 - **A bot entirely:**
   1. Remove it from `hindsight-tenants` and set its `HINDSIGHT_ENABLED`
      back to false.
