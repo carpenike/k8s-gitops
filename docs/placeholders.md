@@ -79,6 +79,18 @@ mailbox, committed as-is. The Outlook server refuses to start on a
 ssh keys are provisioned in-cluster and have no 1Password items. See
 [hermes.md](hermes.md).
 
+## Hermes memory (Hindsight)
+
+Before `kubernetes/apps/hermes-memory` reconciles, create in vault
+`k8s-secrets` (see [hermes-memory.md](hermes-memory.md)):
+
+| Item | Field | Value |
+| --- | --- | --- |
+| `hindsight` (new) | `database_password` | A strong password; CNPG sets it on role `hindsight` |
+| `hermes-chief` | `hindsight_api_key` | `openssl rand -hex 32`: ASCII, no commas. Chief's Hindsight key, read by the server and by Chief |
+
+The LiteLLM key `hermes-memory` is provisioned in-cluster and has no item.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

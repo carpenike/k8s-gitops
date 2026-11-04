@@ -42,6 +42,12 @@ spec:
         comment: LiteLLM proxy
         passwordSecret:
           name: litellm-db
+      - name: hindsight
+        ensure: present
+        login: true
+        comment: Hindsight memory server (hermes-memory)
+        passwordSecret:
+          name: hindsight-db
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 apiVersion: postgresql.cnpg.io/v1
@@ -54,3 +60,28 @@ spec:
   name: litellm
   owner: litellm
   databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Hindsight (namespace hermes-memory, docs/hermes-memory.md): one schema per
+# bot (user_<bot>), created by the server. The operator installs the
+# extensions as superuser, in public, where Hindsight looks for them
+# (hindsight_api/_pg_extensions.py at v1.2.0): vector for embeddings, pg_trgm
+# and btree_gin for entity resolution. Without the last two Hindsight falls
+# back to slower full scans; the hindsight role could not create them itself.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: hindsight
+spec:
+  cluster:
+    name: postgres17
+  name: hindsight
+  owner: hindsight
+  databaseReclaimPolicy: retain
+  extensions:
+    - name: vector
+      ensure: present
+    - name: pg_trgm
+      ensure: present
+    - name: btree_gin
+      ensure: present
