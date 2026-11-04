@@ -52,6 +52,16 @@
       minimumGroupSize: 2,
     },
     {
+      description: "Hindsight: the chart (kubernetes/apps/hermes-memory) and images/hindsight's base image move together. The built image ghcr.io/carpenike/hindsight is re-pinned by hand after hindsight-image.yaml builds it; see docs/hermes-memory.md.",
+      groupName: "hindsight",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/vectorize-io\\/charts\\/hindsight$/", "/vectorize-io\\/hindsight-api$/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
       description: "Flux Operator Group",
       groupName: "flux-operator",
       matchDatasources: ["docker"],
