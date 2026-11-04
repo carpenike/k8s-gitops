@@ -91,6 +91,19 @@ spec:
                 save_config(cfg)
                 print(f"fallback model: {model or 'none'}")
                 PY
+                # Image generation (input IMAGE_MODEL; docs/hermes.md, "Image
+                # generation"): Hermes' OpenAI image plugin against LiteLLM's
+                # Azure gpt-image deployments, on the same key. Unset, Hermes
+                # would fall back to FAL, which has no key and no egress here.
+                if [ -n '${IMAGE_MODEL:=}' ]; then
+                  hermes config set image_gen.provider openai
+                  hermes config set image_gen.openai.base_url http://litellm.litellm.svc.cluster.local:4000/v1
+                  hermes config set image_gen.openai.key_env OPENAI_API_KEY
+                  hermes config set image_gen.openai.model '${IMAGE_MODEL:=}'
+                elif [ "$(hermes config get image_gen.openai.base_url 2>/dev/null)" = http://litellm.litellm.svc.cluster.local:4000/v1 ]; then
+                  hermes config unset image_gen.openai
+                  hermes config unset image_gen.provider
+                fi
                 hermes config set terminal.backend ssh
                 hermes config set terminal.ssh_host screen.hermes-${BOT_NAME}.svc.cluster.local
                 hermes config set terminal.ssh_user pn

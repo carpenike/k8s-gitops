@@ -35,6 +35,7 @@ spec later:
 | `MATRIX_USER` | `chief` | Bare localpart. `@<MATRIX_USER>:ryanholt.net`, device `HERMES_<MATRIX_USER>` |
 | `LLM_MODEL` | `gpt-6.1-terra` | LiteLLM model name for the main model. The key itself may call every model on the proxy ([LiteLLM key](#litellm-key)) |
 | `LLM_FALLBACK_MODEL` | `claude-sonnet` | Optional. LiteLLM model Hermes falls back to when the main model fails ([LiteLLM key](#litellm-key)) |
+| `IMAGE_MODEL` | `gpt-image-2.5-flare` | Optional. Model for the `image_generate` tool, through LiteLLM ([Image generation](#image-generation)) |
 | `LLM_BUDGET_USD` | `25` | Key budget |
 | `LLM_BUDGET_DURATION` | `30d` | Budget reset period |
 | `MATRIX_ALLOWED_USERS` | `@ryan:ryanholt.net` | Comma-separated Matrix IDs the bot answers |
@@ -123,6 +124,42 @@ that model, LiteLLM's URL, and `key_env: OPENAI_API_KEY`. The key stays out
 of config.yaml. Hermes moves a turn to it when the main model fails or is
 rate-limited (`agent/agent_init_fallback.py`). Unset, the init container
 removes that entry. Entries with any other `base_url` are left alone.
+
+### Image generation
+
+With `IMAGE_MODEL` set, the `config` init container points Hermes'
+`image_generate` tool at LiteLLM:
+
+- `image_gen.provider: openai`
+- `image_gen.openai.base_url`: LiteLLM
+- `image_gen.openai.key_env: OPENAI_API_KEY`: the bot's key, read from the
+  environment
+- `image_gen.openai.model: <IMAGE_MODEL>`
+
+Hermes' OpenAI image plugin (`plugins/image_gen/openai`) already knows
+LiteLLM's names for these models. It sends `images.generate` (or
+`images.edit` with source images) to LiteLLM's `/v1/images/*`, which
+serves the Azure deployments ([litellm.md](litellm.md)):
+
+| `IMAGE_MODEL` | Plugin's description |
+| --- | --- |
+| `gpt-image-2.5-flare` (Chief) | Fast; everyday generation and editing |
+| `gpt-image-2.5-sunburst` | Slower; precision generation and editing |
+| `gpt-image-2-low` / `-medium` / `-high` | GPT Image 2 at a fixed quality tier |
+
+A bare 2.5 name uses quality `auto`. Add a suffix to fix the quality, for
+example `gpt-image-2.5-flare-high`. Images are 1024×1024 for square
+prompts and land in `$HERMES_HOME/cache/generated/images` on the agent's
+volume, which is backed up with it. Matrix gets them as attachments.
+
+Unset, the init container removes these keys if they still point at
+LiteLLM. Hermes then falls back to FAL, which has no key and no egress
+here, so `image_generate` fails. The tool is in the bot's Matrix and
+webhook toolsets.
+
+Checked on 4 Nov 2026 in Chief's agent pod with a scratch `HERMES_HOME`:
+the plugin generated a 1024×1024 PNG with `gpt-image-2.5-flare` through
+LiteLLM in about 13 s.
 
 The provisioner updates an existing key's models and budget in place
 (`/key/update`); the key value does not change. To narrow a bot again,
