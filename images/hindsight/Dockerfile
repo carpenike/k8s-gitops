@@ -12,7 +12,9 @@
 # release commit 34a138684a899b6ec34175f7a2b633860466d289,
 # hindsight-extensions/static-keys-tenant (MIT, LICENSE.hindsight). Upstream
 # ships extensions only as source to copy into a derived image; this follows
-# its own Dockerfile.
+# its own Dockerfile. One local change: list_tenants() also returns the base
+# schema, so startup migrates it and installs the maintenance routines
+# (docs/hermes-memory.md).
 ARG HINDSIGHT_IMAGE=ghcr.io/vectorize-io/hindsight-api:1.2.0@sha256:ef1a5ac515a7652fbff605277d44a39e7616e421503c61841189e63ef6db6705
 FROM ${HINDSIGHT_IMAGE}
 

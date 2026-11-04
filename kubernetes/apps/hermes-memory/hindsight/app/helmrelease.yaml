@@ -51,7 +51,7 @@ spec:
       image:
         repository: ghcr.io/carpenike/hindsight
         # Built from images/hindsight by hindsight-image.yaml.
-        tag: 1.2.0-8382298@sha256:8fb3fd1d15918446efe2c9b3ead5ea74b0028e2666f517ec1c8ae62e8785c926
+        tag: 1.2.0-3b4c656@sha256:8d4f82abafc550ec82c9ea40b9512b88d9b83a02aaa769c663b2c7788b596847
       resources:
         requests:
           cpu: 250m

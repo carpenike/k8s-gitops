@@ -352,5 +352,26 @@ class StaticKeysTenantExtension(TenantExtension):
     # ------------------------------------------------------------------
 
     async def list_tenants(self) -> list[Tenant]:
-        """Return all configured tenants for worker processing."""
-        return [Tenant(schema=schema, tenant_id=user_id) for user_id, schema in self._users.items()]
+        """Return the base schema, then every configured tenant.
+
+        Local change (k8s-gitops, not upstream): the engine migrates only the
+        schemas this returns at startup, and Hindsight installs its
+        database-wide maintenance routines (banks_needing_consolidation,
+        schemas_with_expired_rows, mental_models_with_cron) only on the run
+        that targets the configured base schema (alembic b6d2f8a4c1e7,
+        engine/schema.py fq_routine). Upstream returns only the per-user
+        schemas, so the base schema was never migrated and the maintenance
+        loop failed with "function public.... does not exist". The built-in
+        tenant extensions return the base schema for the same reason. No API
+        key maps to it, so no request can read or write it.
+        """
+        from hindsight_api.config import get_config
+
+        base = get_config().database_schema or "public"
+        tenants = [Tenant(schema=base)]
+        tenants += [
+            Tenant(schema=schema, tenant_id=user_id)
+            for user_id, schema in self._users.items()
+            if schema != base
+        ]
+        return tenants
