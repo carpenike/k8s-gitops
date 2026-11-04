@@ -1,13 +1,28 @@
 # Hermes agent pod image: upstream nousresearch/hermes-agent, unchanged, plus
-# the Outlook MCP server (Softeria ms-365-mcp-server) baked in, so nothing is
-# fetched with npx/npm at runtime (the agent pod has no internet egress).
-# Inert unless a bot sets OUTLOOK_MCP_ENABLED=true (docs/hermes.md).
+# what Hermes would otherwise fetch at runtime (the agent pod has no internet
+# egress). Each piece is inert unless the bot's inputs turn it on
+# (docs/hermes.md):
+#   - the Outlook MCP server (Softeria ms-365-mcp-server): OUTLOOK_MCP_ENABLED
+#   - the Hindsight memory provider plugin and hindsight-client:
+#     HINDSIGHT_ENABLED (docs/hermes-memory.md)
 #
-# Pins: the base by digest (below, and Renovate's docker datasource), the
-# server and every transitive package by outlook-mcp/package-lock.json
-# (integrity hashes; `npm ci` refuses a mismatch). Optional dependencies
-# (keytar, Azure identity/Key Vault) and install scripts are left out.
+# Pins: the base by digest (below, and Renovate's docker datasource); the
+# Outlook server and every transitive package by outlook-mcp/package-lock.json
+# (integrity hashes; `npm ci` refuses a mismatch), with optional dependencies
+# (keytar, Azure identity/Key Vault) and install scripts left out; the
+# Hindsight plugin by its vendored source (hindsight/plugin, from
+# vectorize-io/hindsight d952b6e655fccab4581ee0722b51c5f103873d12, the commit
+# Hermes v0.22.6's plugin-catalog/hindsight.yaml names) and hindsight-client
+# by hindsight/requirements.txt (hashes).
+
 ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.22.6@sha256:d27689bc6e8581ec884a7227c9101fdaebf6c853cff8859020dac14f21452b4d
+
+# Pure-Python wheels for Hermes' venv, built against the same Python (3.14.9).
+FROM docker.io/library/python:3.14.9-slim@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8 AS hindsight-client
+COPY hindsight/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --no-deps --require-hashes --only-binary=:all: \
+      --target /out -r /tmp/requirements.txt
+
 FROM ${HERMES_AGENT_IMAGE}
 
 COPY outlook-mcp/package.json outlook-mcp/package-lock.json /opt/outlook-mcp/
@@ -19,3 +34,19 @@ RUN cd /opt/outlook-mcp \
 COPY --chmod=0644 outlook-mcp/enabled-tools.txt /opt/outlook-mcp/enabled-tools.txt
 COPY --chmod=0755 outlook-mcp/outlook-mcp /usr/local/bin/outlook-mcp
 COPY --chmod=0755 hermes-outlook-config /usr/local/bin/hermes-outlook-config
+
+# Hindsight. The plugin lives OUTSIDE /opt/data (the bot's PVC would shadow
+# anything baked there); the config init container copies it to
+# $HERMES_HOME/plugins/hindsight, where Hermes finds user memory providers
+# (plugins/memory/__init__.py: bundled, then $HERMES_HOME/plugins/<name>,
+# then project, then entry points; activated by memory.provider).
+COPY --from=hindsight-client /out/ /opt/hermes/.venv/lib/python3.14/site-packages/
+COPY hindsight/plugin /opt/hermes-plugins/hindsight
+COPY hindsight/LICENSE.hindsight /opt/hermes-plugins/hindsight/LICENSE
+RUN /opt/hermes/.venv/bin/python -c "import hindsight_client, aiohttp_retry; from hindsight_client import Hindsight; print('hindsight-client ok')" \
+    && HERMES_HOME=/tmp/hermes-plugin-check sh -c ' \
+         mkdir -p "$HERMES_HOME/plugins" \
+         && cp -r /opt/hermes-plugins/hindsight "$HERMES_HOME/plugins/hindsight" \
+         && cd /opt/hermes \
+         && /opt/hermes/.venv/bin/python -c "import sys; sys.path.insert(0, \"/opt/hermes\"); from plugins.memory import find_provider_dir, load_memory_provider; d = find_provider_dir(\"hindsight\"); assert d is not None, \"hindsight not discovered\"; p = load_memory_provider(\"hindsight\"); assert p is not None, \"hindsight did not load\"; print(\"hindsight provider ok:\", d, type(p).__name__)"' \
+    && rm -rf /tmp/hermes-plugin-check
