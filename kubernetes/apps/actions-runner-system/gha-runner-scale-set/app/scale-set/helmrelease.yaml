@@ -39,12 +39,15 @@ spec:
     # else they load libpython only through LD_LIBRARY_PATH, and a subprocess
     # started with a minimal environment exits 127. Overlays append to env
     # with /env/-, never replace it.
+    # The image ships /home/runner as mode 777. Code that checks the owner and
+    # mode of every ancestor of a private directory under the workspace rejects
+    # that, so the runner makes its home 755 before it starts.
     template:
       spec:
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:2.338.2
-            command: ["/home/runner/run.sh"]
+            command: ["/bin/bash", "-c", "chmod 0755 /home/runner && exec /home/runner/run.sh"]
             env:
               - name: RUNNER_TOOL_CACHE
                 value: /opt/hostedtoolcache
