@@ -562,7 +562,7 @@ spec:
             image:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
-              tag: v0.22.6-d9a4439@sha256:3bc3b1820e8b23be7a5fd12532939a999d267689ecf10aea299b579691e02df5
+              tag: v0.22.6-a4de4bf@sha256:e7f75a5c9ab34e2f69a1dacc636e474dae889e4b67c14e2ea1809cee907f8e9a
             env:
               TZ: America/New_York
             probes:
