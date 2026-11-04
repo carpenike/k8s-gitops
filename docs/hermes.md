@@ -386,6 +386,105 @@ Default deny in `hermes-<bot>` both ways. The allows:
 Tuwunel's policy admits `app.kubernetes.io/controller: agent` from any
 namespace labelled `hermes.holthome.net/bot`.
 
+## What git owns, and what the Webapp may change
+
+The bot's `config.yaml`, `.env`, skills, plugins and session database live
+on its agent volume (`/opt/data`), which is backed up to R2. Hermes' own
+surfaces can change all of it: the Webapp (when `WEBAPP_ENABLED`), its
+Maintenance page, `hermes` commands through `kubectl exec`, and the bot
+itself. Some of it is set by git instead. The `config` init container
+writes those keys on **every boot**, so a change made elsewhere lasts only
+until the next restart.
+
+### Reset from git on every boot
+
+| Area | What the init container sets | Source |
+| --- | --- | --- |
+| Model | `model.provider`, `model.default`, `model.base_url`, `model.api_key` (the `${OPENAI_API_KEY}` reference); the LiteLLM entry at the front of `fallback_providers` | `LLM_MODEL`, `LLM_FALLBACK_MODEL` |
+| Where tools run | `terminal.backend`, `terminal.ssh_*`, `terminal.cwd`, `bot_desktop.placement` | component |
+| Matrix | `matrix.allowed_users` | `MATRIX_ALLOWED_USERS` |
+| Database | `database.journal_mode` | component |
+| Tool search | `tools.connectors.enabled: false` ([Tool search](#tool-search)) | component |
+| API server | stale `API_SERVER_KEY` removed from `.env` | `API_SERVER_ENABLED` |
+| Outlook | `mcp_servers.outlook`, `platform_toolsets.api_server`, remembered Outlook approvals removed | `OUTLOOK_MCP_ENABLED` |
+| Memory | `memory.provider`, plugin `plugins/hindsight` | `HINDSIGHT_ENABLED` |
+| Webhook | `platforms.webhook.extra.routes.chief-engineer`, stale `WEBHOOK_*` removed from `.env` | `WEBHOOK_ENABLED` |
+| Web search | `web.backend`, `web.keyless_fallback` | `TAVILY_ENABLED` |
+| Images | `image_gen.provider`, `image_gen.openai.*` | `IMAGE_MODEL` |
+| Webapp | `webapp.*`, `dashboard.trusted_proxies`, skill `homelab/desktop-viewer` | `WEBAPP_ENABLED` |
+| Matrix profile | plugin `plugins/matrix-profile`, its entry in `plugins.enabled` | `MATRIX_PROFILE_TOOLS` |
+
+Credentials never come from these files. They arrive as environment
+variables from Secrets that External Secrets builds from 1Password, and
+Hermes strips them from the processes it starts.
+
+### Safe to change in the Webapp or chat
+
+Everything not in that table persists:
+
+- sessions and chat history;
+- skills you add, edit or remove (except `desktop-viewer`);
+- plugins you enable (other than the two above);
+- memory notes (`MEMORY.md`, `USER.md`) and the persona (`SOUL.md`);
+- cron jobs and kanban;
+- display and tool preferences;
+- `/model` switches within a session;
+- Watch and Take over on the desktop viewer.
+
+The bot changing its own Matrix name or avatar (`MATRIX_PROFILE_TOOLS`)
+also persists: that lives on Tuwunel, not in the volume.
+
+### Avoid in the Webapp
+
+- **New bot.** It creates a Hermes *profile* inside this bot's pod: it
+  shares this pod's process, volume, memory limit, screen sandbox, network
+  policy, LiteLLM key and budget, and it has no Matrix account of its own.
+  Gateway groups ("New group chat") only include such profiles. Real bots
+  come from git, one pod each ([Adding a bot](#adding-a-bot)); bots in
+  different pods are meant to talk over A2A, which isn't set up yet.
+- **Tools that need the internet.** The agent may reach only LiteLLM,
+  Tuwunel, the screen, and the hosts its inputs open (Hindsight, Tavily,
+  Microsoft Graph and sign-in, Pocket ID). A cloud browser, a hosted
+  connector or another search provider fails, or stalls until it times out
+  ([Tool search](#tool-search)). Open a host in git first.
+- **API keys and tokens.** A key typed into the Webapp or `hermes setup`
+  lands in `/opt/data/.env` or `config.yaml`. That is outside 1Password,
+  in the R2 backups, and, for the keys git sets, overwritten at the next
+  boot. Add a field to the 1Password item `hermes-<bot>` and wire it in
+  git instead.
+- **`hermes setup` and `hermes doctor --fix`.** Both rewrite provider,
+  model and key settings that git manages.
+
+### Health checks: run doctor in the app container
+
+The Webapp's Maintenance page runs `hermes doctor` in a process without
+the gateway's credentials. On 4 Nov it reported three working features as
+broken:
+
+- web search / extract: "tavily selected; provider not configured";
+- `image_gen` unavailable;
+- `matrix_profile`: "system dependency not met".
+
+It then advised running `hermes setup`. Run doctor where the credentials
+are:
+
+```sh
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes doctor
+```
+
+There, those checks pass. These warnings are expected either way and need
+no action:
+
+- auth providers not logged in (Nous Portal, OpenAI Codex, MiniMax, xAI)
+  and OpenRouter not configured: the bot uses LiteLLM;
+- `connections` (off on purpose), `a2a` (not set up), `browser-cdp` (the
+  browser runs in the screen pod over ssh);
+- platforms the bot doesn't use (Discord, Feishu, Yuanbao, `x_search`,
+  `video_gen`);
+- "install out of sync (venv vs uv.lock)": the image adds hindsight-client
+  to Hermes' venv;
+- the Skills Hub: it fetches from GitHub, which the agent cannot reach.
+
 ## API server (opt-in)
 
 Hermes' gateway can also serve an OpenAI-compatible API:
@@ -790,6 +889,10 @@ has it. When it is on, the component adds:
 
 Off, the init container sets `webapp.enabled: false` and removes the
 skill. Kubernetes objects go with the input.
+
+The Webapp can change much of the bot's own configuration. What survives
+a restart, and what to avoid (New bot, internet tools, API keys), is in
+[What git owns, and what the Webapp may change](#what-git-owns-and-what-the-webapp-may-change).
 
 ### Sign-in
 
