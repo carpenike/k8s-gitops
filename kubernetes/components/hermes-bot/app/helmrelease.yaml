@@ -46,9 +46,12 @@ spec:
         initContainers:
           config:
             image: &agentImage
-              repository: docker.io/nousresearch/hermes-agent
-              # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
-              tag: v0.22.6@sha256:d27689bc6e8581ec884a7227c9101fdaebf6c853cff8859020dac14f21452b4d
+              repository: ghcr.io/carpenike/hermes-agent
+              # Built from images/hermes-agent by hermes-agent-image.yaml:
+              # nousresearch/hermes-agent v0.22.6 (pinned by digest in its
+              # Dockerfile) plus the Outlook MCP server, inert unless
+              # OUTLOOK_MCP_ENABLED.
+              tag: v0.22.6-aae110d@sha256:a2255442d4c19a98d779f43a601e620f216140582c8bd7f4214aeba93b87f599
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -84,6 +87,14 @@ spec:
                 # which is why this container has the same envFrom.
                 if [ -n "$${API_SERVER_KEY:-}" ] && [ -f /opt/data/.env ] && [ ! -L /opt/data/.env ]; then
                   sed -i '/^API_SERVER_KEY=/d' /opt/data/.env
+                fi
+                # Outlook MCP server (input OUTLOOK_MCP_ENABLED; images/hermes-agent,
+                # docs/hermes.md). Writes or removes mcp_servers.outlook and drops
+                # any remembered "always" answer for its tools on every boot.
+                if [ '${OUTLOOK_MCP_ENABLED:=false}' = true ]; then
+                  hermes-outlook-config enable
+                else
+                  hermes-outlook-config disable
                 fi
             # Only api-server: stage2 reads API_SERVER_KEY (above). The
             # gateway's credentials stay in the app container.
@@ -148,6 +159,14 @@ spec:
               # Secret.
               - secretRef:
                   name: api-server
+                  optional: true
+              # MS365_MCP_CLIENT_ID, MS365_MCP_TENANT_ID,
+              # MS365_MCP_EXPECTED_USERNAME, only for a bot with
+              # OUTLOOK_MCP_ENABLED=true (ExternalSecret outlook-mcp). Hermes
+              # hands them to the outlook MCP child through its config env
+              # block; `kubectl exec ... outlook-mcp --login` reads them here.
+              - secretRef:
+                  name: outlook-mcp
                   optional: true
             probes:
               liveness:
@@ -305,7 +324,66 @@ spec:
           - secretKey: api_server_key
             remoteRef:
               key: hermes-${BOT_NAME}/api_server_key
+      # Delegated, single-tenant Entra app (no secret): ids from 1Password,
+      # the expected account from the bot's inputs.
+      outlook-mcp:
+        enabled: ${OUTLOOK_MCP_ENABLED:=false}
+        forceRename: outlook-mcp
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: outlook-mcp
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              MS365_MCP_CLIENT_ID: "{{ .outlook_client_id }}"
+              MS365_MCP_TENANT_ID: "{{ .outlook_tenant_id }}"
+              MS365_MCP_EXPECTED_USERNAME: ${OUTLOOK_MCP_EXPECTED_USERNAME:=}
+        data:
+          - secretKey: outlook_client_id
+            remoteRef:
+              key: hermes-${BOT_NAME}/outlook_client_id
+          - secretKey: outlook_tenant_id
+            remoteRef:
+              key: hermes-${BOT_NAME}/outlook_tenant_id
     rawResources:
+      # The agent's only internet egress, and only with OUTLOOK_MCP_ENABLED:
+      # Entra sign-in and Microsoft Graph on 443. toFQDNs needs the DNS
+      # proxy to see the agent's lookups, hence the L7 DNS rule (all names
+      # still resolve; only these two may be connected to).
+      outlook-egress:
+        enabled: ${OUTLOOK_MCP_ENABLED:=false}
+        forceRename: agent-outlook
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: login.microsoftonline.com
+                  - matchName: graph.microsoft.com
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
       # Additive to provision/ciliumnetworkpolicy.yaml: 8642 from the
       # envoy-internal proxies, nothing else. Agent egress is unchanged.
       api-ingress:
@@ -404,6 +482,16 @@ spec:
               - path: /tmp
             app:
               - path: /tmp
+      # ms-365-mcp-server's logs and audit log: ephemeral, never backed up.
+      # The token cache is on agent-data (/opt/data/outlook).
+      outlook-logs:
+        enabled: ${OUTLOOK_MCP_ENABLED:=false}
+        type: emptyDir
+        sizeLimit: 256Mi
+        advancedMounts:
+          agent:
+            app:
+              - path: /var/log/outlook-mcp
       agent-ssh-src:
         type: secret
         name: agent-ssh

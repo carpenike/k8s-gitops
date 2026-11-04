@@ -19,5 +19,9 @@ configMapGenerator:
       - AGENT_STORAGE_SIZE=10Gi
       - WORKSPACE_STORAGE_SIZE=20Gi
       - API_SERVER_ENABLED=true
+      - OUTLOOK_MCP_ENABLED=true
+      # Ryan's personal Microsoft 365 mailbox, the only account the Outlook
+      # MCP server may use.
+      - OUTLOOK_MCP_EXPECTED_USERNAME=ryan@ryanholt.net
 generatorOptions:
   disableNameSuffixHash: true

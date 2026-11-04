@@ -46,10 +46,11 @@ updated in a pull request.
   the result. Bootstrap commands in `bootstrap/README.md` are run by a
   person, on a workstation, with values that never enter git.
 - Do not point Flux at a live cluster from CI. Workflows install nothing
-  and use no GitHub secrets. One exception: `hermes-screen-image.yaml`
-  builds `images/hermes-screen` and pushes it to `ghcr.io/carpenike` with
-  the built-in `GITHUB_TOKEN` (`packages: write`). It deploys nothing;
-  manifests pin the pushed digest.
+  and use no GitHub secrets. Two exceptions: `hermes-screen-image.yaml`
+  and `hermes-agent-image.yaml` build `images/hermes-screen` and
+  `images/hermes-agent` and push them to `ghcr.io/carpenike` with the
+  built-in `GITHUB_TOKEN` (`packages: write`). They deploy nothing;
+  manifests pin the pushed digests.
 - Pin image and chart tags. Renovate is the updater. Do not use `latest`.
 - Cilium is the primary CNI. Multus is the meta-plugin in front of it
   for a second interface (ADR 0007). Do not add another primary CNI.
