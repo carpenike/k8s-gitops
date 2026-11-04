@@ -106,6 +106,13 @@ setup-python exports. A subprocess started with a minimal environment
 then exits 127. `mcp` has several of those, in tests and in
 `scripts/atrium_artifacts.py`.
 
+The runner image ships `/home/runner` as mode `777`. The shared
+component's runner command runs `chmod 0755 /home/runner` and then execs
+`/home/runner/run.sh`. GitHub-hosted runners have no world-writable home.
+`mcp`'s Hermes interoperability lane keeps private state under the job
+workspace and refuses it when any ancestor is group- or world-writable
+without the sticky bit.
+
 Overlays that add runner environment variables append with
 `path: .../containers/0/env/-`. An `add` on `.../env` would replace the
 whole list and drop `RUNNER_TOOL_CACHE`.
