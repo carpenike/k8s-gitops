@@ -80,7 +80,11 @@ mailbox, committed as-is. The Outlook server refuses to start on a
 with the sender, Chief Engineer); ExternalSecret `webhook` reads it, and
 its inputs carry `WEBHOOK_DELIVER_CHAT_ID`, the DM's room ID, committed
 as-is. A bot with `TAVILY_ENABLED=true` needs field `tavily_api_key` (its
-Tavily API key); ExternalSecret `tavily` reads it. The Matrix token, LiteLLM key, and
+Tavily API key); ExternalSecret `tavily` reads it. A bot with
+`WEBAPP_ENABLED=true` needs field `webapp_oidc_client_id`: the client ID of
+a public Pocket ID client whose callback is
+`https://<bot>-desktop.<domain>/auth/callback` and which admits only Ryan
+(hermes.md, "Watching the bot's desktop"). The Matrix token, LiteLLM key, and
 ssh keys are provisioned in-cluster and have no 1Password items. See
 [hermes.md](hermes.md).
 
