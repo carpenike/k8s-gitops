@@ -1,0 +1,8 @@
+{
+  "name": "hermes-outlook-mcp",
+  "private": true,
+  "description": "Pins Softeria ms-365-mcp-server for the Hermes agent image (images/hermes-agent).",
+  "dependencies": {
+    "@softeria/ms-365-mcp-server": "0.178.0"
+  }
+}
