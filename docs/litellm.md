@@ -61,10 +61,33 @@ resource `ryholt-simplechat-aifoundry`, which rejected its key with a 401,
 and they are gone here. `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-astra`, and
 `gpt-6-luna` are deployments on Azure resource `ryholt-foundry` (project
 `proj-default`), called on the v1 API with `AZURE_FOUNDRY_API_KEY`. No
-Azure embedding model is served. These use the `azure/gpt5_series/` route
-for reasoning parameters. The v1.106.6 cost map prices `gpt-6.1-sol`,
-`gpt-6-astra`, and `gpt-6-luna`; `gpt-6.1-terra` reads $0 until a later
-image lists it.
+Azure embedding model is served. They are routed by bare deployment name,
+`azure/<name>`:
+
+- **Reasoning handling:** LiteLLM treats any name containing `gpt-6` as a
+  reasoning model (`GPT_REASONING_SERIES_MARKERS` in
+  `llms/openai/chat/gpt_5_transformation.py`), so no prefix is needed.
+- **Tools go through the Responses API.** A chat request with function
+  tools (every Hermes turn) is bridged to Azure's `/v1/responses`
+  (`responses_api_bridge_check` in `main.py`), because Chat Completions
+  rejects function tools while reasoning is on.
+- **Why not `azure/gpt5_series/`:** the first config used that prefix.
+  The Responses transformation (`llms/azure/responses/transformation.py`,
+  `get_stripped_model_name`) strips only `responses/`, `o_series/` and
+  `azure_ai/`. So Azure was asked for the deployment
+  `gpt5_series/gpt-6.1-terra` and answered `DeploymentNotFound` for every
+  request with tools, and for every direct `/v1/responses` call. Plain chat
+  worked. The prefix also hid the models from the price table, so their
+  spend read as $0.
+- **Prices:** the proxy downloads LiteLLM's current price table at
+  startup. On 4 Nov 2026 it had `gpt-6.1-terra` ($1/$5 per M input/output
+  tokens), `gpt-6.1-sol` ($2/$10), `gpt-6-astra` ($10/$50) and
+  `gpt-6-luna` ($0.10/$0.50) under their `azure/<name>` keys. So no price
+  is set here. The table bundled in the v1.106.6 image lacks terra: if the
+  download fails at startup, terra's spend reads $0 until the next restart.
+
+These deployments are paid from Azure credits that reset monthly, so
+workloads prefer them over the pay-as-you-go routes.
 
 `decision-1` is the `Decision-1` deployment of `Microsoft-Decision-1` on the
 same resource, routed as `azure_ai/Decision-1` against
