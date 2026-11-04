@@ -1,13 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "apiKeyHelper": "/usr/local/bin/hermes-litellm-key",
   "skipDangerousModePermissionPrompt": true,
   "env": {
-    "ANTHROPIC_BASE_URL": "http://litellm.litellm.svc.cluster.local:4000",
-    "ANTHROPIC_MODEL": "claude-sonnet",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku",
     "DISABLE_AUTOUPDATER": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   },

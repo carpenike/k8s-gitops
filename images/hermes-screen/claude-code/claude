@@ -1,9 +1,17 @@
 #!/bin/sh
 # k8s-gitops: Claude Code in the Hermes screen pod (docs/hermes.md, "Coding
-# with Claude Code"). Sessions, settings and history live on the shared
-# workspace, so `claude -p --resume <session_id>` picks a conversation up
-# again on a later Matrix turn and after the screen pod restarts. Gateway,
-# models and the key helper come from /etc/claude-code/managed-settings.json.
+# with Claude Code"). Signs in with Ryan's Claude subscription through the
+# long-lived token from `claude setup-token` (Secret claude-code-auth,
+# mounted only with CLAUDE_CODE_ENABLED). Sessions, settings and history
+# live on the shared workspace, so `claude -p --resume <session_id>` picks a
+# conversation up again on a later Matrix turn and after a screen restart.
 export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-/workspace/.claude-code}"
 mkdir -p "$CLAUDE_CONFIG_DIR"
+token=/etc/hermes-claude-code/oauth_token
+if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -s "$token" ]; then
+  CLAUDE_CODE_OAUTH_TOKEN=$(cat "$token")
+  export CLAUDE_CODE_OAUTH_TOKEN
+fi
+# Subscription only: a stray API key or gateway would take precedence.
+unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL
 exec /opt/claude-code/bin/claude "$@"

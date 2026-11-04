@@ -117,10 +117,11 @@ COPY --chmod=0644 sshd_config /etc/ssh/sshd_config.hermes
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/hermes-screen-entrypoint
 # k8s-gitops: Claude Code and the GitHub CLI, for multi-turn coding sessions
 # (docs/hermes.md, "Coding with Claude Code"). No credential is baked in: with
-# the bot's CLAUDE_CODE_ENABLED, the pod mounts its LiteLLM key and GitHub
-# token under /etc/hermes-claude-code, and the files in claude-code/ read them
-# from there (ssh sessions do not inherit the pod's environment). Claude Code
-# never updates itself; its version moves with this file.
+# the bot's CLAUDE_CODE_ENABLED, the pod mounts the Claude subscription token
+# and the GitHub token under /etc/hermes-claude-code, and the wrappers in
+# claude-code/ read them from there (ssh sessions do not inherit the pod's
+# environment). Claude Code never updates itself; its version moves with
+# this file.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_CODE_VERSION=2.1.311
 # renovate: datasource=github-releases depName=cli/cli
@@ -140,7 +141,7 @@ RUN set -eu; \
         | grep " ${tarball}\$" | sha256sum -c -; \
     tar -xzf "${tarball}"; mv "gh_${ver}_linux_${arch}" /opt/gh; rm -f "${tarball}"; \
     /opt/gh/bin/gh --version
-COPY --chmod=0755 claude-code/claude claude-code/gh claude-code/hermes-litellm-key /usr/local/bin/
+COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
 COPY --chmod=0644 claude-code/managed-settings.json /etc/claude-code/managed-settings.json
 COPY --chmod=0644 claude-code/gitconfig /etc/gitconfig
 USER pn

@@ -193,10 +193,9 @@ spec:
                   hermes config set webapp.enabled false
                   rm -rf /opt/data/skills/homelab/desktop-viewer
                 fi
-                # Claude Code coding sessions (component hermes-bot/claude-code,
-                # input CLAUDE_CODE_ENABLED; docs/hermes.md, "Coding with Claude
-                # Code"). Claude Code, its LiteLLM key and the GitHub token are
-                # in the screen pod; this skill tells the bot how to hold one
+                # Claude Code coding sessions (input CLAUDE_CODE_ENABLED;
+                # docs/hermes.md, "Coding with Claude Code"). Claude Code, its
+                # subscription token and the GitHub token are in the screen pod; this skill tells the bot how to hold one
                 # resumable Claude Code session per task across Matrix turns.
                 if [ '${CLAUDE_CODE_ENABLED:=false}' = true ]; then
                   install -d /opt/data/skills/homelab/coding-sessions
@@ -215,8 +214,8 @@ spec:
 
                 Use this whenever Ryan asks for a change in a code repository. It replaces the
                 install and login steps of the generic claude-code skill: in your terminal
-                `claude` is installed and already uses its own LiteLLM key, and `git` and `gh`
-                have a GitHub token for the repositories Ryan allowed.
+                `claude` is installed and already signed in to Ryan's Claude subscription, and
+                `git` and `gh` have a GitHub token for the repositories Ryan allowed.
 
                 ## One Claude Code session per task
 
@@ -259,13 +258,14 @@ spec:
                   pull request with `gh pr create --draft`. Send Ryan the PR link.
                 - Never merge, force-push, delete branches or change repository settings.
                   Merging is Ryan's.
-                - Each result has `total_cost_usd`. Mention it when a run cost more than a
-                  dollar. Claude Code's key has its own monthly budget; a budget error means
-                  stop and tell Ryan.
+                - Claude Code runs on Ryan's subscription, so it shares his usage limits. Keep
+                  runs focused (use --max-turns), and on a usage-limit or rate-limit error
+                  stop and tell Ryan when it resets instead of retrying.
 
                 ## When something fails
 
-                - "No LiteLLM key": Claude Code is not set up for this bot yet. Tell Ryan.
+                - "Not logged in" or 401 from `claude`: the subscription token is missing or
+                  expired. Tell Ryan; he renews it with `claude setup-token`.
                 - `git push` or `gh` answers 403 or 404: the GitHub token has no access to
                   that repository. Tell Ryan which repository needs adding to the token.
                 SKILL
@@ -858,6 +858,28 @@ spec:
           - secretKey: webapp_oidc_client_id
             remoteRef:
               key: hermes-${BOT_NAME}/webapp_oidc_client_id
+      # Claude Code's sign-in (CLAUDE_CODE_ENABLED): a one-year token from
+      # `claude setup-token` on Ryan's Claude subscription. Mounted into the
+      # screen pod only (persistence claude-code). Missing field: stays
+      # unready and `claude` reports it is not logged in.
+      claude-code-auth:
+        enabled: ${CLAUDE_CODE_ENABLED:=false}
+        forceRename: claude-code-auth
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: claude-code-auth
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              oauth_token: "{{ .claude_code_oauth_token }}"
+        data:
+          - secretKey: claude_code_oauth_token
+            remoteRef:
+              key: hermes-${BOT_NAME}/claude_code_oauth_token
       # Claude Code's GitHub access (CLAUDE_CODE_ENABLED): a fine-grained
       # token limited to the repositories the bot may work on, plus the
       # bot's commit identity. Mounted into the screen pod only (persistence
@@ -886,29 +908,6 @@ spec:
             remoteRef:
               key: hermes-${BOT_NAME}/github_token
     rawResources:
-      # Claude Code in the screen pod reaches LiteLLM (CLAUDE_CODE_ENABLED):
-      # litellm/litellm on 4000, nothing else in the cluster. The screen's
-      # own key (claude-code-litellm) may call the Claude models only.
-      claude-code-litellm:
-        enabled: ${CLAUDE_CODE_ENABLED:=false}
-        forceRename: screen-litellm
-        manifest:
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          spec:
-            endpointSelector:
-              matchLabels:
-                app.kubernetes.io/name: hermes
-                app.kubernetes.io/controller: screen
-            egress:
-              - toEndpoints:
-                  - matchLabels:
-                      k8s:io.kubernetes.pod.namespace: litellm
-                      app.kubernetes.io/name: litellm
-                toPorts:
-                  - ports:
-                      - port: "4000"
-                        protocol: TCP
       # Tavily for web_search/web_extract, only with TAVILY_ENABLED:
       # api.tavily.com on 443, nothing else. toFQDNs needs the DNS proxy to
       # see the agent's lookups, hence the L7 DNS rule (as agent-outlook).
@@ -1260,9 +1259,9 @@ spec:
             app:
               - path: /dev/shm
       # Claude Code's credentials, screen pod only, only with
-      # CLAUDE_CODE_ENABLED (component hermes-bot/claude-code): the screen's
-      # own LiteLLM key (Flux Kustomization claude-code-key) and the GitHub
-      # token with the bot's git identity (ExternalSecret claude-code-github).
+      # CLAUDE_CODE_ENABLED: the Claude subscription token (ExternalSecret
+      # claude-code-auth) and the GitHub token with the bot's git identity
+      # (ExternalSecret claude-code-github).
       # Files, because ssh sessions do not inherit the pod's environment; the
       # wrappers in images/hermes-screen/claude-code read them. Both sources
       # optional, so a missing 1Password field never holds the sandbox in
@@ -1275,11 +1274,11 @@ spec:
             defaultMode: 0440
             sources:
               - secret:
-                  name: claude-code-litellm
+                  name: claude-code-auth
                   optional: true
                   items:
-                    - key: litellm_key
-                      path: litellm_key
+                    - key: oauth_token
+                      path: oauth_token
               - secret:
                   name: claude-code-github
                   optional: true
