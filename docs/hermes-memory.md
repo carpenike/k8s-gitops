@@ -222,6 +222,50 @@ existing volume").
   drop database `hindsight`. Its `databaseReclaimPolicy` is `retain`, so
   deleting the object alone keeps the data.
 
+## A bot's side (input `HINDSIGHT_ENABLED`)
+
+`HINDSIGHT_ENABLED=true` in a bot's inputs (today: Chief) adds, all gated
+on that input in the hermes-bot HelmRelease:
+
+- **ExternalSecret `hindsight`** in `hermes-<bot>`. It reads
+  `hindsight_api_key` from item `hermes-<bot>` and adds fixed values:
+  - `HINDSIGHT_MODE=local_external`;
+  - `HINDSIGHT_API_URL=http://hindsight.hermes-memory.svc.cluster.local:8888`;
+  - `HINDSIGHT_BANK_ID=hermes`, `HINDSIGHT_TIMEOUT=30`;
+  - `HINDSIGHT_RETAIN_INDICATOR=false`, `HINDSIGHT_RECALL_INDICATOR=false`.
+
+  The agent's containers read it through an optional `envFrom`; the screen
+  never does. Hermes strips `HINDSIGHT_API_KEY` and `HINDSIGHT_API_URL`
+  from child processes.
+- **CNP `agent-hindsight`:** agent egress to the Hindsight pods on 8888.
+- **The plugin.** The agent image (`images/hermes-agent`) carries the
+  Hindsight Hermes plugin at `/opt/hermes-plugins/hindsight`, vendored from
+  the commit Hermes v0.22.6's `plugin-catalog/hindsight.yaml` pins
+  (`d952b6e6`, plugin 1.2.3). It also has `hindsight-client` 0.10.1, the
+  version the plugin's lockfile resolves, in Hermes' venv. On each boot the
+  `config` init container, only when the key is there:
+  1. copies the plugin to `$HERMES_HOME/plugins/hindsight` (`/opt/data`,
+     the PVC, would shadow anything baked there);
+  2. runs `hermes config set memory.provider hindsight`.
+
+  Without the key (no 1Password field) it unsets the provider, and the bot
+  keeps Hermes' built-in memory instead of failing every turn. It warns if
+  a `config.json` exists.
+
+**How Hermes finds it** (`plugins/memory/__init__.py` at v0.22.6): memory
+providers are discovered by directory name, in this order, first match
+wins:
+
+1. bundled `plugins/memory/<name>/` in the Hermes tree;
+2. `$HERMES_HOME/plugins/<name>/`;
+3. `./.hermes/plugins/<name>/`, only with `HERMES_ENABLE_PROJECT_PLUGINS`;
+4. `hermes_agent.memory_providers` entry points.
+
+A directory counts if its `__init__.py` defines a `MemoryProvider`. There
+is no enable list: `memory.provider` names the one active provider. The
+image build copies the plugin into a scratch `$HERMES_HOME`, then checks
+`find_provider_dir("hindsight")` and `load_memory_provider("hindsight")`.
+
 ## Never run `hermes memory setup` in a pod
 
 The bots are configured by environment only: Secret `hindsight` in

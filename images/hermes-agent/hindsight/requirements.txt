@@ -1,0 +1,11 @@
+# hindsight-client for the Hindsight Hermes plugin (./plugin), installed with
+# --no-deps --require-hashes into Hermes' own venv. 0.10.1 is what the
+# plugin's uv.lock resolves at the pinned commit (its pyproject asks for
+# >=0.10.1,<1). Every other dependency (aiohttp, pydantic, python-dateutil,
+# typing-extensions, urllib3, yarl) is already in the venv inside the ranges
+# the client asks for; aiohttp-retry is the one that is not.
+# hindsight-embed is left out on purpose: only local_embedded mode imports it.
+hindsight-client==0.10.1 \
+    --hash=sha256:04e03353a0f9dcfa7b1b1000cccc8f077a93a788b27af62cc5e014b2dd3b960c
+aiohttp-retry==2.9.1 \
+    --hash=sha256:66d2759d1921838256a05a3f80ad7e724936f083e35be5abb5e16eed6be6dc54

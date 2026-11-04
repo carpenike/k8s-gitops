@@ -42,6 +42,7 @@ spec later:
 | `API_SERVER_ENABLED` | `true` | Optional, default `false`. The OpenAI-compatible API on envoy-internal ([API server](#api-server-opt-in)). `true` or `false` only |
 | `OUTLOOK_MCP_ENABLED` | `true` | Optional, default `false`. The Outlook MCP server ([Outlook](#outlook-opt-in)). `true` or `false` only |
 | `OUTLOOK_MCP_EXPECTED_USERNAME` | `ryan@ryanholt.net` | With `OUTLOOK_MCP_ENABLED`: the one Microsoft account the server may use. Committed as-is: this repo is public |
+| `HINDSIGHT_ENABLED` | `true` | Optional, default `false`. Long-term memory on the shared Hindsight server ([hermes-memory.md](hermes-memory.md)). `true` or `false` only |
 
 The `namespace:` line has to match `hermes-<BOT_NAME>`. Kustomize's
 namespace transformer cannot be driven by a ConfigMap value. The
@@ -260,7 +261,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN) |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |

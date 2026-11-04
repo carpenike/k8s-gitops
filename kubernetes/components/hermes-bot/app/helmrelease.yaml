@@ -49,9 +49,9 @@ spec:
               repository: ghcr.io/carpenike/hermes-agent
               # Built from images/hermes-agent by hermes-agent-image.yaml:
               # nousresearch/hermes-agent v0.22.6 (pinned by digest in its
-              # Dockerfile) plus the Outlook MCP server, inert unless
-              # OUTLOOK_MCP_ENABLED.
-              tag: v0.22.6-aae110d@sha256:a2255442d4c19a98d779f43a601e620f216140582c8bd7f4214aeba93b87f599
+              # Dockerfile) plus the Outlook MCP server and the Hindsight
+              # memory plugin, each inert unless its input is on.
+              tag: v0.22.6-33213e0@sha256:23b45b18a30c51361f57bf22860984c6885cb0a5f5430f9b9312cc30ad5a476f
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -96,11 +96,38 @@ spec:
                 else
                   hermes-outlook-config disable
                 fi
-            # Only api-server: stage2 reads API_SERVER_KEY (above). The
-            # gateway's credentials stay in the app container.
+                # Hindsight long-term memory (input HINDSIGHT_ENABLED;
+                # docs/hermes-memory.md). On only when the key reached this
+                # container (Secret hindsight): a missing 1Password field
+                # leaves the bot on built-in memory instead of a provider that
+                # fails every turn. The plugin is copied fresh from the image
+                # each boot, so the image's version always wins. Settings come
+                # from the environment only; a config.json would override it.
+                if [ '${HINDSIGHT_ENABLED:=false}' = true ] && [ -n "$${HINDSIGHT_API_KEY:-}" ]; then
+                  rm -rf /opt/data/plugins/hindsight
+                  install -d /opt/data/plugins
+                  cp -r /opt/hermes-plugins/hindsight /opt/data/plugins/hindsight
+                  hermes config set memory.provider hindsight
+                else
+                  if [ "$(hermes config get memory.provider 2>/dev/null)" = hindsight ]; then
+                    hermes config unset memory.provider
+                  fi
+                  rm -rf /opt/data/plugins/hindsight
+                fi
+                for f in /opt/data/hindsight/config.json /opt/data/.hindsight/config.json; do
+                  if [ -e "$f" ]; then
+                    echo "WARNING: $f overrides the Hindsight environment settings; delete it (docs/hermes-memory.md)" >&2
+                  fi
+                done
+            # api-server: stage2 reads API_SERVER_KEY (above). hindsight: the
+            # step above checks for its key. The gateway's other credentials
+            # stay in the app container.
             envFrom:
               - secretRef:
                   name: api-server
+                  optional: true
+              - secretRef:
+                  name: hindsight
                   optional: true
             securityContext: &restricted
               allowPrivilegeEscalation: false
@@ -167,6 +194,12 @@ spec:
               # block; `kubectl exec ... outlook-mcp --login` reads them here.
               - secretRef:
                   name: outlook-mcp
+                  optional: true
+              # HINDSIGHT_* for the memory provider, only for a bot with
+              # HINDSIGHT_ENABLED=true (ExternalSecret hindsight). Agent pod
+              # only: the screen never gets the key or a route to it.
+              - secretRef:
+                  name: hindsight
                   optional: true
             probes:
               liveness:
@@ -349,7 +382,59 @@ spec:
           - secretKey: outlook_tenant_id
             remoteRef:
               key: hermes-${BOT_NAME}/outlook_tenant_id
+      # Hindsight client settings (docs/hermes-memory.md): the bot's tenant
+      # key from 1Password plus fixed values. Hermes strips HINDSIGHT_API_KEY
+      # and HINDSIGHT_API_URL from child processes. Indicators off: no
+      # "retained"/"recalled" markers in Matrix replies.
+      hindsight:
+        enabled: ${HINDSIGHT_ENABLED:=false}
+        forceRename: hindsight
+        refreshInterval: 1h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: hindsight
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              HINDSIGHT_MODE: local_external
+              HINDSIGHT_API_URL: http://hindsight.hermes-memory.svc.cluster.local:8888
+              HINDSIGHT_API_KEY: "{{ .hindsight_api_key }}"
+              HINDSIGHT_BANK_ID: hermes
+              HINDSIGHT_TIMEOUT: "30"
+              HINDSIGHT_RETAIN_INDICATOR: "false"
+              HINDSIGHT_RECALL_INDICATOR: "false"
+        data:
+          - secretKey: hindsight_api_key
+            remoteRef:
+              key: hermes-${BOT_NAME}/hindsight_api_key
     rawResources:
+      # The agent's route to the shared memory server: hermes-memory's
+      # Hindsight pods on 8888, nothing else. Hindsight's own policy admits
+      # only agent pods from bot-labelled namespaces.
+      hindsight-egress:
+        enabled: ${HINDSIGHT_ENABLED:=false}
+        forceRename: agent-hindsight
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: hermes-memory
+                      app.kubernetes.io/name: hindsight
+                      app.kubernetes.io/component: api
+                toPorts:
+                  - ports:
+                      - port: "8888"
+                        protocol: TCP
       # The agent's only internet egress, and only with OUTLOOK_MCP_ENABLED:
       # Entra sign-in and Microsoft Graph on 443. toFQDNs needs the DNS
       # proxy to see the agent's lookups, hence the L7 DNS rule (all names
