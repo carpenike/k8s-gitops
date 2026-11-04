@@ -72,6 +72,11 @@ spec:
         HINDSIGHT_API_RERANKER_PROVIDER: local
         HINDSIGHT_API_RERANKER_LOCAL_MODEL: hindsight-ai/hs-rerank-1
         HINDSIGHT_API_TENANT_EXTENSION: hindsight_ext_static_keys_tenant:StaticKeysTenantExtension
+        # The in-process worker claims tasks under this id. It defaults to the
+        # pod hostname, which changes on every rollout, and tasks left in
+        # 'processing' under an old id are never recovered. One replica with
+        # Recreate, so a fixed id is safe: the next pod picks those tasks up.
+        HINDSIGHT_API_WORKER_ID: hindsight-api
     worker:
       enabled: false
     controlPlane:
