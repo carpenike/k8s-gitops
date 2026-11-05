@@ -30,7 +30,9 @@ spec:
       database: app
       owner: app
   # The plugin's sidecar archives every WAL segment to R2. Adding or
-  # removing this restarts the instances (standby first, then a switchover).
+  # removing this restarts the instances: the standby first, then the
+  # primary in place (primaryUpdateMethod restart, no switchover), so
+  # clients lose the database for a few minutes.
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true

@@ -21,8 +21,10 @@ spec:
 # 08:30 UTC: 03:30 in New York in winter (EST), 04:30 in summer (EDT). The
 # operator's cron is UTC and has no time-zone field. Barman base backup to
 # R2 through the plugin, taken from the standby when one is in sync. WAL is
-# archived continuously in between. immediate: the first base backup runs
-# when this object is created, so the R2 copy is restorable on day one.
+# archived continuously in between. immediate: a base backup runs when this
+# object is created. It can fail with "requested plugin is not available"
+# if it lands before the instances restart with the plugin sidecar; then
+# take one by hand (docs/postgres17.md, "First check after merge").
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
