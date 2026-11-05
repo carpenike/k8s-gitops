@@ -6,7 +6,8 @@
 #   - the Hindsight memory provider plugin and hindsight-client:
 #     HINDSIGHT_ENABLED (docs/hermes-memory.md)
 #   - the matrix-profile plugin (local, matrix-profile/): the bot changes its
-#     own Matrix display name and avatar; MATRIX_PROFILE_TOOLS
+#     own Matrix display name (mirrored to the Hermes profile name) and
+#     avatar; MATRIX_PROFILE_TOOLS
 #
 # Pins: the base by digest (below, and Renovate's docker datasource); the
 # Outlook server and every transitive package by outlook-mcp/package-lock.json
