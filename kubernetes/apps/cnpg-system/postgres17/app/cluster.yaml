@@ -3,9 +3,10 @@
 # Shared PostgreSQL 17. Forge's LiteLLM database is PostgreSQL 17, so a
 # custom-format dump from that server restores into this image.
 # The bootstrap database is `app`. LiteLLM uses the Database below.
-# Barman Cloud stays unattached: kubernetes/examples/cnpg-cluster.yaml still
-# points at s3.example.invalid. Snapshots use VolumeSnapshotClass csi-ceph-block
-# and remain on Ceph. waitForArchive is false because WAL is not archived.
+# Two backups: volume snapshots (csi-ceph-block, stay on Ceph) and Barman
+# Cloud to R2 (ObjectStore postgres17-r2: continuous WAL plus a daily base
+# backup, 30 days). waitForArchive stays false so a snapshot never waits on
+# R2. docs/postgres17.md.
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -28,6 +29,15 @@ spec:
     initdb:
       database: app
       owner: app
+  # The plugin's sidecar archives every WAL segment to R2. Adding or
+  # removing this restarts the instances: the standby first, then the
+  # primary in place (primaryUpdateMethod restart, no switchover), so
+  # clients lose the database for a few minutes.
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: postgres17-r2
   backup:
     volumeSnapshot:
       className: csi-ceph-block

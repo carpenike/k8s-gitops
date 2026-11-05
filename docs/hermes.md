@@ -478,7 +478,10 @@ Everything not in that table persists:
 - Watch and Take over on the desktop viewer.
 
 The bot changing its own Matrix name or avatar (`MATRIX_PROFILE_TOOLS`)
-also persists: that lives on Tuwunel, not in the volume.
+also persists. The Matrix profile lives on Tuwunel. The name the Webapp
+shows for the bot is `display_name` in `/opt/data/profile.yaml`, which the
+init container never touches. The Webapp sets it through Profiles, "Name
+this agent". With `MATRIX_PROFILE_TOOLS`, the bot's rename sets it too.
 
 ### Avoid in the Webapp
 
@@ -981,7 +984,7 @@ into the agent image at `/opt/hermes-plugins/matrix-profile`.
 | Tool | What |
 | --- | --- |
 | `matrix_get_profile` | The bot's user ID, display name and avatar (`mxc://` URL) |
-| `matrix_set_display_name` | A new display name, 1-64 characters, no control or formatting characters |
+| `matrix_set_display_name` | A new display name, 1-64 characters, no control or formatting characters. It goes to Matrix and to the Hermes profile's `display_name`, the name the Webapp shows (see below) |
 | `matrix_set_avatar` | A new avatar from a local PNG, JPEG, WebP or GIF of at most 5 MiB under `/workspace` or `$HERMES_HOME/cache`. It is uploaded to Tuwunel's media repository, then set as `avatar_url` |
 
 ### How it works
@@ -1007,6 +1010,17 @@ into the agent image at `/opt/hermes-plugins/matrix-profile`.
   `matrix-profile` to that list. Off, it removes both. Bundled plugins are
   unaffected: 55 stay enabled with or without the list (checked on the
   image).
+- **One name in Matrix and the Webapp.** Hermes keeps its own display
+  name for the agent, `display_name` in `$HERMES_HOME/profile.yaml`. Without
+  it, the Webapp shows "Hermes". After the Matrix rename succeeds,
+  `matrix_set_display_name` writes the same name there with Hermes'
+  `write_profile_meta`, keeping the file's other keys. If that write fails,
+  the tool still reports the Matrix rename and adds
+  `hermes_display_name_error`. `matrix_get_profile` returns the current
+  value as `hermes_display_name`. The init container never writes
+  `profile.yaml`, so the name survives restarts. A name set before this
+  change reaches the Webapp at the bot's next rename, or set it once in
+  the Webapp under Profiles, "Name this agent".
 - **Image build check.** The image build fails if discovery doesn't load
   the plugin or its three tools don't register.
 

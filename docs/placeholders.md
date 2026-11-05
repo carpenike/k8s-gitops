@@ -105,6 +105,18 @@ Before `kubernetes/apps/hermes-memory` reconciles, create in vault
 
 The LiteLLM key `hermes-memory` is provisioned in-cluster and has no item.
 
+## postgres17 backup to R2
+
+Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
+(see [postgres17.md](postgres17.md#1password)):
+
+| Item | Field | Value |
+| --- | --- | --- |
+| `postgres17-r2` (new) | `access_key_id` | R2 API token, Object Read & Write on the bucket only |
+| `postgres17-r2` | `secret_access_key` | That token's secret |
+| `postgres17-r2` | `endpoint_url` | `https://<account id>.r2.cloudflarestorage.com` |
+| `postgres17-r2` | `bucket` | Bucket name; objects go under `cnpg/postgres17/` |
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |
@@ -113,7 +125,7 @@ The LiteLLM key `hermes-memory` is provisioned in-cluster and has no item.
 | `/16` mask on `lan0` | `talos/all/20-network.yaml.tpl` | Confirm the LAN mask. v1 used DHCP and did not record it |
 | BMC mask | `cluster.example.toml` `[bmc].cidr` | `10.9.18.0/24` is inferred from `.20`–`.23`. No gateway was observed |
 | `nas-media.example.invalid` | `kubernetes/examples/nfs-pv.yaml` | Example only. The Scrypted recordings PV uses `10.20.0.10` and `/mnt/tank/share/scrypted` |
-| `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage and R2 endpoints and bucket names |
+| `s3.example.invalid`, `PLACEHOLDER_BUCKET_cnpg` | `kubernetes/examples/cnpg-cluster.yaml` | Garage endpoint and bucket for a second copy. postgres17's R2 values come from 1Password item `postgres17-r2` |
 | `refs/heads/rebuild` | flux-instance HelmRelease | `refs/heads/main` at cutover |
 
 `kubernetes/examples/` is not applied by Flux.

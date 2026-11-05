@@ -202,6 +202,10 @@ VolSync copies that volume to R2 (path `hermes-memory`, item
 recreated `hindsight-dumps` PVC is filled from the latest R2 snapshot
 first, like a bot's `agent-data`.
 
+postgres17 itself also goes to R2 through Barman Cloud (WAL plus a daily
+base backup, 30 days). That copy restores the whole server to a point in
+time, not one bot. See [postgres17.md](postgres17.md).
+
 Check a night's run:
 
 ```sh
