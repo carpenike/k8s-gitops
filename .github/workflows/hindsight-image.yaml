@@ -11,6 +11,11 @@ on:
       - images/hindsight/**
       - .github/workflows/hindsight-image.yaml
   workflow_dispatch:
+  # Weekly rebuild for base-image and apt security fixes; Renovate then opens
+  # the digest PR for the manifests. GitHub runs schedules only from the
+  # default branch, so this is dormant until rebuild is the default branch.
+  schedule:
+    - cron: "17 6 * * 5"
 
 permissions:
   contents: read
@@ -19,6 +24,13 @@ permissions:
 concurrency:
   group: hindsight-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # The Hindsight release images/hindsight/Dockerfile builds on.
+  # Renovate bumps it in the same PR as the base image (packageRules in
+  # .renovaterc.json5), so the image tags follow the upstream version.
+  # renovate: datasource=docker depName=ghcr.io/vectorize-io/hindsight-api
+  HINDSIGHT_VERSION: 1.2.0
 
 jobs:
   build:
@@ -40,19 +52,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 1.2.0 is the Hindsight release the Dockerfile builds on. Every build
-      # gets 1.2.0-<sha>; rebuild and main also move 1.2.0.
+      # Every build gets <HINDSIGHT_VERSION>-<sha>; rebuild and main also
+      # move the floating <HINDSIGHT_VERSION> tag, which the manifests pin by
+      # digest.
       - name: Image metadata
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/carpenike/hindsight
           tags: |
-            type=sha,prefix=1.2.0-,format=short
-            type=raw,value=1.2.0,enable=${{ github.ref == 'refs/heads/rebuild' || github.ref == 'refs/heads/main' }}
+            type=sha,prefix=${{ env.HINDSIGHT_VERSION }}-,format=short
+            type=raw,value=${{ env.HINDSIGHT_VERSION }},enable=${{ github.ref == 'refs/heads/rebuild' || github.ref == 'refs/heads/main' }}
           labels: |
             org.opencontainers.image.title=hindsight
-            org.opencontainers.image.description=Hindsight memory server (hindsight-api 1.2.0) with the static-keys tenant extension
+            org.opencontainers.image.description=Hindsight memory server (hindsight-api ${{ env.HINDSIGHT_VERSION }}) with the static-keys tenant extension
 
       - name: Build and push
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0

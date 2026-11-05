@@ -51,8 +51,10 @@ spec:
               # nousresearch/hermes-agent v0.22.6 (pinned by digest in its
               # Dockerfile) plus the Outlook MCP server, the Hindsight memory
               # plugin and the matrix-profile plugin, each inert unless its
-              # input is on.
-              tag: v0.22.6-23c9462@sha256:32ffd4ae7da5a4af22b67f4adcade25b7454aeba65ea030f59a966f828dddf43
+              # input is on. The floating tag moves on every rebuild build;
+              # Renovate re-pins the digest (docs/hermes.md "Updating the
+              # images").
+              tag: v0.22.6@sha256:32ffd4ae7da5a4af22b67f4adcade25b7454aeba65ea030f59a966f828dddf43
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -562,7 +564,8 @@ spec:
             image:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
-              tag: v0.22.6-6cdaa21@sha256:59a8c0d41470088d1ca113597fb422be7219c94911f59ceb0edff2de2e8ff953
+              # Floating tag, digest re-pinned by Renovate (docs/hermes.md).
+              tag: v0.22.6@sha256:59a8c0d41470088d1ca113597fb422be7219c94911f59ceb0edff2de2e8ff953
             env:
               TZ: America/New_York
             probes:

@@ -11,6 +11,11 @@ on:
       - images/hermes-agent/**
       - .github/workflows/hermes-agent-image.yaml
   workflow_dispatch:
+  # Weekly rebuild for base-image and apt security fixes; Renovate then opens
+  # the digest PR for the manifests. GitHub runs schedules only from the
+  # default branch, so this is dormant until rebuild is the default branch.
+  schedule:
+    - cron: "17 6 * * 5"
 
 permissions:
   contents: read
@@ -19,6 +24,13 @@ permissions:
 concurrency:
   group: hermes-agent-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # The Hermes release images/hermes-agent/Dockerfile builds on.
+  # Renovate bumps it in the same PR as the base image (packageRules in
+  # .renovaterc.json5), so the image tags follow the upstream version.
+  # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
+  HERMES_VERSION: v0.22.6
 
 jobs:
   build:
@@ -40,16 +52,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # v0.22.6 is the Hermes release the Dockerfile builds on. Every build
-      # gets v0.22.6-<sha>; rebuild and main also move v0.22.6.
+      # Every build gets <HERMES_VERSION>-<sha>; rebuild and main also
+      # move the floating <HERMES_VERSION> tag, which the manifests pin by
+      # digest.
       - name: Image metadata
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/carpenike/hermes-agent
           tags: |
-            type=sha,prefix=v0.22.6-,format=short
-            type=raw,value=v0.22.6,enable=${{ github.ref == 'refs/heads/rebuild' || github.ref == 'refs/heads/main' }}
+            type=sha,prefix=${{ env.HERMES_VERSION }}-,format=short
+            type=raw,value=${{ env.HERMES_VERSION }},enable=${{ github.ref == 'refs/heads/rebuild' || github.ref == 'refs/heads/main' }}
           labels: |
             org.opencontainers.image.title=hermes-agent
             org.opencontainers.image.description=Hermes agent pod: nousresearch/hermes-agent plus ms-365-mcp-server (Outlook MCP)
