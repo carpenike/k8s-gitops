@@ -7,6 +7,9 @@ secret reader and never returned to the model. Matrix lets any user set their ow
 ``displayname`` and ``avatar_url`` (client-server API, /profile/{userId}/...); an avatar is first
 uploaded to the homeserver's media repository (/_matrix/media/v3/upload).
 
+A new display name is also written to the Hermes profile's ``display_name`` (``profile.yaml`` in
+``HERMES_HOME``), the name the Hermes app shows for this agent, so Matrix and the app agree.
+
 Guards:
 - Matrix conversations only (``HERMES_SESSION_PLATFORM == "matrix"``): not the API server, the
   webhook, cron or the CLI, so a change comes from someone the Matrix allowlist admits.
@@ -99,6 +102,28 @@ def _profile_path(user_id: str, field: str = "") -> str:
     return path + ("/" + field if field else "")
 
 
+def _hermes_profile_name() -> str:
+    """The Hermes profile's display name, or "" when none is set or it cannot be read."""
+    try:
+        from hermes_cli.profiles import read_profile_meta
+        from hermes_constants import get_hermes_home
+        return read_profile_meta(Path(get_hermes_home())).get("display_name", "")
+    except Exception:
+        return ""
+
+
+def _set_hermes_profile_name(name: str) -> str | None:
+    """Write ``display_name`` into this profile's profile.yaml; an error message, or None."""
+    try:
+        from hermes_cli.profiles import write_profile_meta
+        from hermes_constants import get_hermes_home
+        write_profile_meta(Path(get_hermes_home()), display_name=name)
+    except Exception as exc:
+        logger.warning("matrix-profile: Hermes profile display name not updated: %s", exc)
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
 def _guard() -> str | None:
     """An error message when the call must be refused, else None."""
     if not _available():
@@ -118,7 +143,8 @@ def handle_get_profile(args: dict[str, Any], **_kw) -> str:
         prof = _request("GET", _profile_path(user_id))
     except Exception as exc:
         return _result(False, error=str(exc))
-    return _result(True, user_id=user_id, display_name=prof.get("displayname"), avatar_url=prof.get("avatar_url"))
+    return _result(True, user_id=user_id, display_name=prof.get("displayname"), avatar_url=prof.get("avatar_url"),
+                   hermes_display_name=_hermes_profile_name() or None)
 
 
 def handle_set_display_name(args: dict[str, Any], **_kw) -> str:
@@ -135,7 +161,11 @@ def handle_set_display_name(args: dict[str, Any], **_kw) -> str:
     except Exception as exc:
         return _result(False, error=str(exc))
     logger.info("matrix-profile: display name of %s set", user_id)
-    return _result(True, user_id=user_id, display_name=name)
+    # Matrix succeeded; the Hermes app's name follows. A failure there is reported, not fatal.
+    if (err := _set_hermes_profile_name(name)) is not None:
+        return _result(True, user_id=user_id, display_name=name, hermes_display_name_updated=False,
+                       hermes_display_name_error=err)
+    return _result(True, user_id=user_id, display_name=name, hermes_display_name_updated=True)
 
 
 def handle_set_avatar(args: dict[str, Any], **_kw) -> str:
@@ -179,12 +209,14 @@ def _schema(name: str, description: str, properties: dict[str, Any], required: l
 _TOOLS = (
     ("matrix_get_profile", _schema(
         "matrix_get_profile",
-        "Read your own Matrix profile: user ID, display name and avatar (mxc:// URL).",
+        "Read your own Matrix profile: user ID, display name and avatar (mxc:// URL), plus the name "
+        "the Hermes app shows for you (hermes_display_name).",
         {}, []), handle_get_profile, "🪪"),
     ("matrix_set_display_name", _schema(
         "matrix_set_display_name",
-        "Change your own Matrix display name everywhere (1-64 characters). Only when the user asks "
-        "for it in this Matrix conversation. Never use a real person's name.",
+        "Change your own display name (1-64 characters): on Matrix, and the name the Hermes app shows "
+        "for you. Only when the user asks for it in this Matrix conversation. Never use a real "
+        "person's name.",
         {"display_name": {"type": "string", "description": "The new display name."}},
         ["display_name"]), handle_set_display_name, "🏷️"),
     ("matrix_set_avatar", _schema(
