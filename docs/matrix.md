@@ -154,9 +154,10 @@ provisioning it again, so the new keys are not mixed with the old ones.
 Appservice `hermes-bots`, file `hermes-bots.yaml` in Secret
 `tuwunel-appservice-hermes-bots`, mounted as `appservice_dir`. The
 namespace is an explicit list of bot names, today
-`^@(chief):ryanholt\.net$`, exclusive, so a person cannot register those
-names. Bot IDs have no prefix; with a handful of accounts on this server a
-reserved prefix buys nothing. `rate_limited: false`. `url: null`: the
+`^@(chief|hank):ryanholt\.net$`, exclusive, so a person cannot register those
+names. Anchored at both ends: `@hankbot` or `@chief2` do not match. Bot
+IDs have no prefix; with a handful of accounts on this server a reserved
+prefix buys nothing. `rate_limited: false`. `url: null`: the
 appservice receives no transactions. Its sender is `@_hermes`, outside
 the bot namespace.
 
@@ -170,7 +171,7 @@ needs the YubiKey:
 
 ```sh
 sops kubernetes/apps/matrix/tuwunel/app/appservice-hermes-bots.sops.yaml
-# users regex: '^@(chief|newbot):ryanholt\.net$'
+# users regex: '^@(chief|hank|newbot):ryanholt\.net$'
 ```
 
 Tuwunel reads `appservice_dir` only at startup; Reloader restarts the pod
