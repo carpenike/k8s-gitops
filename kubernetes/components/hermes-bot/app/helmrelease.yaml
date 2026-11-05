@@ -52,7 +52,7 @@ spec:
               # Dockerfile) plus the Outlook MCP server, the Hindsight memory
               # plugin and the matrix-profile plugin, each inert unless its
               # input is on.
-              tag: v0.22.6-85d9362@sha256:246be8eb3b4f935e674354f6e4077387a42b8706d6901772030954ce76be8c07
+              tag: v0.22.6-23c9462@sha256:32ffd4ae7da5a4af22b67f4adcade25b7454aeba65ea030f59a966f828dddf43
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
