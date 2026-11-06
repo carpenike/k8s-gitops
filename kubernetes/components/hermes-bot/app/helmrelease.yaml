@@ -9,7 +9,8 @@
 #           runs here over ssh: terminal, file tools, execute_code, the
 #           browser and computer_use. No credentials.
 #
-# Hermes v0.22.6 behaviour this relies on (source paths at that tag):
+# Hermes v0.23.0 behaviour this relies on (source paths at that tag; the same
+# files as v0.22.6):
 #   tools/terminal_tool_backends.py  ssh backend from terminal.ssh_host,
 #     ssh_user, ssh_port, ssh_key; a failed connection raises
 #     EnvironmentConnectionError, it never falls back to local
@@ -48,8 +49,8 @@ spec:
             image: &agentImage
               repository: ghcr.io/carpenike/hermes-agent
               # Built from images/hermes-agent by hermes-agent-image.yaml:
-              # nousresearch/hermes-agent v0.22.6 (pinned by digest in its
-              # Dockerfile) plus the Outlook MCP server, the Hindsight memory
+              # nousresearch/hermes-agent at the release the tag names (pinned
+              # by digest in its Dockerfile) plus the Outlook MCP server, the Hindsight memory
               # plugin and the matrix-profile plugin, each inert unless its
               # input is on. The floating tag moves on every rebuild build;
               # Renovate re-pins the digest (docs/hermes.md "Updating the
