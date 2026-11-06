@@ -671,7 +671,8 @@ Secret is never created, and the bot runs without an API server.
 ### Rotating the key
 
 Change `api_server_key` in 1Password. External Secrets picks it up within
-the 1h refresh, or at once with:
+its 12h refresh; push it at once with
+([external-secrets.md](external-secrets.md)):
 
 ```sh
 kubectl -n hermes-<bot> annotate externalsecret api-server force-sync="$(date +%s)" --overwrite
@@ -901,7 +902,7 @@ them). Expect `202 {"status": "accepted", ...}`.
 ### Rotating the secret
 
 Change `webhook_secret` in 1Password and give the sender the new value.
-External Secrets picks it up within the 1h refresh, or at once with:
+External Secrets picks it up within its 12h refresh; push it at once with:
 
 ```sh
 kubectl -n hermes-<bot> annotate externalsecret webhook force-sync="$(date +%s)" --overwrite
@@ -1020,8 +1021,9 @@ kubectl -n hermes-<bot> exec deploy/hermes-screen -- gh auth status
 ```
 
 Renew either token by replacing its 1Password field (the Claude token
-lasts a year). External Secrets refreshes within the hour and the
-projected volume updates in place, with no restart.
+lasts a year), then force-sync `claude-code-auth` or `claude-code-github`
+(External Secrets otherwise takes up to 12h). The projected volume
+updates in place, with no restart.
 
 ## Matrix profile (opt-in)
 
@@ -1234,7 +1236,7 @@ auxiliary tasks with provider `auto` inherit the main model.
 ### Rotating the key
 
 Create a new key in Tavily, put it in `tavily_api_key`, then revoke the
-old one. External Secrets picks it up within the 1h refresh, or at once
+old one. External Secrets picks it up within its 12h refresh; push it at once
 with:
 
 ```sh

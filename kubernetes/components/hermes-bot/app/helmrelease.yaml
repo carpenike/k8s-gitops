@@ -726,7 +726,7 @@ spec:
       api-server:
         enabled: ${API_SERVER_ENABLED:=false}
         forceRename: api-server
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -750,7 +750,7 @@ spec:
       outlook-mcp:
         enabled: ${OUTLOOK_MCP_ENABLED:=false}
         forceRename: outlook-mcp
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -777,7 +777,7 @@ spec:
       hindsight:
         enabled: ${HINDSIGHT_ENABLED:=false}
         forceRename: hindsight
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -804,7 +804,7 @@ spec:
       webhook:
         enabled: ${WEBHOOK_ENABLED:=false}
         forceRename: webhook
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -826,7 +826,7 @@ spec:
       tavily:
         enabled: ${TAVILY_ENABLED:=false}
         forceRename: tavily
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -846,7 +846,7 @@ spec:
       webapp:
         enabled: ${WEBAPP_ENABLED:=false}
         forceRename: webapp
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -869,7 +869,7 @@ spec:
       claude-code-auth:
         enabled: ${CLAUDE_CODE_ENABLED:=false}
         forceRename: claude-code-auth
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -892,7 +892,7 @@ spec:
       claude-code-github:
         enabled: ${CLAUDE_CODE_ENABLED:=false}
         forceRename: claude-code-github
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
