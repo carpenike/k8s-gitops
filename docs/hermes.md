@@ -1,6 +1,6 @@
 # Hermes agents
 
-Hermes Agent (`docker.io/nousresearch/hermes-agent`, v0.22.6) bots on
+Hermes Agent (`docker.io/nousresearch/hermes-agent`, v0.23.0) bots on
 Matrix (`ryanholt.net`, [matrix.md](matrix.md)). Each bot is a folder of
 inputs under `kubernetes/apps/hermes/<bot>/`, built by the Kustomize
 component `kubernetes/components/hermes-bot/`, in its own namespace
@@ -160,7 +160,7 @@ LiteLLM. Hermes then falls back to FAL, which has no key and no egress
 here, so `image_generate` fails. The tool is in the bot's Matrix and
 webhook toolsets.
 
-Checked on 4 Nov 2026 in Chief's agent pod with a scratch `HERMES_HOME`:
+Checked on 4 Nov 2026 (v0.22.6) in Chief's agent pod with a scratch `HERMES_HOME`:
 the plugin generated a 1024×1024 PNG with `gpt-image-2.5-flare` through
 LiteLLM in about 13 s.
 
@@ -243,11 +243,11 @@ path, or empty if there is none.
 
 `ghcr.io/carpenike/hermes-screen`, built from
 `images/hermes-screen/Dockerfile`, with `runtimeClassName: kata-qemu`. The
-Dockerfile is upstream `docker/sandbox-desktop.Dockerfile` at v0.22.6
+Dockerfile is upstream `docker/sandbox-desktop.Dockerfile` at v0.23.0
 (Xvnc, Xfce, headed Chromium, cua-driver), plus `openssh-server`, with
 passwordless sudo removed. Upstream publishes
 `nousresearch/hermes-sandbox:*-desktop` only up to v0.21.7. Its
-Dockerfile differs from v0.22.6, so the image is built here
+Dockerfile differs from v0.23.0's, so the image is built here
 (`.github/workflows/hermes-screen-image.yaml`) and pinned by digest.
 
 sshd (`images/hermes-screen/sshd_config`) runs as `pn` (uid 1000) on
@@ -289,7 +289,7 @@ and no LAN or cluster routes.
 
 ### Where tools run
 
-From the Hermes source at v0.22.6:
+From the Hermes source at v0.23.0:
 
 | Source | Behaviour |
 | --- | --- |
@@ -348,7 +348,7 @@ belongs in Matrix or a skill.
 
 Hermes keeps the less-used tools out of each prompt and offers
 `tool_search` to find them (`tools/tool_search.py`; 21 of Chief's tools
-were deferred on 4 Nov 2026, the `matrix-profile` tools among them). A
+were deferred on 4 Nov 2026 on v0.22.6, the `matrix-profile` tools among them). A
 search has two parts:
 
 1. **Local.** It covers the bot's own installed tools: built-in, plugin
@@ -383,8 +383,8 @@ Both pod images are built here (`images/hermes-agent`,
 are public, so Renovate's docker datasource reads them without
 credentials. Each build gets an immutable `<version>-<sha>` tag. A build
 on `rebuild` also moves the floating `<version>` tag, for example
-`v0.22.6`. The HelmRelease pins the floating tag by digest,
-`tag: v0.22.6@sha256:…`.
+`v0.23.0`. The HelmRelease pins the floating tag by digest,
+`tag: v0.23.0@sha256:…`.
 
 | What changes | Who notices | What lands |
 | --- | --- | --- |
@@ -392,7 +392,7 @@ on `rebuild` also moves the floating `<version>` tag, for example
 | Base OS and apt fixes | The weekly rebuild (Fridays), and Renovate digest PRs for the base images in the Dockerfiles | Same as above |
 | Playwright, cua-driver, Claude Code, gh | Renovate, from the `# renovate:` annotations in `images/hermes-screen/Dockerfile` | A version PR; merging it rebuilds the screen image |
 | Outlook MCP server | Nobody: bumped by hand ([Upgrades and the pin](#upgrades-and-the-pin)) | |
-| A new Hermes release | Renovate's **hermes** group | One PR: `ARG HERMES_AGENT_IMAGE` and `HERMES_VERSION` in both workflows |
+| A new Hermes release | Renovate's **hermes** group | One PR: `ARG HERMES_AGENT_IMAGE`, `HERMES_VERSION` in both workflows, and the `hermes-ssh-keygen` Job's image |
 
 GitHub runs `schedule:` triggers only from the default branch. Until
 `rebuild` is the default branch, the weekly rebuild does not fire. Base
@@ -411,11 +411,61 @@ but not the screen recipe. Before merging it:
    `k8s-gitops:` change, the `# renovate:` lines and the Claude Code
    block, and update the version in the header.
 2. Read the release notes against this page. Sections marked with a
-   version, such as "How Hermes handles it (v0.22.6)", say what to
+   version, such as "How Hermes handles it (v0.23.0)", say what to
    recheck. Check the Hindsight plugin commit in
    `plugin-catalog/hindsight.yaml` against `images/hermes-agent/hindsight`.
+   Release notes for a minor release roll up its patch releases, so diff
+   the files this page cites between the pinned tag and the new one
+   rather than trusting the notes' "upgrade notes" to be new.
 3. Merge. Both workflows build and push the new floating tag. Renovate
-   then opens the self-built images PR from `v0.22.6` to the new tag.
+   then opens the self-built images PR from the old tag to the new one.
+
+### v0.22.6 to v0.23.0 (6 Nov 2026)
+
+Checked against the source at both tags
+(`nousresearch/hermes-agent:v0.23.0@sha256:adb78909…`, git
+`2bd378ed`). Not yet checked in a pod: that waits for the self-built
+images PR (smoke list in the pull request).
+
+- **Already in v0.22.6.** The v0.23.0 notes' upgrade items were live on
+  Chief before this bump: `browser_exec` is the only browser automation
+  tool (with `browser_cdp`, `browser_dialog`, `browser_vault`), `hermes mcp
+  serve` is the `mcp-serve` plugin, the Office skills are one
+  `microsoft-office` skill, and `webapp.enabled` defaults to `false`.
+  Nothing in this repo names the removed `browser_*` tools, `mcp serve`
+  or the old Office skills.
+- **One gateway.** `gateway/run_startup.py` (`_start_connect_pending`),
+  `gateway/platforms/api_server.py` and `gateway/platforms/webhook.py`
+  still run Matrix, the API server and the webhook in the one `hermes
+  gateway run` process. Unchanged: `docker/stage2-hook.sh` (it still
+  writes `API_SERVER_KEY` into `.env` and warns that the `.env` value
+  wins), `hermes_cli/env_loader.py` (`override=True`), so the init
+  container's `.env` scrub stays.
+- **Unchanged files** behind the rest of this page: the terminal, ssh and
+  file-sync backends, `tools/bot_desktop/`, tool search and connectors
+  (`tools.connectors.enabled` still defaults to `true`, so the override
+  stays), the MCP trust gate and approval prompt, the web and image
+  plugins, the Webapp listener, viewer and Pocket ID provider, and
+  `agent/vault_backends/`.
+- **Small changes, no component change:** a stdio MCP child (Outlook) now
+  also gets `HERMES_HOME`; a Matrix approval card answers only its own
+  request, so a stale card can't approve the next one; `session_search`
+  with no query lists 10 sessions; memory providers gain no-op
+  `on_profile_created`/`on_profile_renamed` hooks.
+- **Hindsight.** The v0.23.0 catalog moves the plugin to `f14cc1eb`
+  (1.2.4), which takes hindsight-client 1.x. The image keeps 1.2.3 and
+  client 0.10.1; the provider interface it uses is unchanged
+  ([hermes-memory.md](hermes-memory.md)).
+- **1Password.** The `onepassword` `browser_vault` backend still reads
+  Login items only (`op item list --categories Login`); cards are still
+  upstream issue #122547 (open). No bot configures it, and
+  `secrets.onepassword.enabled` stays `false`, so `op` never runs: the
+  `op` daemon leak (#87082, open) and the `os.environ` hydration of
+  secret sources (#107700, open) don't reach these pods. Site passwords
+  don't go through Hermes secret sources here.
+- **Importers.** `hermes migrate grok-bot` exists (also in v0.22.6). It
+  installs the `agent-importers` catalog plugin, which the agent cannot
+  fetch, then reads a Grok Bot self-export. Nothing here runs it.
 
 ## Network
 
@@ -507,8 +557,8 @@ this agent". With `MATRIX_PROFILE_TOOLS`, the bot's rename sets it too.
 ### Health checks: run doctor in the app container
 
 The Webapp's Maintenance page runs `hermes doctor` in a process without
-the gateway's credentials. On 4 Nov it reported three working features as
-broken:
+the gateway's credentials. On 4 Nov (v0.22.6) it reported three working
+features as broken:
 
 - web search / extract: "tavily selected; provider not configured";
 - `image_gen` unavailable;
@@ -556,7 +606,7 @@ that one input:
 | CiliumNetworkPolicy `agent-api` | Ingress to 8642 from the envoy-internal proxies only. Agent egress is unchanged |
 | ReferenceGrant `agent-api-gateway-auth` | Lets `pocket-id-exempt` select the route |
 
-The agent reads the Secret through an optional `envFrom`. In v0.22.6 the
+The agent reads the Secret through an optional `envFrom`. In v0.23.0 the
 key, not `API_SERVER_ENABLED`, is what starts the server:
 `gateway/config_env.py` `_api_server` enables it whenever
 `API_SERVER_KEY` is a usable secret (16+ characters, not a placeholder),
@@ -581,7 +631,7 @@ Matrix.
 
 ### What it shares with Matrix
 
-From the source at v0.22.6:
+From the source at v0.23.0:
 
 - **One process.** The API server is a gateway platform adapter
   (`gateway/platforms/api_server.py`). `hermes gateway run` connects every
@@ -711,7 +761,7 @@ is "Chief Engineer" to Chief, from any host. Keep it only on the
 sender's side (and `op read` for Ryan's own tests), and rotate it if it
 leaks ([Rotating the secret](#rotating-the-secret)).
 
-### How Hermes handles it (v0.22.6)
+### How Hermes handles it (v0.23.0)
 
 From `gateway/platforms/webhook.py` and `gateway/config_env.py`:
 
@@ -783,7 +833,7 @@ everything that reaches people or services outside Matrix:
 | | `cronjob`: a scheduled job runs later, unattended, and delivers anywhere |
 | | `delegation`: a subagent's toolset was not checked |
 
-The resolved set was checked in Chief's pod with Hermes' own
+The resolved set was checked (v0.22.6) in Chief's pod with Hermes' own
 `_get_platform_tools`: all twelve kept toolsets survive the webhook
 platform's filtering, and no MCP server is added.
 
@@ -976,7 +1026,7 @@ projected volume updates in place, with no restart.
 ## Matrix profile (opt-in)
 
 `MATRIX_PROFILE_TOOLS=true` lets the bot manage its own Matrix profile:
-its display name and avatar. Today only Chief has it. Hermes v0.22.6 has
+its display name and avatar. Today only Chief has it. Hermes v0.23.0 has
 no tool for this; its Matrix adapter only reads other members' names. So
 this is a small local plugin, `images/hermes-agent/matrix-profile`, baked
 into the agent image at `/opt/hermes-plugins/matrix-profile`.
@@ -1009,7 +1059,7 @@ into the agent image at `/opt/hermes-plugins/matrix-profile`.
   `$HERMES_HOME/plugins/matrix-profile` on every boot and adds
   `matrix-profile` to that list. Off, it removes both. Bundled plugins are
   unaffected: 55 stay enabled with or without the list (checked on the
-  image).
+  v0.22.6 image; recount on v0.23.0 after the digest PR).
 - **One name in Matrix and the Webapp.** Hermes keeps its own display
   name for the agent, `display_name` in `$HERMES_HOME/profile.yaml`. Without
   it, the Webapp shows "Hermes". After the Matrix rename succeeds,
@@ -1024,7 +1074,7 @@ into the agent image at `/opt/hermes-plugins/matrix-profile`.
 - **Image build check.** The image build fails if discovery doesn't load
   the plugin or its three tools don't register.
 
-Checked on 4 Nov 2026 against Tuwunel from Chief's agent pod:
+Checked on 4 Nov 2026 (v0.22.6) against Tuwunel from Chief's agent pod:
 `matrix_get_profile` returned `@chief:ryanholt.net`, display name `chief`,
 no avatar. Setting the display name to that same value succeeded. The
 name and path guards refused bad input.
@@ -1084,7 +1134,7 @@ a restart, and what to avoid (New bot, internet tools, API keys), is in
 - **Without the 1Password field** no provider registers. The gated Webapp
   then stays off and the rest of the bot runs normally.
 
-### How it works (v0.22.6)
+### How it works (v0.23.0)
 
 - **The viewer path.** The viewer is `/api/display/ws`
   (`hermes_cli/web_routers/display.py`). The page gets a single-use,
@@ -1145,7 +1195,7 @@ inputs; today only Chief does. When it is on, the component adds:
 
 ### Strict backend, no fallback
 
-From Hermes v0.22.6 (`tools/web_tools.py`, `agent/web_search_registry.py`,
+From Hermes v0.23.0 (`tools/web_tools.py`, `agent/web_search_registry.py`,
 `plugins/web/keyless_mcp.py`, `plugins/web/tavily/provider.py`):
 
 - A stored `web.backend` is used as-is: no availability probe, no switch
@@ -1164,7 +1214,7 @@ From Hermes v0.22.6 (`tools/web_tools.py`, `agent/web_search_registry.py`,
 
 ### No LLM in `web_extract`
 
-In v0.22.6 `web_extract` returns clean page content with **no LLM
+In v0.23.0 `web_extract` returns clean page content with **no LLM
 summarization** (`tools/web_tools.py`: "Extract clean page content (no
 LLM)"). Pages over `web.extract_char_limit` (15000) come back head and
 tail, with the full text saved to disk for `read_file`.
@@ -1213,7 +1263,7 @@ bot turns it on with `OUTLOOK_MCP_ENABLED=true`. Today only Chief does.
 - **Server and pin.** [Softeria/ms-365-mcp-server](https://github.com/Softeria/ms-365-mcp-server)
   **0.178.0**, baked into `ghcr.io/carpenike/hermes-agent`
   (`images/hermes-agent`). That image is upstream
-  `nousresearch/hermes-agent` v0.22.6 by digest, plus the server installed
+  `nousresearch/hermes-agent` v0.23.0 by digest, plus the server installed
   by `npm ci` from a vendored `package-lock.json`, without optional
   dependencies or install scripts. Nothing is fetched at runtime. Every
   bot uses this image; the server only runs for a bot that turns it on.
@@ -1299,7 +1349,7 @@ their own approval prompts.
 
 ### Approvals: what Ryan sees, and when nobody can answer
 
-From Hermes v0.22.6, `tools/mcp_tool_handlers.py` (`_trust_gate_check`,
+From Hermes v0.23.0, `tools/mcp_tool_handlers.py` (`_trust_gate_check`,
 `_ask_for_call`, `_format_trust_gate_arguments`) and
 `tools/approval_prompt.py` (`request_elicitation_consent`).
 

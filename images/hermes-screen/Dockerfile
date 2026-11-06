@@ -1,10 +1,11 @@
 # Hermes screen pod image.
 #
-# Vendored from NousResearch/hermes-agent v0.22.6 docker/sandbox-desktop.Dockerfile
+# Vendored from NousResearch/hermes-agent v0.23.0 docker/sandbox-desktop.Dockerfile
 # (the image Hermes expects behind a docker/ssh terminal backend: Xvnc, Xfce,
 # headed Playwright Chromium, cua-driver, user pn). nousresearch/hermes-sandbox
-# is not published for v0.22.x (latest tag v0.21.7-desktop, which still bakes
-# agent-browser), so this builds the v0.22.6 recipe. Local changes, each marked
+# is not published for v0.22.x or v0.23.x (latest tag v0.21.7-desktop, which
+# still bakes agent-browser), so this builds the v0.23.0 recipe (unchanged from
+# v0.22.6 upstream). Local changes, each marked
 # "k8s-gitops:" below:
 #   - base image pinned by digest; Playwright pinned instead of playwright@1
 #   - pn's NOPASSWD sudo removed (the pod runs with no_new_privs anyway)
