@@ -17,6 +17,7 @@
 | [lessons-from-v1.md](lessons-from-v1.md) | What the archived tree taught us |
 | [placeholders.md](placeholders.md) | Values a person still has to fill in |
 | [sops.md](sops.md) | YubiKey decryption, and the age key Flux gets later |
+| [external-secrets.md](external-secrets.md) | 1Password through External Secrets: rate limits, the 12h refresh, rotating with force-sync |
 | [adr/](adr/) | Decision records |
 
 `AGENTS.md` at the repo root is the instruction file for agents.
