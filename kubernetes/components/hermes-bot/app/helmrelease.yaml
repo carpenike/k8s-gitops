@@ -410,7 +410,8 @@ spec:
                 import sys
 
                 sys.path.insert(0, "/opt/hermes")
-                import yaml
+                # Hermes' own YAML wrapper (ruamel); the venv has no PyYAML.
+                import hermes_yaml as yaml
                 from hermes_cli.config import read_raw_config, save_config
 
                 SRC = "/etc/hermes-mcp/mcp-servers.yaml"
