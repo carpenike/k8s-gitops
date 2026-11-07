@@ -15,7 +15,7 @@ metadata:
   name: postgres17-r2
   namespace: postgres17-drill
 spec:
-  refreshInterval: 1h
+  refreshInterval: 12h
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword

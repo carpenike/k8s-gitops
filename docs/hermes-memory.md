@@ -313,9 +313,14 @@ on that input in the hermes-bot HelmRelease:
 - **CNP `agent-hindsight`:** agent egress to the Hindsight pods on 8888.
 - **The plugin.** The agent image (`images/hermes-agent`) carries the
   Hindsight Hermes plugin at `/opt/hermes-plugins/hindsight`, vendored from
-  the commit Hermes v0.22.6's `plugin-catalog/hindsight.yaml` pins
+  the commit Hermes v0.22.6's `plugin-catalog/hindsight.yaml` pinned
   (`d952b6e6`, plugin 1.2.3). It also has `hindsight-client` 0.10.1, the
-  version the plugin's lockfile resolves, in Hermes' venv. On each boot the
+  version the plugin's lockfile resolves, in Hermes' venv. Hermes v0.23.0's
+  catalog pins `f14cc1eb` (plugin 1.2.4: retain-durability and recall-retry
+  fixes, and a lockfile on hindsight-client 1.2.0). That is not vendored
+  yet: it moves the client a major version, so it is its own change. 1.2.3
+  still loads on v0.23.0, whose memory-provider interface only adds hooks
+  with no-op defaults. On each boot the
   `config` init container, only when the key is there:
   1. copies the plugin to `$HERMES_HOME/plugins/hindsight` (`/opt/data`,
      the PVC, would shadow anything baked there);
@@ -325,7 +330,7 @@ on that input in the hermes-bot HelmRelease:
   keeps Hermes' built-in memory instead of failing every turn. It warns if
   a `config.json` exists.
 
-**How Hermes finds it** (`plugins/memory/__init__.py` at v0.22.6): memory
+**How Hermes finds it** (`plugins/memory/__init__.py` at v0.23.0): memory
 providers are discovered by directory name, in this order, first match
 wins:
 

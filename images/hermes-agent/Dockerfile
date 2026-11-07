@@ -14,11 +14,13 @@
 # (integrity hashes; `npm ci` refuses a mismatch), with optional dependencies
 # (keytar, Azure identity/Key Vault) and install scripts left out; the
 # Hindsight plugin by its vendored source (hindsight/plugin, from
-# vectorize-io/hindsight d952b6e655fccab4581ee0722b51c5f103873d12, the commit
-# Hermes v0.22.6's plugin-catalog/hindsight.yaml names) and hindsight-client
-# by hindsight/requirements.txt (hashes).
+# vectorize-io/hindsight d952b6e655fccab4581ee0722b51c5f103873d12, plugin
+# 1.2.3, the commit Hermes v0.22.6's plugin-catalog/hindsight.yaml named; the
+# v0.23.0 catalog names f14cc1e, plugin 1.2.4 with hindsight-client 1.x, not
+# taken yet: docs/hermes-memory.md) and hindsight-client by
+# hindsight/requirements.txt (hashes).
 
-ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.22.6@sha256:d27689bc6e8581ec884a7227c9101fdaebf6c853cff8859020dac14f21452b4d
+ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
 
 # Pure-Python wheels for Hermes' venv, built against the same Python (3.14.9).
 FROM docker.io/library/python:3.14.9-slim@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8 AS hindsight-client
