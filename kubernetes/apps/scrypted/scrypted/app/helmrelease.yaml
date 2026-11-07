@@ -34,7 +34,7 @@ spec:
             image:
               repository: docker.io/library/busybox
               # renovate: datasource=docker depName=docker.io/library/busybox
-              tag: "1.37"
+              tag: "1.38"
             # Connected route 10.30.0.0/16 is on net1, so phones on VLAN 30
             # are already sourced from 10.30.0.31. Cameras are 10.50.0.0/16.
             # Without this route the kernel uses eth0, and Cilium masquerades
