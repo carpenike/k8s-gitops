@@ -87,6 +87,8 @@ spec later:
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
 | `CLAUDE_CODE_MERGE` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
+| `TASK_BOARD_ENABLED` | `true` | Optional, default `false`. The shared OpenProject task board: egress to `openproject-mcp` (CNP `agent-task-board`) and skill `homelab/task-board`. The bot's `mcp-servers.yaml` declares the `openproject` server with its token from `hermes-<bot>-mcp` ([openproject.md](openproject.md), "Bot access"). `true` or `false` only |
+| `TASK_BOARD_RYAN_USER_ID` | `4` | Optional, default `4`. Ryan's OpenProject user id, which skill `task-board` treats as Ryan speaking. An id, because non-admins can't see other users' logins and anyone can change their display name |
 | `A2A_ENABLED` | `true` | Optional, default `false`. The A2A server (Agent Card and JSON-RPC, bearer tokens per peer) and the outbound `a2a` tools ([A2A](#a2a-opt-in)). `true` or `false` only |
 | `A2A_TRUSTED_PEERS` | `chief,chief-engineer` | With `A2A_ENABLED`: the peer names allowed to send tasks. Each must be a name in the bot's `a2a_peer_tokens` field. Empty: Hermes refuses every peer |
 | `A2A_HERMES_PEER` | `chief` | With `A2A_ENABLED`: the one other bot this bot calls, as `a2a_agents.<name>` at `agent-a2a.hermes-<name>`, and the only one its egress reaches |
@@ -1591,8 +1593,9 @@ block anyway. Delete the 1Password field if the key is no longer used.
 
 A bot's remote MCP servers are declared in its folder, in
 `mcp-servers.yaml`, the way its persona is. Outlook stays separate (a
-local server baked into the image, [Outlook](#outlook-opt-in)). Today only
-Hank has one: Context7, for library docs.
+local server baked into the image, [Outlook](#outlook-opt-in)). Hank has
+Context7, for library docs, and both bots have `openproject`, the task
+board ([openproject.md](openproject.md), "Bot access").
 
 | File in `kubernetes/apps/hermes/<bot>/` | What it does |
 | --- | --- |
@@ -1626,7 +1629,10 @@ What the init container does with it:
   names and globs. Resources, prompts and sampling are always off.
 - **`trust` defaults to `untrusted`:** every tool without `readOnlyHint`
   asks Ryan first, and fails closed in cron and unattended runs. Set
-  `full` only for a server whose tools are all read-only.
+  `full` only for a server whose tools are all read-only, or whose writes
+  stay inside a system of our own under the bot's own identity: the task
+  board's `openproject` server is the one case, since every write is a
+  board change recorded under the bot's OpenProject user.
 - **`${VAR}` is left for Hermes**, which fills it from the agent's
   environment (Secret `mcp`) when it connects. A missing variable fails
   closed: Hermes refuses to connect and names the variable, rather than
@@ -1657,7 +1663,9 @@ kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes mcp test <name
 ### Egress
 
 `mcp-egress.yaml` is a plain manifest in the bot's folder, applied
-without substitution, so it can only name public hosts. A server on a host
+without substitution, so it can only name public hosts. An in-cluster
+server's egress is a component rule behind an input instead, like
+`agent-task-board` for `openproject-mcp` (`TASK_BOARD_ENABLED`). A server on a host
 under `${SECRET_DOMAIN}` (homelab-mcp, likely Whiskey) needs its egress rule in
 the component instead, behind an input, so the domain comes from
 `cluster-secrets`. None exists yet.

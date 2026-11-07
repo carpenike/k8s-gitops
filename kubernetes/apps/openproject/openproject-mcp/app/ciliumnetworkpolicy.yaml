@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# In: 8000 from Hermes agent pods only, in namespaces the hermes-bot
+# component labels hermes.holthome.net/bot (screen pods carry
+# app.kubernetes.io/controller: screen and never match). Out: DNS and
+# OpenProject's web pods on 8080. No internet. Each request carries the
+# calling bot's own OpenProject API token; this pod holds no secrets.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: openproject-mcp
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: openproject-mcp
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            # Without a namespace key Cilium scopes the selector to this
+            # policy's namespace; Exists plus the label spans hermes-*.
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/instance: openproject
+            app.kubernetes.io/name: openproject
+            openproject/process: web
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

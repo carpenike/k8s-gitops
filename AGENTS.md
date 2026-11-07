@@ -46,9 +46,10 @@ updated in a pull request.
   the result. Bootstrap commands in `bootstrap/README.md` are run by a
   person, on a workstation, with values that never enter git.
 - Do not point Flux at a live cluster from CI. Workflows install nothing
-  and use no GitHub secrets. Three exceptions: `hermes-screen-image.yaml`,
-  `hermes-agent-image.yaml` and `hindsight-image.yaml` build
-  `images/hermes-screen`, `images/hermes-agent` and `images/hindsight` and
+  and use no GitHub secrets. Four exceptions: `hermes-screen-image.yaml`,
+  `hermes-agent-image.yaml`, `hindsight-image.yaml` and
+  `openproject-mcp-image.yaml` build `images/hermes-screen`,
+  `images/hermes-agent`, `images/hindsight` and `images/openproject-mcp` and
   push them to `ghcr.io/carpenike` with the built-in `GITHUB_TOKEN`
   (`packages: write`). They deploy nothing; manifests pin the pushed
   digests.

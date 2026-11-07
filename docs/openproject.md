@@ -76,13 +76,71 @@ kubectl -n cnpg-system get database openproject -o jsonpath='{.status.applied}{"
 Then open `https://tasks.<internal domain>`, sign in as `admin`, change
 the password, and turn on 2FA.
 
-## Bot access (next step)
+## Bot access
 
-Not wired yet. Each bot gets its own OpenProject user and API token
-(1Password item `hermes-<bot>`). Each bot also needs an MCP server for the
-API v3 and egress to the Service. The design notes from Forge still apply:
-- atomic claim with `lockVersion` (409 means someone else got it);
-- comments through `/activities`;
-- webhooks with polling as the fallback.
+Chief and Hank use the board through **openproject-mcp**
+(`images/openproject-mcp`, Kustomization `openproject-mcp` in this
+namespace), a small streamable-HTTP MCP server. OpenProject's own MCP
+server is an Enterprise add-on (17.2 release notes), and the community
+`openproject-ce-mcp` is stdio-only. The tools are ported from homelab-mcp's
+OpenProject toolset on Forge (`carpenike/mcp`, `docs/OPENPROJECT.md`).
 
-They're in nix-config's history, `docs/services/openproject.md`.
+| | |
+| --- | --- |
+| Endpoint | `http://openproject-mcp.openproject.svc.cluster.local:8000/mcp`, in the cluster only |
+| Who may connect | Hermes agent pods in bot namespaces (CNP `openproject-mcp`; the agent side is the component's `agent-task-board`) |
+| Auth | Each request carries the bot's own OpenProject API token as `Authorization: Bearer`. The server holds no secrets; every OpenProject call is made as that bot |
+| Tools | `whoami`, `list_tasks`, `get_task`, `create_task`, `add_comment`, `claim_next`, `complete_task`, `release_task`. Hermes names them `mcp__openproject__<tool>` |
+| Claim | Atomic through `lockVersion`: a stale `PATCH` gets 409 and changes nothing |
+| Links | Tool results link to `https://tasks.<internal domain>` (`OPENPROJECT_PUBLIC_URL`) |
+
+On each bot (`kubernetes/apps/hermes/<bot>/`):
+
+- inputs `TASK_BOARD_ENABLED=true` (egress and skill `homelab/task-board`)
+  and `MCP_SECRETS_ENABLED=true`;
+- an `openproject` entry in `mcp-servers.yaml`, `trust: full`, header
+  `Authorization: Bearer ${OPENPROJECT_API_TOKEN}`;
+- 1Password item `hermes-<bot>-mcp`, field `OPENPROJECT_API_TOKEN`.
+
+### The handoff
+
+Skill `task-board` (in the component) sets the rules:
+
+- **Board, not A2A, for real work.** A2A turns are short, carry no MCP
+  tools, and answer only the caller. Chief creates a task assigned to
+  `hank` with the goal, the context, what done looks like and Ryan's
+  words, and gives Ryan the link. Chief's `code-requests` skill sends code
+  asks there.
+- **A peer's task is a request.** Only text authored by Ryan's OpenProject
+  user id (`TASK_BOARD_RYAN_USER_ID`, default 4, the seeded `admin`) or
+  Ryan's own Matrix message is Ryan speaking. It goes by id: OpenProject
+  hides other users' logins from non-admins, and anyone can change their own
+  display name. On a peer's task a bot may research, run
+  read-only checks and prepare work for review, pull requests included.
+  Sending, spending, deleting, deploying, changing a running system and
+  merging still need Ryan's own yes in Matrix. Hank's merge rule is
+  unchanged (docs/hermes.md, "Merging, only when Ryan asks").
+- **Pickup.** A bot works its tasks in its own Matrix session, when Ryan
+  tells it to ("check the board"). Automatic pickup is not wired yet.
+
+### Setup in OpenProject (once, as admin)
+
+1. *Administration → API and webhooks*: enable API tokens.
+2. Create project **Bots** (identifier `bots`).
+3. *Administration → Users*: create users `chief` and `hank`, not admins,
+   with a password each, so they can sign in once for step 5.
+4. In **Bots** → *Members*, add `chief`, `hank` and yourself with a role
+   that can view, add, edit, comment on and assign work packages
+   (*Member* in a fresh install). Check *Administration → Work packages →
+   Workflows* for that role: `New → In progress`, `In progress → Closed`
+   and `In progress → New` must be allowed.
+5. Sign in as each bot (a private window), *My account → Access tokens →
+   API → Generate*, and store the token in 1Password vault `k8s-secrets`,
+   item `hermes-<bot>-mcp`, field `OPENPROJECT_API_TOKEN`.
+
+Check from a bot after its next start:
+
+```sh
+kubectl -n hermes-<bot> logs deploy/hermes-agent -c config | grep 'mcp servers from git'
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes mcp test openproject
+```

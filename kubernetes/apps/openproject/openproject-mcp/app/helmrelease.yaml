@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Streamable-HTTP MCP server at http://openproject-mcp.openproject.svc.cluster.local:8000/mcp
+# for the bots' task board (images/openproject-mcp, docs/openproject.md).
+# Stateless and secret-free: a bot's Hermes sends its own OpenProject API
+# token as the bearer, and every OpenProject call is made as that bot.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openproject-mcp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: openproject-mcp
+  interval: 1h
+  values:
+    controllers:
+      openproject-mcp:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/carpenike/openproject-mcp
+              tag: IMAGE_TAG_PENDING
+            env:
+              OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
+              # Links the tools hand back, for Ryan to open.
+              OPENPROJECT_PUBLIC_URL: https://tasks.${SECRET_DOMAIN}
+              PORT: "8000"
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8000
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8000
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+    service:
+      app:
+        controller: openproject-mcp
+        ports:
+          http:
+            port: 8000
+    persistence:
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
