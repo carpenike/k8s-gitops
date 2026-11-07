@@ -43,7 +43,12 @@ PROJECT_ID = env!("BOARD_PROJECT")
 PROJECT_NAME = env!("BOARD_PROJECT_NAME")
 BOT_ROLE = env!("BOT_ROLE")
 RYAN_ROLE = env!("RYAN_ROLE")
-RYAN_USER_ID = env!("RYAN_USER_ID").to_i
+# "task_board=<true|false> ryan_user_id=<id>": one string, so substitution
+# can't turn a value into a YAML bool or int (template/job.yaml).
+INPUTS = env!("BOT_INPUTS").split.map { |pair| pair.split("=", 2) }.to_h
+TASK_BOARD_ENABLED = INPUTS["task_board"].to_s
+fail!("BOT_INPUTS ryan_user_id must be a number") unless INPUTS["ryan_user_id"].to_s.match?(/\A[1-9][0-9]*\z/)
+RYAN_USER_ID = INPUTS["ryan_user_id"].to_i
 TOKEN_NAME = "hermes (k8s-gitops provisioner)"
 LABEL_NAME = "openproject-bot-provisioner"
 
@@ -81,8 +86,8 @@ unless labels["app.kubernetes.io/name"] == LABEL_NAME && labels["app.kubernetes.
   fail!("Secret #{NAMESPACE}/#{SECRET} lacks the provisioner labels for #{BOT}; not touching it")
 end
 
-if ENV["TASK_BOARD_ENABLED"] != "true"
-  puts "provision: #{BOT} has TASK_BOARD_ENABLED=#{ENV['TASK_BOARD_ENABLED'].inspect}; nothing to do"
+if TASK_BOARD_ENABLED != "true"
+  puts "provision: #{BOT} has TASK_BOARD_ENABLED=#{TASK_BOARD_ENABLED.inspect}; nothing to do"
   exit 0
 end
 

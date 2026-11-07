@@ -142,6 +142,10 @@ Nothing to do by hand. Each bot's Flux Kustomization `task-board`
   are read-only. So no admin token is needed, or stored.
 - It refuses a Secret without the provisioner labels, and exits at once
   for a bot without `TASK_BOARD_ENABLED=true`.
+- The bot's inputs reach it as one string, `BOT_INPUTS`
+  (`task_board=<true|false> ryan_user_id=<id>`): `kustomize build` drops
+  the quotes around a lone `"${VAR}"`, so a substituted `true` or `4`
+  would become a YAML bool or int, which an env value can't be.
 - It ensures user `<bot>` (active, never an admin; an admin account of
   that login is refused, not demoted), project **Bots** (`bots`), the bot
   as *Member* and Ryan (`TASK_BOARD_RYAN_USER_ID`) as *Project admin*.
