@@ -35,9 +35,10 @@ spec:
     cookieConfig:
       sameSite: Lax
 ---
-# Routes that carry gateway.holthome.net/auth=public or =native replace the
-# gateway policy. flux-webhook is public. A labeled route in another
-# namespace also needs a ReferenceGrant. See docs/gateway-auth.md.
+# Routes that carry gateway.holthome.net/auth=public, =native or =app
+# replace the gateway policy, so a person never logs in twice. flux-webhook
+# is public. A labeled route in another namespace also needs a
+# ReferenceGrant. See docs/gateway-auth.md.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -52,6 +53,7 @@ spec:
           values:
             - public
             - native
+            - app
       namespaces:
         from: All
   authorization:
