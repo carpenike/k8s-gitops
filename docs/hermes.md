@@ -83,6 +83,7 @@ spec later:
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
+| `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
 | `CLAUDE_CODE_MERGE` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
@@ -1572,6 +1573,98 @@ init container unsets `web.backend` if it is still `tavily`.
 all rather than silently using the keyless ring, which its egress would
 block anyway. Delete the 1Password field if the key is no longer used.
 
+## MCP servers from git
+
+A bot's remote MCP servers are declared in its folder, in
+`mcp-servers.yaml`, the way its persona is. Outlook stays separate (a
+local server baked into the image, [Outlook](#outlook-opt-in)). Today only
+Hank has one: Context7, for library docs.
+
+| File in `kubernetes/apps/hermes/<bot>/` | What it does |
+| --- | --- |
+| `mcp-servers.yaml`, in ConfigMap `hermes-bot-mcp` | The servers. The `config` init container writes them into `mcp_servers` on every start |
+| `mcp-egress.yaml` (CiliumNetworkPolicy `agent-mcp-egress`) | Agent egress to each server's public host on 443, with the L7 DNS rule `toFQDNs` needs. Listed under `resources:` in the bot's `kustomization.yaml` |
+| 1Password item `hermes-<bot>-mcp` | The servers' secrets, with `MCP_SECRETS_ENABLED=true`. Every field becomes an env var of the agent's `app` container (ExternalSecret and Secret `mcp`, `dataFrom.extract`); the field's label is the variable's name |
+
+### The file
+
+```yaml
+servers:
+  context7:                                   # the name the tools are prefixed with
+    url: https://mcp.context7.com/mcp         # https://, or an in-cluster http:// Service
+    trust: full                               # optional; default untrusted
+    timeout: 60                               # optional
+    tools: [resolve-library-id, query-docs]   # required: the allowlist
+  whiskey:
+    url: https://<host>/api/mcp
+    headers:
+      Authorization: "Bearer ${WHISKEY_MCP_TOKEN}"   # a field of hermes-<bot>-mcp
+    tools: ["list_*", get_event]
+```
+
+What the init container does with it:
+
+- **HTTP servers only.** Allowed keys are `url`, `transport`, `headers`,
+  `auth`, `oauth`, `trust`, `timeout`, `connect_timeout`,
+  `keepalive_interval` and `tools`. A stdio server would need its program
+  in the image; the name `outlook` is reserved.
+- **`tools` is required** and becomes `tools.include`. Hermes accepts exact
+  names and globs. Resources, prompts and sampling are always off.
+- **`trust` defaults to `untrusted`:** every tool without `readOnlyHint`
+  asks Ryan first, and fails closed in cron and unattended runs. Set
+  `full` only for a server whose tools are all read-only.
+- **`${VAR}` is left for Hermes**, which fills it from the agent's
+  environment (Secret `mcp`) when it connects. A missing variable fails
+  closed: Hermes refuses to connect and names the variable, rather than
+  sending a literal `${VAR}`. Only `${SECRET_DOMAIN}` in a `url` is filled
+  in by the init container, so a homelab server's host stays out of git.
+  The bot folder is applied without Flux substitution, so a `${...}`
+  anywhere else in the file reaches Hermes unchanged.
+- **It owns only what it wrote.** It removes servers it wrote before that
+  are no longer in the file (names kept in `/opt/data/.k8s-gitops-mcp.json`),
+  and never touches `outlook` or a server added in chat or the Webapp. A
+  bad entry is skipped with a warning naming the problem.
+- **No MCP on the API server.** Hermes adds every MCP server to every
+  platform, so whenever any MCP server exists, `platform_toolsets.api_server`
+  is set to `hermes-api-server` plus `no_mcp`, the rule Outlook already
+  applied. Webhook routes and inbound A2A tasks already carry `no_mcp`.
+  Matrix and cron get the servers.
+- **"Always" doesn't stick.** A remembered approval for a git-managed
+  server's tool (`mcp:<name>/…` in `command_allowlist`) is dropped on each
+  start.
+
+Check after a restart:
+
+```sh
+kubectl -n hermes-<bot> logs deploy/hermes-agent -c config | grep 'mcp servers from git'
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes mcp test <name>
+```
+
+### Egress
+
+`mcp-egress.yaml` is a plain manifest in the bot's folder, applied
+without substitution, so it can only name public hosts. A server on a host
+under `${SECRET_DOMAIN}` (homelab-mcp, likely Whiskey) needs its egress rule in
+the component instead, behind an input, so the domain comes from
+`cluster-secrets`. None exists yet.
+
+### OAuth servers
+
+`auth: oauth` with an `oauth:` block (`client_id`, `client_secret` as
+`${VAR}`, `scope`, `redirect_port`) is passed through as written; Hermes
+v0.23.0 supports those keys (`tools/mcp_oauth.py`). Tokens are kept in
+`/opt/data/mcp-tokens/`, so a sign-in survives restarts. The first sign-in
+is manual: `hermes mcp login <name>` in the agent pod, with the callback
+port forwarded to a browser, or `--flow device` where the server offers
+device codes.
+
+The native Hermes on Forge, which talked to homelab-mcp this way, hit a
+stuck OAuth lock in the MCP SDK (modelcontextprotocol/python-sdk#3382):
+every reconnect timed out until Hermes restarted, and it cost a four-day
+outage. v0.23.0 ships `mcp` 2.3.0, and whether that is fixed is not
+checked. Before a routine depends on an OAuth server, add a check that
+runs `hermes mcp test` and restarts the agent when it fails.
+
 ## Outlook (opt-in)
 
 An Outlook (Microsoft 365) MCP server for a bot, against Ryan's own M365
@@ -1854,6 +1947,7 @@ persona (`SOUL.md`). He has no credentials for Forge or the cluster.
 | API server at `https://hank-api` (envoy-internal) | |
 | A2A, inbound and outbound to Chief ([A2A](#a2a-opt-in)) | |
 | Claude Code and GitHub (`CLAUDE_CODE_ENABLED`, `CLAUDE_CODE_MERGE`) | |
+| Context7 library docs ([MCP servers from git](#mcp-servers-from-git)) | |
 | Matrix profile tools, persona from git | |
 | Agent-data backup to R2, path `hermes-hank` | |
 

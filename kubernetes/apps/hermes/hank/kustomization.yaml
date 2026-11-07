@@ -14,6 +14,9 @@ kind: Kustomization
 namespace: hermes-hank
 components:
   - ../../../components/hermes-bot
+# Egress for the public MCP servers in mcp-servers.yaml.
+resources:
+  - mcp-egress.yaml
 configMapGenerator:
   - name: hermes-bot-inputs
     literals:
@@ -59,5 +62,10 @@ configMapGenerator:
     files:
       - SOUL.md
       - SOUL.history
+  # Hank's MCP servers (mcp-servers.yaml; docs/hermes.md, "MCP servers from
+  # git"), written into config.yaml by the config init container.
+  - name: hermes-bot-mcp
+    files:
+      - mcp-servers.yaml
 generatorOptions:
   disableNameSuffixHash: true
