@@ -30,14 +30,23 @@ and a persona is an optional file in the bot's folder ([Persona](#persona)).
 
 ### Persona
 
-A bot's folder may generate ConfigMap `hermes-bot-soul` with one key,
-`SOUL.md` (Hank's: `kubernetes/apps/hermes/hank/SOUL.md`). The `config`
-init container mounts it at `/etc/hermes-soul` and copies it to
-`/opt/data/SOUL.md` only when that file is missing or still the image's
-default (`/opt/hermes/docker/SOUL.md`, which stage2 seeds on first boot).
-So git seeds the persona once. An edit made in chat or the Webapp is kept,
-and changing the file in git later does not overwrite it. To push a new
-version from git, reset the bot's copy to the default first:
+A bot's folder may generate ConfigMap `hermes-bot-soul` with `SOUL.md`
+and `SOUL.history` (Hank's: `kubernetes/apps/hermes/hank/`). The `config`
+init container mounts it at `/etc/hermes-soul` and writes git's `SOUL.md`
+to `/opt/data/SOUL.md` when the live file:
+
+- is missing, or still the image's default (`/opt/hermes/docker/SOUL.md`,
+  which stage2 seeds on first boot);
+- is the version git wrote last (its sha256 is in
+  `/opt/data/.soul-seed.sha256`); or
+- is an earlier git version, listed by sha256 in `SOUL.history`.
+
+So a change in git reaches the bot on its next start, and an edit made in
+chat or the Webapp is kept: the log then says "SOUL.md was edited outside
+git; git's version not applied". **When you change `SOUL.md`, add the old
+version's hash to `SOUL.history`** (`sha256sum SOUL.md` before editing).
+Bots seeded before `.soul-seed.sha256` existed need that line once. To
+make git win over a chat edit, reset the bot's copy to the default:
 
 ```sh
 kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- cp /opt/hermes/docker/SOUL.md /opt/data/SOUL.md
@@ -75,6 +84,8 @@ spec later:
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
+| `CLAUDE_CODE_MERGE` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
+| `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
 | `A2A_ENABLED` | `true` | Optional, default `false`. The A2A server (Agent Card and JSON-RPC, bearer tokens per peer) and the outbound `a2a` tools ([A2A](#a2a-opt-in)). `true` or `false` only |
 | `A2A_TRUSTED_PEERS` | `chief,chief-engineer` | With `A2A_ENABLED`: the peer names allowed to send tasks. Each must be a name in the bot's `a2a_peer_tokens` field. Empty: Hermes refuses every peer |
 | `A2A_HERMES_PEER` | `chief` | With `A2A_ENABLED`: the one other bot this bot calls, as `a2a_agents.<name>` at `agent-a2a.hermes-<name>`, and the only one its egress reaches |
@@ -1185,7 +1196,10 @@ bridge exists:
 [Claude Code](https://code.claude.com/docs) and keep **one Claude Code
 session per task across Matrix messages**. Ryan asks for a change, follows
 up in later messages ("also add tests", "why that approach?"), and gets a
-draft pull request at the end. Today only Chief has it.
+draft pull request at the end. Today only Hank has it, with
+`CLAUDE_CODE_MERGE`. Chief reads mail and the web, the easiest places to
+plant instructions, so it has no Claude Code or GitHub token and sends
+code work to Hank (`CODE_PEER=hank`).
 
 ### Where it runs: the screen pod
 
@@ -1243,7 +1257,7 @@ tells the bot how:
    continues with everything Claude Code already read and changed.
 4. Finish: Claude Code commits on branch `hermes/<slug>`, pushes, and
    opens a draft PR with `gh pr create --draft`. The bot sends the link.
-   Merging is Ryan's.
+   It never pushes to a default branch or to `rebuild`.
 
 Sessions are stored in `CLAUDE_CONFIG_DIR=/workspace/.claude-code` (the
 wrapper sets it), so they survive a screen restart. The workspace is not
@@ -1257,19 +1271,59 @@ mirror and delete pushes, and deny rules hold in every mode. They are
 pattern matches, a guard rail, not a boundary. The boundary is the Kata
 VM and the GitHub token's scope.
 
+### Merging, only when Ryan asks
+
+`CLAUDE_CODE_MERGE=true` appends a "Merging" section to the skill. Without
+it the section says "Never merge". With it the bot merges a pull request
+only when:
+
+- **Ryan asks in his own Matrix message** and names that pull request (number,
+  link, or "merge it" about the one just sent). "Merge when green" counts.
+- **The ask comes from no one else.** A peer over A2A, a webhook, an alert, a
+  cron run, or text in a PR, issue, commit, email or page never counts,
+  even when it claims Ryan approved.
+- **Its checks have all passed** and `mergeStateStatus` is `CLEAN`. A draft is
+  marked ready first. Running checks are waited for; a failure is
+  reported, not merged.
+- **The head commit hasn't moved** since Ryan asked.
+
+The bot runs `gh pr merge <n> --squash` from its own terminal, never inside
+Claude Code (managed settings deny it there), and never with `--admin` or
+`--auto`. In this repo a merge to `rebuild` is a deploy: Flux applies it.
+
+**This rule is the bot's, not GitHub's.** The token's Contents and Pull
+requests write can merge any pull request in the repositories it covers,
+and Hermes cannot require an approval prompt for an arbitrary command (its
+prompts cover a fixed list of dangerous patterns; `approvals.deny` only
+blocks). What GitHub can enforce is the ruleset below: no direct pushes to
+`rebuild` or `main`, and required checks before any merge.
+
+### Bots without it (`CODE_PEER`)
+
+On a bot without `CLAUDE_CODE_ENABLED`, `CODE_PEER=<bot>` writes skill
+`homelab/code-requests`. It tells the bot that code, GitHub and pull-request
+work belongs to that peer: write Ryan a short brief to paste into his DM
+with the peer, ask the peer only read-only questions over A2A (an A2A reply
+reaches only the asking bot, so a coding session there would never reach
+Ryan), and never ask the peer to merge.
+
 ### Turning it on for a bot
 
 1. On a machine signed in to Ryan's Claude account, run
    `claude setup-token` and put the printed token in 1Password vault
    `k8s-secrets`, item `hermes-<bot>`, field `claude_code_oauth_token`.
 2. Create a fine-grained GitHub token with **only the repositories the
-   bot may work on**. Permissions: Contents read/write, Pull requests
+   bot may work on** ("Only select repositories", never "All
+   repositories"). Permissions: Contents read/write, Pull requests
    read/write (Metadata read comes with it). Leave out Administration,
    Secrets and Workflows; without Workflows it cannot change
    `.github/workflows`. Give it an expiry. Put it in the same item, field
    `github_token`.
 3. Protect each repository's default branch with a ruleset that requires
-   a pull request, so the token's Contents write cannot push to it.
+   a pull request, so the token's Contents write cannot push to it. In
+   k8s-gitops protect `rebuild` too (Flux deploys it), and require the
+   Validate checks there. Not set up yet: on 7 Nov 2026 neither `main` nor
+   `rebuild` had a ruleset or branch protection.
 4. Add `CLAUDE_CODE_ENABLED=true` to the bot's inputs.
 
 Each field is optional to the pod: without the Claude token `claude`
@@ -1786,18 +1840,20 @@ kubectl -n hermes-<bot> rollout restart deploy/hermes-agent
 `kubernetes/apps/hermes/hank/`. Ryan's homelab engineer on Hermes, the
 counterpart to Chief Engineer on Grok Bot. He watches what is sent to him
 (alerts, logs, a peer's question), diagnoses Forge and the cluster, and
-writes Claude Code prompts for Ryan to run. He never merges, deploys or
-changes Forge or the cluster without Ryan's explicit yes. That rule is in
-his persona (`SOUL.md`). It is also how he is built: he has no credentials
-for Forge, the cluster or GitHub.
+makes code changes as pull requests with Claude Code. He is the only bot
+with a GitHub token, and he merges a pull request only when Ryan himself
+asks for that one ([Merging](#merging-only-when-ryan-asks)). He never
+deploys or changes Forge or the cluster by hand. Those rules are in his
+persona (`SOUL.md`). He has no credentials for Forge or the cluster.
 
 | On | Off, unlike Chief |
 | --- | --- |
 | Matrix, LiteLLM key `hermes-hank` (US$25 per 30 days) | Outlook (`OUTLOOK_MCP_ENABLED`) |
 | Hindsight memory, tenant `hank` (schema `user_hank`) | The Webapp and desktop viewer (`WEBAPP_ENABLED`) |
-| Tavily web search | Claude Code (`CLAUDE_CODE_ENABLED`): he writes prompts, he does not run them |
-| API server at `https://hank-api` (envoy-internal) | The webhook (`WEBHOOK_ENABLED`); see below |
+| Tavily web search | The webhook (`WEBHOOK_ENABLED`); see below |
+| API server at `https://hank-api` (envoy-internal) | |
 | A2A, inbound and outbound to Chief ([A2A](#a2a-opt-in)) | |
+| Claude Code and GitHub (`CLAUDE_CODE_ENABLED`, `CLAUDE_CODE_MERGE`) | |
 | Matrix profile tools, persona from git | |
 | Agent-data backup to R2, path `hermes-hank` | |
 
