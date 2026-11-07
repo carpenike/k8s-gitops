@@ -25,7 +25,9 @@ The first time a user connects a client to a view, they get a consent page.
 
 ## What runs here
 
-The pod only reaches hosts named in the CiliumNetworkPolicy, on 443.
+The pod only reaches hosts named in its CiliumNetworkPolicy, on 443. That
+policy is in the HelmRelease (`rawResources`), not `ciliumnetworkpolicy.yaml`,
+because kubeconform rejects `${SECRET_DOMAIN}` in a `toFQDNs` name.
 
 These categories run here:
 
@@ -53,7 +55,7 @@ A tool that Forge served today and is missing here is one of these.
 To enable a category:
 
 1. Add it to `HOMELAB_MCP_TOOL_CATEGORIES`.
-2. Add its upstream host to the policy's `toFQDNs`.
+2. Add its upstream host to the policy's `toFQDNs` in the HelmRelease.
 
 MFP writes stay off (`HOMELAB_MCP_MFP_WRITES_ENABLED: "false"`) until the
 write tests pass. The mfp tools only read.
