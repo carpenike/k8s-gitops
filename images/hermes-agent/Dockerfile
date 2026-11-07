@@ -59,13 +59,17 @@ RUN /opt/hermes/.venv/bin/python -c "import hindsight_client, aiohttp_retry; fro
 # matrix-profile (local plugin, matrix-profile/): tools matrix_get_profile,
 # matrix_set_display_name, matrix_set_avatar. Copied into
 # $HERMES_HOME/plugins and listed in plugins.enabled by the component's init
-# container when MATRIX_PROFILE_TOOLS is on. Build check: discovery loads it
-# and its three tools register.
+# container when MATRIX_PROFILE_TOOLS is on. Build checks: discovery loads it
+# and its three tools register; the avatar mirror writes a 256x256 PNG to
+# assets/avatar.png and ui_meta["hermes-bots"]["image"] and bumps the key's
+# revision, keeping the rest of profile.yaml.
 COPY matrix-profile /opt/hermes-plugins/matrix-profile
+COPY matrix-profile-check.py /tmp/matrix-profile-check.py
 RUN HERMES_HOME=/tmp/hermes-plugin-check sh -c ' \
          mkdir -p "$HERMES_HOME/plugins" \
          && cp -r /opt/hermes-plugins/matrix-profile "$HERMES_HOME/plugins/matrix-profile" \
          && printf "plugins:\n  enabled:\n    - matrix-profile\n" > "$HERMES_HOME/config.yaml" \
          && cd /opt/hermes \
-         && /opt/hermes/.venv/bin/python -c "import sys; sys.path.insert(0, \"/opt/hermes\"); from hermes_cli.plugins import discover_plugins; discover_plugins(); from tools.registry import registry; names = (\"matrix_get_profile\", \"matrix_set_display_name\", \"matrix_set_avatar\"); missing = [n for n in names if registry.get_entry(n) is None]; assert not missing, missing; print(\"matrix-profile plugin ok\")"' \
-    && rm -rf /tmp/hermes-plugin-check
+         && /opt/hermes/.venv/bin/python -c "import sys; sys.path.insert(0, \"/opt/hermes\"); from hermes_cli.plugins import discover_plugins; discover_plugins(); from tools.registry import registry; names = (\"matrix_get_profile\", \"matrix_set_display_name\", \"matrix_set_avatar\"); missing = [n for n in names if registry.get_entry(n) is None]; assert not missing, missing; print(\"matrix-profile plugin ok\")" \
+         && /opt/hermes/.venv/bin/python /tmp/matrix-profile-check.py' \
+    && rm -rf /tmp/hermes-plugin-check /tmp/matrix-profile-check.py

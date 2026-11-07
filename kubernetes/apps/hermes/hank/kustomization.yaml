@@ -25,6 +25,8 @@ configMapGenerator:
       # Azure (monthly credits) first; Anthropic only when Azure fails.
       - LLM_MODEL=gpt-6.1-terra
       - LLM_FALLBACK_MODEL=claude-sonnet
+      # Azure gpt-image deployment through LiteLLM, as Chief's.
+      - IMAGE_MODEL=gpt-image-2.5-flare
       # Hank may change its own Matrix display name and avatar when asked.
       - MATRIX_PROFILE_TOOLS=true
       - LLM_BUDGET_USD=25

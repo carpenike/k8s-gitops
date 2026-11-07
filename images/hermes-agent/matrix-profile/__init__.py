@@ -8,7 +8,9 @@ secret reader and never returned to the model. Matrix lets any user set their ow
 uploaded to the homeserver's media repository (/_matrix/media/v3/upload).
 
 A new display name is also written to the Hermes profile's ``display_name`` (``profile.yaml`` in
-``HERMES_HOME``), the name the Hermes app shows for this agent, so Matrix and the app agree.
+``HERMES_HOME``), the name the Hermes app shows for this agent, and a new avatar to the profile's
+``assets/avatar.png`` and ``ui_meta["hermes-bots"]["image"]`` (a 256x256 PNG), the picture the app
+shows, so Matrix and the app agree.
 
 Guards:
 - Matrix conversations only (``HERMES_SESSION_PLATFORM == "matrix"``): not the API server, the
@@ -124,6 +126,63 @@ def _set_hermes_profile_name(name: str) -> str | None:
     return None
 
 
+_APP_AVATAR_EDGE = 256  # the Hermes app's own avatar size (normalizeAvatarImage)
+
+
+def _set_hermes_profile_avatar(path: Path) -> str | None:
+    """Mirror an avatar into the Hermes profile, where the Hermes app reads it; an error message, or None.
+
+    The app shows ``ui_meta["hermes-bots"]["image"]`` in profile.yaml (a PNG data URL) and serves
+    ``assets/avatar.png`` as the profile asset. Both get a centre-cropped 256x256 PNG, as the app's
+    own picker makes. The key's ``_ui_meta_revisions`` counter is bumped, so an open Webapp holding
+    an older copy refreshes instead of writing it back."""
+    try:
+        import base64
+        import io
+
+        from PIL import Image, ImageOps
+
+        from hermes_cli.profiles import _load_yaml_dict
+        from hermes_constants import get_hermes_home
+        from utils import atomic_yaml_write
+
+        with Image.open(path) as src:
+            img = ImageOps.exif_transpose(src).convert("RGBA")  # first frame of a GIF
+        side = min(img.size)
+        left, top = (img.width - side) // 2, (img.height - side) // 2
+        img = img.crop((left, top, left + side, top + side)).resize(
+            (_APP_AVATAR_EDGE, _APP_AVATAR_EDGE), Image.Resampling.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, "PNG", optimize=True)
+        png = buf.getvalue()
+
+        home = Path(get_hermes_home())
+        assets = home / "assets"
+        assets.mkdir(parents=True, exist_ok=True)
+        tmp = assets / "avatar.png.tmp"
+        tmp.write_bytes(png)
+        tmp.replace(assets / "avatar.png")
+        for ext in ("jpg", "webp"):  # one canonical avatar file, as the gateway keeps it
+            (assets / f"avatar.{ext}").unlink(missing_ok=True)
+
+        meta_path = home / "profile.yaml"
+        data = _load_yaml_dict(meta_path) or {}
+        ui_meta = data.get("ui_meta") if isinstance(data.get("ui_meta"), dict) else {}
+        bots = ui_meta.get("hermes-bots") if isinstance(ui_meta.get("hermes-bots"), dict) else {}
+        bots["image"] = "data:image/png;base64," + base64.b64encode(png).decode("ascii")
+        ui_meta["hermes-bots"] = bots
+        data["ui_meta"] = ui_meta
+        revisions = data.get("_ui_meta_revisions") if isinstance(data.get("_ui_meta_revisions"), dict) else {}
+        current = revisions.get("hermes-bots")
+        revisions["hermes-bots"] = (current if isinstance(current, int) and not isinstance(current, bool) and current > 0 else 0) + 1
+        data["_ui_meta_revisions"] = revisions
+        atomic_yaml_write(meta_path, data, sort_keys=False)
+    except Exception as exc:
+        logger.warning("matrix-profile: Hermes profile avatar not updated: %s", exc)
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
 def _guard() -> str | None:
     """An error message when the call must be refused, else None."""
     if not _available():
@@ -198,7 +257,11 @@ def handle_set_avatar(args: dict[str, Any], **_kw) -> str:
     except Exception as exc:
         return _result(False, error=str(exc))
     logger.info("matrix-profile: avatar of %s set (%d bytes)", user_id, size)
-    return _result(True, user_id=user_id, avatar_url=mxc, bytes=size)
+    # Matrix succeeded; the Hermes app's avatar follows. A failure there is reported, not fatal.
+    if (err := _set_hermes_profile_avatar(path)) is not None:
+        return _result(True, user_id=user_id, avatar_url=mxc, bytes=size, hermes_avatar_updated=False,
+                       hermes_avatar_error=err)
+    return _result(True, user_id=user_id, avatar_url=mxc, bytes=size, hermes_avatar_updated=True)
 
 
 def _schema(name: str, description: str, properties: dict[str, Any], required: list[str]) -> dict[str, Any]:
@@ -221,9 +284,9 @@ _TOOLS = (
         ["display_name"]), handle_set_display_name, "🏷️"),
     ("matrix_set_avatar", _schema(
         "matrix_set_avatar",
-        "Change your own Matrix profile picture from a local image file (PNG, JPEG, WebP or GIF, at most "
-        "5 MiB) under /workspace or Hermes' cache, for example the path image_generate returned. Only "
-        "when the user asks for it in this Matrix conversation.",
+        "Change your own profile picture, in Matrix and in the Hermes app, from a local image file (PNG, "
+        "JPEG, WebP or GIF, at most 5 MiB) under /workspace or Hermes' cache, for example the path "
+        "image_generate returned. Only when the user asks for it in this Matrix conversation.",
         {"image_path": {"type": "string", "description": "Absolute path of the image file."}},
         ["image_path"]), handle_set_avatar, "🖼️"),
 )

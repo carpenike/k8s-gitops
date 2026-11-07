@@ -187,7 +187,7 @@ serves the Azure deployments ([litellm.md](litellm.md)):
 
 | `IMAGE_MODEL` | Plugin's description |
 | --- | --- |
-| `gpt-image-2.5-flare` (Chief) | Fast; everyday generation and editing |
+| `gpt-image-2.5-flare` (Chief, Hank) | Fast; everyday generation and editing |
 | `gpt-image-2.5-sunburst` | Slower; precision generation and editing |
 | `gpt-image-2-low` / `-medium` / `-high` | GPT Image 2 at a fixed quality tier |
 
@@ -1347,7 +1347,7 @@ updates in place, with no restart.
 ## Matrix profile (opt-in)
 
 `MATRIX_PROFILE_TOOLS=true` lets the bot manage its own Matrix profile:
-its display name and avatar. Today only Chief has it. Hermes v0.23.0 has
+its display name and avatar. Chief and Hank have it. Hermes v0.23.0 has
 no tool for this; its Matrix adapter only reads other members' names. So
 this is a small local plugin, `images/hermes-agent/matrix-profile`, baked
 into the agent image at `/opt/hermes-plugins/matrix-profile`.
@@ -1356,7 +1356,7 @@ into the agent image at `/opt/hermes-plugins/matrix-profile`.
 | --- | --- |
 | `matrix_get_profile` | The bot's user ID, display name and avatar (`mxc://` URL) |
 | `matrix_set_display_name` | A new display name, 1-64 characters, no control or formatting characters. It goes to Matrix and to the Hermes profile's `display_name`, the name the Webapp shows (see below) |
-| `matrix_set_avatar` | A new avatar from a local PNG, JPEG, WebP or GIF of at most 5 MiB under `/workspace` or `$HERMES_HOME/cache`. It is uploaded to Tuwunel's media repository, then set as `avatar_url` |
+| `matrix_set_avatar` | A new avatar from a local PNG, JPEG, WebP or GIF of at most 5 MiB under `/workspace` or `$HERMES_HOME/cache`. It is uploaded to Tuwunel's media repository, then set as `avatar_url`, and mirrored into the Hermes profile (below) |
 
 ### How it works
 
@@ -1392,8 +1392,20 @@ into the agent image at `/opt/hermes-plugins/matrix-profile`.
   `profile.yaml`, so the name survives restarts. A name set before this
   change reaches the Webapp at the bot's next rename, or set it once in
   the Webapp under Profiles, "Name this agent".
+- **One avatar in Matrix and the Webapp.** The Webapp's picture is
+  `ui_meta["hermes-bots"]["image"]` in `profile.yaml`, a PNG data URL, and
+  the gateway's profile asset is `$HERMES_HOME/assets/avatar.png`. After
+  the Matrix avatar is set, `matrix_set_avatar` writes both from the same
+  file: centre-cropped and resized to 256×256 PNG with Pillow, as the
+  Webapp's own picker does. It keeps profile.yaml's other keys and bumps
+  `_ui_meta_revisions["hermes-bots"]`, so an open Webapp holding an older
+  copy refreshes instead of writing it back. If that fails, the tool still
+  reports the Matrix change and adds `hermes_avatar_error`. An avatar set
+  before this change reaches the Webapp at the bot's next avatar change.
 - **Image build check.** The image build fails if discovery doesn't load
-  the plugin or its three tools don't register.
+  the plugin or its three tools don't register, or if the avatar mirror
+  (`images/hermes-agent/matrix-profile-check.py`) doesn't produce the
+  256×256 PNG, the data URL and the revision bump.
 
 Checked on 4 Nov 2026 (v0.22.6) against Tuwunel from Chief's agent pod:
 `matrix_get_profile` returned `@chief:ryanholt.net`, display name `chief`,
