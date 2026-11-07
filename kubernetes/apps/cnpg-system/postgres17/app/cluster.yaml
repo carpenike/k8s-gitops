@@ -58,6 +58,12 @@ spec:
         comment: Hindsight memory server (hermes-memory)
         passwordSecret:
           name: hindsight-db
+      - name: openproject
+        ensure: present
+        login: true
+        comment: OpenProject task board (openproject)
+        passwordSecret:
+          name: openproject-db
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 apiVersion: postgresql.cnpg.io/v1
@@ -95,3 +101,30 @@ spec:
       ensure: present
     - name: btree_gin
       ensure: present
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# OpenProject (namespace openproject, docs/openproject.md). Its extensions go
+# in pg_catalog, not public: the image's SQL structure load clears
+# search_path and names operator classes such as gin_trgm_ops without a
+# schema, so with them in public the first schema load fails (learned on
+# Forge, nix-config docs/services/openproject.md).
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: openproject
+spec:
+  cluster:
+    name: postgres17
+  name: openproject
+  owner: openproject
+  databaseReclaimPolicy: retain
+  extensions:
+    - name: btree_gist
+      ensure: present
+      schema: pg_catalog
+    - name: pg_trgm
+      ensure: present
+      schema: pg_catalog
+    - name: unaccent
+      ensure: present
+      schema: pg_catalog

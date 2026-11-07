@@ -81,6 +81,14 @@ spec:
       name: csi-ceph-block
       isDefault: true
       deletionPolicy: Delete
+    # CephFS snapshots, for VolSync's Snapshot copy method on ceph-filesystem
+    # (RWX) volumes such as OpenProject's attachments. Not the default: the
+    # block class stays default for ceph-block volumes.
+    cephFileSystemVolumeSnapshotClass:
+      enabled: true
+      name: csi-ceph-filesystem
+      isDefault: false
+      deletionPolicy: Delete
     # Overriding cephFileSystems replaces the chart default list, same as
     # cephBlockPools above. Pools, MDS resources, priority class, and the
     # StorageClass are the rook-ceph-cluster 1.21.1 defaults. The addition
