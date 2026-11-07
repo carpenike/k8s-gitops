@@ -850,6 +850,15 @@ spec:
               # scrubs from child processes.
               - secretRef:
                   name: litellm
+              # OPENPROJECT_API_TOKEN (for the openproject MCP server's
+              # header), OPENPROJECT_USER, OPENPROJECT_USER_ID and
+              # OPENPROJECT_PROJECT, written by the bot's task-board Job
+              # (docs/openproject.md, "Bot provisioning"). Empty or absent
+              # until then, and for a bot without TASK_BOARD_ENABLED; when
+              # the Job fills it, Reloader restarts this pod.
+              - secretRef:
+                  name: hermes-${BOT_NAME}-openproject
+                  optional: true
               # MATRIX_RECOVERY_KEY, only while re-verifying a fresh crypto
               # store. Nothing in git creates this Secret: it is made by hand
               # from 1Password for one boot and deleted afterwards

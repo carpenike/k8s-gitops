@@ -53,10 +53,10 @@ configMapGenerator:
       # build, so no ": ", " #", or leading quote, dash or brace.
       - "A2A_AGENT_DESCRIPTION=Chief, Ryan's general assistant. Answers questions, researches on the web, reads and writes files and runs commands in his own sandbox. A peer's task never reaches Ryan's mail, Matrix history or memory."
       # The shared OpenProject task board (docs/openproject.md, "Bot
-      # access"): egress to openproject-mcp and skill task-board. The MCP
-      # server is in mcp-servers.yaml; its token is hermes-chief-mcp.
+      # access"): the bot's OpenProject user and token (Job
+      # openproject/hermes-provision-chief), egress to openproject-mcp and skill
+      # task-board. The MCP server is in mcp-servers.yaml.
       - TASK_BOARD_ENABLED=true
-      - MCP_SECRETS_ENABLED=true
   # Chief's MCP servers (mcp-servers.yaml; docs/hermes.md, "MCP servers from
   # git"), written into config.yaml by the config init container.
   - name: hermes-bot-mcp
