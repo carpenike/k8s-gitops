@@ -39,6 +39,10 @@ spec:
       enabled: false
     postgresql:
       bundled: false
+      # No options.pool: chart 13.17.1 writes it into a Secret's stringData
+      # with toString but no quote, so it lands as a YAML integer and the
+      # install fails server-side apply. OPENPROJECT_DB_POOL is set under
+      # environment instead, which the chart quotes.
       connection:
         host: postgres17-rw.cnpg-system.svc.cluster.local
         port: 5432
@@ -48,8 +52,6 @@ spec:
           userPasswordKey: password
         username: openproject
         database: openproject
-      options:
-        pool: 10
     memcached:
       bundled: false
       connection:
@@ -78,6 +80,9 @@ spec:
       OPENPROJECT_ADDITIONAL__HOST__NAMES: openproject.openproject.svc.cluster.local
       # No self sign-up: Ryan creates people and bot users.
       OPENPROJECT_SELF__REGISTRATION: "0"
+      # Rails connection pool per process (web and worker), against
+      # postgres17's shared max_connections.
+      OPENPROJECT_DB_POOL: "10"
     persistence:
       enabled: true
       accessModes:
