@@ -5,7 +5,7 @@
 # plus its persona (SOUL.md); everything else is
 # kubernetes/components/hermes-bot. See docs/hermes.md, "Hank".
 #
-# Deliberately not copied from Chief: Outlook, the Webapp and the webhook.
+# Deliberately not copied from Chief: Outlook and the webhook.
 # Hank is the only bot with Claude Code and a GitHub token: he opens pull
 # requests, and merges one only when Ryan asks for it. He does not send
 # mail or act on systems by hand.
@@ -33,6 +33,10 @@ configMapGenerator:
       - AGENT_STORAGE_SIZE=10Gi
       - WORKSPACE_STORAGE_SIZE=20Gi
       - API_SERVER_ENABLED=true
+      # Desktop workspace at https://hank-desktop (envoy-internal, Pocket ID
+      # client hermes-hank, group admins only): his sessions, and his screen
+      # to watch or take over.
+      - WEBAPP_ENABLED=true
       - HINDSIGHT_ENABLED=true
       - TAVILY_ENABLED=true
       # A2A (docs/hermes.md, "A2A (opt-in)"). Inbound at
