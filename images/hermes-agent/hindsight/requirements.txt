@@ -5,7 +5,8 @@
 # typing-extensions, urllib3, yarl) is already in the venv inside the ranges
 # the client asks for; aiohttp-retry is the one that is not.
 # hindsight-embed is left out on purpose: only local_embedded mode imports it.
-hindsight-client==0.10.1 \
-    --hash=sha256:04e03353a0f9dcfa7b1b1000cccc8f077a93a788b27af62cc5e014b2dd3b960c
+hindsight-client==0.10.3 \
+    --hash=sha256:b4d0d1bbc29dcd4ef25a4a23a08a48046d5337b704bdafabb02d0010d299a068 \
+    --hash=sha256:dfd8b9a912cc09d36675f6ab4ab02aa8dc7aa10ae09183794ec5bd083be19540
 aiohttp-retry==2.9.1 \
     --hash=sha256:66d2759d1921838256a05a3f80ad7e724936f083e35be5abb5e16eed6be6dc54
