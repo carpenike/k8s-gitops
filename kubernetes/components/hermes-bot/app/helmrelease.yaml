@@ -418,9 +418,105 @@ spec:
                 elif [ "$(hermes config get web.backend 2>/dev/null)" = tavily ]; then
                   hermes config unset web.backend
                 fi
-            # api-server: stage2 reads API_SERVER_KEY (above). hindsight and
-            # webhook: the steps above check for their keys. The gateway's
-            # other credentials stay in the app container.
+                # Persona (optional ConfigMap hermes-bot-soul in the bot's
+                # folder; docs/hermes.md, "Persona"). Seeded only over the
+                # image's default SOUL.md, so an edit made in chat or the
+                # Webapp is never overwritten. Bots without it keep the default.
+                if [ -f /etc/hermes-soul/SOUL.md ] && { [ ! -f /opt/data/SOUL.md ] || cmp -s /opt/data/SOUL.md /opt/hermes/docker/SOUL.md; }; then
+                  install -m 0644 /etc/hermes-soul/SOUL.md /opt/data/SOUL.md
+                  echo "SOUL.md seeded from hermes-bot-soul"
+                fi
+                # A2A, Agent-to-Agent (input A2A_ENABLED; docs/hermes.md, "A2A
+                # (opt-in)"). The inbound server starts from the env alone
+                # (A2A_PORT in Secret a2a, plugins/platforms/a2a/__init__.py
+                # is_connected); this writes what config.yaml must hold: the
+                # tools an inbound task gets, the a2a toolset on Matrix, and
+                # the outbound peers. Peer URLs and tokens stay $${VAR}
+                # references that Hermes expands from the env at load time, so
+                # no credential lands in config.yaml. Same .env lesson as
+                # API_SERVER_KEY: an A2A_* line there would beat the Secret.
+                if [ -n "$${A2A_PEER_TOKENS:-}" ] && [ -f /opt/data/.env ] && [ ! -L /opt/data/.env ]; then
+                  sed -i '/^A2A_/d' /opt/data/.env
+                fi
+                if [ '${A2A_ENABLED:=false}' = true ] && [ -n "$${A2A_PEER_TOKENS:-}" ]; then
+                  a2a=on
+                else
+                  a2a=off
+                  if [ '${A2A_ENABLED:=false}' = true ]; then
+                    echo "WARNING: A2A_ENABLED without Secret a2a (1Password fields a2a_peer_tokens, a2a_hermes_peer_token); A2A left off" >&2
+                  fi
+                fi
+                A2A_STATE="$a2a" A2A_PEER='${A2A_HERMES_PEER:=}' \
+                  /opt/hermes/.venv/bin/python - <<'PY'
+                import os
+                import sys
+
+                sys.path.insert(0, "/opt/hermes")
+                from hermes_cli.config import read_raw_config, save_config
+
+                # What an inbound A2A task may use. Hermes' default for the a2a
+                # platform is every tool (browser, computer_use, cronjob,
+                # delegation, connections, memory, session_search...), checked
+                # with _get_platform_tools at v0.22.6 and v0.23.0. No memory or
+                # session_search (they would hand a peer Ryan's Matrix
+                # history), no a2a (no chaining from an inbound task), no MCP.
+                # A2A_ADVERTISED_TOOLSETS in Secret a2a must list the same.
+                INBOUND = ["terminal", "file", "code_execution", "web", "vision", "skills", "todo", "no_mcp"]
+                OWNER = "k8s-gitops"
+
+                on = os.environ["A2A_STATE"] == "on"
+                peer = os.environ["A2A_PEER"].strip()
+                cfg = read_raw_config()
+
+                pt = cfg.get("platform_toolsets") if isinstance(cfg.get("platform_toolsets"), dict) else {}
+                matrix = pt.get("matrix") if isinstance(pt.get("matrix"), list) else None
+                if on:
+                    pt["a2a"] = INBOUND
+                    # The composite keeps Matrix on Hermes' default set; only a2a is added.
+                    pt["matrix"] = ["hermes-matrix", "a2a"] if matrix is None else matrix + ([] if "a2a" in matrix else ["a2a"])
+                else:
+                    pt.pop("a2a", None)
+                    if matrix is not None:
+                        matrix = [t for t in matrix if t != "a2a"]
+                        if matrix in ([], ["hermes-matrix"]):
+                            pt.pop("matrix", None)
+                        else:
+                            pt["matrix"] = matrix
+
+                # Peers this file wrote carry managed_by; the a2a tools ignore
+                # the key. Other entries are left alone.
+                agents = cfg.get("a2a_agents") if isinstance(cfg.get("a2a_agents"), dict) else {}
+                agents = {k: v for k, v in agents.items() if not (isinstance(v, dict) and v.get("managed_by") == OWNER)}
+                if on and peer and os.environ.get("A2A_HERMES_PEER_TOKEN"):
+                    agents[peer] = {
+                        "url": f"http://agent-a2a.hermes-{peer}.svc.cluster.local:9900",
+                        "auth": {"type": "bearer", "token": "$${A2A_HERMES_PEER_TOKEN}"},
+                        # a2a_call blocks the turn until the peer answers; the
+                        # peer itself gives up at its A2A_REPLY_TIMEOUT (300 s).
+                        "timeout": 300,
+                        "capabilities": ["hermes"],
+                        "managed_by": OWNER,
+                    }
+                if on and os.environ.get("A2A_CHIEF_ENGINEER_URL") and os.environ.get("A2A_CHIEF_ENGINEER_TOKEN"):
+                    agents["chief-engineer"] = {
+                        "url": "$${A2A_CHIEF_ENGINEER_URL}",
+                        "auth": {"type": "bearer", "token": "$${A2A_CHIEF_ENGINEER_TOKEN}"},
+                        "timeout": 300,
+                        "capabilities": ["homelab", "chief-engineer"],
+                        "managed_by": OWNER,
+                    }
+
+                for key, value in (("platform_toolsets", pt), ("a2a_agents", agents)):
+                    if value:
+                        cfg[key] = value
+                    else:
+                        cfg.pop(key, None)
+                save_config(cfg)
+                print(f"a2a: {'on' if on else 'off'}; peers: {', '.join(sorted(agents)) or 'none'}")
+                PY
+            # api-server: stage2 reads API_SERVER_KEY (above). hindsight,
+            # webhook and the a2a pair: the steps above check for their keys.
+            # The gateway's other credentials stay in the app container.
             envFrom:
               - secretRef:
                   name: api-server
@@ -430,6 +526,12 @@ spec:
                   optional: true
               - secretRef:
                   name: webhook
+                  optional: true
+              - secretRef:
+                  name: a2a
+                  optional: true
+              - secretRef:
+                  name: a2a-chief-engineer
                   optional: true
             securityContext: &restricted
               allowPrivilegeEscalation: false
@@ -521,6 +623,18 @@ spec:
               # Webapp stays off.
               - secretRef:
                   name: webapp
+                  optional: true
+              # A2A_* for the inbound server and the token for the Hermes peer,
+              # only for a bot with A2A_ENABLED=true (ExternalSecret a2a).
+              # Without A2A_PORT here the a2a platform stays off.
+              - secretRef:
+                  name: a2a
+                  optional: true
+              # The Grok Chief Engineer bridge's URL and token, only with
+              # A2A_CHIEF_ENGINEER_ENABLED=true (ExternalSecret
+              # a2a-chief-engineer). Agent pod only.
+              - secretRef:
+                  name: a2a-chief-engineer
                   optional: true
             probes:
               liveness:
@@ -646,6 +760,16 @@ spec:
         ports:
           http:
             port: 9120
+      # Opt-in A2A server (input A2A_ENABLED; docs/hermes.md). Other bots
+      # call agent-a2a.hermes-<bot>.svc.cluster.local:9900 directly; LAN
+      # peers use the route below.
+      a2a:
+        enabled: ${A2A_ENABLED:=false}
+        controller: agent
+        forceRename: agent-a2a
+        ports:
+          http:
+            port: 9900
     # envoy-internal only: LAN clients, never the tunnel. Labelled public
     # because API clients send a bearer key and cannot complete the gateway
     # Pocket ID login; Hermes checks the key on every route but /health.
@@ -720,6 +844,44 @@ spec:
             backendRefs:
               - identifier: desktop
                 port: 9120
+      # A2A for LAN peers (the Chief Engineer bridge): envoy-internal only,
+      # never the tunnel. Labelled public: a peer sends a bearer token and
+      # cannot do the gateway login; Hermes checks the token on every POST.
+      # Only the JSON-RPC endpoint and the Agent Card; /health and /metrics
+      # (unauthenticated in Hermes) stay in the cluster. No A2A_PUBLIC_URL:
+      # the card takes its URL from the request's Host, so it names this
+      # hostname here and the Service name for in-cluster callers.
+      a2a:
+        enabled: ${A2A_ENABLED:=false}
+        kind: HTTPRoute
+        forceRename: agent-a2a
+        labels:
+          gateway.holthome.net/auth: public
+        hostnames:
+          - ${BOT_NAME}-a2a.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          # SendMessage waits for the reply (A2A_REPLY_TIMEOUT, 300 s), and
+          # SendStreamingMessage holds an SSE stream for as long.
+          - matches:
+              - path:
+                  type: Exact
+                  value: /
+              - path:
+                  type: Exact
+                  value: /.well-known/agent-card.json
+              - path:
+                  type: Exact
+                  value: /.well-known/agent.json
+            timeouts:
+              request: 600s
+              backendRequest: 600s
+            backendRefs:
+              - identifier: a2a
+                port: 9900
     # The chart writes target.template with toYaml, not tpl, so
     # {{ .api_server_key }} reaches External Secrets unexpanded.
     externalSecrets:
@@ -911,6 +1073,73 @@ spec:
           - secretKey: github_token
             remoteRef:
               key: hermes-${BOT_NAME}/github_token
+      # A2A (A2A_ENABLED). a2a_peer_tokens is the inbound credential list,
+      # "name:token,name:token": the name a token maps to is the peer's
+      # identity for trust, rate limiting and the audit log, and must be in
+      # A2A_TRUSTED_PEERS. a2a_hermes_peer_token is what this bot presents to
+      # its Hermes peer (A2A_HERMES_PEER), the same value as this bot's entry
+      # in that peer's a2a_peer_tokens. A2A_HOST 0.0.0.0 takes effect only
+      # because a token is set; without A2A_TRUSTED_PEERS Hermes would refuse
+      # every peer on a non-loopback bind. Missing field: stays unready, no
+      # Secret, and the bot runs without A2A. A2A_ADVERTISED_TOOLSETS must
+      # match INBOUND in the config init container.
+      a2a:
+        enabled: ${A2A_ENABLED:=false}
+        forceRename: a2a
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: a2a
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              A2A_PORT: "9900"
+              A2A_HOST: 0.0.0.0
+              A2A_AGENT_NAME: ${BOT_NAME}
+              A2A_AGENT_DESCRIPTION: "${A2A_AGENT_DESCRIPTION:=Hermes agent}"
+              A2A_ADVERTISED_TOOLSETS: terminal,file,code_execution,web,vision,skills,todo
+              A2A_TRUSTED_PEERS: "${A2A_TRUSTED_PEERS:=}"
+              A2A_RATE_LIMIT: "20"
+              A2A_MAX_PINGPONG_TURNS: "5"
+              A2A_REPLY_TIMEOUT: "300"
+              A2A_PEER_TOKENS: "{{ .a2a_peer_tokens }}"
+              A2A_HERMES_PEER_TOKEN: "{{ .a2a_hermes_peer_token }}"
+        data:
+          - secretKey: a2a_peer_tokens
+            remoteRef:
+              key: hermes-${BOT_NAME}/a2a_peer_tokens
+          - secretKey: a2a_hermes_peer_token
+            remoteRef:
+              key: hermes-${BOT_NAME}/a2a_hermes_peer_token
+      # Grok Chief Engineer as an outbound A2A peer (A2A_CHIEF_ENGINEER_ENABLED),
+      # through a bridge that does not exist yet. Its URL is kept out of git
+      # with its token. The agent also needs an egress rule for the bridge's
+      # host before a call can leave the pod (docs/hermes.md).
+      a2a-chief-engineer:
+        enabled: ${A2A_CHIEF_ENGINEER_ENABLED:=false}
+        forceRename: a2a-chief-engineer
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: a2a-chief-engineer
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              A2A_CHIEF_ENGINEER_URL: "{{ .a2a_chief_engineer_url }}"
+              A2A_CHIEF_ENGINEER_TOKEN: "{{ .a2a_chief_engineer_token }}"
+        data:
+          - secretKey: a2a_chief_engineer_url
+            remoteRef:
+              key: hermes-${BOT_NAME}/a2a_chief_engineer_url
+          - secretKey: a2a_chief_engineer_token
+            remoteRef:
+              key: hermes-${BOT_NAME}/a2a_chief_engineer_token
     rawResources:
       # Tavily for web_search/web_extract, only with TAVILY_ENABLED:
       # api.tavily.com on 443, nothing else. toFQDNs needs the DNS proxy to
@@ -1154,6 +1383,81 @@ spec:
               - group: gateway.networking.k8s.io
                 kind: HTTPRoute
                 name: agent-desktop
+      # Additive: 9900 (A2A) from the envoy-internal proxies and from other
+      # bots' agent pods (namespaces the component labels
+      # hermes.holthome.net/bot). Every POST still needs a peer token. The
+      # screen pods, this bot's included, stay out.
+      a2a-ingress:
+        enabled: ${A2A_ENABLED:=false}
+        forceRename: agent-a2a
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                  - matchLabels:
+                      app.kubernetes.io/name: hermes
+                      app.kubernetes.io/controller: agent
+                    matchExpressions:
+                      # Without a namespace key Cilium scopes the selector to
+                      # this policy's namespace; Exists plus the label spans
+                      # hermes-*.
+                      - key: k8s:io.kubernetes.pod.namespace
+                        operator: Exists
+                      - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+                        operator: Exists
+                toPorts:
+                  - ports:
+                      - port: "9900"
+                        protocol: TCP
+      # The agent's route to its Hermes peer's A2A server, 9900 only. The
+      # peer's own a2a-ingress admits it once that bot has A2A on.
+      a2a-peer-egress:
+        enabled: ${A2A_ENABLED:=false}
+        forceRename: agent-a2a-peer
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: hermes-${A2A_HERMES_PEER:=none}
+                      app.kubernetes.io/name: hermes
+                      app.kubernetes.io/controller: agent
+                toPorts:
+                  - ports:
+                      - port: "9900"
+                        protocol: TCP
+      # Lets pocket-id-exempt in network select the public route
+      # (docs/gateway-auth.md, "Opt out").
+      a2a-gateway-auth:
+        enabled: ${A2A_ENABLED:=false}
+        forceRename: agent-a2a-gateway-auth
+        manifest:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          spec:
+            from:
+              - group: gateway.envoyproxy.io
+                kind: SecurityPolicy
+                namespace: network
+            to:
+              - group: gateway.networking.k8s.io
+                kind: HTTPRoute
+                name: agent-a2a
     persistence:
       data:
         type: persistentVolumeClaim
@@ -1223,6 +1527,20 @@ spec:
           agent:
             app:
               - path: /var/log/outlook-mcp
+      # The bot's persona, from optional ConfigMap hermes-bot-soul (a
+      # configMapGenerator in the bot's folder). Init container only; it
+      # seeds /opt/data/SOUL.md once. Bots without one get an empty mount.
+      soul:
+        type: custom
+        volumeSpec:
+          configMap:
+            name: hermes-bot-soul
+            optional: true
+        advancedMounts:
+          agent:
+            config:
+              - path: /etc/hermes-soul
+                readOnly: true
       agent-ssh-src:
         type: secret
         name: agent-ssh

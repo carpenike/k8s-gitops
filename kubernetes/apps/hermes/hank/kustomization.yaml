@@ -1,0 +1,54 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Hank: @hank:ryanholt.net. Ryan's homelab engineer on Hermes, the
+# counterpart to Chief Engineer on Grok Bot. The whole bot is these inputs
+# plus its persona (SOUL.md); everything else is
+# kubernetes/components/hermes-bot. See docs/hermes.md, "Hank".
+#
+# Deliberately not copied from Chief: Outlook, the Webapp, Claude Code and
+# the webhook. Hank drafts Claude Code prompts for Ryan; he does not run
+# them, send mail, or act on systems.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hermes-hank
+components:
+  - ../../../components/hermes-bot
+configMapGenerator:
+  - name: hermes-bot-inputs
+    literals:
+      - BOT_NAME=hank
+      - MATRIX_USER=hank
+      # Azure (monthly credits) first; Anthropic only when Azure fails.
+      - LLM_MODEL=gpt-6.1-terra
+      - LLM_FALLBACK_MODEL=claude-sonnet
+      # Hank may change its own Matrix display name and avatar when asked.
+      - MATRIX_PROFILE_TOOLS=true
+      - LLM_BUDGET_USD=25
+      - LLM_BUDGET_DURATION=30d
+      - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
+      - AGENT_STORAGE_SIZE=10Gi
+      - WORKSPACE_STORAGE_SIZE=20Gi
+      - API_SERVER_ENABLED=true
+      - HINDSIGHT_ENABLED=true
+      - TAVILY_ENABLED=true
+      # A2A (docs/hermes.md, "A2A (opt-in)"). Inbound at
+      # https://hank-a2a (envoy-internal) and agent-a2a.hermes-hank in the
+      # cluster, bearer tokens per peer; outbound to Chief.
+      - A2A_ENABLED=true
+      - A2A_TRUSTED_PEERS=chief,chief-engineer
+      - A2A_HERMES_PEER=chief
+      # Shown on the Agent Card. Lands unquoted in YAML after kustomize
+      # build, so no ": ", " #", or leading quote, dash or brace.
+      - "A2A_AGENT_DESCRIPTION=Hank, Ryan's homelab infrastructure engineer. Diagnoses homelab problems (Forge, the Talos and Kubernetes cluster, Flux) from the alerts, logs and output a peer sends, drafts NixOS and Kubernetes changes as Claude Code prompts for Ryan, and runs read-only checks in his own sandbox, which has no cluster or Forge credentials. Every answer is a proposal; nothing is merged, deployed or changed without Ryan's explicit yes."
+      # TODO(chief-engineer): the Grok Chief Engineer bridge (home MCP or an
+      # a2a-bridge) does not exist yet. When it does: add fields
+      # a2a_chief_engineer_url and a2a_chief_engineer_token to 1Password item
+      # hermes-hank, an egress rule for its host, and set this to true.
+      - A2A_CHIEF_ENGINEER_ENABLED=false
+  # Hank's persona. Seeded into /opt/data/SOUL.md once, over the image's
+  # default only; later edits in chat or the Webapp are kept.
+  - name: hermes-bot-soul
+    files:
+      - SOUL.md
+generatorOptions:
+  disableNameSuffixHash: true
