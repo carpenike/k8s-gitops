@@ -457,7 +457,7 @@ spec:
                 # What an inbound A2A task may use. Hermes' default for the a2a
                 # platform is every tool (browser, computer_use, cronjob,
                 # delegation, connections, memory, session_search...), checked
-                # with _get_platform_tools at v0.22.6. No memory or
+                # with _get_platform_tools at v0.22.6 and v0.23.0. No memory or
                 # session_search (they would hand a peer Ryan's Matrix
                 # history), no a2a (no chaining from an inbound task), no MCP.
                 # A2A_ADVERTISED_TOOLSETS in Secret a2a must list the same.
@@ -1086,7 +1086,7 @@ spec:
       a2a:
         enabled: ${A2A_ENABLED:=false}
         forceRename: a2a
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword
@@ -1121,7 +1121,7 @@ spec:
       a2a-chief-engineer:
         enabled: ${A2A_CHIEF_ENGINEER_ENABLED:=false}
         forceRename: a2a-chief-engineer
-        refreshInterval: 1h
+        refreshInterval: 12h
         secretStoreRef:
           kind: ClusterSecretStore
           name: onepassword

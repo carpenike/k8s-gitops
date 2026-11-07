@@ -976,9 +976,10 @@ does. Everything below is gated on `A2A_ENABLED` unless noted.
 Like the API server, the hostname has no cloudflared rule and no public
 DNS record. A2A is never reachable from the internet.
 
-### How Hermes handles it (v0.22.6)
+### How Hermes handles it (v0.23.0)
 
-From `plugins/platforms/a2a/{__init__,adapter,security,protocol,tools}.py`:
+From `plugins/platforms/a2a/{__init__,adapter,security,protocol,tools}.py`.
+Read at v0.22.6; the plugin is byte-identical at v0.23.0:
 
 - **Enabled by the env.** `A2A_PORT` in the gateway's env connects the
   platform (`is_connected`). No `platforms.a2a` entry is written, so a
@@ -1025,7 +1026,7 @@ From `plugins/platforms/a2a/{__init__,adapter,security,protocol,tools}.py`:
 ### Tools on an inbound task
 
 Without a setting, an A2A task gets Hermes' default for the platform,
-which is every toolset (checked with `_get_platform_tools` at v0.22.6):
+which is every toolset (checked with `_get_platform_tools` at v0.22.6 and v0.23.0):
 browser, `computer_use`, `cronjob`, `delegation`, connections, memory and
 `session_search` included. The init container therefore sets
 `platform_toolsets.a2a`:
