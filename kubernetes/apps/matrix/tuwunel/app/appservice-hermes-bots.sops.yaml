@@ -14,7 +14,7 @@ metadata:
 type: Opaque
 stringData:
   as_token: ENC[AES256_GCM,data:PrgStWR1LvJf6Ia7XUDm+wNyZ/VSlx1/ivW4WTu85raFLkvU3ruBJRx10VZKIw8KlL6EXiiGlhGBFXs7S1tDHQ==,iv:bAFcAoOoH04YdALgviszXw0mX3ddIz/LeaoziKCvO9w=,tag:NUlW3eqPEmLLdhYjmtgseQ==,type:str]
-  hermes-bots.yaml: ENC[AES256_GCM,data:nOfPHChDgwU4i/as97qaGnTv5zzpBsDkG28tJ6rt0rJtyde7GiP/AMzgWZMJc7rHZR+98Bn43nBZN/yHO9FY3B8Vw9n9G62elSA8ByW3ThKO4br+UMvStZ/ognahRM+BilrWI2/QYel6HDXD1muCAxQhrLEV/7jvpt1QQpcQPUQuR0b/jBHKdjSEbpxulS+S7OfFrXSNhUaCDQAXlwYZ/gZdTs+cyHFwMctG5czGYKDbIzqrwI0Ryvm4EQ1xag7SLVb8EnlQk7tLT/94sjN0B3Lf1RLUSE92w4x9vIOl3l+zea3uNnVijvpZk8baUIbfjCjFeUkHQ/MPYL3PU72/tR2NK+wJKHIedXCHNUPILmkqSy5ThxHpyQQ2BbDhoi4TdpF9qExOwJ0sDnBOakPfz4LpfKwUBRLdMiTndGu5QHFxKgD0eETIB6zZmg==,iv:aL3qk9643VLQ1MQOHa1T+MH7sLOWPbBM6+T0D3nz5rE=,tag:fIud35nlGz4J8XyUkNUqcQ==,type:str]
+  hermes-bots.yaml: ENC[AES256_GCM,data:qxlZtxNvskTghz5jquUZXJLDO5BBqRseal6AUSTukY4JoqgnSKgVttW5JW5rB0tNMotK4nYrk+JrhO8JIpF3T+erGydFjm2Wu7v6Kc7XhNCmrb6zy93CiJknIyREmaHtY3v5zfUinva30O+7KNzlLVQqxUsfe00UxUNHmwQrwkqyrwXzKmDiPM62ORelcxcmAM2f30OYr1t6EbcwA8WA2p4nzwe8m1UOSmCjgD/F8in9gCJGBiigrne3dyUZWTkxlgw04IR2QUy73cz65kxbbQaG6I8oo11HU1nvfbpcaxFqarZzWQj0PavCBlZUtAjBi01cXDWZsYHaeMlRz77tP4uXFgkbMYKNXaQ6npJ/AfsVgcSzrM4ubTDwJLvUQuxBcBgFooZAmzbPG591XYritQJ/It4NdUrQZIxaF8Mit292tHQtlL5BITuJAci9OSYu,iv:+D0zBmjyYgGAn4Upvjs3lXXG1RmI1yHa2k6qQcFcVnk=,tag:oJi5V5S74ICZ3udt6vxLkQ==,type:str]
 sops:
   age:
     - enc: |
@@ -27,8 +27,8 @@ sops:
         -----END AGE ENCRYPTED FILE-----
       recipient: age1ea86d2m34zdq4efckuc4mdez0q7hgw7x8rjw9up5msnhvxwje5esgc074h
   encrypted_regex: ^(data|stringData)$
-  lastmodified: "2026-11-03T22:17:20Z"
-  mac: ENC[AES256_GCM,data:hPfHy8hQzcvLEs4DbtPTuigae3LPBKGQSf9NyoLpLYO8HPsxlk+NOXrykKc0BnPrmHY9gnWC8gLWgPFD5ZygI5HN/P4TgoA6NPYvLBV5C8CKQunZMWxgbSg/abdkFmRqa4JApRa09/jVjZ/eIs4bSeIdGBSJFfPTx9yAlXZguWc=,iv:kJtax55W5KjBLY0ufnqefq/B6TIAcRFckpFGFBAxYqk=,tag:XpCsulz1y1jO6WrvBddYzg==,type:str]
+  lastmodified: "2026-11-07T11:48:47Z"
+  mac: ENC[AES256_GCM,data:gfJKkECe6J6VN7SmIwAr3A1XN3fHyl4B3Od5J4Q5IICFY0BKt3dMz/DD0IoyYvPFVjh6Q8nVbmomJdjpvQo75UA+VjwjjzepxrkJoO+FkglL8rTAuEP17k/nnVtYlR9uMHnyZGfymtrkUEN9MCLDzB+DERBA2VyPLO1AmSNtKEg=,iv:RQQpEYlN4gD8kIJUg6i7+k9JDljDc5UJFhJV9BgB8s4=,tag:j5G/fjvyqVrOKFbCVLEqMw==,type:str]
   mac_only_encrypted: true
   pgp:
     - created_at: "2026-11-03T22:17:20Z"
