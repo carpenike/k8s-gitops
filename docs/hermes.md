@@ -1413,8 +1413,9 @@ three modes:
   CAPTCHA or approve a prompt.
 - **Hand back:** return control to the bot.
 
-**Off by default.** `WEBAPP_ENABLED=true` turns it on; today only Chief
-has it. When it is on, the component adds:
+**Off by default.** `WEBAPP_ENABLED=true` turns it on; Chief and Hank have
+it, with Pocket ID clients `hermes` and `hermes-hank`, both public with PKCE
+and limited to group `admins` (Ryan). When it is on, the component adds:
 
 | Object | What |
 | --- | --- |
@@ -1480,8 +1481,9 @@ a restart, and what to avoid (New bot, internet tools, API keys), is in
 
 ### Turning it on for a bot
 
-1. In Pocket ID, create an OIDC client:
-   - name `hermes-<bot>-desktop`;
+1. In Pocket ID, create an OIDC client (API: `~/src/network-config`,
+   `docs/pocketid.md`; copy client `hermes`):
+   - id `hermes-<bot>`;
    - **public client** (PKCE, no secret);
    - callback URL `https://<bot>-desktop.${SECRET_DOMAIN}/auth/callback`;
    - allowed user groups limited to Ryan.
@@ -1942,9 +1944,10 @@ persona (`SOUL.md`). He has no credentials for Forge or the cluster.
 | On | Off, unlike Chief |
 | --- | --- |
 | Matrix, LiteLLM key `hermes-hank` (US$25 per 30 days) | Outlook (`OUTLOOK_MCP_ENABLED`) |
-| Hindsight memory, tenant `hank` (schema `user_hank`) | The Webapp and desktop viewer (`WEBAPP_ENABLED`) |
-| Tavily web search | The webhook (`WEBHOOK_ENABLED`); see below |
+| Hindsight memory, tenant `hank` (schema `user_hank`) | The webhook (`WEBHOOK_ENABLED`); see below |
+| Tavily web search | |
 | API server at `https://hank-api` (envoy-internal) | |
+| Webapp and desktop viewer at `https://hank-desktop` (`WEBAPP_ENABLED`, Pocket ID client `hermes-hank`) | |
 | A2A, inbound and outbound to Chief ([A2A](#a2a-opt-in)) | |
 | Claude Code and GitHub (`CLAUDE_CODE_ENABLED`, `CLAUDE_CODE_MERGE`) | |
 | Context7 library docs ([MCP servers from git](#mcp-servers-from-git)) | |
