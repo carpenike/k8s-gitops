@@ -395,6 +395,106 @@ spec:
                 else
                   hermes-outlook-config disable
                 fi
+                # MCP servers from git (optional ConfigMap hermes-bot-mcp,
+                # file mcp-servers.yaml in the bot's folder; docs/hermes.md,
+                # "MCP servers from git"). Writes the declared HTTP servers into
+                # mcp_servers, removes the ones git wrote before and no longer
+                # declares, and leaves every other entry (outlook, anything
+                # added in chat) alone. $${VAR} in a server's url or headers is
+                # left for Hermes to fill from the environment (Secret mcp) when
+                # it connects; only $${SECRET_DOMAIN} is filled here.
+                MCP_SECRET_DOMAIN='${SECRET_DOMAIN}' /opt/hermes/.venv/bin/python - <<'PY'
+                import json
+                import os
+                import re
+                import sys
+
+                sys.path.insert(0, "/opt/hermes")
+                import yaml
+                from hermes_cli.config import read_raw_config, save_config
+
+                SRC = "/etc/hermes-mcp/mcp-servers.yaml"
+                STATE = "/opt/data/.k8s-gitops-mcp.json"
+                RESERVED = {"outlook"}
+                PASSED = {"url", "transport", "headers", "auth", "oauth", "trust", "timeout", "connect_timeout", "keepalive_interval"}
+                API_TOOLSETS = ["hermes-api-server", "no_mcp"]
+                domain = os.environ["MCP_SECRET_DOMAIN"]
+
+                declared = {}
+                if os.path.isfile(SRC):
+                    with open(SRC) as fh:
+                        doc = yaml.safe_load(fh) or {}
+                    declared = (doc.get("servers") or {}) if isinstance(doc, dict) else None
+                    if not isinstance(declared, dict):
+                        print("WARNING: mcp-servers.yaml: 'servers' must be a mapping; no MCP servers from git", file=sys.stderr)
+                        declared = {}
+                try:
+                    with open(STATE) as fh:
+                        previous = set(json.load(fh))
+                except (OSError, ValueError):
+                    previous = set()
+
+                cfg = read_raw_config()
+                servers = cfg.get("mcp_servers") if isinstance(cfg.get("mcp_servers"), dict) else {}
+                for name in previous - set(declared):
+                    servers.pop(name, None)
+
+                written = []
+                for name, spec in declared.items():
+                    problems = []
+                    if name in RESERVED or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,47}", str(name)):
+                        problems.append("name must be lowercase letters, digits, - or _, and not outlook")
+                    if not isinstance(spec, dict):
+                        spec, problems = {}, problems + ["entry must be a mapping"]
+                    extra = set(spec) - PASSED - {"tools"}
+                    if extra:
+                        problems.append(f"unsupported keys {sorted(extra)} (HTTP servers only)")
+                    url = str(spec.get("url") or "")
+                    if not (url.startswith("https://") or re.match(r"http://[a-z0-9.-]+\.svc\.cluster\.local[:/]", url)):
+                        problems.append("url must be https:// or an in-cluster http:// service")
+                    tools = spec.get("tools")
+                    if not (isinstance(tools, list) and tools and all(isinstance(t, str) and t for t in tools)):
+                        problems.append("tools must be a non-empty list of tool names (the allowlist)")
+                    if spec.get("trust", "untrusted") not in ("untrusted", "full"):
+                        problems.append("trust must be untrusted or full")
+                    if problems:
+                        print(f"WARNING: mcp-servers.yaml: {name}: " + "; ".join(problems) + "; not written", file=sys.stderr)
+                        if name in previous:
+                            servers.pop(name, None)
+                        continue
+                    entry = {k: v for k, v in spec.items() if k in PASSED}
+                    entry["url"] = url.replace("$${SECRET_DOMAIN}", domain)
+                    entry.setdefault("trust", "untrusted")
+                    entry["tools"] = {"include": tools, "resources": False, "prompts": False}
+                    entry["sampling"] = {"enabled": False}
+                    servers[name] = entry
+                    written.append(name)
+
+                # Hermes adds every MCP server to every platform. The API
+                # server's callers answer their own approval prompts, so it
+                # gets no MCP at all (the same rule hermes-outlook-config
+                # applies for Outlook). Webhook routes and inbound A2A tasks
+                # already carry no_mcp.
+                toolsets = cfg.get("platform_toolsets") if isinstance(cfg.get("platform_toolsets"), dict) else {}
+                if servers:
+                    toolsets["api_server"] = API_TOOLSETS
+                # A remembered "Always" for a git-managed server's tool lasts
+                # only until the next start.
+                allowlist = cfg.get("command_allowlist")
+                if isinstance(allowlist, list) and written:
+                    cfg["command_allowlist"] = [
+                        e for e in allowlist if not any(str(e).startswith(f"mcp:{n}/") for n in written)
+                    ]
+                for key, value in (("mcp_servers", servers), ("platform_toolsets", toolsets)):
+                    if value:
+                        cfg[key] = value
+                    else:
+                        cfg.pop(key, None)
+                save_config(cfg)
+                with open(STATE, "w") as fh:
+                    json.dump(sorted(written), fh)
+                print(f"mcp servers from git: {', '.join(sorted(written)) or 'none'}")
+                PY
                 # Hindsight long-term memory (input HINDSIGHT_ENABLED;
                 # docs/hermes-memory.md). On only when the key reached this
                 # container (Secret hindsight): a missing 1Password field
@@ -734,6 +834,12 @@ spec:
               # a2a-chief-engineer). Agent pod only.
               - secretRef:
                   name: a2a-chief-engineer
+                  optional: true
+              # Secrets the bot's git-declared MCP servers reference as
+              # $${VAR}, only with MCP_SECRETS_ENABLED=true (ExternalSecret mcp,
+              # every field of 1Password item hermes-<bot>-mcp). Agent pod only.
+              - secretRef:
+                  name: mcp
                   optional: true
             probes:
               liveness:
@@ -1102,6 +1208,24 @@ spec:
           - secretKey: tavily_api_key
             remoteRef:
               key: hermes-${BOT_NAME}/tavily_api_key
+      # Secrets for the bot's git-declared MCP servers (MCP_SECRETS_ENABLED):
+      # every field of 1Password item hermes-<bot>-mcp, its label as the env
+      # var name, for $${VAR} in mcp-servers.yaml. One item lookup per
+      # refresh, however many fields. Missing item: stays unready, and the
+      # servers that need it fail closed with the variable named.
+      mcp:
+        enabled: ${MCP_SECRETS_ENABLED:=false}
+        forceRename: mcp
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: mcp
+          creationPolicy: Owner
+        dataFrom:
+          - extract:
+              key: hermes-${BOT_NAME}-mcp
       # The Webapp's Pocket ID sign-in (Hermes self-hosted OIDC provider): a
       # public client with PKCE, so only its id; Pocket ID's issuer is fixed.
       webapp:
@@ -1626,9 +1750,25 @@ spec:
           agent:
             app:
               - path: /var/log/outlook-mcp
+      # The bot's git-declared MCP servers, from optional ConfigMap
+      # hermes-bot-mcp (mcp-servers.yaml in the bot's folder). Init container
+      # only; it writes them into config.yaml. Bots without one get an empty
+      # mount and no servers from git.
+      mcp-servers:
+        type: custom
+        volumeSpec:
+          configMap:
+            name: hermes-bot-mcp
+            optional: true
+        advancedMounts:
+          agent:
+            config:
+              - path: /etc/hermes-mcp
+                readOnly: true
       # The bot's persona, from optional ConfigMap hermes-bot-soul (a
       # configMapGenerator in the bot's folder). Init container only; it
-      # seeds /opt/data/SOUL.md once. Bots without one get an empty mount.
+      # writes /opt/data/SOUL.md while the live copy is still a version git
+      # wrote. Bots without one get an empty mount.
       soul:
         type: custom
         volumeSpec:
