@@ -117,6 +117,17 @@ Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
 | `postgres17-r2` | `endpoint_url` | `https://<account id>.r2.cloudflarestorage.com` |
 | `postgres17-r2` | `bucket` | Bucket name; objects go under `cnpg/postgres17/` |
 
+## homelab-mcp
+
+Before `kubernetes/apps/homelab-mcp` reconciles, create item `homelab-mcp`
+(new) in vault `k8s-secrets` with fields `pocketid_client_secret`,
+`ha_token`, `ha_read_token`, `grocy_api_key`, `paperless_token` and
+`mfp_cookies`. [homelab-mcp.md](homelab-mcp.md#1password) says where each
+comes from.
+
+The HelmRelease image tag `sha-0000000000000000000000000000000000000000`
+is a placeholder for the first main build of carpenike/mcp.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in homelab-mcp.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# In: 9200 (MCP and OAuth) from the envoy-external proxies only, which is
+# why HOMELAB_MCP_TRUSTED_PROXY_IPS may be "*"; 9201 (/metrics) from
+# Prometheus only. Probes come from the kubelet, which Cilium allows.
+# Out: DNS, then 443 to the named hosts only. toFQDNs needs the DNS proxy
+# to see the lookups, hence the L7 DNS rule, and the pod's ndots 1.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: homelab-mcp
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homelab-mcp
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-external
+      toPorts:
+        - ports:
+            - port: "9200"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9201"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        # Pocket ID (upstream login) and the tool upstreams.
+        - matchName: id.${SECRET_DOMAIN}
+        - matchName: cook.${SECRET_DOMAIN}
+        - matchName: fedcook.${SECRET_DOMAIN}
+        - matchName: grocy.${SECRET_DOMAIN}
+        - matchName: ha.${SECRET_DOMAIN}
+        - matchName: paperless.${SECRET_DOMAIN}
+        # mfp: cookies go to www only; the v2 API takes the bearer token.
+        - matchName: www.myfitnesspal.com
+        - matchName: api.myfitnesspal.com
+        # arcraiders data sources.
+        - matchName: metaforge.app
+        - matchName: ardb.app
+        - matchName: arcraiders.wiki
+        - matchName: raw.githubusercontent.com
+        - matchName: api.github.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# homelab-mcp health and the MFP browser-cookie session. The cookies cannot
+# be refreshed by the server; carpenike/mcp docs/MFP-COOKIE-RUNBOOK.md says
+# how to replace them. Alerts route to Forge's Alertmanager like the rest.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-mcp
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: homelab-mcp
+      rules:
+        - alert: HomelabMcpDown
+          expr: |
+            up{namespace="homelab-mcp",job="homelab-mcp"} == 0
+              or absent(up{namespace="homelab-mcp",job="homelab-mcp"})
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: homelab-mcp is not being scraped
+            description: >-
+              Prometheus has had no /metrics from homelab-mcp for 10 minutes.
+              Claude's MCP connectors at mcp.<domain> are probably down too.
+        - alert: HomelabMcpMfpAuthExpired
+          # Set by the client on a 401/403 or a refused token refresh; the
+          # mfp tools then return an auth error, never empty data.
+          expr: homelab_mcp_mfp_auth_state{namespace="homelab-mcp",state="expired"} == 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: MyFitnessPal session cookies have expired
+            description: >-
+              The mfp tools are refusing calls until the cookies are replaced.
+              Export fresh cookies to the 1Password item homelab-mcp, field
+              mfp_cookies (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
+        - alert: HomelabMcpMfpCookiesExpiringSoon
+          # The session cookie's own expiry, read from the cookie file.
+          expr: |
+            homelab_mcp_mfp_cookie_expiry_timestamp_seconds{namespace="homelab-mcp"} > 0
+              and (homelab_mcp_mfp_cookie_expiry_timestamp_seconds{namespace="homelab-mcp"} - time()) < 5 * 86400
+          for: 1h
+          labels:
+            severity: info
+          annotations:
+            summary: MyFitnessPal session cookies expire within 5 days
+            description: >-
+              Replace them before they lapse (docs/MFP-COOKIE-RUNBOOK.md in
+              carpenike/mcp).

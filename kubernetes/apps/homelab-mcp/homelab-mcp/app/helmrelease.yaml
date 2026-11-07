@@ -1,0 +1,175 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# homelab-mcp: the Claude tools server (carpenike/mcp), at mcp.${SECRET_DOMAIN}.
+# One replica: OAuth state is a SQLite file and the write-confirmation gate
+# keeps consumed tokens in memory. Recreate, because the volume is RWO.
+#
+# Views (HOMELAB_MCP_VIEWS) make several MCP URLs on this one host, each a
+# protected resource of its own (carpenike/mcp src/homelab_mcp/views.py).
+# Only categories that work from the cluster run here: they reach their
+# upstreams over HTTPS. The Forge-local ones (finances, money, school,
+# amazon/costco/samsclub, messaging, nixos) stay off until they have a
+# network path. See docs/homelab-mcp.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homelab-mcp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: homelab-mcp
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      homelab-mcp:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # A name with a dot is looked up as written first, so Cilium files
+          # the answer under that name and the toFQDNs rules match (see the
+          # same note in components/hermes-bot).
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+        containers:
+          app:
+            image:
+              # PLACEHOLDER until the first image is pushed by carpenike/mcp
+              # .github/workflows/image.yml: replace with
+              # sha-<commit>@sha256:<digest>. This tag does not exist, so the
+              # release cannot start with it by accident.
+              repository: ghcr.io/carpenike/homelab-mcp
+              tag: sha-0000000000000000000000000000000000000000
+            env:
+              HOMELAB_MCP_PUBLIC_BASE_URL: https://mcp.${SECRET_DOMAIN}
+              HOMELAB_MCP_BIND_ADDRESS: 0.0.0.0
+              HOMELAB_MCP_PORT: "9200"
+              HOMELAB_MCP_METRICS_PORT: "9201"
+              HOMELAB_MCP_METRICS_BIND_ADDRESS: 0.0.0.0
+              HOMELAB_MCP_LOG_LEVEL: info
+              # Only envoy-external reaches port 9200 (CiliumNetworkPolicy),
+              # so its X-Forwarded-For is the one to trust.
+              HOMELAB_MCP_TRUSTED_PROXY_IPS: "*"
+              # Same Pocket ID client as Forge: its callback is this host.
+              HOMELAB_MCP_POCKETID_ISSUER: https://id.${SECRET_DOMAIN}
+              HOMELAB_MCP_POCKETID_CLIENT_ID: mcp
+              HOMELAB_MCP_OAUTH_USER_ALLOWLIST: '["ryan@ryanholt.net"]'
+              # State lives in a subdirectory the process creates 0700: the
+              # private-file checks refuse a group-writable directory, and the
+              # volume root is group-writable through fsGroup. The signing key
+              # is generated there on first start.
+              HOMELAB_MCP_OAUTH_STATE_DB_PATH: /var/lib/homelab-mcp/state/state.db
+              HOMELAB_MCP_OAUTH_SIGNING_KEY_PATH: /var/lib/homelab-mcp/state/signing-key.pem
+              HOMELAB_MCP_ARCRAIDERS_DB_PATH: /var/lib/homelab-mcp/state/arcraiders.db
+              HOMELAB_MCP_TOOL_CATEGORIES: '["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders"]'
+              HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
+              HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
+              HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
+              HOMELAB_MCP_HA_BASE_URL: https://ha.${SECRET_DOMAIN}
+              HOMELAB_MCP_PAPERLESS_BASE_URL: https://paperless.${SECRET_DOMAIN}
+              HOMELAB_MCP_MFP_ENABLED: "true"
+              HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
+              # Writes stay off until the HAR-based write tests pass.
+              HOMELAB_MCP_MFP_WRITES_ENABLED: "false"
+              # /mcp: everyday read connector. /mcp/admin: everything, write
+              # requested on connect (Claude's step-up is unreliable).
+              # /mcp/agent: Hermes' restricted list. /mcp/house-sensors:
+              # Groundskeeper; its scope name keys the HA entity policy.
+              HOMELAB_MCP_VIEWS: >-
+                [
+                {"path": "/mcp", "name": "Home (read)", "tools": "read",
+                 "read_scope": "home.read", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/admin", "name": "Home (full)", "tools": "all",
+                 "read_scope": "home.read", "write_scope": "home.write",
+                 "connect_scopes": "all", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/agent", "name": "Hermes", "tools": "scope:hermes",
+                 "read_scope": "hermes", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/house-sensors", "name": "House sensors",
+                 "tools": "scope:atrium-family-house-sensors",
+                 "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]}
+                ]
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-env
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 9200
+                  periodSeconds: 30
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 9200
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                cpu: "1"
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: homelab-mcp
+        ports:
+          http:
+            port: 9200
+          metrics:
+            port: 9201
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 60s
+    persistence:
+      state:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        globalMounts:
+          - path: /var/lib/homelab-mcp
+      mfp:
+        type: secret
+        name: homelab-mcp-mfp
+        defaultMode: 0400
+        globalMounts:
+          - path: /run/mfp
+            readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
