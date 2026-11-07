@@ -67,16 +67,17 @@ spec:
               value: hermes-${BOT_NAME}
             - name: SECRET_NAME
               value: hermes-${BOT_NAME}-openproject
-            - name: TASK_BOARD_ENABLED
-              value: "${TASK_BOARD_ENABLED:=false}"
+            # The bot's inputs in one string. kustomize build drops the
+            # quotes around a lone "${VAR}", so a substituted true or 4
+            # would land as a YAML bool or int, which an env value can't be.
+            - name: BOT_INPUTS
+              value: "task_board=${TASK_BOARD_ENABLED:=false} ryan_user_id=${TASK_BOARD_RYAN_USER_ID:=4}"
             - name: BOARD_PROJECT
               value: bots
             - name: BOARD_PROJECT_NAME
               value: Bots
             - name: BOT_ROLE
               value: Member
-            - name: RYAN_USER_ID
-              value: "${TASK_BOARD_RYAN_USER_ID:=4}"
             - name: RYAN_ROLE
               value: Project admin
           securityContext:
