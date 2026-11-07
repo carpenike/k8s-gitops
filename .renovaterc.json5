@@ -1,6 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["github>home-operations/renovate-presets#10.0.1"],
+  extends: ["github>home-operations/renovate-presets#11.0.0"],
   schedule: ["every weekend"],
   // Plan pin for the Renovate release that opened this config: 44.188.2.
   // The GitHub App version is selected in GitHub, not in this file.
