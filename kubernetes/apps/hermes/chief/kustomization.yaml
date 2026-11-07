@@ -41,5 +41,15 @@ configMapGenerator:
       # Multi-turn coding sessions with Claude Code in the screen pod, on
       # Ryan's Claude subscription.
       - CLAUDE_CODE_ENABLED=true
+      # A2A (docs/hermes.md, "A2A (opt-in)"). Inbound at
+      # https://chief-a2a (envoy-internal) and agent-a2a.hermes-chief in the
+      # cluster, bearer token per peer; outbound to Hank. Inbound tasks get
+      # the component's fixed list: no MCP, so no Outlook, and no memory.
+      - A2A_ENABLED=true
+      - A2A_TRUSTED_PEERS=hank
+      - A2A_HERMES_PEER=hank
+      # Shown on the Agent Card. Lands unquoted in YAML after kustomize
+      # build, so no ": ", " #", or leading quote, dash or brace.
+      - "A2A_AGENT_DESCRIPTION=Chief, Ryan's general assistant. Answers questions, researches on the web, reads and writes files and runs commands in his own sandbox. A peer's task never reaches Ryan's mail, Matrix history or memory."
 generatorOptions:
   disableNameSuffixHash: true
