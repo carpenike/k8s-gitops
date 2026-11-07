@@ -959,8 +959,8 @@ is the Agent2Agent protocol (v1.0). Hermes ships it as the bundled plugin
   `a2a_agents` in config.yaml.
 
 **Off by default.** A bot turns it on with `A2A_ENABLED=true`,
-`A2A_TRUSTED_PEERS` and `A2A_HERMES_PEER` in its inputs; today only Hank
-does. Everything below is gated on `A2A_ENABLED` unless noted.
+`A2A_TRUSTED_PEERS` and `A2A_HERMES_PEER` in its inputs; Chief and Hank
+do, each the other's only peer. Everything below is gated on `A2A_ENABLED` unless noted.
 
 | Object | What |
 | --- | --- |
@@ -1134,19 +1134,32 @@ A missing field leaves ExternalSecret `a2a` unready: no Secret, no
 listener, no peers, and Matrix keeps its usual tools. The route answers
 `503`.
 
-### Chief's side (follow-up)
+### Chief and Hank
 
-Hank's outbound peer is Chief, but Chief's A2A is off. Until it is on,
-Chief has no `agent-a2a` Service, so `a2a_call chief` fails at once (the
-name does not resolve) and nothing reaches Chief. To turn it on, a separate PR sets these inputs on
-Chief: `A2A_ENABLED=true`, `A2A_TRUSTED_PEERS=hank`, `A2A_HERMES_PEER=hank`.
-Before it merges, Ryan adds two fields to `hermes-chief`:
+Chief and Hank call each other. Chief's inputs are `A2A_ENABLED=true`,
+`A2A_TRUSTED_PEERS=hank` and `A2A_HERMES_PEER=hank`. Its 1Password item
+`hermes-chief` holds the other half of each token pair:
 
 - `a2a_peer_tokens`: `hank:<the value of hermes-hank/a2a_hermes_peer_token>`.
 - `a2a_hermes_peer_token`: the token in Hank's `chief:` entry.
 
-Decide in that PR whether Chief's inbound A2A tasks should keep the same
-toolset. Chief has Outlook, but the inbound list never includes MCP.
+Add both before Chief's inputs change. Without them Chief's ExternalSecret
+`a2a` stays unready, and Flux's health check holds Chief's `app`
+Kustomization until it times out. To fill them from Hank's item without
+printing a token:
+
+```sh
+hank_presents=$(op read "op://k8s-secrets/hermes-hank/a2a_hermes_peer_token")
+chief_presents=$(op read "op://k8s-secrets/hermes-hank/a2a_peer_tokens" | tr ',' '\n' | sed -n 's/^chief://p')
+op item edit hermes-chief --vault k8s-secrets \
+  "a2a_peer_tokens[password]=hank:$hank_presents" \
+  "a2a_hermes_peer_token[password]=$chief_presents" >/dev/null
+unset hank_presents chief_presents
+```
+
+Inbound tasks on Chief get the same fixed list as Hank's. The list never
+includes MCP, so a peer's task can't reach Chief's Outlook, and it leaves
+out memory and `session_search`, so it can't read Ryan's Matrix history.
 
 ### Chief Engineer on Grok Bot (not yet)
 
@@ -1895,8 +1908,8 @@ kubectl -n hermes-hank exec deploy/hermes-agent -c app -- hermes config get plat
    ```
 
 7. **Outbound:** in the Matrix DM, ask Hank to list his A2A peers. Expect
-   `chief` (in-cluster URL, bearer auth). A call to Chief fails until
-   [Chief's side](#chiefs-side-follow-up) is done.
+   `chief` (in-cluster URL, bearer auth). Then ask him to send Chief a
+   one-line hello ([Chief and Hank](#chief-and-hank)).
 8. **API, memory, backup:**
 
    ```sh
