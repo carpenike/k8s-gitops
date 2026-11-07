@@ -1,0 +1,14 @@
+---
+# Hank's MCP servers from git (docs/hermes.md, "MCP servers from git"). The
+# config init container writes each entry into config.yaml on every start.
+# Each server also needs egress: public hosts go in mcp-egress.yaml.
+servers:
+  # Up-to-date library and CLI docs for Claude Code work. Public, no key
+  # (rate-limited without one). Read-only, so no approval prompt.
+  context7:
+    url: https://mcp.context7.com/mcp
+    trust: full
+    timeout: 60
+    tools:
+      - resolve-library-id
+      - query-docs

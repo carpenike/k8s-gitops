@@ -1,0 +1,144 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Hindsight 1.2.0: long-term memory for the Hermes bots. docs/hermes-memory.md.
+#
+# One API pod with the in-process worker (worker.enabled false), so the
+# tenant extension only has to be configured once. No control-plane UI, no
+# HTTPRoute, no embedded Postgres: data is database hindsight on postgres17,
+# one schema per bot (user_<bot>), from the static-keys tenant extension
+# baked into ghcr.io/carpenike/hindsight (images/hindsight).
+#
+# Models run in-process from the image: embeddings BAAI/bge-small-en-v1.5
+# (384 dimensions; changing the model later means re-embedding every
+# memory, so it is fixed here) and reranker hindsight-ai/hs-rerank-1.
+# HF_HUB_OFFLINE=1: nothing is downloaded, and there is no internet egress.
+# The LLM is claude-haiku through LiteLLM; LLM request tracing (on by default
+# upstream, it stores prompts and replies in the database) is off.
+#
+# Sizing: with both models loaded the pod idles at about 1.6 GiB (measured,
+# 1.2.0, amd64). Retains run the embedder and recalls the reranker on CPU in
+# this pod; the 4 GiB limit leaves room for that and for a handful of
+# concurrent requests from a few bots.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hindsight
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: hindsight
+  interval: 1h
+  timeout: 15m
+  values:
+    # Secret hindsight-db: postgres-password (URL-encoded) for the chart's
+    # database URL. The LiteLLM key and the tenant keys are added below.
+    existingSecret: hindsight-db
+    api:
+      replicaCount: 1
+      # Startup runs schema migrations; one pod at a time, never two.
+      strategy:
+        type: Recreate
+      automountServiceAccountToken: false
+      # Loading both models and running migrations takes a while on a cold
+      # start; liveness and readiness wait until /health/live answers
+      # (up to 10 minutes).
+      startupProbe:
+        httpGet:
+          path: /health/live
+          port: http
+        periodSeconds: 10
+        failureThreshold: 60
+      image:
+        repository: ghcr.io/carpenike/hindsight
+        # Built from images/hindsight by hindsight-image.yaml. Floating tag,
+        # digest re-pinned by Renovate (docs/hermes-memory.md).
+        tag: 1.2.0@sha256:7cb9080454237620c09b8173272f9e668c1feb8600f0149b17886fbf5ba0c816
+      resources:
+        requests:
+          cpu: 250m
+          memory: 2Gi
+        limits:
+          cpu: "2"
+          memory: 4Gi
+      env:
+        HF_HUB_OFFLINE: "1"
+        TRANSFORMERS_OFFLINE: "1"
+        HINDSIGHT_API_LLM_PROVIDER: openai
+        HINDSIGHT_API_LLM_BASE_URL: http://litellm.litellm.svc.cluster.local:4000/v1
+        HINDSIGHT_API_LLM_MODEL: claude-haiku
+        HINDSIGHT_API_LLM_TRACE_ENABLED: "false"
+        HINDSIGHT_API_OTEL_TRACES_ENABLED: "false"
+        HINDSIGHT_API_EMBEDDINGS_PROVIDER: local
+        HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL: BAAI/bge-small-en-v1.5
+        HINDSIGHT_API_RERANKER_PROVIDER: local
+        HINDSIGHT_API_RERANKER_LOCAL_MODEL: hindsight-ai/hs-rerank-1
+        HINDSIGHT_API_TENANT_EXTENSION: hindsight_ext_static_keys_tenant:StaticKeysTenantExtension
+        # The in-process worker claims tasks under this id. It defaults to the
+        # pod hostname, which changes on every rollout, and tasks left in
+        # 'processing' under an old id are never recovered. One replica with
+        # Recreate, so a fixed id is safe: the next pod picks those tasks up.
+        HINDSIGHT_API_WORKER_ID: hindsight-api
+    worker:
+      enabled: false
+    controlPlane:
+      enabled: false
+    postgresql:
+      enabled: false
+      external:
+        host: postgres17-rw.cnpg-system.svc.cluster.local
+        port: 5432
+        database: hindsight
+        username: hindsight
+    ingress:
+      enabled: false
+    gatewayApi:
+      enabled: false
+    serviceAccount:
+      create: true
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop:
+          - ALL
+  postRenderers:
+    # The chart takes one envFrom Secret. Add the LiteLLM key (Secret litellm,
+    # HINDSIGHT_API_LLM_API_KEY, from Kustomization hindsight-litellm) and the
+    # tenant keys (Secret hindsight-tenants, HINDSIGHT_API_TENANT_USERS).
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: hindsight-api
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/envFrom/-
+                value:
+                  secretRef:
+                    name: litellm
+              - op: add
+                path: /spec/template/spec/containers/0/envFrom/-
+                value:
+                  secretRef:
+                    name: hindsight-tenants
+          # Restart on a changed key or password (Reloader watches the
+          # Secrets the pod references).
+          - target:
+              kind: Deployment
+              name: hindsight-api
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: hindsight-api
+                annotations:
+                  reloader.stakater.com/auto: "true"

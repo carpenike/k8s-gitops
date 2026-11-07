@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# No postBuild substitution. The server name is the literal public zone
+# ryanholt.net, and nothing in app/ needs ${SECRET_DOMAIN}.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tuwunel
+  namespace: flux-system
+spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: ceph-csi-drivers
+      namespace: rook-ceph
+    - name: envoy-gateway
+      namespace: network
+    - name: cloudflare-dns
+      namespace: network
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: tuwunel
+      namespace: matrix
+  interval: 1h
+  path: ./kubernetes/apps/matrix/tuwunel/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: matrix
+  timeout: 10m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. If 1Password item volsync-r2-template cannot be
+# read, this Kustomization stays unready and the homeserver does not wait
+# on it. See docs/matrix.md.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tuwunel-backup
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: tuwunel
+      namespace: flux-system
+    - name: volsync
+      namespace: volsync-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: tuwunel-volsync
+      namespace: matrix
+  interval: 1h
+  path: ./kubernetes/apps/matrix/tuwunel/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: matrix

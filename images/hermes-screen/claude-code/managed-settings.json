@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "skipDangerousModePermissionPrompt": true,
+  "env": {
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "deny": [
+      "Bash(gh pr merge *)",
+      "Bash(gh repo delete *)",
+      "Bash(gh repo edit *)",
+      "Bash(gh secret *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push --mirror *)",
+      "Bash(git push --delete *)"
+    ]
+  }
+}

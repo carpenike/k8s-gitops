@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cloudnative-pg
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: cloudnative-pg
+  interval: 1h
+  values:
+    # Chart 0.29.1 appVersion is 1.30.1, the plan pin.
+    config:
+      clusterWide: true
+    monitoring:
+      podMonitorEnabled: true

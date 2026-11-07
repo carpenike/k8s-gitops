@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kube-prometheus-stack
+  interval: 1h
+  # CRDs belong to prometheus-operator-crds. This release must not install
+  # or replace them.
+  install:
+    crds: Skip
+  upgrade:
+    crds: Skip
+  values:
+    crds:
+      enabled: false
+    alertmanager:
+      enabled: false
+    grafana:
+      enabled: false
+    # Cilium kubeProxyReplacement is on and KubeProxyConfig is disabled.
+    # The chart's ServiceMonitor and KubeProxyDown rules follow this flag.
+    kubeProxy:
+      enabled: false
+    # Talos 1.14 serves etcd HTTP metrics on 2383 with client mTLS
+    # (listen-client-http-urls). etcd is a Talos service, not a pod labeled
+    # component=etcd, and this repo has no etcd client cert for Prometheus.
+    # The chart's default is HTTP :2381 with that selector, so it cannot scrape.
+    kubeEtcd:
+      enabled: false
+    # kube-controller-manager and kube-scheduler stay on. Talos static pods
+    # are hostNetwork and labeled component=kube-controller-manager and
+    # component=kube-scheduler, which is the chart's selector. They listen
+    # on 0.0.0.0:10257 and :10259 because talos/control-plane/00-cluster.yaml
+    # sets bind-address. The chart scrapes those HTTPS ports with its
+    # Prometheus token and insecureSkipVerify.
+    prometheus:
+      prometheusSpec:
+        externalLabels:
+          cluster: k8s-holthome
+        retention: 7d
+        replicas: 2
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 50Gi
+        # Forge Alertmanager is http://127.0.0.1:9093. Caddy publishes it as
+        # https://am.holthome.net (A 10.20.0.30). Pocket ID still gates that
+        # vhost; see docs/architecture.md.
+        additionalAlertManagerConfigs:
+          - scheme: https
+            api_version: v2
+            static_configs:
+              - targets:
+                  - am.holthome.net:443

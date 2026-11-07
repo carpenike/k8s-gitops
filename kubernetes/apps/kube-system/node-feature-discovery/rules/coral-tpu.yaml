@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/nfd.k8s-sigs.io/nodefeaturerule_v1alpha1.json
+# USB Coral. Unplugged or before the runtime loads, the device is
+# Global Unichip 1a6e (sled-1 and sled-3 show 1a6e on USB 4-1). After
+# libedgetpu loads it re-enumerates as Google 18d1:9302. There is no
+# PCIe Coral. Vendor 1a6e matches on its own. 18d1 matches only with
+# product 9302, so other Google USB devices do not count.
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: coral-tpu
+spec:
+  rules:
+    - name: coral-tpu
+      labels:
+        feature.node.kubernetes.io/coral-tpu: "true"
+      matchAny:
+        - matchFeatures:
+            - feature: usb.device
+              matchExpressions:
+                vendor:
+                  op: In
+                  value: ["1a6e"]
+        - matchFeatures:
+            - feature: usb.device
+              matchExpressions:
+                vendor:
+                  op: In
+                  value: ["18d1"]
+                device:
+                  op: In
+                  value: ["9302"]

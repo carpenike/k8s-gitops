@@ -1,0 +1,242 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# One replica. The process runs Prisma migrations on startup. A second
+# replica needs a separate migration job. The image is newer than the
+# v1.100.1 digest Forge qualified for Atrium, so Atrium cannot move here on
+# this tag. The in-process Atrium admission hook is not mounted here. See
+# docs/litellm.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: litellm
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: litellm
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      litellm:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/berriai/litellm
+              # renovate: datasource=docker depName=ghcr.io/berriai/litellm
+              tag: v1.106.6@sha256:37e2dafb088a7723beb998590682957386dfc83ffea1848486f8e0e5cfac0b06
+            args:
+              - --config
+              - /app/config.yaml
+              - --host
+              - 0.0.0.0
+              - --port
+              - "4000"
+            env:
+              LITELLM_MODE: PRODUCTION
+              LITELLM_CONFIG_PATH: /app/config.yaml
+              GENERIC_CLIENT_ID: litellm
+              GENERIC_AUTHORIZATION_ENDPOINT: https://id.${SECRET_DOMAIN}/authorize
+              GENERIC_TOKEN_ENDPOINT: https://id.${SECRET_DOMAIN}/api/oidc/token
+              GENERIC_USERINFO_ENDPOINT: https://id.${SECRET_DOMAIN}/api/oidc/userinfo
+              GENERIC_SCOPE: openid profile email
+              PROXY_BASE_URL: https://litellm.${SECRET_DOMAIN}
+              PROXY_ADMIN_ID: ryan
+            envFrom:
+              - secretRef:
+                  name: litellm-env
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/liveliness
+                    port: 4000
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/liveliness
+                    port: 4000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/readiness
+                    port: 4000
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                cpu: "1"
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+    service:
+      app:
+        ports:
+          http:
+            port: 4000
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics
+            interval: 60s
+            authorization:
+              credentials:
+                name: litellm-env
+                key: LITELLM_MASTER_KEY
+    configMaps:
+      config:
+        data:
+          config.yaml: |-
+            model_list:
+              - model_name: copilot/*
+                litellm_params:
+                  model: anthropic/*
+                  api_base: https://copilot.${SECRET_DOMAIN}
+                  api_key: os.environ/COPILOT_API_KEY
+              - model_name: copilot-oai/*
+                litellm_params:
+                  model: openai/*
+                  api_base: https://copilot.${SECRET_DOMAIN}/v1
+                  api_key: os.environ/COPILOT_API_KEY
+              # Azure resource ryholt-foundry, project proj-default, on the v1
+              # API. Bare azure/<deployment> names: LiteLLM treats any name
+              # containing gpt-6 as a reasoning model (GPT_REASONING_SERIES_
+              # MARKERS), and the bare name is what its price table and its
+              # Responses API path expect. Requests with function tools (every
+              # Hermes turn) are bridged to /v1/responses, whose Azure
+              # transformation does not strip a gpt5_series/ prefix: with it,
+              # Azure answered DeploymentNotFound (docs/litellm.md).
+              - model_name: gpt-6.1-sol
+                litellm_params: &azure-foundry
+                  model: azure/gpt-6.1-sol
+                  api_base: https://ryholt-foundry.openai.azure.com
+                  api_key: os.environ/AZURE_FOUNDRY_API_KEY
+                  api_version: v1
+              - model_name: gpt-6.1-terra
+                litellm_params:
+                  <<: *azure-foundry
+                  model: azure/gpt-6.1-terra
+              - model_name: gpt-6-astra
+                litellm_params:
+                  <<: *azure-foundry
+                  model: azure/gpt-6-astra
+              - model_name: gpt-6-luna
+                litellm_params:
+                  <<: *azure-foundry
+                  model: azure/gpt-6-luna
+              # Decisions API only: /v1/decisions and /v1/systemone, not chat.
+              # Azure will not name a deployment Microsoft-Decision-1, so
+              # base_model points cost tracking at the catalog price.
+              - model_name: decision-1
+                litellm_params:
+                  model: azure_ai/Decision-1
+                  api_base: https://ryholt-foundry.services.ai.azure.com
+                  api_key: os.environ/AZURE_FOUNDRY_API_KEY
+                model_info:
+                  base_model: azure_ai/Microsoft-Decision-1
+              # Azure resource ryholt-foundry-eastus2-resource, project
+              # ryholt-foundry-eastus2, on the v1 API with its own key.
+              # Images only: /v1/images/generations and /v1/images/edits.
+              - model_name: gpt-image-2
+                litellm_params: &azure-foundry-eastus2
+                  model: azure/gpt-image-2
+                  api_base: https://ryholt-foundry-eastus2-resource.openai.azure.com
+                  api_key: os.environ/AZURE_FOUNDRY_EASTUS2_API_KEY
+                  api_version: v1
+                model_info: &image-generation
+                  mode: image_generation
+              - model_name: gpt-image-2.5-sunburst
+                litellm_params:
+                  <<: *azure-foundry-eastus2
+                  model: azure/gpt-image-2.5-sunburst
+                model_info: *image-generation
+              - model_name: gpt-image-2.5-flare
+                litellm_params:
+                  <<: *azure-foundry-eastus2
+                  model: azure/gpt-image-2.5-flare
+                model_info: *image-generation
+              - model_name: anthropic/*
+                litellm_params:
+                  model: anthropic/*
+                  api_key: os.environ/ANTHROPIC_API_KEY
+              - model_name: gemini/*
+                litellm_params:
+                  model: gemini/*
+                  api_key: os.environ/GOOGLE_API_KEY
+              - model_name: openai/*
+                litellm_params:
+                  model: openai/*
+                  api_key: os.environ/OPENAI_API_KEY
+              - model_name: claude-opus
+                litellm_params:
+                  model: anthropic/claude-opus-5
+                  api_key: os.environ/ANTHROPIC_API_KEY
+              - model_name: claude-sonnet
+                litellm_params:
+                  model: anthropic/claude-sonnet-5
+                  api_key: os.environ/ANTHROPIC_API_KEY
+              - model_name: claude-haiku
+                litellm_params:
+                  model: anthropic/claude-haiku-4-5-20251001
+                  api_key: os.environ/ANTHROPIC_API_KEY
+            router_settings:
+              routing_strategy: simple-shuffle
+              num_retries: 0
+              timeout: 600
+              max_fallbacks: 0
+              fallbacks: []
+              context_window_fallbacks: []
+              content_policy_fallbacks: []
+            litellm_settings:
+              callbacks:
+                - prometheus
+              drop_params: true
+              set_verbose: false
+              json_logs: true
+              request_timeout: 600
+              turn_off_message_logging: true
+            general_settings:
+              master_key: os.environ/LITELLM_MASTER_KEY
+              ui_access_mode: all
+              store_model_in_db: true
+              proxy_batch_write_at: 60
+              disable_error_logs: true
+              database_connection_pool_limit: 10
+    persistence:
+      config-file:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true

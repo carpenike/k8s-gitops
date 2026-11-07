@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Provisioning Job egress: cluster DNS, Tuwunel's pod on 8008, and the
+# Kubernetes API (to patch the bot's Secret). Nothing else, including the
+# internet. Ingress stays denied by default-deny in ../../tuwunel/app.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hermes-bot-provisioner
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-bot-provisioner
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: tuwunel
+            app.kubernetes.io/controller: tuwunel
+      toPorts:
+        - ports:
+            - port: "8008"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver

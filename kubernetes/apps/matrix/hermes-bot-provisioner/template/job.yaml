@@ -1,0 +1,85 @@
+---
+# Idempotent: a re-run with a valid stored token changes nothing. Jobs are
+# immutable, so the bot's Flux Kustomization sets force: true to replace
+# this one when the template changes. The pod talks to Tuwunel on the
+# cluster Service, and so does the bot: MATRIX_HOMESERVER written for it is
+# the in-cluster URL.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hermes-provision-${BOT_NAME}
+  namespace: matrix
+  labels:
+    app.kubernetes.io/name: hermes-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hermes-bot-provisioner
+        app.kubernetes.io/instance: ${BOT_NAME}
+    spec:
+      serviceAccountName: hermes-provision-${BOT_NAME}
+      # Never, so each failed attempt keeps its pod and logs. With
+      # OnFailure the Job deletes the pod when it gives up.
+      restartPolicy: Never
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: provision
+          # Debian (glibc), not Alpine. Pods search holthome.net last, and
+          # Cloudflare and the router answer NODATA for any name under it.
+          # musl stops at that NODATA, so an Alpine pod cannot resolve
+          # x.ns.svc.cluster.local or any public name; glibc keeps going.
+          image: docker.io/library/python:3.15.2-slim-trixie@sha256:e97b88e416c3c01eb427b21fd8cd3ebf006e6ee38afcfcc3cae1c54ee2ab0a75
+          command:
+            - python3
+            - /opt/provision/provision.py
+          env:
+            - name: BOT_NAME
+              value: ${BOT_NAME}
+            - name: BOT_NAMESPACE
+              value: hermes-${BOT_NAME}
+            - name: MATRIX_USER
+              value: ${MATRIX_USER}
+            - name: SERVER_NAME
+              value: ryanholt.net
+            - name: HOMESERVER_URL
+              value: http://tuwunel.matrix.svc.cluster.local:8008
+            - name: BOT_HOMESERVER_URL
+              value: http://tuwunel.matrix.svc.cluster.local:8008
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: AS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tuwunel-appservice-hermes-bots
+                  key: as_token
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+          volumeMounts:
+            - name: script
+              mountPath: /opt/provision
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: hermes-bot-provisioner

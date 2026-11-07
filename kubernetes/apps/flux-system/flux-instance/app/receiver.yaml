@@ -1,0 +1,58 @@
+---
+# The webhook token is an ExternalSecret. The Receiver stays Not Ready until
+# that secret exists. See docs/placeholders.md.
+apiVersion: notification.toolkit.fluxcd.io/v1
+kind: Receiver
+metadata:
+  name: flux-webhook
+spec:
+  type: github
+  events:
+    - ping
+    - push
+  secretRef:
+    name: flux-webhook-token
+  resources:
+    - apiVersion: source.toolkit.fluxcd.io/v1
+      kind: GitRepository
+      name: flux-system
+      namespace: flux-system
+---
+# GitHub authenticates this hook with the Receiver token. The public label
+# replaces the gateway Pocket ID policy. The ReferenceGrant below is what
+# lets pocket-id-exempt in namespace network select this route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: flux-webhook
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - flux-webhook.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /hook/
+      backendRefs:
+        - name: webhook-receiver
+          namespace: flux-system
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: flux-webhook-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: flux-webhook

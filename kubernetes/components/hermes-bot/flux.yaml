@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Accounts, keys, and network policy first. wait holds `app` until the
+# Matrix, LiteLLM, and ssh-keygen Jobs have filled their Secrets. force
+# replaces those immutable Jobs when a template changes.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: provision
+spec:
+  dependsOn:
+    - name: hermes-bot-provisioner
+      namespace: flux-system
+    - name: litellm-key-provisioner
+      namespace: litellm
+  force: true
+  interval: 1h
+  path: ./kubernetes/components/hermes-bot/provision
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: hermes-bot-inputs
+      - kind: ConfigMap
+        name: hermes-bot-derived
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  timeout: 15m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# The two pods, their volumes, and backup. targetNamespace and the health
+# check namespace are set by the component's replacements.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app
+spec:
+  dependsOn:
+    - name: provision
+    - name: kata
+      namespace: kube-system
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: ceph-csi-drivers
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: hermes
+      namespace: hermes-BOT_NAME
+  interval: 1h
+  path: ./kubernetes/components/hermes-bot/app
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: hermes-bot-inputs
+      - kind: ConfigMap
+        name: hermes-bot-derived
+      # SECRET_DOMAIN for the API route's hostname (../sops).
+      - kind: Secret
+        name: cluster-secrets
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: hermes-BOT_NAME
+  timeout: 15m

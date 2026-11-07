@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/scheduledbackup_v1.json
+# 03:00 UTC. Online snapshot of the primary. These snapshots do not leave
+# the chassis. Six-field cron includes seconds.
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgres17-daily
+spec:
+  schedule: "0 0 3 * * *"
+  immediate: false
+  backupOwnerReference: cluster
+  method: volumeSnapshot
+  online: true
+  onlineConfiguration:
+    waitForArchive: false
+  cluster:
+    name: postgres17
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/scheduledbackup_v1.json
+# 08:30 UTC: 03:30 in New York in winter (EST), 04:30 in summer (EDT). The
+# operator's cron is UTC and has no time-zone field. Barman base backup to
+# R2 through the plugin, taken from the standby when one is in sync. WAL is
+# archived continuously in between. immediate: a base backup runs when this
+# object is created. It can fail with "requested plugin is not available"
+# if it lands before the instances restart with the plugin sidecar; then
+# take one by hand (docs/postgres17.md, "First check after merge").
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgres17-r2-daily
+spec:
+  schedule: "0 30 8 * * *"
+  immediate: true
+  backupOwnerReference: cluster
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+  cluster:
+    name: postgres17

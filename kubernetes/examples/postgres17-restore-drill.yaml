@@ -1,0 +1,60 @@
+---
+# Not reconciled. Restore drill for postgres17's R2 backup, docs/postgres17.md.
+# Apply by hand, check, then delete the namespace. The ObjectStore is copied
+# from cnpg-system by the command in the doc, because its endpoint and bucket
+# are only in the live object, not in git.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: postgres17-drill
+---
+# Same 1Password item as cnpg-system/postgres17-r2, same Secret keys.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: postgres17-r2
+  namespace: postgres17-drill
+spec:
+  refreshInterval: 12h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: postgres17-r2
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        ACCESS_KEY_ID: "{{ .access_key_id }}"
+        ACCESS_SECRET_KEY: "{{ .secret_access_key }}"
+  data:
+    - secretKey: access_key_id
+      remoteRef:
+        key: postgres17-r2/access_key_id
+    - secretKey: secret_access_key
+      remoteRef:
+        key: postgres17-r2/secret_access_key
+---
+# Recovers the latest base backup plus all archived WAL. No spec.plugins, so
+# this Cluster archives nothing and never writes to the postgres17 path.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres17-drill
+  namespace: postgres17-drill
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.9
+  storage:
+    storageClass: ceph-block
+    size: 20Gi
+  bootstrap:
+    recovery:
+      source: postgres17
+  externalClusters:
+    - name: postgres17
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: postgres17-r2
+          serverName: postgres17

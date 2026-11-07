@@ -1,0 +1,23 @@
+---
+# LAN resolver is the router. No search domain.
+#
+# Kubelet copies the node's search list into every pod, after the cluster
+# suffixes, and pods use ndots:5. holthome.net is DNSSEC-signed on
+# Cloudflare, which answers a name that does not exist with NOERROR and no
+# records instead of NXDOMAIN ("black lies"); the router passes that on.
+# musl (Alpine) takes that answer as final and stops searching, so with
+# holthome.net in the list an Alpine pod could not resolve
+# x.ns.svc.cluster.local or any public name. glibc kept going, which is
+# why only some pods broke. musl's maintainer advises against search for
+# such zones (openwall.com/lists/musl/2022/12/05/1).
+#
+# domains: [] also clears a DHCP-provided list; leaving it unset would
+# inherit one. Internal names are written in full, e.g. forge.holthome.net.
+# See docs/architecture.md, "Names".
+apiVersion: v1alpha1
+kind: ResolverConfig
+nameservers:
+  - address: 10.20.0.1
+searchDomains:
+  domains: []
+  disableDefault: true

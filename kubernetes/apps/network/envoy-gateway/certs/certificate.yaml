@@ -1,0 +1,90 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ${SECRET_DOMAIN/./-}-production
+spec:
+  dnsNames:
+    - ${SECRET_DOMAIN}
+    - "*.${SECRET_DOMAIN}"
+  duration: 160h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+  secretName: ${SECRET_DOMAIN/./-}-production-tls
+  usages:
+    - digital signature
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: warwed-com-production
+spec:
+  dnsNames:
+    - warwed.com
+    - "*.warwed.com"
+  duration: 160h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+  secretName: warwed-com-production-tls
+  usages:
+    - digital signature
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ryanholt-net-production
+spec:
+  dnsNames:
+    - ryanholt.net
+    - "*.ryanholt.net"
+  duration: 160h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+  secretName: ryanholt-net-production-tls
+  usages:
+    - digital signature
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: whiskeywhiskeywhiskey-org-production
+spec:
+  dnsNames:
+    - whiskeywhiskeywhiskey.org
+    - "*.whiskeywhiskeywhiskey.org"
+  duration: 160h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+  secretName: whiskeywhiskeywhiskey-org-production-tls
+  usages:
+    - digital signature
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stefanieholt-com-production
+spec:
+  dnsNames:
+    - stefanieholt.com
+    - "*.stefanieholt.com"
+  duration: 160h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+  secretName: stefanieholt-com-production-tls
+  usages:
+    - digital signature

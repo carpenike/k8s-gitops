@@ -1,0 +1,200 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# One replica, Recreate. Tuwunel does not scale out, and RocksDB holds a
+# lock on the RWO volume. The database and media both live on that volume.
+#
+# Probes and the grace period follow docs/deploying/kubernetes.md at tag
+# v1.9.4: a migration on the first boot after an upgrade keeps the
+# listener closed, so the startup probe allows 30 minutes, and a SIGTERM
+# part way through a migration gets the same 30 minutes to stop cleanly.
+#
+# There is no Prometheus endpoint in v1.9.4 (no metrics option in
+# tuwunel-example.toml at that tag), so there is no ServiceMonitor.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tuwunel
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: tuwunel
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      tuwunel:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          terminationGracePeriodSeconds: 1800
+        containers:
+          app:
+            image:
+              repository: ghcr.io/matrix-construct/tuwunel
+              # renovate: datasource=docker depName=ghcr.io/matrix-construct/tuwunel
+              tag: v1.9.4@sha256:0e86c6164d6c9f5b60291938eb61ad8395021c37fe58d47a963ea7edddbedaec
+            env:
+              TUWUNEL_CONFIG: /etc/tuwunel/tuwunel.toml
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec: &healthcheck
+                    command:
+                      - tuwunel
+                      - --health-check
+                  periodSeconds: 10
+                  timeoutSeconds: 15
+                  failureThreshold: 180
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *healthcheck
+                  periodSeconds: 30
+                  timeoutSeconds: 15
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *healthcheck
+                  periodSeconds: 10
+                  timeoutSeconds: 15
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: "1"
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        ports:
+          http:
+            port: 8008
+    configMaps:
+      config:
+        data:
+          # Option names are from tuwunel-example.toml at tag v1.9.4.
+          tuwunel.toml: |-
+            [global]
+            # Cannot change without wiping the database.
+            server_name = "ryanholt.net"
+            database_path = "/var/lib/tuwunel"
+            address = ["0.0.0.0"]
+            port = 8008
+            new_user_displayname_suffix = ""
+
+            # Token-only registration. allow_registration has to be true for
+            # the token to work at all; with a token file present an account
+            # cannot be created without it, and open registration stays off
+            # because the "very very sure" option is unset. Appservice
+            # registration skips this check (register.rs at v1.9.4).
+            allow_registration = true
+            registration_token_file = "/etc/tuwunel/registration/token"
+            allow_guest_registration = false
+
+            # Nobody is an admin by default. Promote a person with
+            # admin_execute below, once, after they have registered.
+            grant_admin_to_first_user = false
+            # admin_execute = ["users make-user-admin @ryan:ryanholt.net"]
+
+            # Every room created on this server starts end-to-end encrypted,
+            # whatever the client asks for. Rooms that already exist keep
+            # their setting. Bots need MATRIX_ENCRYPTION=true and a persistent
+            # key store to read these rooms; see docs/matrix.md.
+            encryption_enabled_by_default_for_room_type = "all"
+
+            allow_federation = true
+            # No notary: fetch each server's signing keys from that server.
+            # matrix.org would otherwise learn which servers this one talks
+            # to, and be trusted for their keys.
+            trusted_servers = []
+
+            appservice_dir = "/etc/tuwunel/appservices"
+
+            log = "info"
+
+            [global.well_known]
+            client = "https://matrix.ryanholt.net"
+            server = "matrix.ryanholt.net:443"
+
+            # Pocket ID, off for now. Create a confidential client with
+            # callback https://matrix.ryanholt.net/_matrix/client/unstable/login/sso/callback/<client_id>,
+            # put the secret in a SOPS Secret mounted at /etc/tuwunel/oidc,
+            # and allow egress to id.holthome.net in ciliumnetworkpolicy.yaml.
+            # issuer_url must never change once accounts are linked to it.
+            #
+            # [[global.identity_provider]]
+            # brand = "Pocket ID"
+            # name = "Pocket ID"
+            # client_id = "<client_id>"
+            # client_secret_file = "/etc/tuwunel/oidc/client_secret"
+            # issuer_url = "https://id.holthome.net"
+            # callback_url = "https://matrix.ryanholt.net/_matrix/client/unstable/login/sso/callback/<client_id>"
+            # scope = ["openid", "email", "profile"]
+            # default = true
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 20Gi
+        storageClass: ceph-block
+        retain: true
+        # Fixed name for VolSync. See ../backup/replicationsource.yaml.
+        forceRename: tuwunel-data
+        globalMounts:
+          - path: /var/lib/tuwunel
+      config:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /etc/tuwunel/tuwunel.toml
+            subPath: tuwunel.toml
+            readOnly: true
+      registration-token:
+        type: secret
+        name: tuwunel-registration-token
+        defaultMode: 0440
+        items:
+          - key: token
+            path: token
+        globalMounts:
+          - path: /etc/tuwunel/registration
+            readOnly: true
+      # Every file in appservice_dir is parsed as a registration, so only
+      # the YAML key is projected. The as_token key is for the provisioner.
+      appservices:
+        type: secret
+        name: tuwunel-appservice-hermes-bots
+        defaultMode: 0440
+        items:
+          - key: hermes-bots.yaml
+            path: hermes-bots.yaml
+        globalMounts:
+          - path: /etc/tuwunel/appservices
+            readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

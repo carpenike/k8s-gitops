@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The key Jobs hold the LiteLLM master key. Egress: cluster DNS, the
+# LiteLLM pod on 4000, and the Kubernetes API (to patch the consumer's
+# Secret). Nothing else, including the internet. This selects only the
+# Job pods; the rest of namespace litellm has no policy.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: litellm-key-provisioner
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: litellm-key-provisioner
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: litellm
+            app.kubernetes.io/controller: litellm
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver

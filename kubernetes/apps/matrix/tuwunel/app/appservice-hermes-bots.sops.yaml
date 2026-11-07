@@ -1,0 +1,54 @@
+# Appservice registration for Hermes bot accounts. hermes-bots.yaml is the
+# only key Tuwunel mounts (appservice_dir). as_token is the same value as in
+# that YAML, kept as its own key for the provisioning Job's secretKeyRef.
+# Rotate both together. url is null: the appservice receives no transactions,
+# it only registers and logs in the bot users.
+#
+# The users regex is an explicit list of bot names, not a pattern: the
+# as_token can log in as anything it matches. Add a name with the YubiKey
+# (sops this file) before provisioning that bot. See docs/matrix.md.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tuwunel-appservice-hermes-bots
+type: Opaque
+stringData:
+  as_token: ENC[AES256_GCM,data:PrgStWR1LvJf6Ia7XUDm+wNyZ/VSlx1/ivW4WTu85raFLkvU3ruBJRx10VZKIw8KlL6EXiiGlhGBFXs7S1tDHQ==,iv:bAFcAoOoH04YdALgviszXw0mX3ddIz/LeaoziKCvO9w=,tag:NUlW3eqPEmLLdhYjmtgseQ==,type:str]
+  hermes-bots.yaml: ENC[AES256_GCM,data:qxlZtxNvskTghz5jquUZXJLDO5BBqRseal6AUSTukY4JoqgnSKgVttW5JW5rB0tNMotK4nYrk+JrhO8JIpF3T+erGydFjm2Wu7v6Kc7XhNCmrb6zy93CiJknIyREmaHtY3v5zfUinva30O+7KNzlLVQqxUsfe00UxUNHmwQrwkqyrwXzKmDiPM62ORelcxcmAM2f30OYr1t6EbcwA8WA2p4nzwe8m1UOSmCjgD/F8in9gCJGBiigrne3dyUZWTkxlgw04IR2QUy73cz65kxbbQaG6I8oo11HU1nvfbpcaxFqarZzWQj0PavCBlZUtAjBi01cXDWZsYHaeMlRz77tP4uXFgkbMYKNXaQ6npJ/AfsVgcSzrM4ubTDwJLvUQuxBcBgFooZAmzbPG591XYritQJ/It4NdUrQZIxaF8Mit292tHQtlL5BITuJAci9OSYu,iv:+D0zBmjyYgGAn4Upvjs3lXXG1RmI1yHa2k6qQcFcVnk=,tag:oJi5V5S74ICZ3udt6vxLkQ==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBOVmd4bUUycjljOCtFcGhZ
+        NFdPeHV2UnVuYUNYQzdpZHNYaWNQK0UwK3dFCkRzYllwMmVXcDRxdStmRXRrU29t
+        Mjc3K3dJU3Rma3FCWDQ2S1doTlVNQlkKLS0tIFZBZFpobzYvQ01FSHk4U2F0T3NR
+        emwyNTR2QXlOS29XWnVaTHV1NFp6cTAK56qnY4xTCNMi+PyajYvJRKFjDlIVmk7G
+        afoP8I17NIszfrDTOSFj5szdgE/8PMh9FfoIYJyOzB3Ga0N9RVIJ7Q==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1ea86d2m34zdq4efckuc4mdez0q7hgw7x8rjw9up5msnhvxwje5esgc074h
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-11-07T11:48:47Z"
+  mac: ENC[AES256_GCM,data:gfJKkECe6J6VN7SmIwAr3A1XN3fHyl4B3Od5J4Q5IICFY0BKt3dMz/DD0IoyYvPFVjh6Q8nVbmomJdjpvQo75UA+VjwjjzepxrkJoO+FkglL8rTAuEP17k/nnVtYlR9uMHnyZGfymtrkUEN9MCLDzB+DERBA2VyPLO1AmSNtKEg=,iv:RQQpEYlN4gD8kIJUg6i7+k9JDljDc5UJFhJV9BgB8s4=,tag:j5G/fjvyqVrOKFbCVLEqMw==,type:str]
+  mac_only_encrypted: true
+  pgp:
+    - created_at: "2026-11-03T22:17:20Z"
+      enc: |-
+        -----BEGIN PGP MESSAGE-----
+
+        hQIMA8oSIqtHvng8AQ/9EOvDBic7OMQX/ypUNz36LqbpPWvI91K5u0fZVk3IRPVR
+        5qwhLp3fSlX3+TcCjC/YQlVsfEHNpbB5GeEMQdCzUL/Foi7JPQybglLu5RKO/pQD
+        qsmZOSsJemsoiaVQ8dtVYHYbDMNwf/3rv9mJxfDYoSLLySHIhvrIlqaDPdVqObWh
+        gRawVDsIu7wdv/44k0cQ2Fg+cnuKBnZHPKI2NL1CiNqA+2ANbWbiiddYayPIRNCI
+        uENjI91ymJ7QeT0dwDrkIQBCmepE/shjGayE3EyDgC5CBLCYyXAIvMVTIY2sFAN/
+        +wcLXFntvnhLUDqyNjmQvQsWoDvQnXzRAQ9vIMrQwspKqfFMyTUd5opfuj/KTHuu
+        8Fj+rMo6QGaKcDcewUiCpODI+DYDgWa7qQVzh/DP6gHOpCMfPGV1QoIQbg+gYnGZ
+        2vy6GNA7C7ti6JSonBhHsPi+mghtmgYopd5hd7DAWmS7vwiXF2Gb6Q65IpF9M7Kn
+        ufKHeo8UTKRNcMrKpiJ0Uc/OLA0oU3I6EeXdy5eHB/AwdADPWYGt4v3d48jgyhU3
+        GQJ+aWbwM+IwvSusoWB7FqhNAmoLj+hMQFEAWWUC9MJvpKMVqJGEyC6PsCVeScVb
+        UC6Wb3A1F1yrsGeKscRX7EKQ7fkZxI4uCOCLLPo6WUmnm5+JgeIAl9MV4UdEY+vS
+        XgF6velzjSKjyVgXqMcz5uU0epRmwVAF85RSCgve0lLg7nMY66ZNHDZLoVk+VQom
+        4lfb1VTu0V2fp4ClzyFUya0rq3c1jtmvUSGFZA2JJfe68oGNQEcobSAdlWM1KIk=
+        =hwc5
+        -----END PGP MESSAGE-----
+      fp: DA8002060402EC39B195451D5CED80362B5A4EF2
+  version: 3.13.3
