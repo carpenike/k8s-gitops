@@ -23,7 +23,7 @@
 ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
 
 # Pure-Python wheels for Hermes' venv, built against the same Python (3.14.9).
-FROM docker.io/library/python:3.14.9-slim@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8 AS hindsight-client
+FROM docker.io/library/python:3.15.2-slim@sha256:e97b88e416c3c01eb427b21fd8cd3ebf006e6ee38afcfcc3cae1c54ee2ab0a75 AS hindsight-client
 COPY hindsight/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --no-deps --require-hashes --only-binary=:all: \
       --target /out -r /tmp/requirements.txt
