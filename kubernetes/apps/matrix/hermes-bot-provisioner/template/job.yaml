@@ -38,7 +38,7 @@ spec:
           # Cloudflare and the router answer NODATA for any name under it.
           # musl stops at that NODATA, so an Alpine pod cannot resolve
           # x.ns.svc.cluster.local or any public name; glibc keeps going.
-          image: docker.io/library/python:3.15.2-slim-trixie@sha256:8c13a3f37a6a5b71498228e902c4b9f51c1f7900d49fabf71f9a650c6120e0d0
+          image: docker.io/library/python:3.15.2-slim-trixie@sha256:e97b88e416c3c01eb427b21fd8cd3ebf006e6ee38afcfcc3cae1c54ee2ab0a75
           command:
             - python3
             - /opt/provision/provision.py
