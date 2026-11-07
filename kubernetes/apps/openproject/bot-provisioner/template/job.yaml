@@ -40,7 +40,9 @@ spec:
           command:
             - bash
             - -c
-            - mkdir -p /tmp/ruby && cd /app && exec bundle exec rails runner /opt/provision/provision.rb
+            # Ruby refuses a world-writable TMPDIR without the sticky bit, and
+            # the emptyDir /tmp is 0777. The seeder's prepare-tmpdir does the same.
+            - mkdir -p /tmp/ruby && chmod 1777 /tmp/ruby && cd /app && exec bundle exec rails runner /opt/provision/provision.rb
           envFrom:
             - secretRef:
                 name: openproject-core
@@ -50,7 +52,7 @@ spec:
                 name: openproject-environment
           env:
             - name: TMPDIR
-              value: /tmp
+              value: /tmp/ruby
             - name: OPENPROJECT_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
