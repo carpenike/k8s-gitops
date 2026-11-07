@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Shared part of the bots' OpenProject provisioning: the script.
+# kubernetes/components/hermes-bot/task-board instantiates ./template once
+# per bot. No postBuild substitution: the script is Ruby.
+# docs/openproject.md, "Bot provisioning".
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openproject-bot-provisioner
+spec:
+  dependsOn:
+    - name: openproject
+  interval: 1h
+  path: ./kubernetes/apps/openproject/bot-provisioner/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: openproject

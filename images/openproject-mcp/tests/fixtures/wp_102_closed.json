@@ -1,0 +1,149 @@
+{
+  "_type": "WorkPackage",
+  "id": 102,
+  "lockVersion": 4,
+  "subject": "Prune old ZFS snapshots",
+  "description": {
+    "format": "markdown",
+    "raw": "Keep 30 days of `tank/media` snapshots.",
+    "html": "<p class=\"op-uc-p\">Keep 30 days of `tank/media` snapshots.</p>"
+  },
+  "scheduleManually": false,
+  "startDate": null,
+  "dueDate": "2026-10-25",
+  "derivedStartDate": null,
+  "derivedDueDate": null,
+  "estimatedTime": null,
+  "derivedEstimatedTime": null,
+  "duration": null,
+  "ignoreNonWorkingDays": false,
+  "percentageDone": 0,
+  "createdAt": "2026-10-18T14:02:11.000Z",
+  "updatedAt": "2026-10-20T22:50:00.000Z",
+  "_embedded": {
+    "attachments": {
+      "_type": "Collection",
+      "total": 0,
+      "count": 0,
+      "_embedded": {
+        "elements": []
+      },
+      "_links": {
+        "self": {
+          "href": "/api/v3/work_packages/102/attachments"
+        }
+      }
+    },
+    "relations": {
+      "_type": "Collection",
+      "total": 0,
+      "count": 0,
+      "_embedded": {
+        "elements": []
+      },
+      "_links": {
+        "self": {
+          "href": "/api/v3/work_packages/102/relations"
+        }
+      }
+    }
+  },
+  "_links": {
+    "attachments": {
+      "href": "/api/v3/work_packages/102/attachments"
+    },
+    "addAttachment": {
+      "href": "/api/v3/work_packages/102/attachments",
+      "method": "post"
+    },
+    "update": {
+      "href": "/api/v3/work_packages/102/form",
+      "method": "post"
+    },
+    "schema": {
+      "href": "/api/v3/work_packages/schemas/5-1"
+    },
+    "updateImmediately": {
+      "href": "/api/v3/work_packages/102",
+      "method": "patch"
+    },
+    "delete": {
+      "href": "/api/v3/work_packages/102",
+      "method": "delete"
+    },
+    "logTime": {
+      "href": "/work_packages/102/time_entries/new",
+      "type": "text/html",
+      "title": "Log time"
+    },
+    "move": {
+      "href": "/work_packages/102/move/new",
+      "type": "text/html",
+      "title": "Move"
+    },
+    "copy": {
+      "href": "/work_packages/102/copy",
+      "title": "Copy"
+    },
+    "self": {
+      "href": "/api/v3/work_packages/102",
+      "title": "Prune old ZFS snapshots"
+    },
+    "activities": {
+      "href": "/api/v3/work_packages/102/activities"
+    },
+    "addComment": {
+      "href": "/api/v3/work_packages/102/activities",
+      "method": "post",
+      "title": "Add comment"
+    },
+    "watchers": {
+      "href": "/api/v3/work_packages/102/watchers"
+    },
+    "relations": {
+      "href": "/api/v3/work_packages/102/relations"
+    },
+    "revisions": {
+      "href": "/api/v3/work_packages/102/revisions"
+    },
+    "type": {
+      "href": "/api/v3/types/1",
+      "title": "Task"
+    },
+    "priority": {
+      "href": "/api/v3/priorities/8",
+      "title": "Normal"
+    },
+    "project": {
+      "href": "/api/v3/projects/5",
+      "title": "Homelab Manager"
+    },
+    "status": {
+      "href": "/api/v3/statuses/12",
+      "title": "Closed"
+    },
+    "author": {
+      "href": "/api/v3/users/1",
+      "title": "Ryan Holt"
+    },
+    "responsible": {
+      "href": null
+    },
+    "assignee": {
+      "href": "/api/v3/users/21",
+      "title": "Homelab Manager"
+    },
+    "version": {
+      "href": null
+    },
+    "parent": {
+      "href": null
+    },
+    "category": {
+      "href": null
+    },
+    "ancestors": [],
+    "children": [],
+    "customActions": []
+  }
+}

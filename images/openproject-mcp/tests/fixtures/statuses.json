@@ -1,0 +1,105 @@
+{
+  "_type": "Collection",
+  "total": 5,
+  "count": 5,
+  "pageSize": 20,
+  "offset": 1,
+  "_embedded": {
+    "elements": [
+      {
+        "_type": "Status",
+        "id": 1,
+        "name": "New",
+        "isClosed": false,
+        "color": "#1A67A3",
+        "isDefault": true,
+        "isReadonly": false,
+        "defaultDoneRatio": null,
+        "position": 1,
+        "_links": {
+          "self": {
+            "href": "/api/v3/statuses/1",
+            "title": "New"
+          }
+        }
+      },
+      {
+        "_type": "Status",
+        "id": 7,
+        "name": "In progress",
+        "isClosed": false,
+        "color": "#1A67A3",
+        "isDefault": false,
+        "isReadonly": false,
+        "defaultDoneRatio": null,
+        "position": 2,
+        "_links": {
+          "self": {
+            "href": "/api/v3/statuses/7",
+            "title": "In progress"
+          }
+        }
+      },
+      {
+        "_type": "Status",
+        "id": 12,
+        "name": "Closed",
+        "isClosed": true,
+        "color": "#1A67A3",
+        "isDefault": false,
+        "isReadonly": false,
+        "defaultDoneRatio": null,
+        "position": 3,
+        "_links": {
+          "self": {
+            "href": "/api/v3/statuses/12",
+            "title": "Closed"
+          }
+        }
+      },
+      {
+        "_type": "Status",
+        "id": 13,
+        "name": "On hold",
+        "isClosed": false,
+        "color": "#1A67A3",
+        "isDefault": false,
+        "isReadonly": false,
+        "defaultDoneRatio": null,
+        "position": 4,
+        "_links": {
+          "self": {
+            "href": "/api/v3/statuses/13",
+            "title": "On hold"
+          }
+        }
+      },
+      {
+        "_type": "Status",
+        "id": 14,
+        "name": "Rejected",
+        "isClosed": true,
+        "color": "#1A67A3",
+        "isDefault": false,
+        "isReadonly": false,
+        "defaultDoneRatio": null,
+        "position": 5,
+        "_links": {
+          "self": {
+            "href": "/api/v3/statuses/14",
+            "title": "Rejected"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/statuses"
+    },
+    "jumpTo": {
+      "href": "/api/v3/statuses?offset=%7Boffset%7D",
+      "templated": true
+    }
+  }
+}

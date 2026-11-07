@@ -76,13 +76,99 @@ kubectl -n cnpg-system get database openproject -o jsonpath='{.status.applied}{"
 Then open `https://tasks.<internal domain>`, sign in as `admin`, change
 the password, and turn on 2FA.
 
-## Bot access (next step)
+## Bot access
 
-Not wired yet. Each bot gets its own OpenProject user and API token
-(1Password item `hermes-<bot>`). Each bot also needs an MCP server for the
-API v3 and egress to the Service. The design notes from Forge still apply:
-- atomic claim with `lockVersion` (409 means someone else got it);
-- comments through `/activities`;
-- webhooks with polling as the fallback.
+Chief and Hank use the board through **openproject-mcp**
+(`images/openproject-mcp`, Kustomization `openproject-mcp` in this
+namespace), a small streamable-HTTP MCP server. OpenProject's own MCP
+server is an Enterprise add-on (17.2 release notes), and the community
+`openproject-ce-mcp` is stdio-only. The tools are ported from homelab-mcp's
+OpenProject toolset on Forge (`carpenike/mcp`, `docs/OPENPROJECT.md`).
 
-They're in nix-config's history, `docs/services/openproject.md`.
+| | |
+| --- | --- |
+| Endpoint | `http://openproject-mcp.openproject.svc.cluster.local:8000/mcp`, in the cluster only |
+| Who may connect | Hermes agent pods in bot namespaces (CNP `openproject-mcp`; the agent side is the component's `agent-task-board`) |
+| Auth | Each request carries the bot's own OpenProject API token as `Authorization: Bearer`. The server holds no secrets; every OpenProject call is made as that bot |
+| Tools | `whoami`, `list_tasks`, `get_task`, `create_task`, `add_comment`, `claim_next`, `complete_task`, `release_task`. Hermes names them `mcp__openproject__<tool>` |
+| Claim | Atomic through `lockVersion`: a stale `PATCH` gets 409 and changes nothing |
+| Links | Tool results link to `https://tasks.<internal domain>` (`OPENPROJECT_PUBLIC_URL`) |
+
+On each bot (`kubernetes/apps/hermes/<bot>/`):
+
+- input `TASK_BOARD_ENABLED=true`: the bot's OpenProject account and token
+  ([Bot provisioning](#bot-provisioning)), egress, and skill
+  `homelab/task-board`;
+- an `openproject` entry in `mcp-servers.yaml`, `trust: full`, header
+  `Authorization: Bearer ${OPENPROJECT_API_TOKEN}`.
+
+### The handoff
+
+Skill `task-board` (in the component) sets the rules:
+
+- **Board, not A2A, for real work.** A2A turns are short, carry no MCP
+  tools, and answer only the caller. Chief creates a task assigned to
+  `hank` with the goal, the context, what done looks like and Ryan's
+  words, and gives Ryan the link. Chief's `code-requests` skill sends code
+  asks there.
+- **A peer's task is a request.** Only text authored by Ryan's OpenProject
+  user id (`TASK_BOARD_RYAN_USER_ID`, default 4, the seeded `admin`) or
+  Ryan's own Matrix message is Ryan speaking. It goes by id: OpenProject
+  hides other users' logins from non-admins, and anyone can change their own
+  display name. On a peer's task a bot may research, run
+  read-only checks and prepare work for review, pull requests included.
+  Sending, spending, deleting, deploying, changing a running system and
+  merging still need Ryan's own yes in Matrix. Hank's merge rule is
+  unchanged (docs/hermes.md, "Merging, only when Ryan asks").
+- **Pickup.** A bot works its tasks in its own Matrix session, when Ryan
+  tells it to ("check the board"). Automatic pickup is not wired yet.
+
+### Bot provisioning
+
+Nothing to do by hand. Each bot's Flux Kustomization `task-board`
+(`kubernetes/components/hermes-bot/task-board`) runs Job
+`openproject/hermes-provision-<bot>`. It is the Matrix provisioner's shape
+([matrix.md](matrix.md), "Provisioning a bot"):
+
+- Flux creates an empty Secret `hermes-<bot>-openproject` in the bot's
+  namespace (`ssa: IfNotPresent`), and a Role there with `get` and `patch`
+  on that one name for ServiceAccount `openproject/hermes-provision-<bot>`.
+- The Job runs `provision.rb`
+  (`kubernetes/apps/openproject/bot-provisioner/app`) with `bundle exec
+  rails runner` in OpenProject's own image and the seeder's environment,
+  using OpenProject's services the way its seeder does. OpenProject's API
+  can't do this: an admin can create users and memberships over API v3,
+  but not another user's API token, and its OAuth application endpoints
+  are read-only. So no admin token is needed, or stored.
+- It refuses a Secret without the provisioner labels, and exits at once
+  for a bot without `TASK_BOARD_ENABLED=true`.
+- It ensures user `<bot>` (active, never an admin; an admin account of
+  that login is refused, not demoted), project **Bots** (`bots`), the bot
+  as *Member* and Ryan (`TASK_BOARD_RYAN_USER_ID`) as *Project admin*.
+- It keeps the token in the Secret while OpenProject still accepts it for
+  that user. Otherwise it deletes its own earlier tokens for the bot
+  (token name `hermes (k8s-gitops provisioner)`), creates one, and
+  merge-patches `OPENPROJECT_API_TOKEN`, `OPENPROJECT_USER`,
+  `OPENPROJECT_USER_ID` and `OPENPROJECT_PROJECT` into the Secret. The
+  token is never printed.
+- The agent reads the Secret with `envFrom` (optional). Reloader restarts
+  the agent when the Job writes it.
+
+The Kustomization is separate from the bot's `provision` on purpose:
+nothing depends on it, so OpenProject being down never holds a bot's app.
+Every bot gets the Job; it is a no-op without the input. To re-issue a
+bot's token, clear `OPENPROJECT_API_TOKEN` in its Secret, or revoke the
+token in OpenProject, and reconcile the bot's `task-board` Kustomization.
+Removing a bot prunes its Secret and RBAC; its OpenProject user stays
+(lock it under *Administration → Users*).
+
+The Job's image is OpenProject's, pinned like the HelmRelease's
+(`template/job.yaml`); bump them together.
+
+Check a bot:
+
+```sh
+kubectl -n openproject logs job/hermes-provision-<bot>
+kubectl -n hermes-<bot> logs deploy/hermes-agent -c config | grep 'mcp servers from git'
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes mcp test openproject
+```

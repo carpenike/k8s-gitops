@@ -8,3 +8,5 @@ components:
 resources:
   - ./namespace.yaml
   - ./openproject/ks.yaml
+  - ./openproject-mcp/ks.yaml
+  - ./bot-provisioner/ks.yaml

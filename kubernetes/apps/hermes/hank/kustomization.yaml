@@ -60,6 +60,11 @@ configMapGenerator:
       # himself asks for that one (skill coding-sessions, "Merging").
       - CLAUDE_CODE_ENABLED=true
       - CLAUDE_CODE_MERGE=true
+      # The shared OpenProject task board (docs/openproject.md, "Bot
+      # access"): the bot's OpenProject user and token (Job
+      # openproject/hermes-provision-hank), egress to openproject-mcp and skill
+      # task-board. The MCP server is in mcp-servers.yaml.
+      - TASK_BOARD_ENABLED=true
   # Hank's persona. Written to /opt/data/SOUL.md while the live file is
   # still a version git wrote; an edit in chat or the Webapp is kept.
   # SOUL.history lists the sha256 of each earlier SOUL.md: add the old hash
