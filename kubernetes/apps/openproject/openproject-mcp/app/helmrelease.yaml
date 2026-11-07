@@ -20,7 +20,10 @@ spec:
           app:
             image:
               repository: ghcr.io/carpenike/openproject-mcp
-              tag: IMAGE_TAG_PENDING
+              # Built from images/openproject-mcp by openproject-mcp-image.yaml.
+              # Floating tag, digest re-pinned by Renovate. The first digest is
+              # the branch build 0.1.0-a7823be.
+              tag: 0.1.0@sha256:86316d77ad0f84999d82ce29faa41d02d857a38276b1fa299aed254b9219d753
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
