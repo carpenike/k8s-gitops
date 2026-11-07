@@ -1,0 +1,31 @@
+# Dependencies for images/openproject-mcp. Direct dependencies are pinned
+# exactly here; uv.lock pins every transitive one with hashes, and the image
+# installs from it with `uv sync --locked` (a pyproject/lock mismatch fails
+# the build). Bump: edit a pin (or not), `uv lock --upgrade-package <name>`,
+# `uv run pytest`. The project itself is not built or installed (no build
+# backend to fetch unpinned); the image runs it from src/ on PYTHONPATH.
+[project]
+name = "openproject-mcp"
+version = "0.1.0"
+description = "Streamable-HTTP MCP server for an OpenProject task queue; each request brings its own OpenProject API token"
+requires-python = "==3.13.*"
+license = { text = "MIT" }
+dependencies = [
+  "mcp==2.3.0",
+  "httpx==0.28.1",
+  "pydantic==2.14.3",
+  "starlette==1.10.0",
+  "uvicorn==0.54.0",
+]
+
+[dependency-groups]
+# Test-only; installed in the Dockerfile's test stage, never in the final image.
+dev = ["pytest==9.2.0"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"

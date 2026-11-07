@@ -1,0 +1,115 @@
+---
+# Runs provision.rb with OpenProject's own Rails runner, in OpenProject's
+# image and with the seeder's environment (database, secret key base), so
+# it uses OpenProject's services and contracts directly. Idempotent: a
+# re-run with a valid stored token changes nothing. Jobs are immutable, so
+# the bot's task-board Kustomization sets force: true to replace this one
+# when the template changes. Keep the image in step with the HelmRelease
+# (kubernetes/apps/openproject/openproject/app/helmrelease.yaml).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hermes-provision-${BOT_NAME}
+  namespace: openproject
+  labels:
+    app.kubernetes.io/name: openproject-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+spec:
+  backoffLimit: 4
+  activeDeadlineSeconds: 1200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openproject-bot-provisioner
+        app.kubernetes.io/instance: ${BOT_NAME}
+    spec:
+      serviceAccountName: hermes-provision-${BOT_NAME}
+      # Never, so each failed attempt keeps its pod and logs.
+      restartPolicy: Never
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: provision
+          image: docker.io/openproject/openproject:17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+          command:
+            - bash
+            - -c
+            - mkdir -p /tmp/ruby && cd /app && exec bundle exec rails runner /opt/provision/provision.rb
+          envFrom:
+            - secretRef:
+                name: openproject-core
+            - secretRef:
+                name: openproject-memcached
+            - secretRef:
+                name: openproject-environment
+          env:
+            - name: TMPDIR
+              value: /tmp
+            - name: OPENPROJECT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-db
+                  key: password
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-secrets
+                  key: secret-key-base
+            - name: BOT_NAME
+              value: ${BOT_NAME}
+            - name: BOT_NAMESPACE
+              value: hermes-${BOT_NAME}
+            - name: SECRET_NAME
+              value: hermes-${BOT_NAME}-openproject
+            - name: TASK_BOARD_ENABLED
+              value: "${TASK_BOARD_ENABLED:=false}"
+            - name: BOARD_PROJECT
+              value: bots
+            - name: BOARD_PROJECT_NAME
+              value: Bots
+            - name: BOT_ROLE
+              value: Member
+            - name: RYAN_USER_ID
+              value: "${TASK_BOARD_RYAN_USER_ID:=4}"
+            - name: RYAN_ROLE
+              value: Project admin
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: script
+              mountPath: /opt/provision
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: app-tmp
+              mountPath: /app/tmp
+            # As the seeder has it: the app's configured attachments path.
+            - name: data
+              mountPath: /var/openproject/assets
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openproject
+        - name: script
+          configMap:
+            name: openproject-bot-provisioner
+        - name: tmp
+          emptyDir: {}
+        - name: app-tmp
+          emptyDir: {}

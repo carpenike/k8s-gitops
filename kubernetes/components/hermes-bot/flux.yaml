@@ -31,6 +31,36 @@ spec:
   timeout: 15m
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# The bot's OpenProject account and token (docs/openproject.md, "Bot
+# provisioning"). Every bot gets the Job; it exits at once unless the bot
+# has TASK_BOARD_ENABLED=true. Separate from provision on purpose: nothing
+# depends on it, so OpenProject being down never holds the bot's app.
+# wait reports the Job's result; force replaces the immutable Job when the
+# template changes.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: task-board
+spec:
+  dependsOn:
+    - name: openproject-bot-provisioner
+      namespace: openproject
+  force: true
+  interval: 1h
+  path: ./kubernetes/components/hermes-bot/task-board
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: hermes-bot-inputs
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  timeout: 25m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # The two pods, their volumes, and backup. targetNamespace and the health
 # check namespace are set by the component's replacements.
 apiVersion: kustomize.toolkit.fluxcd.io/v1

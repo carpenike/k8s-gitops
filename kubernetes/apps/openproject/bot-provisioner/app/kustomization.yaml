@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# The shared provisioning script. Each bot's task-board Kustomization
+# (kubernetes/components/hermes-bot/task-board) runs it with
+# ../template. docs/openproject.md, "Bot provisioning".
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+configMapGenerator:
+  - name: openproject-bot-provisioner
+    files:
+      - provision.rb
+generatorOptions:
+  disableNameSuffixHash: true
