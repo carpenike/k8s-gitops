@@ -865,6 +865,17 @@ spec:
           # (docker/entrypoint-dispatch.sh), which runs non-root on a
           # read-only root. The gateway is the only long-running process.
           shareProcessNamespace: true
+          # ndots:1 so a name with a dot is looked up as written first. With
+          # the default ndots:5 the first query is the search-domain form
+          # (api.tavily.com.hermes-<bot>.svc.cluster.local), CoreDNS's
+          # autopath answers it with the external address, and Cilium files
+          # that address under the expanded name, so no toFQDNs rule ever
+          # matches (Tavily, Outlook, Pocket ID, MCP servers). Every name the
+          # agent uses has a dot: in-cluster ones are written in full.
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
           securityContext:
             runAsNonRoot: true
             runAsUser: 10000
