@@ -7,6 +7,7 @@ resources:
   - ./ocirepository.yaml
   - ./atrium-k8s
   - ./mcp-k8s
+  - ./mcp-k8s-build
   - ./network-config-k8s
   - ./sam-tracker
   - ./sam-tracker-app-k8s

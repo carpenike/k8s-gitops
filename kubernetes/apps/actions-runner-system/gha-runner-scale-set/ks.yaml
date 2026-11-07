@@ -40,6 +40,10 @@ spec:
       namespace: actions-runner-system
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
+      name: mcp-k8s-build
+      namespace: actions-runner-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
       name: network-config-k8s
       namespace: actions-runner-system
     - apiVersion: helm.toolkit.fluxcd.io/v2
