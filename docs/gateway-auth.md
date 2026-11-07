@@ -53,6 +53,13 @@ A SecurityPolicy the API server rejects is not attached, so it cannot
 install this 500. The manifests in this repo pass the 1.9.3 CRD.
 `scripts/validate.sh` checks them.
 
+## One login per route
+
+A person signs in once per route. A route keeps the gateway's Pocket ID
+login and the app behind it trusts that login or asks for none, or the
+route opts out below and the app's own login is the only one. A gateway
+login followed by an app login is not allowed.
+
 ## Opt out
 
 Envoy Gateway 1.9.3 keeps one effective SecurityPolicy per target. A
@@ -62,12 +69,19 @@ is unset. `pocket-id-exempt` selects every HTTPRoute with:
 ```yaml
 metadata:
   labels:
-    gateway.holthome.net/auth: public   # or native
+    gateway.holthome.net/auth: public   # or native, or app
 ```
 
-`public` is a route that must answer without a login. `native` is a route
-whose app has its own Pocket ID client. Both replace the gateway OIDC
-policy with `authorization.defaultAction: Allow`.
+All three replace the gateway OIDC policy with
+`authorization.defaultAction: Allow`.
+
+| Label | Route | Examples |
+| --- | --- | --- |
+| `public` | Must answer without a login: a webhook, or an API that checks its own bearer token | `flux-webhook`, Hermes `agent-api` |
+| `native` | The app has its own Pocket ID client | LiteLLM, Hermes Webapp |
+| `app` | The app has its own login that is not Pocket ID, because Pocket ID can't sign in to it (for example OIDC is a paid feature). `envoy-internal` only, with 2FA on the app's accounts | OpenProject ([openproject.md](openproject.md)) |
+
+Prefer `native` whenever the app supports OIDC.
 
 The selector watches every namespace. A labeled route outside `network`
 needs a ReferenceGrant in the route's namespace:

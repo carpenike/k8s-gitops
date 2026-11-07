@@ -6,9 +6,11 @@ serves it until the cutover below. This cluster serves the UI at
 The manifest hostname is `scrypted.${SECRET_DOMAIN}`. `mikrotik-dns`
 publishes that name. The route has no parent on `envoy-external`.
 
-The gateway Pocket ID policy applies, then Scrypted's own login. Forge's
-Caddy vhost does not add a second login. That is the cluster pattern for
-an internal route.
+The gateway Pocket ID policy applies, then Scrypted's own login. That is
+two logins, which [gateway-auth.md](gateway-auth.md) ("One login per
+route") no longer allows. To do: pick the one login, the gateway's
+(Scrypted trusting it) or Scrypted's own with the route labelled `app`.
+Forge's Caddy vhost does not add a second login.
 
 ## What Forge runs today
 

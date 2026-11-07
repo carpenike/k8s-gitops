@@ -46,12 +46,19 @@ The role password is 1Password field `database_password`, read by both
 
 ## Sign-in
 
-- **Ryan.** OpenID Connect is an Enterprise add-on in OpenProject, so
-  Pocket ID can't sign in to OpenProject itself. The route has no auth
-  label, so the gateway's Pocket ID login comes first
-  ([gateway-auth.md](gateway-auth.md)), then an internal OpenProject
-  account. The first admin is seeded from `admin_password` and must change
-  it at first sign-in. Turn on 2FA for it.
+- **Ryan.** One login, OpenProject's own account with 2FA. The route is
+  labelled `gateway.holthome.net/auth: app`, so the gateway's Pocket ID
+  login is off for it ([gateway-auth.md](gateway-auth.md), "One login per
+  route"). Pocket ID can't be that login:
+  - OpenID Connect and SAML are Enterprise add-ons. In 17.9.6,
+    `auth_plugin.rb` drops every SSO provider without an Enterprise token,
+    including ones configured from the environment.
+  - Header sign-in (`auth_source_sso`, Community) finds the user with
+    `LdapAuthSource.find_user`, a real LDAP query. It needs an LDAP
+    directory, which Pocket ID isn't.
+
+  The first admin is seeded from `admin_password` and must change it at
+  first sign-in. Turn on 2FA for it.
 - **Bots** use API tokens against the in-cluster Service and never reach
   the gateway. `OPENPROJECT_ADDITIONAL__HOST__NAMES` admits that Service
   name. HSTS is off, as on Forge, so the bots' `http://` calls aren't
@@ -66,8 +73,8 @@ kubectl -n openproject logs job/openproject-seeder-1 | tail
 kubectl -n cnpg-system get database openproject -o jsonpath='{.status.applied}{"\n"}'
 ```
 
-Then open `https://tasks.<internal domain>`, sign in to Pocket ID and then
-as `admin`, change the password, and turn on 2FA.
+Then open `https://tasks.<internal domain>`, sign in as `admin`, change
+the password, and turn on 2FA.
 
 ## Bot access (next step)
 
