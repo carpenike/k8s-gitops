@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# Nightly restic of the attachments volume (PVC openproject, ceph-filesystem,
+# RWX) from a CephFS snapshot (class csi-ceph-filesystem). The database is
+# covered by postgres17's own backups. Files belong to the app user, 1000.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: openproject
+spec:
+  sourcePVC: openproject
+  trigger:
+    schedule: "45 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: openproject-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 2Gi
+    volumeSnapshotClassName: csi-ceph-filesystem
+    storageClassName: ceph-filesystem
+    accessModes:
+      - ReadOnlyMany
+    cacheStorageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: openproject-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4
+      monthly: 3

@@ -9,6 +9,7 @@
 | [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, and the Forge cutover |
 | [postgres17.md](postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
 | [hermes.md](hermes.md) | Hermes agents in Kata VMs: Chief, and what to create for a new one |
+| [openproject.md](openproject.md) | OpenProject task board for Ryan and the bots: database, sign-in, backups |
 | [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
 | [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
 | [scrypted.md](scrypted.md) | Scrypted NVR on VLAN 30, and the Forge cutover |

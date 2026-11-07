@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# OpenProject: docs/openproject.md.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openproject
+spec:
+  dependsOn:
+    - name: postgres17
+      namespace: cnpg-system
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: envoy-gateway
+      namespace: network
+    - name: mikrotik-dns
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+  # The CNPG Database and its role secret are checked here, not on
+  # postgres17: a missing 1Password item for openproject must not make
+  # LiteLLM's chain unhealthy.
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: openproject-db
+      namespace: cnpg-system
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      name: openproject
+      namespace: cnpg-system
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: openproject-db
+      namespace: openproject
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: openproject-secrets
+      namespace: openproject
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: openproject
+      namespace: openproject
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      current: has(status.applied) && status.applied
+  interval: 1h
+  path: ./kubernetes/apps/openproject/openproject/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: openproject
+  timeout: 25m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nightly attachments backup. Nothing depends on this; if 1Password item
+# volsync-r2-template cannot be read, only this stays unready.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openproject-backup
+spec:
+  dependsOn:
+    - name: openproject
+    - name: volsync
+      namespace: volsync-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: openproject-volsync
+      namespace: openproject
+  interval: 1h
+  path: ./kubernetes/apps/openproject/openproject/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: openproject
