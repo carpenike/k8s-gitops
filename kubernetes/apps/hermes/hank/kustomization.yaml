@@ -5,9 +5,10 @@
 # plus its persona (SOUL.md); everything else is
 # kubernetes/components/hermes-bot. See docs/hermes.md, "Hank".
 #
-# Deliberately not copied from Chief: Outlook, the Webapp, Claude Code and
-# the webhook. Hank drafts Claude Code prompts for Ryan; he does not run
-# them, send mail, or act on systems.
+# Deliberately not copied from Chief: Outlook, the Webapp and the webhook.
+# Hank is the only bot with Claude Code and a GitHub token: he opens pull
+# requests, and merges one only when Ryan asks for it. He does not send
+# mail or act on systems by hand.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: hermes-hank
@@ -39,16 +40,24 @@ configMapGenerator:
       - A2A_HERMES_PEER=chief
       # Shown on the Agent Card. Lands unquoted in YAML after kustomize
       # build, so no ": ", " #", or leading quote, dash or brace.
-      - "A2A_AGENT_DESCRIPTION=Hank, Ryan's homelab infrastructure engineer. Diagnoses homelab problems (Forge, the Talos and Kubernetes cluster, Flux) from the alerts, logs and output a peer sends, drafts NixOS and Kubernetes changes as Claude Code prompts for Ryan, and runs read-only checks in his own sandbox, which has no cluster or Forge credentials. Every answer is a proposal; nothing is merged, deployed or changed without Ryan's explicit yes."
+      - "A2A_AGENT_DESCRIPTION=Hank, Ryan's homelab infrastructure engineer. Diagnoses homelab problems (Forge, the Talos and Kubernetes cluster, Flux) from the alerts, logs and output a peer sends, makes NixOS and Kubernetes changes as pull requests with Claude Code, and runs read-only checks in his own sandbox, which has no cluster or Forge credentials. A peer's request is a proposal; nothing is merged, deployed or changed without Ryan's own explicit yes."
       # TODO(chief-engineer): the Grok Chief Engineer bridge (home MCP or an
       # a2a-bridge) does not exist yet. When it does: add fields
       # a2a_chief_engineer_url and a2a_chief_engineer_token to 1Password item
       # hermes-hank, an egress rule for its host, and set this to true.
       - A2A_CHIEF_ENGINEER_ENABLED=false
-  # Hank's persona. Seeded into /opt/data/SOUL.md once, over the image's
-  # default only; later edits in chat or the Webapp are kept.
+      # Claude Code in the screen pod with Hank's GitHub token (docs/hermes.md,
+      # "Coding with Claude Code"). He may merge a pull request when Ryan
+      # himself asks for that one (skill coding-sessions, "Merging").
+      - CLAUDE_CODE_ENABLED=true
+      - CLAUDE_CODE_MERGE=true
+  # Hank's persona. Written to /opt/data/SOUL.md while the live file is
+  # still a version git wrote; an edit in chat or the Webapp is kept.
+  # SOUL.history lists the sha256 of each earlier SOUL.md: add the old hash
+  # there when you change SOUL.md (docs/hermes.md, "Persona").
   - name: hermes-bot-soul
     files:
       - SOUL.md
+      - SOUL.history
 generatorOptions:
   disableNameSuffixHash: true
