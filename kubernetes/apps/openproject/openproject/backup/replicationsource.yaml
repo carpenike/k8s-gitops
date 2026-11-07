@@ -21,6 +21,10 @@ spec:
     accessModes:
       - ReadOnlyMany
     cacheStorageClassName: ceph-block
+    # Without this, VolSync gives the cache PVC the source's ReadOnlyMany,
+    # and ceph-block (RBD) refuses to provision it: "readOnly access".
+    cacheAccessModes:
+      - ReadWriteOnce
     moverPodLabels:
       app.kubernetes.io/name: openproject-volsync
     moverSecurityContext:
