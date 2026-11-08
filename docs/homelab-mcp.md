@@ -179,9 +179,8 @@ carpenike/mcp `.github/workflows/image.yml` builds both images on the
   mcp 0.39.0);
 - `ghcr.io/carpenike/homelab-mcp-actual-sidecar`.
 
-Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`). The
-server image is a placeholder tag until carpenike/mcp #121 is on main; pin
-both from that build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
+Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`), to mcp
+main `72a9b0f` (0.39.0). Bump both together from a later main build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
 (no GHCR copy upstream), pinned the same way.
 
 ## Alerts

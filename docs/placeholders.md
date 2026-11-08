@@ -135,9 +135,7 @@ comes from.
 
 Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password`.
 
-The HelmRelease's `ghcr.io/carpenike/homelab-mcp` tag is the placeholder
-`sha-0000000000000000000000000000000000000000` until carpenike/mcp #121 is
-on main. The sidecar stays pinned to `0f27fd4`; pin both from the #121 build.
+The HelmRelease's images are pinned to carpenike/mcp main `72a9b0f`.
 
 ## Still to confirm or generate
 

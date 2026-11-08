@@ -55,12 +55,11 @@ spec:
           # start. The only step that runs as root; CHOWN and FOWNER only.
           permissions:
             image: &mcpImage
-              # Built by carpenike/mcp .github/workflows/image.yml from main.
-              # Placeholder until carpenike/mcp #121 (homelab-finances-runtime,
-              # supercronic) is on main: the tag does not exist, so nothing
-              # can start by accident. Every container below uses this image.
+              # Built by carpenike/mcp .github/workflows/image.yml from main
+              # (72a9b0f, 0.39.0: homelab-finances-runtime and supercronic).
+              # Every container below uses this image.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-0000000000000000000000000000000000000000
+              tag: sha-72a9b0f35549fe39e15b116676cd02788c8b35df@sha256:de465550789ea61c28aae541c91c170d1acc0959a92fcd1f7fb2367ac027a933
             command:
               - /bin/sh
               - -c
@@ -199,7 +198,7 @@ spec:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-0f27fd4c75710d40f09cc8ec7ae57ff7be15b328@sha256:e95dcd16ef48288d0f380158d81ac21f0c212aef0f3a6d14c87ca2dd38d27ae6
+              tag: sha-72a9b0f35549fe39e15b116676cd02788c8b35df@sha256:59306caf8575309e5a9908306dfa210d0564ca8d5228fd5dfb67288569c551c4
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
