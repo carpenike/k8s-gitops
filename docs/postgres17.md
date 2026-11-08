@@ -264,3 +264,123 @@ Then repoint LiteLLM and Hindsight at its `-rw` Service, or rename it into
 place. Give the restored Cluster its own `spec.plugins` entry with a new
 `serverName` before it archives, so it never writes into
 `cnpg/postgres17/`.
+
+## Forge stores
+
+Three databases moved here from Forge's local PostgreSQL, along with
+everything that writes to them:
+- `schoolhouse` (grades scraped from Schoology),
+- `lading` (Amazon, Costco and Sam's Club order history),
+- `homelab_finance` (the household finance projection).
+
+A fourth, `finances_context`, is new. It holds the shared transaction-context
+table that the `finances_context_*` tools and the Signal capture worker both
+write to (carpenike/mcp #120).
+
+Every client runs in the cluster and connects to `postgres17-rw` with
+CloudNativePG's default `pg_hba`. Nothing outside the cluster connects, so
+there is no LoadBalancer and no CA to copy anywhere.
+
+| Database | Owner (writes) | Readers | Runs in |
+| --- | --- | --- | --- |
+| `schoolhouse` | `schoolhouse` | `schoolhouse_reader` (homelab-mcp), `schoolhouse_grafana` | schoolhouse app; homelab-mcp; Grafana |
+| `lading` | `lading` | `lading_reader` (homelab-mcp, finances export) | lading app; homelab-mcp |
+| `homelab_finance` | `homelab_finance` (the finances export) | `homelab_finance_money` (`money_overview` only), `homelab_finance_report` (`money_overview` and `export_runs`), `homelab_finance_grafana` | homelab-mcp pod; Grafana |
+| `finances_context` | `finances_context` | none; the same role reads and writes | homelab-mcp pod |
+
+Readers get no cluster-wide role. Each owner grants its own readers, once, at
+restore time (below), and default privileges cover the tables its later
+migrations create. One store's reader therefore cannot read another store,
+unlike Forge's shared `readonly` group.
+
+### 1Password
+
+Create these items in vault `k8s-secrets`, one strong random password per
+field. Reusing Forge's sops values is fine but not needed: nothing on Forge
+connects here.
+
+| Item | Field | Role | Forge sops key it replaces |
+| --- | --- | --- | --- |
+| `schoolhouse` | `db_password` | `schoolhouse` | `schoolhouse/db_password` |
+| `schoolhouse` | `reader_password` | `schoolhouse_reader` | `schoolhouse/reader_password` |
+| `schoolhouse` | `grafana_password` | `schoolhouse_grafana` | `schoolhouse/grafana_password` |
+| `lading` | `db_password` | `lading` | `lading/db_password` |
+| `lading` | `reader_password` | `lading_reader` | `lading/reader_password` |
+| `homelab-finance` | `export_db_password` | `homelab_finance` | `homelab-mcp/export_db_password` |
+| `homelab-finance` | `money_password` | `homelab_finance_money` | none (Forge used peer auth) |
+| `homelab-finance` | `report_password` | `homelab_finance_report` | none (Forge used peer auth) |
+| `homelab-finance` | `grafana_db_password` | `homelab_finance_grafana` | `homelab-mcp/grafana_db_password` |
+| `finances-context` | `db_password` | `finances_context` | none (new) |
+
+Until an item exists, its ExternalSecret is not ready and CloudNativePG
+leaves that role (and the Database it owns) unapplied. Nothing else in
+postgres17 is affected.
+
+### Restore from Forge (cutover)
+
+1. Stop every writer on Forge (the nix-config cutover lists the units):
+   - schoolhouse and its ingest timer;
+   - lading and its sync timers;
+   - the finances ingest, export and snapshot timers;
+   - the Signal capture and report units;
+   - the Forge homelab-mcp.
+2. Dump each store on Forge:
+
+   ```sh
+   for db in schoolhouse lading homelab_finance; do
+     sudo -u postgres pg_dump -h /run/postgresql -Fc --no-owner --no-acl "$db" > "$db.dump"
+   done
+   ```
+
+3. From a machine with `kubectl`, forward the primary and restore each dump
+   as its owner, not with the dump's owners or ACLs:
+
+   ```sh
+   kubectl -n cnpg-system port-forward svc/postgres17-rw 15432:5432 &
+   export PGHOST=127.0.0.1 PGPORT=15432 PGSSLMODE=require
+   pg_restore --no-owner --no-acl -U schoolhouse -d schoolhouse schoolhouse.dump
+   pg_restore --no-owner --no-acl -U lading -d lading lading.dump
+   pg_restore --no-owner --no-acl -U homelab_finance -d homelab_finance homelab_finance.dump
+   ```
+
+4. Grant the readers, as each owner:
+
+   ```sql
+   -- psql -U schoolhouse -d schoolhouse
+   GRANT USAGE ON SCHEMA public TO schoolhouse_reader, schoolhouse_grafana;
+   GRANT SELECT ON ALL TABLES IN SCHEMA public TO schoolhouse_reader, schoolhouse_grafana;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO schoolhouse_reader, schoolhouse_grafana;
+
+   -- psql -U lading -d lading
+   GRANT USAGE ON SCHEMA public TO lading_reader;
+   GRANT SELECT ON ALL TABLES IN SCHEMA public TO lading_reader;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO lading_reader;
+
+   -- psql -U homelab_finance -d homelab_finance
+   GRANT USAGE ON SCHEMA household_finance TO homelab_finance_grafana, homelab_finance_money, homelab_finance_report;
+   GRANT SELECT ON ALL TABLES IN SCHEMA household_finance TO homelab_finance_grafana;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA household_finance GRANT SELECT ON TABLES TO homelab_finance_grafana;
+   GRANT SELECT ON household_finance.money_overview TO homelab_finance_money, homelab_finance_report;
+   GRANT SELECT ON household_finance.export_runs TO homelab_finance_report;
+   ALTER ROLE homelab_finance_report SET default_transaction_read_only = on;
+   ```
+
+   The last line needs a superuser (`kubectl cnpg psql postgres17`).
+
+5. Move the transaction context, with the same port-forward:
+
+   ```sh
+   HOMELAB_MCP_FINANCES_CONTEXT_DSN="postgresql://finances_context:<password>@127.0.0.1:15432/finances_context?sslmode=require" \
+     homelab-finances-context copy --from finances-context.db
+   ```
+
+   Copy `/var/lib/homelab-mcp/finances-context.db` off Forge first. The
+   command refuses a target that already has rows, and keeps ids and Signal
+   event keys.
+
+6. Start the cluster workers (docs/homelab-mcp.md, cutover).
+
+The snapshot tables in `homelab_finance` (`reconcile_daily`,
+`sync_health_daily`, `hygiene_daily`) are the only record of past bank
+balances, so restore them; never let the export job recreate them empty.
+Keep Forge's database for a week after the cutover before dropping it.

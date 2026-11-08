@@ -188,6 +188,10 @@ bot's port, and the route's filter takes only events naming that bot.
 
 **Adding a bot:** `TASK_BOARD_WEBHOOK_ENABLED=true` and its
 `WEBHOOK_DELIVER_CHAT_ID` in its inputs, and its login in `RELAY_BOTS`.
+The agent pod can start a moment before Secret `task-board-webhook`
+exists. Reloader then restarts it once the Secret is created
+(`reloadOnCreate`, `kube-system/reloader`), and the next start writes
+the route.
 
 **Rotating a key:** change the field in 1Password. For `webhook_secret`,
 also bump `script-revision` in `webhook-job.yaml` so the Job stores the

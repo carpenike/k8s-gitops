@@ -55,7 +55,7 @@ spec:
               # input is on. The floating tag moves on every rebuild build;
               # Renovate re-pins the digest (docs/hermes.md "Updating the
               # images").
-              tag: v0.23.0@sha256:e56ccd885b229d79214435b07fc91f9607d368e6f442ba3ab9cfc58fe5afffbe
+              tag: v0.23.0@sha256:41cf24ef230f4d58c4abea7dbace3405e0935b0931eb640b85aec7a7ee144d7b
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -1140,7 +1140,7 @@ spec:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
               # Floating tag, digest re-pinned by Renovate (docs/hermes.md).
-              tag: v0.23.0@sha256:5dd9a65d65114abd893d47befc1212cc5cb1ba47e65c18160650de1d71c2730e
+              tag: v0.23.0@sha256:99545e8b302b6a56fc2a0d8a7ca7c9edfbce85611358eaa430f5fb7f55c748b8
             env:
               TZ: America/New_York
             probes:
