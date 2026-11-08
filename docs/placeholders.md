@@ -117,6 +117,33 @@ Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
 | `postgres17-r2` | `endpoint_url` | `https://<account id>.r2.cloudflarestorage.com` |
 | `postgres17-r2` | `bucket` | Bucket name; objects go under `cnpg/postgres17/` |
 
+## schoolhouse
+
+Before `kubernetes/apps/schoolhouse` reconciles, create item
+`schoolhouse-ingest` (new) in vault `k8s-secrets` with fields
+`schoology_username`, `schoology_password`, `children` and `ical_feeds`, and
+the postgres17 item `schoolhouse`. [schoolhouse.md](schoolhouse.md#1password)
+says where each comes from.
+
+The HelmRelease's `ghcr.io/carpenike/schoolhouse` tag is the placeholder
+`sha-0000000000000000000000000000000000000000` (no digest) until
+carpenike/schoolhouse #24 is merged. Pin it to the merged main build, tag
+and digest. The ingest CronJob ships `suspend: true` until the cutover.
+
+## lading
+
+Before `kubernetes/apps/lading` reconciles, create items `lading-ryan` (new:
+`amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
+`costco_tokens`, `samsclub_tokens`) and `lading-steffi` (new:
+`amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
+`costco_tokens`) in vault `k8s-secrets`, and the postgres17 item `lading`.
+[lading.md](lading.md#1password) says where each comes from.
+
+The HelmRelease's `ghcr.io/carpenike/lading` tag is the placeholder
+`sha-0000000000000000000000000000000000000000` (no digest) until
+carpenike/lading #9 is merged. Pin it to the merged main build, tag and
+digest. Both sync CronJobs ship `suspend: true` until the cutover.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |
