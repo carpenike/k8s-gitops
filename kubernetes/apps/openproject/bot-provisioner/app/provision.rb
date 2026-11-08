@@ -25,8 +25,12 @@ require "net/http"
 require "openssl"
 require "securerandom"
 
+$stdout.sync = true
+
+# $stderr.puts, not warn: OpenProject loads StructuredWarnings, which takes
+# over Kernel#warn, and the message never reaches the pod log.
 def fail!(msg)
-  warn "provision: #{msg}"
+  $stderr.puts "provision: #{msg}"
   exit 1
 end
 
@@ -130,7 +134,10 @@ end
 project = Project.find_by(identifier: PROJECT_ID)
 if project.nil?
   project = service!(
-    Projects::CreateService.new(user: actor).call(name: PROJECT_NAME, identifier: PROJECT_ID, public: false),
+    # OpenProject 17 requires a workspace type (project, program or portfolio).
+    Projects::CreateService.new(user: actor).call(
+      name: PROJECT_NAME, identifier: PROJECT_ID, public: false, workspace_type: "project"
+    ),
     "create project #{PROJECT_ID}"
   )
   puts "provision: created project #{PROJECT_ID} (id #{project.id})"
