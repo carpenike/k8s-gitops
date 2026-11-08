@@ -19,7 +19,8 @@ spec:
     controllers:
       openproject-mcp:
         annotations:
-          # Restart when Secret openproject-mcp-relay changes.
+          # Restart when Secret openproject-mcp-relay or
+          # openproject-mcp-relay-targets changes.
           reloader.stakater.com/auto: "true"
         containers:
           app:
@@ -39,15 +40,22 @@ spec:
               # task-board doesn't name one.
               OPENPROJECT_DEFAULT_PROJECT: bots
               PORT: "8000"
-              # The bots the relay may wake, by OpenProject login. Each needs
-              # TASK_BOARD_WEBHOOK_ENABLED=true in its inputs, or its event
-              # has nowhere to go (the relay logs and moves on).
-              RELAY_BOTS: chief,hank
+              # The bots the relay may wake, by OpenProject login. A Hermes
+              # bot needs TASK_BOARD_WEBHOOK_ENABLED=true in its inputs; a bot
+              # outside the cluster needs an entry in RELAY_TARGETS (Secret
+              # openproject-mcp-relay-targets) and an egress rule in this
+              # app's CNP. Otherwise its event has nowhere to go (the relay
+              # logs and moves on).
+              RELAY_BOTS: chief,hank,chief-engineer
             # OPENPROJECT_WEBHOOK_SECRET and HERMES_WEBHOOK_SECRET. Without
             # them the relay answers 404 and the MCP server works as before.
             envFrom:
               - secretRef:
                   name: openproject-mcp-relay
+                  optional: true
+              # RELAY_TARGETS, the webhook targets of bots outside the cluster.
+              - secretRef:
+                  name: openproject-mcp-relay-targets
                   optional: true
             resources:
               requests:

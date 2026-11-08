@@ -15,7 +15,7 @@ install that was never put into use (nix-config).
 | Cache | memcached (`memcached.openproject.svc`), official image |
 | Attachments | PVC `openproject`, ceph-filesystem, RWX, 10 GiB |
 | Backups | Database: postgres17's backups. Attachments: VolSync restic to R2 (`openproject`), nightly, from a CephFS snapshot |
-| 1Password | item `openproject` in `k8s-secrets`: `database_password`, `secret_key_base`, `admin_password`, and the board webhook's `webhook_secret` and `bot_webhook_secret` |
+| 1Password | item `openproject` in `k8s-secrets`: `database_password`, `secret_key_base`, `admin_password`, and the board webhook's `webhook_secret` and `bot_webhook_secret`; item `chief-engineer`: `routine_url`, `routine_key` and `openproject_api_token` ([Bots outside the cluster](#bots-outside-the-cluster)) |
 
 ## Layout
 
@@ -179,7 +179,7 @@ drops a redelivered event (`webhook-id`).
 | --- | --- |
 | OpenProject webhook *Hermes task board*: project `bots`, events `work_package:created` and `work_package:updated`, signed with `webhook_secret` | Job `openproject-board-webhook` (`bot-provisioner/app/webhook-job.yaml`, `webhook.rb`), idempotent. Edits in *Administration → Webhooks* are overwritten on its next run |
 | OpenProject may post to the relay | `OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST` (`openproject/app/helmrelease.yaml`) lists the openproject-mcp Service's pinned ClusterIP. It takes addresses, not names; change both together |
-| Relay | openproject-mcp `POST /hooks/openproject`; Secret `openproject-mcp-relay` (`webhook_secret`, `bot_webhook_secret`); `RELAY_BOTS=chief,hank` |
+| Relay | openproject-mcp `POST /hooks/openproject`; Secret `openproject-mcp-relay` (`webhook_secret`, `bot_webhook_secret`); `RELAY_BOTS=chief,hank,chief-engineer`; Secret `openproject-mcp-relay-targets` (`RELAY_TARGETS`) for bots outside the cluster |
 | Network | CNP `openproject-mcp`: in from OpenProject's pods on 8000, out to bots' agent pods on 8644. Each bot's CNP `agent-board-hooks`: 8644 from openproject-mcp only |
 | Bot side | Input `TASK_BOARD_WEBHOOK_ENABLED=true` (with `TASK_BOARD_ENABLED` and `WEBHOOK_DELIVER_CHAT_ID`): Secret `task-board-webhook` (`bot_webhook_secret`, and Hermes' webhook listener on 8644), Service `agent-board-hooks`, route `task-board` |
 
@@ -211,6 +211,60 @@ OpenProject's own log of each delivery and the relay's answer is under
 
 **After a relay restart**, the first event on an already closed task
 counts as its close: the author may hear about that task once more.
+
+### Bots outside the cluster
+
+**Chief Engineer**, Ryan's homelab assistant on Grok Bot, is a board user
+like Chief and Hank: login `chief-engineer`, a *Member* of `bots`, never an
+admin. It isn't a Hermes bot, so it reaches the board and is woken a
+different way.
+
+- **Account.** Flux Kustomization `external-bot-chief-engineer`
+  (`bot-provisioner/external-bots.yaml`) runs the same `provision.rb` with
+  `BOT_EXTERNAL=true` (template `bot-provisioner/external`): user,
+  membership, and an API token in Secret
+  `openproject/openproject-bot-chief-engineer`. Nothing in the cluster
+  reads that Secret. Ryan copies the token to 1Password (item
+  `chief-engineer`, field `openproject_api_token`) and to Chief Engineer's
+  machine.
+- **Access.** Over Chief Engineer's own VPN into the LAN, to
+  `https://tasks.<internal domain>/api/v3` on envoy-internal, with HTTP
+  Basic `apikey:<token>`. Nothing is published to the internet. The route
+  has OpenProject's own sign-in (`gateway.holthome.net/auth: app`), so the
+  token works without the gateway login. If the VPN is narrowed, the board
+  needs DNS and 443 to envoy-internal.
+- **Wake-ups.** A Grok Bot routine with a webhook trigger: a POST to its
+  URL with `Authorization: Bearer <key>` starts a run, and the result goes
+  to the bot's chat. The relay sends `chief-engineer`'s events there
+  (`RELAY_TARGETS`, from item `chief-engineer`, fields `routine_url` and
+  `routine_key`), with the same pointer as a Hermes bot gets plus
+  `task_url`. Egress: CNP `openproject-mcp`, `toFQDNs` the routine's
+  host. Same rules as any bot: it is woken when someone else changes its
+  task or closes one it created, never by its own changes. Grok runs
+  routines at most 200 times an hour each.
+- **What it knows.** [grok-board-guide.md](grok-board-guide.md): the
+  guide for its instructions (API recipes, statuses, user ids, the trust
+  rules of skill `task-board`) and the routine's instruction. Its tasks
+  and comments are a peer's requests to Hank and Chief, never Ryan's.
+
+**Setting it up** (Ryan):
+
+1. In Grok, create a routine for Chief Engineer with a **webhook trigger**,
+   and paste in the routine instruction from the guide. Its Webhook
+   section shows the URL and the key. If the URL's host isn't
+   `api2.cursor.sh`, change the `toFQDNs` rule in
+   `openproject-mcp/app/ciliumnetworkpolicy.yaml`.
+2. Create 1Password item `chief-engineer` in `k8s-secrets` with
+   `routine_url` and `routine_key`.
+3. After the merge, copy the token from Secret
+   `openproject/openproject-bot-chief-engineer` to that item
+   (`openproject_api_token`) and to Chief Engineer's machine.
+4. Paste the guide into Chief Engineer's instructions, with the real
+   domain.
+
+**Another Grok bot:** another Kustomization in `external-bots.yaml`, its
+login in `RELAY_BOTS`, and an entry in the `openproject-mcp-relay-targets`
+template.
 
 ### Bot provisioning
 
