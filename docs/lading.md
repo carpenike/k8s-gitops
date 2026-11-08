@@ -47,7 +47,7 @@ Namespace `lading`, chart `app-template` 5.3.0, image
   init container sets each volume root to `65532:65532` mode 0700 on every
   run, as Forge's dataset and `StateDirectoryMode`. There is no `fsGroup`,
   so file modes are not widened.
-- The CronJobs ship `suspend: true`. They are turned on at the cutover.
+- The CronJobs shipped `suspend: true` and were turned on at the cutover.
 
 ### Token seeds
 

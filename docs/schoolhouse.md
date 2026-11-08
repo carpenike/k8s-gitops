@@ -40,7 +40,7 @@ Namespace `schoolhouse`, chart `app-template` 5.3.0, image
   variables, so the digest source is off.
 - Probes are TCP. `/healthz` returns 503 every weekend by design, and a
   restart fixes neither staleness nor a database outage. Readiness is off.
-- The CronJob ships `suspend: true`. It is turned on at the cutover.
+- The CronJob shipped `suspend: true` and was turned on at the cutover.
 
 ## Network
 
