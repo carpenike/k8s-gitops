@@ -101,11 +101,11 @@ spec:
       sync-ryan:
         type: cronjob
         cronjob:
-          # Suspended until the cutover copies Forge's state for this account
-          # onto its volume (docs/lading.md). A first run on an empty volume
-          # is a cold Amazon login, the path that hit a JavaScript challenge
-          # on Forge's first deploy. Set to false then.
-          suspend: true
+          # Unsuspended at the cutover once Forge's state for this account
+          # was on its volume (docs/lading.md). A run on an empty volume is a
+          # cold Amazon login, the path that hit a JavaScript challenge on
+          # Forge's first deploy: suspend again before replacing a volume.
+          suspend: false
           # Forge: the module default, *-*-* 04:20:00, local time.
           schedule: "20 4 * * *"
           timeZone: America/New_York
@@ -235,7 +235,7 @@ spec:
         type: cronjob
         # The same settings as sync-ryan except the schedule.
         cronjob:
-          suspend: true
+          suspend: false
           # Forge: onCalendar *-*-* 05:40:00. A different hour from ryan's on
           # purpose: two logins to two Amazon accounts from one IP in the
           # same minute is a more interesting pattern than two spread across
