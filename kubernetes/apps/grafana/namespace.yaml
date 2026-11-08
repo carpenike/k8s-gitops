@@ -1,0 +1,14 @@
+---
+# Grafana and Grafana OnCall, moved from Forge (docs/grafana.md). Their own
+# namespace rather than observability: observability is privileged for
+# node-exporter, and a namespace-wide default deny there would also cut off
+# kube-prometheus-stack. Every pod here runs as a fixed non-root uid with no
+# capabilities, so restricted fits. The VolSync movers set the same profile.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grafana
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

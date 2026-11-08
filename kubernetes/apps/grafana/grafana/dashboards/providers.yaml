@@ -1,0 +1,35 @@
+---
+# Grafana dashboard providers, as Forge's modules/nixos/services/grafana
+# wrote them: the same provider names (Grafana keys provisioned dashboards
+# by provider, and drops a provider's boards when the name disappears), the
+# same folders, editable, rescanned every 60 seconds. Each path is a
+# ConfigMap the HelmRelease mounts.
+apiVersion: 1
+providers:
+  - name: Household Finance
+    folder: Household Finance
+    orgId: 1
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana-dashboards/household-finance
+  - name: Schoolhouse
+    folder: Schoolhouse
+    orgId: 1
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana-dashboards/schoolhouse
+  - name: Operation W.W.W.
+    folder: Applications
+    orgId: 1
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana-dashboards/whiskey-whiskey-whiskey

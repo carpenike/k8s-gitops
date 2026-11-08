@@ -54,8 +54,8 @@ spec:
                 requests:
                   storage: 50Gi
         # Forge Alertmanager is http://127.0.0.1:9093. Caddy publishes it as
-        # https://am.holthome.net (A 10.20.0.30). Pocket ID still gates that
-        # vhost; see docs/architecture.md.
+        # https://am.holthome.net (A 10.20.0.30). Pocket ID gates that vhost
+        # except POST /api/v2/alerts from the sleds; see docs/architecture.md.
         additionalAlertManagerConfigs:
           - scheme: https
             api_version: v2

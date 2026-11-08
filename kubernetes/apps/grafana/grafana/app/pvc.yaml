@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# /var/lib/grafana: grafana.db (users, folders, UI-built dashboards,
+# plugin settings) and the plugins Grafana installs at start. grafana.db is
+# copied from Forge at the cutover (docs/grafana.md). Backed up by ../backup.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 5Gi

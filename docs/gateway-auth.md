@@ -140,9 +140,10 @@ listener status still shows the condition; that is expected.
 Forge's Caddy module can skip the portal for a regex path
 (`bypassResources`), a path prefix (`bypassPaths`), and a source CIDR
 (`allowedNetworks`). Alertmanager's vhost
-(`hosts/forge/infrastructure/monitoring-ui.nix`) is still policy
-`admins` for the whole host. The cluster's `POST /api/v2/alerts` is
-refused there until that matcher exists. The shape to copy is a named
+(`hosts/forge/infrastructure/monitoring-ui.nix`) combines all three with a
+method (`bypassMethods`): `POST` to `^/api/v2/alerts$` from the four sled
+addresses skips the portal, and everything else stays policy `admins`. The
+cluster's alerts are delivered that way. The same shape here is a named
 HTTPRoute rule and a SecurityPolicy that targets that rule's
 `sectionName`.
 
