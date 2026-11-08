@@ -276,17 +276,22 @@ A fourth, `finances_context`, is new. It holds the shared transaction-context
 table that the `finances_context_*` tools and Forge's Signal capture worker
 both write to (carpenike/mcp #120).
 
-The writers stay on Forge: the Schoolhouse scraper, lading's sync and the
-Signal worker. Forge's Grafana does too. They connect to Service
-`postgres17-forge` (LoadBalancer `10.45.10.52`, the primary) over TLS. The
-export job and the homelab-mcp readers run in the cluster and use
-`postgres17-rw` like every other app.
+The writers stay on Forge:
+- the Schoolhouse scraper;
+- lading's sync;
+- the finances export (one step of Forge's ingestion, export and snapshots
+  chain);
+- the Signal worker.
+
+Forge's Grafana does too. They connect to Service `postgres17-forge`
+(LoadBalancer `10.45.10.52`, the primary) over TLS. The homelab-mcp readers
+run in the cluster and use `postgres17-rw` like every other app.
 
 | Database | Owner (writes) | Readers | Connects from |
 | --- | --- | --- | --- |
 | `schoolhouse` | `schoolhouse` | `schoolhouse_reader` (homelab-mcp), `schoolhouse_grafana` | Owner and Grafana from Forge; reader in-cluster |
 | `lading` | `lading` | `lading_reader` (homelab-mcp, finances export) | Owner from Forge; reader in-cluster |
-| `homelab_finance` | `homelab_finance` (finances export CronJob) | `homelab_finance_money` (`money_overview` only), `homelab_finance_grafana` | Owner in-cluster (from Forge only for the restore); Grafana from Forge |
+| `homelab_finance` | `homelab_finance` (Forge's finances export) | `homelab_finance_money` (`money_overview` only), `homelab_finance_grafana` | Owner and Grafana from Forge; money reader in-cluster |
 | `finances_context` | `finances_context` | none; the same role reads and writes | homelab-mcp in-cluster, Signal worker from Forge |
 
 `pg_hba` admits Forge (`10.20.0.30`) for exactly the Forge rows above. It

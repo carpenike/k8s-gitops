@@ -113,7 +113,7 @@ spec:
       - name: homelab_finance
         ensure: present
         login: true
-        comment: homelab-mcp finances export job (writer, owner of homelab_finance)
+        comment: Forge finances export (writer, owner of homelab_finance)
         passwordSecret:
           name: homelab-finance-db
       - name: homelab_finance_money
@@ -241,7 +241,7 @@ spec:
   databaseReclaimPolicy: retain
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
-# Household finance projection for Grafana and money_*. Owner: the export CronJob in homelab-mcp. Its snapshot tables are the only history of bank balances; restore them, never recreate.
+# Household finance projection for Grafana and money_*. Owner: Forge's finances export. Its snapshot tables are the only history of bank balances; restore them, never recreate.
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
