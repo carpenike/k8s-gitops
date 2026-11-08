@@ -8,6 +8,8 @@
 | [headlamp.md](headlamp.md) | Read-only Kubernetes UI on the internal gateway |
 | [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, and the Forge cutover |
 | [postgres17.md](postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
+| [schoolhouse.md](schoolhouse.md) | Schoology ingest CronJob and health server, and the Forge cutover |
+| [lading.md](lading.md) | Amazon, Costco and Sam's Club sync per account, token seeds, and the Forge cutover |
 | [hermes.md](hermes.md) | Hermes agents in Kata VMs: Chief, and what to create for a new one |
 | [openproject.md](openproject.md) | OpenProject task board for Ryan and the bots: database, sign-in, backups |
 | [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |

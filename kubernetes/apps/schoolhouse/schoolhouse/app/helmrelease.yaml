@@ -1,0 +1,240 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# schoolhouse (carpenike/schoolhouse), replacing Forge's
+# hosts/forge/services/schoolhouse.nix and the upstream nix/module.nix units:
+#
+#   schoolhouse  Deployment. The health server: /healthz (a verdict, 503 once
+#                the last good ingest is older than stale_after_hours) and
+#                /metrics (the raw timestamps the alerts use). Holds only the
+#                read-only DSN; never logs in, never fetches.
+#   ingest       CronJob. schoolhouse-migrate, then schoolhouse-ingest. Holds
+#                the Schoology login and the iCal capability URLs, and is the
+#                only pod that mounts the session cookie jar.
+#
+# Forge gave the two units different EnvironmentFiles. Here they get
+# different Secrets (externalsecret.yaml) for the same reason: the always-on
+# process holds no Schoology password.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: schoolhouse
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: schoolhouse
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      schoolhouse:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: &image
+              # Built by carpenike/schoolhouse .github/workflows/image.yml from
+              # main (d25df9d, carpenike/schoolhouse #24). Both controllers use
+              # this image.
+              repository: ghcr.io/carpenike/schoolhouse
+              tag: sha-d25df9dc33b1becee71b4e72cdd8a1cac4793bd5@sha256:2f0e229b9ff7f59ae9648bcb7827e3bde062390c6d39ee0af78e07daf916baf4
+            # The image's default command is the health server.
+            env:
+              # Forge's services.schoolhouse.settings, as the module renders
+              # them (SCHOOLHOUSE_<NAME>). The module gives both units all of
+              # them; the ingest container repeats this list. Parents use a
+              # native account at app.schoology.com; lms.fcps.org is the
+              # student door (ADFS, Entra).
+              SCHOOLHOUSE_SCHOOLOGY_ORIGIN: https://app.schoology.com
+              SCHOOLHOUSE_TIMEZONE: America/New_York
+              SCHOOLHOUSE_STALE_AFTER_HOURS: "18"
+              SCHOOLHOUSE_RAW_RETENTION_DAYS: "30"
+              SCHOOLHOUSE_FACULTY_REFRESH_DAYS: "7"
+              SCHOOLHOUSE_STATE_DIR: /var/lib/schoolhouse
+              SCHOOLHOUSE_BIND_ADDRESS: 0.0.0.0
+              SCHOOLHOUSE_PORT: "9220"
+            envFrom:
+              - secretRef:
+                  name: schoolhouse-health
+            probes:
+              # TCP, not /healthz: /healthz answers 503 for a stale ingest
+              # (every weekend, by design) and for an unreachable database.
+              # Neither is fixed by restarting this process, and the alerts
+              # read /metrics instead.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9220
+                  periodSeconds: 30
+                  failureThreshold: 3
+              # Off: a 503 must not take the pod out of the Service, or
+              # Prometheus loses the /metrics that say why.
+              readiness:
+                enabled: false
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9220
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext: &containerSecurity
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+      ingest:
+        type: cronjob
+        cronjob:
+          # Suspended until the cutover copies Forge's cookie jar onto
+          # schoolhouse-state (docs/schoolhouse.md). Set to false then.
+          suspend: true
+          # Forge's onCalendar (module default): Mon..Fri 07:00, 16:00 and
+          # 20:00, local time. The 20:00 run catches work due 23:59 that is
+          # not yet late at 16:00.
+          schedule: "0 7,16,20 * * 1-5"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          # Forge's timer is Persistent=true: a missed run happens late
+          # rather than not at all. An hour late is still before the next
+          # slot (four hours away at the closest).
+          startingDeadlineSeconds: 3600
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          # No retries. Forge never restarted a failed ingest; the next slot
+          # is hours away, and a failing login retried at once spends the
+          # district's politeness budget (schoolhouse AGENTS.md
+          # non-negotiable 11) on the same failure.
+          backoffLimit: 0
+        pod:
+          restartPolicy: Never
+        initContainers:
+          # A new volume's root is root-owned, and fsGroup would add group
+          # bits to the cookie jar. Forge kept the directory at 0700 owned by
+          # the service user (StateDirectoryMode), so this sets the root's
+          # owner and mode only, not recursively. The only step that runs as
+          # root; CHOWN and FOWNER only.
+          permissions:
+            image: *image
+            command:
+              - /bin/sh
+              - -c
+              - chown 65532:65532 /var/lib/schoolhouse && chmod 0700 /var/lib/schoolhouse
+            securityContext:
+              runAsUser: 0
+              runAsGroup: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - CHOWN
+                  - FOWNER
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+        containers:
+          app:
+            image: *image
+            # Kubernetes has no RandomizedDelaySec, so the module's 15
+            # minutes of jitter is a random sleep before the run. Then
+            # migrations (Forge's ExecStartPre), then the ingest under
+            # Forge's 30 minute TimeoutStartSec. Exit codes: 0 clean,
+            # 1 partial (pending parsers), 2 failed. Forge's
+            # SuccessExitStatus=0 1 counts a partial run as success, so this
+            # does too; the partial count is on /metrics.
+            # Never --allow-unconfirmed (non-negotiable 9).
+            command:
+              - /bin/sh
+              - -c
+              - |
+                delay=$(shuf -i 0-900 -n 1)
+                echo "jitter: starting in $delay s"
+                sleep "$delay"
+                schoolhouse-migrate || exit $?
+                timeout 30m schoolhouse-ingest
+                rc=$?
+                if [ "$rc" -le 1 ]; then
+                  exit 0
+                fi
+                exit "$rc"
+            env:
+              # The same settings as the health server.
+              SCHOOLHOUSE_SCHOOLOGY_ORIGIN: https://app.schoology.com
+              SCHOOLHOUSE_TIMEZONE: America/New_York
+              SCHOOLHOUSE_STALE_AFTER_HOURS: "18"
+              SCHOOLHOUSE_RAW_RETENTION_DAYS: "30"
+              SCHOOLHOUSE_FACULTY_REFRESH_DAYS: "7"
+              SCHOOLHOUSE_STATE_DIR: /var/lib/schoolhouse
+            envFrom:
+              - secretRef:
+                  name: schoolhouse-ingest
+            securityContext: *containerSecurity
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    # No fsGroup: the permissions init container sets owner and mode instead.
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      # A name with a dot is looked up as written first, so Cilium files the
+      # answer under that name and the toFQDNs rules match (same as
+      # homelab-mcp and components/hermes-bot).
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: schoolhouse
+        ports:
+          http:
+            port: 9220
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          # Forge scraped every 60s with a 10s timeout: four SELECTs against
+          # a table the ingest changes three times a day.
+          - port: http
+            path: /metrics
+            interval: 60s
+            scrapeTimeout: 10s
+    persistence:
+      # In pvc.yaml so a later backup can name it.
+      state:
+        existingClaim: schoolhouse-state
+        advancedMounts:
+          ingest:
+            permissions:
+              - path: /var/lib/schoolhouse
+            app:
+              - path: /var/lib/schoolhouse
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

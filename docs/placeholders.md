@@ -137,6 +137,29 @@ Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password
 
 The HelmRelease's images are pinned to carpenike/mcp main `72a9b0f`.
 
+## schoolhouse
+
+Before `kubernetes/apps/schoolhouse` reconciles, create item
+`schoolhouse-ingest` (new) in vault `k8s-secrets` with fields
+`schoology_username`, `schoology_password`, `children` and `ical_feeds`, and
+the postgres17 item `schoolhouse`. [schoolhouse.md](schoolhouse.md#1password)
+says where each comes from.
+
+The HelmRelease's image is pinned to schoolhouse main `d25df9d`. The ingest
+CronJob ships `suspend: true` until the cutover.
+
+## lading
+
+Before `kubernetes/apps/lading` reconciles, create items `lading-ryan` (new:
+`amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
+`costco_tokens`, `samsclub_tokens`) and `lading-steffi` (new:
+`amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
+`costco_tokens`) in vault `k8s-secrets`, and the postgres17 item `lading`.
+[lading.md](lading.md#1password) says where each comes from.
+
+The HelmRelease's image is pinned to lading main `d73fae0`. Both sync
+CronJobs ship `suspend: true` until the cutover.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

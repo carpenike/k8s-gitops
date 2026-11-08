@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# Ryan's sync state (LADING_STATE_DIR): the Amazon cookie jar (a LIVE
+# authenticated session that can place orders), the rotating Costco and Sam's
+# Club refresh tokens, and the amazon-orders config and scratch dir. One
+# volume per account, never shared: two accounts in one jar would clobber
+# each other's login and write rows under the wrong label (lading
+# nix/module.nix, sync.accounts). Only the sync-ryan CronJob mounts it.
+# Copied from Forge's /var/lib/lading/ryan at the cutover (docs/lading.md).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lading-ryan-state
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 1Gi
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# Steffi's sync state: her Amazon cookie jar and rotating Costco token. Same
+# rules as lading-ryan-state. Copied from Forge's /var/lib/lading/steffi.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lading-steffi-state
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 1Gi
