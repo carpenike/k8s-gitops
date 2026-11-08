@@ -1,0 +1,271 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Grafana OnCall OSS, moved from Forge (nix-config
+# modules/nixos/services/grafana-oncall and hosts/forge/services/
+# grafana-oncall.nix). Upstream archived OnCall OSS; this is its last
+# release, the one Forge pins. Same layout as Forge:
+#   grafana-oncall  migrate (init, Forge's -migration unit), engine (API on
+#                   8080) and celery (worker with beat), in one pod because
+#                   both open the same SQLite file on one RWO volume
+#   redis           the broker, its own pod; only that pod reaches it
+# The image digests are the module's pins. Env is the module's
+# oncallEnvironment plus the sops template, with the hosts changed to
+# Services in this namespace.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-oncall
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: grafana-oncall
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      grafana-oncall:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          # python manage.py migrate, before the engine, as on Forge. A no-op
+          # on a database already at this version.
+          migrate:
+            image: &oncallImage
+              repository: docker.io/grafana/oncall
+              tag: v1.16.11@sha256:9abc7342e10022da5893867789a91112fe366b3cd064a07a32d752f9de395fe5
+            command:
+              - python
+              - manage.py
+              - migrate
+              - --noinput
+            env:
+              DATABASE_TYPE: sqlite3
+              BASE_URL: https://oncall.${SECRET_DOMAIN}
+              GRAFANA_API_URL: http://grafana.grafana.svc.cluster.local:3000
+              GRAFANA_ADMIN_USER: admin
+              DJANGO_SETTINGS_MODULE: settings.hobby
+              BROKER_TYPE: redis
+              REDIS_URI: redis://grafana-oncall-redis.grafana.svc.cluster.local:6379/0
+              FEATURE_PROMETHEUS_EXPORTER_ENABLED: "False"
+            envFrom: &oncallSecret
+              - secretRef:
+                  name: grafana-oncall-secret
+            securityContext: &oncallSecurity
+              allowPrivilegeEscalation: false
+              # Not verified with a read-only root; Forge ran it writable.
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+        containers:
+          engine:
+            image: *oncallImage
+            # The image's default command: uwsgi on 0.0.0.0:8080.
+            env:
+              DATABASE_TYPE: sqlite3
+              # Links in notifications and integration URLs. The
+              # Alertmanager integration is reached here, through the
+              # route in httproute.yaml.
+              BASE_URL: https://oncall.${SECRET_DOMAIN}
+              GRAFANA_API_URL: http://grafana.grafana.svc.cluster.local:3000
+              GRAFANA_ADMIN_USER: admin
+              DJANGO_SETTINGS_MODULE: settings.hobby
+              BROKER_TYPE: redis
+              REDIS_URI: redis://grafana-oncall-redis.grafana.svc.cluster.local:6379/0
+              CELERY_WORKER_QUEUE: default,critical,long,slack,telegram,mattermost,webhook,retry,celery,grafana
+              CELERY_WORKER_CONCURRENCY: "1"
+              CELERY_WORKER_MAX_TASKS_PER_CHILD: "100"
+              CELERY_WORKER_SHUTDOWN_INTERVAL: 65m
+              CELERY_WORKER_BEAT_ENABLED: "True"
+              FEATURE_PROMETHEUS_EXPORTER_ENABLED: "true"
+            envFrom: *oncallSecret
+            probes:
+              # Forge's container healthcheck: GET /health/, 30s, 3 tries,
+              # 60s start period.
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/
+                    port: 8080
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/
+                    port: 8080
+                  periodSeconds: 5
+                  failureThreshold: 36
+            securityContext: *oncallSecurity
+            # Forge: 1G, 2 CPUs (uwsgi workers; 512M was OOM-killed).
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: "2"
+                memory: 1Gi
+          # Forge ran /etc/app/celery_with_exporter.sh from a shell that
+          # prepended /etc/app to PYTHONPATH and changed to
+          # /var/lib/oncall/celery. The same without the shell: celery beat
+          # writes its schedule to the working directory, and /etc/app is
+          # not writable.
+          celery:
+            image: *oncallImage
+            command:
+              - /etc/app/celery_with_exporter.sh
+            workingDir: /var/lib/oncall/celery
+            env:
+              DATABASE_TYPE: sqlite3
+              BASE_URL: https://oncall.${SECRET_DOMAIN}
+              GRAFANA_API_URL: http://grafana.grafana.svc.cluster.local:3000
+              GRAFANA_ADMIN_USER: admin
+              DJANGO_SETTINGS_MODULE: settings.hobby
+              BROKER_TYPE: redis
+              REDIS_URI: redis://grafana-oncall-redis.grafana.svc.cluster.local:6379/0
+              CELERY_WORKER_QUEUE: default,critical,long,slack,telegram,mattermost,webhook,retry,celery,grafana
+              CELERY_WORKER_CONCURRENCY: "1"
+              CELERY_WORKER_MAX_TASKS_PER_CHILD: "100"
+              CELERY_WORKER_SHUTDOWN_INTERVAL: 65m
+              CELERY_WORKER_BEAT_ENABLED: "True"
+              FEATURE_PROMETHEUS_EXPORTER_ENABLED: "true"
+              PYTHONPATH: /etc/app
+            envFrom: *oncallSecret
+            securityContext: *oncallSecurity
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                cpu: "2"
+                memory: 1Gi
+        pod:
+          securityContext: &oncallPod
+            runAsNonRoot: true
+            # Forge's static grafana-oncall uid and gid (lib/service-uids.nix);
+            # the copied database keeps them.
+            runAsUser: 957
+            runAsGroup: 952
+            fsGroup: 952
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+      redis:
+        replicas: 1
+        strategy: Recreate
+        pod:
+          securityContext: *oncallPod
+        containers:
+          app:
+            image:
+              repository: docker.io/library/redis
+              tag: 8.10-alpine@sha256:0bf6577d7774e592b29d093e3ac9390eb91e13d72c21e506afce736de5e0eeb0
+            # Forge's command line.
+            command:
+              - redis-server
+              - --port
+              - "6379"
+              - --bind
+              - 0.0.0.0
+              - --save
+              - "60"
+              - "1"
+              - --appendonly
+              - "yes"
+            probes:
+              liveness: &redisProbe
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - redis-cli
+                      - ping
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *redisProbe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            # Forge: 256m, 0.5 CPU.
+            resources:
+              requests:
+                cpu: 20m
+                memory: 64Mi
+              limits:
+                cpu: 500m
+                memory: 256Mi
+    service:
+      engine:
+        controller: grafana-oncall
+        forceRename: grafana-oncall-engine
+        ports:
+          http:
+            port: 8080
+      redis:
+        controller: redis
+        forceRename: grafana-oncall-redis
+        ports:
+          redis:
+            port: 6379
+    serviceMonitor:
+      # OnCall's exporter answers /metrics/ on the API port with the bearer
+      # PROMETHEUS_EXPORTER_SECRET (Forge's grafana-oncall scrape job).
+      engine:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics/
+            interval: 60s
+            authorization:
+              credentials:
+                name: grafana-oncall-secret
+                key: PROMETHEUS_EXPORTER_SECRET
+    persistence:
+      data:
+        existingClaim: grafana-oncall-data
+        advancedMounts:
+          grafana-oncall:
+            migrate:
+              - path: /var/lib/oncall
+            engine:
+              - path: /var/lib/oncall
+            celery:
+              - path: /var/lib/oncall
+      # celerybeat-schedule. Forge kept it in its own directory; it is
+      # rebuilt from the database's periodic tasks when lost.
+      celery:
+        type: emptyDir
+        advancedMounts:
+          grafana-oncall:
+            celery:
+              - path: /var/lib/oncall/celery
+      redis:
+        existingClaim: grafana-oncall-redis
+        advancedMounts:
+          redis:
+            app:
+              - path: /data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

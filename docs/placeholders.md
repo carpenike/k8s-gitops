@@ -117,6 +117,33 @@ Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
 | `postgres17-r2` | `endpoint_url` | `https://<account id>.r2.cloudflarestorage.com` |
 | `postgres17-r2` | `bucket` | Bucket name; objects go under `cnpg/postgres17/` |
 
+## Grafana and OnCall
+
+Before `kubernetes/apps/grafana` reconciles, create in vault `k8s-secrets`
+(see [grafana.md](grafana.md#secrets)). Field names are Forge's sops keys,
+and the values are copied from Forge's sops, not generated: the copied
+databases depend on them.
+
+| Item | Field | Value |
+| --- | --- | --- |
+| `grafana` (new) | `admin-password` | Forge's `grafana/admin-password` |
+| `grafana` | `oidc_client_secret` | Forge's `grafana/oidc_client_secret` (Pocket ID client `grafana`) |
+| `grafana-oncall` (new) | `secret_key` | Forge's `grafana-oncall/secret_key` |
+| `grafana-oncall` | `metrics_secret` | Forge's `grafana-oncall/metrics_secret` |
+
+The datasources also read `schoolhouse/grafana_password` and
+`homelab-finance/grafana_db_password` ([postgres17.md](postgres17.md)).
+
+Still to confirm:
+
+| Value | Where | Confirm |
+| --- | --- | --- |
+| `grafana-oncall-app@1.16.11` | `kubernetes/apps/grafana/grafana/app/helmrelease.yaml`, `GF_PLUGINS_PREINSTALL*` | Not checked against grafana.com (blocked from the agent's sandbox). Must exist in the catalog and match Forge's installed plugin, cutover step 1 |
+| `volkovlabs-echarts-panel@7.2.2` | same | nixpkgs' pin for Forge; not checked against grafana.com |
+| `storage.googleapis.com` | Grafana's CiliumNetworkPolicy (HelmRelease `rawResources`) | Assumed host of the plugin archives grafana.com redirects to; the first start's log shows a refused host if not |
+| Grafana 12.3.11 >= Forge | Grafana image | Forge's `grafana --version` at the cutover, step 1 |
+| OnCall egress | `kubernetes/apps/grafana/grafana-oncall/app/ciliumnetworkpolicy.yaml` | 443 to any public address until the notification channels in OnCall's database are known |
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

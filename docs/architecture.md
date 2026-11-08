@@ -38,6 +38,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Postgres backup | Barman Cloud plugin | chart 0.8.1, app v0.15.1 |
 | PVC backup | VolSync restic | chart 0.17.0 |
 | Metrics | kube-prometheus-stack, in-cluster Alertmanager off | chart 92.14.0 |
+| Dashboards and on-call | Grafana in namespace `grafana`, Grafana OnCall OSS beside it (see grafana.md) | Grafana 12.3.11, OnCall v1.16.11 |
 | Node features | Node Feature Discovery, master and worker | chart 0.20.1 |
 | Node upgrades | tuppr | chart 0.5.10 |
 | Image pull cache | spegel | 0.8.0 |
@@ -184,14 +185,17 @@ Prometheus Operator CRDs come from `prometheus-operator-crds` 32.0.2.
 Bootstrap applies them once. The Flux HelmRelease of that chart is the
 only day-2 owner (`install.crds` and `upgrade.crds` are `CreateReplace`).
 kube-prometheus-stack does not manage CRDs. kube-prometheus-stack runs
-Prometheus and not Alertmanager or Grafana.
+Prometheus and not Alertmanager or Grafana. Grafana and Grafana OnCall run
+in namespace `grafana` ([grafana.md](grafana.md)).
 Prometheus labels every series and alert `cluster=k8s-holthome` and sends
 alerts to `https://am.holthome.net:443`. That name is Forge's Caddy vhost
 (`hosts/forge/infrastructure/monitoring-ui.nix`). Its A record is
 `10.20.0.30`, which is on `10.20.0.0/16`. The Alertmanager process listens
-on `127.0.0.1:9093` only. Caddy requires a Pocket ID admin session and has
-no API key, so the cluster's `POST /api/v2/alerts` is refused until Forge
-allows that path from the sleds.
+on `127.0.0.1:9093` only. Caddy requires a Pocket ID admin session for the
+UI and every other path, but bypasses it for `POST /api/v2/alerts` from
+the four sled addresses (`10.20.10.20/32` through `10.20.10.23/32`), so
+the cluster's alerts are delivered. Pods reach Forge from those addresses
+because Cilium masquerades traffic leaving the pod CIDR.
 
 ## What stays off the cluster
 

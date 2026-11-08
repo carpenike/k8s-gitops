@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# No hash suffix: the Job mounts the script by name. A change to the script
+# alone leaves the Job's spec as it was, so it does not run again by itself;
+# delete the Job and reconcile (docs/grafana.md).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ciliumnetworkpolicy.yaml
+  - ./job.yaml
+configMapGenerator:
+  - name: grafana-oncall-plugin-setup
+    files:
+      - ./setup-plugin.py
+generatorOptions:
+  disableNameSuffixHash: true
