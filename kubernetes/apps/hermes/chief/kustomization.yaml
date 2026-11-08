@@ -61,10 +61,18 @@ configMapGenerator:
       # Board wake-ups (docs/openproject.md, "Waking a bot"), delivered to
       # WEBHOOK_DELIVER_CHAT_ID above.
       - TASK_BOARD_WEBHOOK_ENABLED=true
+      # Private details for routines.yaml: 1Password item hermes-chief-routines,
+      # one field per routine key (docs/hermes.md, "Routines from git").
+      - ROUTINES_PRIVATE_ENABLED=true
   # Chief's MCP servers (mcp-servers.yaml; docs/hermes.md, "MCP servers from
   # git"), written into config.yaml by the config init container.
   - name: hermes-bot-mcp
     files:
       - mcp-servers.yaml
+  # Chief's scheduled routines (routines.yaml; docs/hermes.md, "Routines from
+  # git"), written into Hermes' cron store by the config init container.
+  - name: hermes-bot-routines
+    files:
+      - routines.yaml
 generatorOptions:
   disableNameSuffixHash: true
