@@ -62,15 +62,10 @@ Actual's only API client is the Node package `@actual-app/api`, so container
 
 ### Finances export
 
-The `finances-export` CronJob runs at 05:30 America/New_York and projects
-the register and lading into `homelab_finance` for Grafana and `money_*`.
-- It reads the register through the server pod's sidecar (Service
-  `homelab-mcp-actual`, admitted by policy from the job only, and the sidecar
-  token).
-- It reads TICKLERS.md from a fresh read-only clone, since the server's
-  checkout is on its RWO volume.
-- Its Secret `homelab-mcp-export` holds the only credential that can write
-  `homelab_finance`.
+The nightly export into `homelab_finance` stays on Forge. It is one step of
+a chain there: bank ingestion, then the export (`--after-ingestion`), then
+snapshots. It writes to postgres17 through `postgres17-forge` as the owner.
+`money_*` here and Forge's Grafana read the result.
 
 MFP writes stay off (`HOMELAB_MCP_MFP_WRITES_ENABLED: "false"`) until the
 write tests pass. The mfp tools only read.
@@ -96,7 +91,7 @@ Item `homelab-mcp` in vault `k8s-secrets`:
 | `grocy_api_key` | Grocy API key |
 | `paperless_token` | Paperless API token |
 | `mfp_cookies` | The MyFitnessPal cookie export (carpenike/mcp `docs/MFP-COOKIE-RUNBOOK.md`) |
-| `sidecar_token` | Shared token between the tools, the export job and the sidecar (Forge's `homelab-mcp/actual-env` `SIDECAR_TOKEN`, or a new `openssl rand -hex 32`) |
+| `sidecar_token` | Shared token between the tools, and the sidecar (Forge's `homelab-mcp/actual-env` `SIDECAR_TOKEN`, or a new `openssl rand -hex 32`) |
 | `actual_password` | Actual server password (Forge's `homelab-mcp/actual-env` `ACTUAL_PASSWORD`) |
 | `actual_budget_sync_id` | Budget sync id (same file, `ACTUAL_BUDGET_SYNC_ID`) |
 | `actual_encryption_password` | Budget encryption password (same file, `ACTUAL_ENCRYPTION_PASSWORD`) |
@@ -117,7 +112,6 @@ ExternalSecrets:
   `/run/mfp`.
 - `homelab-mcp-actual` holds the sidecar's login, which only the sidecar
   container sees.
-- `homelab-mcp-export` holds the export job's credentials.
 
 The server re-reads the cookie file when it changes, so new cookies need a
 force-sync but no restart:
@@ -137,8 +131,7 @@ finances checkout re-clones.
 carpenike/mcp `.github/workflows/image.yml` builds both images on the
 `mcp-k8s-build` runners from main:
 
-- `ghcr.io/carpenike/homelab-mcp`: the server, and the export job (one
-  `&image` anchor in the HelmRelease);
+- `ghcr.io/carpenike/homelab-mcp`: the server;
 - `ghcr.io/carpenike/homelab-mcp-actual-sidecar`.
 
 Both carry the placeholder tag `sha-0000000000000000000000000000000000000000`.
@@ -178,8 +171,8 @@ over from Forge directly.
 
 5. Apply the nix-config cutover. It turns off Forge's homelab-mcp: the
    service, the Caddy vhost, and the Cloudflare tunnel ingress for `mcp`. It
-   points schoolhouse, lading, the Signal workers and Grafana at
-   postgres17, and lets Gatus' read API through. Then delete the `mcp` DNS
+   points schoolhouse, lading, the finances export, the Signal workers and
+   Grafana at postgres17, and lets Gatus' read API through. Then delete the `mcp` DNS
    record.
 
    external-dns will not take over a record it does not own (TXT
