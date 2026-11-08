@@ -16,6 +16,7 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Scale set | HelmRelease `mcp-k8s` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s`. Non-Nix jobs. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
 | Scale set | HelmRelease `mcp-k8s-build` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s-build`. Nix and image jobs. Kata VM pods, privileged inside the guest (ADR 0011). Runner `2` CPU / `4Gi` up to `8` CPU / `16Gi`, `maxRunners` 2 |
 | Scale set | HelmRelease `schoolhouse-k8s-build` | Repo `https://github.com/carpenike/schoolhouse`. `runs-on` name `schoolhouse-k8s-build`. The image build. Same Kata VM pods and limits as `mcp-k8s-build` |
+| Scale set | HelmRelease `lading-k8s` | Repo `https://github.com/carpenike/lading`. `runs-on` name `lading-k8s`. Lint and tests. Shared limits, no Docker |
 | Scale set | HelmRelease `lading-k8s-build` | Repo `https://github.com/carpenike/lading`. `runs-on` name `lading-k8s-build`. The image build. Same Kata VM pods and limits as `mcp-k8s-build` |
 | Scale set | HelmRelease `network-config-k8s` | Repo `https://github.com/carpenike/network-config`. `runs-on` name `network-config-k8s`. Runner `250m` / `512Mi` up to `1` CPU / `2Gi` |
 | Scale set | HelmRelease `schoolhouse-k8s` | Repo `https://github.com/carpenike/schoolhouse`. `runs-on` name `schoolhouse-k8s`. Shared limits |
