@@ -39,12 +39,9 @@ spec:
         containers:
           app:
             image:
-              # PLACEHOLDER until the first image is pushed by carpenike/mcp
-              # .github/workflows/image.yml: replace with
-              # sha-<commit>@sha256:<digest>. This tag does not exist, so the
-              # release cannot start with it by accident.
+              # Built by carpenike/mcp .github/workflows/image.yml from main.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-0000000000000000000000000000000000000000
+              tag: sha-0f27fd4c75710d40f09cc8ec7ae57ff7be15b328@sha256:8ada6c3d221f9693aa1e6a85688e9062b24929df6c5e639ca3da7373423c0578
             env:
               HOMELAB_MCP_PUBLIC_BASE_URL: https://mcp.${SECRET_DOMAIN}
               HOMELAB_MCP_BIND_ADDRESS: 0.0.0.0
@@ -151,10 +148,9 @@ spec:
           # that. Liveness is the TCP port, never /health.
           actual:
             image:
-              # PLACEHOLDER until carpenike/mcp image.yml pushes the sidecar
-              # image: replace with sha-<commit>@sha256:<digest>.
+              # Built by carpenike/mcp .github/workflows/image.yml from main.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-0000000000000000000000000000000000000000
+              tag: sha-0f27fd4c75710d40f09cc8ec7ae57ff7be15b328@sha256:e95dcd16ef48288d0f380158d81ac21f0c212aef0f3a6d14c87ca2dd38d27ae6
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"

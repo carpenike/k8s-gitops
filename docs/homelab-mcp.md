@@ -134,9 +134,8 @@ carpenike/mcp `.github/workflows/image.yml` builds both images on the
 - `ghcr.io/carpenike/homelab-mcp`: the server;
 - `ghcr.io/carpenike/homelab-mcp-actual-sidecar`.
 
-Both carry the placeholder tag `sha-0000000000000000000000000000000000000000`.
-Replace each with `sha-<commit>@sha256:<digest>` from the first main build.
-The tag does not exist, so the release cannot start by accident.
+Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`). The first
+pin is mcp `0f27fd4`; bump both together from a later main build.
 
 ## Alerts
 
