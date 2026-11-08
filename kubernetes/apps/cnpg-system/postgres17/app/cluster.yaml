@@ -64,6 +64,70 @@ spec:
         comment: OpenProject task board (openproject)
         passwordSecret:
           name: openproject-db
+      # Stores moved from Forge (docs/postgres17.md, "Forge stores"). Every
+      # client runs in the cluster and keeps CloudNativePG's default pg_hba.
+      # Read access is granted by each owner (ALTER DEFAULT PRIVILEGES), not
+      # by a cluster-wide role, so a reader sees its own store only.
+      - name: schoolhouse
+        ensure: present
+        login: true
+        comment: schoolhouse ingest (writer, owner of schoolhouse)
+        passwordSecret:
+          name: schoolhouse-db
+      - name: schoolhouse_reader
+        ensure: present
+        login: true
+        comment: homelab-mcp school_* tools (read only)
+        passwordSecret:
+          name: schoolhouse-reader-db
+      - name: schoolhouse_grafana
+        ensure: present
+        login: true
+        comment: Grafana, Schoolhouse dashboards (read only)
+        passwordSecret:
+          name: schoolhouse-grafana-db
+      - name: lading
+        ensure: present
+        login: true
+        comment: lading order sync (writer, owner of lading)
+        passwordSecret:
+          name: lading-db
+      - name: lading_reader
+        ensure: present
+        login: true
+        comment: homelab-mcp amazon/costco/samsclub tools and the finances export (read only)
+        passwordSecret:
+          name: lading-reader-db
+      - name: homelab_finance
+        ensure: present
+        login: true
+        comment: homelab-mcp finances export (writer, owner of homelab_finance)
+        passwordSecret:
+          name: homelab-finance-db
+      - name: homelab_finance_money
+        ensure: present
+        login: true
+        comment: homelab-mcp money_* tools (money_overview only)
+        passwordSecret:
+          name: homelab-finance-money-db
+      - name: homelab_finance_grafana
+        ensure: present
+        login: true
+        comment: Grafana, Household Finance dashboards (read only)
+        passwordSecret:
+          name: homelab-finance-grafana-db
+      - name: homelab_finance_report
+        ensure: present
+        login: true
+        comment: homelab-mcp Signal finance reports (money_overview and export_runs, read only)
+        passwordSecret:
+          name: homelab-finance-report-db
+      - name: finances_context
+        ensure: present
+        login: true
+        comment: homelab-mcp finances_context_* tools and Signal capture (owner of finances_context)
+        passwordSecret:
+          name: finances-context-db
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 apiVersion: postgresql.cnpg.io/v1
@@ -128,3 +192,55 @@ spec:
     - name: unaccent
       ensure: present
       schema: pg_catalog
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Schoolhouse (Schoology scrape; three minors' grades). Owner: the schoolhouse ingest.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: schoolhouse
+spec:
+  cluster:
+    name: postgres17
+  name: schoolhouse
+  owner: schoolhouse
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# lading (Amazon, Costco and Sam's Club order history). Owner: the lading sync.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lading
+spec:
+  cluster:
+    name: postgres17
+  name: lading
+  owner: lading
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Household finance projection for Grafana and money_*. Owner: homelab-mcp's finances export. Its snapshot tables are the only history of bank balances; restore them, never recreate.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: homelab-finance
+spec:
+  cluster:
+    name: postgres17
+  name: homelab_finance
+  owner: homelab_finance
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# What people said about transactions (Signal replies, tool notes). Owner: finances_context; the table is created by homelab-mcp on first connect.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: finances-context
+spec:
+  cluster:
+    name: postgres17
+  name: finances_context
+  owner: finances_context
+  databaseReclaimPolicy: retain
