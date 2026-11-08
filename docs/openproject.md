@@ -15,7 +15,7 @@ install that was never put into use (nix-config).
 | Cache | memcached (`memcached.openproject.svc`), official image |
 | Attachments | PVC `openproject`, ceph-filesystem, RWX, 10 GiB |
 | Backups | Database: postgres17's backups. Attachments: VolSync restic to R2 (`openproject`), nightly, from a CephFS snapshot |
-| 1Password | item `openproject` in `k8s-secrets`: `database_password`, `secret_key_base`, `admin_password` |
+| 1Password | item `openproject` in `k8s-secrets`: `database_password`, `secret_key_base`, `admin_password`, and the board webhook's `webhook_secret` and `bot_webhook_secret` |
 
 ## Layout
 
@@ -88,8 +88,8 @@ OpenProject toolset on Forge (`carpenike/mcp`, `docs/OPENPROJECT.md`).
 | | |
 | --- | --- |
 | Endpoint | `http://openproject-mcp.openproject.svc.cluster.local:8000/mcp`, in the cluster only |
-| Who may connect | Hermes agent pods in bot namespaces (CNP `openproject-mcp`; the agent side is the component's `agent-task-board`) |
-| Auth | Each request carries the bot's own OpenProject API token as `Authorization: Bearer`. The server holds no secrets; every OpenProject call is made as that bot |
+| Who may connect | Hermes agent pods in bot namespaces (CNP `openproject-mcp`; the agent side is the component's `agent-task-board`), and OpenProject's own pods for the webhook relay ([Waking a bot](#waking-a-bot)) |
+| Auth | Each request carries the bot's own OpenProject API token as `Authorization: Bearer`, and every OpenProject call is made as that bot. The server holds no OpenProject credentials; its only secrets are the relay's two HMAC keys |
 | Tools | `whoami`, `list_tasks`, `get_task`, `create_task`, `add_comment`, `claim_next`, `complete_task`, `release_task`. Hermes names them `mcp__openproject__<tool>` |
 | Claim | Atomic through `lockVersion`: a stale `PATCH` gets 409 and changes nothing |
 | Links | Tool results link to `https://tasks.<internal domain>` (`OPENPROJECT_PUBLIC_URL`) |
@@ -121,8 +121,92 @@ Skill `task-board` (in the component) sets the rules:
   Sending, spending, deleting, deploying, changing a running system and
   merging still need Ryan's own yes in Matrix. Hank's merge rule is
   unchanged (docs/hermes.md, "Merging, only when Ryan asks").
-- **Pickup.** A bot works its tasks in its own Matrix session, when Ryan
-  tells it to ("check the board"). Automatic pickup is not wired yet.
+- **Pickup.** With wake-ups on ([Waking a bot](#waking-a-bot)), a bot gets
+  a turn about 5 minutes after someone else assigns it a task or changes
+  one of its tasks, and when a task it created is closed. Otherwise, and
+  any time, Ryan can tell it to check the board.
+
+### Waking a bot
+
+A task change on the board starts a turn for the bot it is for, without
+anyone telling it to check. The turn is delivered to Ryan's Matrix DM with
+that bot, like a Chief Engineer webhook turn (docs/hermes.md, "Webhook").
+
+```text
+OpenProject worker ── webhook, HMAC-SHA1 ──▶ openproject-mcp /hooks/openproject
+                                                 │ checks the signature, picks the bot,
+                                                 │ forwards only a pointer
+                                                 ▼ HMAC-SHA256 (Hermes generic V2)
+                         agent-board-hooks.hermes-<bot>:8644/webhooks/task-board
+                                                 │
+                                                 ▼
+                      bot turn: get_task, act, report to Ryan in Matrix
+```
+
+**Why a relay.** OpenProject signs its webhook with HMAC-SHA1
+(`X-OP-Signature`), and Hermes' webhook routes accept only SHA-256
+schemes. The relay is in openproject-mcp (`images/openproject-mcp`,
+README "Task-board relay").
+
+**Who is woken.** OpenProject sends one event per journal: an assignment,
+an edit, a status change or a comment. It waits out its aggregation
+window first (5 minutes by default), so a burst of edits is one event.
+
+- The task's **assignee**, when it is a bot and someone else made the
+  change. A change that closes the task does not wake it.
+- The task's **author**, when it is a bot, someone else made the change,
+  and the change closed the task (a handoff it created is done).
+- A bot's own change never wakes that bot, so two bots can't wake each
+  other in a loop: a comment wakes only the assignee, and a closed task
+  wakes its author once.
+
+**Nothing on the board reaches a prompt through the relay.** It forwards
+the task id, a reason (`assigned`, `updated` or `closed`), and the
+actor's login and id, never a subject, description or comment. The bot
+reads the task itself through the MCP tools, as itself, and skill
+`task-board` ("Board wake-ups") says what to do: the same rules as any
+task, where a peer's text is a request and only Ryan's user id is Ryan.
+
+**What a board turn can do.** It gets the bot's Matrix toolsets, MCP
+servers included (route `task-board`'s `toolsets`, copied from
+`platform_toolsets.matrix` at each start). It runs unattended, so Hermes
+refuses any command that would need approval (`unattended_mode`, default
+`deny`). Sending, deploying and merging wait for Ryan in Matrix, as the
+skill already says. Hermes also caps a route at 30 turns a minute and
+drops a redelivered event (`webhook-id`).
+
+| Piece | Where |
+| --- | --- |
+| OpenProject webhook *Hermes task board*: project `bots`, events `work_package:created` and `work_package:updated`, signed with `webhook_secret` | Job `openproject-board-webhook` (`bot-provisioner/app/webhook-job.yaml`, `webhook.rb`), idempotent. Edits in *Administration → Webhooks* are overwritten on its next run |
+| OpenProject may post to the relay | `OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST` (`openproject/app/helmrelease.yaml`) lists the openproject-mcp Service's pinned ClusterIP. It takes addresses, not names; change both together |
+| Relay | openproject-mcp `POST /hooks/openproject`; Secret `openproject-mcp-relay` (`webhook_secret`, `bot_webhook_secret`); `RELAY_BOTS=chief,hank` |
+| Network | CNP `openproject-mcp`: in from OpenProject's pods on 8000, out to bots' agent pods on 8644. Each bot's CNP `agent-board-hooks`: 8644 from openproject-mcp only |
+| Bot side | Input `TASK_BOARD_WEBHOOK_ENABLED=true` (with `TASK_BOARD_ENABLED` and `WEBHOOK_DELIVER_CHAT_ID`): Secret `task-board-webhook` (`bot_webhook_secret`, and Hermes' webhook listener on 8644), Service `agent-board-hooks`, route `task-board` |
+
+One `bot_webhook_secret` serves every bot. Only the relay can reach a
+bot's port, and the route's filter takes only events naming that bot.
+
+**Adding a bot:** `TASK_BOARD_WEBHOOK_ENABLED=true` and its
+`WEBHOOK_DELIVER_CHAT_ID` in its inputs, and its login in `RELAY_BOTS`.
+
+**Rotating a key:** change the field in 1Password. For `webhook_secret`,
+also bump `script-revision` in `webhook-job.yaml` so the Job stores the
+new key in OpenProject. The ExternalSecrets refresh every 12 hours, and
+Reloader restarts openproject-mcp.
+
+**Check it:**
+
+```sh
+kubectl -n openproject logs job/openproject-board-webhook
+kubectl -n openproject logs deploy/openproject-mcp | grep relay
+kubectl -n hermes-<bot> logs deploy/hermes-agent -c config | grep 'route task-board'
+```
+
+OpenProject's own log of each delivery and the relay's answer is under
+*Administration → API and webhooks → Webhooks → Hermes task board*.
+
+**After a relay restart**, the first event on an already closed task
+counts as its close: the author may hear about that task once more.
 
 ### Bot provisioning
 

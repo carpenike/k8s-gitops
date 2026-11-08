@@ -83,6 +83,12 @@ spec:
       # Rails connection pool per process (web and worker), against
       # postgres17's shared max_connections.
       OPENPROJECT_DB_POOL: "10"
+      # The board webhook posts to openproject-mcp's relay
+      # (bot-provisioner/app/webhook.rb). OpenProject refuses private
+      # addresses for webhooks unless listed here, and takes addresses only,
+      # not names: this is that Service's ClusterIP, pinned in
+      # openproject-mcp/app/helmrelease.yaml. Change both together.
+      OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST: 10.43.104.160
     persistence:
       enabled: true
       accessModes:
