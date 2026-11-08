@@ -482,6 +482,23 @@ spec:
             metrics:
               - path: /run
                 readOnly: true
+      # s6-overlay in the signal-api image writes its supervision state under
+      # /run as the container starts. The image's /run is root-owned and this
+      # pod runs as uid 65532, so with no writable mount s6's preinit fails
+      # ("cannot create /run/test of writability") and the container never
+      # starts. s6 tolerates the volume itself still being root-owned ("we can
+      # still work in single-uid mapping"), so this needs no fsGroup. Kept
+      # separate from `run` above on purpose: that one is the finance jobs'
+      # 16Mi reader/metrics area, shared scheduler -> metrics read-only, and
+      # s6's supervision state does not belong in it.
+      signal-run:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 64Mi
+        advancedMounts:
+          homelab-mcp:
+            signal-api:
+              - path: /run
       # 0444, not 0400: Secret files are root-owned, and with no fsGroup
       # uid 65532 could not read a 0400 file. Only the app container mounts it.
       mfp:
