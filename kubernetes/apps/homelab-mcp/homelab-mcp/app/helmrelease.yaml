@@ -617,6 +617,15 @@ spec:
                   # CDN hosts. A pattern, because signal-cli follows the
                   # server's host list rather than a fixed one.
                   - matchPattern: "*.signal.org"
+                  # Cilium's "*" in a matchPattern matches exactly ONE label, so
+                  # the pattern above covers chat/cdsi/storage/svr2.signal.org
+                  # but not libsignal's gRPC endpoint, which sits one level
+                  # deeper. Without this entry its SYN is dropped, libsignal
+                  # reports "all connect attempts failed", and signal-cli starts
+                  # the daemon with no account loaded: /v1/accounts returns [],
+                  # nothing sends or receives, and the listener still reports
+                  # healthy.
+                  - matchName: grpc.chat.signal.org
                 toPorts:
                   - ports:
                       - port: "443"
