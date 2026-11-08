@@ -83,6 +83,7 @@ spec later:
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED` or `TASK_BOARD_WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it no route is written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
+| `ROUTINES_PRIVATE_ENABLED` | `true` | Optional, default `false`. Secret `routines-private` from every field of 1Password item `hermes-<bot>-routines`: the private details of the bot's `routines.yaml`, one field per routine key ([Routines from git](#routines-from-git)). `true` or `false` only |
 | `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
 | `CLAUDE_CODE_MERGE` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
@@ -1705,6 +1706,72 @@ every reconnect timed out until Hermes restarted, and it cost a four-day
 outage. v0.23.0 ships `mcp` 2.3.0, and whether that is fixed is not
 checked. Before a routine depends on an OAuth server, add a check that
 runs `hermes mcp test` and restarts the agent when it fails.
+
+## Routines from git
+
+A bot's scheduled jobs can live in git, in `routines.yaml` in its folder
+(ConfigMap `hermes-bot-routines`). At each start the `config` init
+container writes them into Hermes' own cron store with Hermes' `cronjob`
+API, and the gateway's scheduler runs them like jobs made in chat.
+
+- Jobs from git are tracked in `/opt/data/.routines-from-git.json`. A
+  routine changed in git is updated, and one removed from git or past its
+  `until` date is deleted. Jobs made in chat are never touched.
+- One bad routine is reported in the `config` log and skipped. It never
+  blocks the others or the bot.
+- A routine paused in chat stays paused across restarts. Only a pause this
+  step made (reason starting `git:`) is lifted again.
+
+```yaml
+routines:
+  band-mail-check:            # key: lowercase letters, digits and -
+    name: Band booster mail check
+    schedule: "0 8 * * 1-5"   # cron, or Hermes forms like "every 2h"
+    timezone: America/New_York  # default
+    deliver: dm               # default: matrix:<WEBHOOK_DELIVER_CHAT_ID>
+    toolsets: [web, outlook]  # per-job allowlist; naming an MCP server keeps only it
+    continuity: true          # default: each run sees its previous output
+    catch_up: false           # default: a run missed while down is skipped
+    until: 2026-12-20         # optional: past it, the job is removed
+    paused: false             # optional
+    private: true             # notes from 1Password, below
+    prompt: |
+      ...
+```
+
+**What every run is told.** The component appends to each prompt:
+- "respond with exactly `[SILENT]` if nothing new needs Ryan's attention" (Hermes then delivers nothing);
+- "never send, reply, buy, sign up or delete";
+- with `until`, to go silent after that date;
+- with `private`, where the private notes are.
+
+**Private details stay out of git.** This repo is public, so names,
+addresses, links and lists go in 1Password item `hermes-<bot>-routines`,
+one text field per routine key. With `ROUTINES_PRIVATE_ENABLED=true`,
+ExternalSecret `routines-private` makes them files for the `config` init
+container only. The step writes each one to its job's notepad under
+`private`, and Hermes puts the notepad in every run's prompt. The values
+never reach the app container's env. A `private: true` routine without its
+field is created paused (`git: private notes missing`), and resumes once
+the field exists and the bot restarts.
+
+**Unattended means read-only.** A cron run refuses anything that needs
+approval (`unattended_mode`, default `deny`). On the `trust: untrusted`
+Outlook server, every tool without `readOnlyHint` needs approval, so a
+routine can read mail but not send, draft or move it. Drafting stays in
+Ryan's Matrix conversation with the bot.
+
+**Check it:**
+
+```sh
+kubectl -n hermes-<bot> logs deploy/hermes-agent -c config | grep routine
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes cron list --all
+kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes cron run <job id>   # one run now
+```
+
+Chief's routines came from Grok Chief's inventory: four read-and-report
+jobs that need only Outlook and the web. Grok's copies are paused once
+these have run cleanly.
 
 ## Outlook (opt-in)
 

@@ -286,3 +286,86 @@ def test_settings_from_env() -> None:
     assert (s.openproject_webhook_secret, s.hermes_webhook_secret) == ("a", "b")
     assert s.relay_bots == ("chief", "hank")
     assert "{bot}" in s.relay_hermes_url
+
+
+# --- bots outside the cluster (RELAY_TARGETS) -------------------------------------
+
+GROK_URL = "https://grok.example.test/automations/webhook/dummy-routine"
+GROK_KEY = "dummy-grok-routine-key"
+USERS["chief-engineer"] = 7
+
+
+def external_settings(**overrides: Any) -> Settings:
+    return relay_settings(
+        relay_bots=("chief", "hank", "chief-engineer"),
+        relay_targets=(("chief-engineer", GROK_URL, GROK_KEY),),
+        public_url="https://tasks.example.test",
+        **overrides,
+    )
+
+
+def test_an_external_bot_gets_the_pointer_with_its_bearer_key(
+    fake: FakeOpenProject, hermes: FakeHermes
+) -> None:
+    app, _ = build_app(external_settings(), transport=fake.transport,
+                       relay_transport=hermes.transport)
+    with TestClient(app, base_url="http://testserver") as c:
+        resp = post(c, wp_event("work_package:created", assignee="chief-engineer", actor="hank"))
+    assert resp.json()["woke"] == {"chief-engineer": 202}
+    (call,) = hermes.calls
+    assert str(call.url) == GROK_URL
+    assert call.headers["authorization"] == f"Bearer {GROK_KEY}"
+    assert "x-webhook-signature-v2" not in call.headers
+    assert json.loads(call.content) == {
+        "event_type": "task_board", "bot": "chief-engineer", "task_id": 39,
+        "reason": "assigned", "actor": "hank", "actor_id": 5,
+        "task_url": "https://tasks.example.test/work_packages/39",
+    }
+    assert b"IGNORE ME" not in call.content
+
+
+def test_hermes_and_external_bots_in_one_event(fake: FakeOpenProject,
+                                               hermes: FakeHermes) -> None:
+    app, _ = build_app(external_settings(), transport=fake.transport,
+                       relay_transport=hermes.transport)
+    with TestClient(app, base_url="http://testserver") as c:
+        post(c, wp_event(assignee="hank", author="chief-engineer", actor="hank"))
+        resp = post(c, wp_event(assignee="hank", author="chief-engineer", actor="hank",
+                                closed=True))
+    assert resp.json()["woke"] == {"chief-engineer": 202}
+    assert [str(c.url) for c in hermes.calls] == [GROK_URL]
+
+
+def test_targets_alone_turn_the_relay_on(fake: FakeOpenProject, hermes: FakeHermes) -> None:
+    app, _ = build_app(external_settings(hermes_webhook_secret=""), transport=fake.transport,
+                       relay_transport=hermes.transport)
+    with TestClient(app, base_url="http://testserver") as c:
+        resp = post(c, wp_event("work_package:created", assignee="hank"))
+        assert resp.status_code == 200
+        # A Hermes bot needs HERMES_WEBHOOK_SECRET; without it nothing is sent.
+        assert resp.json()["woke"] == {"hank": -1}
+    assert not hermes.calls
+
+
+def test_target_keys_stay_out_of_the_settings_repr() -> None:
+    text = repr(external_settings())
+    assert GROK_KEY not in text and GROK_URL not in text
+
+
+def test_parse_targets() -> None:
+    from openproject_mcp.config import parse_targets
+
+    good = json.dumps({"Chief-Engineer": {"url": GROK_URL, "bearer": GROK_KEY}})
+    assert parse_targets(good) == ((("chief-engineer", GROK_URL, GROK_KEY),), ())
+    assert parse_targets("") == ((), ())
+    targets, errors = parse_targets(json.dumps({
+        "a": {"url": "http://plain.example.test/x", "bearer": "k"},
+        "b": {"url": GROK_URL, "bearer": " "},
+        "Bad Name": {"url": GROK_URL, "bearer": "k"},
+        "c": "not an object",
+    }))
+    assert targets == () and len(errors) == 4
+    assert all(GROK_URL not in e for e in errors)
+    assert parse_targets("{nope")[1] == ("RELAY_TARGETS is not valid JSON",)
+    s = Settings.from_env({"RELAY_TARGETS": good})
+    assert s.relay_targets == (("chief-engineer", GROK_URL, GROK_KEY),)

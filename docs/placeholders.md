@@ -125,6 +125,18 @@ vault `k8s-secrets`. The table in
 [postgres17.md](postgres17.md#1password) lists each field and the Forge
 sops key whose value it can reuse.
 
+## homelab-mcp
+
+Before `kubernetes/apps/homelab-mcp` reconciles, create item `homelab-mcp`
+(new) in vault `k8s-secrets` with fields `pocketid_client_secret`,
+`ha_token`, `ha_read_token`, `grocy_api_key`, `paperless_token` and
+`mfp_cookies`. [homelab-mcp.md](homelab-mcp.md#1password) says where each
+comes from.
+
+Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password`.
+
+The HelmRelease's images are pinned to carpenike/mcp main `72a9b0f`.
+
 ## schoolhouse
 
 Before `kubernetes/apps/schoolhouse` reconciles, create item

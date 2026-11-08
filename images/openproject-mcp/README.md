@@ -56,7 +56,7 @@ the MCP SDK's DNS-rebinding check. Other hosts get HTTP 421.
 
 ## Environment
 
-None of these is a secret except the relay's two keys.
+None of these is a secret except the relay's keys and targets.
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -75,6 +75,7 @@ None of these is a secret except the relay's two keys.
 | `OPENPROJECT_WEBHOOK_SECRET` | *(none)* | **Secret.** The key OpenProject's webhook signs with. Relay only |
 | `HERMES_WEBHOOK_SECRET` | *(none)* | **Secret.** The key the relay signs bot events with. Relay only |
 | `RELAY_BOTS` | *(none)* | Comma list of the bots' OpenProject logins. Only these are ever woken |
+| `RELAY_TARGETS` | *(none)* | **Secret.** JSON `{"<bot>": {"url": "https://…", "bearer": "<key>"}}`: bots outside the cluster, such as a Grok Bot routine's webhook trigger. A bad entry is logged (never its values) and ignored |
 | `RELAY_HERMES_URL` | `http://agent-board-hooks.hermes-{bot}.svc.cluster.local:8644/webhooks/task-board` | Where a bot's event goes; `{bot}` is its login |
 
 Status, priority and type names are resolved case-insensitively through the
@@ -141,6 +142,11 @@ accepts only SHA-256 schemes. `POST /hooks/openproject` sits between them
    (`X-Webhook-Signature-V2`, hex HMAC-SHA256 of `<timestamp>.<body>`, and
    `X-Webhook-Timestamp`) with `HERMES_WEBHOOK_SECRET`. `webhook-id` is
    `op-<sha256 of OpenProject's body>-<bot>`, so Hermes drops a redelivery.
+   A bot with an entry in `RELAY_TARGETS` lives outside the cluster. It
+   gets the same pointer plus `task_url`, as a JSON POST to its `url` with
+   `Authorization: Bearer <bearer>`. A Grok Bot routine's webhook trigger
+   takes exactly that. The relay never logs that URL, which carries the
+   routine's id.
 5. It answers OpenProject 200 with what each bot returned (`-1` if
    unreachable). OpenProject keeps that in its webhook log.
 

@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Per-bot template for a bot outside the cluster (a Grok Bot), built by that
+# bot's Flux Kustomization in ../../external-bots with postBuild
+# substitution: BOT_NAME, BOT_DISPLAY_NAME and TASK_BOARD_RYAN_USER_ID.
+# Like ../template, but everything is in openproject: the Secret the token
+# lands in, the Role on it, and the Job. Ryan copies the token from that
+# Secret to 1Password and to the bot (docs/openproject.md, "Bots outside
+# the cluster").
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./secret.yaml
+  - ./rbac.yaml
+  - ./job.yaml

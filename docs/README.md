@@ -15,6 +15,7 @@
 | [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
 | [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
 | [scrypted.md](scrypted.md) | Scrypted NVR on VLAN 30, and the Forge cutover |
+| [homelab-mcp.md](homelab-mcp.md) | Claude tools server at `mcp.`: views, MFP cookies, and the Forge cutover |
 | [website.md](website.md) | The `ryanholt.net` static site, and how it shares the apex with Matrix |
 | [deviations.md](deviations.md) | Where this tree leaves onedr0p/cluster-template |
 | [lessons-from-v1.md](lessons-from-v1.md) | What the archived tree taught us |

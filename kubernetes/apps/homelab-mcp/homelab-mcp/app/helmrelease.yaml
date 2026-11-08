@@ -1,0 +1,641 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# homelab-mcp: the Claude tools server (carpenike/mcp), at mcp.${SECRET_DOMAIN}.
+# One replica: OAuth state is a SQLite file and the write-confirmation gate
+# keeps consumed tokens in memory. Recreate, because the volume is RWO.
+#
+# Views (HOMELAB_MCP_VIEWS) make several MCP URLs on this one host, each a
+# protected resource of its own (carpenike/mcp src/homelab_mcp/views.py).
+# Upstreams are reached over HTTPS, and the stores that used to sit in
+# Forge's local Postgres are in postgres17 (docs/postgres17.md, "Forge
+# stores").
+#
+# The finance workers that ran on Forge run here too, as more containers in
+# this pod, because carpenike/mcp only accepts the Actual sidecar and
+# signal-api on loopback and they share one state directory with the server
+# (the Signal store, the ingestion reservation, the finances checkout):
+#   actual       the Actual sidecar (one login, kept up)
+#   signal-api   signal-cli-rest-api, the household bot's Signal identity
+#   capture      the Signal note listener
+#   scheduler    supercronic: bank ingest, nightly export, snapshots, the
+#                daily and weekly Signal reports, metrics (crontab below)
+#   metrics      serves the jobs' finance_*.prom files on 9202
+# nixos (Forge's deploy trigger) stays off. See docs/homelab-mcp.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homelab-mcp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: homelab-mcp
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      homelab-mcp:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # A name with a dot is looked up as written first, so Cilium files
+          # the answer under that name and the toFQDNs rules match (see the
+          # same note in components/hermes-bot).
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+        initContainers:
+          # The finance runtime refuses its state unless /var/lib/homelab-mcp
+          # is owned by the pod's uid with mode exactly 0700 (the same check
+          # Forge made of its dataset), and signal-cli keeps the bot's keys
+          # in its own volume. A volume root is created root-owned, and
+          # fsGroup would add group bits, so this sets owner and mode once per
+          # start. The only step that runs as root; CHOWN and FOWNER only.
+          permissions:
+            image: &mcpImage
+              # Built by carpenike/mcp .github/workflows/image.yml from main
+              # (72a9b0f, 0.39.0: homelab-finances-runtime and supercronic).
+              # Every container below uses this image.
+              repository: ghcr.io/carpenike/homelab-mcp
+              tag: sha-72a9b0f35549fe39e15b116676cd02788c8b35df@sha256:de465550789ea61c28aae541c91c170d1acc0959a92fcd1f7fb2367ac027a933
+            command:
+              - /bin/sh
+              - -c
+              - >-
+                chown 65532:65532 /var/lib/homelab-mcp /signal &&
+                chmod 0700 /var/lib/homelab-mcp /signal
+            securityContext:
+              runAsUser: 0
+              runAsGroup: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - CHOWN
+                  - FOWNER
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+        containers:
+          app:
+            image: *mcpImage
+            env:
+              HOMELAB_MCP_PUBLIC_BASE_URL: https://mcp.${SECRET_DOMAIN}
+              HOMELAB_MCP_BIND_ADDRESS: 0.0.0.0
+              HOMELAB_MCP_PORT: "9200"
+              HOMELAB_MCP_METRICS_PORT: "9201"
+              HOMELAB_MCP_METRICS_BIND_ADDRESS: 0.0.0.0
+              HOMELAB_MCP_LOG_LEVEL: info
+              # Only envoy-external reaches port 9200 (CiliumNetworkPolicy),
+              # so its X-Forwarded-For is the one to trust.
+              HOMELAB_MCP_TRUSTED_PROXY_IPS: "*"
+              # Same Pocket ID client as Forge: its callback is this host.
+              HOMELAB_MCP_POCKETID_ISSUER: https://id.${SECRET_DOMAIN}
+              HOMELAB_MCP_POCKETID_CLIENT_ID: mcp
+              HOMELAB_MCP_OAUTH_USER_ALLOWLIST: '["ryan@ryanholt.net"]'
+              # State lives in a subdirectory the process creates 0700: the
+              # private-file checks refuse a group-writable directory, and the
+              # volume root is group-writable through fsGroup. The signing key
+              # is generated there on first start.
+              HOMELAB_MCP_OAUTH_STATE_DB_PATH: /var/lib/homelab-mcp/state/state.db
+              HOMELAB_MCP_OAUTH_SIGNING_KEY_PATH: /var/lib/homelab-mcp/state/signing-key.pem
+              HOMELAB_MCP_ARCRAIDERS_DB_PATH: /var/lib/homelab-mcp/state/arcraiders.db
+              HOMELAB_MCP_TOOL_CATEGORIES: >-
+                ["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders",
+                "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
+                "finances_sentinel", "money", "school", "school_today",
+                "amazon", "costco", "samsclub"]
+              HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
+              HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
+              HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
+              HOMELAB_MCP_HA_BASE_URL: https://ha.${SECRET_DOMAIN}
+              HOMELAB_MCP_PAPERLESS_BASE_URL: https://paperless.${SECRET_DOMAIN}
+              # Gatus' read API; status. lets /api/v1/endpoints through without
+              # the admin login (nix-config gatus.nix).
+              HOMELAB_MCP_GATUS_BASE_URL: https://status.${SECRET_DOMAIN}
+              # The Actual sidecar is the second container in this pod.
+              HOMELAB_MCP_FINANCES_SIDECAR_BASE_URL: http://127.0.0.1:9210
+              HOMELAB_MCP_FINANCES_REPO_URL: https://github.com/carpenike/finances.git
+              HOMELAB_MCP_FINANCES_REPO_PATH: /var/lib/homelab-mcp/finances
+              HOMELAB_MCP_FINANCES_STATE_PATH: /var/lib/homelab-mcp/state/finances-state.json
+              # The Signal store and the local mirror of the context store;
+              # the fixed path the capture and report jobs check.
+              HOMELAB_MCP_FINANCES_CONTEXT_DB_PATH: /var/lib/homelab-mcp/finances-context.db
+              HOMELAB_MCP_MONEY_PG_SCHEMA: household_finance
+              HOMELAB_MCP_MFP_ENABLED: "true"
+              HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
+              # Writes stay off until the HAR-based write tests pass.
+              HOMELAB_MCP_MFP_WRITES_ENABLED: "false"
+              # /mcp: everyday read connector. /mcp/admin: everything, write
+              # requested on connect (Claude's step-up is unreliable).
+              # /mcp/agent: Hermes' restricted list. /mcp/house-sensors:
+              # Groundskeeper; its scope name keys the HA entity policy.
+              HOMELAB_MCP_VIEWS: >-
+                [
+                {"path": "/mcp", "name": "Home (read)", "tools": "read",
+                 "read_scope": "home.read", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/admin", "name": "Home (full)", "tools": "all",
+                 "read_scope": "home.read", "write_scope": "home.write",
+                 "connect_scopes": "all", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/agent", "name": "Hermes", "tools": "scope:hermes",
+                 "read_scope": "hermes", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/house-sensors", "name": "House sensors",
+                 "tools": "scope:atrium-family-house-sensors",
+                 "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]}
+                ]
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-env
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 9200
+                  periodSeconds: 30
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 9200
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                cpu: "1"
+                memory: 1Gi
+          # Actual Budget's only client is the Node @actual-app/api package,
+          # so it runs here and the finances_* tools call it on loopback.
+          # One login per process, and Actual locks the account after 5
+          # failed logins in 15 minutes: a failed boot holds /health at 503
+          # for 5 minutes before exiting, so CrashLoopBackOff stays under
+          # that. Liveness is the TCP port, never /health.
+          actual:
+            image:
+              # Built by carpenike/mcp .github/workflows/image.yml from main.
+              repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
+              tag: sha-72a9b0f35549fe39e15b116676cd02788c8b35df@sha256:59306caf8575309e5a9908306dfa210d0564ca8d5228fd5dfb67288569c551c4
+            env:
+              SIDECAR_HOST: 127.0.0.1
+              SIDECAR_PORT: "9210"
+              ACTUAL_SERVER_URL: https://budget.${SECRET_DOMAIN}
+              ACTUAL_DATA_DIR: /var/lib/actual-sidecar
+              SIDECAR_BOOT_FAILURE_HOLD_SECONDS: "300"
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-actual
+            probes:
+              # exec, not tcpSocket: the sidecar binds SIDECAR_HOST
+              # (127.0.0.1) only and kubelet dials the pod IP, so a
+              # tcpSocket probe on 9210 can never connect. As a startup
+              # probe that failed for its whole budget and restarted a
+              # healthy container roughly every two minutes, which kept the
+              # pod -- and with it every MCP endpoint -- out of the Service.
+              # The check therefore runs inside the container, and reads the
+              # same two env vars the sidecar binds from so the probe and
+              # the listener cannot drift apart.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: &actualProbe
+                      - node
+                      - -e
+                      - >-
+                        const net = require("net");
+                        const s = net.connect(Number(process.env.SIDECAR_PORT || 9210), process.env.SIDECAR_HOST || "127.0.0.1");
+                        s.setTimeout(3000);
+                        s.on("connect", () => { s.destroy(); process.exit(0); });
+                        s.on("error", () => process.exit(1));
+                        s.on("timeout", () => { s.destroy(); process.exit(1); });
+                  periodSeconds: 30
+                  failureThreshold: 3
+              # Off on purpose: a not-ready container makes the whole pod
+              # not ready, and an Actual outage must not take the MCP
+              # endpoints down with it. The finances tools report it.
+              readiness:
+                enabled: false
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: *actualProbe
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 20m
+                memory: 192Mi
+              limits:
+                memory: 768Mi
+          # signal-cli-rest-api in JSON-RPC mode: a resident JVM holding the
+          # household bot's Signal registration. The REST API has no
+          # authentication at all, so it is never given a Service or a route:
+          # it listens on 8080 in this pod's network namespace and the
+          # network policy below admits nothing to 8080 from outside the pod.
+          # Image pinned like Forge's (nix-config modules/nixos/services/
+          # signal-api); bump it when sending breaks, signal-cli tracks a
+          # server-driven protocol.
+          signal-api:
+            image:
+              repository: docker.io/bbernhard/signal-cli-rest-api
+              tag: 0.101@sha256:2cf09d66a86fdd210e42ee91662216364acc27da1163a8c44167a77ea3a6559a
+            env:
+              MODE: json-rpc
+              TZ: America/New_York
+              LOG_LEVEL: info
+              JSON_RPC_IGNORE_ATTACHMENTS: "true"
+              JSON_RPC_IGNORE_STORIES: "true"
+              JSON_RPC_IGNORE_STICKERS: "true"
+            probes:
+              # /v1/health answers 204. A cold JVM plus the signal-cli
+              # daemon is slow to start.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /v1/health
+                    port: 8080
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: false
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /v1/health
+                    port: 8080
+                  periodSeconds: 10
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              # s6 in this image writes under /run and /var; not yet
+              # verified with a read-only root, so left writable.
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 1Gi
+          # The Signal note listener (homelab-finances-signal listen, through
+          # the runtime's checks). It writes notes to the shared context store
+          # in postgres17 and mirrors them into the local Signal store.
+          capture:
+            image: *mcpImage
+            command:
+              - homelab-finances-runtime
+              - capture
+              - "8080"
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-signal
+            securityContext: &jobSecurity
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 96Mi
+              limits:
+                memory: 384Mi
+          # supercronic runs the Forge timers' jobs on the same schedules,
+          # America/New_York. A run that is still going when its next slot
+          # comes is not started twice. Job output goes to this container's
+          # log, never secrets: the CLIs print fixed diagnostic codes only.
+          scheduler:
+            image: *mcpImage
+            command:
+              - supercronic
+              - -passthrough-logs
+              - /etc/finance-jobs/crontab
+            env:
+              TZ: America/New_York
+              # Reports owe only slots at or after this instant (Forge's
+              # services.financeSignalProduction.reportsNotBefore).
+              FINANCE_REPORTS_NOT_BEFORE: "2026-10-01T00:00:00-04:00"
+              HOMELAB_MCP_FINANCES_SIDECAR_BASE_URL: http://127.0.0.1:9210
+              HOMELAB_MCP_FINANCES_REPO_URL: https://github.com/carpenike/finances.git
+              HOMELAB_MCP_FINANCES_REPO_PATH: /var/lib/homelab-mcp/finances
+              HOMELAB_MCP_MONEY_PG_SCHEMA: household_finance
+              # Bank ingestion (carpenike/mcp nix/finances-ingest.nix, with
+              # Forge's values): one pull a day, anchored to 19:30 UTC.
+              HOMELAB_MCP_FINANCES_INGEST_ENABLED: "true"
+              HOMELAB_MCP_FINANCES_INGEST_STATE_PATH: /var/lib/homelab-mcp/finances-ingest/state.json
+              HOMELAB_MCP_FINANCES_INGEST_MIN_INTERVAL_SECONDS: "86400"
+              HOMELAB_MCP_FINANCES_INGEST_READ_TIMEOUT_SECONDS: "30"
+              HOMELAB_MCP_FINANCES_INGEST_PULL_TIMEOUT_SECONDS: "360"
+              HOMELAB_MCP_FINANCES_INGEST_RUN_TIMEOUT_SECONDS: "480"
+              HOMELAB_MCP_FINANCES_INGEST_ANCHOR_UTC: "19:30"
+              HOMELAB_MCP_FINANCES_INGEST_ANCHOR_TOLERANCE_SECONDS: "1800"
+              HOMELAB_MCP_LOG_LEVEL: info
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-jobs
+              - secretRef:
+                  name: homelab-mcp-signal
+            securityContext: *jobSecurity
+            resources:
+              requests:
+                cpu: 20m
+                memory: 128Mi
+              limits:
+                memory: 768Mi
+          metrics:
+            image: *mcpImage
+            command:
+              - homelab-finances-runtime
+              - serve-metrics
+              - /run/finance-metrics
+              - 0.0.0.0:9202
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9202
+                  periodSeconds: 30
+              readiness:
+                enabled: false
+            securityContext: *jobSecurity
+            resources:
+              requests:
+                cpu: 5m
+                memory: 48Mi
+              limits:
+                memory: 128Mi
+    # No fsGroup: the init container sets owner and mode instead (see there).
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+    configMaps:
+      jobs:
+        data:
+          # m h dom mon dow (America/New_York, from TZ). Each schedule is the
+          # Forge timer it replaces. supercronic runs each line with /bin/sh.
+          crontab: |
+            # Bank ingestion eligibility, every 15 minutes; pulls only when
+            # due (once a day). Exit 3 is a reported, degraded run.
+            */15 * * * * homelab-finances-ingest due && homelab-finances-ingest run --allow-bank-sync --distinguish-degraded
+            */2 * * * * homelab-finances-runtime ingest-metrics /run/finance-metrics/finance_ingest.prom
+            # Nightly export: after lading's overnight sync, before the morning sweep.
+            30 5 * * * homelab-finances-export
+            # Publish a snapshot after each completed ingestion.
+            */5 * * * * homelab-finances-runtime snapshots /run/finance-metrics/finance_snapshot.prom
+            # Signal reports: three attempts inside the slot's window; the
+            # runtime sends at most once per slot.
+            0,5,10 8 * * * homelab-finances-runtime due daily "$FINANCE_REPORTS_NOT_BEFORE" && homelab-finances-runtime project && homelab-finances-runtime report daily 8080 "$FINANCE_REPORTS_NOT_BEFORE"
+            0,5,10 16 * * 5 homelab-finances-runtime due weekly "$FINANCE_REPORTS_NOT_BEFORE" && homelab-finances-runtime project && homelab-finances-runtime report weekly 8080 "$FINANCE_REPORTS_NOT_BEFORE"
+            */2 * * * * homelab-finances-runtime collect 8080 "$FINANCE_REPORTS_NOT_BEFORE" /run/finance-metrics/finance_signal.prom
+    service:
+      app:
+        controller: homelab-mcp
+        ports:
+          http:
+            port: 9200
+          metrics:
+            port: 9201
+          finance-metrics:
+            port: 9202
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 60s
+          - port: finance-metrics
+            path: /metrics
+            interval: 60s
+    persistence:
+      # PVCs are in pvc.yaml so the VolSync backups (../backup) can name
+      # them.
+      state:
+        existingClaim: homelab-mcp-state
+        advancedMounts:
+          homelab-mcp:
+            permissions:
+              - path: /var/lib/homelab-mcp
+            app:
+              - path: /var/lib/homelab-mcp
+            capture:
+              - path: /var/lib/homelab-mcp
+            scheduler:
+              - path: /var/lib/homelab-mcp
+      signal:
+        existingClaim: homelab-mcp-signal
+        advancedMounts:
+          homelab-mcp:
+            permissions:
+              - path: /signal
+            signal-api:
+              - path: /home/.local/share/signal-cli
+      jobs:
+        type: configMap
+        identifier: jobs
+        advancedMounts:
+          homelab-mcp:
+            scheduler:
+              - path: /etc/finance-jobs
+                readOnly: true
+      # /run for the jobs: reader.json and its secret files
+      # (/run/finance-report-reader) and the metrics files
+      # (/run/finance-metrics), which the metrics container serves.
+      run:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 16Mi
+        advancedMounts:
+          homelab-mcp:
+            scheduler:
+              - path: /run
+            metrics:
+              - path: /run
+                readOnly: true
+      # s6-overlay in the signal-api image writes its supervision state under
+      # /run as the container starts. The image's /run is root-owned and this
+      # pod runs as uid 65532, so with no writable mount s6's preinit fails
+      # ("cannot create /run/test of writability") and the container never
+      # starts. s6 tolerates the volume itself still being root-owned ("we can
+      # still work in single-uid mapping"), so this needs no fsGroup. Kept
+      # separate from `run` above on purpose: that one is the finance jobs'
+      # 16Mi reader/metrics area, shared scheduler -> metrics read-only, and
+      # s6's supervision state does not belong in it.
+      signal-run:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 64Mi
+        advancedMounts:
+          homelab-mcp:
+            signal-api:
+              - path: /run
+      # 0444, not 0400: Secret files are root-owned, and with no fsGroup
+      # uid 65532 could not read a 0400 file. Only the app container mounts it.
+      mfp:
+        type: secret
+        name: homelab-mcp-mfp
+        defaultMode: 0444
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /run/mfp
+                readOnly: true
+      # The sidecar's downloaded budget cache: rebuilt on every start.
+      actual:
+        type: emptyDir
+        advancedMounts:
+          homelab-mcp:
+            actual:
+              - path: /var/lib/actual-sidecar
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    # The pod's own CiliumNetworkPolicy. It is here rather than in
+    # ciliumnetworkpolicy.yaml because kubeconform checks files before Flux
+    # substitutes ${SECRET_DOMAIN}, and Cilium's schema refuses "${" in a
+    # toFQDNs name (same as components/hermes-bot).
+    rawResources:
+      policy:
+        forceRename: homelab-mcp
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # In: 9200 (MCP and OAuth) from the envoy-external proxies only,
+          # which is why HOMELAB_MCP_TRUSTED_PROXY_IPS may be "*"; 9201
+          # (/metrics) from Prometheus only. Probes come from the kubelet,
+          # which Cilium allows. Out: DNS, then 443 to the named hosts only.
+          # toFQDNs needs the DNS proxy to see the lookups, hence the L7 DNS
+          # rule, and the pod's ndots 1.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: homelab-mcp
+                app.kubernetes.io/controller: homelab-mcp
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                toPorts:
+                  - ports:
+                      - port: "9200"
+                        protocol: TCP
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: observability
+                      app.kubernetes.io/name: prometheus
+                toPorts:
+                  - ports:
+                      - port: "9201"
+                        protocol: TCP
+                      - port: "9202"
+                        protocol: TCP
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  # Pocket ID (upstream login) and the tool upstreams.
+                  - matchName: id.${SECRET_DOMAIN}
+                  - matchName: cook.${SECRET_DOMAIN}
+                  - matchName: fedcook.${SECRET_DOMAIN}
+                  - matchName: grocy.${SECRET_DOMAIN}
+                  - matchName: ha.${SECRET_DOMAIN}
+                  - matchName: paperless.${SECRET_DOMAIN}
+                  # mfp: cookies go to www only; the v2 API takes the bearer token.
+                  - matchName: www.myfitnesspal.com
+                  - matchName: api.myfitnesspal.com
+                  # arcraiders data sources.
+                  - matchName: metaforge.app
+                  - matchName: ardb.app
+                  - matchName: arcraiders.wiki
+                  - matchName: raw.githubusercontent.com
+                  - matchName: api.github.com
+                  # gatus, Actual (the sidecar), the finances repo, SnapTrade.
+                  - matchName: status.${SECRET_DOMAIN}
+                  - matchName: budget.${SECRET_DOMAIN}
+                  - matchName: github.com
+                  - matchName: api.snaptrade.com
+                  # signal-api: Signal's chat, storage, contact-discovery and
+                  # CDN hosts. A pattern, because signal-cli follows the
+                  # server's host list rather than a fixed one.
+                  - matchPattern: "*.signal.org"
+                  # Cilium's "*" in a matchPattern matches exactly ONE label, so
+                  # the pattern above covers chat/cdsi/storage/svr2.signal.org
+                  # but not libsignal's gRPC endpoint, which sits one level
+                  # deeper. Without this entry its SYN is dropped, libsignal
+                  # reports "all connect attempts failed", and signal-cli starts
+                  # the daemon with no account loaded: /v1/accounts returns [],
+                  # nothing sends or receives, and the listener still reports
+                  # healthy.
+                  - matchName: grpc.chat.signal.org
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
+              # schoolhouse, lading, homelab_finance, finances_context.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: cnpg-system
+                      cnpg.io/cluster: postgres17
+                toPorts:
+                  - ports:
+                      - port: "5432"
+                        protocol: TCP

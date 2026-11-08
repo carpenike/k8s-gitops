@@ -6,11 +6,14 @@ resources:
   - ./externalsecret.yaml
   - ./ocirepository.yaml
   - ./atrium-k8s
+  - ./lading-k8s
+  - ./lading-k8s-build
   - ./mcp-k8s
   - ./mcp-k8s-build
   - ./network-config-k8s
   - ./sam-tracker
   - ./sam-tracker-app-k8s
   - ./schoolhouse-k8s
+  - ./schoolhouse-k8s-build
   - ./va-acr-app-k8s
   - ./whiskey-k8s

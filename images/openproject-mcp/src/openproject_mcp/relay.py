@@ -20,6 +20,12 @@ of edits within its aggregation window, 5 minutes by default, is one event):
   - the author, when it is a bot, someone else made the change, and the change
     closed the task (a handoff it created is done).
 
+Where the event goes: a bot with an entry in RELAY_TARGETS lives outside
+the cluster (a Grok Bot routine's webhook trigger). It gets the same pointer
+plus the task's link, as a JSON POST with `Authorization: Bearer <key>`. Any
+other bot is a Hermes bot, reached at RELAY_HERMES_URL with the signature
+above.
+
 A bot's own changes never wake that bot. "Closed the task" needs the previous
 state, which only this process has seen: it keeps the last status per task in
 memory. After a restart the first event on an already closed task counts as
@@ -110,13 +116,16 @@ class Relay:
     ) -> None:
         self.settings = settings
         self.bots = frozenset(settings.relay_bots)
+        self.targets = {bot: (url, bearer) for bot, url, bearer in settings.relay_targets}
         self._seen: OrderedDict[int, _Seen] = OrderedDict()
         self._client = httpx.AsyncClient(timeout=10.0, transport=transport)
 
     @property
     def enabled(self) -> bool:
         s = self.settings
-        return bool(s.openproject_webhook_secret and s.hermes_webhook_secret and self.bots)
+        return bool(
+            s.openproject_webhook_secret and self.bots and (s.hermes_webhook_secret or self.targets)
+        )
 
     def decide(self, event: dict[str, Any]) -> tuple[int | None, list[Wake], dict[str, Any]]:
         """Which bots this event wakes. Updates the per-task state."""
@@ -165,21 +174,34 @@ class Relay:
             "actor": info["actor"],
             "actor_id": info["actor_id"],
         }
-        body = json.dumps(payload, separators=(",", ":")).encode()
-        url = self.settings.relay_hermes_url.format(bot=wake.bot)
-        headers = hermes_headers(
-            self.settings.hermes_webhook_secret, body, f"op-{digest}-{wake.bot}"
-        )
+        target = self.targets.get(wake.bot)
+        if target is not None:
+            url, bearer = target
+            payload["task_url"] = f"{self.settings.web_base}/work_packages/{task_id}"
+            body = json.dumps(payload, separators=(",", ":")).encode()
+            headers = {"content-type": "application/json", "authorization": f"Bearer {bearer}"}
+            kind = "external"
+        elif self.settings.hermes_webhook_secret:
+            body = json.dumps(payload, separators=(",", ":")).encode()
+            url = self.settings.relay_hermes_url.format(bot=wake.bot)
+            headers = hermes_headers(
+                self.settings.hermes_webhook_secret, body, f"op-{digest}-{wake.bot}"
+            )
+            kind = "hermes"
+        else:
+            log.warning("relay: task %s -> %s: no target and no HERMES_WEBHOOK_SECRET",
+                        task_id, wake.bot)
+            return -1
         try:
             resp = await self._client.post(url, content=body, headers=headers)
         except httpx.HTTPError as exc:
             log.warning(
-                "relay: task %s -> %s (%s) failed: %s",
-                task_id, wake.bot, wake.reason, exc.__class__.__name__,
+                "relay: task %s -> %s (%s, %s) failed: %s",
+                task_id, wake.bot, wake.reason, kind, exc.__class__.__name__,
             )
             return -1
-        log.info("relay: task %s -> %s (%s): HTTP %s", task_id, wake.bot, wake.reason,
-                 resp.status_code)
+        log.info("relay: task %s -> %s (%s, %s): HTTP %s", task_id, wake.bot, wake.reason,
+                 kind, resp.status_code)
         return resp.status_code
 
     async def handle(self, request: Request) -> Response:
