@@ -10,8 +10,8 @@ carpenike/nix-config. The data is three minors' education records. The
 ## What runs
 
 Namespace `schoolhouse`, chart `app-template` 5.3.0, image
-`ghcr.io/carpenike/schoolhouse` (placeholder tag until carpenike/schoolhouse
-#24 is merged; see [placeholders.md](placeholders.md#schoolhouse)).
+`ghcr.io/carpenike/schoolhouse`, pinned by tag and digest to schoolhouse main
+`d25df9d` (#24).
 
 | Controller | Kind | What it does | Secret |
 | --- | --- | --- | --- |
@@ -92,7 +92,9 @@ Ported from `schoolhouse.nix`, same expressions and severities:
 | `SchoolhouseRecordsCollapsed` | Last run saw under half the 14-day average of records |
 
 Prometheus here keeps 7 days, so the 14-day average covers 7. Until the
-cutover, `SchoolhouseDown` fires: the placeholder image cannot start.
+restore at the cutover, the health server's database has no schema, so its
+`/healthz` and freshness metrics report errors; the ingest CronJob stays
+suspended.
 
 ## Cutover from Forge
 

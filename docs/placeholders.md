@@ -133,10 +133,8 @@ Before `kubernetes/apps/schoolhouse` reconciles, create item
 the postgres17 item `schoolhouse`. [schoolhouse.md](schoolhouse.md#1password)
 says where each comes from.
 
-The HelmRelease's `ghcr.io/carpenike/schoolhouse` tag is the placeholder
-`sha-0000000000000000000000000000000000000000` (no digest) until
-carpenike/schoolhouse #24 is merged. Pin it to the merged main build, tag
-and digest. The ingest CronJob ships `suspend: true` until the cutover.
+The HelmRelease's image is pinned to schoolhouse main `d25df9d`. The ingest
+CronJob ships `suspend: true` until the cutover.
 
 ## lading
 
@@ -147,10 +145,8 @@ Before `kubernetes/apps/lading` reconciles, create items `lading-ryan` (new:
 `costco_tokens`) in vault `k8s-secrets`, and the postgres17 item `lading`.
 [lading.md](lading.md#1password) says where each comes from.
 
-The HelmRelease's `ghcr.io/carpenike/lading` tag is the placeholder
-`sha-0000000000000000000000000000000000000000` (no digest) until
-carpenike/lading #9 is merged. Pin it to the merged main build, tag and
-digest. Both sync CronJobs ship `suspend: true` until the cutover.
+The HelmRelease's image is pinned to lading main `d73fae0`. Both sync
+CronJobs ship `suspend: true` until the cutover.
 
 ## Still to confirm or generate
 

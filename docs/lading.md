@@ -11,8 +11,8 @@ credential can place orders and change shipping addresses.
 ## What runs
 
 Namespace `lading`, chart `app-template` 5.3.0, image
-`ghcr.io/carpenike/lading` (placeholder tag until carpenike/lading #9 is
-merged; see [placeholders.md](placeholders.md#lading)).
+`ghcr.io/carpenike/lading`, pinned by tag and digest to lading main
+`d73fae0` (#9).
 
 | Controller | Kind | Schedule (`America/New_York`) | Secret | State volume |
 | --- | --- | --- | --- | --- |
@@ -121,8 +121,8 @@ rules use kube-state-metrics, per CronJob (one per account):
 
 These see the Job's exit status only. Per-source freshness within a run
 (Amazon, Costco, Sam's Club) is on `/healthz`, which nothing scrapes yet.
-Until the cutover, `LadingDown` fires (placeholder image) and, 36 hours
-after merge, `LadingSyncStale` (suspended CronJobs).
+Until the cutover the sync CronJobs are suspended, so `LadingSyncStale` fires
+36 hours after merge: merge this at the cutover (docs/forge-cutover.md).
 
 ### When a sync fails
 

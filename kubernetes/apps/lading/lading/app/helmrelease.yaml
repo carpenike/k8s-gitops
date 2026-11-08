@@ -35,13 +35,11 @@ spec:
         containers:
           app:
             image: &image
-              # Built by carpenike/lading .github/workflows/image.yml from
-              # main. Placeholder until carpenike/lading #9 is merged: the tag
-              # does not exist, so nothing can start by accident. Pin it to
-              # the merged main build (tag and digest); every container here
-              # uses this image.
+              # Built by carpenike/lading .github/workflows/image.yml from main
+              # (d73fae0, carpenike/lading #9). Every container here uses this
+              # image.
               repository: ghcr.io/carpenike/lading
-              tag: sha-0000000000000000000000000000000000000000
+              tag: sha-d73fae0410273c02ed38a6c814dca584bc912c4d@sha256:34a3af2c730e4db80adc9f5efcc9d431ae50fd906baaf7218e72accebf746f37
             # The image's default command is the health server.
             env:
               # Forge's services.lading.settings (LADING_<NAME>). The module

@@ -34,12 +34,10 @@ spec:
           app:
             image: &image
               # Built by carpenike/schoolhouse .github/workflows/image.yml from
-              # main. Placeholder until carpenike/schoolhouse #24 is merged:
-              # the tag does not exist, so nothing can start by accident. Pin
-              # it to the merged main build (tag and digest); both
-              # controllers use this image.
+              # main (d25df9d, carpenike/schoolhouse #24). Both controllers use
+              # this image.
               repository: ghcr.io/carpenike/schoolhouse
-              tag: sha-0000000000000000000000000000000000000000
+              tag: sha-d25df9dc33b1becee71b4e72cdd8a1cac4793bd5@sha256:2f0e229b9ff7f59ae9648bcb7827e3bde062390c6d39ee0af78e07daf916baf4
             # The image's default command is the health server.
             env:
               # Forge's services.schoolhouse.settings, as the module renders
