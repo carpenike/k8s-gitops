@@ -81,13 +81,14 @@ spec later:
 | `OUTLOOK_MCP_EXPECTED_USERNAME` | `ryan@ryanholt.net` | With `OUTLOOK_MCP_ENABLED`: the one Microsoft account the server may use. Committed as-is: this repo is public |
 | `HINDSIGHT_ENABLED` | `true` | Optional, default `false`. Long-term memory on the shared Hindsight server ([hermes-memory.md](hermes-memory.md)). `true` or `false` only |
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
-| `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it the route is not written |
+| `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED` or `TASK_BOARD_WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it no route is written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
 | `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
 | `CLAUDE_CODE_MERGE` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
 | `TASK_BOARD_ENABLED` | `true` | Optional, default `false`. The shared OpenProject task board: the bot's OpenProject user and API token (Job `openproject/hermes-provision-<bot>` writes Secret `hermes-<bot>-openproject`), egress to `openproject-mcp` (CNP `agent-task-board`) and skill `homelab/task-board`. The bot's `mcp-servers.yaml` declares the `openproject` server ([openproject.md](openproject.md), "Bot access"). `true` or `false` only |
+| `TASK_BOARD_WEBHOOK_ENABLED` | `true` | Optional, default `false`. With `TASK_BOARD_ENABLED` and `WEBHOOK_DELIVER_CHAT_ID`: board wake-ups, a turn when someone else changes the bot's task ([openproject.md](openproject.md), "Waking a bot"). Adds Secret `task-board-webhook`, Service and CNP `agent-board-hooks`, and route `task-board`. `true` or `false` only |
 | `TASK_BOARD_RYAN_USER_ID` | `4` | Optional, default `4`. Ryan's OpenProject user id, which skill `task-board` treats as Ryan speaking. An id, because non-admins can't see other users' logins and anyone can change their display name |
 | `A2A_ENABLED` | `true` | Optional, default `false`. The A2A server (Agent Card and JSON-RPC, bearer tokens per peer) and the outbound `a2a` tools ([A2A](#a2a-opt-in)). `true` or `false` only |
 | `A2A_TRUSTED_PEERS` | `chief,chief-engineer` | With `A2A_ENABLED`: the peer names allowed to send tasks. Each must be a name in the bot's `a2a_peer_tokens` field. Empty: Hermes refuses every peer |
@@ -281,6 +282,22 @@ PM in summer (7 daily, 4 weekly). The R2 path is
 `hermes-<bot>`. The PVC's `dataSourceRef` is ReplicationDestination
 `agent-data-restore`, so a new PVC starts from the latest backup in that
 path, or empty if there is none.
+
+`/opt/data` is the volume's `hermes-data/` folder, mounted by `subPath`,
+not the volume root. Hermes's CLI (`hermes chat`, the TUI) attaches to the
+running gateway through a control socket in `$HERMES_HOME`, and refuses
+unless that folder is owned by the gateway's uid (10000) and isn't
+group-writable. The volume root is root-owned, restricted Pod Security
+forbids a chown, and `fsGroup: 1000` keeps it group-writable. Init
+container `data-home` runs first: it keeps `hermes-data/` at owner 10000,
+mode 0750, and on the first start with this layout, or after restoring an
+older backup, moves everything at the root into it.
+
+So a one-off turn works from the pod:
+
+```bash
+kubectl -n hermes-<bot> exec -i deploy/hermes-agent -c app -- hermes chat --oneshot --query-file - --source tool
+```
 
 ### Screen
 
@@ -770,6 +787,8 @@ text in its history (`mirror_to_session`).
 
 **Off by default.** A bot turns it on with `WEBHOOK_ENABLED=true` and
 `WEBHOOK_DELIVER_CHAT_ID=<room id>` in its inputs; today only Chief does.
+The task board's wake-ups use the same listener with their own route,
+Service and key ([openproject.md](openproject.md), "Waking a bot").
 
 When it is on, the component adds these, all gated in the HelmRelease by
 `WEBHOOK_ENABLED`:
@@ -1980,10 +1999,11 @@ public things (DNS, TLS, upstream release notes) and reason over output
 he is given. A read-only cluster role, or a route to Forge, would be new
 scope beyond Chief's and needs its own decision.
 
-**Webhook later.** A signed webhook for Hank works like Chief's. It needs
-the room ID of Ryan's DM with Hank (`WEBHOOK_DELIVER_CHAT_ID`), which
-exists only after the first DM, and its own `webhook_secret`. The route is
-the same `/webhooks/chief-engineer` on `https://hank-hooks`.
+**Webhooks.** Hank has board wake-ups (`TASK_BOARD_WEBHOOK_ENABLED`,
+delivered to his DM with Ryan, `WEBHOOK_DELIVER_CHAT_ID`), but not the
+Chief Engineer webhook. That one would work like Chief's, with
+`WEBHOOK_ENABLED=true`, his own `webhook_secret`, and the route
+`/webhooks/chief-engineer` on `https://hank-hooks`.
 
 ### Before merge
 

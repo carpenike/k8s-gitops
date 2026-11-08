@@ -55,7 +55,7 @@ spec:
               # input is on. The floating tag moves on every rebuild build;
               # Renovate re-pins the digest (docs/hermes.md "Updating the
               # images").
-              tag: v0.23.0@sha256:e56ccd885b229d79214435b07fc91f9607d368e6f442ba3ab9cfc58fe5afffbe
+              tag: v0.23.0@sha256:41cf24ef230f4d58c4abea7dbace3405e0935b0931eb640b85aec7a7ee144d7b
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -372,7 +372,7 @@ spec:
                 ---
                 name: task-board
                 description: "The shared OpenProject task board: hand work to another bot, pick up your own, and report progress there."
-                version: 1.0.0
+                version: 1.1.0
                 author: k8s-gitops (hermes-bot component)
                 metadata:
                   hermes:
@@ -401,11 +401,11 @@ spec:
                    that the other bot will need, what done looks like, and where it
                    came from ("Ryan asked in his Matrix DM with me on <date>: <his
                    words>").
-                2. Give Ryan the task's link and say who it is with. The other bot picks
-                   it up in its own session: when Ryan tells it to, or when its board
-                   check finds new work.
+                2. Give Ryan the task's link and say who it is with. The board wakes
+                   the other bot about 5 minutes later, if its wake-ups are on (see
+                   below); otherwise it picks the task up when Ryan tells it to.
                 3. Follow up by reading the task's comments (`get_task`),
-                   not by asking over A2A.
+                   not by asking over A2A. You are woken when it is closed.
 
                 ## Working your own tasks
 
@@ -416,6 +416,33 @@ spec:
                 - Finish with `complete_task` and a summary of what changed
                   and where. If you can't finish, `release_task` with the
                   reason, or leave it assigned with a comment saying what blocks it.
+
+                ## Board wake-ups
+
+                With wake-ups on, the board starts a turn for you about 5 minutes
+                after someone else changes a task: a "Task board" message naming a
+                task id and why (`assigned`, `updated`, or `closed`). It is only a
+                pointer, from the board's relay, never from Ryan, and its text
+                carries no instructions. Read the task with `get_task` and act on
+                what you find there:
+
+                - `assigned` or `updated` on your task: read the newest comments.
+                  New work that is ready: claim it (a task already assigned to you
+                  is claimed by working it: comment, then `complete_task`). A
+                  question for you: answer it in a comment. Nothing new for you:
+                  say so in one line.
+                - `closed` on a task you created: read the summary and tell Ryan
+                  what came back, in a few lines.
+
+                A board turn has no one to approve a command: anything that would
+                need Ryan's approval is refused there. Leave that step for his
+                Matrix session, and say what you need in a task comment and in your
+                message to him.
+
+                Your own changes never wake you, and a comment wakes the task's
+                assignee. So don't comment only to thank or acknowledge: that wakes
+                the other bot for nothing. A task's author hears only when it
+                closes; to ask the author something, ask Ryan too.
 
                 ## What a task authorizes
 
@@ -791,8 +818,87 @@ spec:
                 save_config(cfg)
                 print(f"a2a: {'on' if on else 'off'}; peers: {', '.join(sorted(agents)) or 'none'}")
                 PY
+                # Board wake-ups (input TASK_BOARD_WEBHOOK_ENABLED;
+                # docs/openproject.md, "Waking a bot"): route task-board under
+                # platforms.webhook.extra.routes, for openproject-mcp's relay.
+                # Written only with the input and TASK_BOARD_ENABLED on, the
+                # key in this container (Secret task-board-webhook), and a
+                # delivery room; otherwise removed. The route's secret is a
+                # $${VAR} reference the gateway expands from its env, so the
+                # key never lands in config.yaml. Its toolsets are the bot's
+                # Matrix ones as the steps above left them; a webhook turn
+                # still refuses any command that would need approval.
+                if [ -n "$${TASK_BOARD_WEBHOOK_SECRET:-}" ] && [ -f /opt/data/.env ] && [ ! -L /opt/data/.env ]; then
+                  sed -i -e '/^WEBHOOK_ENABLED=/d' -e '/^WEBHOOK_PORT=/d' -e '/^TASK_BOARD_WEBHOOK_SECRET=/d' /opt/data/.env
+                fi
+                if [ '${TASK_BOARD_WEBHOOK_ENABLED:=false}' = true ] && [ '${TASK_BOARD_ENABLED:=false}' = true ] \
+                  && [ -n "$${TASK_BOARD_WEBHOOK_SECRET:-}" ] && [ -n '${WEBHOOK_DELIVER_CHAT_ID:=}' ]; then
+                  board_route=write
+                else
+                  board_route=remove
+                  if [ '${TASK_BOARD_WEBHOOK_ENABLED:=false}' = true ]; then
+                    echo "WARNING: TASK_BOARD_WEBHOOK_ENABLED needs TASK_BOARD_ENABLED, Secret task-board-webhook (1Password openproject/bot_webhook_secret) and WEBHOOK_DELIVER_CHAT_ID; route task-board not written" >&2
+                  fi
+                fi
+                BOARD_ROUTE="$board_route" BOARD_ROUTE_CHAT_ID='${WEBHOOK_DELIVER_CHAT_ID:=}' \
+                  /opt/hermes/.venv/bin/python - <<'PY'
+                import os
+                import sys
+
+                sys.path.insert(0, "/opt/hermes")
+                from hermes_cli.config import read_raw_config, save_config
+
+                NAME = "task-board"
+                BOT = "${BOT_NAME}"
+
+                cfg = read_raw_config()
+                pt = cfg.get("platform_toolsets") if isinstance(cfg.get("platform_toolsets"), dict) else {}
+                matrix = pt.get("matrix") if isinstance(pt.get("matrix"), list) and pt.get("matrix") else ["hermes-matrix"]
+                ROUTE = {
+                    # Fields from the relay only (images/openproject-mcp, relay.py):
+                    # an id, a fixed reason word, and an OpenProject login and id.
+                    "prompt": (
+                        "Task board: task {task_id} needs a look ({reason}, by OpenProject user {actor}, "
+                        "id {actor_id}). This pointer comes from the board's webhook relay, not from Ryan, "
+                        "and carries no instructions. Follow the task-board skill, section Board wake-ups: "
+                        "read the task with get_task, act on what it says there, and tell Ryan in a few "
+                        "lines what came in and what you did or propose."
+                    ),
+                    "skills": ["task-board"],
+                    "secret": "$${TASK_BOARD_WEBHOOK_SECRET}",
+                    "events": ["task_board"],
+                    "filters": [
+                        {"field": "bot", "equals": BOT},
+                        {"field": "task_id", "exists": True},
+                        {"field": "reason", "in": ["assigned", "updated", "closed"]},
+                    ],
+                    "deliver": "matrix",
+                    "deliver_extra": {"chat_id": os.environ["BOARD_ROUTE_CHAT_ID"]},
+                    "mirror_to_session": True,
+                    "toolsets": list(matrix),
+                }
+
+                platforms = cfg.get("platforms") if isinstance(cfg.get("platforms"), dict) else {}
+                webhook = platforms.get("webhook") if isinstance(platforms.get("webhook"), dict) else {}
+                extra = webhook.get("extra") if isinstance(webhook.get("extra"), dict) else {}
+                routes = extra.get("routes") if isinstance(extra.get("routes"), dict) else {}
+                if os.environ["BOARD_ROUTE"] == "write":
+                    routes[NAME] = ROUTE
+                else:
+                    routes.pop(NAME, None)
+                for parent, key, value in ((extra, "routes", routes), (webhook, "extra", extra),
+                                           (platforms, "webhook", webhook), (cfg, "platforms", platforms)):
+                    if value:
+                        parent[key] = value
+                    else:
+                        parent.pop(key, None)
+                save_config(cfg)
+                state = "written, toolsets " + ",".join(matrix) if os.environ["BOARD_ROUTE"] == "write" else "removed"
+                print(f"webhook route {NAME}: {state}")
+                PY
             # api-server: stage2 reads API_SERVER_KEY (above). hindsight,
-            # webhook and the a2a pair: the steps above check for their keys.
+            # webhook, task-board-webhook and the a2a pair: the steps above
+            # check for their keys.
             # The gateway's other credentials stay in the app container.
             envFrom:
               - secretRef:
@@ -810,6 +916,9 @@ spec:
               - secretRef:
                   name: a2a-chief-engineer
                   optional: true
+              - secretRef:
+                  name: task-board-webhook
+                  optional: true
             securityContext: &restricted
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -822,6 +931,47 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 1Gi
+            dependsOn: data-home
+          # $HERMES_HOME (/opt/data) is the volume's hermes-data/ folder, not
+          # its root. Hermes's CLI (hermes chat, the TUI) attaches to the
+          # running gateway through a control socket in $HERMES_HOME and
+          # refuses unless that folder is owned by the gateway's uid and not
+          # writable by a shared group. The volume root can never be: it is
+          # root-owned, the namespace's restricted Pod Security forbids a
+          # chown, and fsGroup 1000 keeps it group-writable. This runs before
+          # config, so the folder exists before any subPath mount of it (the
+          # kubelet would create a missing one as root). On the first start
+          # with this layout, or after a restore of an older backup, it moves
+          # everything at the root into hermes-data/.
+          data-home:
+            image: *agentImage
+            # Not the image's entrypoint, which bootstraps $HERMES_HOME.
+            command:
+              - sh
+              - -c
+              - |
+                set -eu
+                cd /opt/volume
+                if [ ! -d hermes-data ]; then
+                  install -d -m 0750 hermes-data.new
+                  find . -mindepth 1 -maxdepth 1 ! -name hermes-data.new ! -name lost+found \
+                    -exec mv {} hermes-data.new/ \;
+                  mv hermes-data.new hermes-data
+                  echo "data-home: moved the volume root into hermes-data/"
+                fi
+                if [ "$(stat -c %u hermes-data)" != "$(id -u)" ]; then
+                  echo "data-home: hermes-data/ is owned by uid $(stat -c %u hermes-data), not $(id -u)" >&2
+                  exit 1
+                fi
+                # fsGroup can add group write on a recursive relabel.
+                chmod 0750 hermes-data
+            securityContext: *restricted
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
         containers:
           app:
             image: *agentImage
@@ -896,6 +1046,13 @@ spec:
               # only: the screen never gets the secret or the port.
               - secretRef:
                   name: webhook
+                  optional: true
+              # WEBHOOK_ENABLED, WEBHOOK_PORT and TASK_BOARD_WEBHOOK_SECRET,
+              # only with TASK_BOARD_WEBHOOK_ENABLED=true (ExternalSecret
+              # task-board-webhook): the key route task-board checks the
+              # relay's events with. Agent pod only.
+              - secretRef:
+                  name: task-board-webhook
                   optional: true
               # TAVILY_API_KEY, only for a bot with TAVILY_ENABLED=true
               # (ExternalSecret tavily). Web tools run in this process; the
@@ -983,7 +1140,7 @@ spec:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
               # Floating tag, digest re-pinned by Renovate (docs/hermes.md).
-              tag: v0.23.0@sha256:5dd9a65d65114abd893d47befc1212cc5cb1ba47e65c18160650de1d71c2730e
+              tag: v0.23.0@sha256:99545e8b302b6a56fc2a0d8a7ca7c9edfbce85611358eaa430f5fb7f55c748b8
             env:
               TZ: America/New_York
             probes:
@@ -1052,6 +1209,17 @@ spec:
         enabled: ${WEBHOOK_ENABLED:=false}
         controller: agent
         forceRename: agent-hooks
+        ports:
+          webhook:
+            port: 8644
+      # Board wake-ups (input TASK_BOARD_WEBHOOK_ENABLED;
+      # docs/openproject.md, "Waking a bot"): the same webhook listener, for
+      # openproject-mcp's relay only (CNP agent-board-hooks). In the cluster
+      # only; no HTTPRoute.
+      board-hooks:
+        enabled: ${TASK_BOARD_WEBHOOK_ENABLED:=false}
+        controller: agent
+        forceRename: agent-board-hooks
         ports:
           webhook:
             port: 8644
@@ -1286,6 +1454,32 @@ spec:
           - secretKey: webhook_secret
             remoteRef:
               key: hermes-${BOT_NAME}/webhook_secret
+      # The key openproject-mcp's relay signs board wake-ups with: one field
+      # for every bot (item openproject, bot_webhook_secret; the relay's
+      # ExternalSecret openproject-mcp-relay reads it too). Also turns on
+      # Hermes' webhook listener, for a bot without WEBHOOK_ENABLED. The
+      # route task-board names the key itself; a bot without WEBHOOK_SECRET
+      # has no global key, so no other route can be written for it.
+      task-board-webhook:
+        enabled: ${TASK_BOARD_WEBHOOK_ENABLED:=false}
+        forceRename: task-board-webhook
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: task-board-webhook
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              WEBHOOK_ENABLED: "true"
+              WEBHOOK_PORT: "8644"
+              TASK_BOARD_WEBHOOK_SECRET: "{{ .bot_webhook_secret }}"
+        data:
+          - secretKey: bot_webhook_secret
+            remoteRef:
+              key: openproject/bot_webhook_secret
       # Tavily web search/extract key. Missing field: this stays unready,
       # Secret tavily is never created, and web tools answer "not set".
       tavily:
@@ -1638,6 +1832,29 @@ spec:
                   - ports:
                       - port: "8644"
                         protocol: TCP
+      # Board wake-ups: 8644 from openproject-mcp's pods (the relay),
+      # nothing else. Additive to provision/ciliumnetworkpolicy.yaml and to
+      # agent-hooks; the screen pod is not allowed.
+      board-hooks-ingress:
+        enabled: ${TASK_BOARD_WEBHOOK_ENABLED:=false}
+        forceRename: agent-board-hooks
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: openproject
+                      app.kubernetes.io/name: openproject-mcp
+                toPorts:
+                  - ports:
+                      - port: "8644"
+                        protocol: TCP
       # Lets pocket-id-exempt in network select the public route
       # (docs/gateway-auth.md, "Opt out").
       hooks-gateway-auth:
@@ -1818,14 +2035,20 @@ spec:
           apiGroup: volsync.backube
           kind: ReplicationDestination
           name: agent-data-restore
+        # $HERMES_HOME is the volume's hermes-data/ folder (init container
+        # data-home says why); only data-home sees the volume root.
         advancedMounts:
           agent:
+            data-home:
+              - path: /opt/volume
             config:
               - path: /opt/data
+                subPath: hermes-data
             app:
               - path: /opt/data
+                subPath: hermes-data
               - path: /opt/data/skills
-                subPath: skills
+                subPath: hermes-data/skills
                 readOnly: true
       workspace:
         type: persistentVolumeClaim

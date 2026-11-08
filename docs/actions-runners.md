@@ -14,6 +14,7 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Runner `1` CPU / `2Gi` up to `8` CPU / `16Gi`, no container mode (see below) |
 | Scale set | HelmRelease `atrium-k8s` | Repo `https://github.com/carpenike/atrium`. `runs-on` name `atrium-k8s`. Non-Nix jobs, shared limits |
 | Scale set | HelmRelease `mcp-k8s` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s`. Non-Nix jobs. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
+| Scale set | HelmRelease `mcp-k8s-build` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s-build`. Nix and image jobs. Kata VM pods, privileged inside the guest (ADR 0011). Runner `2` CPU / `4Gi` up to `8` CPU / `16Gi`, `maxRunners` 2 |
 | Scale set | HelmRelease `network-config-k8s` | Repo `https://github.com/carpenike/network-config`. `runs-on` name `network-config-k8s`. Runner `250m` / `512Mi` up to `1` CPU / `2Gi` |
 | Scale set | HelmRelease `schoolhouse-k8s` | Repo `https://github.com/carpenike/schoolhouse`. `runs-on` name `schoolhouse-k8s`. Shared limits |
 | Scale set | HelmRelease `whiskey-k8s` | Repo `https://github.com/carpenike/whiskey-whiskey-whiskey`. `runs-on` name `whiskey-k8s`. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
@@ -84,9 +85,16 @@ pod is not privileged. Their jobs start no service containers or Docker
 builds. If one later needs Docker, set `containerMode.type: dind` in that
 overlay.
 
-The Nix jobs in `atrium` and `mcp` have no scale set yet. What they need
-(a Nix install in the pod, build sandboxing, `/dev/kvm` for the NixOS VM
-test in `mcp`) sets their privilege level, so it is decided separately.
+`mcp-k8s-build` runs `mcp`'s Nix job and its image build. Every pod is a
+Kata VM (`runtimeClassName: kata-qemu`). Its runner container and dind
+sidecar are privileged, but only inside the guest: the `kata-qemu` handler
+sets `privileged_without_host_devices = true`, so they get no host devices
+and do not share the host kernel. ADR 0011 records the decision. No
+`/dev/kvm` reaches the guest, so a NixOS VM test cannot run there. A
+`/nix` emptyDir (`40Gi`) holds the job's Nix store.
+
+The Nix jobs in `atrium` have no scale set yet. The same Kata pattern fits
+them when they need one.
 
 The runner image is not the GitHub-hosted Ubuntu image. It has
 passwordless `sudo`, `git`, `curl`, `jq`, and the system `python3`, but

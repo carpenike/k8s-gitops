@@ -117,6 +117,14 @@ Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
 | `postgres17-r2` | `endpoint_url` | `https://<account id>.r2.cloudflarestorage.com` |
 | `postgres17-r2` | `bucket` | Bucket name; objects go under `cnpg/postgres17/` |
 
+## Forge stores in postgres17
+
+Before the Forge stores move (docs/postgres17.md, "Forge stores"), create
+items `schoolhouse`, `lading`, `homelab-finance` and `finances-context` in
+vault `k8s-secrets`. The table in
+[postgres17.md](postgres17.md#1password) lists each field and the Forge
+sops key whose value it can reuse.
+
 ## homelab-mcp
 
 Before `kubernetes/apps/homelab-mcp` reconciles, create item `homelab-mcp`
