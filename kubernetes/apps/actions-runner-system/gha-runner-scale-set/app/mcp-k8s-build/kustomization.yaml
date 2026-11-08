@@ -54,6 +54,28 @@ patches:
           name: nix-store
           emptyDir:
             sizeLimit: 40Gi
+      # Kubelet creates emptyDir directories mode 0777, and Nix refuses a
+      # world-writable /nix ("Path "/nix" is world-writable or a symlink").
+      # The runner user has passwordless sudo in the actions-runner image.
+      - op: replace
+        path: /spec/values/template/spec/containers/0/command
+        value:
+          - /bin/bash
+          - -c
+          - sudo chmod 0755 /nix && chmod 0755 /home/runner && exec /home/runner/run.sh
+      # Docker's storage. In a Kata guest the container rootfs is virtio-fs,
+      # which overlayfs cannot use as an upper layer, so image builds fail
+      # with "failed to mount ... fstype: overlay ... err: invalid argument".
+      # A Memory emptyDir is a tmpfs inside the guest, which overlayfs
+      # accepts. The dind sidecar mounts it at /var/lib/docker (post-renderer
+      # below). See kata-containers docs/how-to/how-to-run-docker-with-kata.md.
+      - op: add
+        path: /spec/values/template/spec/volumes/-
+        value:
+          name: dind-storage
+          emptyDir:
+            medium: Memory
+            sizeLimit: 12Gi
       - op: replace
         path: /spec/values/template/spec/containers/0/resources/requests/cpu
         value: "2"
@@ -76,6 +98,12 @@ patches:
       # starts. The runner waits for docker itself
       # (RUNNER_WAIT_FOR_DOCKER_IN_SECONDS=120, set by the chart), so the
       # probe is dropped here. It stays in place for the runc scale sets.
+      #
+      # The same patch mounts dind-storage at /var/lib/docker and gives the
+      # sidecar a memory limit. Kata sizes the guest VM from container limits,
+      # and the tmpfs, dockerd and the build containers it runs are all
+      # charged to the sidecar, so the limit covers the 12Gi tmpfs plus
+      # headroom for the builds.
       - op: add
         path: /spec/postRenderers
         value:
@@ -91,3 +119,17 @@ patches:
                       value: dind
                     - op: remove
                       path: /spec/template/spec/initContainers/1/startupProbe
+                    - op: add
+                      path: /spec/template/spec/initContainers/1/volumeMounts/-
+                      value:
+                        name: dind-storage
+                        mountPath: /var/lib/docker
+                    - op: add
+                      path: /spec/template/spec/initContainers/1/resources
+                      value:
+                        requests:
+                          cpu: 500m
+                          memory: 1Gi
+                        limits:
+                          cpu: "4"
+                          memory: 16Gi
