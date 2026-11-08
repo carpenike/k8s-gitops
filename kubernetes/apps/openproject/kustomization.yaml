@@ -10,3 +10,4 @@ resources:
   - ./openproject/ks.yaml
   - ./openproject-mcp/ks.yaml
   - ./bot-provisioner/ks.yaml
+  - ./bot-provisioner/external-bots.yaml

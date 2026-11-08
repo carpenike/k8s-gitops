@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-# Provision one Hermes bot on the OpenProject task board (docs/openproject.md,
-# "Bot provisioning"). Run by Job openproject/hermes-provision-<bot> with
-# `bundle exec rails runner`, inside OpenProject's own image, so it uses
-# OpenProject's services and contracts the way its seeder does. No admin API
-# token is involved: the runner talks to the database as the app.
+# Provision one bot on the OpenProject task board (docs/openproject.md,
+# "Bot provisioning"). Run by Job openproject/hermes-provision-<bot> (a Hermes
+# bot) or openproject/external-provision-<bot> (a bot outside the cluster,
+# BOT_EXTERNAL=true; "Bots outside the cluster") with `bundle exec rails
+# runner`, inside OpenProject's own image, so it uses OpenProject's services
+# and contracts the way its seeder does. No admin API token is involved: the
+# runner talks to the database as the app.
 #
 # Idempotent. Each run:
 #   0. Checks BOT_NAME, the bot's namespace and Secret name, and the Secret's
@@ -55,10 +57,20 @@ fail!("BOT_INPUTS ryan_user_id must be a number") unless INPUTS["ryan_user_id"].
 RYAN_USER_ID = INPUTS["ryan_user_id"].to_i
 TOKEN_NAME = "hermes (k8s-gitops provisioner)"
 LABEL_NAME = "openproject-bot-provisioner"
+# A bot outside the cluster (Grok Bot): its Secret lives here in openproject,
+# and Ryan copies the token to the bot himself.
+EXTERNAL = ENV["BOT_EXTERNAL"].to_s == "true"
+DISPLAY_NAME = ENV["BOT_DISPLAY_NAME"].to_s.strip
 
 fail!("BOT_NAME must be lowercase letters, digits and -, at most 40") unless BOT.match?(/\A[a-z0-9][a-z0-9-]{0,39}\z/)
-fail!("BOT_NAMESPACE must be hermes-#{BOT}") unless NAMESPACE == "hermes-#{BOT}"
-fail!("SECRET_NAME must be hermes-#{BOT}-openproject") unless SECRET == "hermes-#{BOT}-openproject"
+if EXTERNAL
+  fail!("BOT_NAMESPACE must be openproject for an external bot") unless NAMESPACE == "openproject"
+  fail!("SECRET_NAME must be openproject-bot-#{BOT}") unless SECRET == "openproject-bot-#{BOT}"
+else
+  fail!("BOT_NAMESPACE must be hermes-#{BOT}") unless NAMESPACE == "hermes-#{BOT}"
+  fail!("SECRET_NAME must be hermes-#{BOT}-openproject") unless SECRET == "hermes-#{BOT}-openproject"
+end
+fail!("BOT_DISPLAY_NAME is too long") if DISPLAY_NAME.length > 60
 
 # --- Kubernetes API, as this Job's ServiceAccount (get/patch on SECRET only)
 SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
@@ -110,9 +122,9 @@ if user.nil?
   user = service!(
     Users::CreateService.new(user: actor).call(
       login: BOT,
-      firstname: BOT.capitalize,
+      firstname: DISPLAY_NAME.empty? ? BOT.capitalize : DISPLAY_NAME,
       lastname: "(bot)",
-      mail: "#{BOT}@hermes.invalid",
+      mail: EXTERNAL ? "#{BOT}@bots.invalid" : "#{BOT}@hermes.invalid",
       admin: false,
       status: User.statuses[:active],
       password: password,

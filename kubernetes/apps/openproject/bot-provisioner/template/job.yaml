@@ -23,7 +23,7 @@ spec:
       # lives in another Kustomization, so only a change here makes the
       # task-board Kustomization replace a finished or failed Job.
       annotations:
-        openproject-bot-provisioner/script-revision: "2"
+        openproject-bot-provisioner/script-revision: "3"
       labels:
         app.kubernetes.io/name: openproject-bot-provisioner
         app.kubernetes.io/instance: ${BOT_NAME}

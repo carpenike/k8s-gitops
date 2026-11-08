@@ -135,14 +135,19 @@ def main() -> None:
         settings.api_base,
         settings.default_project or "(none)",
     )
+    external = sorted(bot for bot, _, _ in settings.relay_targets)
     log.info(
         "task-board relay at %s: %s",
         HOOK_PATH,
-        f"on, bots {', '.join(settings.relay_bots)}"
-        if settings.openproject_webhook_secret and settings.hermes_webhook_secret
-        and settings.relay_bots
-        else "off (needs OPENPROJECT_WEBHOOK_SECRET, HERMES_WEBHOOK_SECRET and RELAY_BOTS)",
+        f"on, bots {', '.join(settings.relay_bots)}; outside the cluster: "
+        f"{', '.join(external) or 'none'}"
+        if settings.openproject_webhook_secret and settings.relay_bots
+        and (settings.hermes_webhook_secret or external)
+        else "off (needs OPENPROJECT_WEBHOOK_SECRET, RELAY_BOTS, and HERMES_WEBHOOK_SECRET "
+        "or RELAY_TARGETS)",
     )
+    for problem in settings.relay_target_errors:
+        log.warning("task-board relay: %s; entry ignored", problem)
     uvicorn.run(
         app,
         host="0.0.0.0",  # noqa: S104

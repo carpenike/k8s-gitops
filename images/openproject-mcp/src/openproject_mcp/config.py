@@ -8,7 +8,9 @@ the dataclass repr.
 
 from __future__ import annotations
 
+import json
 import os
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
@@ -40,6 +42,44 @@ def _int(env: Mapping[str, str], name: str, default: int, lo: int, hi: int) -> i
     if not lo <= value <= hi:
         raise ValueError(f"{name} must be between {lo} and {hi}, got {value}")
     return value
+
+
+_BOT_LOGIN = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
+
+
+def parse_targets(raw: str) -> tuple[tuple[tuple[str, str, str], ...], tuple[str, ...]]:
+    """RELAY_TARGETS: `{"<bot>": {"url": "https://...", "bearer": "<key>"}}`.
+
+    Webhook targets for bots outside the cluster (a Grok Bot routine's
+    trigger). Returns ((bot, url, bearer), ...) and the problems found, which
+    never include a value: a bad entry is dropped, not fatal, so a typo in
+    the Secret can't take the MCP server down.
+    """
+    if not raw.strip():
+        return (), ()
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        return (), ("RELAY_TARGETS is not valid JSON",)
+    if not isinstance(data, dict):
+        return (), ("RELAY_TARGETS must be a JSON object",)
+    targets: list[tuple[str, str, str]] = []
+    errors: list[str] = []
+    for bot, spec in data.items():
+        name = str(bot).strip().lower()
+        if not _BOT_LOGIN.match(name):
+            errors.append("RELAY_TARGETS has an entry that is not a bot login")
+            continue
+        url = spec.get("url", "") if isinstance(spec, dict) else ""
+        bearer = spec.get("bearer", "") if isinstance(spec, dict) else ""
+        if not (isinstance(url, str) and url.startswith("https://") and len(url) > 8):
+            errors.append(f"RELAY_TARGETS[{name}].url must be an https:// URL")
+            continue
+        if not (isinstance(bearer, str) and bearer.strip()):
+            errors.append(f"RELAY_TARGETS[{name}].bearer is empty")
+            continue
+        targets.append((name, url.strip(), bearer.strip()))
+    return tuple(targets), tuple(errors)
 
 
 def normalize_base(url: str) -> str:
@@ -82,6 +122,9 @@ class Settings:
     hermes_webhook_secret: str = field(default="", repr=False)
     relay_bots: tuple[str, ...] = ()
     relay_hermes_url: str = DEFAULT_RELAY_HERMES_URL
+    #: Bots outside the cluster: (bot, url, bearer). Secret, so no repr.
+    relay_targets: tuple[tuple[str, str, str], ...] = field(default=(), repr=False)
+    relay_target_errors: tuple[str, ...] = ()
 
     @property
     def api_base(self) -> str:
@@ -100,6 +143,7 @@ class Settings:
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
         env = os.environ if env is None else env
         ready = _csv(env.get("OPENPROJECT_READY_STATUSES", "")) or ["New"]
+        targets, target_errors = parse_targets(env.get("RELAY_TARGETS", ""))
         return cls(
             url=env.get("OPENPROJECT_URL", "").strip() or DEFAULT_URL,
             public_url=env.get("OPENPROJECT_PUBLIC_URL", "").strip(),
@@ -119,4 +163,6 @@ class Settings:
             hermes_webhook_secret=env.get("HERMES_WEBHOOK_SECRET", "").strip(),
             relay_bots=tuple(b.lower() for b in _csv(env.get("RELAY_BOTS", ""))),
             relay_hermes_url=env.get("RELAY_HERMES_URL", "").strip() or DEFAULT_RELAY_HERMES_URL,
+            relay_targets=targets,
+            relay_target_errors=target_errors,
         )

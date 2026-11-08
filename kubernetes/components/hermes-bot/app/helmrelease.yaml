@@ -372,7 +372,7 @@ spec:
                 ---
                 name: task-board
                 description: "The shared OpenProject task board: hand work to another bot, pick up your own, and report progress there."
-                version: 1.1.0
+                version: 1.2.0
                 author: k8s-gitops (hermes-bot component)
                 metadata:
                   hermes:
@@ -396,7 +396,10 @@ spec:
                 started there never reaches Ryan.
 
                 1. Create the task with `create_task`, assigned to the other
-                   bot's login (for example `hank` for code and homelab engineering).
+                   bot's login: `hank` for code and homelab engineering, `chief` for
+                   mail, the web and general questions, `chief-engineer` for Chief
+                   Engineer, Ryan's homelab assistant on Grok Bot (outside the
+                   cluster; it reads the board over its VPN).
                    The description says: the goal, the context from your conversation
                    that the other bot will need, what done looks like, and where it
                    came from ("Ryan asked in his Matrix DM with me on <date>: <his
