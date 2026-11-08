@@ -93,6 +93,7 @@ OpenProject toolset on Forge (`carpenike/mcp`, `docs/OPENPROJECT.md`).
 | Tools | `whoami`, `list_tasks`, `get_task`, `create_task`, `add_comment`, `claim_next`, `complete_task`, `release_task`. Hermes names them `mcp__openproject__<tool>` |
 | Claim | Atomic through `lockVersion`: a stale `PATCH` gets 409 and changes nothing |
 | Links | Tool results link to `https://tasks.<internal domain>` (`OPENPROJECT_PUBLIC_URL`) |
+| Default project | `bots` (`OPENPROJECT_DEFAULT_PROJECT`), the project the provisioning Job creates; a tool call can still name another |
 
 On each bot (`kubernetes/apps/hermes/<bot>/`):
 
