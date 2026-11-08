@@ -45,6 +45,7 @@ global *manage user* / *create user* permission. So:
 |---|---|---|
 | `POST /mcp` | Bearer | MCP over streamable HTTP. Stateless, with JSON responses. Serves both the 2025 `initialize` protocol and 2026-07-28 |
 | `GET /healthz` | none | `{"status":"ok"}`. Does not call OpenProject |
+| `POST /hooks/openproject` | OpenProject's `X-OP-Signature` | The task-board relay ([below](#task-board-relay)). 404 while it is off |
 
 The container listens on `0.0.0.0:$PORT` (default 8000) as UID 65532. It runs
 one uvicorn process and writes nothing outside `/tmp`, so
@@ -55,7 +56,7 @@ the MCP SDK's DNS-rebinding check. Other hosts get HTTP 421.
 
 ## Environment
 
-None of these is a secret.
+None of these is a secret except the relay's two keys.
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -71,6 +72,10 @@ None of these is a secret.
 | `PORT` | `8000` | Listen port |
 | `ALLOWED_HOSTS` | `openproject-mcp.openproject.svc.cluster.local:*,openproject-mcp.openproject.svc:*,openproject-mcp:*,localhost:*,127.0.0.1:*` | Comma list of allowed `Host` headers. `name:*` allows any port and also the bare `name`, so a Service on port 80 works |
 | `LOG_LEVEL` | `INFO` | Python log level |
+| `OPENPROJECT_WEBHOOK_SECRET` | *(none)* | **Secret.** The key OpenProject's webhook signs with. Relay only |
+| `HERMES_WEBHOOK_SECRET` | *(none)* | **Secret.** The key the relay signs bot events with. Relay only |
+| `RELAY_BOTS` | *(none)* | Comma list of the bots' OpenProject logins. Only these are ever woken |
+| `RELAY_HERMES_URL` | `http://agent-board-hooks.hermes-{bot}.svc.cluster.local:8644/webhooks/task-board` | Where a bot's event goes; `{bot}` is its login |
 
 Status, priority and type names are resolved case-insensitively through the
 API and cached. A numeric value is used as an id.
@@ -106,6 +111,42 @@ read, check, PATCH and retry loop.
 The OpenProject workflow for the bots' role must allow `New → In progress`,
 `In progress → Closed` and `In progress → New` (or whatever statuses are
 configured).
+
+## Task-board relay
+
+OpenProject can send a webhook when a work package changes, but it signs it
+with HMAC-SHA1 (`X-OP-Signature: sha1=<hex>`), and a Hermes webhook route
+accepts only SHA-256 schemes. `POST /hooks/openproject` sits between them
+(`relay.py`):
+
+1. It checks OpenProject's signature with `OPENPROJECT_WEBHOOK_SECRET`. A
+   missing or wrong one gets 401.
+2. It takes only `work_package:created` and `work_package:updated`. A comment
+   arrives as an update, since OpenProject sends one event per journal.
+3. It picks who to wake, by the `login`s OpenProject embeds (it renders the
+   payload as its system user):
+   - the **assignee**, if it is one of `RELAY_BOTS` and someone else made the
+     change, unless the change closed the task;
+   - the **author**, if it is one of `RELAY_BOTS`, someone else made the
+     change, and the change closed the task.
+
+   A bot's own change never wakes that bot, and an event without an `actor`
+   wakes no one. "Closed the task" needs the previous status, which the
+   relay keeps in memory per task. After a restart, the first event on a
+   closed task counts as the close: at most one extra notice per task.
+4. For each bot it posts `RELAY_HERMES_URL` a pointer only:
+   `{"event_type": "task_board", "bot", "task_id", "reason": "assigned" |
+   "updated" | "closed", "actor", "actor_id"}`. No subject, description or
+   comment text goes through. It is signed with Hermes' generic V2 scheme
+   (`X-Webhook-Signature-V2`, hex HMAC-SHA256 of `<timestamp>.<body>`, and
+   `X-Webhook-Timestamp`) with `HERMES_WEBHOOK_SECRET`. `webhook-id` is
+   `op-<sha256 of OpenProject's body>-<bot>`, so Hermes drops a redelivery.
+5. It answers OpenProject 200 with what each bot returned (`-1` if
+   unreachable). OpenProject keeps that in its webhook log.
+
+OpenProject sends an event once its journal aggregation window has passed
+(5 minutes by default), so a burst of edits is one event, and a bot hears
+about a change about 5 minutes after it.
 
 ## Development
 

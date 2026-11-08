@@ -2,8 +2,10 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # Streamable-HTTP MCP server at http://openproject-mcp.openproject.svc.cluster.local:8000/mcp
 # for the bots' task board (images/openproject-mcp, docs/openproject.md).
-# Stateless and secret-free: a bot's Hermes sends its own OpenProject API
-# token as the bearer, and every OpenProject call is made as that bot.
+# Stateless: a bot's Hermes sends its own OpenProject API token as the
+# bearer, and every OpenProject call is made as that bot. It also serves the
+# board webhook's relay at /hooks/openproject (docs/openproject.md, "Waking a
+# bot"), whose two HMAC keys are its only secrets.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -16,14 +18,17 @@ spec:
   values:
     controllers:
       openproject-mcp:
+        annotations:
+          # Restart when Secret openproject-mcp-relay changes.
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
               repository: ghcr.io/carpenike/openproject-mcp
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
-              # Floating tag, digest re-pinned by Renovate. The first digest is
-              # the branch build 0.1.0-a7823be.
-              tag: 0.1.0@sha256:86316d77ad0f84999d82ce29faa41d02d857a38276b1fa299aed254b9219d753
+              # Floating tag, digest re-pinned by Renovate. This digest is the
+              # branch build 0.2.0-d560435 (the task-board relay).
+              tag: 0.2.0@sha256:4070f5942abf485b7953f29e10936b96f95c04859ef47cf820a4faf1197b81fe
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
@@ -34,6 +39,16 @@ spec:
               # task-board doesn't name one.
               OPENPROJECT_DEFAULT_PROJECT: bots
               PORT: "8000"
+              # The bots the relay may wake, by OpenProject login. Each needs
+              # TASK_BOARD_WEBHOOK_ENABLED=true in its inputs, or its event
+              # has nowhere to go (the relay logs and moves on).
+              RELAY_BOTS: chief,hank
+            # OPENPROJECT_WEBHOOK_SECRET and HERMES_WEBHOOK_SECRET. Without
+            # them the relay answers 404 and the MCP server works as before.
+            envFrom:
+              - secretRef:
+                  name: openproject-mcp-relay
+                  optional: true
             resources:
               requests:
                 cpu: 10m
@@ -70,6 +85,11 @@ spec:
     service:
       app:
         controller: openproject-mcp
+        # Pinned: OpenProject's webhook allowlist takes addresses, not names
+        # (OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST in
+        # openproject/app/helmrelease.yaml). The address the Service already
+        # had; change both together.
+        clusterIP: 10.43.104.160
         ports:
           http:
             port: 8000

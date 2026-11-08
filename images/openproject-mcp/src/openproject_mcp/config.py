@@ -1,7 +1,9 @@
-"""Settings from the environment. None of them is a secret.
+"""Settings from the environment.
 
 The server holds no OpenProject credentials: every MCP request brings the
-caller's own OpenProject API token as `Authorization: Bearer <token>`.
+caller's own OpenProject API token as `Authorization: Bearer <token>`. The
+only secrets are the task-board relay's two HMAC keys (relay.py), kept out of
+the dataclass repr.
 """
 
 from __future__ import annotations
@@ -17,6 +19,9 @@ DEFAULT_ALLOWED_HOSTS = (
     "openproject-mcp:*,"
     "localhost:*,"
     "127.0.0.1:*"
+)
+DEFAULT_RELAY_HERMES_URL = (
+    "http://agent-board-hooks.hermes-{bot}.svc.cluster.local:8644/webhooks/task-board"
 )
 
 
@@ -72,6 +77,11 @@ class Settings:
     allowed_hosts: tuple[str, ...] = field(
         default_factory=lambda: tuple(expand_hosts(_csv(DEFAULT_ALLOWED_HOSTS)))
     )
+    #: Task-board relay (relay.py). Off unless both keys and a bot are set.
+    openproject_webhook_secret: str = field(default="", repr=False)
+    hermes_webhook_secret: str = field(default="", repr=False)
+    relay_bots: tuple[str, ...] = ()
+    relay_hermes_url: str = DEFAULT_RELAY_HERMES_URL
 
     @property
     def api_base(self) -> str:
@@ -105,4 +115,8 @@ class Settings:
             allowed_hosts=tuple(
                 expand_hosts(_csv(env.get("ALLOWED_HOSTS", "")) or _csv(DEFAULT_ALLOWED_HOSTS))
             ),
+            openproject_webhook_secret=env.get("OPENPROJECT_WEBHOOK_SECRET", "").strip(),
+            hermes_webhook_secret=env.get("HERMES_WEBHOOK_SECRET", "").strip(),
+            relay_bots=tuple(b.lower() for b in _csv(env.get("RELAY_BOTS", ""))),
+            relay_hermes_url=env.get("RELAY_HERMES_URL", "").strip() or DEFAULT_RELAY_HERMES_URL,
         )

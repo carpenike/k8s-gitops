@@ -1,13 +1,19 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# The shared provisioning script. Each bot's task-board Kustomization
-# (kubernetes/components/hermes-bot/task-board) runs it with
-# ../template. docs/openproject.md, "Bot provisioning".
+# The shared provisioning script, which each bot's task-board Kustomization
+# (kubernetes/components/hermes-bot/task-board) runs with ../template, and
+# the board's one webhook (webhook.rb, run by webhook-job.yaml).
+# docs/openproject.md, "Bot provisioning" and "Waking a bot".
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+resources:
+  - ./webhook-job.yaml
 configMapGenerator:
   - name: openproject-bot-provisioner
     files:
       - provision.rb
+  - name: openproject-board-webhook
+    files:
+      - webhook.rb
 generatorOptions:
   disableNameSuffixHash: true

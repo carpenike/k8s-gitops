@@ -2,7 +2,9 @@
 
 Request flow:
   BearerGate      /mcp* without `Authorization: Bearer <token>` -> 401, before
-                  any MCP handling. /healthz passes through unauthenticated.
+                  any MCP handling. /healthz passes through unauthenticated,
+                  and /hooks/openproject, which checks OpenProject's own
+                  webhook signature instead (relay.py).
   MCP app         the SDK's Starlette app: Host allowlist (DNS-rebinding
                   check), then stateless streamable HTTP with JSON responses.
   tools           read the same bearer token from the request and use it for
@@ -25,6 +27,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 from openproject_mcp import __version__
 from openproject_mcp.config import Settings
+from openproject_mcp.relay import HOOK_PATH, Relay
 from openproject_mcp.tools import INSTRUCTIONS, OpenProject, bearer_token, register
 
 log = logging.getLogger(__name__)
@@ -44,7 +47,7 @@ class BearerGate:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] == "http" and scope.get("path", "") != HEALTH_PATH:
+        if scope["type"] == "http" and scope.get("path", "") not in (HEALTH_PATH, HOOK_PATH):
             header = next(
                 (v.decode("latin-1") for k, v in scope.get("headers", []) if k == b"authorization"),
                 None,
@@ -76,10 +79,14 @@ class BearerGate:
 
 
 def build_app(
-    settings: Settings, *, transport: httpx.AsyncBaseTransport | None = None
+    settings: Settings,
+    *,
+    transport: httpx.AsyncBaseTransport | None = None,
+    relay_transport: httpx.AsyncBaseTransport | None = None,
 ) -> tuple[BearerGate, OpenProject]:
-    """The ASGI app and its OpenProject client. `transport` is for tests."""
+    """The ASGI app and its OpenProject client. The transports are for tests."""
     op = OpenProject(settings, transport=transport)
+    relay = Relay(settings, transport=relay_transport)
     mcp = MCPServer(
         name="openproject",
         title="OpenProject task queue",
@@ -91,6 +98,10 @@ def build_app(
     @mcp.custom_route(HEALTH_PATH, methods=["GET"], include_in_schema=False)
     async def healthz(_: Request) -> Response:
         return JSONResponse({"status": "ok"})
+
+    @mcp.custom_route(HOOK_PATH, methods=["POST"], include_in_schema=False)
+    async def openproject_hook(request: Request) -> Response:
+        return await relay.handle(request)
 
     app = mcp.streamable_http_app(
         streamable_http_path=MCP_PATH,
@@ -123,6 +134,14 @@ def main() -> None:
         settings.port,
         settings.api_base,
         settings.default_project or "(none)",
+    )
+    log.info(
+        "task-board relay at %s: %s",
+        HOOK_PATH,
+        f"on, bots {', '.join(settings.relay_bots)}"
+        if settings.openproject_webhook_secret and settings.hermes_webhook_secret
+        and settings.relay_bots
+        else "off (needs OPENPROJECT_WEBHOOK_SECRET, HERMES_WEBHOOK_SECRET and RELAY_BOTS)",
     )
     uvicorn.run(
         app,

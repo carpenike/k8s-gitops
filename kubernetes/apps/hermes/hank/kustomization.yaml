@@ -5,7 +5,8 @@
 # plus its persona (SOUL.md); everything else is
 # kubernetes/components/hermes-bot. See docs/hermes.md, "Hank".
 #
-# Deliberately not copied from Chief: Outlook and the webhook.
+# Deliberately not copied from Chief: Outlook and the Chief Engineer
+# webhook (WEBHOOK_ENABLED).
 # Hank is the only bot with Claude Code and a GitHub token: he opens pull
 # requests, and merges one only when Ryan asks for it. He does not send
 # mail or act on systems by hand.
@@ -65,6 +66,11 @@ configMapGenerator:
       # openproject/hermes-provision-hank), egress to openproject-mcp and skill
       # task-board. The MCP server is in mcp-servers.yaml.
       - TASK_BOARD_ENABLED=true
+      # Board wake-ups (docs/openproject.md, "Waking a bot"): a task change
+      # by someone else starts a turn here, delivered to Ryan's DM with
+      # @hank (Ryan and Hank its only members).
+      - TASK_BOARD_WEBHOOK_ENABLED=true
+      - WEBHOOK_DELIVER_CHAT_ID=!fs5O-cPPZMQixfo4TLkbOoREwQ_Oe0r9Edl1ikfzvKM
   # Hank's persona. Written to /opt/data/SOUL.md while the live file is
   # still a version git wrote; an edit in chat or the Webapp is kept.
   # SOUL.history lists the sha256 of each earlier SOUL.md: add the old hash
