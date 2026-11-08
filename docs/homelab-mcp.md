@@ -42,9 +42,9 @@ a `toFQDNs` name.
 | `school`, `school_today` | postgres17 `schoolhouse` |
 | `amazon`, `costco`, `samsclub` | postgres17 `lading` |
 
-Off: `messaging` (`signal_send` needs Forge's signal-cli, which stays on
-Forge) and `nixos` (Forge's deploy trigger). The Signal capture and report
-workers stay on Forge and write the shared context store in postgres17.
+Off: `messaging` (not configured yet; signal-api now runs in this pod) and
+`nixos` (Forge's deploy trigger). Signal capture and reports run in this pod
+(below) and write the shared context store in postgres17.
 
 The stores in postgres17 and how they got there:
 [postgres17.md, "Forge stores"](postgres17.md#forge-stores).
@@ -60,12 +60,44 @@ Actual's only API client is the Node package `@actual-app/api`, so container
   not-ready container would take the whole pod, and every MCP endpoint, out
   of service when Actual is down.
 
-### Finances export
+### Finance jobs
 
-The nightly export into `homelab_finance` stays on Forge. It is one step of
-a chain there: bank ingestion, then the export (`--after-ingestion`), then
-snapshots. It writes to postgres17 through `postgres17-forge` as the owner.
-`money_*` here and Forge's Grafana read the result.
+The finance workers that ran on Forge run in this pod as well, because
+carpenike/mcp accepts the Actual sidecar and signal-api only on loopback,
+and the jobs share one state directory with the server.
+
+| Container | What it does |
+| --- | --- |
+| `permissions` (init) | Sets `/var/lib/homelab-mcp` and the Signal volume to uid 65532, mode 0700. The finance runtime refuses anything else. The only step that runs as root (`CHOWN`, `FOWNER` only) |
+| `actual` | The Actual sidecar |
+| `signal-api` | signal-cli-rest-api 0.101, JSON-RPC mode, the household bot's registration on PVC `homelab-mcp-signal`. No authentication, so no Service and no route; the network policy admits nothing to 8080 |
+| `capture` | `homelab-finances-runtime capture 8080`: the Signal note listener |
+| `scheduler` | supercronic, crontab in the HelmRelease, America/New_York |
+| `metrics` | `homelab-finances-runtime serve-metrics`: the jobs' `finance_*.prom` files on 9202, scraped by the ServiceMonitor |
+
+| Job | When | Replaces on Forge |
+| --- | --- | --- |
+| Bank ingestion (`homelab-finances-ingest due && run`) | Every 15 minutes; pulls once a day, anchored to 19:30 UTC | `homelab-mcp-finances-ingest.timer` |
+| Ingestion metrics | Every 2 minutes | `finance-ingest-metrics.timer` |
+| Nightly export (`homelab-finances-export`) | 05:30 | `homelab-mcp-finances-export.timer` |
+| Snapshots | Every 5 minutes | `finance-snapshot.timer` |
+| Daily report (`project`, then `report daily`) | 08:00, 08:05, 08:10 | `finance-signal-report@daily.timer` |
+| Weekly report | Fridays 16:00, 16:05, 16:10 | `finance-signal-report@weekly.timer` |
+| Signal metrics (`collect`) | Every 2 minutes | `finance-signal-metrics.timer` |
+
+The export writes `homelab_finance` as its owner; that credential is in
+`homelab-mcp-jobs`, which only the scheduler reads, never the server's
+environment. Reports read through `homelab_finance_report`
+(`money_overview` and `export_runs` only).
+
+Volumes:
+- `homelab-mcp-state`: server state, the Signal store
+  (`finances-context.db`), the ingestion reservation and report state, the
+  finances checkout.
+- `homelab-mcp-signal`: signal-cli's registration. Not reproducible.
+
+Both are backed up to R2 by VolSync every 6 hours (`../backup`, item
+`volsync-r2-template`).
 
 MFP writes stay off (`HOMELAB_MCP_MFP_WRITES_ENABLED: "false"`) until the
 write tests pass. The mfp tools only read.
@@ -126,21 +158,39 @@ in `/var/lib/homelab-mcp/state` on the PVC. They are not in 1Password.
 Losing the PVC means every client connects again. Nothing else is lost; the
 finances checkout re-clones.
 
+Also:
+
+| Item | Fields | From Forge |
+| --- | --- | --- |
+| `homelab-mcp-signal` | `number`, `group_id`, `ops_group_id`, `bot_uuid`, `capture_senders` | `HOMELAB_MCP_SIGNAL_*` in sops `homelab-mcp/finance-signal-env` |
+| `homelab-finance` | `report_password` (new field) | none; generate |
+
+`homelab-mcp-jobs` reuses `homelab-mcp` (`sidecar_token`,
+`finances_repo_token`, `finances_*` amounts), `homelab-finance/export_db_password`,
+`lading/reader_password` and `homelab-finance/report_password`.
+
 ## Images
 
 carpenike/mcp `.github/workflows/image.yml` builds both images on the
 `mcp-k8s-build` runners from main:
 
-- `ghcr.io/carpenike/homelab-mcp`: the server;
+- `ghcr.io/carpenike/homelab-mcp`: the server and every finance job
+  container (it carries `homelab-finances-runtime` and supercronic from
+  mcp 0.39.0);
 - `ghcr.io/carpenike/homelab-mcp-actual-sidecar`.
 
-Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`). The first
-pin is mcp `0f27fd4`; bump both together from a later main build.
+Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`). The
+server image is a placeholder tag until carpenike/mcp #121 is on main; pin
+both from that build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
+(no GHCR copy upstream), pinned the same way.
 
 ## Alerts
 
-The PrometheusRule `homelab-mcp` defines three alerts. They route to Forge's
-Alertmanager like every other alert here.
+The PrometheusRule `homelab-mcp` defines these, plus the finance job alerts
+ported from Forge (groups `homelab-mcp-finance-*`, same expressions and
+runbook text; the systemd unit checks became `FinanceSchedulerDown` and
+`FinanceSignalContainerDown`). They route to Forge's Alertmanager like every
+other alert here.
 
 | Alert | Fires when |
 | --- | --- |
@@ -153,34 +203,30 @@ Alertmanager like every other alert here.
 There is no staging hostname. The cluster takes `mcp.${SECRET_DOMAIN}`
 over from Forge directly.
 
-1. Merge carpenike/mcp #117 through #120.
-
-   Merging to main triggers nix-config's automatic homelab-mcp pin bump.
-   Do not let that reach Forge before the nix-config cutover PR: #118 makes
-   the server refuse Forge's leftover Atrium settings at startup. Close the
-   bump PR, or disable the job first.
-
-2. Wait for both image builds on main. Set the tags and digests here.
-
+1. ~~Merge carpenike/mcp #117 through #120.~~ Done.
+2. Merge carpenike/mcp #121 and pin its image here (both tags).
 3. Create the 1Password items above and the postgres17 ones, then merge the
    postgres17 PR.
+4. Stop on Forge: homelab-mcp, the Actual sidecar, the finance ingest,
+   export, snapshot and report timers, Signal capture, and `signal-api`.
+5. Restore the stores and copy the transaction context
+   ([postgres17.md](postgres17.md#restore-from-forge-cutover)).
+6. Merge this app with `replicas: 0`, or scale it to 0 once it is up, then
+   copy into its volumes, as uid 65532 with modes preserved:
+   - Forge `/var/lib/homelab-mcp/finances-context.db` (0600) and
+     `/var/lib/homelab-mcp/finances-ingest/` into `homelab-mcp-state`;
+   - Forge `/var/lib/signal-api/` into `homelab-mcp-signal`.
 
-4. Stop Forge's writers and homelab-mcp, then restore the stores and copy
-   the transaction context ([postgres17.md](postgres17.md#restore-from-forge-cutover)).
-
-5. Apply the nix-config cutover. It turns off Forge's homelab-mcp: the
-   service, the Caddy vhost, and the Cloudflare tunnel ingress for `mcp`. It
-   points schoolhouse, lading, the finances export, the Signal workers and
-   Grafana at postgres17, and lets Gatus' read API through. Then delete the `mcp` DNS
-   record.
+   Do not copy Forge's OAuth state: tokens from Forge do not work here.
+   Scale back to 1.
+7. Apply the nix-config cutover: it removes homelab-mcp, the finance jobs
+   and signal-api from Forge, and the Caddy vhost and tunnel ingress for
+   `mcp`. Then delete the `mcp` DNS record.
 
    external-dns will not take over a record it does not own (TXT
    ownership, prefix `k8s.`).
-
-6. Merge this app. external-dns publishes `mcp.${SECRET_DOMAIN}` to the
-   cluster tunnel.
-
-7. Remove the old connectors in Claude. Add one connector per view URL
+8. external-dns publishes `mcp.${SECRET_DOMAIN}` to the cluster tunnel.
+9. Remove the old connectors in Claude. Add one connector per view URL
    (`/mcp`, `/mcp/admin`), and approve each on the consent page.
 
    Point Hermes at `/mcp/agent`, and Groundskeeper at

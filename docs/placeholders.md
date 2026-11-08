@@ -125,7 +125,11 @@ Before `kubernetes/apps/homelab-mcp` reconciles, create item `homelab-mcp`
 `mfp_cookies`. [homelab-mcp.md](homelab-mcp.md#1password) says where each
 comes from.
 
-The HelmRelease images are pinned to carpenike/mcp main `0f27fd4`.
+Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password`.
+
+The HelmRelease's `ghcr.io/carpenike/homelab-mcp` tag is the placeholder
+`sha-0000000000000000000000000000000000000000` until carpenike/mcp #121 is
+on main. The sidecar stays pinned to `0f27fd4`; pin both from the #121 build.
 
 ## Still to confirm or generate
 

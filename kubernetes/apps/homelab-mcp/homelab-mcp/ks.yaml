@@ -6,6 +6,8 @@ metadata:
   name: homelab-mcp
 spec:
   dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
     - name: envoy-gateway
       namespace: network
     - name: external-secrets
@@ -36,3 +38,36 @@ spec:
     namespace: flux-system
   targetNamespace: homelab-mcp
   timeout: 10m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. If 1Password item volsync-r2-template cannot be
+# read, this Kustomization stays unready and the server does not wait on it.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: homelab-mcp-backup
+spec:
+  dependsOn:
+    - name: homelab-mcp
+    - name: volsync
+      namespace: volsync-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: homelab-mcp-state-volsync
+      namespace: homelab-mcp
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: homelab-mcp-signal-volsync
+      namespace: homelab-mcp
+  interval: 1h
+  path: ./kubernetes/apps/homelab-mcp/homelab-mcp/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: homelab-mcp
+  timeout: 5m
