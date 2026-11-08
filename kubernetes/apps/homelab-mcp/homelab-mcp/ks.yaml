@@ -12,6 +12,8 @@ spec:
       namespace: external-secrets
     - name: prometheus-operator-crds
       namespace: observability
+    - name: postgres17
+      namespace: cnpg-system
   healthChecks:
     - apiVersion: external-secrets.io/v1
       kind: ExternalSecret

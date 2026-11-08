@@ -6,10 +6,11 @@
 #
 # Views (HOMELAB_MCP_VIEWS) make several MCP URLs on this one host, each a
 # protected resource of its own (carpenike/mcp src/homelab_mcp/views.py).
-# Only categories that work from the cluster run here: they reach their
-# upstreams over HTTPS. The Forge-local ones (finances, money, school,
-# amazon/costco/samsclub, messaging, nixos) stay off until they have a
-# network path. See docs/homelab-mcp.md.
+# Upstreams are reached over HTTPS, and the stores that used to sit in
+# Forge's local Postgres are in postgres17 (docs/postgres17.md, "Forge
+# stores"). messaging (Signal stays on Forge) and nixos (Forge's deploy
+# trigger) stay off. The finances export runs as a CronJob here. See
+# docs/homelab-mcp.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -37,7 +38,7 @@ spec:
                 value: "1"
         containers:
           app:
-            image:
+            image: &image
               # PLACEHOLDER until the first image is pushed by carpenike/mcp
               # .github/workflows/image.yml: replace with
               # sha-<commit>@sha256:<digest>. This tag does not exist, so the
@@ -65,12 +66,25 @@ spec:
               HOMELAB_MCP_OAUTH_STATE_DB_PATH: /var/lib/homelab-mcp/state/state.db
               HOMELAB_MCP_OAUTH_SIGNING_KEY_PATH: /var/lib/homelab-mcp/state/signing-key.pem
               HOMELAB_MCP_ARCRAIDERS_DB_PATH: /var/lib/homelab-mcp/state/arcraiders.db
-              HOMELAB_MCP_TOOL_CATEGORIES: '["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders"]'
+              HOMELAB_MCP_TOOL_CATEGORIES: >-
+                ["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders",
+                "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
+                "finances_sentinel", "money", "school", "school_today",
+                "amazon", "costco", "samsclub"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
               HOMELAB_MCP_HA_BASE_URL: https://ha.${SECRET_DOMAIN}
               HOMELAB_MCP_PAPERLESS_BASE_URL: https://paperless.${SECRET_DOMAIN}
+              # Gatus' read API; status. lets /api/v1/endpoints through without
+              # the admin login (nix-config gatus.nix).
+              HOMELAB_MCP_GATUS_BASE_URL: https://status.${SECRET_DOMAIN}
+              # The Actual sidecar is the second container in this pod.
+              HOMELAB_MCP_FINANCES_SIDECAR_BASE_URL: http://127.0.0.1:9210
+              HOMELAB_MCP_FINANCES_REPO_URL: https://github.com/carpenike/finances.git
+              HOMELAB_MCP_FINANCES_REPO_PATH: /var/lib/homelab-mcp/finances
+              HOMELAB_MCP_FINANCES_STATE_PATH: /var/lib/homelab-mcp/state/finances-state.json
+              HOMELAB_MCP_MONEY_PG_SCHEMA: household_finance
               HOMELAB_MCP_MFP_ENABLED: "true"
               HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
               # Writes stay off until the HAR-based write tests pass.
@@ -129,6 +143,128 @@ spec:
               limits:
                 cpu: "1"
                 memory: 1Gi
+          # Actual Budget's only client is the Node @actual-app/api package,
+          # so it runs here and the finances_* tools call it on loopback.
+          # One login per process, and Actual locks the account after 5
+          # failed logins in 15 minutes: a failed boot holds /health at 503
+          # for 5 minutes before exiting, so CrashLoopBackOff stays under
+          # that. Liveness is the TCP port, never /health.
+          actual:
+            image:
+              # PLACEHOLDER until carpenike/mcp image.yml pushes the sidecar
+              # image: replace with sha-<commit>@sha256:<digest>.
+              repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
+              tag: sha-0000000000000000000000000000000000000000
+            env:
+              SIDECAR_HOST: 0.0.0.0
+              SIDECAR_PORT: "9210"
+              ACTUAL_SERVER_URL: https://budget.${SECRET_DOMAIN}
+              ACTUAL_DATA_DIR: /var/lib/actual-sidecar
+              SIDECAR_BOOT_FAILURE_HOLD_SECONDS: "300"
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-actual
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9210
+                  periodSeconds: 30
+                  failureThreshold: 3
+              # Off on purpose: a not-ready container makes the whole pod
+              # not ready, and an Actual outage must not take the MCP
+              # endpoints down with it. The finances tools report it.
+              readiness:
+                enabled: false
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9210
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 20m
+                memory: 192Mi
+              limits:
+                memory: 768Mi
+      # The nightly projection into homelab_finance for Grafana and money_*.
+      # 05:30 Eastern: after lading's overnight sync, before the morning
+      # sweep (carpenike/mcp AGENTS.md, "Not everything is a tool"). It reads
+      # the register through the server pod's sidecar, and TICKLERS.md from a
+      # fresh read-only clone, because the server's checkout is on its RWO
+      # volume.
+      finances-export:
+        type: cronjob
+        cronjob:
+          schedule: "30 5 * * *"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 3600
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          backoffLimit: 0
+        pod:
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+        initContainers:
+          checkout:
+            image: *image
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                # Token via a credential helper reading the environment, so it
+                # is never in the URL, argv or .git/config.
+                exec git -c credential.helper='!f() { echo username=x-access-token; echo "password=$${FINANCES_REPO_TOKEN}"; }; f' \
+                  clone --depth 1 --quiet https://github.com/carpenike/finances.git /work/finances
+            env:
+              HOME: /tmp
+              GIT_TERMINAL_PROMPT: "0"
+              GIT_CONFIG_GLOBAL: /dev/null
+              FINANCES_REPO_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: homelab-mcp-env
+                    key: HOMELAB_MCP_FINANCES_REPO_TOKEN
+            securityContext: &jobsecurity
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+        containers:
+          app:
+            image: *image
+            command:
+              - homelab-finances-export
+            env:
+              HOMELAB_MCP_FINANCES_SIDECAR_BASE_URL: http://homelab-mcp-actual.homelab-mcp.svc.cluster.local:9210
+              HOMELAB_MCP_FINANCES_REPO_PATH: /work/finances
+              HOMELAB_MCP_EXPORT_PG_SCHEMA: household_finance
+            envFrom:
+              - secretRef:
+                  name: homelab-mcp-export
+            securityContext: *jobsecurity
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -146,6 +282,12 @@ spec:
             port: 9200
           metrics:
             port: 9201
+      # Only for the export CronJob; the policy admits nothing else on 9210.
+      actual:
+        controller: homelab-mcp
+        ports:
+          http:
+            port: 9210
     serviceMonitor:
       app:
         labels:
@@ -160,15 +302,35 @@ spec:
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /var/lib/homelab-mcp
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /var/lib/homelab-mcp
       mfp:
         type: secret
         name: homelab-mcp-mfp
         defaultMode: 0400
-        globalMounts:
-          - path: /run/mfp
-            readOnly: true
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /run/mfp
+                readOnly: true
+      # The sidecar's downloaded budget cache: rebuilt on every start.
+      actual:
+        type: emptyDir
+        advancedMounts:
+          homelab-mcp:
+            actual:
+              - path: /var/lib/actual-sidecar
+      work:
+        type: emptyDir
+        advancedMounts:
+          finances-export:
+            checkout:
+              - path: /work
+            app:
+              - path: /work
+                readOnly: true
       tmp:
         type: emptyDir
         globalMounts:
@@ -193,6 +355,7 @@ spec:
             endpointSelector:
               matchLabels:
                 app.kubernetes.io/name: homelab-mcp
+                app.kubernetes.io/controller: homelab-mcp
             ingress:
               - fromEndpoints:
                   - matchLabels:
@@ -209,6 +372,16 @@ spec:
                 toPorts:
                   - ports:
                       - port: "9201"
+                        protocol: TCP
+              # The Actual sidecar, for the export CronJob only (token-checked
+              # by the sidecar as well).
+              - fromEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: finances-export
+                toPorts:
+                  - ports:
+                      - port: "9210"
                         protocol: TCP
             egress:
               - toEndpoints:
@@ -239,7 +412,68 @@ spec:
                   - matchName: arcraiders.wiki
                   - matchName: raw.githubusercontent.com
                   - matchName: api.github.com
+                  # gatus, Actual (the sidecar), the finances repo, SnapTrade.
+                  - matchName: status.${SECRET_DOMAIN}
+                  - matchName: budget.${SECRET_DOMAIN}
+                  - matchName: github.com
+                  - matchName: api.snaptrade.com
                 toPorts:
                   - ports:
                       - port: "443"
+                        protocol: TCP
+              # schoolhouse, lading, homelab_finance, finances_context.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: cnpg-system
+                      cnpg.io/cluster: postgres17
+                toPorts:
+                  - ports:
+                      - port: "5432"
+                        protocol: TCP
+      export-policy:
+        forceRename: homelab-mcp-finances-export
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # The export job: no ingress. Out: DNS, github.com for the
+          # TICKLERS.md clone, the server pod's sidecar, and postgres17
+          # (lading to read, homelab_finance to write).
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: homelab-mcp
+                app.kubernetes.io/controller: finances-export
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: github.com
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: homelab-mcp
+                toPorts:
+                  - ports:
+                      - port: "9210"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: cnpg-system
+                      cnpg.io/cluster: postgres17
+                toPorts:
+                  - ports:
+                      - port: "5432"
                         protocol: TCP
