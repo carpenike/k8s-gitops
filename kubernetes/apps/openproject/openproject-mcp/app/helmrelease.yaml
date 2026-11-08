@@ -28,6 +28,11 @@ spec:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
               OPENPROJECT_PUBLIC_URL: https://tasks.${SECRET_DOMAIN}
+              # The board project the provisioning Job creates (BOARD_PROJECT
+              # in bot-provisioner/template/job.yaml). Without a default,
+              # create_task needs a project on every call, and the skill
+              # task-board doesn't name one.
+              OPENPROJECT_DEFAULT_PROJECT: bots
               PORT: "8000"
             resources:
               requests:
