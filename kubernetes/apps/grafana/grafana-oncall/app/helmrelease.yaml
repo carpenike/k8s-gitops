@@ -230,6 +230,9 @@ spec:
       # OnCall's exporter answers /metrics/ on the API port with the bearer
       # PROMETHEUS_EXPORTER_SECRET (Forge's grafana-oncall scrape job).
       engine:
+        # Two Services in this release (engine, redis), so name the target.
+        service:
+          identifier: engine
         labels:
           release: kube-prometheus-stack
         endpoints:
