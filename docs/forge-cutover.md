@@ -19,16 +19,16 @@ Each app's own doc has the detail; this page is the order.
 | PR | Repo | Merge when |
 | --- | --- | --- |
 | #5766 postgres17 databases | k8s-gitops | Merged |
-| #5778 build runners | k8s-gitops | Before the images (any time) |
-| schoolhouse #24, lading #9 | schoolhouse, lading | After #5778; they push the images |
-| mcp #121 finance runtime (0.39.0) | mcp | Any time; it pushes the image |
-| #1433 Prometheus/Loki sled read bypass | nix-config | Any time before Grafana |
-| #1434 cluster Watchdog routing | nix-config | Any time (a live bug fix) |
-| #1432 homelab-mcp pin bump | nix-config | With the Forge retirement PR, or closed by it |
-| #5765 homelab-mcp (pin from #121 first) | k8s-gitops | Window, step 4 |
-| #5780 schoolhouse and lading (pin from #24, #9 first) | k8s-gitops | Window, step 4 |
+| #5778 build runners | k8s-gitops | Merged |
+| schoolhouse #24, lading #9 | schoolhouse, lading | Merged; images pinned in #5780 |
+| mcp #121 finance runtime (0.39.0) | mcp | Merged; image pinned in #5765 |
+| #1433 Prometheus/Loki sled read bypass | nix-config | Merged; deploy before the window |
+| #1434 cluster Watchdog routing | nix-config | Merged; deploy before the window |
+| #1432 homelab-mcp pin bump | nix-config | Close: superseded by #1435 (its pin is the frozen revision the Atrium checks need) |
+| #5765 homelab-mcp | k8s-gitops | Window, step 4 |
+| #5780 schoolhouse and lading | k8s-gitops | Window, step 4 |
 | #5781 Grafana and OnCall | k8s-gitops | Window, step 4 |
-| Forge retirement | nix-config | Window, step 7 |
+| #1435 Forge retirement | nix-config | Window, step 7 |
 
 ## Before the window
 
@@ -92,12 +92,18 @@ Each app's own doc has the detail; this page is the order.
      the OnCall plugin connected.
 6. **Unsuspend** the schoolhouse and lading CronJobs (`suspend: false` in
    #5780's HelmReleases, a follow-up commit).
-7. **Deploy the Forge retirement PR** (nix-config). Set Forge
-   Alertmanager's `grafana-oncall/alertmanager-webhook-url` to the cluster
-   OnCall integration URL in the same deploy.
+7. **Deploy nix-config #1435** (Forge retirement). In the same commit, set
+   `grafana-oncall/alertmanager-webhook-url` in `hosts/forge/secrets.sops.yaml`
+   to `https://oncall.<domain>/integrations/v1/alertmanager/<token>/`. The
+   token is unchanged (it lives in the copied OnCall database), so if the
+   current value already uses `oncall.<domain>` only a loopback URL needs
+   replacing. #1435 keeps every retired dataset, backup and the three
+   Postgres databases for the rollback week.
 8. **DNS:** delete Forge's Cloudflare tunnel records for `mcp.`,
    `grafana.` and `oncall.`; external-dns publishes the cluster's (it does
-   not take over records it does not own).
+   not take over records it does not own). Forge's internal A records for
+   those names drop out with #1435; check that internal DNS answers the
+   cluster gateway for them (mikrotik-dns publishes envoy-internal routes).
 9. **Clients:** remove the old Claude connectors and add one per view URL
    (`/mcp`, `/mcp/admin`); point Hermes at `/mcp/agent` and Groundskeeper at
    `/mcp/house-sensors`.
