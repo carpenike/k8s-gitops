@@ -19,6 +19,11 @@ spec:
   activeDeadlineSeconds: 1200
   template:
     metadata:
+      # Bump with every change to app/provision.rb. The script's ConfigMap
+      # lives in another Kustomization, so only a change here makes the
+      # task-board Kustomization replace a finished or failed Job.
+      annotations:
+        openproject-bot-provisioner/script-revision: "2"
       labels:
         app.kubernetes.io/name: openproject-bot-provisioner
         app.kubernetes.io/instance: ${BOT_NAME}
