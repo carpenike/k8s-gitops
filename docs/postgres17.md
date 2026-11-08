@@ -267,37 +267,26 @@ place. Give the restored Cluster its own `spec.plugins` entry with a new
 
 ## Forge stores
 
-Three databases moved here from Forge's local PostgreSQL so that homelab-mcp can run in the cluster:
+Three databases moved here from Forge's local PostgreSQL, along with
+everything that writes to them:
 - `schoolhouse` (grades scraped from Schoology),
 - `lading` (Amazon, Costco and Sam's Club order history),
 - `homelab_finance` (the household finance projection).
 
 A fourth, `finances_context`, is new. It holds the shared transaction-context
-table that the `finances_context_*` tools and Forge's Signal capture worker
-both write to (carpenike/mcp #120).
+table that the `finances_context_*` tools and the Signal capture worker both
+write to (carpenike/mcp #120).
 
-The writers stay on Forge:
-- the Schoolhouse scraper;
-- lading's sync;
-- the finances export (one step of Forge's ingestion, export and snapshots
-  chain);
-- the Signal worker.
+Every client runs in the cluster and connects to `postgres17-rw` with
+CloudNativePG's default `pg_hba`. Nothing outside the cluster connects, so
+there is no LoadBalancer and no CA to copy anywhere.
 
-Forge's Grafana does too. They connect to Service `postgres17-forge`
-(LoadBalancer `10.45.10.52`, the primary) over TLS. The homelab-mcp readers
-run in the cluster and use `postgres17-rw` like every other app.
-
-| Database | Owner (writes) | Readers | Connects from |
+| Database | Owner (writes) | Readers | Runs in |
 | --- | --- | --- | --- |
-| `schoolhouse` | `schoolhouse` | `schoolhouse_reader` (homelab-mcp), `schoolhouse_grafana` | Owner and Grafana from Forge; reader in-cluster |
-| `lading` | `lading` | `lading_reader` (homelab-mcp, finances export) | Owner from Forge; reader in-cluster |
-| `homelab_finance` | `homelab_finance` (Forge's finances export) | `homelab_finance_money` (`money_overview` only), `homelab_finance_grafana` | Owner and Grafana from Forge; money reader in-cluster |
-| `finances_context` | `finances_context` | none; the same role reads and writes | homelab-mcp in-cluster, Signal worker from Forge |
-
-`pg_hba` admits Forge (`10.20.0.30`) for exactly the Forge rows above. It
-rejects every other address on the node LAN, `10.20.0.0/16`. Cilium's
-LoadBalancer is DSR, so Postgres sees Forge's own address. If that ever stops
-holding, Forge is rejected: the rule fails closed.
+| `schoolhouse` | `schoolhouse` | `schoolhouse_reader` (homelab-mcp), `schoolhouse_grafana` | schoolhouse app; homelab-mcp; Grafana |
+| `lading` | `lading` | `lading_reader` (homelab-mcp, finances export) | lading app; homelab-mcp |
+| `homelab_finance` | `homelab_finance` (the finances export) | `homelab_finance_money` (`money_overview` only), `homelab_finance_report` (`money_overview` and `export_runs`), `homelab_finance_grafana` | homelab-mcp pod; Grafana |
+| `finances_context` | `finances_context` | none; the same role reads and writes | homelab-mcp pod |
 
 Readers get no cluster-wide role. Each owner grants its own readers, once, at
 restore time (below), and default privileges cover the tables its later
@@ -307,7 +296,8 @@ unlike Forge's shared `readonly` group.
 ### 1Password
 
 Create these items in vault `k8s-secrets`, one strong random password per
-field. Reusing Forge's sops values keeps the cutover to a host change.
+field. Reusing Forge's sops values is fine but not needed: nothing on Forge
+connects here.
 
 | Item | Field | Role | Forge sops key it replaces |
 | --- | --- | --- | --- |
@@ -318,6 +308,7 @@ field. Reusing Forge's sops values keeps the cutover to a host change.
 | `lading` | `reader_password` | `lading_reader` | `lading/reader_password` |
 | `homelab-finance` | `export_db_password` | `homelab_finance` | `homelab-mcp/export_db_password` |
 | `homelab-finance` | `money_password` | `homelab_finance_money` | none (Forge used peer auth) |
+| `homelab-finance` | `report_password` | `homelab_finance_report` | none (Forge used peer auth) |
 | `homelab-finance` | `grafana_db_password` | `homelab_finance_grafana` | `homelab-mcp/grafana_db_password` |
 | `finances-context` | `db_password` | `finances_context` | none (new) |
 
@@ -325,42 +316,34 @@ Until an item exists, its ExternalSecret is not ready and CloudNativePG
 leaves that role (and the Database it owns) unapplied. Nothing else in
 postgres17 is affected.
 
-### TLS from Forge
-
-CloudNativePG serves its own certificate, signed by the CA in Secret
-`postgres17-ca`, key `ca.crt`. That is a public certificate, not a secret.
-Copy it to Forge and connect with `sslmode=verify-ca`, for example:
-
-```sh
-kubectl -n cnpg-system get secret postgres17-ca -o jsonpath='{.data.ca\.crt}' | base64 -d > postgres17-ca.crt
-```
-
-`verify-ca` rather than `verify-full`: the server certificate names the
-in-cluster Services, not the LoadBalancer address. The CA check still refuses
-any server that does not hold CloudNativePG's key.
-
 ### Restore from Forge (cutover)
 
-1. Stop every writer on Forge (the nix-config PR's cutover lists the units):
+1. Stop every writer on Forge (the nix-config cutover lists the units):
    - schoolhouse and its ingest timer;
    - lading and its sync timers;
-   - the finances export timer;
+   - the finances ingest, export and snapshot timers;
    - the Signal capture and report units;
    - the Forge homelab-mcp.
-2. Dump each store on Forge, then restore it as its owner. Restore as the
-   owner, not with the dump's owners or ACLs:
+2. Dump each store on Forge:
 
    ```sh
-   export PGSSLMODE=verify-ca PGSSLROOTCERT=postgres17-ca.crt PGHOST=10.45.10.52
    for db in schoolhouse lading homelab_finance; do
      sudo -u postgres pg_dump -h /run/postgresql -Fc --no-owner --no-acl "$db" > "$db.dump"
    done
+   ```
+
+3. From a machine with `kubectl`, forward the primary and restore each dump
+   as its owner, not with the dump's owners or ACLs:
+
+   ```sh
+   kubectl -n cnpg-system port-forward svc/postgres17-rw 15432:5432 &
+   export PGHOST=127.0.0.1 PGPORT=15432 PGSSLMODE=require
    pg_restore --no-owner --no-acl -U schoolhouse -d schoolhouse schoolhouse.dump
    pg_restore --no-owner --no-acl -U lading -d lading lading.dump
    pg_restore --no-owner --no-acl -U homelab_finance -d homelab_finance homelab_finance.dump
    ```
 
-3. Grant the readers, as each owner:
+4. Grant the readers, as each owner:
 
    ```sql
    -- psql -U schoolhouse -d schoolhouse
@@ -374,24 +357,28 @@ any server that does not hold CloudNativePG's key.
    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO lading_reader;
 
    -- psql -U homelab_finance -d homelab_finance
-   GRANT USAGE ON SCHEMA household_finance TO homelab_finance_grafana, homelab_finance_money;
+   GRANT USAGE ON SCHEMA household_finance TO homelab_finance_grafana, homelab_finance_money, homelab_finance_report;
    GRANT SELECT ON ALL TABLES IN SCHEMA household_finance TO homelab_finance_grafana;
    ALTER DEFAULT PRIVILEGES IN SCHEMA household_finance GRANT SELECT ON TABLES TO homelab_finance_grafana;
-   GRANT SELECT ON household_finance.money_overview TO homelab_finance_money;
+   GRANT SELECT ON household_finance.money_overview TO homelab_finance_money, homelab_finance_report;
+   GRANT SELECT ON household_finance.export_runs TO homelab_finance_report;
+   ALTER ROLE homelab_finance_report SET default_transaction_read_only = on;
    ```
 
-4. Move the transaction context: on Forge, with the Signal worker stopped:
+   The last line needs a superuser (`kubectl cnpg psql postgres17`).
+
+5. Move the transaction context, with the same port-forward:
 
    ```sh
-   HOMELAB_MCP_FINANCES_CONTEXT_DSN="postgresql://finances_context:<password>@10.45.10.52/finances_context?sslmode=verify-ca&sslrootcert=postgres17-ca.crt" \
-     homelab-finances-context copy --from /var/lib/homelab-mcp/finances-context.db
+   HOMELAB_MCP_FINANCES_CONTEXT_DSN="postgresql://finances_context:<password>@127.0.0.1:15432/finances_context?sslmode=require" \
+     homelab-finances-context copy --from finances-context.db
    ```
 
-   It refuses a target that already has rows, and keeps ids and Signal
+   Copy `/var/lib/homelab-mcp/finances-context.db` off Forge first. The
+   command refuses a target that already has rows, and keeps ids and Signal
    event keys.
 
-5. Repoint Forge (nix-config) and start the writers. Merge the homelab-mcp
-   app (k8s-gitops).
+6. Start the cluster workers (docs/homelab-mcp.md, cutover).
 
 The snapshot tables in `homelab_finance` (`reconcile_daily`,
 `sync_health_daily`, `hygiene_daily`) are the only record of past bank
