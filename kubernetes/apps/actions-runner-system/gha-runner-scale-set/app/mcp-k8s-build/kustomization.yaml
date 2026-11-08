@@ -54,6 +54,16 @@ patches:
           name: nix-store
           emptyDir:
             sizeLimit: 40Gi
+      # An emptyDir is created mode 0777, and Nix refuses a world-writable
+      # /nix ("Path /nix is world-writable or a symlink"). The runner makes it
+      # 0755 root-owned before it starts (the image has passwordless sudo),
+      # then does what the shared command does.
+      - op: replace
+        path: /spec/values/template/spec/containers/0/command
+        value:
+          - /bin/bash
+          - -c
+          - sudo chown root:root /nix && sudo chmod 0755 /nix && chmod 0755 /home/runner && exec /home/runner/run.sh
       - op: replace
         path: /spec/values/template/spec/containers/0/resources/requests/cpu
         value: "2"
