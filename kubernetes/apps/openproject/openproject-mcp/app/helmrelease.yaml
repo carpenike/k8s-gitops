@@ -84,6 +84,17 @@ spec:
               capabilities:
                 drop: ["ALL"]
         pod:
+          # ndots:1 so a name with a dot is looked up as written first. With
+          # the default ndots:5 the first query is api2.cursor.sh.openproject.svc.cluster.local,
+          # CoreDNS's autopath answers it with the external address, and
+          # Cilium files that address under the expanded name, so the CNP's
+          # toFQDNs rule for the Grok routine host never matches (the
+          # hermes-bot component has the same fix). The in-cluster names the
+          # relay uses are written in full.
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
           securityContext:
             runAsNonRoot: true
             runAsUser: 65532
