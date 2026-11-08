@@ -483,10 +483,12 @@ spec:
             metrics:
               - path: /run
                 readOnly: true
+      # 0444, not 0400: Secret files are root-owned, and with no fsGroup
+      # uid 65532 could not read a 0400 file. Only the app container mounts it.
       mfp:
         type: secret
         name: homelab-mcp-mfp
-        defaultMode: 0400
+        defaultMode: 0444
         advancedMounts:
           homelab-mcp:
             app:
