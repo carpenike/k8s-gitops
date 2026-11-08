@@ -899,6 +899,144 @@ spec:
                 state = "written, toolsets " + ",".join(matrix) if os.environ["BOARD_ROUTE"] == "write" else "removed"
                 print(f"webhook route {NAME}: {state}")
                 PY
+                # Routines from git (optional ConfigMap hermes-bot-routines,
+                # routines.yaml in the bot's folder; docs/hermes.md, "Routines
+                # from git"): scheduled jobs written into Hermes' own cron store
+                # with its cronjob API, so the gateway's scheduler runs them.
+                # Jobs this step made are tracked in
+                # /opt/data/.routines-from-git.json: changed in git, updated;
+                # gone from git or past `until`, removed; jobs made in chat are
+                # left alone. Private details (names, addresses, lists) stay out
+                # of this public repo: 1Password item hermes-<bot>-routines, one
+                # field per routine (Secret routines-private, input
+                # ROUTINES_PRIVATE_ENABLED), written to that job's notepad, which
+                # Hermes puts in every run's prompt. A routine marked private
+                # without its field is created paused. Unattended runs refuse
+                # anything needing approval, so Outlook is read-only there.
+                ROUTINES_DM='${WEBHOOK_DELIVER_CHAT_ID:=}' /opt/hermes/.venv/bin/python - <<'PY'
+                import datetime
+                import json
+                import os
+                import re
+                import sys
+                from zoneinfo import ZoneInfo
+
+                sys.path.insert(0, "/opt/hermes")
+                # Hermes' own YAML wrapper (ruamel); the venv has no PyYAML.
+                import hermes_yaml as yaml  # noqa: E402
+                from cron.notepad import delete_note, set_note  # noqa: E402
+                from tools.cronjob_tools import cronjob  # noqa: E402
+
+                SRC = os.environ.get("ROUTINES_SRC", "/etc/hermes-routines/routines.yaml")
+                PRIVATE = os.environ.get("ROUTINES_PRIVATE", "/etc/hermes-routines-private")
+                STATE = os.path.join(os.environ.get("HERMES_HOME", "/opt/data"), ".routines-from-git.json")
+                DM = os.environ.get("ROUTINES_DM", "").strip()
+                TZ = "America/New_York"
+                GIT_PAUSE = "git: "
+                KEY = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")
+                FIELDS = {"name", "schedule", "prompt", "deliver", "toolsets", "skills", "timezone", "continuity",
+                          "paused", "until", "private", "catch_up"}
+
+
+                def api(**kw):
+                    res = json.loads(cronjob(**kw))
+                    if not res.get("success"):
+                        raise RuntimeError(res.get("error") or res)
+                    return res
+
+
+                try:
+                    with open(STATE) as fh:
+                        state = json.load(fh)
+                except (OSError, ValueError):
+                    state = {}
+                spec = {}
+                if os.path.exists(SRC):
+                    with open(SRC) as fh:
+                        spec = (yaml.safe_load(fh) or {}).get("routines") or {}
+                if not isinstance(spec, dict):
+                    sys.exit("routines.yaml: routines must be a mapping")
+
+                jobs = {j["job_id"]: j for j in api(action="list", include_disabled=True).get("jobs", [])}
+                today = datetime.datetime.now(ZoneInfo(TZ)).date()
+                done, problems = {}, []
+
+                for key, r in spec.items():
+                    try:
+                        if not KEY.match(str(key)) or not isinstance(r, dict):
+                            raise ValueError("key must be lowercase letters, digits and -, and its value a mapping")
+                        extra = set(r) - FIELDS
+                        if extra:
+                            raise ValueError(f"unknown fields {sorted(extra)}")
+                        until = r.get("until")
+                        if until and datetime.date.fromisoformat(str(until)) < today:
+                            print(f"routine {key}: past until {until}; not scheduled")
+                            continue
+                        deliver = str(r.get("deliver", "dm"))
+                        if deliver == "dm":
+                            if not DM:
+                                raise ValueError("deliver: dm needs WEBHOOK_DELIVER_CHAT_ID")
+                            deliver = f"matrix:{DM}"
+                        private_text = None
+                        paused, reason = bool(r.get("paused", False)), "paused in git"
+                        if r.get("private"):
+                            path = os.path.join(PRIVATE, key)
+                            if os.path.isfile(path) and open(path).read().strip():
+                                private_text = open(path).read().strip()
+                            else:
+                                paused, reason = True, f"private notes missing (1Password hermes-<bot>-routines, field {key})"
+                        prompt = str(r["prompt"]).strip()
+                        if until:
+                            prompt += f"\n\nThis routine ends on {until}; after that date respond with exactly [SILENT]."
+                        if r.get("private"):
+                            prompt += ("\n\nThe details for this routine (names, addresses, lists) are in your notepad "
+                                       "under 'private'. They are Ryan's, private: never repeat them outside the reply to Ryan.")
+                        prompt += ("\n\nIf nothing new needs Ryan's attention, respond with exactly [SILENT]. "
+                                   "Never send, reply, buy, sign up or delete anything: this is a read-and-report routine.")
+                        args = dict(
+                            name=str(r.get("name") or key), schedule=str(r["schedule"]), prompt=prompt, deliver=deliver,
+                            timezone=str(r.get("timezone", TZ)), continuity=bool(r.get("continuity", True)),
+                            skills=list(r.get("skills") or []), catch_up=bool(r.get("catch_up", False)),
+                        )
+                        if r.get("toolsets") is not None:
+                            args["enabled_toolsets"] = [str(t) for t in r["toolsets"]]
+                        job_id = state.get(key)
+                        if job_id in jobs:
+                            api(action="update", job_id=job_id, **args)
+                            job = jobs[job_id]
+                        else:
+                            job_id = api(action="create", paused=paused,
+                                         paused_reason=(GIT_PAUSE + reason) if paused else None, **args)["job_id"]
+                            job = None
+                        if job is not None:
+                            is_paused = job.get("state") == "paused" or not job.get("enabled", True)
+                            ours = str(job.get("paused_reason") or "").startswith(GIT_PAUSE)
+                            if paused and not is_paused:
+                                api(action="pause", job_id=job_id, reason=GIT_PAUSE + reason)
+                            elif not paused and is_paused and ours:
+                                api(action="resume", job_id=job_id)
+                        if private_text is not None:
+                            set_note(job_id, "private", private_text)
+                        else:
+                            delete_note(job_id, "private")
+                        done[key] = job_id
+                        print(f"routine {key}: {'paused (' + reason + ')' if paused else 'scheduled'} [{r['schedule']}]")
+                    except Exception as exc:  # one bad routine never blocks the others or the bot
+                        problems.append(f"routine {key}: {exc}")
+                        if state.get(key) in jobs:
+                            done[key] = state[key]
+
+                for key, job_id in state.items():
+                    if key not in done and job_id in jobs:
+                        api(action="remove", job_id=job_id)
+                        print(f"routine {key}: removed (no longer in git)")
+
+                with open(STATE, "w") as fh:
+                    json.dump(done, fh)
+                for p in problems:
+                    print(f"WARNING: {p}", file=sys.stderr)
+                print(f"routines from git: {', '.join(sorted(done)) or 'none'}")
+                PY
             # api-server: stage2 reads API_SERVER_KEY (above). hindsight,
             # webhook, task-board-webhook and the a2a pair: the steps above
             # check for their keys.
@@ -1521,6 +1659,23 @@ spec:
         dataFrom:
           - extract:
               key: hermes-${BOT_NAME}-mcp
+      # Private details for the bot's git-declared routines
+      # (ROUTINES_PRIVATE_ENABLED): every field of 1Password item
+      # hermes-<bot>-routines, one per routine key, as files for the config
+      # init container. Never reaches the app container's env.
+      routines-private:
+        enabled: ${ROUTINES_PRIVATE_ENABLED:=false}
+        forceRename: routines-private
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: routines-private
+          creationPolicy: Owner
+        dataFrom:
+          - extract:
+              key: hermes-${BOT_NAME}-routines
       # The Webapp's Pocket ID sign-in (Hermes self-hosted OIDC provider): a
       # public client with PKCE, so only its id; Pocket ID's issuer is fixed.
       webapp:
@@ -2113,6 +2268,34 @@ spec:
           agent:
             config:
               - path: /etc/hermes-mcp
+                readOnly: true
+      # The bot's git-declared routines, from optional ConfigMap
+      # hermes-bot-routines (routines.yaml in the bot's folder), and their
+      # private details from optional Secret routines-private (one file per
+      # routine). Init container only; it writes them into Hermes' cron
+      # store. Bots without them get empty mounts and no routines from git.
+      routines:
+        type: custom
+        volumeSpec:
+          configMap:
+            name: hermes-bot-routines
+            optional: true
+        advancedMounts:
+          agent:
+            config:
+              - path: /etc/hermes-routines
+                readOnly: true
+      routines-private:
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: routines-private
+            optional: true
+            defaultMode: 0400
+        advancedMounts:
+          agent:
+            config:
+              - path: /etc/hermes-routines-private
                 readOnly: true
       # The bot's persona, from optional ConfigMap hermes-bot-soul (a
       # configMapGenerator in the bot's folder). Init container only; it
