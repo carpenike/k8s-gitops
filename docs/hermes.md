@@ -282,6 +282,22 @@ PM in summer (7 daily, 4 weekly). The R2 path is
 `agent-data-restore`, so a new PVC starts from the latest backup in that
 path, or empty if there is none.
 
+`/opt/data` is the volume's `hermes-data/` folder, mounted by `subPath`,
+not the volume root. Hermes's CLI (`hermes chat`, the TUI) attaches to the
+running gateway through a control socket in `$HERMES_HOME`, and refuses
+unless that folder is owned by the gateway's uid (10000) and isn't
+group-writable. The volume root is root-owned, restricted Pod Security
+forbids a chown, and `fsGroup: 1000` keeps it group-writable. Init
+container `data-home` runs first: it keeps `hermes-data/` at owner 10000,
+mode 0750, and on the first start with this layout, or after restoring an
+older backup, moves everything at the root into it.
+
+So a one-off turn works from the pod:
+
+```bash
+kubectl -n hermes-<bot> exec -i deploy/hermes-agent -c app -- hermes chat --oneshot --query-file - --source tool
+```
+
 ### Screen
 
 `ghcr.io/carpenike/hermes-screen`, built from

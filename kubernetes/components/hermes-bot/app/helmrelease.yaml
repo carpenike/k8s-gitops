@@ -822,6 +822,47 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 1Gi
+            dependsOn: data-home
+          # $HERMES_HOME (/opt/data) is the volume's hermes-data/ folder, not
+          # its root. Hermes's CLI (hermes chat, the TUI) attaches to the
+          # running gateway through a control socket in $HERMES_HOME and
+          # refuses unless that folder is owned by the gateway's uid and not
+          # writable by a shared group. The volume root can never be: it is
+          # root-owned, the namespace's restricted Pod Security forbids a
+          # chown, and fsGroup 1000 keeps it group-writable. This runs before
+          # config, so the folder exists before any subPath mount of it (the
+          # kubelet would create a missing one as root). On the first start
+          # with this layout, or after a restore of an older backup, it moves
+          # everything at the root into hermes-data/.
+          data-home:
+            image: *agentImage
+            # Not the image's entrypoint, which bootstraps $HERMES_HOME.
+            command:
+              - sh
+              - -c
+              - |
+                set -eu
+                cd /opt/volume
+                if [ ! -d hermes-data ]; then
+                  install -d -m 0750 hermes-data.new
+                  find . -mindepth 1 -maxdepth 1 ! -name hermes-data.new ! -name lost+found \
+                    -exec mv {} hermes-data.new/ \;
+                  mv hermes-data.new hermes-data
+                  echo "data-home: moved the volume root into hermes-data/"
+                fi
+                if [ "$(stat -c %u hermes-data)" != "$(id -u)" ]; then
+                  echo "data-home: hermes-data/ is owned by uid $(stat -c %u hermes-data), not $(id -u)" >&2
+                  exit 1
+                fi
+                # fsGroup can add group write on a recursive relabel.
+                chmod 0750 hermes-data
+            securityContext: *restricted
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
         containers:
           app:
             image: *agentImage
@@ -1818,14 +1859,20 @@ spec:
           apiGroup: volsync.backube
           kind: ReplicationDestination
           name: agent-data-restore
+        # $HERMES_HOME is the volume's hermes-data/ folder (init container
+        # data-home says why); only data-home sees the volume root.
         advancedMounts:
           agent:
+            data-home:
+              - path: /opt/volume
             config:
               - path: /opt/data
+                subPath: hermes-data
             app:
               - path: /opt/data
+                subPath: hermes-data
               - path: /opt/data/skills
-                subPath: skills
+                subPath: hermes-data/skills
                 readOnly: true
       workspace:
         type: persistentVolumeClaim
