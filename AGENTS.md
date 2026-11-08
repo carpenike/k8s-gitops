@@ -78,6 +78,15 @@ kubernetes/examples/       not reconciled
 is that directory, and kustomize-controller includes each child that has a
 `kustomization.yaml`.
 
+## Grok routines
+
+When Ryan pastes a Grok bot's routine handoff (a public spec, a private
+block, and what can't move), follow
+`.github/instructions/hermes-routines.instructions.md`. The routine goes
+into the bot's `routines.yaml`, and the private block goes to 1Password,
+never into git. For Claude Code, `.claude/skills/graduate-grok-routine`
+points to the same file; it holds no rules of its own.
+
 ## Checks
 
 From a workstation with the tools in `mise.toml` installed:
