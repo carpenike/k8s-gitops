@@ -198,10 +198,12 @@ stay closed. Narrow it once the channels in use are known.
 
 1Password vault `k8s-secrets`. Field names are Forge's sops keys.
 
+Item `grafana-forge`, not `grafana`: vault `k8s-secrets` already has an unrelated `grafana` item from the v1 cluster (`GF_DATABASE_*`, `admin_password`), which nothing here reads. Grafana's SQL datasources read only `schoolhouse` and `homelab_finance` (`schoolhouse/grafana_password`, `homelab-finance/grafana_db_password`); no dashboard reads `lading` or `finances_context`, and OnCall uses SQLite, not Postgres.
+
 | Item | Field | Value | Read by |
 | --- | --- | --- | --- |
-| `grafana` (new) | `admin-password` | Forge's sops `grafana/admin-password`. The variable only seeds a new database; after the copy, `admin`'s password is Forge's, and the setup Job and OnCall log in with this field | Grafana, OnCall, setup Job |
-| `grafana` | `oidc_client_secret` | Forge's sops `grafana/oidc_client_secret` (Pocket ID client `grafana`) | Grafana |
+| `grafana-forge` (new) | `admin-password` | Forge's sops `grafana/admin-password`. The variable only seeds a new database; after the copy, `admin`'s password is Forge's, and the setup Job and OnCall log in with this field | Grafana, OnCall, setup Job |
+| `grafana-forge` | `oidc_client_secret` | Forge's sops `grafana/oidc_client_secret` (Pocket ID client `grafana`) | Grafana |
 | `grafana-oncall` (new) | `secret_key` | Forge's sops `grafana-oncall/secret_key`. Must be Forge's: OnCall encrypts integration and notifier credentials in the copied database with it. Also `MIRAGE_SECRET_KEY` | OnCall |
 | `grafana-oncall` | `metrics_secret` | Forge's sops `grafana-oncall/metrics_secret` | OnCall, the ServiceMonitor |
 | `schoolhouse` | `grafana_password` | [postgres17.md](postgres17.md) | Grafana datasource |

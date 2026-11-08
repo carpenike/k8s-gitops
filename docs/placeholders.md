@@ -134,8 +134,8 @@ databases depend on them.
 
 | Item | Field | Value |
 | --- | --- | --- |
-| `grafana` (new) | `admin-password` | Forge's `grafana/admin-password` |
-| `grafana` | `oidc_client_secret` | Forge's `grafana/oidc_client_secret` (Pocket ID client `grafana`) |
+| `grafana-forge` (new) | `admin-password` | Forge's `grafana/admin-password` |
+| `grafana-forge` | `oidc_client_secret` | Forge's `grafana/oidc_client_secret` (Pocket ID client `grafana`) |
 | `grafana-oncall` (new) | `secret_key` | Forge's `grafana-oncall/secret_key` |
 | `grafana-oncall` | `metrics_secret` | Forge's `grafana-oncall/metrics_secret` |
 
