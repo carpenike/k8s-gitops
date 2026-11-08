@@ -125,6 +125,41 @@ vault `k8s-secrets`. The table in
 [postgres17.md](postgres17.md#1password) lists each field and the Forge
 sops key whose value it can reuse.
 
+## homelab-mcp
+
+Before `kubernetes/apps/homelab-mcp` reconciles, create item `homelab-mcp`
+(new) in vault `k8s-secrets` with fields `pocketid_client_secret`,
+`ha_token`, `ha_read_token`, `grocy_api_key`, `paperless_token` and
+`mfp_cookies`. [homelab-mcp.md](homelab-mcp.md#1password) says where each
+comes from.
+
+Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password`.
+
+The HelmRelease's images are pinned to carpenike/mcp main `72a9b0f`.
+
+## schoolhouse
+
+Before `kubernetes/apps/schoolhouse` reconciles, create item
+`schoolhouse-ingest` (new) in vault `k8s-secrets` with fields
+`schoology_username`, `schoology_password`, `children` and `ical_feeds`, and
+the postgres17 item `schoolhouse`. [schoolhouse.md](schoolhouse.md#1password)
+says where each comes from.
+
+The HelmRelease's image is pinned to schoolhouse main `d25df9d`. The ingest
+CronJob ships `suspend: true` until the cutover.
+
+## lading
+
+Before `kubernetes/apps/lading` reconciles, create items `lading-ryan` (new:
+`amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
+`costco_tokens`, `samsclub_tokens`) and `lading-steffi` (new:
+`amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
+`costco_tokens`) in vault `k8s-secrets`, and the postgres17 item `lading`.
+[lading.md](lading.md#1password) says where each comes from.
+
+The HelmRelease's image is pinned to lading main `d73fae0`. Both sync
+CronJobs ship `suspend: true` until the cutover.
+
 ## Grafana and OnCall
 
 Before `kubernetes/apps/grafana` reconciles, create in vault `k8s-secrets`

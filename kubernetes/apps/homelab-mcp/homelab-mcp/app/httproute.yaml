@@ -1,0 +1,41 @@
+---
+# The MCP server is its own OAuth authorization server (federated to Pocket
+# ID) and serves the MCP endpoints, OAuth endpoints and protected-resource
+# metadata itself. Claude cannot complete the gateway Pocket ID login, so
+# the whole route is native. See docs/gateway-auth.md and
+# docs/homelab-mcp.md. The ReferenceGrant is what lets pocket-id-exempt in
+# namespace network select this route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: homelab-mcp
+  labels:
+    gateway.holthome.net/auth: native
+spec:
+  hostnames:
+    - mcp.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    # Streamable HTTP holds a request open while a tool runs.
+    - timeouts:
+        request: 300s
+        backendRequest: 300s
+      backendRefs:
+        - name: homelab-mcp
+          port: 9200
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: homelab-mcp-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: homelab-mcp

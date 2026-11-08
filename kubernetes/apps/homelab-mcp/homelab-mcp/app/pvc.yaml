@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# The server's and the finance jobs' state: OAuth state and signing key
+# (state/), the finances checkout, the Signal store (finances-context.db), the
+# ingestion reservation and report state. The ingestion state and the Signal
+# store are restored from Forge at the cutover (docs/homelab-mcp.md). Backed
+# up by ../backup.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homelab-mcp-state
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 5Gi
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# signal-cli's registration: the household bot's Signal identity keys and
+# sessions. Not reproducible: losing it means re-registering the number and
+# having the family group re-add the bot. Copied from Forge's
+# /var/lib/signal-api at the cutover; backed up by ../backup.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homelab-mcp-signal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 1Gi

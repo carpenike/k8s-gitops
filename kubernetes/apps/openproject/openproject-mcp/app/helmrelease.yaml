@@ -19,7 +19,8 @@ spec:
     controllers:
       openproject-mcp:
         annotations:
-          # Restart when Secret openproject-mcp-relay changes.
+          # Restart when Secret openproject-mcp-relay or
+          # openproject-mcp-relay-targets changes.
           reloader.stakater.com/auto: "true"
         containers:
           app:
@@ -27,8 +28,8 @@ spec:
               repository: ghcr.io/carpenike/openproject-mcp
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
               # Floating tag, digest re-pinned by Renovate. This digest is the
-              # branch build 0.2.0-d560435 (the task-board relay).
-              tag: 0.2.0@sha256:00d6b803562349f2b052e1719d8e062e93a3fa98f0c73abfc34660e31a49fd73
+              # branch build 0.3.0-9cac727 (external webhook targets).
+              tag: 0.3.0@sha256:cba81d2751e51c0c3eb3bb3a1b70aa1c7c745ef77cb350317dd9ca691aff4cdf
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
@@ -39,15 +40,22 @@ spec:
               # task-board doesn't name one.
               OPENPROJECT_DEFAULT_PROJECT: bots
               PORT: "8000"
-              # The bots the relay may wake, by OpenProject login. Each needs
-              # TASK_BOARD_WEBHOOK_ENABLED=true in its inputs, or its event
-              # has nowhere to go (the relay logs and moves on).
-              RELAY_BOTS: chief,hank
+              # The bots the relay may wake, by OpenProject login. A Hermes
+              # bot needs TASK_BOARD_WEBHOOK_ENABLED=true in its inputs; a bot
+              # outside the cluster needs an entry in RELAY_TARGETS (Secret
+              # openproject-mcp-relay-targets) and an egress rule in this
+              # app's CNP. Otherwise its event has nowhere to go (the relay
+              # logs and moves on).
+              RELAY_BOTS: chief,hank,chief-engineer
             # OPENPROJECT_WEBHOOK_SECRET and HERMES_WEBHOOK_SECRET. Without
             # them the relay answers 404 and the MCP server works as before.
             envFrom:
               - secretRef:
                   name: openproject-mcp-relay
+                  optional: true
+              # RELAY_TARGETS, the webhook targets of bots outside the cluster.
+              - secretRef:
+                  name: openproject-mcp-relay-targets
                   optional: true
             resources:
               requests:
@@ -76,6 +84,17 @@ spec:
               capabilities:
                 drop: ["ALL"]
         pod:
+          # ndots:1 so a name with a dot is looked up as written first. With
+          # the default ndots:5 the first query is api2.cursor.sh.openproject.svc.cluster.local,
+          # CoreDNS's autopath answers it with the external address, and
+          # Cilium files that address under the expanded name, so the CNP's
+          # toFQDNs rule for the Grok routine host never matches (the
+          # hermes-bot component has the same fix). The in-cluster names the
+          # relay uses are written in full.
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
           securityContext:
             runAsNonRoot: true
             runAsUser: 65532

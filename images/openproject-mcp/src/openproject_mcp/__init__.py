@@ -5,4 +5,4 @@ author; LICENSE.homelab-mcp); identity comes from each request's own
 OpenProject API token instead of a server-side token map.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
