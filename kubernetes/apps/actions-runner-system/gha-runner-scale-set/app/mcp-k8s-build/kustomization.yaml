@@ -91,3 +91,24 @@ patches:
                       value: dind
                     - op: remove
                       path: /spec/template/spec/initContainers/1/startupProbe
+                    # Docker cannot use overlayfs on the container's root
+                    # filesystem under Kata: it is shared from the host over
+                    # virtio-fs, and overlayfs refuses it as an upper dir
+                    # ("failed to mount ... overlay ... invalid argument").
+                    # A memory-backed emptyDir is a tmpfs inside the guest,
+                    # where overlayfs works, for docker's and buildkit's
+                    # layers alike. It is sized for the image builds (a
+                    # Python slim base and its venv, a Node sidecar) and is
+                    # gone with the pod. Counted against the guest's memory.
+                    - op: add
+                      path: /spec/template/spec/volumes/-
+                      value:
+                        name: dind-storage
+                        emptyDir:
+                          medium: Memory
+                          sizeLimit: 8Gi
+                    - op: add
+                      path: /spec/template/spec/initContainers/1/volumeMounts/-
+                      value:
+                        name: dind-storage
+                        mountPath: /var/lib/docker
