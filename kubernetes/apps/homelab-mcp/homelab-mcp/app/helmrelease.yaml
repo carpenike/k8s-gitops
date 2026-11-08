@@ -209,12 +209,30 @@ spec:
               - secretRef:
                   name: homelab-mcp-actual
             probes:
+              # exec, not tcpSocket: the sidecar binds SIDECAR_HOST
+              # (127.0.0.1) only and kubelet dials the pod IP, so a
+              # tcpSocket probe on 9210 can never connect. As a startup
+              # probe that failed for its whole budget and restarted a
+              # healthy container roughly every two minutes, which kept the
+              # pod -- and with it every MCP endpoint -- out of the Service.
+              # The check therefore runs inside the container, and reads the
+              # same two env vars the sidecar binds from so the probe and
+              # the listener cannot drift apart.
               liveness:
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
-                    port: 9210
+                  exec:
+                    command: &actualProbe
+                      - node
+                      - -e
+                      - >-
+                        const net = require("net");
+                        const s = net.connect(Number(process.env.SIDECAR_PORT || 9210), process.env.SIDECAR_HOST || "127.0.0.1");
+                        s.setTimeout(3000);
+                        s.on("connect", () => { s.destroy(); process.exit(0); });
+                        s.on("error", () => process.exit(1));
+                        s.on("timeout", () => { s.destroy(); process.exit(1); });
                   periodSeconds: 30
                   failureThreshold: 3
               # Off on purpose: a not-ready container makes the whole pod
@@ -226,8 +244,8 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
-                    port: 9210
+                  exec:
+                    command: *actualProbe
                   periodSeconds: 5
                   failureThreshold: 24
             securityContext:
