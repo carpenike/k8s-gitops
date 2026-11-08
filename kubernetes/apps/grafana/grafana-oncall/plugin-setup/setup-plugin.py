@@ -32,7 +32,7 @@ AUTH = "Basic " + base64.b64encode(
 ).decode()
 
 
-def call(method, url, body=None, auth=True, timeout=30):
+def call(method, url, body=None, auth=True, timeout=30, parse=True):
     data = None if body is None else json.dumps(body).encode()
     req = urllib.request.Request(url, data=data, method=method)
     if auth:
@@ -41,13 +41,19 @@ def call(method, url, body=None, auth=True, timeout=30):
         req.add_header("Content-Type", "application/json")
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read()
+        # Readiness probes are text, not JSON: the OnCall engine's /health/
+        # answers `Ok`, so parsing it raised ValueError and wait_for() logged a
+        # healthy 200 as "waiting" until it gave up. Callers that want the body
+        # ask for it; callers that only want the status do not.
+        if not parse:
+            return resp.status, None
         return resp.status, (json.loads(raw) if raw else None)
 
 
 def wait_for(name, url, tries=60, delay=5):
     for i in range(1, tries + 1):
         try:
-            status, _ = call("GET", url, auth=False, timeout=10)
+            status, _ = call("GET", url, auth=False, timeout=10, parse=False)
             if status == 200:
                 print(f"{name} is ready", flush=True)
                 return
