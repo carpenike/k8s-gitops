@@ -56,11 +56,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (50da122, 0.40.0: the finance runtime, supercronic and per-user
-              # upstream credentials).
+              # (13d15b5, 0.41.0: the finance runtime, supercronic, per-user
+              # upstream credentials, credential-free categories).
               # Every container below uses this image.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-50da12212992d6db60e7fa378c6dc9de6f66d301@sha256:78858c36955a94f50c9c4d43884486923d63da257d9c3675852c2f5e0b15155a
+              tag: sha-13d15b58b506462e3d94876afdb8816f9ae6d08b@sha256:4f4b3c2b3702eb802ba4e9c21efec5e52cccedcc011c8850e124ae0fe133dd8b
             command:
               - /bin/sh
               - -c
@@ -151,6 +151,12 @@ spec:
               # list under its own scope; give it its own list when the two
               # diverge. /mcp/house-sensors: Groundskeeper; its scope
               # name keys the HA entity policy.
+              # /mcp/steffi: Steffi's own connector, credentials "per_user".
+              # Grocy acts as her (grocy.steffi in homelab-mcp-user-credentials;
+              # refused, never the shared key, until it exists): reads plus
+              # stock, ensure and unit-conversion writes, not the one-shot
+              # grocy_seed_defaults. Cooklang sends no credential, so it is the
+              # same for everyone; read tools only, no recipe edits.
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -162,6 +168,16 @@ spec:
                  "read_scope": "hermes", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent/grokbot", "name": "Grokbot", "tools": "scope:hermes",
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/steffi", "name": "Steffi",
+                 "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
+                 "grocy_convert_units", "grocy_product_card", "grocy_consumption_history",
+                 "grocy_stock_value", "grocy_stock_by_location",
+                 "grocy_ensure", "grocy_stock_item", "grocy_set_unit_conversion",
+                 "cooklang_list_recipes", "cooklang_get_recipe",
+                 "cooklang_search_federation", "cooklang_build_shopping_list"],
+                 "read_scope": "steffi.read", "write_scope": "steffi.write",
+                 "connect_scopes": "all", "credentials": "per_user",
+                 "users": ["stefanie@stefanieholt.com"]},
                 {"path": "/mcp/house-sensors", "name": "House sensors",
                  "tools": "scope:atrium-family-house-sensors",
                  "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]}
@@ -213,7 +229,7 @@ spec:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-50da12212992d6db60e7fa378c6dc9de6f66d301@sha256:929f66d63b7f9d4effd6554bbb897e62cc6a6b583764ecaaef35f191a573fd67
+              tag: sha-13d15b58b506462e3d94876afdb8816f9ae6d08b@sha256:e4682fa4935e47765b94466061de4e4cc4435f47214d434f20757e6040c4bccf
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
