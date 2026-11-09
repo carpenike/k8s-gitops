@@ -141,6 +141,27 @@ Item `homelab-mcp` in vault `k8s-secrets`:
 | `snaptrade_client_id`, `snaptrade_consumer_key` | SnapTrade read credentials (Forge's `HOMELAB_MCP_SNAPTRADE_*`) |
 | `amazon_account_last4` | JSON object, ledger account name to card last four, as in Forge's `HOMELAB_MCP_AMAZON_ACCOUNT_LAST4`. Without it `amazon_*` matches top out at `probable` |
 
+Item `homelab-mcp-user-credentials` in vault `k8s-secrets` holds per-user
+upstream keys, one field per upstream and person, named
+`<upstream>.<alias>` (alias from `HOMELAB_MCP_USERS`):
+
+| Field | Value |
+| --- | --- |
+| `grocy.ryan` | Ryan's own Grocy API key, used only by views with `credentials: "per_user"` |
+| `grocy.steffi` | Steffi's own Grocy API key (from her Grocy user), same use |
+
+To give someone a per-user key:
+1. Add them to `HOMELAB_MCP_USERS` in the HelmRelease.
+2. Add the field to the item. The ExternalSecret extracts every field, so
+   nothing else changes; force-sync it to skip the 12h wait. Every field of
+   the item becomes a file there, so keep only credentials in it, and no two
+   fields with the same label (the provider refuses those).
+
+The volume is optional, so the pod starts before the item exists. A
+per-user call then fails with `<upstream>_no_user_credential` and is
+counted in `homelab_mcp_user_credential_missing_total`; it never falls back
+to the shared key. No view uses `per_user` yet.
+
 The database passwords come from the postgres17 items (`schoolhouse`,
 `lading`, `homelab-finance`, `finances-context`;
 [postgres17.md](postgres17.md#1password)). The ExternalSecrets build the
@@ -153,6 +174,8 @@ ExternalSecrets:
   `/run/mfp`.
 - `homelab-mcp-actual` holds the sidecar's login, which only the sidecar
   container sees.
+- `homelab-mcp-user-credentials` builds the Secret of the same name, mounted
+  at `/run/user-credentials` (optional).
 
 The server re-reads the cookie file when it changes, so new cookies need a
 force-sync but no restart:
@@ -184,12 +207,12 @@ carpenike/mcp `.github/workflows/image.yml` builds both images on the
 `mcp-k8s-build` runners from main:
 
 - `ghcr.io/carpenike/homelab-mcp`: the server and every finance job
-  container (it carries `homelab-finances-runtime` and supercronic from
+  container (it carries `homelab-finances-runtime` and supercronic, since
   mcp 0.39.0);
 - `ghcr.io/carpenike/homelab-mcp-actual-sidecar`.
 
 Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`), to mcp
-main `72a9b0f` (0.39.0). Bump both together from a later main build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
+main `50da122` (0.40.0). Bump both together from a later main build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
 (no GHCR copy upstream), pinned the same way.
 
 ## Alerts

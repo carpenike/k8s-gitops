@@ -56,10 +56,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (72a9b0f, 0.39.0: homelab-finances-runtime and supercronic).
+              # (50da122, 0.40.0: the finance runtime, supercronic and per-user
+              # upstream credentials).
               # Every container below uses this image.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-72a9b0f35549fe39e15b116676cd02788c8b35df@sha256:de465550789ea61c28aae541c91c170d1acc0959a92fcd1f7fb2367ac027a933
+              tag: sha-50da12212992d6db60e7fa378c6dc9de6f66d301@sha256:78858c36955a94f50c9c4d43884486923d63da257d9c3675852c2f5e0b15155a
             command:
               - /bin/sh
               - -c
@@ -132,6 +133,12 @@ spec:
               HOMELAB_MCP_MONEY_PG_SCHEMA: household_finance
               HOMELAB_MCP_MFP_ENABLED: "true"
               HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
+              # Per-user credentials: who they are kept for, and where. No view
+              # uses credentials "per_user" yet (docs/homelab-mcp.md).
+              HOMELAB_MCP_USERS: >-
+                {"ryan": {"email": "ryan@ryanholt.net"},
+                "steffi": {"email": "stefanie@stefanieholt.com"}}
+              HOMELAB_MCP_USER_CREDENTIALS_DIR: /run/user-credentials
               # Writes stay off until the HAR-based write tests pass.
               HOMELAB_MCP_MFP_WRITES_ENABLED: "false"
               # /mcp: everyday read connector. /mcp/full: every tool, write
@@ -206,7 +213,7 @@ spec:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-72a9b0f35549fe39e15b116676cd02788c8b35df@sha256:59306caf8575309e5a9908306dfa210d0564ca8d5228fd5dfb67288569c551c4
+              tag: sha-50da12212992d6db60e7fa378c6dc9de6f66d301@sha256:929f66d63b7f9d4effd6554bbb897e62cc6a6b583764ecaaef35f191a573fd67
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
@@ -535,6 +542,23 @@ spec:
           homelab-mcp:
             app:
               - path: /run/mfp
+                readOnly: true
+      # Per-user upstream credentials (carpenike/mcp credentials.py): one file
+      # per upstream and person, `<upstream>.<alias>`, read only by views with
+      # credentials "per_user". Optional, so the pod starts before the
+      # 1Password item exists; a per-user call then refuses, it never uses the
+      # shared key. Custom so `optional` reaches the volume as written.
+      user-credentials:
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: homelab-mcp-user-credentials
+            optional: true
+            defaultMode: 0444
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /run/user-credentials
                 readOnly: true
       # The sidecar's downloaded budget cache: rebuilt on every start.
       actual:
