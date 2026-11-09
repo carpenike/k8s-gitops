@@ -105,7 +105,7 @@ Each app's own doc has the detail; this page is the order.
    those names drop out with #1435; check that internal DNS answers the
    cluster gateway for them (mikrotik-dns publishes envoy-internal routes).
 9. **Clients:** remove the old Claude connectors and add one per view URL
-   (`/mcp`, `/mcp/admin`); point Hermes at `/mcp/agent` and Groundskeeper at
+   (`/mcp`, `/mcp/full`); point Hermes at `/mcp/agent` and Groundskeeper at
    `/mcp/house-sensors`.
 
 ## After
