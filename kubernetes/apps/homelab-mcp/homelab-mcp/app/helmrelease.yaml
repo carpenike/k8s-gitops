@@ -56,11 +56,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (50da122, 0.40.0: the finance runtime, supercronic and per-user
-              # upstream credentials).
+              # (13d15b5, 0.41.0: the finance runtime, supercronic, per-user
+              # upstream credentials, credential-free categories).
               # Every container below uses this image.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-50da12212992d6db60e7fa378c6dc9de6f66d301@sha256:78858c36955a94f50c9c4d43884486923d63da257d9c3675852c2f5e0b15155a
+              tag: sha-13d15b58b506462e3d94876afdb8816f9ae6d08b@sha256:4f4b3c2b3702eb802ba4e9c21efec5e52cccedcc011c8850e124ae0fe133dd8b
             command:
               - /bin/sh
               - -c
@@ -229,7 +229,7 @@ spec:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-50da12212992d6db60e7fa378c6dc9de6f66d301@sha256:929f66d63b7f9d4effd6554bbb897e62cc6a6b583764ecaaef35f191a573fd67
+              tag: sha-13d15b58b506462e3d94876afdb8816f9ae6d08b@sha256:e4682fa4935e47765b94466061de4e4cc4435f47214d434f20757e6040c4bccf
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"

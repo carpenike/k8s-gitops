@@ -21,6 +21,11 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
+View paths follow one rule. The household owner's views sit at the root
+and are named by access: `/mcp` (read) and `/mcp/full` (read and write);
+the server requires a view at `/mcp`. Every other person gets
+`/mcp/<person>`, and every agent platform `/mcp/agent/<platform>`.
+
 Agents get one view per platform, at `/mcp/agent/<platform>`, not one per
 bot. Every bot on a platform gets the same tool list. Each bot that connects
 (each Hermes bot runs in its own `hermes-<bot>` namespace) still logs in and
@@ -221,7 +226,7 @@ carpenike/mcp `.github/workflows/image.yml` builds both images on the
 - `ghcr.io/carpenike/homelab-mcp-actual-sidecar`.
 
 Both are pinned by tag and digest (`sha-<commit>@sha256:<digest>`), to mcp
-main `50da122` (0.40.0). Bump both together from a later main build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
+main `13d15b5` (0.41.0). Bump both together from a later main build. signal-api is `docker.io/bbernhard/signal-cli-rest-api`
 (no GHCR copy upstream), pinned the same way.
 
 ## Alerts
