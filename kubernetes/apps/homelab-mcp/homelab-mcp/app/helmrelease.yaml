@@ -597,7 +597,8 @@ spec:
         manifest:
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
-          # In: 9200 (MCP and OAuth) from the envoy-external proxies only,
+          # In: 9200 (MCP and OAuth) from the envoy-external and
+          # envoy-internal proxies only -- still proxies in namespace network,
           # which is why HOMELAB_MCP_TRUSTED_PROXY_IPS may be "*"; 9201
           # (/metrics) from Prometheus only. Probes come from the kubelet,
           # which Cilium allows. Out: DNS, then 443 to the named hosts only.
@@ -613,6 +614,9 @@ spec:
                   - matchLabels:
                       k8s:io.kubernetes.pod.namespace: network
                       gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
                 toPorts:
                   - ports:
                       - port: "9200"
