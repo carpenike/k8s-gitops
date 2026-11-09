@@ -185,6 +185,31 @@ spec:
               # stock, ensure and unit-conversion writes, not the one-shot
               # grocy_seed_defaults. Cooklang sends no credential, so it is the
               # same for everyone; read tools only, no recipe edits.
+              # /mcp/household: the SHARED-credential household data set --
+              # finances, school, the purchase stores, Fidelity and Paperless.
+              # Named for the DATA, not a person: one ledger and one set of
+              # kids belong to the house, so a second parent joins by being
+              # added to `users`, not by getting a copy of this list under
+              # their own path. A person-named path used by someone else also
+              # reads wrong in the audit line, which is `view=` plus `user=`.
+              # (/mcp/steffi stays person-named because it genuinely is
+              # personal: its credentials are hers.)
+              # It is a second view rather than more tools on
+              # /mcp/steffi because that one is "per_user", and bind_tools
+              # refuses a per_user view that exposes a category without
+              # per-user support (today only grocy has it, plus cooklang which
+              # sends no credential). Adding them there is a STARTUP failure,
+              # not a runtime refusal, so it would take every connector down.
+              # The same split will be wanted for the Personal wing once mfp
+              # grows per-user credentials; until then mfp reads one cookie
+              # jar for the whole server and must not be shared out.
+              # Its tool list is the union of PERSONAL_FINANCE_TOOLS,
+              # PERSONAL_SCHOOL_TOOLS and PERSONAL_MONEY_TOOLS as of 0.41.1,
+              # written out rather than `scope:`d because a view takes one
+              # scope and this spans three. It therefore does NOT follow later
+              # additions to those lists -- deliberately: a new finance tool
+              # should be an explicit decision here, which is the same reason
+              # scope_definitions.py refuses to derive lists by subtraction.
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -216,6 +241,36 @@ spec:
                  "cooklang_search_federation", "cooklang_build_shopping_list"],
                  "read_scope": "steffi.read", "write_scope": "steffi.write",
                  "connect_scopes": "all", "credentials": "per_user",
+                 "users": ["stefanie@stefanieholt.com"]},
+                {"path": "/mcp/household", "name": "Household",
+                 "tools": ["finances_balance_history", "finances_breaches", "finances_buffer",
+                 "finances_cashflow", "finances_categorize", "finances_clarify_candidates",
+                 "finances_context_add", "finances_context_consume",
+                 "finances_context_list", "finances_debt_status",
+                 "finances_decision_append", "finances_docs_get",
+                 "finances_loan_adjustment_post", "finances_loan_adjustments",
+                 "finances_loan_statement_adjustment_post", "finances_monthly_summary",
+                 "finances_net_worth", "finances_overview", "finances_payee_merge",
+                 "finances_payees", "finances_payoff_projection",
+                 "finances_planned_append", "finances_reconcile", "finances_recurring",
+                 "finances_room", "finances_rule_create", "finances_rule_delete",
+                 "finances_rules_list", "finances_sentinel", "finances_subscriptions",
+                 "finances_sync_status", "finances_tickler_append", "finances_ticklers",
+                 "finances_transactions", "finances_trend", "school_get_announcements",
+                 "school_get_assignment", "school_get_grades", "school_get_missing_work",
+                 "school_get_sync_status", "school_get_upcoming_work",
+                 "school_list_children", "school_list_courses", "school_list_staff",
+                 "school_parent_today", "amazon_get_order", "amazon_get_sync_status",
+                 "amazon_list_orders", "amazon_match_charges", "amazon_search_items",
+                 "costco_get_receipt", "costco_get_sync_status", "costco_list_receipts",
+                 "costco_match_charges", "costco_price_history", "costco_search_items",
+                 "samsclub_get_receipt", "samsclub_get_sync_status",
+                 "samsclub_list_receipts", "samsclub_match_charges",
+                 "samsclub_search_items", "fidelity_positions", "fidelity_summary",
+                 "paperless_get", "paperless_link", "paperless_search"],
+                 "read_scope": "household.read",
+                 "write_scope": "household.write",
+                 "connect_scopes": "all",
                  "users": ["stefanie@stefanieholt.com"]},
                 {"path": "/mcp/house-sensors", "name": "House sensors",
                  "tools": "scope:atrium-family-house-sensors",
