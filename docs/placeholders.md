@@ -135,7 +135,7 @@ comes from.
 
 Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password`.
 
-The HelmRelease's images are pinned to carpenike/mcp main `72a9b0f`.
+The HelmRelease's images are pinned to carpenike/mcp main `50da122` (0.40.0).
 
 ## schoolhouse
 
