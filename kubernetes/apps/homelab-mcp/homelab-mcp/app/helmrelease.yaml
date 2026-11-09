@@ -135,7 +135,9 @@ spec:
               HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
               # Per-user credentials: who they are kept for, and where. No view
               # uses credentials "per_user" yet (docs/homelab-mcp.md).
-              HOMELAB_MCP_USERS: '{"ryan": {"email": "ryan@ryanholt.net"}}'
+              HOMELAB_MCP_USERS: >-
+                {"ryan": {"email": "ryan@ryanholt.net"},
+                "steffi": {"email": "stefanie@stefanieholt.com"}}
               HOMELAB_MCP_USER_CREDENTIALS_DIR: /run/user-credentials
               # Writes stay off until the HAR-based write tests pass.
               HOMELAB_MCP_MFP_WRITES_ENABLED: "false"

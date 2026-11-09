@@ -148,6 +148,7 @@ upstream keys, one field per upstream and person, named
 | Field | Value |
 | --- | --- |
 | `grocy.ryan` | Ryan's own Grocy API key, used only by views with `credentials: "per_user"` |
+| `grocy.steffi` | Steffi's own Grocy API key (from her Grocy user), same use |
 
 To give someone a per-user key:
 1. Add them to `HOMELAB_MCP_USERS` in the HelmRelease.
