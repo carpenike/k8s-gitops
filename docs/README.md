@@ -7,6 +7,7 @@
 | [actions-runners.md](actions-runners.md) | Self-hosted Actions runners for private repos, and the GitHub App |
 | [headlamp.md](headlamp.md) | Read-only Kubernetes UI on the internal gateway |
 | [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, and the Forge cutover |
+| [forge-cutover.md](forge-cutover.md) | Moving homelab-mcp, its finance and Signal workers, schoolhouse, lading, Grafana and OnCall off Forge: PR order and the cutover window |
 | [postgres17.md](postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
 | [schoolhouse.md](schoolhouse.md) | Schoology ingest CronJob and health server, and the Forge cutover |
 | [lading.md](lading.md) | Amazon, Costco and Sam's Club sync per account, token seeds, and the Forge cutover |
