@@ -8,7 +8,7 @@
 name = "openproject-mcp"
 version = "0.3.0"
 description = "Streamable-HTTP MCP server for an OpenProject task queue; each request brings its own OpenProject API token"
-requires-python = "==3.13.*"
+requires-python = "==3.15.*"
 license = { text = "MIT" }
 dependencies = [
   "mcp==2.3.0",
