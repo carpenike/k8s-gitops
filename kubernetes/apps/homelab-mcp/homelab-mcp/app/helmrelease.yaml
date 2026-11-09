@@ -106,7 +106,29 @@ spec:
               # Same Pocket ID client as Forge: its callback is this host.
               HOMELAB_MCP_POCKETID_ISSUER: https://id.${SECRET_DOMAIN}
               HOMELAB_MCP_POCKETID_CLIENT_ID: mcp
-              HOMELAB_MCP_OAUTH_USER_ALLOWLIST: '["ryan@ryanholt.net"]'
+              # Gates login at the PocketID callback, BEFORE a view's own
+              # `users` list is consulted -- so /mcp/steffi being scoped to
+              # Stefanie is not enough on its own; she has to be here too.
+              HOMELAB_MCP_OAUTH_USER_ALLOWLIST: '["ryan@ryanholt.net","stefanie@stefanieholt.com"]'
+              # Redirect-URI allowlist. Setting this REPLACES the code
+              # defaults, so every default is repeated here; the only addition
+              # is Grok's callback, which is served from Cursor's agent
+              # infrastructure (measured 2026-11-09: Grok's MCP client
+              # registers as name='Cursor' and asks for exactly this URI).
+              #
+              # Pinned to the full callback path, not `https://www.cursor.com/`:
+              # matching is a prefix check after the URL is parsed and
+              # userinfo rejected, so the longer the prefix the narrower the
+              # grant. This one admits that endpoint and nothing else on the
+              # host. It does mean Cursor-operated infrastructure receives
+              # authorization codes for whatever view the user consents to --
+              # today /mcp/steffi, which carries steffi.write (grocy writes).
+              HOMELAB_MCP_OAUTH_REDIRECT_URI_ALLOWLIST: >-
+                ["https://claude.ai/","https://claude.com/",
+                "https://vscode.dev/redirect","https://insiders.vscode.dev/redirect",
+                "http://127.0.0.1:","http://127.0.0.1/",
+                "http://localhost:","http://localhost/",
+                "https://www.cursor.com/agents/mcp/oauth/callback"]
               # State lives in a subdirectory the process creates 0700: the
               # private-file checks refuse a group-writable directory, and the
               # volume root is group-writable through fsGroup. The signing key
