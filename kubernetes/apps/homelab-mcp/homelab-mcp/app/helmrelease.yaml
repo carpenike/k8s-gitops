@@ -138,8 +138,12 @@ spec:
               # requested on connect (Claude's step-up is unreliable). Not
               # /mcp/admin: it holds household writes, not server
               # administration.
-              # /mcp/agent: Hermes' restricted list. /mcp/house-sensors:
-              # Groundskeeper; its scope name keys the HA entity policy.
+              # /mcp/agent/<platform>: one view per agent platform, shared by
+              # all its bots. Each bot that logs in still gets its own token;
+              # what they share is the tool list. Grokbot starts with Hermes'
+              # list under its own scope; give it its own list when the two
+              # diverge. /mcp/house-sensors: Groundskeeper; its scope
+              # name keys the HA entity policy.
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -147,8 +151,10 @@ spec:
                 {"path": "/mcp/full", "name": "Home (full)", "tools": "all",
                  "read_scope": "home.read", "write_scope": "home.write",
                  "connect_scopes": "all", "users": ["ryan@ryanholt.net"]},
-                {"path": "/mcp/agent", "name": "Hermes", "tools": "scope:hermes",
+                {"path": "/mcp/agent/hermes", "name": "Hermes", "tools": "scope:hermes",
                  "read_scope": "hermes", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/agent/grokbot", "name": "Grokbot", "tools": "scope:hermes",
+                 "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/house-sensors", "name": "House sensors",
                  "tools": "scope:atrium-family-house-sensors",
                  "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]}

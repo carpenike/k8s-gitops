@@ -16,8 +16,17 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | --- | --- | --- | --- |
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
-| `/mcp/agent` | the `hermes` list | `hermes` | Hermes |
+| `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
+| `/mcp/agent/grokbot` | the `hermes` list, for now | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
+
+Agents get one view per platform, at `/mcp/agent/<platform>`, not one per
+bot. Every bot on a platform gets the same tool list. Each bot that connects
+(each Hermes bot runs in its own `hermes-<bot>` namespace) still logs in and
+holds its own token, so one can be disconnected without the others. Split a
+bot out into its own view only when it needs a risky tool the others must
+not have. A new platform is one more entry in `HOMELAB_MCP_VIEWS`, with its
+own `read_scope`, so a platform's tokens never work on another's view.
 
 Only users listed in a view can use it. Today that is Ryan only.
 
@@ -228,7 +237,8 @@ over from Forge directly.
 9. Remove the old connectors in Claude. Add one connector per view URL
    (`/mcp`, `/mcp/full`), and approve each on the consent page.
 
-   Point Hermes at `/mcp/agent`, and Groundskeeper at
+   Point Hermes at `/mcp/agent/hermes`, Grokbot at `/mcp/agent/grokbot`,
+   and Groundskeeper at
    `/mcp/house-sensors`.
 
 Tokens from Forge do not work here. The signing key is new, and the
