@@ -15,7 +15,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | URL | Tools | Scopes | For |
 | --- | --- | --- | --- |
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
-| `/mcp/admin` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
+| `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent` | the `hermes` list | `hermes` | Hermes |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
@@ -226,7 +226,7 @@ over from Forge directly.
    ownership, prefix `k8s.`).
 8. external-dns publishes `mcp.${SECRET_DOMAIN}` to the cluster tunnel.
 9. Remove the old connectors in Claude. Add one connector per view URL
-   (`/mcp`, `/mcp/admin`), and approve each on the consent page.
+   (`/mcp`, `/mcp/full`), and approve each on the consent page.
 
    Point Hermes at `/mcp/agent`, and Groundskeeper at
    `/mcp/house-sensors`.

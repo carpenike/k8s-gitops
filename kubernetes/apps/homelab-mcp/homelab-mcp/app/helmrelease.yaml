@@ -134,15 +134,17 @@ spec:
               HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
               # Writes stay off until the HAR-based write tests pass.
               HOMELAB_MCP_MFP_WRITES_ENABLED: "false"
-              # /mcp: everyday read connector. /mcp/admin: everything, write
-              # requested on connect (Claude's step-up is unreliable).
+              # /mcp: everyday read connector. /mcp/full: every tool, write
+              # requested on connect (Claude's step-up is unreliable). Not
+              # /mcp/admin: it holds household writes, not server
+              # administration.
               # /mcp/agent: Hermes' restricted list. /mcp/house-sensors:
               # Groundskeeper; its scope name keys the HA entity policy.
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
                  "read_scope": "home.read", "users": ["ryan@ryanholt.net"]},
-                {"path": "/mcp/admin", "name": "Home (full)", "tools": "all",
+                {"path": "/mcp/full", "name": "Home (full)", "tools": "all",
                  "read_scope": "home.read", "write_scope": "home.write",
                  "connect_scopes": "all", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent", "name": "Hermes", "tools": "scope:hermes",
