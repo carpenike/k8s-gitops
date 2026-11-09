@@ -17,7 +17,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
-| `/mcp/agent/grokbot` | the `hermes` list, for now | `grokbot` | Grokbot (every Grokbot agent) |
+| `/mcp/agent/grokbot` | the `hermes` list, plus school reads and Cooklang reads | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
