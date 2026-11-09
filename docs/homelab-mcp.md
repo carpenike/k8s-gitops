@@ -18,6 +18,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
 | `/mcp/agent/grokbot` | the `hermes` list, for now | `grokbot` | Grokbot (every Grokbot agent) |
+| `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
 Agents get one view per platform, at `/mcp/agent/<platform>`, not one per
@@ -28,7 +29,15 @@ bot out into its own view only when it needs a risky tool the others must
 not have. A new platform is one more entry in `HOMELAB_MCP_VIEWS`, with its
 own `read_scope`, so a platform's tokens never work on another's view.
 
-Only users listed in a view can use it. Today that is Ryan only.
+Only users listed in a view can use it. Steffi can use `/mcp/steffi` only;
+every other view is Ryan's.
+
+`/mcp/steffi` acts as her: its Grocy tools send her own key (field
+`grocy.steffi` below) and are refused, never given Ryan's, until it exists.
+Cooklang has no key at all, so it is the same for everyone. Nothing else
+can be added to this view unless it either resolves her own credential or
+uses none; the server refuses to start otherwise (carpenike/mcp
+`credentials.py`).
 
 The first time a user connects a client to a view, they get a consent page.
 

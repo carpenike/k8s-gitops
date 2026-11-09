@@ -151,6 +151,12 @@ spec:
               # list under its own scope; give it its own list when the two
               # diverge. /mcp/house-sensors: Groundskeeper; its scope
               # name keys the HA entity policy.
+              # /mcp/steffi: Steffi's own connector, credentials "per_user".
+              # Grocy acts as her (grocy.steffi in homelab-mcp-user-credentials;
+              # refused, never the shared key, until it exists): reads plus
+              # stock, ensure and unit-conversion writes, not the one-shot
+              # grocy_seed_defaults. Cooklang sends no credential, so it is the
+              # same for everyone; read tools only, no recipe edits.
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -162,6 +168,16 @@ spec:
                  "read_scope": "hermes", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent/grokbot", "name": "Grokbot", "tools": "scope:hermes",
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/steffi", "name": "Steffi",
+                 "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
+                 "grocy_convert_units", "grocy_product_card", "grocy_consumption_history",
+                 "grocy_stock_value", "grocy_stock_by_location",
+                 "grocy_ensure", "grocy_stock_item", "grocy_set_unit_conversion",
+                 "cooklang_list_recipes", "cooklang_get_recipe",
+                 "cooklang_search_federation", "cooklang_build_shopping_list"],
+                 "read_scope": "steffi.read", "write_scope": "steffi.write",
+                 "connect_scopes": "all", "credentials": "per_user",
+                 "users": ["stefanie@stefanieholt.com"]},
                 {"path": "/mcp/house-sensors", "name": "House sensors",
                  "tools": "scope:atrium-family-house-sensors",
                  "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]}
