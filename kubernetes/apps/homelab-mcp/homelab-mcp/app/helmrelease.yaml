@@ -152,9 +152,10 @@ spec:
               # administration.
               # /mcp/agent/<platform>: one view per agent platform, shared by
               # all its bots. Each bot that logs in still gets its own token;
-              # what they share is the tool list. Grokbot starts with Hermes'
-              # list under its own scope; give it its own list when the two
-              # diverge. /mcp/house-sensors: Groundskeeper; its scope
+              # what they share is the tool list. Grokbot's own list: Hermes'
+              # tools plus the school reads (car-ride check-in, the kitchen
+              # paper) and the Cooklang reads (cookbook shopping lists); no
+              # recipe edits. /mcp/house-sensors: Groundskeeper; its scope
               # name keys the HA entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
               # Grocy acts as her (grocy.steffi in homelab-mcp-user-credentials;
@@ -171,7 +172,18 @@ spec:
                  "connect_scopes": "all", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent/hermes", "name": "Hermes", "tools": "scope:hermes",
                  "read_scope": "hermes", "users": ["ryan@ryanholt.net"]},
-                {"path": "/mcp/agent/grokbot", "name": "Grokbot", "tools": "scope:hermes",
+                {"path": "/mcp/agent/grokbot", "name": "Grokbot",
+                 "tools": ["finances_sync_status", "finances_monthly_summary",
+                 "finances_recurring", "finances_debt_status", "finances_breaches",
+                 "finances_buffer", "finances_room", "finances_context_add",
+                 "finances_context_list", "finances_clarify_candidates",
+                 "finances_ticklers", "finances_sentinel", "homelab_list_status",
+                 "school_list_children", "school_list_courses", "school_get_upcoming_work",
+                 "school_get_missing_work", "school_get_grades", "school_get_assignment",
+                 "school_get_announcements", "school_list_staff", "school_get_sync_status",
+                 "school_parent_today",
+                 "cooklang_list_recipes", "cooklang_get_recipe",
+                 "cooklang_search_federation", "cooklang_build_shopping_list"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
