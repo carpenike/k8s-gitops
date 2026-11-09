@@ -148,9 +148,11 @@ spec:
             path: /metrics
             interval: 60s
     route:
-      # Forge publishes grafana. through its Cloudflare tunnel with no Caddy
-      # login (Grafana's own Pocket ID client is the login), so this route
-      # is on envoy-external and native. The ReferenceGrant is in
+      # Grafana's own Pocket ID client is the login, so this route is native
+      # and the gateway login is skipped. It is on BOTH gateways: external so
+      # cloudflare-dns keeps publishing the proxied CNAME, internal so
+      # mikrotik-dns publishes an A record and in-network clients stop
+      # hairpinning out through Cloudflare. The ReferenceGrant is in
       # httproute.yaml.
       app:
         kind: HTTPRoute
@@ -161,6 +163,8 @@ spec:
           - grafana.${SECRET_DOMAIN}
         parentRefs:
           - name: envoy-external
+            namespace: network
+          - name: envoy-internal
             namespace: network
         rules:
           # Forge's dataproxy timeout, plus a little.
@@ -220,7 +224,8 @@ spec:
         manifest:
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
-          # In: 3000 from envoy-external (the route), Prometheus (/metrics),
+          # In: 3000 from the envoy-external and envoy-internal proxies (the
+          # route is on both), Prometheus (/metrics),
           # the OnCall engine and worker (user and plugin sync through the
           # Grafana API) and the plugin setup Job. Probes come from the
           # kubelet, which Cilium allows.
@@ -238,6 +243,9 @@ spec:
                   - matchLabels:
                       k8s:io.kubernetes.pod.namespace: network
                       gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
                   - matchLabels:
                       k8s:io.kubernetes.pod.namespace: observability
                       app.kubernetes.io/name: prometheus

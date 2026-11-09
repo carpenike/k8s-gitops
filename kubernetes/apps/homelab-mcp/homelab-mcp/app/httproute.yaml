@@ -17,6 +17,15 @@ spec:
   parentRefs:
     - name: envoy-external
       namespace: network
+    # Also on the internal gateway so mikrotik-dns publishes
+    # mcp.${SECRET_DOMAIN} as an A record to the internal gateway address:
+    # in-network clients then reach the MCP server directly instead of
+    # hairpinning out through Cloudflare and back. pocket-id-exempt selects
+    # this route by its gateway.holthome.net/auth label with namespaces
+    # from: All, so the native treatment -- no gateway Pocket ID login, which
+    # Claude cannot complete -- follows the route onto envoy-internal too.
+    - name: envoy-internal
+      namespace: network
   rules:
     # Streamable HTTP holds a request open while a tool runs.
     - timeouts:
