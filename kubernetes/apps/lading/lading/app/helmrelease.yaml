@@ -36,10 +36,15 @@ spec:
           app:
             image: &image
               # Built by carpenike/lading .github/workflows/image.yml from main
-              # (d73fae0, carpenike/lading #9). Every container here uses this
-              # image.
+              # (302cc78, carpenike/lading #10: the Costco B2C policy travels in
+              # the token file, so a re-seed carries it instead of needing a
+              # code change). Every container here uses this image.
+              #
+              # Renovate does NOT bump this: its self-built-images group
+              # follows a floating tag, and this pins the immutable sha- one,
+              # so it is bumped by hand on every lading release.
               repository: ghcr.io/carpenike/lading
-              tag: sha-d73fae0410273c02ed38a6c814dca584bc912c4d@sha256:34a3af2c730e4db80adc9f5efcc9d431ae50fd906baaf7218e72accebf746f37
+              tag: sha-302cc78aec7bd7ddd288a44658d3a3428dbc4b41@sha256:71ece66a8520ac650daf88c8a206f2d5308b334b938987c22dbe4d41f31fe5e4
             # The image's default command is the health server.
             env:
               # Forge's services.lading.settings (LADING_<NAME>). The module
