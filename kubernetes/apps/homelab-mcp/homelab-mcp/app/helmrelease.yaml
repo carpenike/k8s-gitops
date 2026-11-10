@@ -56,9 +56,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (ed7c186, 0.45.0: MFP write tools, preview then confirm, for
-              # diary entries and recipes; they answer mfp_writes_disabled
-              # while the flag below is "false".
+              # (b9d684f, 0.46.0: MFP confirm tokens commit only on the
+              # connector that issued them, carry no readable identity, and
+              # previews are no longer listed in read-only views.
+              # 0.45.0: MFP write tools, preview then confirm, for diary
+              # entries and recipes.
               # 0.44.0: mfp_get_recipe flags lines MFP matched at a
               # different amount; foods flag ambiguous duplicate servings.
               # 0.43.0 added read-only mfp_search_food, mfp_list_recipes and
@@ -71,7 +73,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-ed7c186b635ef98d82f6be396565db896ef98d6d@sha256:42a8fc39e2410e27d645784b0663b9763e2deb383c3260fb48aaf16136f283c4
+              tag: sha-b9d684f1f9ef9de278ebb6c1b60400762fced60d@sha256:1c45995e5682d81bf7b0f19c6e466362997d40bfc7f4e6c87f90e840908c9358
             command:
               - /bin/sh
               - -c
@@ -330,9 +332,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (ed7c186). Moves with the app image above.
+              # (b9d684f). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-ed7c186b635ef98d82f6be396565db896ef98d6d@sha256:f4d4c110906e5e418a8c958be9aee5256fd68ac6284d2211159d7417951cecd5
+              tag: sha-b9d684f1f9ef9de278ebb6c1b60400762fced60d@sha256:89f72ca501bac1f665946f429ebb730c77d152ef97c05b017b6e74944fe780b2
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
