@@ -56,9 +56,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (525a29f, 0.43.0: read-only mfp_search_food, mfp_list_recipes
-              # and mfp_get_recipe, plus normalized units, verified, a macro
-              # check and a raw/cooked hint in mfp_get_day; MFP writes stay off.
+              # (daa6d56, 0.44.0: mfp_get_recipe flags lines MFP matched at a
+              # different amount; foods flag ambiguous duplicate servings.
+              # 0.43.0 added read-only mfp_search_food, mfp_list_recipes and
+              # mfp_get_recipe and the review fields; MFP writes stay off.
               # 0.42.1 added homelab_mcp_mfp_cookies_usable, the metric
               # HomelabMcpMfpCookiesUnusable alerts on).
               # Every container below uses this image.
@@ -67,7 +68,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-525a29f4072b448f8693781456528d312d9a2d88@sha256:cec5179ceb15e49e3c7859c62b99fabaebfe274a5a930a166c1df96201b6df2f
+              tag: sha-daa6d5653426920e95dd3220d0ffbca13b17a1c6@sha256:0776f710892f9893e9bbeb4a0d0cc53e5dd5e5d34b2182c4f02023dd881050f3
             command:
               - /bin/sh
               - -c
@@ -324,9 +325,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (525a29f). Moves with the app image above.
+              # (daa6d56). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-525a29f4072b448f8693781456528d312d9a2d88@sha256:fbd00f904324c0174fcc24779f466a78c4fa41e37a01189a9a58333a97a9a7b0
+              tag: sha-daa6d5653426920e95dd3220d0ffbca13b17a1c6@sha256:c4402bd52e56fbcd55cd2a131bf44b41253b2038f366a8fac71c2eaa517fa95c
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
