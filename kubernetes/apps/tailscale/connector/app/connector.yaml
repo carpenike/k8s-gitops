@@ -1,0 +1,29 @@
+---
+# Subnet router into the home network for tailnet clients: laptops, phones,
+# and Grok Bot if its device accepts subnet routes (docs/tailscale.md).
+#
+# Only two addresses are advertised:
+#   10.45.10.50  envoy-internal, so every internal HTTPRoute works with its
+#                existing hostname, certificate and Pocket ID policy
+#   10.20.0.1    the router, the resolver for holthome.net (split DNS in
+#                the tailnet policy points the zone here; ADR 0003)
+# Widen this list in a PR, not in the admin console. The tailnet policy's
+# autoApprovers must list the same prefixes or the routes stay unapproved.
+#
+# Two replicas, kept on different sleds by ProxyClass connector, so a node
+# drain does not drop the route. With replicas > 1 the field is
+# hostnamePrefix; each device is that prefix plus its pod ordinal.
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: home
+spec:
+  replicas: 2
+  hostnamePrefix: k8s-home
+  proxyClass: connector
+  tags:
+    - tag:k8s-subnet
+  subnetRouter:
+    advertiseRoutes:
+      - 10.45.10.50/32
+      - 10.20.0.1/32

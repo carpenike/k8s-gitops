@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale-operator
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: tailscale-operator
+      version: 1.104.4
+      sourceRef:
+        kind: HelmRepository
+        name: tailscale
+      interval: 15m
+  values:
+    # Leaving oauth.clientId empty means the chart does not template its own
+    # Secret. It mounts operator-oauth, which the ExternalSecret writes.
+    # Workload identity federation (oauth.audience) is not used: Tailscale
+    # would have to reach this cluster's service-account issuer, and the
+    # API server is not published.
+    operatorConfig:
+      # The operator's own tailnet device. Its tag owns tag:k8s and the
+      # Connector's tag (tagOwners in the tailnet policy, docs/tailscale.md).
+      hostname: k8s-holthome-operator
+      defaultTags:
+        - tag:k8s-operator
+      image:
+        # Tag is empty, so it follows the chart appVersion (v1.104.4).
+        # Proxies use the same version; the operator does not support
+        # proxies newer than itself.
+        pullPolicy: IfNotPresent
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+    # No tailscale IngressClass. Envoy Gateway is the one HTTP gateway
+    # (AGENTS.md, docs/lessons-from-v1.md). Tailnet clients reach
+    # envoy-internal through the Connector subnet router instead. ADR 0012.
+    ingressClass:
+      enabled: false
+    proxyConfig:
+      defaultTags: tag:k8s
+    apiServerProxyConfig:
+      mode: "false"

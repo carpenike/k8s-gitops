@@ -15,6 +15,7 @@
 | [hermes.md](hermes.md) | Hermes agents in Kata VMs: Chief, and what to create for a new one |
 | [openproject.md](openproject.md) | OpenProject task board for Ryan and the bots: database, sign-in, backups |
 | [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
+| [tailscale.md](tailscale.md) | Tailscale operator and the `home` subnet router to `envoy-internal`: tailnet policy, OAuth client, Grok Bot |
 | [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
 | [scrypted.md](scrypted.md) | Scrypted NVR on VLAN 30, and the Forge cutover |
 | [homelab-mcp.md](homelab-mcp.md) | Claude tools server at `mcp.`: views, MFP cookies, and the Forge cutover |
