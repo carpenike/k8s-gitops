@@ -56,7 +56,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (580c131, 0.48.1: saved-meal amounts read as fractions; the
+              # (00ea822, 0.49.0: mfp_delete_meal_entries clears one meal on
+              # one date with a single confirmation.
+              # 0.48.1: saved-meal amounts read as fractions; the
               # macro check lets fibre count 0-4 kcal/g.
               # 0.48.0: MFP log_recipe logs any saved recipe and
               # log_meal logs a meal's separate foods, both through MFP's
@@ -80,7 +82,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-580c13102baa4a97e2eb27c15522c0a69d4795f0@sha256:7dcf334a910d2d6baf7c516562c7fc717b457b4a16f5c440aa6fda2ea537cb80
+              tag: sha-00ea822348d6744f8c1367bad42f97474c76257d@sha256:a4fdf1a2e7637a674da243fb5c0389b71eb2ff8e5d33816fadb40777126a51ba
             command:
               - /bin/sh
               - -c
@@ -339,9 +341,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (580c131). Moves with the app image above.
+              # (00ea822). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-580c13102baa4a97e2eb27c15522c0a69d4795f0@sha256:a02fd165077e19753c029eec4b45c911d104f26c14a7d175d9f38d965355ef29
+              tag: sha-00ea822348d6744f8c1367bad42f97474c76257d@sha256:eb86d91065693f0559e698cc0ed71f70c55cdae901a16871594cd4b1179ccf16
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
