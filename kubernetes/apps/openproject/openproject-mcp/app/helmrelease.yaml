@@ -29,7 +29,7 @@ spec:
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
               # Floating tag, digest re-pinned by Renovate. This digest is the
               # branch build 0.3.0-9cac727 (external webhook targets).
-              tag: 0.3.0@sha256:cba81d2751e51c0c3eb3bb3a1b70aa1c7c745ef77cb350317dd9ca691aff4cdf
+              tag: 0.3.0@sha256:70dd24e18664c0fdf86be3b57efe639d2b32e62c4eef2ee35ac28e4e01018e81
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
