@@ -56,7 +56,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (4324e58, 0.47.0: MFP log_recipe, log_meal, list/create/delete
+              # (36428da, 0.48.0: MFP log_recipe logs any saved recipe and
+              # log_meal logs a meal's separate foods, both through MFP's
+              # website form; list_meals checks each food's macros.
+              # 0.47.0: MFP log_recipe, log_meal, list/create/delete
               # saved meals; create/delete go through MFP's website.
               # 0.46.0: MFP confirm tokens commit only on the
               # connector that issued them, carry no readable identity, and
@@ -75,7 +78,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-4324e58ef481c8d2dc8a4d5f2b85063162d3ef69@sha256:7ae720b680945da52920768b0b56fa5e0aa93908cdc1670d0da091c928e76a41
+              tag: sha-36428daae888bb5fa2b00ab3af320a7354b6eb90@sha256:57fb1f7d81842cf890aad4a2a874a63358ad4d5db7eb092b7d49cae001225693
             command:
               - /bin/sh
               - -c
@@ -334,9 +337,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (4324e58). Moves with the app image above.
+              # (36428da). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-4324e58ef481c8d2dc8a4d5f2b85063162d3ef69@sha256:f3fbfdd5b2cb0f6b670ac1ea0fc0dd7a62b1f0fec78b022c58e9f559e4028901
+              tag: sha-36428daae888bb5fa2b00ab3af320a7354b6eb90@sha256:699d469b0f9074504df110fe191fe065ee09cf4bd910bbdb570ea506fee16017
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
