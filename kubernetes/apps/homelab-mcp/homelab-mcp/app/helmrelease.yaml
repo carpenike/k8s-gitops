@@ -172,10 +172,10 @@ spec:
                 {"ryan": {"email": "ryan@ryanholt.net"},
                 "steffi": {"email": "stefanie@stefanieholt.com"}}
               HOMELAB_MCP_USER_CREDENTIALS_DIR: /run/user-credentials
-              # Writes stay off until Ryan confirms turning them on. The write
-              # acceptance tests passed (carpenike/mcp#129); enabling is its
-              # own PR.
-              HOMELAB_MCP_MFP_WRITES_ENABLED: "false"
+              # Writes on, confirmed by Ryan on 2026-11-10 after the write
+              # acceptance tests passed (carpenike/mcp#129). Every write is
+              # preview then confirm; set "false" to turn them all off.
+              HOMELAB_MCP_MFP_WRITES_ENABLED: "true"
               # /mcp: everyday read connector. /mcp/full: every tool, write
               # requested on connect (Claude's step-up is unreliable). Not
               # /mcp/admin: it holds household writes, not server
