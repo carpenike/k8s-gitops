@@ -56,7 +56,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (daa6d56, 0.44.0: mfp_get_recipe flags lines MFP matched at a
+              # (ed7c186, 0.45.0: MFP write tools, preview then confirm, for
+              # diary entries and recipes; they answer mfp_writes_disabled
+              # while the flag below is "false".
+              # 0.44.0: mfp_get_recipe flags lines MFP matched at a
               # different amount; foods flag ambiguous duplicate servings.
               # 0.43.0 added read-only mfp_search_food, mfp_list_recipes and
               # mfp_get_recipe and the review fields; MFP writes stay off.
@@ -68,7 +71,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-daa6d5653426920e95dd3220d0ffbca13b17a1c6@sha256:0776f710892f9893e9bbeb4a0d0cc53e5dd5e5d34b2182c4f02023dd881050f3
+              tag: sha-ed7c186b635ef98d82f6be396565db896ef98d6d@sha256:42a8fc39e2410e27d645784b0663b9763e2deb383c3260fb48aaf16136f283c4
             command:
               - /bin/sh
               - -c
@@ -169,7 +172,9 @@ spec:
                 {"ryan": {"email": "ryan@ryanholt.net"},
                 "steffi": {"email": "stefanie@stefanieholt.com"}}
               HOMELAB_MCP_USER_CREDENTIALS_DIR: /run/user-credentials
-              # Writes stay off until the HAR-based write tests pass.
+              # Writes stay off until Ryan confirms turning them on. The write
+              # acceptance tests passed (carpenike/mcp#129); enabling is its
+              # own PR.
               HOMELAB_MCP_MFP_WRITES_ENABLED: "false"
               # /mcp: everyday read connector. /mcp/full: every tool, write
               # requested on connect (Claude's step-up is unreliable). Not
@@ -325,9 +330,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (daa6d56). Moves with the app image above.
+              # (ed7c186). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-daa6d5653426920e95dd3220d0ffbca13b17a1c6@sha256:c4402bd52e56fbcd55cd2a131bf44b41253b2038f366a8fac71c2eaa517fa95c
+              tag: sha-ed7c186b635ef98d82f6be396565db896ef98d6d@sha256:f4d4c110906e5e418a8c958be9aee5256fd68ac6284d2211159d7417951cecd5
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
