@@ -187,6 +187,14 @@ Still to confirm:
 | Grafana 12.3.11 >= Forge | Grafana image | Forge's `grafana --version` at the cutover, step 1 |
 | OnCall egress | `kubernetes/apps/grafana/grafana-oncall/app/ciliumnetworkpolicy.yaml` | 443 to any public address until the notification channels in OnCall's database are known |
 
+## Tailscale
+
+Create item `tailscale` in vault `k8s-secrets`. Fields: `client_id` and
+`client_secret`, from a Tailscale OAuth client with Devices Core, Auth Keys
+and Services write scopes and tag `tag:k8s-operator`. The tailnet policy
+and split DNS are set in the admin console before the merge
+([tailscale.md](tailscale.md)).
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

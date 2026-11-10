@@ -31,6 +31,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Public DNS | external-dns to Cloudflare, external gateway only | app v0.24.0, chart 1.23.0 |
 | Internal DNS | external-dns plus MikroTik webhook | webhook v1.6.3 |
 | Public reach | cloudflared tunnel to `envoy-external` | cloudflared 2026.10.3 |
+| Tailnet reach | Tailscale operator, Connector `home` subnet router to `envoy-internal` and the router's DNS, no IngressClass (see tailscale.md, ADR 0012) | chart 1.104.4 |
 | Secrets | External Secrets, 1Password SDK | chart 2.14.0 |
 | Block | Rook-Ceph, 3 replicas, host failure domain | 1.21.1 |
 | Media | NFS static volumes, class `nfs-media` | no provisioner |
