@@ -56,17 +56,18 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (db7a72a, 0.42.1: publishes homelab_mcp_mfp_cookies_usable, the
-              # metric HomelabMcpMfpCookiesUnusable alerts on; 0.42.0 let mfp_*
-              # use the CALLER's own MyFitnessPal session, inert here because
-              # every view that exposes mfp_* is shared-credential).
+              # (525a29f, 0.43.0: read-only mfp_search_food, mfp_list_recipes
+              # and mfp_get_recipe, plus normalized units, verified, a macro
+              # check and a raw/cooked hint in mfp_get_day; MFP writes stay off.
+              # 0.42.1 added homelab_mcp_mfp_cookies_usable, the metric
+              # HomelabMcpMfpCookiesUnusable alerts on).
               # Every container below uses this image.
               #
               # Renovate does NOT bump this: its self-built-images group
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-db7a72a7105b275e193cd6c4f89e9cc7e5ba2e8d@sha256:422f6a09f4f18f36b0ab91d62bfb17931706158c67e2cc2299da39d82c297aea
+              tag: sha-525a29f4072b448f8693781456528d312d9a2d88@sha256:cec5179ceb15e49e3c7859c62b99fabaebfe274a5a930a166c1df96201b6df2f
             command:
               - /bin/sh
               - -c
@@ -323,9 +324,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (db7a72a). Moves with the app image above.
+              # (525a29f). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-db7a72a7105b275e193cd6c4f89e9cc7e5ba2e8d@sha256:06629f0776ab1a1c47557e04100bfc70ca93698ba93f7e267e536f05b3e54149
+              tag: sha-525a29f4072b448f8693781456528d312d9a2d88@sha256:fbd00f904324c0174fcc24779f466a78c4fa41e37a01189a9a58333a97a9a7b0
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
