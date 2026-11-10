@@ -38,6 +38,22 @@ spec:
               The mfp tools are refusing calls until the cookies are replaced.
               Export fresh cookies to the 1Password item homelab-mcp, field
               mfp_cookies (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
+        - alert: HomelabMcpMfpCookiesUnusable
+          # The export itself is missing, empty, unparseable or was captured
+          # logged out. AuthExpired cannot see this -- no call reaches MFP to
+          # be rejected -- and ExpiringSoon is silent when the export has no
+          # expirationDate. On 2026-11-09 an empty export sat for a day with
+          # neither firing. Set at startup and on every mfp_* call (0.42.1+).
+          expr: homelab_mcp_mfp_cookies_usable{namespace="homelab-mcp"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: MyFitnessPal cookie export is missing or unusable
+            description: >-
+              The mfp tools are refusing every call. Capture a fresh session
+              into the 1Password item homelab-mcp, field mfp_cookies
+              (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
         - alert: HomelabMcpMfpCookiesExpiringSoon
           # The session cookie's own expiry, read from the cookie file.
           expr: |
