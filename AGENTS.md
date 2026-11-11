@@ -96,9 +96,16 @@ bash scripts/validate.sh
 ```
 
 CI runs the same steps in `.github/workflows/validate.yaml`: yamllint,
-kubeconform, a check that any `*.sops.yaml` is encrypted, helm template,
-gitleaks on the working tree, and `renovate-config-validator` for Renovate
-44.188.2.
+kubeconform, a check that any `*.sops.yaml` is encrypted, a doc link
+check, helm template, gitleaks on the working tree, and
+`renovate-config-validator` for Renovate 44.188.2.
+
+`scripts/check-doc-links.sh` fails on a relative Markdown link or
+`#anchor` that does not resolve, and on any `docs/<name>.md` path named in
+a manifest, script or prompt that does not exist. Renaming a doc or a
+heading means fixing every mention in the same pull request. A `docs/`
+path that belongs to another repository goes in the `EXTERNAL_DOCS` list
+at the top of that script.
 
 kubeconform checks the HelmRelease objects, not their `spec.values`.
 `scripts/helm-template.sh` builds each Flux Kustomization, applies its
