@@ -57,6 +57,16 @@ points the MX of each mail domain at the VM. The edge:
 - relays everything it accepts through an `MtaRoute/Relay` to
   `10.45.10.25:2525`, and queues while that is unreachable
 - gets its own certificate for the MX name with Stalwart's ACME client
+- also carries outbound mail: the cluster's Stalwart relays remote
+  domains through it, so mail leaves from the VM's static address with
+  its own PTR. Vultr opens outbound 25 on request. This is what lets the
+  cluster's Stalwart publish SPF itself (`docs/mail.md`, "DNS"): its SPF
+  authorizes the MX host, which is the VM. The cluster-to-tailnet path
+  for this is not built yet
+
+The MX target is `mx.holthome.net`, published by the cluster's Stalwart.
+Publicly that name is an A record for the VM; on the LAN the MikroTik
+answers `10.45.10.25`.
 
 The cluster side:
 
@@ -83,8 +93,8 @@ The same route also lets tailnet devices reach the client ports (465,
   as its queue retention allows, instead of relying on senders' retries
 - Good, because sender checks and rejections happen at the real address,
   during the SMTP session
-- Good, because a static address with its own PTR can later carry
-  outbound mail and replace the relay in `docs/mail.md`
+- Good, because outbound leaves from a static address with its own PTR,
+  so no third-party relay is needed
 - Bad, because there are two Stalwart servers to configure and patch. The
   edge's configuration lives in its own store, like the cluster's
   (`stalwart-cli snapshot`), not in this repo
@@ -96,8 +106,10 @@ The same route also lets tailnet devices reach the client ports (465,
   other senders off it
 - Bad, because mail sits on the VM's disk while queued, outside the
   cluster and its backups
-- Neutral, because the VM costs a few dollars a month and needs a Vultr
-  support request to open outbound 25, if outbound is ever moved there
+- Bad, because outbound waits on a Vultr support request to open port 25
+  and on a cluster-to-tailnet path; until both exist nothing is
+  delivered outside
+- Neutral, because the VM costs a few dollars a month
 
 ## Pros and Cons of the Options
 
