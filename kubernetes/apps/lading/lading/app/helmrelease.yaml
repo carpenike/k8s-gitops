@@ -107,7 +107,7 @@ spec:
         type: cronjob
         cronjob:
           # Unsuspended at the cutover once Forge's state for this account
-          # was on its volume (docs/lading.md). A run on an empty volume is a
+          # was on its volume (docs/apps/lading.md). A run on an empty volume is a
           # cold Amazon login, the path that hit a JavaScript challenge on
           # Forge's first deploy: suspend again before replacing a volume.
           suspend: false

@@ -20,7 +20,7 @@ spec:
 # the client ports plus 2525 for the Vultr edge relay (ADR 0014). The
 # Connector source-NATs tailnet traffic, so it arrives from those pods,
 # not from world. Which tailnet device reaches which port is decided by
-# the grants in the tailnet policy (docs/tailscale.md). 2525 is open to
+# the grants in the tailnet policy (docs/platform/tailscale.md). 2525 is open to
 # nothing else, because Stalwart trusts that listener's mail as already
 # filtered. Probes are exec, so there is no host rule.
 #

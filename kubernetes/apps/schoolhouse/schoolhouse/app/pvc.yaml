@@ -5,7 +5,7 @@
 # treat the volume as a credential. Only the ingest CronJob mounts it; the
 # health server never sees it. The raw archive and every record are in
 # postgres17, not here. Copied from Forge's /var/lib/schoolhouse at the
-# cutover (docs/schoolhouse.md).
+# cutover (docs/apps/schoolhouse.md).
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

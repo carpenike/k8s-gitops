@@ -4,7 +4,7 @@
 # replica needs a separate migration job. The image is newer than the
 # v1.100.1 digest Forge qualified for Atrium, so Atrium cannot move here on
 # this tag. The in-process Atrium admission hook is not mounted here. See
-# docs/litellm.md.
+# docs/apps/litellm.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -135,7 +135,7 @@ spec:
               # Responses API path expect. Requests with function tools (every
               # Hermes turn) are bridged to /v1/responses, whose Azure
               # transformation does not strip a gpt5_series/ prefix: with it,
-              # Azure answered DeploymentNotFound (docs/litellm.md).
+              # Azure answered DeploymentNotFound (docs/apps/litellm.md).
               - model_name: gpt-6.1-sol
                 litellm_params: &azure-foundry
                   model: azure/gpt-6.1-sol

@@ -3,7 +3,7 @@
 # The server's and the finance jobs' state: OAuth state and signing key
 # (state/), the finances checkout, the Signal store (finances-context.db), the
 # ingestion reservation and report state. The ingestion state and the Signal
-# store are restored from Forge at the cutover (docs/homelab-mcp.md). Backed
+# store are restored from Forge at the cutover (docs/apps/homelab-mcp.md). Backed
 # up by ../backup.
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -38,7 +38,7 @@ them. Every other `envoy-external` host keeps the default. Listeners on one
 port are chosen by SNI, so the tunnel's `matrix.ryanholt.net` rule sets
 `originServerName: matrix.ryanholt.net`. Without it, cloudflared sends
 `external.holthome.net` and lands on the shared listener. See
-[gateway-auth.md](gateway-auth.md).
+[gateway-auth.md](../platform/gateway-auth.md).
 
 The apex is also the `ryanholt.net` website ([website.md](website.md)).
 Its route in namespace `web` matches `/`; this one matches the longer

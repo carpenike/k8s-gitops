@@ -2,7 +2,7 @@
 # The HTTPRoute itself is in the HelmRelease (route.app). Grafana signs
 # people in with its own Pocket ID client, so the route is labelled native
 # and the gateway login is skipped: one login per route
-# (docs/gateway-auth.md). This grant lets pocket-id-exempt in namespace
+# (docs/platform/gateway-auth.md). This grant lets pocket-id-exempt in namespace
 # network select it.
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant

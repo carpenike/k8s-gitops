@@ -5,7 +5,7 @@
 # substitution: BOT_NAME, BOT_DISPLAY_NAME and TASK_BOARD_RYAN_USER_ID.
 # Like ../template, but everything is in openproject: the Secret the token
 # lands in, the Role on it, and the Job. Ryan copies the token from that
-# Secret to 1Password and to the bot (docs/openproject.md, "Bots outside
+# Secret to 1Password and to the bot (docs/apps/openproject.md, "Bots outside
 # the cluster").
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

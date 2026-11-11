@@ -10,7 +10,7 @@ decision-makers: Ryan Holt
 
 Every app in this cluster that can sign people in with OIDC does so with
 Pocket ID (`id.holthome.net`, on Forge), and its route is labelled
-`native` (`docs/gateway-auth.md`). Stalwart's route is already `native`,
+`native` (`docs/platform/gateway-auth.md`). Stalwart's route is already `native`,
 but its accounts would otherwise live in Stalwart's internal directory,
 with their own passwords.
 

@@ -6,7 +6,7 @@ applyTo: "kubernetes/apps/hermes/*/routines.yaml"
 # Hermes routines from Grok
 
 `AGENTS.md` is canonical. This file is the path-scoped supplement for
-`routines.yaml` (docs/hermes.md, "Routines from git").
+`routines.yaml` (docs/apps/hermes.md, "Routines from git").
 
 Ryan tries a routine in a Grok bot first, then moves it here once it is
 settled. Grok Chief hands it over in three parts:

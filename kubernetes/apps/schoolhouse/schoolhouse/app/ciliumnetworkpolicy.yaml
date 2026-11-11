@@ -69,7 +69,7 @@ spec:
 # uses. The feed URLs are secret, so that is not checked here; if a feed
 # lives on another host, the ingest logs "iCal fetch failed for child <id>
 # (ConnectTimeout)" and carries on, and that exact host goes here
-# (docs/schoolhouse.md). No IMAP: Forge configures no digest mailbox.
+# (docs/apps/schoolhouse.md). No IMAP: Forge configures no digest mailbox.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

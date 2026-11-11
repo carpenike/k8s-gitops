@@ -1,7 +1,7 @@
 ---
 # Bearer keys cannot complete the gateway Pocket ID login. The Admin UI
 # has its own Pocket ID client, so the whole route is native. See
-# docs/gateway-auth.md and docs/litellm.md. The ReferenceGrant is what
+# docs/platform/gateway-auth.md and docs/apps/litellm.md. The ReferenceGrant is what
 # lets pocket-id-exempt in namespace network select this route.
 # parentRefs is only envoy-internal. mikrotik-dns publishes that gateway.
 # Timeouts match the proxy request_timeout of 600 seconds.

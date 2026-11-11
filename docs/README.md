@@ -3,6 +3,13 @@
 The repository [README](../README.md) is the overview. These files are the
 detail. `AGENTS.md` at the repo root is the instruction file for agents.
 
+| Folder | Holds |
+| --- | --- |
+| [platform/](platform/) | What every app stands on: ingress login, secrets, networking, Postgres, monitoring |
+| [apps/](apps/) | One guide per application |
+| [adr/](adr/) | Decision records |
+| [history/](history/) | Records of the build and the moves onto this cluster |
+
 ## Start here
 
 | File | Contents |
@@ -10,21 +17,20 @@ detail. `AGENTS.md` at the repo root is the instruction file for agents.
 | [architecture.md](architecture.md) | What runs, the networks, the names, where data lives, and what stays off the cluster |
 | [adr/](adr/) | Decision records, listed [below](#decision-records) |
 | [deviations.md](deviations.md) | Where this tree leaves onedr0p/cluster-template |
-| [lessons-from-v1.md](lessons-from-v1.md) | What the archived tree taught us |
 
 ## Platform
 
 | File | Contents |
 | --- | --- |
-| [gateway-auth.md](gateway-auth.md) | Pocket ID login on the Envoy gateways, and how a route opts out |
-| [external-secrets.md](external-secrets.md) | 1Password through External Secrets: rate limits, the 12h refresh, rotating with force-sync |
-| [sops.md](sops.md) | YubiKey decryption, and the age key Flux uses |
-| [tailscale.md](tailscale.md) | Tailscale operator and the `home` subnet router to `envoy-internal`: tailnet policy, OAuth client, Grok Bot |
-| [multus.md](multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
-| [postgres17.md](postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
-| [grafana.md](grafana.md) | Grafana and Grafana OnCall: datasources, plugins, secrets |
-| [actions-runners.md](actions-runners.md) | Self-hosted Actions runners for private repos, and the GitHub App |
-| [headlamp.md](headlamp.md) | Read-only Kubernetes UI on the internal gateway |
+| [gateway-auth.md](platform/gateway-auth.md) | Pocket ID login on the Envoy gateways, and how a route opts out |
+| [external-secrets.md](platform/external-secrets.md) | 1Password through External Secrets: rate limits, the 12h refresh, rotating with force-sync |
+| [sops.md](platform/sops.md) | YubiKey decryption, and the age key Flux uses |
+| [tailscale.md](platform/tailscale.md) | Tailscale operator and the `home` subnet router to `envoy-internal`: tailnet policy, OAuth client, Grok Bot |
+| [multus.md](platform/multus.md) | Multus in front of Cilium, and the `vlan30` attachment |
+| [postgres17.md](platform/postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
+| [grafana.md](platform/grafana.md) | Grafana and Grafana OnCall: datasources, plugins, secrets |
+| [actions-runners.md](platform/actions-runners.md) | Self-hosted Actions runners for private repos, and the GitHub App |
+| [headlamp.md](platform/headlamp.md) | Read-only Kubernetes UI on the internal gateway |
 
 Node config and first install are next to the files they describe:
 [talos/README.md](../talos/README.md) and
@@ -34,20 +40,20 @@ Node config and first install are next to the files they describe:
 
 | File | Contents |
 | --- | --- |
-| [hermes.md](hermes.md) | Hermes agents in Kata VMs, and what to create for a new one |
-| [hermes-memory.md](hermes-memory.md) | Hindsight, the bots' shared long-term memory |
-| [litellm.md](litellm.md) | LiteLLM proxy on the internal gateway, its models and keys |
-| [homelab-mcp.md](homelab-mcp.md) | Claude tools server at `mcp.`: views and MFP cookies |
-| [openproject.md](openproject.md) | OpenProject task board for Ryan and the bots: database, sign-in, backups |
-| [grok-board-guide.md](grok-board-guide.md) | The task board instructions to paste into a Grok bot |
-| [matrix.md](matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
-| [mail.md](mail.md) | Stalwart mail server: postgres17 and RGW storage, backups, names, and first-run setup |
-| [scrypted.md](scrypted.md) | Scrypted NVR on VLAN 30 |
-| [schoolhouse.md](schoolhouse.md) | Schoology ingest CronJob and health server |
-| [lading.md](lading.md) | Amazon, Costco and Sam's Club sync per account, and token seeds |
-| [website.md](website.md) | The `ryanholt.net` static site, and how it shares the apex with Matrix |
+| [hermes.md](apps/hermes.md) | Hermes agents in Kata VMs, and what to create for a new one |
+| [hermes-memory.md](apps/hermes-memory.md) | Hindsight, the bots' shared long-term memory |
+| [litellm.md](apps/litellm.md) | LiteLLM proxy on the internal gateway, its models and keys |
+| [homelab-mcp.md](apps/homelab-mcp.md) | Claude tools server at `mcp.`: views and MFP cookies |
+| [openproject.md](apps/openproject.md) | OpenProject task board for Ryan and the bots: database, sign-in, backups |
+| [grok-board-guide.md](apps/grok-board-guide.md) | The task board instructions to paste into a Grok bot |
+| [matrix.md](apps/matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
+| [mail.md](apps/mail.md) | Stalwart mail server: postgres17 and RGW storage, backups, names, and first-run setup |
+| [scrypted.md](apps/scrypted.md) | Scrypted NVR on VLAN 30 |
+| [schoolhouse.md](apps/schoolhouse.md) | Schoology ingest CronJob and health server |
+| [lading.md](apps/lading.md) | Amazon, Costco and Sam's Club sync per account, and token seeds |
+| [website.md](apps/website.md) | The `ryanholt.net` static site, and how it shares the apex with Matrix |
 
-## Build and migration records
+## History
 
 These were written while the cluster was being built and apps were moving
 onto it. Read them as a record of that work, not as a guide to the running
@@ -55,8 +61,9 @@ system.
 
 | File | Contents |
 | --- | --- |
-| [forge-cutover.md](forge-cutover.md) | Moving homelab-mcp, its finance and Signal workers, schoolhouse, lading, Grafana and OnCall off Forge: PR order and the cutover window |
-| [placeholders.md](placeholders.md) | Values a person had to fill in for the install, and which 1Password item each consumer reads |
+| [lessons-from-v1.md](history/lessons-from-v1.md) | What the archived tree taught us |
+| [forge-cutover.md](history/forge-cutover.md) | Moving homelab-mcp, its finance and Signal workers, schoolhouse, lading, Grafana and OnCall off Forge: PR order and the cutover window |
+| [placeholders.md](history/placeholders.md) | Values a person had to fill in for the install, and which 1Password item each consumer reads |
 
 ## Decision records
 

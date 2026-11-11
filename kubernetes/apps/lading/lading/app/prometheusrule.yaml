@@ -58,7 +58,7 @@ spec:
               (45 minute timeout). Read its Job's log before rerunning. An
               AmazonOrdersAuthError or a JavaScript challenge means do NOT
               retry in a loop: that is how the account gets challenge-locked.
-              See docs/lading.md, "When a sync fails".
+              See docs/apps/lading.md, "When a sync fails".
         - alert: LadingSyncStale
           # The /healthz verdict, from the Job side: no successful run for
           # longer than stale_after_hours (36h, one missed daily run is

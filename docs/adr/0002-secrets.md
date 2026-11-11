@@ -34,14 +34,14 @@ and are not committed. App credentials are ExternalSecret resources.
 The SDK store uses vault `k8s-secrets`
 (`h3aojtbptukuxixo5ysdco7r6u`), the vault v1 selected by name. Item names
 that v1 already had are filled in. The rest stay placeholders. See
-`docs/placeholders.md`.
+`docs/history/placeholders.md`.
 
 Personal decryption reuses the YubiKey OpenPGP fingerprint from
 `archive/talos-v1:.sops.yaml` (`user_ryan`). That file put the fingerprint
 and the cluster age recipient in one SOPS key group, so either key could
 decrypt. `.sops.yaml` keeps the fingerprint and a new age recipient in that same
 group. The v1 age recipient is not reused. The private age key is not in
-git. See `docs/sops.md`.
+git. See `docs/platform/sops.md`.
 
 ### Consequences
 

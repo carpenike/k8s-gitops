@@ -10,7 +10,7 @@
 # and the integration token in the path is what OnCall authenticates. A
 # clientCIDRs allowlist for Forge would not work here: envoy's Service uses
 # externalTrafficPolicy Cluster, so Envoy sees a node address, not Forge's
-# (docs/gateway-auth.md).
+# (docs/platform/gateway-auth.md).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

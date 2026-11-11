@@ -62,7 +62,7 @@ now would point WAL at `s3.example.invalid`.
 The Atrium admission hook stays on Forge. It is an in-process callback
 plus files published on that host. This deployment does not mount it.
 Cutover of `llm.holthome.net` waits on that. The procedure is in
-[litellm.md](../litellm.md).
+[litellm.md](../apps/litellm.md).
 
 ### Consequences
 

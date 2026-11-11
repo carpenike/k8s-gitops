@@ -4,7 +4,7 @@ External Secrets (chart 2.14.0) reads app secrets from the 1Password vault
 `k8s-secrets` through one ClusterSecretStore, `onepassword`
 (`kubernetes/apps/external-secrets/external-secrets/store/clustersecretstore.yaml`).
 It uses the 1Password SDK provider and authenticates with a service account,
-whose token is created out of band ([bootstrap/README.md](../bootstrap/README.md)).
+whose token is created out of band ([bootstrap/README.md](../../bootstrap/README.md)).
 
 ## 1Password rate limits
 

@@ -20,7 +20,7 @@ spec:
 # bot's screen pod :22. No public internet: browsing runs in the screen pod
 # (Bot Desktop placement follows the ssh backend), and web_search /
 # web_extract need a provider (Firecrawl, Exa, SearXNG...) that is not
-# configured. Add a /32 here if one is. See docs/hermes.md.
+# configured. Add a /32 here if one is. See docs/apps/hermes.md.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

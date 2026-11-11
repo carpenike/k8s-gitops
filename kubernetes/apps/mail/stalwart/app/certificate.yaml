@@ -2,7 +2,7 @@
 # TLS for SMTP, submission, IMAP, POP3 and ManageSieve. HTTPS for the WebUI
 # terminates at envoy-internal with the gateway's own wildcard. Stalwart
 # reads these files through a Certificate object whose certificate and
-# privateKey are File sources (docs/mail.md). Reloader restarts the pod when
+# privateKey are File sources (docs/apps/mail.md). Reloader restarts the pod when
 # cert-manager renews the secret.
 apiVersion: cert-manager.io/v1
 kind: Certificate

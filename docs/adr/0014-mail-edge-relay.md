@@ -12,7 +12,7 @@ ADR 0013 put Stalwart in the cluster with its mail ports on LoadBalancer
 `10.45.10.25`, reachable from the LAN only. Mail from the internet needs a
 public address that accepts port 25. The home connection cannot provide
 one reliably: the address is residential and dynamic, Cloudflare Tunnel
-carries HTTP only, and `docs/mail.md` lists inbound 25 as needing its own
+carries HTTP only, and `docs/apps/mail.md` lists inbound 25 as needing its own
 ADR.
 
 The cluster already has a path from the tailnet into the home network:
@@ -60,7 +60,7 @@ points the MX of each mail domain at the VM. The edge:
 - also carries outbound mail: the cluster's Stalwart relays remote
   domains through it, so mail leaves from the VM's static address with
   its own PTR. Vultr opens outbound 25 on request. This is what lets the
-  cluster's Stalwart publish SPF itself (`docs/mail.md`, "DNS"): its SPF
+  cluster's Stalwart publish SPF itself (`docs/apps/mail.md`, "DNS"): its SPF
   authorizes the MX host, which is the VM. The cluster-to-tailnet path
   for this is not built yet
 

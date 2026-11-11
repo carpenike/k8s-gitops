@@ -1,6 +1,6 @@
 """matrix-profile: the bot reads and changes its own Matrix profile (display name, avatar).
 
-Local Hermes plugin (k8s-gitops, images/hermes-agent/matrix-profile; docs/hermes.md,
+Local Hermes plugin (k8s-gitops, images/hermes-agent/matrix-profile; docs/apps/hermes.md,
 "Matrix profile"). It uses the gateway's own Matrix login from the agent's environment
 (MATRIX_HOMESERVER, MATRIX_ACCESS_TOKEN, MATRIX_USER_ID), read through Hermes' profile-scoped
 secret reader and never returned to the model. Matrix lets any user set their own

@@ -3,7 +3,7 @@
 # The shared provisioning script, which each bot's task-board Kustomization
 # (kubernetes/components/hermes-bot/task-board) runs with ../template, and
 # the board's one webhook (webhook.rb, run by webhook-job.yaml).
-# docs/openproject.md, "Bot provisioning" and "Waking a bot".
+# docs/apps/openproject.md, "Bot provisioning" and "Waking a bot".
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

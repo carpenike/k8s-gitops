@@ -24,7 +24,7 @@ spec:
 # archived continuously in between. immediate: a base backup runs when this
 # object is created. It can fail with "requested plugin is not available"
 # if it lands before the instances restart with the plugin sidecar; then
-# take one by hand (docs/postgres17.md, "First check after merge").
+# take one by hand (docs/platform/postgres17.md, "First check after merge").
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:

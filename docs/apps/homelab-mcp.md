@@ -3,7 +3,7 @@
 The Claude tools server from [carpenike/mcp](https://github.com/carpenike/mcp),
 at `mcp.${SECRET_DOMAIN}` on envoy-external. It is its own OAuth 2.1
 authorization server, federated to Pocket ID, so the route is `native`
-(see [gateway-auth.md](gateway-auth.md)).
+(see [gateway-auth.md](../platform/gateway-auth.md)).
 
 Manifests: `kubernetes/apps/homelab-mcp/`.
 
@@ -72,7 +72,7 @@ Off: `messaging` (not configured yet; signal-api now runs in this pod) and
 (below) and write the shared context store in postgres17.
 
 The stores in postgres17 and how they got there:
-[postgres17.md, "Forge stores"](postgres17.md#forge-stores).
+[postgres17.md, "Forge stores"](../platform/postgres17.md#forge-stores).
 
 ### Actual sidecar
 
@@ -225,7 +225,7 @@ to the shared key. No view uses `per_user` yet.
 
 The database passwords come from the postgres17 items (`schoolhouse`,
 `lading`, `homelab-finance`, `finances-context`;
-[postgres17.md](postgres17.md#1password)). The ExternalSecrets build the
+[postgres17.md](../platform/postgres17.md#1password)). The ExternalSecrets build the
 DSNs from them, URL-encoded, against `postgres17-rw`.
 
 ExternalSecrets:
@@ -305,7 +305,7 @@ over from Forge directly.
 4. Stop on Forge: homelab-mcp, the Actual sidecar, the finance ingest,
    export, snapshot and report timers, Signal capture, and `signal-api`.
 5. Restore the stores and copy the transaction context
-   ([postgres17.md](postgres17.md#restore-from-forge-cutover)).
+   ([postgres17.md](../platform/postgres17.md#restore-from-forge-cutover)).
 6. Merge this app with `replicas: 0`, or scale it to 0 once it is up, then
    copy into its volumes, as uid 65532 with modes preserved:
    - Forge `/var/lib/homelab-mcp/finances-context.db` (0600) and

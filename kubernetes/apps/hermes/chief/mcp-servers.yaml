@@ -1,8 +1,8 @@
-# Chief's MCP servers from git (docs/hermes.md, "MCP servers from git"). The
+# Chief's MCP servers from git (docs/apps/hermes.md, "MCP servers from git"). The
 # config init container writes each entry into config.yaml on every start.
 # Outlook is separate (OUTLOOK_MCP_ENABLED).
 servers:
-  # The shared task board (docs/openproject.md, "Bot access"), as OpenProject
+  # The shared task board (docs/apps/openproject.md, "Bot access"), as OpenProject
   # user chief. Egress is the component's agent-task-board
   # (TASK_BOARD_ENABLED). OPENPROJECT_API_TOKEN comes from Secret
   # hermes-chief-openproject, which the provisioning Job fills. trust full:

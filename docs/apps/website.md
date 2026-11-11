@@ -40,4 +40,4 @@ into `nginx-unprivileged`), pinned here by tag and digest so Renovate
 moves it. The route, policy, and namespace stay as they are.
 
 The site goes down with the cluster. The chassis is one failure domain
-(architecture.md).
+([architecture.md](../architecture.md)).

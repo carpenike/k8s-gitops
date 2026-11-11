@@ -16,7 +16,7 @@ run, and GitHub-hosted runners are blocked by the account spending limit:
 - The image job runs `docker build` and pushes to GHCR, which needs a
   Docker daemon.
 
-`docs/actions-runners.md` left the privilege level for Nix jobs to be
+`docs/platform/actions-runners.md` left the privilege level for Nix jobs to be
 decided separately. A privileged `runc` pod gives repository CI code
 host-level privilege on a sled, bounded only by the runner egress policy.
 

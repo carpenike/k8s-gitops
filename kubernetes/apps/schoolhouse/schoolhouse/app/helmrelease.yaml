@@ -97,7 +97,7 @@ spec:
         type: cronjob
         cronjob:
           # Unsuspended at the cutover once Forge's state was on
-          # schoolhouse-state (docs/schoolhouse.md, docs/forge-cutover.md).
+          # schoolhouse-state (docs/apps/schoolhouse.md, docs/history/forge-cutover.md).
           suspend: false
           # Forge's onCalendar (module default): Mon..Fri 07:00, 16:00 and
           # 20:00, local time. The 20:00 run catches work due 23:59 that is

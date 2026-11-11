@@ -121,7 +121,7 @@ to accept them. To test, ask Chief Engineer to fetch
 resolved to.
 
 - If it works, Chief Engineer no longer needs its own VPN into the LAN.
-  Update "Bots outside the cluster" in [openproject.md](openproject.md).
+  Update "Bots outside the cluster" in [openproject.md](../apps/openproject.md).
 - If it does not, the fallback is a ProxyGroup of ingress proxies with
   `*.ts.net` names for the services Grok Bot needs. That is a second HTTP
   entry point, so it needs its own ADR. homelab-mcp is not a candidate: it

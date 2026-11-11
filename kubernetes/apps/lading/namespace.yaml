@@ -2,7 +2,7 @@
 # lading: Amazon, Costco and Sam's Club order sync (carpenike/lading) and its
 # health server. The sync pods hold credentials that can place Amazon orders.
 # Nothing in this namespace is reachable from outside the cluster. See
-# docs/lading.md.
+# docs/apps/lading.md.
 apiVersion: v1
 kind: Namespace
 metadata:

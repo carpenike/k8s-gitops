@@ -3,7 +3,7 @@
 # spawned by the gateway), or for a one-off --login / --verify-login /
 # --list-permissions run from `kubectl exec`. Both get the same environment
 # and the same tool filter, so a login asks for exactly the scopes the server
-# uses. See docs/hermes.md, "Outlook (opt-in)".
+# uses. See docs/apps/hermes.md, "Outlook (opt-in)".
 #
 # Fails closed instead of starting with a broader identity:
 #   - no client id, or Softeria's shared default app id (src/cloud-config.ts)

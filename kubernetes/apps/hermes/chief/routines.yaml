@@ -1,4 +1,4 @@
-# Chief's scheduled routines (docs/hermes.md, "Routines from git"), written
+# Chief's scheduled routines (docs/apps/hermes.md, "Routines from git"), written
 # into Hermes' cron store by the config init container at each start.
 #
 # This repo is public: names, addresses, links and lists go in 1Password item

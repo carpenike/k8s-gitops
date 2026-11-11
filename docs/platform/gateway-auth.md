@@ -79,7 +79,7 @@ All three replace the gateway OIDC policy with
 | --- | --- | --- |
 | `public` | Must answer without a login: a webhook, or an API that checks its own bearer token | `flux-webhook`, Hermes `agent-api` |
 | `native` | The app has its own Pocket ID client | LiteLLM, Hermes Webapp |
-| `app` | The app has its own login that is not Pocket ID, because Pocket ID can't sign in to it (for example OIDC is a paid feature). `envoy-internal` only, with 2FA on the app's accounts | OpenProject ([openproject.md](openproject.md)) |
+| `app` | The app has its own login that is not Pocket ID, because Pocket ID can't sign in to it (for example OIDC is a paid feature). `envoy-internal` only, with 2FA on the app's accounts | OpenProject ([openproject.md](../apps/openproject.md)) |
 
 Prefer `native` whenever the app supports OIDC.
 
@@ -110,7 +110,7 @@ gateway policy.
 A Hermes bot's API route, `agent-api` in `hermes-<bot>` on
 `envoy-internal` only, is also labelled `public`. Its clients send the
 bot's `API_SERVER_KEY` as a bearer token, and Hermes checks it. Its
-ReferenceGrant is `agent-api-gateway-auth` ([hermes.md](hermes.md)).
+ReferenceGrant is `agent-api-gateway-auth` ([hermes.md](../apps/hermes.md)).
 
 Two policies must not select the same route. The oldest attached policy
 wins. A route uses the label or its own SecurityPolicy, and only one of

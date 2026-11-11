@@ -2,7 +2,7 @@
 
 OpenProject Community Edition 17.9.6 is the shared task board for Ryan and
 the bots: Chief posts a task, tells Hank over A2A to pick it up, and Hank
-comments and closes it there (docs/hermes.md, A2A). It replaces the Forge
+comments and closes it there (docs/apps/hermes.md, A2A). It replaces the Forge
 install that was never put into use (nix-config).
 
 | | |
@@ -48,7 +48,7 @@ The role password is 1Password field `database_password`, read by both
 
 - **Ryan.** One login, OpenProject's own account with 2FA. The route is
   labelled `gateway.holthome.net/auth: app`, so the gateway's Pocket ID
-  login is off for it ([gateway-auth.md](gateway-auth.md), "One login per
+  login is off for it ([gateway-auth.md](../platform/gateway-auth.md), "One login per
   route"). Pocket ID can't be that login:
   - OpenID Connect and SAML are Enterprise add-ons. In 17.9.6,
     `auth_plugin.rb` drops every SSO provider without an Enterprise token,
@@ -120,7 +120,7 @@ Skill `task-board` (in the component) sets the rules:
   read-only checks and prepare work for review, pull requests included.
   Sending, spending, deleting, deploying, changing a running system and
   merging still need Ryan's own yes in Matrix. Hank's merge rule is
-  unchanged (docs/hermes.md, "Merging, only when Ryan asks").
+  unchanged (docs/apps/hermes.md, "Merging, only when Ryan asks").
 - **Pickup.** With wake-ups on ([Waking a bot](#waking-a-bot)), a bot gets
   a turn about 5 minutes after someone else assigns it a task or changes
   one of its tasks, and when a task it created is closed. Otherwise, and
@@ -130,7 +130,7 @@ Skill `task-board` (in the component) sets the rules:
 
 A task change on the board starts a turn for the bot it is for, without
 anyone telling it to check. The turn is delivered to Ryan's Matrix DM with
-that bot, like a Chief Engineer webhook turn (docs/hermes.md, "Webhook").
+that bot, like a Chief Engineer webhook turn (docs/apps/hermes.md, "Webhook").
 
 ```text
 OpenProject worker ── webhook, HMAC-SHA1 ──▶ openproject-mcp /hooks/openproject

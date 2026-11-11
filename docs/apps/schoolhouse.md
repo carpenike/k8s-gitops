@@ -73,7 +73,7 @@ Vault `k8s-secrets`:
 | `schoolhouse-ingest` | `schoology_password` | Its password | `schoolhouse/schoology_password` |
 | `schoolhouse-ingest` | `children` | JSON `{"<schoology uid>": "<name>"}` | `schoolhouse/children` |
 | `schoolhouse-ingest` | `ical_feeds` | JSON `{"<schoology uid>": "<feed URL>"}` or `{}`. Capability URLs | `schoolhouse/ical_feeds` |
-| `schoolhouse` | `db_password` | Role `schoolhouse` ([postgres17.md](postgres17.md#1password)) | `schoolhouse/db_password` |
+| `schoolhouse` | `db_password` | Role `schoolhouse` ([postgres17.md](../platform/postgres17.md#1password)) | `schoolhouse/db_password` |
 | `schoolhouse` | `reader_password` | Role `schoolhouse_reader` | `schoolhouse/reader_password` |
 
 The health server uses `schoolhouse_reader`. Its queries are SELECTs only.
@@ -101,7 +101,7 @@ suspended.
 1. Merge carpenike/schoolhouse #24. Pin the image here (tag and digest).
 2. Create the 1Password items above. postgres17 (#5766) is merged and the
    `schoolhouse` database is restored, with reader grants
-   ([postgres17.md](postgres17.md#restore-from-forge-cutover)).
+   ([postgres17.md](../platform/postgres17.md#restore-from-forge-cutover)).
 3. On Forge, stop the timer and service and keep them stopped:
    `systemctl stop schoolhouse-ingest.timer schoolhouse-ingest.service schoolhouse.service`.
    The nix-config change that removes them follows.

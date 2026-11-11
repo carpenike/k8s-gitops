@@ -12,11 +12,11 @@ data:
   KEY_ALIAS: hermes-BOT_NAME
   TEAM_ALIAS: hermes
   # Every model on the proxy, wildcard routes included (LiteLLM sentinel;
-  # the team sets no list). The key's budget is the limit. docs/hermes.md.
+  # the team sets no list). The key's budget is the limit. docs/apps/hermes.md.
   MODELS: all-proxy-models
   BUDGET: LLM_BUDGET_USD/LLM_BUDGET_DURATION
   TARGET_NAMESPACE: hermes-BOT_NAME
   SECRET_NAME: litellm
   # A name Hermes scrubs from child-process environments (it is the
-  # openai-api provider's key variable). See docs/hermes.md.
+  # openai-api provider's key variable). See docs/apps/hermes.md.
   SECRET_KEY_NAME: OPENAI_API_KEY

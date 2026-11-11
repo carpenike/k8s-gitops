@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# ADR 0013 and docs/mail.md. Data and search on postgres17, blobs on the
+# ADR 0013 and docs/apps/mail.md. Data and search on postgres17, blobs on the
 # Ceph RGW bucket claimed in app/objectbucketclaim.yaml.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

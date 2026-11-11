@@ -1,6 +1,6 @@
 ---
 # Subnet router into the home network for tailnet clients: laptops, phones,
-# and Grok Bot if its device accepts subnet routes (docs/tailscale.md).
+# and Grok Bot if its device accepts subnet routes (docs/platform/tailscale.md).
 #
 # Only three addresses are advertised:
 #   10.45.10.50  envoy-internal, so every internal HTTPRoute works with its
@@ -10,7 +10,7 @@
 #   10.45.10.25  Stalwart's mail LoadBalancer: the Vultr edge relay delivers
 #                to port 2525 (ADR 0014), and tailnet mail clients use the
 #                client ports. Grants in the tailnet policy decide which
-#                device reaches which port (docs/tailscale.md).
+#                device reaches which port (docs/platform/tailscale.md).
 # Widen this list in a PR, not in the admin console. The tailnet policy's
 # autoApprovers must list the same prefixes or the routes stay unapproved.
 #

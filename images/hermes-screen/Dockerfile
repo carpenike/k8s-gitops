@@ -121,7 +121,7 @@ RUN apt-get -o Acquire::Retries=3 update && \
 COPY --chmod=0644 sshd_config /etc/ssh/sshd_config.hermes
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/hermes-screen-entrypoint
 # k8s-gitops: Claude Code and the GitHub CLI, for multi-turn coding sessions
-# (docs/hermes.md, "Coding with Claude Code"). No credential is baked in: with
+# (docs/apps/hermes.md, "Coding with Claude Code"). No credential is baked in: with
 # the bot's CLAUDE_CODE_ENABLED, the pod mounts the Claude subscription token
 # and the GitHub token under /etc/hermes-claude-code, and the wrappers in
 # claude-code/ read them from there (ssh sessions do not inherit the pod's

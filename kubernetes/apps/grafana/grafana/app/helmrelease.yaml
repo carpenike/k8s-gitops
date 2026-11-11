@@ -4,7 +4,7 @@
 # observability/grafana.nix and modules/nixos/services/grafana). One
 # replica on SQLite (grafana.db on grafana-data, copied from Forge at the
 # cutover), so Recreate. Settings are Forge's, as GF_* variables; what
-# differs is listed in docs/grafana.md.
+# differs is listed in docs/platform/grafana.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -122,7 +122,7 @@ spec:
                 cpu: 500m
                 memory: 1Gi
     # The image's grafana user. The copied grafana.db must be owned by it
-    # (docs/grafana.md, cutover).
+    # (docs/platform/grafana.md, cutover).
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true

@@ -42,7 +42,7 @@ committing it.
 # Generate a new one. Do not commit age.key, and do not reuse the v1 age key.
 # Add the public recipient to the .sops.yaml key group next to the YubiKey
 # fingerprint, then re-encrypt. Ryan's own decrypt path is the YubiKey.
-# See docs/sops.md.
+# See docs/platform/sops.md.
 kubectl --namespace flux-system create secret generic sops-age \
   --from-file=age.agekey=./age.key
 

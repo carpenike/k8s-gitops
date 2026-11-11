@@ -1,5 +1,5 @@
 #!/bin/sh
-# k8s-gitops: Claude Code in the Hermes screen pod (docs/hermes.md, "Coding
+# k8s-gitops: Claude Code in the Hermes screen pod (docs/apps/hermes.md, "Coding
 # with Claude Code"). Signs in with Ryan's Claude subscription through the
 # long-lived token from `claude setup-token` (Secret claude-code-auth,
 # mounted only with CLAUDE_CODE_ENABLED). Sessions, settings and history

@@ -7,7 +7,7 @@
 # Views (HOMELAB_MCP_VIEWS) make several MCP URLs on this one host, each a
 # protected resource of its own (carpenike/mcp src/homelab_mcp/views.py).
 # Upstreams are reached over HTTPS, and the stores that used to sit in
-# Forge's local Postgres are in postgres17 (docs/postgres17.md, "Forge
+# Forge's local Postgres are in postgres17 (docs/platform/postgres17.md, "Forge
 # stores").
 #
 # The finance workers that ran on Forge run here too, as more containers in
@@ -20,7 +20,7 @@
 #   scheduler    supercronic: bank ingest, nightly export, snapshots, the
 #                daily and weekly Signal reports, metrics (crontab below)
 #   metrics      serves the jobs' finance_*.prom files on 9202
-# nixos (Forge's deploy trigger) stays off. See docs/homelab-mcp.md.
+# nixos (Forge's deploy trigger) stays off. See docs/apps/homelab-mcp.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -227,7 +227,7 @@ spec:
               HOMELAB_MCP_VAULT_TMP_PATH: /vault/.tmp
               HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
               # Per-user credentials: who they are kept for, and where. No view
-              # uses credentials "per_user" yet (docs/homelab-mcp.md).
+              # uses credentials "per_user" yet (docs/apps/homelab-mcp.md).
               HOMELAB_MCP_USERS: >-
                 {"ryan": {"email": "ryan@ryanholt.net"},
                 "steffi": {"email": "stefanie@stefanieholt.com"}}
@@ -536,7 +536,7 @@ spec:
           # keeps /vault/notes in step with the owner's devices; the app's
           # vault_* tools read and write the same folder. run.sh installs the
           # client into the volume once per lockfile, waits for the one-time
-          # `ob login` / `ob sync-setup` (docs/homelab-mcp.md), then syncs.
+          # `ob login` / `ob sync-setup` (docs/apps/homelab-mcp.md), then syncs.
           # Same uid as the app, so neither can leave a file the other cannot
           # read (an unreadable file busy-loops the client, upstream #56).
           obsidian-sync:

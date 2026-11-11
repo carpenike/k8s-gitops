@@ -76,4 +76,4 @@ spec:
               Grafana's OnCall plugin may not be connected to the engine. kubectl
               -n grafana logs job/grafana-oncall-plugin-setup, then delete the Job
               and reconcile Kustomization grafana-oncall-plugin-setup
-              (docs/grafana.md).
+              (docs/platform/grafana.md).
