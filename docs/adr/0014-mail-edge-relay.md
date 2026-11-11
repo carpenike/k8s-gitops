@@ -85,6 +85,56 @@ The same route also lets tailnet devices reach the client ports (465,
 587, 993, 995, 4190) through the Connector. Grants give those to
 `autogroup:member` only.
 
+### Interim outbound through SMTP2GO
+
+Amended 2026-11-11. Until Vultr opens outbound 25 and the cluster can
+reach the tailnet, the cluster's Stalwart sends remote domains through
+SMTP2GO instead of the edge: an `MtaRoute/Relay` named `smtp2go` to
+`mail.smtp2go.com:465` (implicit TLS), authenticated as an SMTP2GO SMTP
+user whose password Stalwart reads from `STALWART_SMTP2GO_PASSWORD`. The
+egress policy already allows 465 to public IPv4. Local domains still go
+to route `local`. When the edge can send, the outbound strategy points
+at the edge's route instead and the SMTP2GO account is closed.
+
+`holthome.net` is a verified sender domain at SMTP2GO, with its
+return-path and DKIM CNAMEs published by hand (they are not records
+Stalwart manages). Authentication then works without touching the SPF
+Stalwart publishes (`v=spf1 mx -all`):
+
+- SPF is checked against the envelope sender, which SMTP2GO rewrites to
+  its return-path subdomain of `holthome.net`. That subdomain's SPF is
+  SMTP2GO's, and it aligns with `holthome.net` under relaxed DMARC
+  alignment. "Maintain Return-Path" stays off: it keeps the original
+  envelope sender, which would need `include:spf.smtp2go.com` in the apex
+  SPF that Stalwart owns
+- Stalwart still signs with its own keys (`v1-rsa`, `v1-ed25519`):
+  signing happens in the DATA stage, before routing, so the route does
+  not change it. SMTP2GO adds a second signature for `holthome.net` with
+  its own selector. Either one aligned signature passes DMARC
+- open and click tracking stay off, so SMTP2GO does not rewrite the body
+  or links, and Stalwart's signature stays valid
+
+SMTP2GO accepts each message and delivers it later, so a failed
+delivery becomes a bounce at SMTP2GO, not a DSN from Stalwart. Its bounce
+notifications are set to go to the sender.
+
+SMTP2GO was chosen over:
+
+- Amazon SES, because it replaces the `Message-ID` of every message,
+  which breaks reply threading and Stalwart's DKIM signature, and needs
+  a production-access request
+- Postmark and Mailgun, because their free tiers (100 a month, 100 a day)
+  are smaller and their paid tiers start at $15 a month, and Postmark is
+  built for application mail rather than mailboxes
+- Forward Email ($3 a month), because it asks for `include:` in the apex
+  SPF, which Stalwart manages
+- Cloudflare Email Service, because it sends through the Workers API,
+  not as an SMTP smart host
+
+SMTP2GO's free plan (1,000 a month, 200 a day) covers a household, and
+its terms allow mail to people the sender has a personal relationship
+with.
+
 ### Consequences
 
 - Good, because nothing new listens on the home connection; the only
@@ -106,9 +156,10 @@ The same route also lets tailnet devices reach the client ports (465,
   other senders off it
 - Bad, because mail sits on the VM's disk while queued, outside the
   cluster and its backups
-- Bad, because outbound waits on a Vultr support request to open port 25
-  and on a cluster-to-tailnet path; until both exist nothing is
-  delivered outside
+- Bad, because outbound through the edge waits on a Vultr support
+  request to open port 25 and on a cluster-to-tailnet path. Until both
+  exist, outbound goes through SMTP2GO, a third party that sees every
+  message and holds its bounces
 - Neutral, because the VM costs a few dollars a month
 
 ## Pros and Cons of the Options

@@ -61,6 +61,8 @@ Vault `k8s-secrets`:
 | `stalwart` | `database_password` | Role `stalwart` on `postgres17`. Read by `cnpg-system` and `mail` |
 | `stalwart` | `admin_password` | `STALWART_RECOVERY_ADMIN=admin:<password>`. Always accepted as an administrator while set |
 | `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zone `holthome.net` only, for automatic DNS ([DNS](#dns)) |
+| `stalwart` | `smtp2go_password` | `STALWART_SMTP2GO_PASSWORD`. Password of the SMTP2GO SMTP user, for the interim outbound route ([Outbound](#outbound)) |
+| `stalwart` | `smtp2go_username` | That SMTP user's name. Not read by the cluster: it is typed into the route |
 | `bulwark` | `session_secret` | `SESSION_SECRET` for Bulwark, at least 32 characters (`openssl rand -base64 32`) |
 | `stalwart-r2` | `access_key_id`, `secret_access_key`, `endpoint_url`, `bucket` | The blob copy. Same values as `postgres17-r2`: the same R2 token and bucket, with blobs under `stalwart/blobs/` beside Barman's `cnpg/postgres17/`. Rotating the `postgres17-r2` token means updating both items |
 
@@ -116,8 +118,8 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    Ed25519 and RSA), TLS Manual (cert-manager owns the certificate), and
    report address `mailto:postmaster@holthome.net`. Then set up its DNS as
    in [DNS](#dns).
-7. **Outbound**: through the edge relay (ADR 0014), once Vultr opens its
-   outbound 25. Until then nothing is delivered outside.
+7. **Outbound**: through SMTP2GO for now ([Outbound](#outbound)), and
+   through the edge relay (ADR 0014) once Vultr opens its outbound 25.
 8. **Directory** (ADR 0015), before creating any account, because
    Stalwart does not move accounts between directories:
    - in Pocket ID, create a public OIDC client for the WebUI (PKCE, no
@@ -172,7 +174,8 @@ Stalwart rotate DKIM keys; with Manual it never rotates them.
 | --- | --- | --- |
 | DKIM | Stalwart | Rotation every 90 days, old key retired after 7 |
 | MX | Stalwart | Points at `mx.holthome.net`. Publicly that name is the edge VM (an A record added by hand at cutover); on the LAN the MikroTik answers `10.45.10.25` |
-| SPF | Stalwart | Authorizes the MX host, which is right because the edge also sends outbound (ADR 0014) |
+| SPF | Stalwart | Authorizes the MX host, which is right because the edge also sends outbound (ADR 0014). SMTP2GO needs no change to it: it sends with its own return-path subdomain |
+| SMTP2GO return-path and DKIM CNAMEs | By hand | Interim outbound ([Outbound](#outbound)). Names and targets come from SMTP2GO's sender-domain page. Stalwart writes only the names it publishes, and external-dns only records it owns |
 | DMARC | Stalwart | Reports to the domain's report address |
 | TLS-RPT | Stalwart | Same address |
 | CAA | Nobody, for now | `holthome.net` is the whole cluster zone. A CAA record at the apex limits which certificate authorities may issue for every name in it, including Cloudflare's proxied hostnames |
@@ -206,6 +209,83 @@ Setup, in order:
 6. Check against the Cloudflare nameserver, not the MikroTik, and diff
    the apex TXT records against step 3. Restore anything that went
    missing other than the old SPF.
+
+## Outbound
+
+Interim, until the edge relay can send (ADR 0014, "Interim outbound
+through SMTP2GO"). Stalwart relays every remote domain to SMTP2GO on
+465 with implicit TLS. The egress policy already allows 465 to public
+IPv4.
+
+1. **SMTP2GO account** (free plan). In its settings, turn off open and
+   click tracking (they rewrite the body and break Stalwart's DKIM
+   signature), leave Maintain Return-Path off, and send bounce
+   notifications to the sender.
+2. **Sender domain.** Add `holthome.net` as a verified sender domain.
+   In Cloudflare, add the return-path CNAME and the DKIM CNAME it shows,
+   DNS only (not proxied). Skip the link-tracking CNAME. Do not change
+   the apex SPF; it stays Stalwart's. Wait until SMTP2GO shows the domain
+   verified.
+3. **SMTP user.** Add one, and store its name and password in item
+   `stalwart` as `smtp2go_username` and `smtp2go_password`. The
+   ExternalSecret needs `smtp2go_password`, so do this before merging the
+   change that reads it; Reloader restarts the pod.
+4. **Route.** In the WebUI, add an MTA route of type Relay, or:
+
+   ```sh
+   stalwart-cli create MtaRoute/Relay --json '{
+     "name": "smtp2go",
+     "description": "Interim outbound relay (ADR 0014)",
+     "host": "mail.smtp2go.com",
+     "port": 465,
+     "protocol": "smtp",
+     "implicitTls": true,
+     "allowInvalidCerts": false,
+     "authUsername": "<smtp2go_username>",
+     "authSecret": {"@type": "EnvironmentVariable",
+                    "variableName": "STALWART_SMTP2GO_PASSWORD"}
+   }'
+   ```
+
+5. **Outbound strategy.** Change the `route` expression of
+   MtaOutboundStrategy from its default (`'mx'` for remote domains) to
+   send remote domains to the new route:
+
+   ```sh
+   stalwart-cli update MtaOutboundStrategy --json '{
+     "route": {"else": "'\''smtp2go'\''",
+               "match": {"0": {"if": "is_local_domain(rcpt_domain)",
+                               "then": "'\''local'\''"}}}
+   }'
+   ```
+
+   It applies at the next reload. Undo it by setting `else` back to
+   `'mx'`.
+6. **DKIM.** Nothing to change. Signing happens in the DATA stage, before
+   routing: the default `dkimSignDomain` signs mail from authenticated
+   senders on local domains with the domain's active keys. Check that the
+   DATA stage expression is still the default. Mail from Pocket ID and
+   Mealie is signed once they submit with an account on 587 or 465.
+
+SMTP2GO accepts only senders on its verified domains. Mail with another
+domain in the envelope sender, such as a Sieve redirect that keeps the
+original sender, is refused and stays in Stalwart's queue.
+
+Test, with an outside mailbox (inbound is not live yet, so use a check
+that does not reply by mail):
+
+1. From an account on `holthome.net`, send a message to a Gmail address
+   and to the address mail-tester.com gives you.
+2. In Stalwart's queue (WebUI, or `stalwart-cli` queue listing) the
+   message leaves on route `smtp2go`; SMTP2GO's activity view shows it
+   delivered.
+3. In Gmail, Show original: SPF `PASS` for SMTP2GO's return-path
+   subdomain of `holthome.net`, DKIM `PASS` for `holthome.net`, DMARC
+   `PASS`. The headers carry two `DKIM-Signature`s for `d=holthome.net`:
+   Stalwart's (`s=v1-rsa`, `s=v1-ed25519`) and SMTP2GO's. Both should
+   verify; if Stalwart's fails, something in SMTP2GO rewrote the message
+   (tracking).
+4. mail-tester.com shows the same results and checks blocklists.
 
 ## Webmail
 
@@ -284,7 +364,10 @@ the address to the edge's recipient list.
   has a matching PTR (ADR 0014). That needs Vultr to open its outbound
   25, a way from the cluster to the tailnet (such as an operator egress
   Service), and a policy rule; the current egress rule excludes
-  100.64.0.0/10.
+  100.64.0.0/10. Until then it goes through SMTP2GO ([Outbound](#outbound)).
+  At the switch, point the outbound strategy at the edge's route, then
+  remove the SMTP2GO CNAMEs, field `smtp2go_password` and its
+  ExternalSecret entry, and close the account.
 - **Webmail.** Stalwart has no bundled webmail. Native clients work over
   IMAP or JMAP.
 - **More than one replica.** Needs a shared in-memory store (Redis or
