@@ -216,6 +216,17 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      # Stalwart's default Log tracer writes daily files here, and the
+      # WebUI's log viewer reads them. The root filesystem is read-only, so
+      # without this the tracer fails with "Failed to create log file".
+      # Scratch like the rest: the files go with the pod, and the console
+      # tracer (kubectl logs) carries the same events. 1Gi caps a runaway
+      # debug level; the kubelet evicts the pod past it.
+      logs:
+        type: emptyDir
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /var/log/stalwart
     # The Pocket ID egress lives here rather than in ciliumnetworkpolicy.yaml:
     # kubeconform checks files before Flux substitutes ${SECRET_DOMAIN}, and
     # Cilium's schema refuses "${" in a toFQDNs name (same as Grafana and
