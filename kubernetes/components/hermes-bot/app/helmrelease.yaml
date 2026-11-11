@@ -372,7 +372,7 @@ spec:
                 ---
                 name: task-board
                 description: "The shared OpenProject task board: hand work to another bot, pick up your own, and report progress there."
-                version: 1.2.0
+                version: 1.3.0
                 author: k8s-gitops (hermes-bot component)
                 metadata:
                   hermes:
@@ -400,15 +400,22 @@ spec:
                    mail, the web and general questions, `chief-engineer` for Chief
                    Engineer, Ryan's homelab assistant on Grok Bot (outside the
                    cluster; it reads the board over its VPN).
-                   The description says: the goal, the context from your conversation
-                   that the other bot will need, what done looks like, and where it
-                   came from ("Ryan asked in his Matrix DM with me on <date>: <his
-                   words>").
+                   Every task needs two fields, or the board refuses it:
+                   - `context`: the vault path of the note that explains the task. Link
+                     the note; don't paste it into the task.
+                   - `done_when`: one sentence saying what is true when it is done.
+                   The description says: the goal, anything else from your conversation
+                   that the other bot will need, and where it came from ("Ryan asked in
+                   his Matrix DM with me on <date>: <his words>").
                 2. Give Ryan the task's link and say who it is with. The board wakes
                    the other bot about 5 minutes later, if its wake-ups are on (see
                    below); otherwise it picks the task up when Ryan tells it to.
                 3. Follow up by reading the task's comments (`get_task`),
                    not by asking over A2A. You are woken when it is closed.
+
+                A decision only Ryan can make goes to Ryan: `create_task` with
+                `assignee` "${TASK_BOARD_RYAN_USER_ID:=4}" (his user id) and `status`
+                "Needs Ryan", with the same `context` and `done_when`.
 
                 ## Working your own tasks
 

@@ -60,6 +60,10 @@ class FakeOpenProject:
         self.on("GET", "/types", fx("types"))
         self.on("GET", "/projects/homelab", fx("project_homelab"))
         self.on("GET", "/projects/bots-shared", fx("project_shared"))
+        # The create form of project 5 (homelab) carries the board's handoff
+        # fields: customField7 "Context" (String), customField8 "Done when"
+        # (Formattable). A test that needs them absent overrides this route.
+        self.on("POST", "/projects/5/work_packages/form", fx("wp_form_with_handoff_fields"))
         self.transport = httpx.MockTransport(self._handle)
 
     def on(self, method: str, path: str, *responses: Any, status: int = 200) -> None:

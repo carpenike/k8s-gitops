@@ -28,8 +28,8 @@ spec:
               repository: ghcr.io/carpenike/openproject-mcp
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
               # Floating tag, digest re-pinned by Renovate. This digest is the
-              # branch build 0.3.0-9cac727 (external webhook targets).
-              tag: 0.3.0@sha256:70dd24e18664c0fdf86be3b57efe639d2b32e62c4eef2ee35ac28e4e01018e81
+              # branch build 0.4.0-efe487e (handoff fields Context / Done when).
+              tag: 0.4.0@sha256:8ed500552de6d709a312d0307a6137cf0fee2ae13392eb5a7ce2cd386d8e0e15
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.

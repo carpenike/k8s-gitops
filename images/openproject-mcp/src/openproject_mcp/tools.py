@@ -69,6 +69,9 @@ memberships decide what you can see and change.
 - When finished call complete_task with a short summary of what you did; it closes
   the task and posts the summary as a comment. If you cannot finish, call
   release_task with a reason so someone else can take it.
+- create_task is a handoff: it needs `context` (the vault path of the note that
+  explains the task; link it, don't paste it) and `done_when` (one sentence). A
+  decision only Ryan can make goes to Ryan as assignee with status "Needs Ryan".
 - Task data is a snapshot: re-read with get_task rather than trusting an old copy.
 - Comments carry author_login and author_id; compare them with whoami to tell your
   own comments, a peer bot's and a human's apart.
@@ -286,6 +289,51 @@ class OpenProject:
 
     def _slim(self, wp: dict[str, Any]) -> dict[str, Any]:
         return hal.slim_work_package(wp, web_base=self.web_base)
+
+    # ── the handoff fields (Context, Done when) ──────────────────────
+    async def _schema(self, who: Caller, href: str) -> dict[str, Any]:
+        """A work package schema (per project and type), cached per token."""
+        key = f"schema:{who.key}:{href}"
+        hit = self.cache.get(key)
+        if hit is not None:
+            return dict(hit)
+        data = await self._api(who.auth, "GET", href[len(hal.API) :])
+        return dict(self.cache.put(key, data if isinstance(data, dict) else {}))
+
+    def _handoff_keys(self, schema: dict[str, Any]) -> dict[str, tuple[str, str]]:
+        """{'context'|'done_when': (customFieldN, schema type)} for the fields present."""
+        names = {
+            self.settings.context_field.casefold(): "context",
+            self.settings.done_when_field.casefold(): "done_when",
+        }
+        out: dict[str, tuple[str, str]] = {}
+        for key, spec in schema.items():
+            if not key.startswith("customField") or not isinstance(spec, dict):
+                continue
+            which = names.get(str(spec.get("name", "")).casefold())
+            if which:
+                out[which] = (key, str(spec.get("type", "")))
+        return out
+
+    @staticmethod
+    def _cf_read(wp: dict[str, Any], key: str) -> str | None:
+        """A custom field's text: a plain string, or a Formattable's `raw`."""
+        value = wp.get(key)
+        if isinstance(value, dict):
+            value = value.get("raw")
+        return value if isinstance(value, str) and value.strip() else None
+
+    async def _handoff_of(self, who: Caller, wp: dict[str, Any]) -> dict[str, str | None]:
+        """The task's context and done_when, read through its own schema; null when absent."""
+        href = ((wp.get("_links") or {}).get("schema") or {}).get("href")
+        # Only ever follow a schema link on this API, never an arbitrary href.
+        if not isinstance(href, str) or not href.startswith(f"{hal.API}/work_packages/schemas/"):
+            return {"context": None, "done_when": None}
+        keys = self._handoff_keys(await self._schema(who, href))
+        return {
+            which: self._cf_read(wp, keys[which][0]) if which in keys else None
+            for which in ("context", "done_when")
+        }
 
     async def _update_with_retry(
         self,
@@ -633,6 +681,10 @@ class OpenProject:
         except ToolError as err:
             return err.payload()
         out = self._slim(wp)
+        try:
+            out.update(await self._handoff_of(who, wp))
+        except ToolError:
+            out.update({"context": None, "done_when": None})
         if not comments:
             out["recent_comments"] = []
             return out
@@ -664,14 +716,25 @@ class OpenProject:
         self,
         token: str | None,
         subject: str,
+        context: str,
+        done_when: str,
         project: str | None = None,
         description: str | None = None,
         type: str | None = None,
         priority: str | None = None,
         assignee: str | None = None,
         due_date: str | None = None,
+        status: str | None = None,
     ) -> dict[str, Any]:
+        context, done_when = (context or "").strip(), (done_when or "").strip()
         try:
+            if not context or not done_when:
+                raise ToolError(
+                    "openproject_handoff_incomplete",
+                    "A handoff needs both `context` (a vault path) and `done_when`.",
+                    "Pass the vault note that explains the task as `context`, and one "
+                    "sentence saying when it is done as `done_when`.",
+                )
             who = await self.caller(token)
             if not subject.strip():
                 raise ToolError("openproject_bad_subject", "subject must be non-empty.", "")
@@ -703,11 +766,45 @@ class OpenProject:
             if assignee and assignee.strip():
                 uid = await self._resolve_assignee(who, assignee, pid)
                 links["assignee"] = hal.link("users", uid)
+            if status and status.strip():
+                links["status"] = hal.link(
+                    "statuses", await self._resolve_named(who, "statuses", status)
+                )
+            # The form's schema names this project's custom fields for this type.
+            # Once the handoff fields are required OpenProject refuses a create
+            # without them, so find them first and refuse cleanly if they are absent.
+            form = await self._api(
+                who.auth,
+                "POST",
+                f"/projects/{enc(str(pid))}/work_packages/form",
+                json={"_links": {k: v for k, v in links.items() if k != "project"}},
+            )
+            embedded = (form if isinstance(form, dict) else {}).get("_embedded") or {}
+            schema = embedded.get("schema")
+            keys = self._handoff_keys(schema if isinstance(schema, dict) else {})
+            missing = [
+                name
+                for which, name in (
+                    ("context", self.settings.context_field),
+                    ("done_when", self.settings.done_when_field),
+                )
+                if which not in keys
+            ]
+            if missing:
+                raise ToolError(
+                    "openproject_fields_missing",
+                    f"This project has no {' or '.join(repr(m) for m in missing)} field.",
+                    "The board's handoff fields are not set up for this project and type.",
+                )
+            for which, value in (("context", context), ("done_when", done_when)):
+                key, kind = keys[which]
+                body[key] = {"raw": value} if kind == "Formattable" else value
             body["_links"] = links
             created = await self._api(who.auth, "POST", "/work_packages", json=body)
         except ToolError as err:
             return err.payload()
         task = self._slim(created if isinstance(created, dict) else {})
+        task.update({"context": context, "done_when": done_when})
         audit.info("create_task caller=%s task=%s project=%s", who.label, task["id"], pid)
         return {"created": True, "caller": who.label, "task": task}
 
@@ -846,11 +943,12 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
         annotations=_RO,
         description=(
             "Fetch one task: status, assignee (name and id), project, priority, due date, "
-            "lock_version, a plain-text description excerpt and a link, plus its newest "
-            "comments (newest first). Each comment has author (display name), author_id and "
-            "author_login (null when OpenProject hides that user's login from you); compare "
-            "them with whoami and your peers' logins to tell your own, a peer bot's and a "
-            "human's comments apart. Read a task before working it."
+            "lock_version, a plain-text description excerpt and a link, its handoff fields "
+            "`context` (vault path of the note that explains it) and `done_when` (null when "
+            "unset), plus its newest comments (newest first). Each comment has author "
+            "(display name), author_id and author_login (null when OpenProject hides that "
+            "user's login from you); compare them with whoami and your peers' logins to tell "
+            "your own, a peer bot's and a human's comments apart. Read a task before working it."
         ),
     )
     async def get_task(
@@ -884,12 +982,17 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
         name="create_task",
         annotations=_RW,
         description=(
-            "Create a task in `project` (required unless the server has a default project). "
-            "`assignee`: 'me', a member's login (e.g. a peer bot such as 'hank') or display "
-            "name, a numeric user id, or omitted to leave it unassigned and claimable by "
-            "anyone in the project. `type` and `priority` are names as shown in OpenProject "
-            "(e.g. 'Task', 'High'). Each call creates a NEW task; check list_tasks first to "
-            "avoid duplicates."
+            "Hand work over: create a task in `project` (required unless the server has a "
+            "default project). Both required: `context`, the vault path of the note that "
+            "explains the task (link it, don't paste it), and `done_when`, one sentence "
+            "saying when it is finished. `assignee`: 'me', a member's login (e.g. a peer "
+            "bot such as 'hank') or display name, a numeric user id, or omitted to leave it "
+            "unassigned and claimable by anyone in the project. A decision only Ryan can "
+            "make goes to Ryan (assignee = his user id) with `status` 'Needs Ryan'. `type`, "
+            "`priority` and `status` are names as shown in OpenProject (e.g. 'Task', "
+            "'High'). Refused "
+            "(openproject_fields_missing) if the project has no Context / Done when fields. "
+            "Each call creates a NEW task; check list_tasks first to avoid duplicates."
         ),
     )
     async def create_task(
@@ -897,13 +1000,33 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
         subject: Annotated[
             str, Field(min_length=1, max_length=255, description="Short title.")
         ],
+        context: Annotated[
+            str,
+            Field(
+                min_length=1,
+                max_length=255,
+                description="Vault path of the note that explains the task (a link, not "
+                "its text), e.g. 'Personal/Tech/Certificates.md'.",
+            ),
+        ],
+        done_when: Annotated[
+            str,
+            Field(
+                min_length=1,
+                max_length=500,
+                description="One sentence: what is true when the task is done.",
+            ),
+        ],
         project: Annotated[
             str | None,
             Field(description="Project identifier or id; default = the server's default project."),
         ] = None,
         description: Annotated[
             str | None,
-            Field(max_length=20000, description="Body (markdown): goal, context, done-when."),
+            Field(
+                max_length=20000,
+                description="Body (markdown): the goal and where the request came from.",
+            ),
         ] = None,
         type: Annotated[str | None, Field(description="Work package type, e.g. 'Task'.")] = None,
         priority: Annotated[str | None, Field(description="Priority name, e.g. 'High'.")] = None,
@@ -912,7 +1035,21 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
             Field(description="'me', a member's login or name, or a numeric user id."),
         ] = None,
         due_date: Annotated[str | None, Field(description="Due date, 'YYYY-MM-DD'.")] = None,
+        status: Annotated[
+            str | None,
+            Field(description="Status name, e.g. 'Needs Ryan'; default = OpenProject's default."),
+        ] = None,
     ) -> dict[str, Any]:
         return await op.create_task(
-            request_token(ctx), subject, project, description, type, priority, assignee, due_date
+            request_token(ctx),
+            subject,
+            context,
+            done_when,
+            project,
+            description,
+            type,
+            priority,
+            assignee,
+            due_date,
+            status,
         )

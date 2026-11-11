@@ -30,6 +30,10 @@ pytestmark = pytest.mark.anyio
 T = TOKEN_HOMELAB  # the default caller: user 21 "Homelab Manager", login bot-homelab
 
 
+# A valid handoff for creates whose subject is not the handoff itself.
+HANDOFF = {"context": "Inbox/x.md", "done_when": "x is done."}
+
+
 def conflict() -> tuple[int, Any]:
     return (409, fx("error_409_update_conflict"))
 
@@ -547,6 +551,8 @@ async def test_create_task_resolves_names_and_a_peer_by_login_via_principals(
     out = await op.create_task(
         T,
         subject="Renew the certificate",
+        context="Personal/Tech/Certificates.md",
+        done_when="The certificate is renewed and served.",
         project="homelab",
         description="Created by the Homelab Manager bot.",
         type="task",
@@ -561,12 +567,26 @@ async def test_create_task_resolves_names_and_a_peer_by_login_via_principals(
         "subject": "Renew the certificate",
         "description": {"format": "markdown", "raw": "Created by the Homelab Manager bot."},
         "dueDate": "2026-11-01",
+        # A String custom field is written plain, a Formattable one as {raw}.
+        "customField7": "Personal/Tech/Certificates.md",
+        "customField8": {"raw": "The certificate is renewed and served."},
         "_links": {
             "project": {"href": "/api/v3/projects/5"},
             "type": {"href": "/api/v3/types/1"},
             "priority": {"href": "/api/v3/priorities/9"},
             "assignee": {"href": "/api/v3/users/23"},
         },
+    }
+    assert out["task"]["context"] == "Personal/Tech/Certificates.md"
+    assert out["task"]["done_when"] == "The certificate is renewed and served."
+    # The form is asked with the same links but the project, which is in its path.
+    (form,) = fake.sent("POST", "/projects/5/work_packages/form")
+    assert form == {
+        "_links": {
+            "type": {"href": "/api/v3/types/1"},
+            "priority": {"href": "/api/v3/priorities/9"},
+            "assignee": {"href": "/api/v3/users/23"},
+        }
     }
     # Members of the target project only, users only, searched by name attributes
     # (which includes the login even when OpenProject does not show it).
@@ -584,7 +604,7 @@ async def test_assignee_by_login_picks_the_exact_login_among_several(
     fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
     # Hank's login is known once Hank has used the server.
     await op.whoami(TOKEN_HANK)
-    await op.create_task(T, subject="x", project="homelab", assignee="hank")
+    await op.create_task(T, subject="x", **HANDOFF, project="homelab", assignee="hank")
     assert fake.sent("POST", "/work_packages")[0]["_links"]["assignee"] == {
         "href": "/api/v3/users/23"
     }
@@ -593,7 +613,7 @@ async def test_assignee_by_login_picks_the_exact_login_among_several(
 async def test_assignee_by_display_name(op: OpenProject, fake: FakeOpenProject) -> None:
     fake.on("GET", "/principals", fx("principals_two_hanks"))
     fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
-    await op.create_task(T, subject="x", project="homelab", assignee="Hank Hill")
+    await op.create_task(T, subject="x", **HANDOFF, project="homelab", assignee="Hank Hill")
     assert fake.sent("POST", "/work_packages")[0]["_links"]["assignee"] == {
         "href": "/api/v3/users/24"
     }
@@ -603,11 +623,11 @@ async def test_assignee_ambiguous_or_unknown_is_an_error_before_creating(
     op: OpenProject, fake: FakeOpenProject
 ) -> None:
     fake.on("GET", "/principals", fx("principals_two_hanks"))
-    out = await op.create_task(T, subject="x", project="homelab", assignee="han")
+    out = await op.create_task(T, subject="x", **HANDOFF, project="homelab", assignee="han")
     assert out["error"]["code"] == "openproject_ambiguous_assignee"
     assert "Hank Hill" in out["error"]["hint"]
     fake.on("GET", "/principals", fx("principals_empty"))
-    out = await op.create_task(T, subject="x", project="homelab", assignee="nobody")
+    out = await op.create_task(T, subject="x", **HANDOFF, project="homelab", assignee="nobody")
     assert out["error"]["code"] == "openproject_unknown_assignee"
     assert not fake.sent("POST", "/work_packages")
 
@@ -616,8 +636,8 @@ async def test_assignee_me_and_numeric_skip_the_principals_lookup(
     op: OpenProject, fake: FakeOpenProject
 ) -> None:
     fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
-    await op.create_task(T, subject="x", project="homelab", assignee="me")
-    await op.create_task(T, subject="x", project="homelab", assignee="42")
+    await op.create_task(T, subject="x", **HANDOFF, project="homelab", assignee="me")
+    await op.create_task(T, subject="x", **HANDOFF, project="homelab", assignee="42")
     assert [b["_links"]["assignee"] for b in fake.sent("POST", "/work_packages")] == [
         {"href": "/api/v3/users/21"},
         {"href": "/api/v3/users/42"},
@@ -629,11 +649,11 @@ async def test_create_task_needs_a_project_unless_there_is_a_default(
     make_op, fake: FakeOpenProject
 ) -> None:
     op = make_op()
-    out = await op.create_task(T, subject="x")
+    out = await op.create_task(T, subject="x", **HANDOFF)
     assert out["error"]["code"] == "openproject_project_required"
     fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
     op = make_op(default_project="homelab")
-    assert (await op.create_task(T, subject="x"))["created"] is True
+    assert (await op.create_task(T, subject="x", **HANDOFF))["created"] is True
     assert fake.sent("POST", "/work_packages")[0]["_links"]["project"] == {
         "href": "/api/v3/projects/5"
     }
@@ -642,9 +662,111 @@ async def test_create_task_needs_a_project_unless_there_is_a_default(
 async def test_create_task_rejects_a_bad_date_before_calling_out(
     op: OpenProject, fake: FakeOpenProject
 ) -> None:
-    out = await op.create_task(T, subject="x", project="homelab", due_date="next week")
+    out = await op.create_task(T, subject="x", **HANDOFF, project="homelab", due_date="next week")
     assert out["error"]["code"] == "openproject_bad_date"
     assert not fake.sent("POST", "/work_packages")
+
+
+async def test_create_needs_the_projects_handoff_fields(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    fake.on("POST", "/projects/5/work_packages/form", fx("wp_form_without_handoff_fields"))
+    out = await op.create_task(T, subject="x", project="homelab", **HANDOFF)
+    assert out["error"]["code"] == "openproject_fields_missing"
+    assert "'Context' or 'Done when'" in out["error"]["message"]
+    assert fake.sent("POST", "/projects/5/work_packages/form")
+    assert not fake.sent("POST", "/work_packages")
+
+
+async def test_create_refuses_a_blank_handoff_before_calling_out(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    for context, done_when in (("  ", "x is done."), ("Inbox/x.md", ""), ("", " ")):
+        out = await op.create_task(
+            T, subject="x", context=context, done_when=done_when, project="homelab"
+        )
+        assert out["error"]["code"] == "openproject_handoff_incomplete"
+    assert not fake.calls
+
+
+async def test_create_finds_the_fields_by_configured_name_case_insensitively(
+    make_op, fake: FakeOpenProject
+) -> None:
+    form = fx("wp_form_with_handoff_fields")
+    schema = form["_embedded"]["schema"]
+    schema["customField8"]["name"] = "Acceptance"
+    schema["customField7"]["name"] = "CONTEXT"
+    fake.on("POST", "/projects/5/work_packages/form", form)
+    fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
+    op = make_op(done_when_field="acceptance")
+    assert (await op.create_task(T, subject="x", project="homelab", **HANDOFF))["created"]
+    (body,) = fake.sent("POST", "/work_packages")
+    assert body["customField7"] == "Inbox/x.md"
+    assert body["customField8"] == {"raw": "x is done."}
+
+
+async def test_a_decision_for_ryan_goes_to_him_with_needs_ryan(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    statuses = fx("statuses")
+    statuses["_embedded"]["elements"].append(
+        {"_type": "Status", "id": 15, "name": "Needs Ryan", "isClosed": False}
+    )
+    fake.on("GET", "/statuses", statuses)
+    fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
+    out = await op.create_task(
+        T,
+        subject="Pick a cut target",
+        context="Personal/Fitness/Inbox.md",
+        done_when="Ryan has chosen a calorie target.",
+        project="homelab",
+        assignee="1",
+        status="needs ryan",
+    )
+    assert out["created"] is True
+    (body,) = fake.sent("POST", "/work_packages")
+    assert body["_links"]["assignee"] == {"href": "/api/v3/users/1"}
+    assert body["_links"]["status"] == {"href": "/api/v3/statuses/15"}
+    # The form is asked for that status too: its schema can differ by status.
+    (form,) = fake.sent("POST", "/projects/5/work_packages/form")
+    assert form["_links"]["status"] == {"href": "/api/v3/statuses/15"}
+
+
+async def test_create_with_an_unknown_status_is_refused_before_creating(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    out = await op.create_task(T, subject="x", project="homelab", status="Nope", **HANDOFF)
+    assert out["error"]["code"] == "openproject_unknown_status"
+    assert not fake.sent("POST", "/work_packages")
+
+
+async def test_get_task_shows_the_handoff_fields(op: OpenProject, fake: FakeOpenProject) -> None:
+    wp = fx("wp_101_new")
+    wp["customField7"] = "Personal/Fitness/Plan.md"
+    wp["customField8"] = {"format": "markdown", "raw": "The plan names a target.", "html": ""}
+    fake.on("GET", "/work_packages/101", wp)
+    fake.on("GET", "/work_packages/schemas/9-1", fx("wp_schema_9_1"))
+    out = await op.get_task(T, 101, comments=0)
+    assert out["context"] == "Personal/Fitness/Plan.md"
+    assert out["done_when"] == "The plan names a target."
+    # The schema is cached: a second read does not fetch it again.
+    await op.get_task(T, 101, comments=0)
+    assert len(fake.query("GET", "/work_packages/schemas/9-1")) == 1
+
+
+async def test_get_task_handoff_fields_are_null_when_unset_or_unreadable(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    fake.on("GET", "/work_packages/102", fx("wp_102_new"))
+    fake.on("GET", "/work_packages/schemas/5-1", fx("wp_schema_5_1"))
+    out = await op.get_task(T, 102, comments=0)
+    assert "error" not in out
+    assert (out["context"], out["done_when"]) == (None, None)
+    # A schema OpenProject will not serve leaves them null, not an error.
+    fake.on("GET", "/work_packages/101", fx("wp_101_new"))
+    out = await op.get_task(T, 101, comments=0)
+    assert "error" not in out
+    assert (out["context"], out["done_when"]) == (None, None)
 
 
 # ── config ────────────────────────────────────────────────────────────
@@ -661,6 +783,7 @@ def test_settings_from_env() -> None:
     assert s.web_base == s.api_base
     assert s.port == 8000 and s.claim_max_attempts == 5 and s.cache_seconds == 600
     assert s.ready_statuses == ("New",) and s.default_project is None
+    assert (s.context_field, s.done_when_field) == ("Context", "Done when")
     assert "openproject-mcp.openproject.svc.cluster.local:*" in s.allowed_hosts
     assert "openproject-mcp.openproject.svc.cluster.local" in s.allowed_hosts
     s = Settings.from_env(
@@ -670,6 +793,8 @@ def test_settings_from_env() -> None:
             "OPENPROJECT_DEFAULT_PROJECT": "bots",
             "OPENPROJECT_READY_STATUSES": "New, Ready",
             "OPENPROJECT_DONE_STATUS": "Done",
+            "OPENPROJECT_CONTEXT_FIELD": "Vault note",
+            "OPENPROJECT_DONE_WHEN_FIELD": "Acceptance",
             "OPENPROJECT_CLAIM_MAX_ATTEMPTS": "3",
             "OPENPROJECT_CACHE_SECONDS": "0",
             "PORT": "9000",
@@ -680,6 +805,7 @@ def test_settings_from_env() -> None:
     assert s.default_project == "bots" and s.ready_statuses == ("New", "Ready")
     assert s.done_status == "Done" and s.claim_max_attempts == 3 and s.port == 9000
     assert s.identity_seconds == 0
+    assert (s.context_field, s.done_when_field) == ("Vault note", "Acceptance")
     assert s.allowed_hosts == ("mcp.test:*", "mcp.test")
     with pytest.raises(ValueError, match="OPENPROJECT_CLAIM_MAX_ATTEMPTS"):
         Settings.from_env({"OPENPROJECT_CLAIM_MAX_ATTEMPTS": "50"})
