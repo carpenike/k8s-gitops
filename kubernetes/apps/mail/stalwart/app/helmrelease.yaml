@@ -155,6 +155,12 @@ spec:
             port: 995
           sieve:
             port: 4190
+          # Listener smtp-edge: mail relayed by the Vultr edge (ADR 0014)
+          # over the tailnet. Created in the WebUI, not on an empty store.
+          # Only the Connector pods may reach it (ciliumnetworkpolicy.yaml),
+          # and only tag:mx-edge may use that route to this port.
+          smtp-edge:
+            port: 2525
       # WebUI, JMAP, CalDAV, CardDAV, WebDAV and autoconfig, behind
       # envoy-internal (httproute.yaml).
       http:
@@ -210,3 +216,39 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+    # The Pocket ID egress lives here rather than in ciliumnetworkpolicy.yaml:
+    # kubeconform checks files before Flux substitutes ${SECRET_DOMAIN}, and
+    # Cilium's schema refuses "${" in a toFQDNs name (same as Grafana and
+    # homelab-mcp). Cilium adds its allows to policy stalwart's.
+    rawResources:
+      pocket-id-policy:
+        forceRename: stalwart-pocket-id
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # Out: 443 to Pocket ID on Forge, by name, for the OIDC directory's
+          # discovery, keys and userinfo (ADR 0015). DNS goes through
+          # Cilium's proxy here so toFQDNs can learn Forge's address.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: stalwart
+                app.kubernetes.io/controller: stalwart
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
