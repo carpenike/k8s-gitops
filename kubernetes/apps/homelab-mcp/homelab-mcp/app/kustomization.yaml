@@ -18,5 +18,9 @@ configMapGenerator:
       - ./obsidian-sync/run.sh
       - ./obsidian-sync/package.json
       - ./obsidian-sync/package-lock.json
+  # The vault access policy (domains and client profiles), app container only.
+  - name: homelab-mcp-vault-policy
+    files:
+      - policy.yaml=./vault-policy.yaml
 generatorOptions:
   disableNameSuffixHash: true

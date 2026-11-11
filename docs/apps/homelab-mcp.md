@@ -17,7 +17,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
-| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, and the Obsidian vault (`vault_*`, reads and writes) | `grokbot` | Grokbot (every Grokbot agent) |
+| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, and the Obsidian vault (`vault_*`, its own `fitness` and `inbox` domains only; no move or delete) | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
@@ -180,6 +180,16 @@ kubectl -n homelab-mcp exec -it deploy/homelab-mcp -c obsidian-sync -- ob sync-c
 file types leave out "unsupported" files. Within a minute `run.sh` sees the
 setup and starts `ob sync --continuous`. Check it with
 `kubectl -n homelab-mcp logs deploy/homelab-mcp -c obsidian-sync`.
+
+**Who sees what.** `app/vault-policy.yaml` (the `homelab-mcp-vault-policy`
+ConfigMap, mounted into the app only) splits the vault into domains and binds
+each connector to a profile. Claude (`/mcp`, `/mcp/full`) sees everything;
+Grokbot sees only `fitness` and `inbox`, and to it every other folder does not
+exist. External providers can never be given a work-sensitivity domain: the app
+refuses to load such a policy, and with no valid policy every vault tool
+refuses every caller. Adding a domain is an edit to that file and a pod
+restart (reloader does it), never an image change. Moves and deletes are
+preview then confirm.
 
 ## 1Password
 
