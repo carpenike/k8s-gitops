@@ -56,7 +56,13 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (00ea822, 0.49.0: mfp_delete_meal_entries clears one meal on
+              # (6eb2870, 0.52.0: mfp_update_recipe edits a saved recipe in
+              # place, behind HOMELAB_MCP_MFP_STAGED_WRITES_ENABLED (unset
+              # here, so off).
+              # 0.51.0: mfp_log_meal adjustments and mfp_copy_entries, also
+              # behind the staged-writes flag.
+              # 0.50.0: read-only mfp_audit; failed writes log MFP's reason.
+              # 0.49.0: mfp_delete_meal_entries clears one meal on
               # one date with a single confirmation.
               # 0.48.1: saved-meal amounts read as fractions; the
               # macro check lets fibre count 0-4 kcal/g.
@@ -82,7 +88,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-00ea822348d6744f8c1367bad42f97474c76257d@sha256:a4fdf1a2e7637a674da243fb5c0389b71eb2ff8e5d33816fadb40777126a51ba
+              tag: sha-6eb2870231cccad2eff2bdf308051b26d6388439@sha256:f9b574aeafecb9587a3781b05d61e7b71ae4864acbe095a23ecfb7b0b90b326f
             command:
               - /bin/sh
               - -c
@@ -341,9 +347,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (00ea822). Moves with the app image above.
+              # (6eb2870). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-00ea822348d6744f8c1367bad42f97474c76257d@sha256:eb86d91065693f0559e698cc0ed71f70c55cdae901a16871594cd4b1179ccf16
+              tag: sha-6eb2870231cccad2eff2bdf308051b26d6388439@sha256:dc5a83761f2c372331fae1bd0af7d79448a0d421ceea00fb8ecedf1848d24d10
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
