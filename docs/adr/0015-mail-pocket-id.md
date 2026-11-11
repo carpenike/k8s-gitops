@@ -51,7 +51,9 @@ have workarounds that fit a household.
 - Pocket ID gets a public client for the WebUI, with PKCE. It has no
   secret, so nothing is added to 1Password or this repo. The WebUI
   Application's `oauthClientId` is that client's id, and the directory's
-  `acceptedAudiences` lists it
+  `acceptedAudiences` lists it. Pocket ID also needs an API whose
+  resource is the public URL, granted to the client, because the WebUI
+  sends that URL as the `resource` parameter
 - The directory uses issuer `https://id.holthome.net`, `claimUsername`
   `preferred_username`, the mail domain as `usernameDomain`, and
   `claimGroups` `groups`
