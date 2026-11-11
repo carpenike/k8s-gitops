@@ -1,0 +1,180 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Bulwark, a JMAP webmail for Stalwart (ADR 0017, docs/apps/mail.md "Webmail").
+# The browser talks JMAP to Stalwart at mail.${SECRET_DOMAIN} with a Pocket
+# ID token; this pod serves the app and does the server side of sign-in.
+#
+# Nothing here is kept: settings live in each browser (settings sync is
+# off), the admin dashboard is off (no ADMIN_PASSWORD), and the session
+# secret comes from 1Password. One replica, because without Redis each
+# replica keeps its own sign-in state.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bulwark
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: bulwark
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      bulwark:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # Names with a dot are looked up as written, so Cilium files the
+          # answer under that name and the toFQDNs rule for Pocket ID
+          # matches (same as Stalwart's helmrelease.yaml).
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/bulwarkmail/webmail
+              # renovate: datasource=docker depName=ghcr.io/bulwarkmail/webmail
+              tag: 1.21.1@sha256:53df0683b2c59870611073b425937999c859b3a51106ecda08ed41ee12d97a7d
+            env:
+              # The JMAP server, for this pod and for users' browsers. Setting
+              # it turns off the setup wizard.
+              JMAP_SERVER_URL: https://mail.${SECRET_DOMAIN}
+              # Sign-in through Pocket ID only, as a public client with PKCE
+              # (client bulwark). The resource makes Pocket ID issue the
+              # token for Stalwart's API, which is the audience Stalwart
+              # accepts; the Stalwart scope lets the token reach account
+              # security (app passwords) as well as mail.
+              OAUTH_ENABLED: "true"
+              OAUTH_ONLY: "true"
+              OAUTH_CLIENT_ID: bulwark
+              OAUTH_ISSUER_URL: https://id.${SECRET_DOMAIN}
+              OAUTH_RESOURCE: https://mail.${SECRET_DOMAIN}
+              OAUTH_EXTRA_SCOPES: groups offline_access urn:stalwart:oauth:scope:full
+              # Pocket ID's endpoints resolve to Forge's LAN address, which
+              # Bulwark refuses for a host other than the JMAP server's
+              # unless this is set.
+              OAUTH_ALLOW_PRIVATE_ENDPOINTS: "true"
+              # Signing out of webmail does not sign out of Pocket ID, which
+              # would also need a registered post-logout URI.
+              OAUTH_END_SESSION: "false"
+              # envoy-internal is the only proxy in front of the pod.
+              TRUSTED_PROXY_DEPTH: "1"
+              BULWARK_TELEMETRY: "off"
+              BULWARK_UPDATE_CHECK: "off"
+            envFrom:
+              # SESSION_SECRET
+              - secretRef:
+                  name: bulwark
+            # Exec, not HTTP, so the network policy needs no host ingress.
+            # The image ships this script for its own HEALTHCHECK: it asks
+            # /api/health/live, which stays up when Stalwart is down.
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec: &healthcheck
+                    command:
+                      - node
+                      - healthcheck.mjs
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *healthcheck
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *healthcheck
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 768Mi
+    defaultPodOptions:
+      securityContext:
+        # The image's runtime user (nextjs).
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: bulwark
+        ports:
+          http:
+            port: 3000
+    persistence:
+      # Scratch: the setup state Bulwark writes, Next.js's cache and /tmp.
+      # The upstream Kubernetes example mounts the same three.
+      data:
+        type: emptyDir
+        globalMounts:
+          - path: /app/data
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /app/.next/cache
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    # The Pocket ID egress lives here rather than in ciliumnetworkpolicy.yaml:
+    # kubeconform checks files before Flux substitutes ${SECRET_DOMAIN}, and
+    # Cilium's schema refuses "${" in a toFQDNs name (same as Stalwart).
+    rawResources:
+      pocket-id-policy:
+        forceRename: bulwark-pocket-id
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # Out: 443 to Pocket ID on Forge, by name, for discovery and the
+          # code exchange. DNS goes through Cilium's proxy here so toFQDNs
+          # can learn Forge's address.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: bulwark
+                app.kubernetes.io/controller: bulwark
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP

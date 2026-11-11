@@ -1,12 +1,14 @@
 # Mail
 
 Stalwart v1.1.0 in namespace `mail`. ADR 0013 (server and storage), 0014
-(inbound edge relay) and 0015 (accounts from Pocket ID).
+(inbound edge relay), 0015 (accounts from Pocket ID) and 0017 (Bulwark
+webmail).
 
 | Path | Purpose |
 | --- | --- |
 | `kubernetes/apps/mail/stalwart/app` | Server, bucket claim, certificate, route, network policy |
 | `kubernetes/apps/mail/stalwart/backup` | Hourly copy of the blob bucket to R2 |
+| `kubernetes/apps/mail/bulwark/app` | Bulwark webmail ([Webmail](#webmail)) |
 | `kubernetes/apps/cnpg-system/postgres17/app` | Role and database `stalwart`, and Secret `stalwart-db` |
 
 ## Storage
@@ -36,6 +38,7 @@ the bucket and the mail in it.
 | Name | Points at | Serves |
 | --- | --- | --- |
 | `mail.holthome.net` | `envoy-internal`, published by `mikrotik-dns` | WebUI (`/admin`), JMAP, CalDAV, CardDAV, autoconfig |
+| `webmail.holthome.net` | `envoy-internal`, published by `mikrotik-dns` | Bulwark webmail |
 | `mx.holthome.net` | `10.45.10.25`, Service `stalwart-mail` | SMTP 25, 465, 587; IMAP 993; POP3 995; ManageSieve 4190; `smtp-edge` 2525 from the edge relay only |
 | MX of each mail domain (public DNS) | The Vultr edge relay | Inbound SMTP from the internet (ADR 0014) |
 
@@ -58,6 +61,7 @@ Vault `k8s-secrets`:
 | `stalwart` | `database_password` | Role `stalwart` on `postgres17`. Read by `cnpg-system` and `mail` |
 | `stalwart` | `admin_password` | `STALWART_RECOVERY_ADMIN=admin:<password>`. Always accepted as an administrator while set |
 | `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zone `holthome.net` only, for automatic DNS ([DNS](#dns)) |
+| `bulwark` | `session_secret` | `SESSION_SECRET` for Bulwark, at least 32 characters (`openssl rand -base64 32`) |
 | `stalwart-r2` | `access_key_id`, `secret_access_key`, `endpoint_url`, `bucket` | The blob copy. Same values as `postgres17-r2`: the same R2 token and bucket, with blobs under `stalwart/blobs/` beside Barman's `cnpg/postgres17/`. Rotating the `postgres17-r2` token means updating both items |
 
 The RGW credentials are not in 1Password. Rook writes them to Secret
@@ -202,6 +206,30 @@ Setup, in order:
 6. Check against the Cloudflare nameserver, not the MikroTik, and diff
    the apex TXT records against step 3. Restore anything that went
    missing other than the old SPF.
+
+## Webmail
+
+Bulwark (ADR 0017) at `https://webmail.holthome.net`. It signs in with
+Pocket ID only, then the browser calls Stalwart's JMAP API at
+`mail.holthome.net` with that token. Before the first sign-in:
+
+1. 1Password item `bulwark` with `session_secret`.
+2. Pocket ID: a public client `bulwark` (PKCE, no secret), callback
+   `https://webmail.holthome.net/en/auth/callback`, gated to `family`.
+   Grant it the API `Stalwart Mail` (`https://mail.holthome.net`) for
+   user-delegated access, as the `stalwart` client has. Bulwark builds the
+   callback from the browser's locale, so a browser set to another
+   language needs that locale's path too.
+3. Stalwart: turn on `usePermissiveCors` in the HTTP settings. The
+   webmail runs on another origin, and without it the browser blocks
+   every JMAP call. It adds `Access-Control-Allow-Origin: *` to every
+   response and opens nothing: each call still needs credentials. Saving
+   it is not enough: it applies after a pod restart
+   (`kubectl -n mail rollout restart deployment stalwart`).
+
+Each browser keeps its own Bulwark settings. Settings sync and Bulwark's
+admin dashboard are off, and the pod keeps nothing, so a restart costs
+nothing but a fresh page load.
 
 ## Restore
 

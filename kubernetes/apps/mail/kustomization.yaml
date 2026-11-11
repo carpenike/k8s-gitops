@@ -8,3 +8,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./stalwart/ks.yaml
+  - ./bulwark/ks.yaml
