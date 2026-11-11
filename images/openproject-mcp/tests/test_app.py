@@ -113,7 +113,7 @@ def test_initialize_and_tools_list_with_any_bearer(
         assert len(tool["description"]) > 80, name
         # The token is never a tool argument; identity comes from the header.
         assert not {"bot", "token"} & set(tool["inputSchema"].get("properties", {})), name
-    assert tools["create_task"]["inputSchema"]["required"] == ["subject"]
+    assert tools["create_task"]["inputSchema"]["required"] == ["subject", "context", "done_when"]
     assert set(tools["get_task"]["inputSchema"]["required"]) == {"task_id"}
     # Listing tools needs no OpenProject at all.
     assert not fake.calls

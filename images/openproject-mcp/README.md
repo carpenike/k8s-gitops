@@ -67,6 +67,8 @@ None of these is a secret except the relay's keys and targets.
 | `OPENPROJECT_IN_PROGRESS_STATUS` | `In progress` | Status a claim sets |
 | `OPENPROJECT_DONE_STATUS` | `Closed` | Status `complete_task` sets |
 | `OPENPROJECT_RELEASE_STATUS` | `New` | Status `release_task` resets to |
+| `OPENPROJECT_CONTEXT_FIELD` | `Context` | Name of the work package custom field `create_task` writes `context` to (matched case-insensitively) |
+| `OPENPROJECT_DONE_WHEN_FIELD` | `Done when` | Name of the custom field `create_task` writes `done_when` to |
 | `OPENPROJECT_CLAIM_MAX_ATTEMPTS` | `5` | PATCH attempts per claim, and the retry bound for complete/release (1–20) |
 | `OPENPROJECT_CACHE_SECONDS` | `600` | TTL for status/priority/type/project lookups (0 = off). Identity uses `min(60, this)` |
 | `PORT` | `8000` | Listen port |
@@ -95,9 +97,9 @@ identifier or a numeric id.
 | `complete_task` | no | `task_id`, `summary` | Set the done status (`lockVersion`, retried on 409), then post `summary` as a comment. The task must be assigned to the caller |
 | `release_task` | no | `task_id`, `reason?` | Clear the assignee, reset the status, and post the optional reason. The task must be assigned to the caller |
 | `list_tasks` | yes | `project?`, `status="open"`, `assignee="any"\|"unassigned"\|"me"`, `limit=25` | Tasks, newest-updated first, with `returned/total/truncated` |
-| `get_task` | yes | `task_id`, `comments=5` | One slim task and its newest comments: `{id, author, author_id, author_login, created_at, text}` |
+| `get_task` | yes | `task_id`, `comments=5` | One slim task with its `context` and `done_when` (null when unset), and its newest comments: `{id, author, author_id, author_login, created_at, text}` |
 | `add_comment` | no | `task_id`, `text` | Post a comment as the caller |
-| `create_task` | no | `subject`, `project?`, `description?`, `type?`, `priority?`, `assignee?`, `due_date?` | Create a task. `assignee` is `me`, a member's login or name, or a numeric user id |
+| `create_task` | no | `subject`, `context`, `done_when`, `project?`, `description?`, `type?`, `priority?`, `assignee?`, `due_date?`, `status?` | Create a task ([handoff fields](#handoff-fields)). `assignee` is `me`, a member's login or name, or a numeric user id |
 
 ### Claiming
 
@@ -112,6 +114,26 @@ read, check, PATCH and retry loop.
 The OpenProject workflow for the bots' role must allow `New → In progress`,
 `In progress → Closed` and `In progress → New` (or whatever statuses are
 configured).
+
+### Handoff fields
+
+Every task carries two work package custom fields: `Context`, the vault path
+of the note that explains it, and `Done when`, one sentence. Once they are
+required in OpenProject, a create without them fails, so `create_task` takes
+both as required arguments:
+
+1. A blank `context` or `done_when` is refused
+   (`openproject_handoff_incomplete`) before any OpenProject call.
+2. It POSTs `/projects/{id}/work_packages/form` with the task's type,
+   priority, assignee and status, and finds the two fields in the form's
+   schema by name (`OPENPROJECT_CONTEXT_FIELD`, `OPENPROJECT_DONE_WHEN_FIELD`).
+   If either is missing it creates nothing (`openproject_fields_missing`).
+3. It writes a `String` field as a plain string and a `Formattable` one as
+   `{"raw": …}`.
+
+`get_task` reads them back through the work package's own schema
+(`_links.schema`, cached per token), and shows null when one is unset or the
+schema cannot be read.
 
 ## Task-board relay
 

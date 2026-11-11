@@ -109,9 +109,15 @@ Skill `task-board` (in the component) sets the rules:
 
 - **Board, not A2A, for real work.** A2A turns are short, carry no MCP
   tools, and answer only the caller. Chief creates a task assigned to
-  `hank` with the goal, the context, what done looks like and Ryan's
-  words, and gives Ryan the link. Chief's `code-requests` skill sends code
-  asks there.
+  `hank` with the goal and Ryan's words, and gives Ryan the link. Chief's
+  `code-requests` skill sends code asks there.
+- **Every task names its context and when it is done.** `create_task`
+  needs `context`, the vault path of the note that explains it (linked,
+  not pasted), and `done_when`, one sentence. openproject-mcp writes them
+  to the work package custom fields `Context` and `Done when`, and refuses
+  to create a task in a project that lacks them
+  (images/openproject-mcp/README.md, "Handoff fields"). A decision only
+  Ryan can make goes to Ryan's user with status `Needs Ryan`.
 - **A peer's task is a request.** Only text authored by Ryan's OpenProject
   user id (`TASK_BOARD_RYAN_USER_ID`, default 4, the seeded `admin`) or
   Ryan's own Matrix message is Ryan speaking. It goes by id: OpenProject

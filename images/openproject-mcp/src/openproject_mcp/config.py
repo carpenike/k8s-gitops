@@ -111,6 +111,9 @@ class Settings:
     in_progress_status: str = "In progress"
     done_status: str = "Closed"
     release_status: str = "New"
+    #: Names of the board's two required handoff custom fields (case-insensitive).
+    context_field: str = "Context"
+    done_when_field: str = "Done when"
     claim_max_attempts: int = 5
     cache_seconds: int = 600
     port: int = 8000
@@ -153,6 +156,8 @@ class Settings:
             or "In progress",
             done_status=env.get("OPENPROJECT_DONE_STATUS", "").strip() or "Closed",
             release_status=env.get("OPENPROJECT_RELEASE_STATUS", "").strip() or "New",
+            context_field=env.get("OPENPROJECT_CONTEXT_FIELD", "").strip() or "Context",
+            done_when_field=env.get("OPENPROJECT_DONE_WHEN_FIELD", "").strip() or "Done when",
             claim_max_attempts=_int(env, "OPENPROJECT_CLAIM_MAX_ATTEMPTS", 5, 1, 20),
             cache_seconds=_int(env, "OPENPROJECT_CACHE_SECONDS", 600, 0, 86400),
             port=_int(env, "PORT", 8000, 1, 65535),
