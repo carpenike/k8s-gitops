@@ -54,6 +54,34 @@ spec:
               The mfp tools are refusing every call. Capture a fresh session
               into the 1Password item homelab-mcp, field mfp_cookies
               (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
+        - alert: HomelabMcpObsidianSyncDown
+          # The obsidian-sync container is not running (crash loop, or the
+          # pod is down). The vault then stops matching the owner's devices,
+          # and the vault_* tools work on a stale copy.
+          expr: kube_pod_container_status_running{namespace="homelab-mcp",container="obsidian-sync"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Obsidian Sync is not running in homelab-mcp
+            description: >-
+              The obsidian-sync container has not been running for 15 minutes.
+              Check its log (kubectl -n homelab-mcp logs deploy/homelab-mcp -c
+              obsidian-sync); docs/homelab-mcp.md, "Obsidian Sync".
+        - alert: HomelabMcpObsidianSyncRestarting
+          # The liveness probe restarts the client when its lock stops being
+          # refreshed (a dead event loop); repeated restarts mean it cannot
+          # stay up: a bad login, a revoked device, or an upstream hang.
+          expr: >-
+            increase(kube_pod_container_status_restarts_total{namespace="homelab-mcp",container="obsidian-sync"}[1h]) > 2
+          labels:
+            severity: warning
+          annotations:
+            summary: Obsidian Sync keeps restarting in homelab-mcp
+            description: >-
+              obsidian-sync restarted more than twice in an hour. Its log says
+              why; if the login was revoked, run the one-time setup again
+              (docs/homelab-mcp.md, "Obsidian Sync").
         - alert: HomelabMcpWithingsTokenUnusable
           # No Withings token on the state volume, or Withings refused it and
           # a refresh. Set at startup and on every withings_* call. Expected

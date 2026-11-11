@@ -53,10 +53,21 @@ spec:
           # in its own volume. A volume root is created root-owned, and
           # fsGroup would add group bits, so this sets owner and mode once per
           # start. The only step that runs as root; CHOWN and FOWNER only.
+          # It also lays out the Obsidian vault volume (homelab-mcp-vault):
+          # workspace/notes is the vault and workspace/.tmp the scratch dir for
+          # atomic writes (outside the vault, same mount, so a rename is atomic
+          # and Sync never sees a temp file); config/ holds the Sync client's
+          # login and end-to-end key, mounted only into obsidian-sync; ob/ is
+          # its npm install. The volume root and workspace/ stay 0755: this
+          # container has no DAC_OVERRIDE, so on the next start it could not
+          # search a 0700 directory owned by 65532 to reach the ones below.
+          # Only config/ and .tmp/ are 0700, and it never needs to enter them.
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (5301ae9, 0.58.0: withings_get_measurements and withings_trend,
+              # (ad0059c, 0.59.0: vault_* read and write the Obsidian vault that
+              # obsidian-sync keeps in step; every change needs the note's hash.
+              # 0.58.0: withings_get_measurements and withings_trend,
               # read-only, from the scale and the blood pressure cuff.
               # 0.57.0: previews warn when a food's carbs look
               # fibre-inflated; every MFP write states nutrition_matches_preview.
@@ -98,13 +109,20 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-5301ae9081c8e430f5580e0bdc4bc78ca692de90@sha256:32246a42a1e7d76e3018ed96eaa5636f5449d44cd824cf3cfec3c8725027b82c
+              tag: sha-ad0059cd6a7c17729ce119715bad9ecff3ee929a@sha256:ede7d720a22a5c1d9e9e2ffb6891dd9e9598a6a1cadc5d8dd7bf6c9236abcb79
             command:
               - /bin/sh
               - -c
               - >-
                 chown 65532:65532 /var/lib/homelab-mcp /signal &&
-                chmod 0700 /var/lib/homelab-mcp /signal
+                chmod 0700 /var/lib/homelab-mcp /signal &&
+                mkdir -p /vault-data/workspace/notes /vault-data/workspace/.tmp
+                /vault-data/config /vault-data/ob &&
+                chown 65532:65532 /vault-data /vault-data/workspace
+                /vault-data/workspace/notes /vault-data/workspace/.tmp
+                /vault-data/config /vault-data/ob &&
+                chmod 0755 /vault-data /vault-data/workspace &&
+                chmod 0700 /vault-data/config /vault-data/workspace/.tmp
             securityContext:
               runAsUser: 0
               runAsGroup: 0
@@ -173,7 +191,7 @@ spec:
                 ["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders",
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
-                "amazon", "costco", "samsclub", "withings"]
+                "amazon", "costco", "samsclub", "withings", "vault"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
@@ -200,6 +218,13 @@ spec:
               # VolSync), never in a secret. After a restore it needs one
               # re-authorization (carpenike/mcp README, "Withings posture").
               HOMELAB_MCP_WITHINGS_ENABLED: "true"
+              # The Obsidian vault (vault_*), kept in step by obsidian-sync.
+              # Writes are on (Ryan, 2026-11-11): every change needs the hash
+              # it was based on, so a phone edit is never overwritten.
+              HOMELAB_MCP_VAULT_ENABLED: "true"
+              HOMELAB_MCP_VAULT_WRITES_ENABLED: "true"
+              HOMELAB_MCP_VAULT_PATH: /vault/notes
+              HOMELAB_MCP_VAULT_TMP_PATH: /vault/.tmp
               HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
               # Per-user credentials: who they are kept for, and where. No view
               # uses credentials "per_user" yet (docs/homelab-mcp.md).
@@ -223,7 +248,9 @@ spec:
               # recipe edits) and every MFP tool, reads and writes including
               # deletes (Ryan, 2026-11-11). Writes are preview then confirm,
               # but a bot can confirm its own preview, so nobody reviews a
-              # Grokbot write before it lands.
+              # Grokbot write before it lands. Grokbot also reads and writes the
+              # Obsidian vault (vault_*, Ryan, 2026-11-11); every vault change
+              # needs the note's current hash, so it cannot clobber an edit.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -289,7 +316,9 @@ spec:
                  "mfp_preview_log_recipe", "mfp_log_recipe", "mfp_preview_log_meal",
                  "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
-                 "mfp_delete_meal"],
+                 "mfp_delete_meal",
+                 "vault_read", "vault_list", "vault_search", "vault_links",
+                 "vault_create", "vault_edit", "vault_move", "vault_delete"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
@@ -381,9 +410,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (5301ae9). Moves with the app image above.
+              # (ad0059c). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-5301ae9081c8e430f5580e0bdc4bc78ca692de90@sha256:48eac38600a9ebfea3b9582a7bbb141d41f74651b7c7066ce3a523f33d5c08c5
+              tag: sha-ad0059cd6a7c17729ce119715bad9ecff3ee929a@sha256:b991899aea446d71f06cfe7d364e4b7df290cbef7fbc45e795e625bacce706dd
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
@@ -500,6 +529,66 @@ spec:
               requests:
                 cpu: 50m
                 memory: 512Mi
+              limits:
+                memory: 1Gi
+          # Obsidian's headless Sync client (obsidian-headless, pinned in
+          # obsidian-sync/package-lock.json, which Renovate keeps current). It
+          # keeps /vault/notes in step with the owner's devices; the app's
+          # vault_* tools read and write the same folder. run.sh installs the
+          # client into the volume once per lockfile, waits for the one-time
+          # `ob login` / `ob sync-setup` (docs/homelab-mcp.md), then syncs.
+          # Same uid as the app, so neither can leave a file the other cannot
+          # read (an unreadable file busy-loops the client, upstream #56).
+          obsidian-sync:
+            image:
+              repository: docker.io/library/node
+              tag: 22.23.4-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+            command:
+              - /bin/sh
+              - /opt/obsidian-sync/run.sh
+            env:
+              TZ: America/New_York
+              HOME: /tmp/obsidian-sync
+              XDG_CONFIG_HOME: /config
+              npm_config_cache: /tmp/obsidian-sync/npm
+              VAULT: /vault/notes
+              PATH: /opt/ob/current/node_modules/.bin:/usr/local/bin:/usr/bin:/bin
+            probes:
+              # While syncing, the client touches .sync.lock every second; a
+              # lock older than two minutes means its event loop is gone.
+              # Installing and waiting are healthy states. A hang that keeps
+              # the event loop alive (stuck at "Connecting...", upstream #60)
+              # is not caught here; HomelabMcpObsidianSyncRestarting and the
+              # vault tools' own errors are what show it.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /bin/sh
+                      - -c
+                      - >-
+                        test "$(cat /tmp/obsidian-sync/state 2>/dev/null)" != syncing ||
+                        test -n "$(find /vault/notes/.obsidian/.sync.lock -maxdepth 0 -mmin -2 2>/dev/null)"
+                  initialDelaySeconds: 60
+                  periodSeconds: 60
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 20m
+                memory: 128Mi
               limits:
                 memory: 1Gi
           # The Signal note listener (homelab-finances-signal listen, through
@@ -730,6 +819,37 @@ spec:
             app:
               - path: /run/user-credentials
                 readOnly: true
+      # The Obsidian vault volume (pvc.yaml; laid out by the permissions init
+      # container). The app sees only workspace/ (the vault and its scratch
+      # dir); the Sync client's login and end-to-end key (config/) are mounted
+      # only into obsidian-sync.
+      vault:
+        existingClaim: homelab-mcp-vault
+        advancedMounts:
+          homelab-mcp:
+            permissions:
+              - path: /vault-data
+            app:
+              - path: /vault
+                subPath: workspace
+            obsidian-sync:
+              - path: /vault
+                subPath: workspace
+              - path: /config
+                subPath: config
+              - path: /opt/ob
+                subPath: ob
+      # run.sh and the pinned package files (app/kustomization.yaml generates
+      # this ConfigMap without a hash suffix; reloader restarts the pod when
+      # it changes, so a Renovate lockfile bump installs the new client).
+      obsidian-sync:
+        type: configMap
+        name: homelab-mcp-obsidian-sync
+        advancedMounts:
+          homelab-mcp:
+            obsidian-sync:
+              - path: /opt/obsidian-sync
+                readOnly: true
       # The sidecar's downloaded budget cache: rebuilt on every start.
       actual:
         type: emptyDir
@@ -821,6 +941,15 @@ spec:
                   - matchName: api.snaptrade.com
                   # withings: the token endpoint and Measure, both on wbsapi.
                   - matchName: wbsapi.withings.net
+                  # obsidian-sync: api.obsidian.md and the vault's sync server
+                  # (sync-N.obsidian.md; the client refuses any host outside
+                  # .obsidian.md). One label, so "*" covers both.
+                  - matchPattern: "*.obsidian.md"
+                  # obsidian-sync's install, once per lockfile: the npm
+                  # registry, and better-sqlite3's prebuilt binary (a GitHub
+                  # release, redirected to release-assets).
+                  - matchName: registry.npmjs.org
+                  - matchName: release-assets.githubusercontent.com
                   # signal-api: Signal's chat, storage, contact-discovery and
                   # CDN hosts. A pattern, because signal-cli follows the
                   # server's host list rather than a fixed one.
