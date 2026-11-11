@@ -56,7 +56,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (33ef762, 0.56.0: mfp_audit severity and saved meals; alcohol
+              # (6a9aca3, 0.57.0: previews warn when a food's carbs look
+              # fibre-inflated; every MFP write states nutrition_matches_preview.
+              # 0.56.0: mfp_audit severity and saved meals; alcohol
               # and missing fat in the macro check; writes report what MFP
               # saved differently from the preview; merged meal adds.
               # 0.55.0: the connector icon, public at /icon.png
@@ -94,7 +96,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-33ef762244e2b5faff7e61b0d752e912d5fb3caa@sha256:86471642b3f47eac4a33ead20b047799ef5375deae761974f6b831cc9119ccef
+              tag: sha-6a9aca33055fb16bec2b77280b6aed34b057e2db@sha256:7360874b596c9a8cbefda56a84604ee047f41a416e344187f88d3a1ea666f1c1
             command:
               - /bin/sh
               - -c
@@ -369,9 +371,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (33ef762). Moves with the app image above.
+              # (6a9aca3). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-33ef762244e2b5faff7e61b0d752e912d5fb3caa@sha256:e10e0528979e60a9e987d9c023af5bd79f58d0c4b74b994cad3af5ad67631d1e
+              tag: sha-6a9aca33055fb16bec2b77280b6aed34b057e2db@sha256:2f6b8e522a6a4fe94c2d31ed2632d3144e5c561ee7209c6b23b2286a010cbe4e
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
