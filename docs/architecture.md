@@ -31,7 +31,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Public DNS | external-dns to Cloudflare, external gateway only | app v0.24.0, chart 1.23.0 |
 | Internal DNS | external-dns plus MikroTik webhook | webhook v1.6.3 |
 | Public reach | cloudflared tunnel to `envoy-external` | cloudflared 2026.10.3 |
-| Tailnet reach | Tailscale operator, Connector `home` subnet router to `envoy-internal` and the router's DNS, no IngressClass (see tailscale.md, ADR 0012) | chart 1.104.4 |
+| Tailnet reach | Tailscale operator, Connector `home` subnet router to `envoy-internal`, the router's DNS and Stalwart's mail address, no IngressClass (see tailscale.md, ADR 0012) | chart 1.104.4 |
 | Secrets | External Secrets, 1Password SDK | chart 2.14.0 |
 | Block | Rook-Ceph, 3 replicas, host failure domain | 1.21.1 |
 | Media | NFS static volumes, class `nfs-media` | no provisioner |
@@ -47,7 +47,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Actions runners | ARC scale sets, one per private repo (see actions-runners.md) | chart 0.15.1 |
 | Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
 | Matrix | Tuwunel, `ryanholt.net`, external gateway (see matrix.md) | v1.9.4 |
-| Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI (see mail.md, ADR 0013) | v1.1.0 |
+| Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI, accounts from Pocket ID, inbound from the internet through a Stalwart edge relay on Vultr over the tailnet (see mail.md, ADR 0013, 0014, 0015) | v1.1.0 |
 | Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see hermes.md) | v0.23.0 |
 | Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see website.md) | 1.31.7 |
 
