@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# Same shape as ../../../matrix/tuwunel/backup. The csi-ceph-block snapshot
+# is crash consistent; RocksDB replays its WAL on restore, as after a power
+# loss. Mail that arrived after the snapshot is lost on restore, so the
+# schedule is every six hours rather than daily.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: stalwart
+spec:
+  sourcePVC: stalwart-data
+  trigger:
+    schedule: "15 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: stalwart-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 5Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: stalwart-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 2000
+      runAsGroup: 2000
+      fsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      hourly: 8
+      daily: 14
+      weekly: 8
+      monthly: 6
