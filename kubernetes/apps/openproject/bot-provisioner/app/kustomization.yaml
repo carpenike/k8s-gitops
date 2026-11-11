@@ -2,18 +2,35 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 # The shared provisioning script, which each bot's task-board Kustomization
 # (kubernetes/components/hermes-bot/task-board) runs with ../template, and
-# the board's one webhook (webhook.rb, run by webhook-job.yaml).
+# the board's one webhook (webhook.rb, run by webhook-job.yaml), and the
+# board's structure (structure.rb and board.yaml, run by structure-job.yaml).
 # docs/apps/openproject.md, "Bot provisioning" and "Waking a bot".
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./webhook-job.yaml
+  - ./structure-job.yaml
 configMapGenerator:
   - name: openproject-bot-provisioner
     files:
       - provision.rb
+    # No hash suffix: other Kustomizations and Jobs name it.
+    options:
+      disableNameSuffixHash: true
   - name: openproject-board-webhook
     files:
       - webhook.rb
-generatorOptions:
-  disableNameSuffixHash: true
+    # No hash suffix: other Kustomizations and Jobs name it.
+    options:
+      disableNameSuffixHash: true
+  - name: openproject-board-structure-script
+    files:
+      - structure.rb
+    # No hash suffix: other Kustomizations and Jobs name it.
+    options:
+      disableNameSuffixHash: true
+  # The board's shape, with a hash suffix (unlike the scripts): an edit to
+  # board.yaml renames it, which changes the Job's spec and replaces it.
+  - name: openproject-board
+    files:
+      - board.yaml

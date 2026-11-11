@@ -11,3 +11,4 @@ resources:
   - ./openproject-mcp/ks.yaml
   - ./bot-provisioner/ks.yaml
   - ./bot-provisioner/external-bots.yaml
+  - ./bot-provisioner/homelab-mcp-bots.yaml
