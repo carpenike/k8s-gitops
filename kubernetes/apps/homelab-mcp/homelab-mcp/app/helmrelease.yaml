@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (1ce6566, 0.60.0: the vault is split into domains, and each
+              # (d158acf, 0.61.0: vault writes warn about missing frontmatter;
+              # vault_lint; the one-off briefing archive command, run by hand.
+              # 1ce6566, 0.60.0: the vault is split into domains, and each
               # connector sees only its own (app/vault-policy.yaml); moves and
               # deletes are preview then confirm; vault_domains.
               # ad0059c, 0.59.0: vault_* read and write the Obsidian vault that
@@ -112,7 +114,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-1ce6566f6118fb0364f48d917509a3471caae9d6@sha256:eb4ea2a10356c4cc84fe70b7b1bcf876812b8cd151293882f08d09d572716eec
+              tag: sha-d158acf45ece8252be9816326d6b3253feb032f3@sha256:02ef542b0214fc99d03d3056235710e8ff29703062646b4fef511afbd83ae7b7
             command:
               - /bin/sh
               - -c
@@ -325,7 +327,7 @@ spec:
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
                  "vault_domains", "vault_read", "vault_list", "vault_search",
-                 "vault_links", "vault_create", "vault_edit"],
+                 "vault_links", "vault_lint", "vault_create", "vault_edit"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
@@ -417,9 +419,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (1ce6566). Moves with the app image above.
+              # (d158acf). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-1ce6566f6118fb0364f48d917509a3471caae9d6@sha256:232deeb2aeb2520d9d7d6d372bc233c0468ea65cf62da2adc3745760a7a55c21
+              tag: sha-d158acf45ece8252be9816326d6b3253feb032f3@sha256:1ffcc935411e46a09c25fd3e7e3ad2aa931947a88b54889b27055efc39f77034
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
