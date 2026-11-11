@@ -37,6 +37,18 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           terminationGracePeriodSeconds: 120
+          # A name with a dot is looked up as written first, so Cilium files
+          # the answer under that name and the toFQDNs rule for Pocket ID
+          # matches (same note as components/hermes-bot). With ndots:5,
+          # id.holthome.net was first tried as id.holthome.net.mail.svc...,
+          # CoreDNS's autopath answered that name, the policy dropped the
+          # connection, and the OIDC directory failed to build at startup.
+          # Every name Stalwart resolves has a dot, so nothing relies on the
+          # search list.
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
         containers:
           app:
             image:
