@@ -96,9 +96,19 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
+              # /usr/local/bin/stalwart carries cap_net_bind_service as a file
+              # capability with the effective bit. execve refuses such a
+              # binary ("operation not permitted") when the capability is
+              # missing from the bounding set, which drop ALL empties. Adding
+              # it back to the bounding set lets the binary start; no_new_privs
+              # still keeps the non-root process from gaining it, so ports
+              # below 1024 come from the sysctl below. Restricted allows this
+              # one added capability.
               capabilities:
                 drop:
                   - ALL
+                add:
+                  - NET_BIND_SERVICE
             resources:
               requests:
                 cpu: 100m
@@ -115,8 +125,8 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-        # The image grants cap_net_bind_service as a file capability, which
-        # allowPrivilegeEscalation: false (no_new_privs) ignores. This safe,
+        # The file capability on the binary is not granted under
+        # allowPrivilegeEscalation: false (no_new_privs). This safe,
         # namespaced sysctl lets the non-root process bind 25, 465 and 993.
         sysctls:
           - name: net.ipv4.ip_unprivileged_port_start
