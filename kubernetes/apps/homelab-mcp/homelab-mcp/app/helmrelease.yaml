@@ -56,11 +56,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (6eb2870, 0.52.0: mfp_update_recipe edits a saved recipe in
-              # place, behind HOMELAB_MCP_MFP_STAGED_WRITES_ENABLED (unset
-              # here, so off).
-              # 0.51.0: mfp_log_meal adjustments and mfp_copy_entries, also
-              # behind the staged-writes flag.
+              # (100cf07, 0.53.0: the staged-writes flag is gone; copying
+              # entries, meal adjustments and in-place recipe updates follow
+              # HOMELAB_MCP_MFP_WRITES_ENABLED like every other MFP write.
+              # 0.52.0: mfp_update_recipe edits a saved recipe in place.
+              # 0.51.0: mfp_log_meal adjustments and mfp_copy_entries.
               # 0.50.0: read-only mfp_audit; failed writes log MFP's reason.
               # 0.49.0: mfp_delete_meal_entries clears one meal on
               # one date with a single confirmation.
@@ -88,7 +88,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-6eb2870231cccad2eff2bdf308051b26d6388439@sha256:f9b574aeafecb9587a3781b05d61e7b71ae4864acbe095a23ecfb7b0b90b326f
+              tag: sha-100cf0794baeecf4642d466d59443ce309f9aacf@sha256:552241305959780a0a1fc2fee8421942a329306c6c0034f60ab5a9492ec1251c
             command:
               - /bin/sh
               - -c
@@ -347,9 +347,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (6eb2870). Moves with the app image above.
+              # (100cf07). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-6eb2870231cccad2eff2bdf308051b26d6388439@sha256:dc5a83761f2c372331fae1bd0af7d79448a0d421ceea00fb8ecedf1848d24d10
+              tag: sha-100cf0794baeecf4642d466d59443ce309f9aacf@sha256:f7613702c20f8351795ed529b1b233f8a2acda55780336141f787f762c4b45a3
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
