@@ -46,14 +46,22 @@ spec:
               # Sign-in through Pocket ID only, as a public client with PKCE
               # (client bulwark). The resource makes Pocket ID issue the
               # token for Stalwart's API, which is the audience Stalwart
-              # accepts; the Stalwart scope lets the token reach account
-              # security (app passwords) as well as mail.
+              # accepts. Stalwart refuses an outside client's token unless
+              # it carries one of the four service scopes (unscopedTokens
+              # reject), and counts no others, so Bulwark asks for those.
+              # Pocket ID grants them as permissions of the Stalwart Mail
+              # API. Account security (app passwords) stays in the WebUI.
               OAUTH_ENABLED: "true"
               OAUTH_ONLY: "true"
               OAUTH_CLIENT_ID: bulwark
               OAUTH_ISSUER_URL: https://id.${SECRET_DOMAIN}
               OAUTH_RESOURCE: https://mail.${SECRET_DOMAIN}
-              OAUTH_EXTRA_SCOPES: groups offline_access urn:stalwart:oauth:scope:full
+              OAUTH_EXTRA_SCOPES: >-
+                groups offline_access
+                urn:ietf:params:oauth:scope:mail
+                urn:ietf:params:oauth:scope:contacts
+                urn:ietf:params:oauth:scope:calendars
+                urn:ietf:params:oauth:scope:files
               # Pocket ID's endpoints resolve to Forge's LAN address, which
               # Bulwark refuses for a host other than the JMAP server's
               # unless this is set.
