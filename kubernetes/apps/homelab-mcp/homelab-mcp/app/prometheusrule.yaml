@@ -54,6 +54,21 @@ spec:
               The mfp tools are refusing every call. Capture a fresh session
               into the 1Password item homelab-mcp, field mfp_cookies
               (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
+        - alert: HomelabMcpWithingsTokenUnusable
+          # No Withings token on the state volume, or Withings refused it and
+          # a refresh. Set at startup and on every withings_* call. Expected
+          # until the first authorization, and after a restore (the restored
+          # refresh token has usually already rotated).
+          expr: homelab_mcp_withings_token_usable{namespace="homelab-mcp"} == 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: Withings needs re-authorizing
+            description: >-
+              The withings tools are refusing calls. Run the one-time
+              authorization in carpenike/mcp README, "Withings posture"
+              (scripts/withings_authorize.py piped into the seed command).
         - alert: HomelabMcpMfpCookiesExpiringSoon
           # The session cookie's own expiry, read from the cookie file.
           expr: |
