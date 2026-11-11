@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   lint-and-manifests:
-    name: yamllint, kubeconform, sops check
+    name: yamllint, kubeconform, sops check, doc links
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,6 +37,11 @@ jobs:
 
       - name: Reject unencrypted sops files
         run: bash scripts/check-sops-encrypted.sh
+
+      # Relative Markdown links, their anchors, and docs/*.md paths named in
+      # manifests. Web links are not fetched.
+      - name: Check doc links
+        run: bash scripts/check-doc-links.sh
 
       - name: kubeconform
         run: bash scripts/kubeconform.sh

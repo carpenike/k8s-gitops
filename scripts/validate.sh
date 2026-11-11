@@ -8,6 +8,7 @@ cd "${ROOT}"
 
 yamllint -c .yamllint.yml .
 bash scripts/check-sops-encrypted.sh
+bash scripts/check-doc-links.sh
 bash scripts/kubeconform.sh
 bash scripts/helm-template.sh
 
