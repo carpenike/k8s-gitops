@@ -65,7 +65,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (ad0059c, 0.59.0: vault_* read and write the Obsidian vault that
+              # (1ce6566, 0.60.0: the vault is split into domains, and each
+              # connector sees only its own (app/vault-policy.yaml); moves and
+              # deletes are preview then confirm; vault_domains.
+              # ad0059c, 0.59.0: vault_* read and write the Obsidian vault that
               # obsidian-sync keeps in step; every change needs the note's hash.
               # 0.58.0: withings_get_measurements and withings_trend,
               # read-only, from the scale and the blood pressure cuff.
@@ -109,7 +112,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-ad0059cd6a7c17729ce119715bad9ecff3ee929a@sha256:ede7d720a22a5c1d9e9e2ffb6891dd9e9598a6a1cadc5d8dd7bf6c9236abcb79
+              tag: sha-1ce6566f6118fb0364f48d917509a3471caae9d6@sha256:eb4ea2a10356c4cc84fe70b7b1bcf876812b8cd151293882f08d09d572716eec
             command:
               - /bin/sh
               - -c
@@ -225,6 +228,9 @@ spec:
               HOMELAB_MCP_VAULT_WRITES_ENABLED: "true"
               HOMELAB_MCP_VAULT_PATH: /vault/notes
               HOMELAB_MCP_VAULT_TMP_PATH: /vault/.tmp
+              # Who sees and changes which domains (app/vault-policy.yaml).
+              # 0.60.0 refuses every vault call without it.
+              HOMELAB_MCP_VAULT_POLICY_PATH: /etc/homelab-mcp/vault/policy.yaml
               HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
               # Per-user credentials: who they are kept for, and where. No view
               # uses credentials "per_user" yet (docs/apps/homelab-mcp.md).
@@ -249,8 +255,9 @@ spec:
               # deletes (Ryan, 2026-11-11). Writes are preview then confirm,
               # but a bot can confirm its own preview, so nobody reviews a
               # Grokbot write before it lands. Grokbot also reads and writes the
-              # Obsidian vault (vault_*, Ryan, 2026-11-11); every vault change
-              # needs the note's current hash, so it cannot clobber an edit.
+              # Obsidian vault (vault_*, Ryan, 2026-11-11), but only its own
+              # domains (fitness, inbox; app/vault-policy.yaml): everything else
+              # does not exist for it. No move or delete, here or in the policy.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -317,8 +324,8 @@ spec:
                  "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
-                 "vault_read", "vault_list", "vault_search", "vault_links",
-                 "vault_create", "vault_edit", "vault_move", "vault_delete"],
+                 "vault_domains", "vault_read", "vault_list", "vault_search",
+                 "vault_links", "vault_create", "vault_edit"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
@@ -410,9 +417,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (ad0059c). Moves with the app image above.
+              # (1ce6566). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-ad0059cd6a7c17729ce119715bad9ecff3ee929a@sha256:b991899aea446d71f06cfe7d364e4b7df290cbef7fbc45e795e625bacce706dd
+              tag: sha-1ce6566f6118fb0364f48d917509a3471caae9d6@sha256:232deeb2aeb2520d9d7d6d372bc233c0468ea65cf62da2adc3745760a7a55c21
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
@@ -849,6 +856,16 @@ spec:
           homelab-mcp:
             obsidian-sync:
               - path: /opt/obsidian-sync
+                readOnly: true
+      # The vault access policy (app/kustomization.yaml, no hash suffix;
+      # reloader restarts the pod when it changes). The app container only.
+      vault-policy:
+        type: configMap
+        name: homelab-mcp-vault-policy
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /etc/homelab-mcp/vault
                 readOnly: true
       # The sidecar's downloaded budget cache: rebuilt on every start.
       actual:
