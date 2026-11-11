@@ -58,7 +58,7 @@ Vault `k8s-secrets`:
 | `stalwart` | `database_password` | Role `stalwart` on `postgres17`. Read by `cnpg-system` and `mail` |
 | `stalwart` | `admin_password` | `STALWART_RECOVERY_ADMIN=admin:<password>`. Always accepted as an administrator while set |
 | `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zone `holthome.net` only, for automatic DNS ([DNS](#dns)) |
-| `stalwart-r2` | `access_key_id`, `secret_access_key`, `endpoint_url`, `bucket` | The blob copy. Same shape as `postgres17-r2`: an R2 token with Object Read & Write on one bucket, endpoint without the bucket |
+| `stalwart-r2` | `access_key_id`, `secret_access_key`, `endpoint_url`, `bucket` | The blob copy. Same values as `postgres17-r2`: the same R2 token and bucket, with blobs under `stalwart/blobs/` beside Barman's `cnpg/postgres17/`. Rotating the `postgres17-r2` token means updating both items |
 
 The RGW credentials are not in 1Password. Rook writes them to Secret
 `stalwart-blobs` in `mail` when it provisions the bucket.
@@ -119,12 +119,23 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    - in Pocket ID, create a public OIDC client for the WebUI (PKCE, no
      secret) with the redirect URI the WebUI shows, and allow the groups
      that should have mail
+   - in Pocket ID, also create an API with resource
+     `https://mail.holthome.net` (no permissions) and grant it to the
+     client for user-delegated access. The WebUI sends that URL as the
+     RFC 8707 `resource` parameter, and Pocket ID rejects a resource the
+     client has no grant for: "The 'resource' or 'scope' parameter is
+     invalid"
    - in Stalwart, add an OIDC directory: issuer `https://id.holthome.net`
      (exactly as Pocket ID reports it), `claimUsername`
      `preferred_username`, `usernameDomain` the mail domain, `claimGroups`
      `groups`, and the client id under `acceptedAudiences`. Set it as
      the directory, and the client id as the WebUI Application's
      `oauthClientId`
+   - restart the pod after saving the Application
+     (`kubectl -n mail rollout restart deployment stalwart`). Stalwart
+     writes `oauthClientId` and the scopes into the WebUI's page when it
+     starts, so until then the WebUI sends an empty client id and Pocket
+     ID answers "The requested OAuth 2.0 Client does not exist"
    - create every account in advance. OIDC cannot look up an address, so
      an account that does not exist yet rejects mail until its owner
      first signs in
