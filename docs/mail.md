@@ -223,7 +223,9 @@ Pocket ID only, then the browser calls Stalwart's JMAP API at
 3. Stalwart: turn on `usePermissiveCors` in the HTTP settings. The
    webmail runs on another origin, and without it the browser blocks
    every JMAP call. It adds `Access-Control-Allow-Origin: *` to every
-   response and opens nothing: each call still needs credentials.
+   response and opens nothing: each call still needs credentials. Saving
+   it is not enough: it applies after a pod restart
+   (`kubectl -n mail rollout restart deployment stalwart`).
 
 Each browser keeps its own Bulwark settings. Settings sync and Bulwark's
 admin dashboard are off, and the pod keeps nothing, so a restart costs
