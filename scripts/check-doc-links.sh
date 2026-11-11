@@ -7,6 +7,10 @@
 #   3. A plain mention of docs/<something>.md anywhere in the tree (manifest
 #      comments, alert annotations, bot prompts) names a file that exists.
 #
+# "Exists" means tracked by git with that exact spelling. The filesystem is
+# not asked, because macOS would accept docs/FOO.md for docs/foo.md and CI
+# on Linux would not.
+#
 # Web links are not fetched. No cluster, no secrets, no network.
 
 set -euo pipefail
@@ -20,6 +24,7 @@ EXTERNAL_DOCS="
 docs/rpi/README.md
 docs/pocketid.md
 docs/MFP-COOKIE-RUNBOOK.md
+docs/OPENPROJECT.md
 docs/RECON.md
 docs/services/openproject.md
 docs/deploying/kubernetes.md
@@ -27,9 +32,53 @@ docs/deploying/kubernetes.md
 # docs/rpi/README.md             microsoft/hve-core
 # docs/pocketid.md               network-config
 # docs/MFP-COOKIE-RUNBOOK.md     carpenike/mcp
+# docs/OPENPROJECT.md            carpenike/mcp
 # docs/RECON.md                  carpenike/schoolhouse
 # docs/services/openproject.md   carpenike/nix-config
 # docs/deploying/kubernetes.md   Tuwunel upstream
+
+# Every tracked file, and every directory that holds one.
+TRACKED="$(mktemp)"
+trap 'rm -f "${TRACKED}"' EXIT
+git ls-files | awk '
+  {
+    print
+    path = $0
+    while (sub(/\/[^\/]*$/, "", path)) {
+      if (!(path in dirs)) { dirs[path] = 1; print path }
+    }
+  }
+' > "${TRACKED}"
+
+tracked() {
+  grep -q -x -F -- "$1" "${TRACKED}"
+}
+
+# Collapse "." and ".." in a repo-relative path. Prints nothing when the
+# path climbs out of the repository.
+normalize() {
+  local IFS=/ part out=""
+  for part in $1; do
+    case "${part}" in
+      '' | .) ;;
+      ..)
+        [ -n "${out}" ] || return 0
+        case "${out}" in
+          */*) out="${out%/*}" ;;
+          *) out="." ;;
+        esac
+        ;;
+      *)
+        if [ -z "${out}" ] || [ "${out}" = "." ]; then
+          out="${part}"
+        else
+          out="${out}/${part}"
+        fi
+        ;;
+    esac
+  done
+  printf '%s' "${out}"
+}
 
 fail=0
 report() {
@@ -43,7 +92,7 @@ anchors() {
   awk '
     /^[[:space:]]*(```|~~~)/ { fence = !fence; next }
     fence { next }
-    /^#{1,6}[[:space:]]/ {
+    /^##*[[:space:]]/ {
       line = $0
       sub(/^#+[[:space:]]+/, "", line)
       sub(/[[:space:]]+#*[[:space:]]*$/, "", line)
@@ -97,21 +146,23 @@ while IFS= read -r file; do
       if [ -z "${path}" ]; then
         resolved="${file}"
       else
-        resolved="${dir}/${path}"
+        resolved="$(normalize "${dir}/${path}")"
       fi
-      if [ ! -e "${resolved}" ]; then
+      if [ -z "${resolved}" ]; then
+        report "${file}:${line}: link leaves the repository: ${target}"
+        continue
+      fi
+      if [ "${resolved}" != "." ] && ! tracked "${resolved}"; then
         report "${file}:${line}: link target does not exist: ${target}"
         continue
       fi
-      if [ -n "${anchor}" ] && [ -f "${resolved}" ]; then
-        case "${resolved}" in
-          *.md)
-            if ! anchors "${resolved}" | grep -q -x -F -- "${anchor}"; then
-              report "${file}:${line}: no heading for #${anchor} in ${resolved}"
-            fi
-            ;;
-        esac
-      fi
+      case "${resolved}" in
+        *.md)
+          if [ -n "${anchor}" ] && ! anchors "${resolved}" | grep -q -x -F -- "${anchor}"; then
+            report "${file}:${line}: no heading for #${anchor} in ${resolved}"
+          fi
+          ;;
+      esac
     done
     exit "${fail}"
   } || fail=1
@@ -119,7 +170,7 @@ done < <(git ls-files '*.md')
 
 # Check 3.
 while IFS=: read -r file line path; do
-  [ -e "${path}" ] && continue
+  tracked "${path}" && continue
   if printf '%s' "${EXTERNAL_DOCS}" | grep -q -x -F -- "${path}"; then
     continue
   fi
