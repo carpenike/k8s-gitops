@@ -19,8 +19,9 @@ spec:
 # externalTrafficPolicy Local is the real client: LAN, tailnet, or the
 # public edge). Probes are exec, so there is no host rule.
 #
-# Egress: cluster DNS, and public IPv4 on the ports mail delivery and its
-# lookups use. 25 is direct MX delivery, 465/587/2525 a smart host (relay),
+# Egress: cluster DNS, postgres17 (data and search stores), the Ceph RGW
+# (blob store; Service port 80, pod port 8080; policy matches the pod), and
+# public IPv4 on the ports mail delivery and its lookups use. 25 is direct MX delivery, 465/587/2525 a smart host (relay),
 # 443 MTA-STS policies, ACME and spam-rule updates. No RFC1918, CGNAT or
 # link-local.
 apiVersion: cilium.io/v2
@@ -66,6 +67,23 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: rook-ceph
+            app: rook-ceph-rgw
+            rook_object_store: ceph-objectstore
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     - toCIDRSet:
         - cidr: 0.0.0.0/0
           except:

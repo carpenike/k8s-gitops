@@ -2,16 +2,21 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # ADR 0013 and docs/mail.md.
 #
-# One replica, Recreate. Every store (data, blobs, full-text search,
-# in-memory) is RocksDB on one ceph-block RWO volume, and RocksDB holds a
-# lock on it. Ceph keeps three copies across the sleds; VolSync takes the
-# copy that leaves the chassis (../backup).
+# Stores:
+# - data and full-text search: database stalwart on postgres17 (config.json
+#   below). CloudNativePG keeps two instances, and Barman archives WAL to R2.
+# - blobs (message bodies, attachments): S3 on the Ceph RGW bucket
+#   stalwart-blobs (objectbucketclaim.yaml), set once in the WebUI.
+# - in-memory: Stalwart's local store, which is single-node only.
+# The pod keeps nothing on disk, so a lost sled costs a reschedule, not a
+# volume reattach. One replica, Recreate: the local in-memory store (rate
+# limits, locks) is not shared between instances.
 #
-# Stalwart 1.x keeps only the datastore on disk (config.json below).
-# Domains, accounts, listeners, DKIM, spam rules and certificates are JMAP
-# objects inside that store, managed from the WebUI or stalwart-cli apply.
-# On an empty store Stalwart creates the listeners smtp 25, submissions 465,
-# imaps 993, pop3s 995, sieve 4190, https 443 and http 8080
+# Stalwart 1.x keeps only the datastore on disk. Domains, accounts,
+# listeners, DKIM, spam rules and certificates are JMAP objects in the
+# database, managed from the WebUI or stalwart-cli apply. On an empty store
+# Stalwart creates the listeners smtp 25, submissions 465, imaps 993, pop3s
+# 995, sieve 4190, https 443 and http 8080
 # (crates/common/src/manager/defaults.rs at v1.1.0).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -47,8 +52,14 @@ spec:
               # Base URL in OAuth, OIDC and JMAP discovery documents.
               STALWART_PUBLIC_URL: https://mail.${SECRET_DOMAIN}
             envFrom:
+              # STALWART_DB_PASSWORD, STALWART_RECOVERY_ADMIN
               - secretRef:
                   name: stalwart
+              # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY for the blob store,
+              # written by Rook for the bucket claim. The WebUI's S3 blob
+              # store reads them as EnvironmentVariable sources.
+              - secretRef:
+                  name: stalwart-blobs
             # Exec, not HTTP, so the network policy needs no host ingress.
             # The image ships curl for its own HEALTHCHECK.
             probes:
@@ -146,22 +157,29 @@ spec:
     configMaps:
       config:
         data:
-          # The DataStore object (x:RocksDbStore in resources/schema at
-          # v1.1.0). Blob, search and in-memory stores default to this one.
+          # The DataStore object (x:PostgreSqlStore in resources/schema at
+          # v1.1.0). The password is read from the environment, so this
+          # file holds no secret. TLS without CA verification is libpq's
+          # sslmode=require, the same as hindsight-backup: the postgres17 CA
+          # secret lives in cnpg-system, not here.
           config.json: |-
             {
-              "@type": "RocksDb",
-              "path": "/var/lib/stalwart/data"
+              "@type": "PostgreSql",
+              "host": "postgres17-rw.cnpg-system.svc.cluster.local",
+              "port": 5432,
+              "database": "stalwart",
+              "authUsername": "stalwart",
+              "useTls": true,
+              "allowInvalidCerts": true,
+              "authSecret": {
+                "@type": "EnvironmentVariable",
+                "variableName": "STALWART_DB_PASSWORD"
+              }
             }
     persistence:
+      # Scratch only. Nothing here survives a restart, and nothing needs to.
       data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 50Gi
-        storageClass: ceph-block
-        retain: true
-        # Fixed name for VolSync. See ../backup/replicationsource.yaml.
-        forceRename: stalwart-data
+        type: emptyDir
         globalMounts:
           - path: /var/lib/stalwart
       config:

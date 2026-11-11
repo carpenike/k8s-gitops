@@ -128,6 +128,12 @@ spec:
         comment: homelab-mcp finances_context_* tools and Signal capture (owner of finances_context)
         passwordSecret:
           name: finances-context-db
+      - name: stalwart
+        ensure: present
+        login: true
+        comment: Stalwart mail server (mail; data and search stores)
+        passwordSecret:
+          name: stalwart-db
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 apiVersion: postgresql.cnpg.io/v1
@@ -243,4 +249,19 @@ spec:
     name: postgres17
   name: finances_context
   owner: finances_context
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Stalwart (namespace mail, docs/mail.md, ADR 0013): accounts, mailboxes,
+# message metadata, configuration and the full-text index. Message bodies
+# are in the Ceph RGW bucket, not here. Stalwart creates its own tables.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: stalwart
+spec:
+  cluster:
+    name: postgres17
+  name: stalwart
+  owner: stalwart
   databaseReclaimPolicy: retain

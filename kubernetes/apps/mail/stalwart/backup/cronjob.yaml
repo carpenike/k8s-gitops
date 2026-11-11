@@ -1,0 +1,102 @@
+---
+# Off-chassis copy of the RGW bucket stalwart-blobs. The database half is
+# postgres17's Barman WAL archive to R2; this is the other half.
+#
+# rclone copy, not sync: nothing is ever deleted in R2. Stalwart's blobs are
+# content-addressed and written once, so after a point-in-time restore of
+# the database every blob it references is in R2 as long as it was written
+# before the last run. Blobs Stalwart later purged stay in R2 as unreferenced
+# objects; that costs storage, not correctness. Hourly keeps the window of
+# blobs that exist only on Ceph to one hour.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: stalwart-blobs-r2
+spec:
+  schedule: "40 * * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3300
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: stalwart-blobs-r2
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 2000
+            runAsGroup: 2000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: rclone
+              # renovate: datasource=docker depName=docker.io/rclone/rclone
+              image: docker.io/rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
+              args:
+                - copy
+                - ceph:stalwart-blobs
+                - r2:$(R2_BUCKET)/stalwart/blobs
+                - --fast-list
+                - --transfers=8
+                - --checkers=16
+                # The token is scoped to one bucket and cannot create or
+                # list buckets.
+                - --s3-no-check-bucket
+                - --stats=0
+                - --stats-one-line
+                - -v
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: RCLONE_CONFIG
+                  value: /tmp/rclone.conf
+                - name: RCLONE_CONFIG_CEPH_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_CEPH_PROVIDER
+                  value: Ceph
+                - name: RCLONE_CONFIG_CEPH_ENDPOINT
+                  value: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc.cluster.local
+                - name: RCLONE_CONFIG_CEPH_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: stalwart-blobs
+                      key: AWS_ACCESS_KEY_ID
+                - name: RCLONE_CONFIG_CEPH_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: stalwart-blobs
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: RCLONE_CONFIG_R2_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_R2_PROVIDER
+                  value: Cloudflare
+              envFrom:
+                # RCLONE_CONFIG_R2_ACCESS_KEY_ID, _SECRET_ACCESS_KEY,
+                # _ENDPOINT, and R2_BUCKET
+                - secretRef:
+                    name: stalwart-r2
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}

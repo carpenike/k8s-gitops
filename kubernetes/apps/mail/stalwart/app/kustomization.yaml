@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./externalsecret.yaml
+  - ./objectbucketclaim.yaml
   - ./certificate.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
