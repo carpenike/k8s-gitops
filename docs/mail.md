@@ -57,6 +57,7 @@ Vault `k8s-secrets`:
 | --- | --- | --- |
 | `stalwart` | `database_password` | Role `stalwart` on `postgres17`. Read by `cnpg-system` and `mail` |
 | `stalwart` | `admin_password` | `STALWART_RECOVERY_ADMIN=admin:<password>`. Always accepted as an administrator while set |
+| `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zone `holthome.net` only, for automatic DNS ([DNS](#dns)) |
 | `stalwart-r2` | `access_key_id`, `secret_access_key`, `endpoint_url`, `bucket` | The blob copy. Same shape as `postgres17-r2`: an R2 token with Object Read & Write on one bucket, endpoint without the bucket |
 
 The RGW credentials are not in 1Password. Rook writes them to Secret
@@ -88,8 +89,11 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    and `/etc/stalwart/tls/tls.key`, and use it on the TLS listeners.
 5. **Listeners**: Stalwart creates 25, 465, 993, 995, 4190, 443 and 8080 on
    an empty store. Add `submission` on 587 (STARTTLS) if clients need it.
-   Mark the `envoy-internal` pods as trusted proxies on the 8080 listener
-   so HTTP logs and rate limits see the client address.
+   Leave Settings › Network › Proxy › Trusted Networks empty. Every
+   connection from a network listed there must start with a PROXY
+   header or Stalwart drops it, and nothing here sends one: not Envoy,
+   not the edge relay. Client addresses in HTTP logs come from Envoy's
+   forwarded headers, which is a separate HTTP setting.
 
    Add `smtp-edge`: SMTP on 2525, STARTTLS with the certificate from step
    4, no PROXY protocol. Mail on it was already checked by the edge relay
@@ -104,11 +108,12 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
 
    The network policy and the tailnet grant are what keep everyone but
    the edge off this listener. Do not open 2525 anywhere else.
-6. **Domain**: add the mail domain and publish the records the UI
-   generates (MX, SPF, DKIM, DMARC, MTA-STS, TLS-RPT, autoconfig SRV) in
-   Cloudflare by hand. `cloudflare-dns` does not manage them.
-7. **Outbound**: add a relay route (for example SMTP2GO on 2525 or 587)
-   for remote domains, with its password as an EnvironmentVariable secret.
+6. **Domain**: add `holthome.net`, with DKIM management Automatic (DKIM1
+   Ed25519 and RSA), TLS Manual (cert-manager owns the certificate), and
+   report address `mailto:postmaster@holthome.net`. Then set up its DNS as
+   in [DNS](#dns).
+7. **Outbound**: through the edge relay (ADR 0014), once Vultr opens its
+   outbound 25. Until then nothing is delivered outside.
 8. **Directory** (ADR 0015), before creating any account, because
    Stalwart does not move accounts between directories:
    - in Pocket ID, create a public OIDC client for the WebUI (PKCE, no
@@ -138,6 +143,54 @@ Then check the first blob copy:
 kubectl -n mail create job --from=cronjob/stalwart-blobs-r2 stalwart-blobs-r2-manual
 kubectl -n mail logs -f job/stalwart-blobs-r2-manual
 ```
+
+## DNS
+
+`holthome.net` is the cluster's zone at Cloudflare. external-dns
+(`cloudflare-dns`) only touches records it owns, marked by `k8s.`-prefixed
+ownership TXT records, so it leaves mail records alone. Stalwart manages
+the mail records itself through a Cloudflare DNS provider, with the token
+in `STALWART_CLOUDFLARE_TOKEN`. Automatic management is also what lets
+Stalwart rotate DKIM keys; with Manual it never rotates them.
+
+| Record type | Owner | Why |
+| --- | --- | --- |
+| DKIM | Stalwart | Rotation every 90 days, old key retired after 7 |
+| MX | Stalwart | Points at `mx.holthome.net`. Publicly that name is the edge VM (an A record added by hand at cutover); on the LAN the MikroTik answers `10.45.10.25` |
+| SPF | Stalwart | Authorizes the MX host, which is right because the edge also sends outbound (ADR 0014) |
+| DMARC | Stalwart | Reports to the domain's report address |
+| TLS-RPT | Stalwart | Same address |
+| CAA | Nobody, for now | `holthome.net` is the whole cluster zone. A CAA record at the apex limits which certificate authorities may issue for every name in it, including Cloudflare's proxied hostnames |
+| MTA-STS | Later | Needs `mta-sts.holthome.net` served publicly over HTTPS |
+| SRV, autoconfig, autodiscover | Later | They would point at JMAP and DAV on 443, which are not exposed on the mail address |
+
+Setup, in order:
+
+1. In Cloudflare, turn off Email Routing for the zone (it locks its MX
+   records and removes them with itself), and delete leftovers from
+   earlier tests: the proxied `mail` A and AAAA records (they send IPv6
+   clients to Cloudflare instead of `envoy-internal`) and `autodiscover`.
+   Mailgun's `include:mailgun.org` and DKIM selector `pic` can go too;
+   Pocket ID and Mealie on Forge still name Mailgun as their SMTP server
+   and move to Stalwart's submission port before they need mail again.
+2. Create the Cloudflare token and store it as `cloudflare_api_token` in
+   item `stalwart`. The ExternalSecret needs the field, so do this before
+   merging the change that reads it; Reloader restarts the pod.
+3. Save the apex TXT records before Stalwart touches the zone. They also
+   hold site verifications (`MS=`, `google-site-verification`, keybase),
+   and SPF is a TXT record at the same name:
+
+   ```sh
+   dig +short TXT holthome.net @adel.ns.cloudflare.com > holthome-apex-txt.before
+   ```
+
+4. In Stalwart, Settings › Network › DNS › DNS Providers: add Cloudflare,
+   secret EnvironmentVariable `STALWART_CLOUDFLARE_TOKEN`.
+5. On domain `holthome.net`: DNS management Automatic, that provider, no
+   origin, and publish only DKIM, MX, SPF, DMARC and TLS-RPT.
+6. Check against the Cloudflare nameserver, not the MikroTik, and diff
+   the apex TXT records against step 3. Restore anything that went
+   missing other than the old SPF.
 
 ## Restore
 
@@ -172,9 +225,10 @@ checks it, queues it, and relays it over the tailnet to `smtp-edge` on
    - an `MtaRoute/Relay` to `10.45.10.25` port 2525, STARTTLS, and a
      routing rule that sends the mail domains there
    - queue retention long enough to cover a rebuild (days, not hours)
-4. **Public DNS.** MX of each mail domain to the edge's name, and that
-   name's A record to the VM. On the LAN, `mx.holthome.net` stays
-   `10.45.10.25`.
+4. **Public DNS.** Stalwart in the cluster already publishes the MX
+   (`mx.holthome.net`, see [DNS](#dns)). At cutover, add a public A
+   record for `mx.holthome.net` pointing at the VM. On the LAN,
+   `mx.holthome.net` stays `10.45.10.25`.
 5. Export the edge's configuration with `stalwart-cli snapshot` too.
 
 Adding an address: create the account in the cluster (ADR 0015) and add
@@ -182,12 +236,12 @@ the address to the edge's recipient list.
 
 ## Not in this tree yet
 
-- **Outbound reputation.** A residential address will be rejected or
-  spam-foldered. Use a relay (step 7) until there is a static address
-  with a matching PTR record. The edge VM is one: once Vultr opens its
-  outbound 25, the cluster can relay through it. That needs a way from
-  the cluster to the tailnet, such as an operator egress Service, and a
-  policy rule; the current egress rule excludes 100.64.0.0/10.
+- **Outbound through the edge.** A residential address will be rejected
+  or spam-foldered, so outbound goes through the edge VM, whose address
+  has a matching PTR (ADR 0014). That needs Vultr to open its outbound
+  25, a way from the cluster to the tailnet (such as an operator egress
+  Service), and a policy rule; the current egress rule excludes
+  100.64.0.0/10.
 - **Webmail.** Stalwart has no bundled webmail. Native clients work over
   IMAP or JMAP.
 - **More than one replica.** Needs a shared in-memory store (Redis or
