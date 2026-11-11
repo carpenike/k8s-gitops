@@ -266,6 +266,59 @@ different way.
 login in `RELAY_BOTS`, and an entry in the `openproject-mcp-relay-targets`
 template.
 
+### Board structure
+
+`bot-provisioner/app/board.yaml` is the board's shape, and Job
+`openproject/openproject-board-structure` (`structure.rb`, OpenProject's own
+Rails runner, no API token, no Kubernetes access) makes OpenProject match it.
+The board ConfigMap has a hash suffix, so an edit to `board.yaml` replaces the
+Job; bump the Job's `script-revision` annotation for an edit to `structure.rb`.
+
+- **Projects:** Bots, Personal (one sub-project per approved vault domain:
+  Fitness so far) and Work, all private. The seeded demo projects are archived
+  (they were public, so every bot could see them).
+- **Role Agent:** view, create, edit, comment, watch, relate and be assigned.
+  No moving or copying items between projects, no deleting, no managing
+  members or the project. Its workflows are Member's, plus every transition
+  into and out of **Needs Ryan** (also for Member and Project admin).
+- **Fields:** `Context` (a vault path) and `Done when` (one sentence) on every
+  board project and type. `fields_required` turns them required, after the
+  bots' servers send them (openproject-mcp 0.4.0, homelab-mcp 0.62.0).
+- **Members:** each listed user on exactly its projects' subtrees as Agent,
+  and removed from every other project. structure.rb creates a missing user
+  (no token). Ryan (user 4) is Project admin of every board project and the
+  assignee for Needs Ryan.
+- **The rule:** external providers never get a role in Work. Grokbot is xAI;
+  the Hermes bots call Azure, Anthropic and Tavily, not local models (checked
+  2026-11-11), so they are external too.
+- **Self-check:** the run ends by asking OpenProject what each member can
+  see, and fails (rolling everything back) unless it is exactly that
+  member's line. A public project or a stray membership fails it.
+
+A new personal domain: add `{identifier: <name>, name: <Name>, parent:
+personal}` here, and the matching domain in homelab-mcp's `vault-policy.yaml`.
+Members listed with `personal` get it through the subtree.
+
+Dry run, against the live board, rolled back:
+
+```sh
+kubectl -n openproject exec -i deploy/openproject-web -c openproject -- sh -c 'mkdir -p /tmp/board && cat > /tmp/board/structure.rb' < kubernetes/apps/openproject/bot-provisioner/app/structure.rb
+kubectl -n openproject exec -i deploy/openproject-web -c openproject -- sh -c 'cat > /tmp/board/board.yaml' < kubernetes/apps/openproject/bot-provisioner/app/board.yaml
+kubectl -n openproject exec deploy/openproject-web -c openproject -- sh -c 'cd /app && DRY_RUN=true BOARD_FILE=/tmp/board/board.yaml bundle exec rails runner /tmp/board/structure.rb'
+```
+
+### Bots through homelab-mcp
+
+Claude and Grokbot can't reach the in-cluster API; they use homelab-mcp's
+`openproject_*` tools, which act as one OpenProject user per connector
+(`HOMELAB_MCP_OPENPROJECT_VIEW_BOTS`). `homelab-mcp-bots.yaml` runs
+`provision.rb` with `BOT_TARGET=homelab-mcp` once per bot: it issues the
+token into Secret `homelab-mcp/homelab-mcp-openproject-<bot>` (Role on that
+one Secret for ServiceAccount `openproject/homelab-provision-<bot>`), which
+homelab-mcp mounts at `HOMELAB_MCP_OPENPROJECT_TOKENS_DIR`. Nobody copies the
+token, and it is never printed. The user and its memberships come from
+structure.rb.
+
 ### Bot provisioning
 
 Nothing to do by hand. Each bot's Flux Kustomization `task-board`

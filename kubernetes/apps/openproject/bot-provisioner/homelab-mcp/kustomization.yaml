@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# One homelab-mcp bot's token (../homelab-mcp-bots.yaml instantiates it).
+# Namespaces are set per object: the Job is in openproject, the Secret and its
+# RBAC in homelab-mcp.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./secret.yaml
+  - ./rbac.yaml
+  - ./job.yaml

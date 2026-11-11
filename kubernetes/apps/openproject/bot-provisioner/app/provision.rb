@@ -60,10 +60,18 @@ LABEL_NAME = "openproject-bot-provisioner"
 # A bot outside the cluster (Grok Bot): its Secret lives here in openproject,
 # and Ryan copies the token to the bot himself.
 EXTERNAL = ENV["BOT_EXTERNAL"].to_s == "true"
+# A bot that reaches the board through homelab-mcp (Claude, Grokbot): its
+# Secret lives in homelab-mcp, which mounts it (HOMELAB_MCP_OPENPROJECT_TOKENS_DIR).
+# Nobody copies the token; its user and memberships come from structure.rb.
+HOMELAB = ENV["BOT_TARGET"].to_s == "homelab-mcp"
 DISPLAY_NAME = ENV["BOT_DISPLAY_NAME"].to_s.strip
 
 fail!("BOT_NAME must be lowercase letters, digits and -, at most 40") unless BOT.match?(/\A[a-z0-9][a-z0-9-]{0,39}\z/)
-if EXTERNAL
+if HOMELAB
+  fail!("BOT_EXTERNAL and BOT_TARGET=homelab-mcp are exclusive") if EXTERNAL
+  fail!("BOT_NAMESPACE must be homelab-mcp") unless NAMESPACE == "homelab-mcp"
+  fail!("SECRET_NAME must be homelab-mcp-openproject-#{BOT}") unless SECRET == "homelab-mcp-openproject-#{BOT}"
+elsif EXTERNAL
   fail!("BOT_NAMESPACE must be openproject for an external bot") unless NAMESPACE == "openproject"
   fail!("SECRET_NAME must be openproject-bot-#{BOT}") unless SECRET == "openproject-bot-#{BOT}"
 else
@@ -124,7 +132,7 @@ if user.nil?
       login: BOT,
       firstname: DISPLAY_NAME.empty? ? BOT.capitalize : DISPLAY_NAME,
       lastname: "(bot)",
-      mail: EXTERNAL ? "#{BOT}@bots.invalid" : "#{BOT}@hermes.invalid",
+      mail: if HOMELAB then "#{BOT}@agents.invalid" elsif EXTERNAL then "#{BOT}@bots.invalid" else "#{BOT}@hermes.invalid" end,
       admin: false,
       status: User.statuses[:active],
       password: password,
