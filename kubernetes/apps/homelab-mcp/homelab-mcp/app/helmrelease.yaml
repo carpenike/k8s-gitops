@@ -56,7 +56,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (6a9aca3, 0.57.0: previews warn when a food's carbs look
+              # (5301ae9, 0.58.0: withings_get_measurements and withings_trend,
+              # read-only, from the scale and the blood pressure cuff.
+              # 0.57.0: previews warn when a food's carbs look
               # fibre-inflated; every MFP write states nutrition_matches_preview.
               # 0.56.0: mfp_audit severity and saved meals; alcohol
               # and missing fat in the macro check; writes report what MFP
@@ -96,7 +98,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-6a9aca33055fb16bec2b77280b6aed34b057e2db@sha256:7360874b596c9a8cbefda56a84604ee047f41a416e344187f88d3a1ea666f1c1
+              tag: sha-5301ae9081c8e430f5580e0bdc4bc78ca692de90@sha256:32246a42a1e7d76e3018ed96eaa5636f5449d44cd824cf3cfec3c8725027b82c
             command:
               - /bin/sh
               - -c
@@ -171,7 +173,7 @@ spec:
                 ["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders",
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
-                "amazon", "costco", "samsclub"]
+                "amazon", "costco", "samsclub", "withings"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
@@ -191,6 +193,14 @@ spec:
               HOMELAB_MCP_MONEY_PG_SCHEMA: household_finance
               HOMELAB_MCP_MFP_ENABLED: "true"
               HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
+              # Withings (read-only weigh-ins). The app credentials come from
+              # the homelab-mcp-withings item; the OAuth token is written by
+              # `python -m homelab_mcp.tools._withings seed` and rotates on
+              # every refresh, so it lives on the state volume (backed up by
+              # VolSync), never in a secret. After a restore it needs one
+              # re-authorization (carpenike/mcp README, "Withings posture").
+              HOMELAB_MCP_WITHINGS_ENABLED: "true"
+              HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
               # Per-user credentials: who they are kept for, and where. No view
               # uses credentials "per_user" yet (docs/homelab-mcp.md).
               HOMELAB_MCP_USERS: >-
@@ -371,9 +381,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (6a9aca3). Moves with the app image above.
+              # (5301ae9). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-6a9aca33055fb16bec2b77280b6aed34b057e2db@sha256:2f6b8e522a6a4fe94c2d31ed2632d3144e5c561ee7209c6b23b2286a010cbe4e
+              tag: sha-5301ae9081c8e430f5580e0bdc4bc78ca692de90@sha256:48eac38600a9ebfea3b9582a7bbb141d41f74651b7c7066ce3a523f33d5c08c5
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
@@ -809,6 +819,8 @@ spec:
                   - matchName: budget.${SECRET_DOMAIN}
                   - matchName: github.com
                   - matchName: api.snaptrade.com
+                  # withings: the token endpoint and Measure, both on wbsapi.
+                  - matchName: wbsapi.withings.net
                   # signal-api: Signal's chat, storage, contact-discovery and
                   # CDN hosts. A pattern, because signal-cli follows the
                   # server's host list rather than a fixed one.
