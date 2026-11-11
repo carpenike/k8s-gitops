@@ -1,8 +1,9 @@
 # postgres17
 
 Cluster `postgres17` in `cnpg-system` is the shared PostgreSQL 17 database:
-LiteLLM's `litellm` ([litellm.md](litellm.md)) and Hindsight's `hindsight`
-([hermes-memory.md](hermes-memory.md)). Losing it loses bot memory and the
+LiteLLM's `litellm` ([litellm.md](litellm.md)), Hindsight's `hindsight`
+([hermes-memory.md](hermes-memory.md)), Stalwart's `stalwart`
+([mail.md](mail.md)). Losing it loses bot memory and the
 proxy's keys and spend.
 
 ## postgres17 backup and restore

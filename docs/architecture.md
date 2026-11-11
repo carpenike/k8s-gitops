@@ -47,6 +47,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Actions runners | ARC scale sets, one per private repo (see actions-runners.md) | chart 0.15.1 |
 | Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
 | Matrix | Tuwunel, `ryanholt.net`, external gateway (see matrix.md) | v1.9.4 |
+| Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI (see mail.md, ADR 0013) | v1.1.0 |
 | Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see hermes.md) | v0.23.0 |
 | Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see website.md) | 1.31.7 |
 
@@ -172,6 +173,15 @@ when `csi.createCsiOperatorResources` is true. The RBD and CephFS Driver
 CRs come from the `ceph-csi-drivers` chart, not from the operator chart.
 The provisioner names are `rook-ceph.rbd.csi.ceph.com` and
 `rook-ceph.cephfs.csi.ceph.com`.
+
+The cluster values do not override `cephObjectStores`, so the
+rook-ceph-cluster chart default applies: CephObjectStore
+`ceph-objectstore` (metadata 3x replicated, data erasure coded 2+1, one
+RGW instance on port 80) and bucket StorageClass `ceph-bucket`
+(`reclaimPolicy: Delete`). Apps claim a bucket with an
+ObjectBucketClaim. The first is Stalwart's `stalwart-blobs`
+([mail.md](mail.md)). RGW data stays on the chassis; each app copies its
+own bucket off it.
 
 Ceph itself is the rook-ceph-cluster chart default,
 `quay.io/ceph/ceph:v20.2.4`. CSI CephX users are generation 2

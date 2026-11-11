@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# ADR 0013 and docs/mail.md. Data and search on postgres17, blobs on the
+# Ceph RGW bucket claimed in app/objectbucketclaim.yaml.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: stalwart
+spec:
+  dependsOn:
+    - name: postgres17
+      namespace: cnpg-system
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: cert-manager
+      namespace: cert-manager
+    - name: envoy-gateway
+      namespace: network
+    - name: mikrotik-dns
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: stalwart
+      namespace: mail
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: stalwart
+      namespace: mail
+  interval: 1h
+  path: ./kubernetes/apps/mail/stalwart/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: mail
+  timeout: 10m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Off-chassis copy of the blob bucket (backup/). The database already goes
+# to R2 through postgres17's Barman archive. Nothing depends on this: if
+# 1Password item stalwart-r2 cannot be read, this stays unready and mail
+# keeps working.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: stalwart-backup
+spec:
+  dependsOn:
+    - name: stalwart
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: stalwart-r2
+      namespace: mail
+  interval: 1h
+  path: ./kubernetes/apps/mail/stalwart/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: mail
