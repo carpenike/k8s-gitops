@@ -3,7 +3,7 @@
 # and nothing else: not the node LAN, the router, the LoadBalancer pool, other
 # pods, or the Kubernetes API. Listeners and the controller need the API, and
 # this selector does not match them. ARC sets actions-ephemeral-runner on runner
-# pods only (resourcebuilder.go, chart 0.15.1). See docs/actions-runners.md.
+# pods only (resourcebuilder.go, chart 0.15.1). See docs/platform/actions-runners.md.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

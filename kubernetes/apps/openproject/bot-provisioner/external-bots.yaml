@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Board accounts for bots outside the cluster (docs/openproject.md, "Bots
+# Board accounts for bots outside the cluster (docs/apps/openproject.md, "Bots
 # outside the cluster"): one Flux Kustomization per bot, built from
 # ./external with that bot's inputs. Its token lands in Secret
 # openproject/openproject-bot-<bot>; Ryan copies it to 1Password and to the

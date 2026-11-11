@@ -41,7 +41,7 @@ spec:
 # Forge's one-shot grafana-oncall-plugin-setup unit, as a Job. Jobs are
 # immutable, so force replaces it when the manifest or script changes. To
 # run it again with no change (after the cutover copies grafana.db), delete
-# the Job and reconcile this Kustomization (docs/grafana.md). No postBuild:
+# the Job and reconcile this Kustomization (docs/platform/grafana.md). No postBuild:
 # nothing here needs the domain.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

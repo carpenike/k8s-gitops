@@ -9,7 +9,7 @@ decision-makers: Ryan Holt
 ## Context and Problem Statement
 
 Mail for the public zones is hosted elsewhere today (`ryanholt.net` has
-Microsoft MX records, see `docs/matrix.md`). Ryan wants to try running a
+Microsoft MX records, see `docs/apps/matrix.md`). Ryan wants to try running a
 mail server on this cluster. It has to fit the rules in `AGENTS.md`: one
 HTTP gateway, one block store (Rook-Ceph), backups that leave the chassis,
 and no second ingress.
@@ -61,7 +61,7 @@ That is a TCP Service, not an HTTP gateway. The WebUI, JMAP and DAV stay on
 - Good, because the pod is stateless: losing a sled reschedules it without
   waiting for an RBD volume to detach
 - Good, because the database gets the same backup, alerts and restore
-  drill as every other `postgres17` store (`docs/postgres17.md`)
+  drill as every other `postgres17` store (`docs/platform/postgres17.md`)
 - Good, because blobs do not grow the database, and RGW's erasure-coded
   data pool stores them at 1.5x rather than 3x
 - Bad, because mail now depends on `postgres17` and the RGW. A database
@@ -75,7 +75,7 @@ That is a TCP Service, not an HTTP gateway. The WebUI, JMAP and DAV stay on
   shared. Scaling out needs Redis or Valkey and is a later decision
 - Bad, because a residential address cannot send mail reliably and most
   ISPs block port 25. Outbound needs a relay and inbound needs a reachable
-  port 25. Both are outside this tree and are listed in `docs/mail.md`
+  port 25. Both are outside this tree and are listed in `docs/apps/mail.md`
 - Neutral, because Stalwart 1.x keeps its configuration in its own store,
   not in git. `stalwart-cli snapshot` exports it as a plan that
   `stalwart-cli apply` can replay

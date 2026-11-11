@@ -65,7 +65,7 @@ Secret volume is root-owned and there is no `fsGroup`.
 
 Re-seeding: put the new blob in the 1Password field, wait for the
 ExternalSecret refresh (or force-sync it,
-[external-secrets.md](external-secrets.md)), delete the live file on that
+[external-secrets.md](../platform/external-secrets.md)), delete the live file on that
 account's volume, then run the job.
 
 ## Network
@@ -100,7 +100,7 @@ Vault `k8s-secrets`:
 | `lading-steffi` | `amazon_password` | `lading/steffi/amazon_password` |
 | `lading-steffi` | `amazon_otp_secret_key` | `lading/steffi/amazon_otp_secret_key` |
 | `lading-steffi` | `costco_tokens` | `lading/steffi/costco_tokens` (seed JSON) |
-| `lading` | `db_password` | `lading/db_password` (role `lading`, [postgres17.md](postgres17.md#1password)) |
+| `lading` | `db_password` | `lading/db_password` (role `lading`, [postgres17.md](../platform/postgres17.md#1password)) |
 | `lading` | `reader_password` | `lading/reader_password` (role `lading_reader`) |
 
 The health server uses `lading_reader`; `/healthz` is SELECTs only. Only
@@ -122,7 +122,7 @@ rules use kube-state-metrics, per CronJob (one per account):
 These see the Job's exit status only. Per-source freshness within a run
 (Amazon, Costco, Sam's Club) is on `/healthz`, which nothing scrapes yet.
 Until the cutover the sync CronJobs are suspended, so `LadingSyncStale` fires
-36 hours after merge: merge this at the cutover (docs/forge-cutover.md).
+36 hours after merge: merge this at the cutover (docs/history/forge-cutover.md).
 
 ### When a sync fails
 
@@ -137,7 +137,7 @@ browser.
 1. Merge carpenike/lading #9. Pin the image here (tag and digest).
 2. Create the 1Password items above. postgres17 (#5766) is merged and the
    `lading` database is restored, with reader grants
-   ([postgres17.md](postgres17.md#restore-from-forge-cutover)).
+   ([postgres17.md](../platform/postgres17.md#restore-from-forge-cutover)).
 3. On Forge, stop the timers and services and keep them stopped:
    `systemctl stop lading-sync-ryan.timer lading-sync-steffi.timer lading-sync-ryan.service lading-sync-steffi.service lading.service`.
    The nix-config change that removes them follows.

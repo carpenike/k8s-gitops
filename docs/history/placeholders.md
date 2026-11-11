@@ -31,8 +31,8 @@ by name and builds the same `credentials.json`.
 | --- | --- | --- |
 | `mikrotik` | `username`, `password`, `baseurl` (`https://10.20.0.1`) | external-dns MikroTik webhook. Secret keys `MIKROTIK_USERNAME`, `MIKROTIK_PASSWORD`, `MIKROTIK_BASEURL` |
 | `flux-webhook` | `token` | Flux Receiver secret `flux-webhook-token`, key `token` |
-| `pocket-id-gateway` | `client_id`, `client_secret` | Envoy Gateway OIDC secret `pocket-id-gateway`, keys `client-id` and `client-secret`. The Pocket ID client is still to be created. Settings are in [gateway-auth.md](gateway-auth.md) |
-| `actions-runner-controller` | `github_app_id`, `github_app_installation_id`, `github_app_private_key` | Actions runner scale set secret `actions-runner-controller`, same key names. The GitHub App is still to be created. Settings are in [actions-runners.md](actions-runners.md) |
+| `pocket-id-gateway` | `client_id`, `client_secret` | Envoy Gateway OIDC secret `pocket-id-gateway`, keys `client-id` and `client-secret`. The Pocket ID client is still to be created. Settings are in [gateway-auth.md](../platform/gateway-auth.md) |
+| `actions-runner-controller` | `github_app_id`, `github_app_installation_id`, `github_app_private_key` | Actions runner scale set secret `actions-runner-controller`, same key names. The GitHub App is still to be created. Settings are in [actions-runners.md](../platform/actions-runners.md) |
 
 v1 internal DNS was item `bind` (`externaldns_algorithm`, `externaldns_secret`). That is RFC2136, not this webhook. The MikroTik item is new.
 
@@ -60,7 +60,7 @@ Create item `litellm` in vault `k8s-secrets`. The cluster token can read it
 and cannot create it. Fields: `master_key`, `salt_key`, `database_password`,
 `anthropic_api_key`, `openai_api_key`, `google_api_key`, `azure_api_key`,
 `copilot_api_key`, `oidc_client_secret`. Where each value is copied from is
-in [litellm.md](litellm.md). The salt field has to be the existing Forge
+in [litellm.md](../apps/litellm.md). The salt field has to be the existing Forge
 salt. A new salt does not decrypt stored credentials.
 
 ## Hermes
@@ -72,7 +72,7 @@ A bot with `API_SERVER_ENABLED=true` also needs field `api_server_key`
 in the same item (a strong secret, e.g. `openssl rand -hex 32`);
 ExternalSecret `api-server` reads it. A bot with `OUTLOOK_MCP_ENABLED=true`
 needs fields `outlook_client_id` and `outlook_tenant_id` (its Entra app;
-see hermes.md, "Outlook"), and its inputs carry
+see [hermes.md](../apps/hermes.md), "Outlook"), and its inputs carry
 `OUTLOOK_MCP_EXPECTED_USERNAME`: for Chief, Ryan's personal Microsoft 365
 mailbox, committed as-is. The Outlook server refuses to start on a
 `REPLACE_*` value. A bot with `WEBHOOK_ENABLED=true` needs field
@@ -84,19 +84,19 @@ Tavily API key); ExternalSecret `tavily` reads it. A bot with
 `WEBAPP_ENABLED=true` needs field `webapp_oidc_client_id`: the client ID of
 a public Pocket ID client whose callback is
 `https://<bot>-desktop.<domain>/auth/callback` and which admits only Ryan
-(hermes.md, "Watching the bot's desktop"). A bot with
+([hermes.md](../apps/hermes.md), "Watching the bot's desktop"). A bot with
 `CLAUDE_CODE_ENABLED=true` needs fields `claude_code_oauth_token` (from
 `claude setup-token` on Ryan's Claude subscription) and `github_token` (a
 fine-grained GitHub token limited to the repositories it may work on);
 ExternalSecrets `claude-code-auth` and `claude-code-github` read them
-(hermes.md, "Coding with Claude Code"). The Matrix token, LiteLLM key, and
+([hermes.md](../apps/hermes.md), "Coding with Claude Code"). The Matrix token, LiteLLM key, and
 ssh keys are provisioned in-cluster and have no 1Password items. See
-[hermes.md](hermes.md).
+[hermes.md](../apps/hermes.md).
 
 ## Hermes memory (Hindsight)
 
 Before `kubernetes/apps/hermes-memory` reconciles, create in vault
-`k8s-secrets` (see [hermes-memory.md](hermes-memory.md)):
+`k8s-secrets` (see [hermes-memory.md](../apps/hermes-memory.md)):
 
 | Item | Field | Value |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ The LiteLLM key `hermes-memory` is provisioned in-cluster and has no item.
 ## postgres17 backup to R2
 
 Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
-(see [postgres17.md](postgres17.md#1password)):
+(see [postgres17.md](../platform/postgres17.md#1password)):
 
 | Item | Field | Value |
 | --- | --- | --- |
@@ -119,10 +119,10 @@ Before the Barman Cloud backup reconciles, create in vault `k8s-secrets`
 
 ## Forge stores in postgres17
 
-Before the Forge stores move (docs/postgres17.md, "Forge stores"), create
+Before the Forge stores move (docs/platform/postgres17.md, "Forge stores"), create
 items `schoolhouse`, `lading`, `homelab-finance` and `finances-context` in
 vault `k8s-secrets`. The table in
-[postgres17.md](postgres17.md#1password) lists each field and the Forge
+[postgres17.md](../platform/postgres17.md#1password) lists each field and the Forge
 sops key whose value it can reuse.
 
 ## homelab-mcp
@@ -130,7 +130,7 @@ sops key whose value it can reuse.
 Before `kubernetes/apps/homelab-mcp` reconciles, create item `homelab-mcp`
 (new) in vault `k8s-secrets` with fields `pocketid_client_secret`,
 `ha_token`, `ha_read_token`, `grocy_api_key`, `paperless_token` and
-`mfp_cookies`. [homelab-mcp.md](homelab-mcp.md#1password) says where each
+`mfp_cookies`. [homelab-mcp.md](../apps/homelab-mcp.md#1password) says where each
 comes from.
 
 Also items `homelab-mcp-signal` (new) and field `homelab-finance/report_password`.
@@ -142,7 +142,7 @@ The HelmRelease's images are pinned to carpenike/mcp main `13d15b5` (0.41.0).
 Before `kubernetes/apps/schoolhouse` reconciles, create item
 `schoolhouse-ingest` (new) in vault `k8s-secrets` with fields
 `schoology_username`, `schoology_password`, `children` and `ical_feeds`, and
-the postgres17 item `schoolhouse`. [schoolhouse.md](schoolhouse.md#1password)
+the postgres17 item `schoolhouse`. [schoolhouse.md](../apps/schoolhouse.md#1password)
 says where each comes from.
 
 The HelmRelease's image is pinned to schoolhouse main `d25df9d`. The ingest
@@ -155,7 +155,7 @@ Before `kubernetes/apps/lading` reconciles, create items `lading-ryan` (new:
 `costco_tokens`, `samsclub_tokens`) and `lading-steffi` (new:
 `amazon_username`, `amazon_password`, `amazon_otp_secret_key`,
 `costco_tokens`) in vault `k8s-secrets`, and the postgres17 item `lading`.
-[lading.md](lading.md#1password) says where each comes from.
+[lading.md](../apps/lading.md#1password) says where each comes from.
 
 The HelmRelease's image is pinned to lading main `d73fae0`. Both sync
 CronJobs ship `suspend: true` until the cutover.
@@ -163,7 +163,7 @@ CronJobs ship `suspend: true` until the cutover.
 ## Grafana and OnCall
 
 Before `kubernetes/apps/grafana` reconciles, create in vault `k8s-secrets`
-(see [grafana.md](grafana.md#secrets)). Field names are Forge's sops keys,
+(see [grafana.md](../platform/grafana.md#secrets)). Field names are Forge's sops keys,
 and the values are copied from Forge's sops, not generated: the copied
 databases depend on them.
 
@@ -175,7 +175,7 @@ databases depend on them.
 | `grafana-oncall` | `metrics_secret` | Forge's `grafana-oncall/metrics_secret` |
 
 The datasources also read `schoolhouse/grafana_password` and
-`homelab-finance/grafana_db_password` ([postgres17.md](postgres17.md)).
+`homelab-finance/grafana_db_password` ([postgres17.md](../platform/postgres17.md)).
 
 Still to confirm:
 
@@ -193,7 +193,7 @@ Create item `tailscale` in vault `k8s-secrets`. Fields: `client_id` and
 `client_secret`, from a Tailscale OAuth client with Devices Core, Auth Keys
 and Services write scopes and tag `tag:k8s-operator`. The tailnet policy
 and split DNS are set in the admin console before the merge
-([tailscale.md](tailscale.md)).
+([tailscale.md](../platform/tailscale.md)).
 
 ## Still to confirm or generate
 

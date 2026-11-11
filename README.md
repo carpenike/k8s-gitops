@@ -23,7 +23,7 @@ after bootstrap.
 It is the second version of this cluster. The first one grew three block
 stores, two ways to do ingress and more than one identity provider. This
 one keeps one of each. The old tree is the tag `archive/talos-v1`, and
-[docs/lessons-from-v1.md](docs/lessons-from-v1.md) says what it taught.
+[docs/history/lessons-from-v1.md](docs/history/lessons-from-v1.md) says what it taught.
 
 The decisions behind the choices below are recorded in
 [docs/adr/](docs/adr/). The full component list is
@@ -72,7 +72,7 @@ that have to outlive it stay off the cluster:
   a [Tailscale](https://github.com/tailscale/tailscale) subnet router
   ([ADR 0012](docs/adr/0012-tailscale-subnet-router.md)).
 - **Login**: HTTPS on both gateways needs a Pocket ID login unless a
-  route opts out ([docs/gateway-auth.md](docs/gateway-auth.md)).
+  route opts out ([docs/platform/gateway-auth.md](docs/platform/gateway-auth.md)).
 - **DNS and certificates**: two
   [external-dns](https://github.com/kubernetes-sigs/external-dns)
   instances. One writes public names to Cloudflare. The other writes
@@ -90,34 +90,34 @@ that have to outlive it stay off the cluster:
   [VolSync](https://github.com/backube/volsync) backs up volumes.
 - **Postgres**: one shared [CloudNativePG](https://github.com/cloudnative-pg/cloudnative-pg)
   cluster, `postgres17`, with continuous backup to Cloudflare R2
-  ([docs/postgres17.md](docs/postgres17.md)).
+  ([docs/platform/postgres17.md](docs/platform/postgres17.md)).
 - **Observability**: Prometheus from
   [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts),
   alerting to Forge, with Grafana and Grafana OnCall in the cluster
-  ([docs/grafana.md](docs/grafana.md)).
+  ([docs/platform/grafana.md](docs/platform/grafana.md)).
 - **Sandboxing**: [Kata Containers](https://github.com/kata-containers/kata-containers)
   runtime classes put agent desktops and privileged CI jobs in VMs
   ([ADR 0009](docs/adr/0009-kata.md), [ADR 0011](docs/adr/0011-kata-ci-runners.md)).
 - **Housekeeping**: [spegel](https://github.com/spegel-org/spegel) as a
   local image mirror, [reloader](https://github.com/stakater/Reloader),
   and [Actions Runner Controller](https://github.com/actions/actions-runner-controller)
-  for self-hosted runners ([docs/actions-runners.md](docs/actions-runners.md)).
+  for self-hosted runners ([docs/platform/actions-runners.md](docs/platform/actions-runners.md)).
 
 ## What runs on it
 
 | Namespace | What | Doc |
 | --- | --- | --- |
-| `hermes-<bot>`, `hermes-memory` | [Hermes](https://github.com/NousResearch/hermes-agent) agents on Matrix, one namespace per bot, each with a Kata-sandboxed desktop, and a shared memory server | [hermes.md](docs/hermes.md), [hermes-memory.md](docs/hermes-memory.md) |
-| `litellm` | LLM proxy, and the virtual keys the bots call it with | [litellm.md](docs/litellm.md) |
-| `homelab-mcp` | MCP tools server for Claude and the bots | [homelab-mcp.md](docs/homelab-mcp.md) |
-| `openproject` | Task board shared by people and bots | [openproject.md](docs/openproject.md) |
-| `matrix` | Tuwunel homeserver | [matrix.md](docs/matrix.md) |
-| `mail` | Stalwart mail server, with an edge relay outside the house | [mail.md](docs/mail.md) |
-| `scrypted` | Camera NVR | [scrypted.md](docs/scrypted.md) |
-| `grafana` | Grafana and Grafana OnCall | [grafana.md](docs/grafana.md) |
-| `lading`, `schoolhouse` | Scheduled syncs from private repositories that feed `homelab-mcp` | [lading.md](docs/lading.md), [schoolhouse.md](docs/schoolhouse.md) |
-| `web` | A static site | [website.md](docs/website.md) |
-| `headlamp` | Read-only cluster UI | [headlamp.md](docs/headlamp.md) |
+| `hermes-<bot>`, `hermes-memory` | [Hermes](https://github.com/NousResearch/hermes-agent) agents on Matrix, one namespace per bot, each with a Kata-sandboxed desktop, and a shared memory server | [hermes.md](docs/apps/hermes.md), [hermes-memory.md](docs/apps/hermes-memory.md) |
+| `litellm` | LLM proxy, and the virtual keys the bots call it with | [litellm.md](docs/apps/litellm.md) |
+| `homelab-mcp` | MCP tools server for Claude and the bots | [homelab-mcp.md](docs/apps/homelab-mcp.md) |
+| `openproject` | Task board shared by people and bots | [openproject.md](docs/apps/openproject.md) |
+| `matrix` | Tuwunel homeserver | [matrix.md](docs/apps/matrix.md) |
+| `mail` | Stalwart mail server, with an edge relay outside the house | [mail.md](docs/apps/mail.md) |
+| `scrypted` | Camera NVR | [scrypted.md](docs/apps/scrypted.md) |
+| `grafana` | Grafana and Grafana OnCall | [grafana.md](docs/platform/grafana.md) |
+| `lading`, `schoolhouse` | Scheduled syncs from private repositories that feed `homelab-mcp` | [lading.md](docs/apps/lading.md), [schoolhouse.md](docs/apps/schoolhouse.md) |
+| `web` | A static site | [website.md](docs/apps/website.md) |
+| `headlamp` | Read-only cluster UI | [headlamp.md](docs/platform/headlamp.md) |
 
 ## How it works
 
@@ -202,7 +202,7 @@ mise run validate
 | [bootstrap/](bootstrap/) | The helmfile that installs Cilium, CoreDNS, spegel, cert-manager and Flux before Flux takes over |
 | [images/](images/) | Dockerfiles for the few images built here and pushed to GHCR |
 | [scripts/](scripts/) | Validation and the bootstrap sequence |
-| [docs/](docs/) | Architecture, guides for each app, and decision records |
+| [docs/](docs/) | Architecture, platform and app guides, and decision records |
 | [AGENTS.md](AGENTS.md) | Instructions for coding agents |
 
 ## Cloud dependencies

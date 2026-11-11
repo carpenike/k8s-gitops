@@ -147,7 +147,7 @@ Cluster `postgres17` in `cnpg-system`, image
 03:00 UTC through `csi-ceph-block`. Snapshots accumulate on Ceph. The
 off-chassis copy is Barman Cloud to R2: WAL continuously, a base backup
 daily at 08:30 UTC, 30 days kept. Backups, alerts and the restore drill are
-in [postgres17.md](postgres17.md).
+in [postgres17.md](../platform/postgres17.md).
 
 ## 1Password
 

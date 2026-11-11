@@ -1,6 +1,6 @@
 ---
 # Internal gateway only (LAN and VPN); mikrotik-dns publishes it.
-# One login per route (docs/gateway-auth.md): OpenProject's OIDC is
+# One login per route (docs/platform/gateway-auth.md): OpenProject's OIDC is
 # Enterprise-only, so the only login is OpenProject's own account with 2FA,
 # and the route is labelled app to replace the gateway's Pocket ID login.
 # The ReferenceGrant lets pocket-id-exempt in namespace network select it.

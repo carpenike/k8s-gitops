@@ -2,7 +2,7 @@
 
 Paste the **Guide** into the Grok bot's instructions (or a skill), and
 the **Routine instruction** into the routine whose webhook trigger is in
-1Password (docs/openproject.md, "Bots outside the cluster"). Replace
+1Password (docs/apps/openproject.md, "Bots outside the cluster"). Replace
 `<internal domain>` with the real one; it stays out of this repo.
 
 The ids below are the board's today (`openproject` 17.9.6). The guide tells

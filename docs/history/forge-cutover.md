@@ -9,10 +9,10 @@ Each app's own doc has the detail; this page is the order.
 
 | Doc | What it covers |
 | --- | --- |
-| [postgres17.md](postgres17.md#forge-stores) | The four databases, roles, 1Password items, restore and grants |
-| [homelab-mcp.md](homelab-mcp.md) | The pod: server, Actual sidecar, signal-api, capture, scheduler, metrics |
-| [schoolhouse.md](schoolhouse.md), [lading.md](lading.md) | Ingest and sync CronJobs, their state volumes |
-| [grafana.md](grafana.md) | Grafana and OnCall, the database copies, Forge-side changes |
+| [postgres17.md](../platform/postgres17.md#forge-stores) | The four databases, roles, 1Password items, restore and grants |
+| [homelab-mcp.md](../apps/homelab-mcp.md) | The pod: server, Actual sidecar, signal-api, capture, scheduler, metrics |
+| [schoolhouse.md](../apps/schoolhouse.md), [lading.md](../apps/lading.md) | Ingest and sync CronJobs, their state volumes |
+| [grafana.md](../platform/grafana.md) | Grafana and OnCall, the database copies, Forge-side changes |
 
 ## PRs
 
@@ -49,7 +49,7 @@ Each app's own doc has the detail; this page is the order.
    that `/graph` and `/loki/api/v1/push` still need one.
 4. On Forge, write down: `grafana --version` (the cluster runs 12.3.11, so
    Forge's must be older or equal), and the hosts in
-   `schoolhouse/ical_feeds` without printing the URLs (schoolhouse.md).
+   `schoolhouse/ical_feeds` without printing the URLs ([schoolhouse.md](../apps/schoolhouse.md)).
 
 ## The window
 
@@ -62,7 +62,7 @@ Each app's own doc has the detail; this page is the order.
    - Grafana OnCall (engine, celery, redis) and Grafana.
 2. **Databases:** dump and restore `schoolhouse`, `lading` and
    `homelab_finance` into postgres17, grant the readers, and copy the
-   transaction context ([postgres17.md](postgres17.md#restore-from-forge-cutover)).
+   transaction context ([postgres17.md](../platform/postgres17.md#restore-from-forge-cutover)).
 3. **Copy files off Forge** (keep modes; everything below ends up owned by
    the target uid):
    - `/var/lib/homelab-mcp/finances-context.db` and

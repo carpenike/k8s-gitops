@@ -52,7 +52,7 @@
       minimumGroupSize: 2,
     },
     {
-      description: "Hindsight: the chart (kubernetes/apps/hermes-memory), images/hindsight's base image and HINDSIGHT_VERSION in hindsight-image.yaml move together. The built image ghcr.io/carpenike/hindsight follows in the self-built images PR once the merge has rebuilt it; see docs/hermes-memory.md.",
+      description: "Hindsight: the chart (kubernetes/apps/hermes-memory), images/hindsight's base image and HINDSIGHT_VERSION in hindsight-image.yaml move together. The built image ghcr.io/carpenike/hindsight follows in the self-built images PR once the merge has rebuilt it; see docs/apps/hermes-memory.md.",
       groupName: "hindsight",
       matchDatasources: ["docker"],
       matchPackageNames: ["/vectorize-io\\/charts\\/hindsight$/", "/vectorize-io\\/hindsight-api$/"],
@@ -73,7 +73,7 @@
       minimumGroupSize: 2,
       minimumReleaseAge: "3 days",
       prBodyNotes: [
-        "Before merging, re-vendor `images/hermes-screen/Dockerfile` from upstream `docker/sandbox-desktop.Dockerfile` at the new tag, keeping the `k8s-gitops:` changes, and read the release notes against docs/hermes.md (\"Updating the images\").",
+        "Before merging, re-vendor `images/hermes-screen/Dockerfile` from upstream `docker/sandbox-desktop.Dockerfile` at the new tag, keeping the `k8s-gitops:` changes, and read the release notes against docs/apps/hermes.md (\"Updating the images\").",
       ],
     },
     {

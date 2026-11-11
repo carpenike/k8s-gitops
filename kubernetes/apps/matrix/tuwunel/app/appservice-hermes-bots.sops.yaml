@@ -6,7 +6,7 @@
 #
 # The users regex is an explicit list of bot names, not a pattern: the
 # as_token can log in as anything it matches. Add a name with the YubiKey
-# (sops this file) before provisioning that bot. See docs/matrix.md.
+# (sops this file) before provisioning that bot. See docs/apps/matrix.md.
 apiVersion: v1
 kind: Secret
 metadata:

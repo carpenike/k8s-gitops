@@ -59,7 +59,7 @@ not serve the aggregated API.
 alias (kernel parent `ens1f0`). VLAN id 30, no address. That is the
 wireless client network `10.30.0.0/16`, and it is the macvlan master for
 `NetworkAttachmentDefinition/vlan30`. The port's untagged network stays
-the server LAN. See `docs/multus.md`.
+the server LAN. See `docs/platform/multus.md`.
 
 The owner applies this machine config to each sled. If `ens1f0.30` does
 not come up, reboot that sled. Each sled's switch port has to carry VLAN

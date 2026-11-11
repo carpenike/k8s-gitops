@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # OpenProject 17.9.6 Community Edition: the shared task board for Ryan and
-# the bots. docs/openproject.md.
+# the bots. docs/apps/openproject.md.
 #
 # Web (puma) and one GoodJob worker, which also runs the scheduled jobs. The
 # seeder Job migrates and seeds on each chart revision. Database openproject

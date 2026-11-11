@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # MCP server for the bots' task board (images/openproject-mcp,
-# docs/openproject.md "Bot access"). Its own Kustomization, so a bad image
+# docs/apps/openproject.md "Bot access"). Its own Kustomization, so a bad image
 # never makes OpenProject itself unhealthy.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

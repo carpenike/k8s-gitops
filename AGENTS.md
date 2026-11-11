@@ -39,8 +39,8 @@ updated in a pull request.
   and the boot-disk selector are the 27 Oct 2026 preflight. Passwords stay
   out of git. See `docs/architecture.md` and ADR 0004.
 - SOPS personal access is the YubiKey fingerprint in `.sops.yaml`. Do not
-  generate or commit an age private key. See `docs/sops.md`.
-- Site-specific values stay as the placeholders in `docs/placeholders.md`
+  generate or commit an age private key. See `docs/platform/sops.md`.
+- Site-specific values stay as the placeholders in `docs/history/placeholders.md`
   and `cluster.example.toml`.
 - Do not generate an age key, a deploy key, or a webhook token and commit
   the result. Bootstrap commands in `bootstrap/README.md` are run by a
@@ -58,7 +58,7 @@ updated in a pull request.
   for a second interface (ADR 0007). Do not add another primary CNI.
   One HTTP gateway (Envoy Gateway), one block store (Rook-Ceph), one
   secrets operator (External Secrets). Do not add the overlapping
-  pieces called out in `docs/lessons-from-v1.md`.
+  pieces called out in `docs/history/lessons-from-v1.md`.
 
 ## Layout
 
@@ -70,7 +70,11 @@ talos/topf.yaml
 talos/all/                 patches for every node
 talos/control-plane/       patches for control-plane nodes
 bootstrap/helmfile/        first install, before Flux syncs the repo
+docs/architecture.md       what runs, and why it is shaped this way
+docs/platform/             shared services: ingress login, secrets, Postgres
+docs/apps/                 one guide per application
 docs/adr/                  decisions
+docs/history/              records of the build and the moves from Forge
 kubernetes/examples/       not reconciled
 ```
 

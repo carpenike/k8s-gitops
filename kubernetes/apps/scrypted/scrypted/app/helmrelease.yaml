@@ -177,7 +177,7 @@ spec:
       hostNetwork: false
       # NFD rule coral-tpu. USB vendor 1a6e, or 18d1:9302 after the
       # runtime reloads the device. sled-1 and sled-3 match. See
-      # docs/scrypted.md.
+      # docs/apps/scrypted.md.
       nodeSelector:
         feature.node.kubernetes.io/coral-tpu: "true"
       annotations:

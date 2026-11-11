@@ -2,7 +2,7 @@
 """hermes-outlook-config enable|disable: git's part of $HERMES_HOME/config.yaml for the Outlook MCP server.
 
 Run by the hermes-bot component's config init container with the bot's OUTLOOK_MCP_ENABLED
-input (docs/hermes.md, "Outlook (opt-in)"). Uses Hermes' own read_raw_config/save_config, so
+input (docs/apps/hermes.md, "Outlook (opt-in)"). Uses Hermes' own read_raw_config/save_config, so
 the rest of config.yaml stays Hermes-managed and no defaults are written.
 
 enable:

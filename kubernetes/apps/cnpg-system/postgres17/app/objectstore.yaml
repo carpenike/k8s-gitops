@@ -4,7 +4,7 @@
 # Objects land under s3://<bucket>/cnpg/postgres17/ (base/ and wals/); the
 # serverName defaults to the Cluster name. Endpoint and bucket come from
 # Secret postgres17-r2-vars (Kustomization postgres17-r2), credentials from
-# Secret postgres17-r2. docs/postgres17.md has the checks and the restore drill.
+# Secret postgres17-r2. docs/platform/postgres17.md has the checks and the restore drill.
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:

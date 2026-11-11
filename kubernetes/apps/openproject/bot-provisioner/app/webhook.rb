@@ -1,6 +1,6 @@
 # Ensures OpenProject's outgoing webhook for the bots' task board: task
 # changes in the board project go to openproject-mcp's relay, which wakes the
-# bot they are for (docs/openproject.md, "Waking a bot"). Run with
+# bot they are for (docs/apps/openproject.md, "Waking a bot"). Run with
 # `bundle exec rails runner` in OpenProject's image (webhook-job.yaml).
 #
 # Idempotent: it finds the webhook by name, sets every field to what git
@@ -44,7 +44,7 @@ created = hook.new_record?
 result = Webhooks::Outgoing::UpdateWebhookService.new(hook, current_user: User.system).call(
   attributes: {
     name: NAME,
-    description: "Wakes the Hermes bots on task changes (k8s-gitops, docs/openproject.md). " \
+    description: "Wakes the Hermes bots on task changes (k8s-gitops, docs/apps/openproject.md). " \
                  "Managed by git: edits here are overwritten.",
     url: URL,
     secret: SECRET,

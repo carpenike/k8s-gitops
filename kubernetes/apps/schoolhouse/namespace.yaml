@@ -2,7 +2,7 @@
 # schoolhouse: the Schoology parent-account ingest (carpenike/schoolhouse) and
 # its health and metrics server. Three minors' education records. Nothing in
 # this namespace is reachable from outside the cluster. See
-# docs/schoolhouse.md.
+# docs/apps/schoolhouse.md.
 apiVersion: v1
 kind: Namespace
 metadata:

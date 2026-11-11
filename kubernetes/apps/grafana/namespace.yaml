@@ -1,5 +1,5 @@
 ---
-# Grafana and Grafana OnCall, moved from Forge (docs/grafana.md). Their own
+# Grafana and Grafana OnCall, moved from Forge (docs/platform/grafana.md). Their own
 # namespace rather than observability: observability is privileged for
 # node-exporter, and a namespace-wide default deny there would also cut off
 # kube-prometheus-stack. Every pod here runs as a fixed non-root uid with no

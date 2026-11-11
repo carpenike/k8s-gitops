@@ -1,7 +1,7 @@
 ---
 # homelab-mcp: the Claude tools server (carpenike/mcp). Baseline Pod
 # Security: the pod runs as an unprivileged user with no capabilities.
-# See docs/homelab-mcp.md.
+# See docs/apps/homelab-mcp.md.
 apiVersion: v1
 kind: Namespace
 metadata:

@@ -1,10 +1,10 @@
 # Hermes agent pod image: upstream nousresearch/hermes-agent, unchanged, plus
 # what Hermes would otherwise fetch at runtime (the agent pod has no internet
 # egress). Each piece is inert unless the bot's inputs turn it on
-# (docs/hermes.md):
+# (docs/apps/hermes.md):
 #   - the Outlook MCP server (Softeria ms-365-mcp-server): OUTLOOK_MCP_ENABLED
 #   - the Hindsight memory provider plugin and hindsight-client:
-#     HINDSIGHT_ENABLED (docs/hermes-memory.md)
+#     HINDSIGHT_ENABLED (docs/apps/hermes-memory.md)
 #   - the matrix-profile plugin (local, matrix-profile/): the bot changes its
 #     own Matrix display name (mirrored to the Hermes profile name) and
 #     avatar; MATRIX_PROFILE_TOOLS
@@ -17,7 +17,7 @@
 # vectorize-io/hindsight d952b6e655fccab4581ee0722b51c5f103873d12, plugin
 # 1.2.3, the commit Hermes v0.22.6's plugin-catalog/hindsight.yaml named; the
 # v0.23.0 catalog names f14cc1e, plugin 1.2.4 with hindsight-client 1.x, not
-# taken yet: docs/hermes-memory.md) and hindsight-client by
+# taken yet: docs/apps/hermes-memory.md) and hindsight-client by
 # hindsight/requirements.txt (hashes).
 
 ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002

@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Shared part of bot provisioning: the script and its network policy.
 # kubernetes/components/hermes-bot/provision instantiates ./template once
-# per bot. See docs/hermes.md. No postBuild substitution here: the script is
+# per bot. See docs/apps/hermes.md. No postBuild substitution here: the script is
 # Python.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

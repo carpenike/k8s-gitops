@@ -10,7 +10,7 @@
 #
 # Scoped to listener https-matrix (envoy.yaml), so every other route on
 # envoy-external keeps the default. ClientTrafficPolicy can target a Gateway
-# or a listener, not a route. See docs/gateway-auth.md.
+# or a listener, not a route. See docs/platform/gateway-auth.md.
 #
 # ALPN: see envoy-external-https below.
 apiVersion: gateway.envoyproxy.io/v1alpha1

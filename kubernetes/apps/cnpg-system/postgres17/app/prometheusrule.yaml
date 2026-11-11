@@ -5,7 +5,7 @@
 # barman_cloud_cloudnative_pg_io_* come from the plugin through each
 # instance's exporter (plugin docs, "Observability"); cnpg_pg_stat_archiver_*
 # and cnpg_pg_replication_in_recovery are CNPG's default queries.
-# docs/postgres17.md says what to check for each.
+# docs/platform/postgres17.md says what to check for each.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

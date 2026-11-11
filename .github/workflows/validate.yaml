@@ -89,7 +89,7 @@ jobs:
           sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
 
       # Working tree only. Full history still contains the archived v1 tree
-      # and is not rewritten. See docs/lessons-from-v1.md.
+      # and is not rewritten. See docs/history/lessons-from-v1.md.
       - name: Scan the working tree
         run: gitleaks detect --no-git --redact --config .gitleaks.toml --source .
 

@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # LiteLLM key hermes-memory for Hindsight's fact extraction: claude-haiku only,
 # USD 10 per 30 days, team hermes. Written to Secret litellm as
-# HINDSIGHT_API_LLM_API_KEY (docs/litellm.md, "Virtual keys for cluster apps").
+# HINDSIGHT_API_LLM_API_KEY (docs/apps/litellm.md, "Virtual keys for cluster apps").
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

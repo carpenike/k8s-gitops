@@ -6,7 +6,7 @@
 # Two backups: volume snapshots (csi-ceph-block, stay on Ceph) and Barman
 # Cloud to R2 (ObjectStore postgres17-r2: continuous WAL plus a daily base
 # backup, 30 days). waitForArchive stays false so a snapshot never waits on
-# R2. docs/postgres17.md.
+# R2. docs/platform/postgres17.md.
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -64,7 +64,7 @@ spec:
         comment: OpenProject task board (openproject)
         passwordSecret:
           name: openproject-db
-      # Stores moved from Forge (docs/postgres17.md, "Forge stores"). Every
+      # Stores moved from Forge (docs/platform/postgres17.md, "Forge stores"). Every
       # client runs in the cluster and keeps CloudNativePG's default pg_hba.
       # Read access is granted by each owner (ALTER DEFAULT PRIVILEGES), not
       # by a cluster-wide role, so a reader sees its own store only.
@@ -148,7 +148,7 @@ spec:
   databaseReclaimPolicy: retain
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
-# Hindsight (namespace hermes-memory, docs/hermes-memory.md): one schema per
+# Hindsight (namespace hermes-memory, docs/apps/hermes-memory.md): one schema per
 # bot (user_<bot>), created by the server. The operator installs the
 # extensions as superuser, in public, where Hindsight looks for them
 # (hindsight_api/_pg_extensions.py at v1.2.0): vector for embeddings, pg_trgm
@@ -173,7 +173,7 @@ spec:
       ensure: present
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
-# OpenProject (namespace openproject, docs/openproject.md). Its extensions go
+# OpenProject (namespace openproject, docs/apps/openproject.md). Its extensions go
 # in pg_catalog, not public: the image's SQL structure load clears
 # search_path and names operator classes such as gin_trgm_ops without a
 # schema, so with them in public the first schema load fails (learned on
@@ -252,7 +252,7 @@ spec:
   databaseReclaimPolicy: retain
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
-# Stalwart (namespace mail, docs/mail.md, ADR 0013): accounts, mailboxes,
+# Stalwart (namespace mail, docs/apps/mail.md, ADR 0013): accounts, mailboxes,
 # message metadata, configuration and the full-text index. Message bodies
 # are in the Ceph RGW bucket, not here. Stalwart creates its own tables.
 apiVersion: postgresql.cnpg.io/v1
