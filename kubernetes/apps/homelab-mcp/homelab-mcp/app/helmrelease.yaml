@@ -193,6 +193,11 @@ spec:
               # acceptance tests passed (carpenike/mcp#129). Every write is
               # preview then confirm; set "false" to turn them all off.
               HOMELAB_MCP_MFP_WRITES_ENABLED: "true"
+              # Staged MFP writes (copy entries, log a meal with adjustments,
+              # update a recipe in place) on from the start, per Ryan on
+              # 2026-11-11. Same preview-then-confirm gate; "false" turns only
+              # these three off.
+              HOMELAB_MCP_MFP_STAGED_WRITES_ENABLED: "true"
               # /mcp: everyday read connector. /mcp/full: every tool, write
               # requested on connect (Claude's step-up is unreliable). Not
               # /mcp/admin: it holds household writes, not server
