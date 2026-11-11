@@ -175,7 +175,7 @@ Stalwart rotate DKIM keys; with Manual it never rotates them.
 | DKIM | Stalwart | Rotation every 90 days, old key retired after 7 |
 | MX | Stalwart | Points at `mx.holthome.net`. Publicly that name is the edge VM (an A record added by hand at cutover); on the LAN the MikroTik answers `10.45.10.25` |
 | SPF | Stalwart | Authorizes the MX host, which is right because the edge also sends outbound (ADR 0014). SMTP2GO needs no change to it: it sends with its own return-path subdomain |
-| SMTP2GO return-path and DKIM CNAMEs | By hand | Interim outbound ([Outbound](#outbound)). Names and targets come from SMTP2GO's sender-domain page. Stalwart writes only the names it publishes, and external-dns only records it owns |
+| SMTP2GO return-path, DKIM and link-tracking CNAMEs | SMTP2GO, added once through its Cloudflare connection | Interim outbound ([Outbound](#outbound)). Names and targets come from SMTP2GO's sender-domain page. Stalwart writes only the names it publishes, and external-dns only records it owns |
 | DMARC | Stalwart | Reports to the domain's report address |
 | TLS-RPT | Stalwart | Same address |
 | CAA | Nobody, for now | `holthome.net` is the whole cluster zone. A CAA record at the apex limits which certificate authorities may issue for every name in it, including Cloudflare's proxied hostnames |
@@ -217,19 +217,21 @@ through SMTP2GO"). Stalwart relays every remote domain to SMTP2GO on
 465 with implicit TLS. The egress policy already allows 465 to public
 IPv4.
 
-1. **SMTP2GO account** (free plan). In its settings, turn off open and
-   click tracking (they rewrite the body and break Stalwart's DKIM
-   signature), leave Maintain Return-Path off, and send bounce
-   notifications to the sender.
-2. **Sender domain.** Add `holthome.net` as a verified sender domain.
-   In Cloudflare, add the return-path CNAME and the DKIM CNAME it shows,
-   DNS only (not proxied). Skip the link-tracking CNAME. Do not change
-   the apex SPF; it stays Stalwart's. Wait until SMTP2GO shows the domain
-   verified.
-3. **SMTP user.** Add one, and store its name and password in item
-   `stalwart` as `smtp2go_username` and `smtp2go_password`. The
-   ExternalSecret needs `smtp2go_password`, so do this before merging the
-   change that reads it; Reloader restarts the pod.
+1. **SMTP2GO account** (free plan). Leave Maintain Return-Path off, and
+   send bounce notifications to the sender.
+2. **Sender domain.** Sending › Verified Senders › Sender domains: add
+   `holthome.net`. SMTP2GO can add its three CNAMEs (return path `em…`,
+   DKIM, link tracking `link`) to Cloudflare itself; otherwise add them
+   by hand, DNS only (not proxied). The link-tracking CNAME does nothing
+   while tracking is off. Do not change the apex SPF; it stays
+   Stalwart's. Wait until SMTP2GO shows the domain verified.
+3. **SMTP user.** Sending › SMTP Users: add one. On its Tracking & Status
+   tab, turn Open Tracking and Click Tracking off: they rewrite the body
+   and links and break Stalwart's DKIM signature. Store its name and
+   password in item `stalwart` as `smtp2go_username` and
+   `smtp2go_password`. The ExternalSecret needs `smtp2go_password`, so do
+   this before merging the change that reads it; Reloader restarts the
+   pod.
 4. **Route.** In the WebUI, add an MTA route of type Relay, or:
 
    ```sh

@@ -97,8 +97,8 @@ to route `local`. When the edge can send, the outbound strategy points
 at the edge's route instead and the SMTP2GO account is closed.
 
 `holthome.net` is a verified sender domain at SMTP2GO, with its
-return-path and DKIM CNAMEs published by hand (they are not records
-Stalwart manages). Authentication then works without touching the SPF
+return-path, DKIM and link-tracking CNAMEs in Cloudflare (added by
+SMTP2GO; they are not records Stalwart manages). Authentication then works without touching the SPF
 Stalwart publishes (`v=spf1 mx -all`):
 
 - SPF is checked against the envelope sender, which SMTP2GO rewrites to
@@ -111,8 +111,8 @@ Stalwart publishes (`v=spf1 mx -all`):
   signing happens in the DATA stage, before routing, so the route does
   not change it. SMTP2GO adds a second signature for `holthome.net` with
   its own selector. Either one aligned signature passes DMARC
-- open and click tracking stay off, so SMTP2GO does not rewrite the body
-  or links, and Stalwart's signature stays valid
+- open and click tracking stay off on the SMTP user, so SMTP2GO does
+  not rewrite the body or links, and Stalwart's signature stays valid
 
 SMTP2GO accepts each message and delivers it later, so a failed
 delivery becomes a bounce at SMTP2GO, not a DSN from Stalwart. Its bounce
