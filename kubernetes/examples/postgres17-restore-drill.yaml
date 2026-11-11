@@ -1,5 +1,5 @@
 ---
-# Not reconciled. Restore drill for postgres17's R2 backup, docs/postgres17.md.
+# Not reconciled. Restore drill for postgres17's R2 backup, docs/platform/postgres17.md.
 # Apply by hand, check, then delete the namespace. The ObjectStore is copied
 # from cnpg-system by the command in the doc, because its endpoint and bucket
 # are only in the live object, not in git.

@@ -2,7 +2,7 @@
 # Builds images/hindsight and pushes it to ghcr.io/carpenike/hindsight.
 # Like hermes-screen-image.yaml (see AGENTS.md for the publishing workflows): the built-in GITHUB_TOKEN
 # (packages: write), no repository secrets, and deploys nothing. Manifests pin
-# the pushed digest; see AGENTS.md "Hard rules" and docs/hermes.md.
+# the pushed digest; see AGENTS.md "Hard rules" and docs/apps/hermes.md.
 name: hindsight image
 
 on:

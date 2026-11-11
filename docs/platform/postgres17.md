@@ -1,9 +1,9 @@
 # postgres17
 
 Cluster `postgres17` in `cnpg-system` is the shared PostgreSQL 17 database:
-LiteLLM's `litellm` ([litellm.md](litellm.md)), Hindsight's `hindsight`
-([hermes-memory.md](hermes-memory.md)), Stalwart's `stalwart`
-([mail.md](mail.md)). Losing it loses bot memory and the
+LiteLLM's `litellm` ([litellm.md](../apps/litellm.md)), Hindsight's `hindsight`
+([hermes-memory.md](../apps/hermes-memory.md)), Stalwart's `stalwart`
+([mail.md](../apps/mail.md)). Losing it loses bot memory and the
 proxy's keys and spend.
 
 ## postgres17 backup and restore
@@ -17,7 +17,7 @@ Two copies, both taken by CloudNativePG:
 | WAL archive | Same, `…/cnpg/postgres17/wals/` | Continuous. `archive_timeout` is 5 minutes | Same window |
 
 Hindsight also has its own nightly `pg_dump` to R2
-([hermes-memory.md](hermes-memory.md#backups)). That one restores a single
+([hermes-memory.md](../apps/hermes-memory.md#backups)). That one restores a single
 bot's schema. The R2 copy here restores the whole server to any point in
 the last 30 days.
 
@@ -179,7 +179,7 @@ first base backup, then every few months. It reads R2 and writes nothing
 there: the drill Cluster has no `spec.plugins`, so it archives nothing, and
 the copied ObjectStore drops `retentionPolicy`.
 
-Manifests: [`kubernetes/examples/postgres17-restore-drill.yaml`](../kubernetes/examples/postgres17-restore-drill.yaml)
+Manifests: [`kubernetes/examples/postgres17-restore-drill.yaml`](../../kubernetes/examples/postgres17-restore-drill.yaml)
 (not reconciled).
 
 1. Namespace and credentials:
@@ -379,7 +379,7 @@ postgres17 is affected.
    command refuses a target that already has rows, and keeps ids and Signal
    event keys.
 
-6. Start the cluster workers (docs/homelab-mcp.md, cutover).
+6. Start the cluster workers (docs/apps/homelab-mcp.md, cutover).
 
 The snapshot tables in `homelab_finance` (`reconcile_daily`,
 `sync_health_daily`, `hygiene_daily`) are the only record of past bank

@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# ADR 0013 and docs/mail.md.
+# ADR 0013 and docs/apps/mail.md.
 #
 # Stores:
 # - data and full-text search: database stalwart on postgres17 (config.json

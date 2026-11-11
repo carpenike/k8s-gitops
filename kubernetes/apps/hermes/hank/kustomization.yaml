@@ -3,7 +3,7 @@
 # Hank: @hank:ryanholt.net. Ryan's homelab engineer on Hermes, the
 # counterpart to Chief Engineer on Grok Bot. The whole bot is these inputs
 # plus its persona (SOUL.md); everything else is
-# kubernetes/components/hermes-bot. See docs/hermes.md, "Hank".
+# kubernetes/components/hermes-bot. See docs/apps/hermes.md, "Hank".
 #
 # Deliberately not copied from Chief: Outlook and the Chief Engineer
 # webhook (WEBHOOK_ENABLED).
@@ -42,7 +42,7 @@ configMapGenerator:
       - WEBAPP_ENABLED=true
       - HINDSIGHT_ENABLED=true
       - TAVILY_ENABLED=true
-      # A2A (docs/hermes.md, "A2A (opt-in)"). Inbound at
+      # A2A (docs/apps/hermes.md, "A2A (opt-in)"). Inbound at
       # https://hank-a2a (envoy-internal) and agent-a2a.hermes-hank in the
       # cluster, bearer tokens per peer; outbound to Chief.
       - A2A_ENABLED=true
@@ -56,17 +56,17 @@ configMapGenerator:
       # a2a_chief_engineer_url and a2a_chief_engineer_token to 1Password item
       # hermes-hank, an egress rule for its host, and set this to true.
       - A2A_CHIEF_ENGINEER_ENABLED=false
-      # Claude Code in the screen pod with Hank's GitHub token (docs/hermes.md,
+      # Claude Code in the screen pod with Hank's GitHub token (docs/apps/hermes.md,
       # "Coding with Claude Code"). He may merge a pull request when Ryan
       # himself asks for that one (skill coding-sessions, "Merging").
       - CLAUDE_CODE_ENABLED=true
       - CLAUDE_CODE_MERGE=true
-      # The shared OpenProject task board (docs/openproject.md, "Bot
+      # The shared OpenProject task board (docs/apps/openproject.md, "Bot
       # access"): the bot's OpenProject user and token (Job
       # openproject/hermes-provision-hank), egress to openproject-mcp and skill
       # task-board. The MCP server is in mcp-servers.yaml.
       - TASK_BOARD_ENABLED=true
-      # Board wake-ups (docs/openproject.md, "Waking a bot"): a task change
+      # Board wake-ups (docs/apps/openproject.md, "Waking a bot"): a task change
       # by someone else starts a turn here, delivered to Ryan's DM with
       # @hank (Ryan and Hank its only members).
       - TASK_BOARD_WEBHOOK_ENABLED=true
@@ -74,12 +74,12 @@ configMapGenerator:
   # Hank's persona. Written to /opt/data/SOUL.md while the live file is
   # still a version git wrote; an edit in chat or the Webapp is kept.
   # SOUL.history lists the sha256 of each earlier SOUL.md: add the old hash
-  # there when you change SOUL.md (docs/hermes.md, "Persona").
+  # there when you change SOUL.md (docs/apps/hermes.md, "Persona").
   - name: hermes-bot-soul
     files:
       - SOUL.md
       - SOUL.history
-  # Hank's MCP servers (mcp-servers.yaml; docs/hermes.md, "MCP servers from
+  # Hank's MCP servers (mcp-servers.yaml; docs/apps/hermes.md, "MCP servers from
   # git"), written into config.yaml by the config init container.
   - name: hermes-bot-mcp
     files:

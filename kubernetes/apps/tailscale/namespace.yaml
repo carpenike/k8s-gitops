@@ -1,7 +1,7 @@
 # Tailscale operator and every proxy it creates (Connector, and later any
 # ProxyGroup) run here. Proxies set sysctls in a privileged init container
 # and need NET_ADMIN, which baseline does not allow. Baseline is the cluster
-# default, and this namespace opts into privileged. See docs/tailscale.md.
+# default, and this namespace opts into privileged. See docs/platform/tailscale.md.
 apiVersion: v1
 kind: Namespace
 metadata:

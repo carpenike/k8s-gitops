@@ -204,7 +204,7 @@ first, like a bot's `agent-data`.
 
 postgres17 itself also goes to R2 through Barman Cloud (WAL plus a daily
 base backup, 30 days). That copy restores the whole server to a point in
-time, not one bot. See [postgres17.md](postgres17.md).
+time, not one bot. See [postgres17.md](../platform/postgres17.md).
 
 Check a night's run:
 

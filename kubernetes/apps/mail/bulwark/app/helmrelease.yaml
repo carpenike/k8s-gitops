@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Bulwark, a JMAP webmail for Stalwart (ADR 0017, docs/mail.md "Webmail").
+# Bulwark, a JMAP webmail for Stalwart (ADR 0017, docs/apps/mail.md "Webmail").
 # The browser talks JMAP to Stalwart at mail.${SECRET_DOMAIN} with a Pocket
 # ID token; this pod serves the app and does the server side of sign-in.
 #

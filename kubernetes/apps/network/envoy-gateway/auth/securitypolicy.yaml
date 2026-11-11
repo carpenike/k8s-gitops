@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 # Default login for every HTTPS route on both gateways. A route-level
-# SecurityPolicy with no mergeType replaces this one. See docs/gateway-auth.md.
+# SecurityPolicy with no mergeType replaces this one. See docs/platform/gateway-auth.md.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -38,7 +38,7 @@ spec:
 # Routes that carry gateway.holthome.net/auth=public, =native or =app
 # replace the gateway policy, so a person never logs in twice. flux-webhook
 # is public. A labeled route in another namespace also needs a
-# ReferenceGrant. See docs/gateway-auth.md.
+# ReferenceGrant. See docs/platform/gateway-auth.md.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

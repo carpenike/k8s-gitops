@@ -15,7 +15,7 @@ webmail).
 
 | Stalwart store | Where | Off the chassis |
 | --- | --- | --- |
-| Data (accounts, mailboxes, metadata, configuration) | Database `stalwart` on `postgres17` | Barman WAL archive and daily base backup to R2, 30-day point-in-time recovery ([postgres17.md](postgres17.md)) |
+| Data (accounts, mailboxes, metadata, configuration) | Database `stalwart` on `postgres17` | Barman WAL archive and daily base backup to R2, 30-day point-in-time recovery ([postgres17.md](../platform/postgres17.md)) |
 | Full-text search | Same database (search store `Default`) | Same |
 | Blobs (message bodies, attachments, Sieve scripts) | RGW bucket `stalwart-blobs` on `ceph-objectstore` | CronJob `stalwart-blobs-r2`, hourly at :40, `rclone copy` to `<bucket>/stalwart/blobs/` |
 | In-memory (rate limits, locks) | Local to the pod | Not needed |
@@ -47,7 +47,7 @@ added on the router by hand. The `stalwart` Certificate covers `mx` for
 the mail protocols. HTTPS terminates at Envoy.
 
 Tailnet devices reach `10.45.10.25` through Connector `home`, on the ports
-the tailnet policy grants them ([tailscale.md](tailscale.md)).
+the tailnet policy grants them ([tailscale.md](../platform/tailscale.md)).
 
 The route is `native`: mail and DAV clients send their own credentials and
 cannot complete the gateway's Pocket ID login.
@@ -234,7 +234,7 @@ nothing but a fresh page load.
 ## Restore
 
 1. Restore `postgres17` (or just database `stalwart`) to the chosen time,
-   as in [postgres17.md](postgres17.md).
+   as in [postgres17.md](../platform/postgres17.md).
 2. If the RGW bucket is gone, recreate the claim and copy the blobs back:
    `rclone copy r2:<bucket>/stalwart/blobs ceph:stalwart-blobs`, from a
    pod with the same environment as the CronJob.

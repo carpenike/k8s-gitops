@@ -2,7 +2,7 @@
 # Nothing depends on this. Every scale set reads ExternalSecret
 # actions-runner-controller. Until that secret is Ready, this
 # Kustomization stays unready. The controller does not wait on it.
-# See docs/actions-runners.md.
+# See docs/platform/actions-runners.md.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

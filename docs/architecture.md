@@ -31,7 +31,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Public DNS | external-dns to Cloudflare, external gateway only | app v0.24.0, chart 1.23.0 |
 | Internal DNS | external-dns plus MikroTik webhook | webhook v1.6.3 |
 | Public reach | cloudflared tunnel to `envoy-external` | cloudflared 2026.10.3 |
-| Tailnet reach | Tailscale operator, Connector `home` subnet router to `envoy-internal`, the router's DNS and Stalwart's mail address, no IngressClass (see tailscale.md, ADR 0012) | chart 1.104.4 |
+| Tailnet reach | Tailscale operator, Connector `home` subnet router to `envoy-internal`, the router's DNS and Stalwart's mail address, no IngressClass (see [tailscale.md](platform/tailscale.md), ADR 0012) | chart 1.104.4 |
 | Secrets | External Secrets, 1Password SDK | chart 2.14.0 |
 | Block | Rook-Ceph, 3 replicas, host failure domain | 1.21.1 |
 | Media | NFS static volumes, class `nfs-media` | no provisioner |
@@ -39,26 +39,26 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Postgres backup | Barman Cloud plugin | chart 0.8.1, app v0.15.1 |
 | PVC backup | VolSync restic | chart 0.17.0 |
 | Metrics | kube-prometheus-stack, in-cluster Alertmanager off | chart 92.14.0 |
-| Dashboards and on-call | Grafana in namespace `grafana`, Grafana OnCall OSS beside it (see grafana.md) | Grafana 12.3.11, OnCall v1.16.11 |
+| Dashboards and on-call | Grafana in namespace `grafana`, Grafana OnCall OSS beside it (see [grafana.md](platform/grafana.md)) | Grafana 12.3.11, OnCall v1.16.11 |
 | Node features | Node Feature Discovery, master and worker | chart 0.20.1 |
 | Node upgrades | tuppr | chart 0.5.10 |
 | Image pull cache | spegel | 0.8.0 |
 | Dependency updates | Renovate | 44.188.2 |
-| Actions runners | ARC scale sets, one per private repo (see actions-runners.md) | chart 0.15.1 |
+| Actions runners | ARC scale sets, one per private repo (see [actions-runners.md](platform/actions-runners.md)) | chart 0.15.1 |
 | Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
-| Matrix | Tuwunel, `ryanholt.net`, external gateway (see matrix.md) | v1.9.4 |
-| Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI, accounts from Pocket ID, inbound from the internet through a Stalwart edge relay on Vultr over the tailnet, Bulwark webmail (see mail.md, ADR 0013, 0014, 0015, 0017) | v1.1.0, Bulwark 1.21.1 |
-| Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see hermes.md) | v0.23.0 |
-| Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see website.md) | 1.31.7 |
+| Matrix | Tuwunel, `ryanholt.net`, external gateway (see [matrix.md](apps/matrix.md)) | v1.9.4 |
+| Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI, accounts from Pocket ID, inbound from the internet through a Stalwart edge relay on Vultr over the tailnet, Bulwark webmail (see [mail.md](apps/mail.md), ADR 0013, 0014, 0015, 0017) | v1.1.0, Bulwark 1.21.1 |
+| Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see [hermes.md](apps/hermes.md)) | v0.23.0 |
+| Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see [website.md](apps/website.md)) | 1.31.7 |
 
 Chart tags that the plan did not name (spegel, CoreDNS, metrics-server,
 reloader, echo, app-template, tuppr, kube-prometheus-stack, cloudflared)
 are the current pins from onedr0p/cluster-template or the chart repo as of
 27 Oct 2026. Renovate is expected to move them. The Actions runner
 policy, the GitHub App, and each repository's `runs-on` name are in
-[actions-runners.md](actions-runners.md). Headlamp's URL, read-only
+[actions-runners.md](platform/actions-runners.md). Headlamp's URL, read-only
 ServiceAccount, and how to grant write later are in
-[headlamp.md](headlamp.md).
+[headlamp.md](platform/headlamp.md).
 
 ## Networks
 
@@ -86,9 +86,9 @@ VLAN themselves. The phones are on VLAN 30. Cameras are on VLAN 50
 (`10.50.0.0/16`) and are reached by routed unicast. The VLAN 30 gateway
 is `10.30.0.1`. Scrypted's address is `10.30.0.31/16`, which has to stay
 outside the wireless DHCP pool `10.30.100.0/24`. The app is
-`kubernetes/apps/scrypted`. ADR 0008 and [scrypted.md](scrypted.md).
+`kubernetes/apps/scrypted`. ADR 0008 and [scrypted.md](apps/scrypted.md).
 Cilium `cni.exclusive` is false
-and `devices` stays `ens1f0`. See [multus.md](multus.md) and ADR 0007.
+and `devices` stays `ens1f0`. See [multus.md](platform/multus.md) and ADR 0007.
 
 Cilium advertises LoadBalancer IPs only. The pool is `10.45.0.0/16`, the
 same `CiliumLoadBalancerIPPool` block as v1. Envoy reuses the v1 gateway
@@ -140,7 +140,7 @@ keeps its Receiver token. The client secret is Kustomization
 `envoy-gateway-auth` in namespace `network`, which nothing else waits on. While that secret is
 missing, Envoy Gateway answers the protected routes with 500. The label,
 the path bypass, and the Pocket ID client settings are in
-[gateway-auth.md](gateway-auth.md).
+[gateway-auth.md](platform/gateway-auth.md).
 
 ## Data
 
@@ -149,22 +149,28 @@ Rook `useAllDevices` stays false. `devicePathFilter` matches the three
 disk is `ata5` and does not match. `wipeDevicesFromOtherClusters` stays
 true; the v1 Ceph data on those disks is wiped on install.
 
-STATE and EPHEMERAL are LUKS2 with a `nodeID` key. The chassis has no TPM
-module. sled-1's Talos dmesg on 27 Oct 2026 was `No TPM chip found` /
-`TPM device is not available`. Secure Boot stays off. See `talos/README.md`.
+STATE and EPHEMERAL are not encrypted. The planned LUKS2 `nodeID` key does
+not work on these boards. The chassis has no TPM module (sled-1's Talos
+dmesg on 27 Oct 2026 was `No TPM chip found` / `TPM device is not
+available`), and Talos refuses to derive a `nodeID` key from the boards'
+SMBIOS machine UUID. Secure Boot stays off. See `talos/README.md`.
 
 Cluster `postgres17` in `cnpg-system` is the shared PostgreSQL 17 database
 (`ghcr.io/cloudnative-pg/postgresql:17.9`, two instances, `ceph-block`).
 LiteLLM's database is the first one on it. ADR 0006 and
-[litellm.md](litellm.md). `ScheduledBackup` `postgres17-daily` takes an
+[litellm.md](apps/litellm.md). `ScheduledBackup` `postgres17-daily` takes an
 online volume snapshot through `csi-ceph-block`. Those snapshots stay on
 Ceph. The copy that leaves the chassis is the Barman Cloud plugin to
 Cloudflare R2: continuous WAL archiving plus a daily base backup
 (`postgres17-r2-daily`), 30-day recovery window. See
-[postgres17.md](postgres17.md).
+[postgres17.md](platform/postgres17.md).
 
-VolSync is installed. ReplicationSource objects are examples only.
-It waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
+VolSync copies app volumes to Cloudflare R2 with restic. The
+ReplicationSource for a volume is in that app's `backup/` folder: Grafana,
+Grafana OnCall, homelab-mcp, Tuwunel and OpenProject. Hindsight's is in
+its `app/` folder, and each Hermes bot gets one from the `hermes-bot`
+component. They share 1Password item `volsync-r2-template`, with one
+repository path per volume. VolSync waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
 snapshotter v8.7.0). That chart also carries the VolumeSnapshot CRDs.
 `ceph-block` has VolumeSnapshotClass `csi-ceph-block`.
 
@@ -180,7 +186,7 @@ rook-ceph-cluster chart default applies: CephObjectStore
 RGW instance on port 80) and bucket StorageClass `ceph-bucket`
 (`reclaimPolicy: Delete`). Apps claim a bucket with an
 ObjectBucketClaim. The first is Stalwart's `stalwart-blobs`
-([mail.md](mail.md)). RGW data stays on the chassis; each app copies its
+([mail.md](apps/mail.md)). RGW data stays on the chassis; each app copies its
 own bucket off it.
 
 Ceph itself is the rook-ceph-cluster chart default,
@@ -197,7 +203,7 @@ Bootstrap applies them once. The Flux HelmRelease of that chart is the
 only day-2 owner (`install.crds` and `upgrade.crds` are `CreateReplace`).
 kube-prometheus-stack does not manage CRDs. kube-prometheus-stack runs
 Prometheus and not Alertmanager or Grafana. Grafana and Grafana OnCall run
-in namespace `grafana` ([grafana.md](grafana.md)).
+in namespace `grafana` ([grafana.md](platform/grafana.md)).
 Prometheus labels every series and alert `cluster=k8s-holthome` and sends
 alerts to `https://am.holthome.net:443`. That name is Forge's Caddy vhost
 (`hosts/forge/infrastructure/monitoring-ui.nix`). Its A record is

@@ -37,7 +37,7 @@ appservice registrations from a directory, and it serves both
 `/.well-known/matrix` files from its own config.
 
 The chart is `app-template` 5.3.0. Details are in
-[../matrix.md](../matrix.md).
+[../matrix.md](../apps/matrix.md).
 
 Secrets are SOPS, not External Secrets. The registration token,
 `as_token`, and `hs_token` are generated once, have no upstream source,

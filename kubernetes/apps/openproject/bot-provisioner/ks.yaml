@@ -3,7 +3,7 @@
 # Shared part of the bots' OpenProject provisioning: the script, which
 # kubernetes/components/hermes-bot/task-board instantiates with ./template
 # once per bot, and the board's one webhook Job. No postBuild substitution:
-# the scripts are Ruby. docs/openproject.md, "Bot provisioning" and "Waking
+# the scripts are Ruby. docs/apps/openproject.md, "Bot provisioning" and "Waking
 # a bot".
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

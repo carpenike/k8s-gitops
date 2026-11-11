@@ -85,7 +85,7 @@ the only process that writes it besides the client.
   restarts the sync, and the pod's egress list grows by the Obsidian, npm and
   release-asset hosts.
 - Neutral: the one-time `ob login` and `ob sync-setup` are run by hand in the
-  container (docs/homelab-mcp.md), as is a re-setup after a restore.
+  container (docs/apps/homelab-mcp.md), as is a re-setup after a restore.
 
 ## Pros and Cons of the Options
 

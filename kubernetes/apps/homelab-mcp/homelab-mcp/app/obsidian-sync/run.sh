@@ -7,7 +7,7 @@
 #               redistributable). A failed install retries; it never blocks
 #               the pod, because this runs in a sidecar, not an init container.
 #   waiting     until the one-time `ob login` and `ob sync-setup` have been run
-#               in this container (docs/homelab-mcp.md, "Obsidian Sync").
+#               in this container (docs/apps/homelab-mcp.md, "Obsidian Sync").
 #   syncing     `ob sync --continuous`. The client refreshes
 #               /vault/notes/.obsidian/.sync.lock every second while its event
 #               loop runs; the liveness probe restarts it if that stops.

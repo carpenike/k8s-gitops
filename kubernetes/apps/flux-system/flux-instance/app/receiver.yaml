@@ -1,6 +1,6 @@
 ---
 # The webhook token is an ExternalSecret. The Receiver stays Not Ready until
-# that secret exists. See docs/placeholders.md.
+# that secret exists. See docs/history/placeholders.md.
 apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Receiver
 metadata:

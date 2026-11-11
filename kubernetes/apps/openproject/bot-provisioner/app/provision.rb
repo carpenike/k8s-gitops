@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Provision one bot on the OpenProject task board (docs/openproject.md,
+# Provision one bot on the OpenProject task board (docs/apps/openproject.md,
 # "Bot provisioning"). Run by Job openproject/hermes-provision-<bot> (a Hermes
 # bot) or openproject/external-provision-<bot> (a bot outside the cluster,
 # BOT_EXTERNAL=true; "Bots outside the cluster") with `bundle exec rails

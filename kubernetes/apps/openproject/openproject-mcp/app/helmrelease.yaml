@@ -1,10 +1,10 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # Streamable-HTTP MCP server at http://openproject-mcp.openproject.svc.cluster.local:8000/mcp
-# for the bots' task board (images/openproject-mcp, docs/openproject.md).
+# for the bots' task board (images/openproject-mcp, docs/apps/openproject.md).
 # Stateless: a bot's Hermes sends its own OpenProject API token as the
 # bearer, and every OpenProject call is made as that bot. It also serves the
-# board webhook's relay at /hooks/openproject (docs/openproject.md, "Waking a
+# board webhook's relay at /hooks/openproject (docs/apps/openproject.md, "Waking a
 # bot"), whose two HMAC keys are its only secrets.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease

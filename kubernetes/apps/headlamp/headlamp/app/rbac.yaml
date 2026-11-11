@@ -2,7 +2,7 @@
 # Read on the Flux objects the Headlamp Flux plugin lists. Aggregated into
 # the built-in view role, which is what the Headlamp ServiceAccount is bound
 # to. view does not include Secrets. aggregate-to-edit is unused until the
-# binding is changed to edit. See docs/headlamp.md.
+# binding is changed to edit. See docs/platform/headlamp.md.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:

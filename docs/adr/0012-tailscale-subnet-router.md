@@ -17,10 +17,10 @@ reachable only on the LAN. Two kinds of clients need them from elsewhere:
   tailnet as a device carrying the connecting user's identity, scoped by
   tailnet policy (a custom posture attribute on Premium and Enterprise, a
   tag on other plans). Today Chief Engineer reaches the task board over
-  its own VPN into the LAN (`docs/openproject.md`).
+  its own VPN into the LAN (`docs/apps/openproject.md`).
 
 v1 ran a Tailscale load balancer class beside ingress-nginx and Cilium's
-Gateway resources, and `docs/lessons-from-v1.md` lists that as ingress
+Gateway resources, and `docs/history/lessons-from-v1.md` lists that as ingress
 sprawl. `AGENTS.md` allows one HTTP gateway.
 
 ## Decision Drivers
@@ -50,7 +50,7 @@ own. The chart's `tailscale` IngressClass is disabled.
 
 The Connector advertises `10.45.10.50/32` and `10.20.0.1/32` only, with two
 replicas on different sleds. Split DNS in the tailnet points `holthome.net`
-at `10.20.0.1`. Setup and the tailnet policy are in `docs/tailscale.md`.
+at `10.20.0.1`. Setup and the tailnet policy are in `docs/platform/tailscale.md`.
 
 ### Consequences
 

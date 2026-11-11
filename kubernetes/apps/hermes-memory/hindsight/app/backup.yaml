@@ -17,7 +17,7 @@ spec:
       protocol: TCP
 ---
 # Nightly logical backup of database hindsight (every bot's schema), required
-# before any real memory goes in. docs/hermes-memory.md has the restore steps.
+# before any real memory goes in. docs/apps/hermes-memory.md has the restore steps.
 #
 # pg_dump -Fc from the same image and version as postgres17, as role
 # hindsight, onto PVC hindsight-dumps (7 kept). VolSync copies that volume to

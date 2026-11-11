@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # Static site for the ryanholt.net apex. The page lives in this file as a
 # ConfigMap, so an edit is a commit and Reloader rolls the pods. A larger
-# site would ship as its own image instead; see docs/website.md.
+# site would ship as its own image instead; see docs/apps/website.md.
 # /.well-known/matrix/ on the same host is a separate, longer-prefix route
 # in namespace matrix and never reaches this pod.
 apiVersion: helm.toolkit.fluxcd.io/v2

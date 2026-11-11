@@ -39,8 +39,8 @@ updated in a pull request.
   and the boot-disk selector are the 27 Oct 2026 preflight. Passwords stay
   out of git. See `docs/architecture.md` and ADR 0004.
 - SOPS personal access is the YubiKey fingerprint in `.sops.yaml`. Do not
-  generate or commit an age private key. See `docs/sops.md`.
-- Site-specific values stay as the placeholders in `docs/placeholders.md`
+  generate or commit an age private key. See `docs/platform/sops.md`.
+- Site-specific values stay as the placeholders in `docs/history/placeholders.md`
   and `cluster.example.toml`.
 - Do not generate an age key, a deploy key, or a webhook token and commit
   the result. Bootstrap commands in `bootstrap/README.md` are run by a
@@ -58,7 +58,7 @@ updated in a pull request.
   for a second interface (ADR 0007). Do not add another primary CNI.
   One HTTP gateway (Envoy Gateway), one block store (Rook-Ceph), one
   secrets operator (External Secrets). Do not add the overlapping
-  pieces called out in `docs/lessons-from-v1.md`.
+  pieces called out in `docs/history/lessons-from-v1.md`.
 
 ## Layout
 
@@ -70,7 +70,11 @@ talos/topf.yaml
 talos/all/                 patches for every node
 talos/control-plane/       patches for control-plane nodes
 bootstrap/helmfile/        first install, before Flux syncs the repo
+docs/architecture.md       what runs, and why it is shaped this way
+docs/platform/             shared services: ingress login, secrets, Postgres
+docs/apps/                 one guide per application
 docs/adr/                  decisions
+docs/history/              records of the build and the moves from Forge
 kubernetes/examples/       not reconciled
 ```
 
@@ -96,9 +100,16 @@ bash scripts/validate.sh
 ```
 
 CI runs the same steps in `.github/workflows/validate.yaml`: yamllint,
-kubeconform, a check that any `*.sops.yaml` is encrypted, helm template,
-gitleaks on the working tree, and `renovate-config-validator` for Renovate
-44.188.2.
+kubeconform, a check that any `*.sops.yaml` is encrypted, a doc link
+check, helm template, gitleaks on the working tree, and
+`renovate-config-validator` for Renovate 44.188.2.
+
+`scripts/check-doc-links.sh` fails on a relative Markdown link or
+`#anchor` that does not resolve, and on any `docs/<name>.md` path named in
+a manifest, script or prompt that does not exist. Renaming a doc or a
+heading means fixing every mention in the same pull request. A `docs/`
+path that belongs to another repository goes in the `EXTERNAL_DOCS` list
+at the top of that script.
 
 kubeconform checks the HelmRelease objects, not their `spec.values`.
 `scripts/helm-template.sh` builds each Flux Kustomization, applies its

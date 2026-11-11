@@ -22,7 +22,7 @@ spec:
     # API server is not published.
     operatorConfig:
       # The operator's own tailnet device. Its tag owns tag:k8s and the
-      # Connector's tag (tagOwners in the tailnet policy, docs/tailscale.md).
+      # Connector's tag (tagOwners in the tailnet policy, docs/platform/tailscale.md).
       hostname: k8s-holthome-operator
       defaultTags:
         - tag:k8s-operator
@@ -38,7 +38,7 @@ spec:
         limits:
           memory: 256Mi
     # No tailscale IngressClass. Envoy Gateway is the one HTTP gateway
-    # (AGENTS.md, docs/lessons-from-v1.md). Tailnet clients reach
+    # (AGENTS.md, docs/history/lessons-from-v1.md). Tailnet clients reach
     # envoy-internal through the Connector subnet router instead. ADR 0012.
     ingressClass:
       enabled: false

@@ -19,12 +19,12 @@ has no `#:schema` line.
 | Template | This tree | Why |
 | --- | --- | --- |
 | k8s_gateway for internal DNS | external-dns and the MikroTik webhook | A zone forward would capture static router records. ADR 0003 |
-| SOPS/age for app secrets | External Secrets, 1Password SDK; SOPS only for bootstrap. Personal decrypt is the v1 YubiKey PGP fingerprint | ADR 0002 and `docs/sops.md` |
+| SOPS/age for app secrets | External Secrets, 1Password SDK; SOPS only for bootstrap. Personal decrypt is the v1 YubiKey PGP fingerprint | ADR 0002 and `docs/platform/sops.md` |
 | BGP optional, eBGP (different ASNs) | BGP required, same ASN on both sides | Plan: iBGP to RouterOS 7 |
 | Cilium `cni.exclusive: false` | `false` | Matches the template. Multus is installed (ADR 0007). This tree previously set `true` because Multus was absent |
 | LoadBalancer pool = the whole node CIDR | Pool is `10.45.0.0/16`, separate from the node LAN | v1 already advertised services from that range. Nodes stay on `10.20.0.0/16` |
 | Storage left as a follow-up | Rook-Ceph, static NFS class, VolSync | Plan |
-| Postgres left as a follow-up | CloudNativePG operator, Barman Cloud plugin, and Cluster `postgres17` | LiteLLM needs a database. Barman Cloud ships postgres17 to R2 ([postgres17.md](postgres17.md)). ADR 0006 |
+| Postgres left as a follow-up | CloudNativePG operator, Barman Cloud plugin, and Cluster `postgres17` | LiteLLM needs a database. Barman Cloud ships postgres17 to R2 ([postgres17.md](platform/postgres17.md)). ADR 0006 |
 | No metrics stack | kube-prometheus-stack, Alertmanager and Grafana disabled | Alerts go to Forge. Forge already runs Grafana |
 | No tuppr | tuppr plus TalosUpgrade and KubernetesUpgrade | Plan. Health checks watch Ceph only, not kopiur |
 | Talos tool pin v1.14.4 in `.mise/config.toml` | v1.14.5 in `mise.toml` and `topf.yaml` | Plan pin. Template checkout was one patch behind |

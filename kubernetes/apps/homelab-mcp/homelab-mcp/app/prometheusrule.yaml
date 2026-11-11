@@ -67,7 +67,7 @@ spec:
             description: >-
               The obsidian-sync container has not been running for 15 minutes.
               Check its log (kubectl -n homelab-mcp logs deploy/homelab-mcp -c
-              obsidian-sync); docs/homelab-mcp.md, "Obsidian Sync".
+              obsidian-sync); docs/apps/homelab-mcp.md, "Obsidian Sync".
         - alert: HomelabMcpObsidianSyncRestarting
           # The liveness probe restarts the client when its lock stops being
           # refreshed (a dead event loop); repeated restarts mean it cannot
@@ -81,7 +81,7 @@ spec:
             description: >-
               obsidian-sync restarted more than twice in an hour. Its log says
               why; if the login was revoked, run the one-time setup again
-              (docs/homelab-mcp.md, "Obsidian Sync").
+              (docs/apps/homelab-mcp.md, "Obsidian Sync").
         - alert: HomelabMcpWithingsTokenUnusable
           # No Withings token on the state volume, or Withings refused it and
           # a refresh. Set at startup and on every withings_* call. Expected

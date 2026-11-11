@@ -6,7 +6,7 @@
 # volume per account, never shared: two accounts in one jar would clobber
 # each other's login and write rows under the wrong label (lading
 # nix/module.nix, sync.accounts). Only the sync-ryan CronJob mounts it.
-# Copied from Forge's /var/lib/lading/ryan at the cutover (docs/lading.md).
+# Copied from Forge's /var/lib/lading/ryan at the cutover (docs/apps/lading.md).
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

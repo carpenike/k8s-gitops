@@ -733,7 +733,7 @@ Secret is never created, and the bot runs without an API server.
 
 Change `api_server_key` in 1Password. External Secrets picks it up within
 its 12h refresh; push it at once with
-([external-secrets.md](external-secrets.md)):
+([external-secrets.md](../platform/external-secrets.md)):
 
 ```sh
 kubectl -n hermes-<bot> annotate externalsecret api-server force-sync="$(date +%s)" --overwrite

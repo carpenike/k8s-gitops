@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 # Shared long-term memory for the Hermes bots: one Hindsight server, one
-# Postgres schema per bot. See docs/hermes-memory.md.
+# Postgres schema per bot. See docs/apps/hermes-memory.md.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: hermes-memory

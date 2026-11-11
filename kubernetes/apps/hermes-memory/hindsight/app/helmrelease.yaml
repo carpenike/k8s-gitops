@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Hindsight 1.2.0: long-term memory for the Hermes bots. docs/hermes-memory.md.
+# Hindsight 1.2.0: long-term memory for the Hermes bots. docs/apps/hermes-memory.md.
 #
 # One API pod with the in-process worker (worker.enabled false), so the
 # tenant extension only has to be configured once. No control-plane UI, no
@@ -51,7 +51,7 @@ spec:
       image:
         repository: ghcr.io/carpenike/hindsight
         # Built from images/hindsight by hindsight-image.yaml. Floating tag,
-        # digest re-pinned by Renovate (docs/hermes-memory.md).
+        # digest re-pinned by Renovate (docs/apps/hermes-memory.md).
         tag: 1.2.0@sha256:31e3707cc4afd722a8b1985a8d0f1d3f9f789cbec57bf55c20d7ba883a26f182
       resources:
         requests:

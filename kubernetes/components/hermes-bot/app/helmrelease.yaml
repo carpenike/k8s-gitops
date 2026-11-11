@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# One Hermes bot as two pods (docs/hermes.md):
+# One Hermes bot as two pods (docs/apps/hermes.md):
 #
 #   agent   runc. `hermes gateway run`: Matrix, the model, memory, skills.
 #           The only pod with the Matrix token and the LiteLLM key. Runs no
@@ -53,7 +53,7 @@ spec:
               # by digest in its Dockerfile) plus the Outlook MCP server, the Hindsight memory
               # plugin and the matrix-profile plugin, each inert unless its
               # input is on. The floating tag moves on every rebuild build;
-              # Renovate re-pins the digest (docs/hermes.md "Updating the
+              # Renovate re-pins the digest (docs/apps/hermes.md "Updating the
               # images").
               tag: v0.23.0@sha256:dc9c61ba64d33c5f8027a1ff960546684a76b5874710298ca6ae334a524dd320
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
@@ -69,7 +69,7 @@ spec:
                 hermes config set model.default '${LLM_MODEL}'
                 hermes config set model.base_url http://litellm.litellm.svc.cluster.local:4000/v1
                 hermes config set model.api_key '$${OPENAI_API_KEY}'
-                # Fallback model (input LLM_FALLBACK_MODEL; docs/hermes.md,
+                # Fallback model (input LLM_FALLBACK_MODEL; docs/apps/hermes.md,
                 # "LiteLLM key"): when the main model fails or is rate-limited,
                 # the turn moves to this one on the same LiteLLM endpoint.
                 # key_env names the variable, so no key lands in config.yaml.
@@ -95,7 +95,7 @@ spec:
                 save_config(cfg)
                 print(f"fallback model: {model or 'none'}")
                 PY
-                # Image generation (input IMAGE_MODEL; docs/hermes.md, "Image
+                # Image generation (input IMAGE_MODEL; docs/apps/hermes.md, "Image
                 # generation"): Hermes' OpenAI image plugin against LiteLLM's
                 # Azure gpt-image deployments, on the same key. Unset, Hermes
                 # would fall back to FAL, which has no key and no egress here.
@@ -108,7 +108,7 @@ spec:
                   hermes config unset image_gen.openai
                   hermes config unset image_gen.provider
                 fi
-                # matrix-profile plugin (input MATRIX_PROFILE_TOOLS; docs/hermes.md,
+                # matrix-profile plugin (input MATRIX_PROFILE_TOOLS; docs/apps/hermes.md,
                 # "Matrix profile"): the bot changes its own Matrix display name
                 # and avatar from a Matrix conversation. Copied fresh from the
                 # image each boot and listed in plugins.enabled (Hermes loads
@@ -151,7 +151,7 @@ spec:
                 PY
                 # Webapp: the browser Desktop workspace, including the Bot
                 # Desktop viewer (Watch / Take over / Hand back) for the screen
-                # pod's browser (input WEBAPP_ENABLED; docs/hermes.md, "Watching
+                # pod's browser (input WEBAPP_ENABLED; docs/apps/hermes.md, "Watching
                 # the bot's desktop"). Served at https://<bot>-desktop on
                 # envoy-internal. A non-loopback bind engages Hermes' sign-in
                 # gate, here Pocket ID through the self-hosted OIDC provider
@@ -197,7 +197,7 @@ spec:
                   rm -rf /opt/data/skills/homelab/desktop-viewer
                 fi
                 # Claude Code coding sessions (input CLAUDE_CODE_ENABLED;
-                # docs/hermes.md, "Coding with Claude Code"). Claude Code, its
+                # docs/apps/hermes.md, "Coding with Claude Code"). Claude Code, its
                 # subscription token and the GitHub token are in the screen pod; this skill tells the bot how to hold one
                 # resumable Claude Code session per task across Matrix turns.
                 if [ '${CLAUDE_CODE_ENABLED:=false}' = true ]; then
@@ -362,7 +362,7 @@ spec:
                   rm -rf /opt/data/skills/homelab/code-requests
                 fi
                 # The shared task board (input TASK_BOARD_ENABLED;
-                # docs/openproject.md, "Bot access"): OpenProject through the
+                # docs/apps/openproject.md, "Bot access"): OpenProject through the
                 # openproject MCP server in the bot's mcp-servers.yaml, as the
                 # bot's own OpenProject user. How work is handed over, and what
                 # a task from a peer does and doesn't authorize.
@@ -475,7 +475,7 @@ spec:
                 hermes config set bot_desktop.placement terminal
                 hermes config set matrix.allowed_users '${MATRIX_ALLOWED_USERS}'
                 hermes config set database.journal_mode wal
-                # No hosted connectors (Nous tool gateway, docs/hermes.md "Tool
+                # No hosted connectors (Nous tool gateway, docs/apps/hermes.md "Tool
                 # search"): the agent has no route to it, so every tool_search
                 # waited ~45 s for the blocked call. Local tool search (built-in,
                 # plugin and MCP tools) is unaffected.
@@ -495,7 +495,7 @@ spec:
                   sed -i '/^API_SERVER_KEY=/d' /opt/data/.env
                 fi
                 # Outlook MCP server (input OUTLOOK_MCP_ENABLED; images/hermes-agent,
-                # docs/hermes.md). Writes or removes mcp_servers.outlook and drops
+                # docs/apps/hermes.md). Writes or removes mcp_servers.outlook and drops
                 # any remembered "always" answer for its tools on every boot.
                 if [ '${OUTLOOK_MCP_ENABLED:=false}' = true ]; then
                   hermes-outlook-config enable
@@ -503,7 +503,7 @@ spec:
                   hermes-outlook-config disable
                 fi
                 # MCP servers from git (optional ConfigMap hermes-bot-mcp,
-                # file mcp-servers.yaml in the bot's folder; docs/hermes.md,
+                # file mcp-servers.yaml in the bot's folder; docs/apps/hermes.md,
                 # "MCP servers from git"). Writes the declared HTTP servers into
                 # mcp_servers, removes the ones git wrote before and no longer
                 # declares, and leaves every other entry (outlook, anything
@@ -604,7 +604,7 @@ spec:
                 print(f"mcp servers from git: {', '.join(sorted(written)) or 'none'}")
                 PY
                 # Hindsight long-term memory (input HINDSIGHT_ENABLED;
-                # docs/hermes-memory.md). On only when the key reached this
+                # docs/apps/hermes-memory.md). On only when the key reached this
                 # container (Secret hindsight): a missing 1Password field
                 # leaves the bot on built-in memory instead of a provider that
                 # fails every turn. The plugin is copied fresh from the image
@@ -623,11 +623,11 @@ spec:
                 fi
                 for f in /opt/data/hindsight/config.json /opt/data/.hindsight/config.json; do
                   if [ -e "$f" ]; then
-                    echo "WARNING: $f overrides the Hindsight environment settings; delete it (docs/hermes-memory.md)" >&2
+                    echo "WARNING: $f overrides the Hindsight environment settings; delete it (docs/apps/hermes-memory.md)" >&2
                   fi
                 done
                 # Signed webhook from Chief Engineer (input WEBHOOK_ENABLED;
-                # docs/hermes.md, "Webhook (opt-in)"). Same .env lesson as
+                # docs/apps/hermes.md, "Webhook (opt-in)"). Same .env lesson as
                 # API_SERVER_KEY: a WEBHOOK_* line there beats the Secret.
                 if [ -n "$${WEBHOOK_SECRET:-}" ] && [ -f /opt/data/.env ] && [ ! -L /opt/data/.env ]; then
                   sed -i -e '/^WEBHOOK_SECRET=/d' -e '/^WEBHOOK_ENABLED=/d' -e '/^WEBHOOK_PORT=/d' /opt/data/.env
@@ -669,7 +669,7 @@ spec:
                     "mirror_to_session": True,
                     # The Matrix toolset minus what reaches people or services
                     # outside Matrix: no MCP (Outlook), browser, computer_use,
-                    # connections, cronjob or delegation (docs/hermes.md).
+                    # connections, cronjob or delegation (docs/apps/hermes.md).
                     "toolsets": [
                         "terminal", "file", "code_execution", "web", "vision", "memory",
                         "session_search", "skills", "todo", "clarify", "tts", "image_gen", "no_mcp",
@@ -699,7 +699,7 @@ spec:
                 print(f"webhook route {NAME}: {'written' if os.environ['WEBHOOK_ROUTE'] == 'write' else 'removed'}")
                 PY
                 # Tavily web search and extract (input TAVILY_ENABLED;
-                # docs/hermes.md, "Web search (opt-in)"). A stored web.backend
+                # docs/apps/hermes.md, "Web search (opt-in)"). A stored web.backend
                 # is strict: no probe, no fallback. keyless_fallback false
                 # turns off the anonymous third-party ring, keyless rescue,
                 # and keyless Tavily, so a missing key is an error, not a
@@ -711,7 +711,7 @@ spec:
                   hermes config unset web.backend
                 fi
                 # Persona (optional ConfigMap hermes-bot-soul in the bot's
-                # folder; docs/hermes.md, "Persona"). Git's SOUL.md is written
+                # folder; docs/apps/hermes.md, "Persona"). Git's SOUL.md is written
                 # when the live one is missing, is the image's default, or is
                 # still a version git wrote: the last seed (its hash in
                 # /opt/data/.soul-seed.sha256) or an earlier one listed in the
@@ -733,7 +733,7 @@ spec:
                     echo "SOUL.md was edited outside git; git's version not applied"
                   fi
                 fi
-                # A2A, Agent-to-Agent (input A2A_ENABLED; docs/hermes.md, "A2A
+                # A2A, Agent-to-Agent (input A2A_ENABLED; docs/apps/hermes.md, "A2A
                 # (opt-in)"). The inbound server starts from the env alone
                 # (A2A_PORT in Secret a2a, plugins/platforms/a2a/__init__.py
                 # is_connected); this writes what config.yaml must hold: the
@@ -822,7 +822,7 @@ spec:
                 print(f"a2a: {'on' if on else 'off'}; peers: {', '.join(sorted(agents)) or 'none'}")
                 PY
                 # Board wake-ups (input TASK_BOARD_WEBHOOK_ENABLED;
-                # docs/openproject.md, "Waking a bot"): route task-board under
+                # docs/apps/openproject.md, "Waking a bot"): route task-board under
                 # platforms.webhook.extra.routes, for openproject-mcp's relay.
                 # Written only with the input and TASK_BOARD_ENABLED on, the
                 # key in this container (Secret task-board-webhook), and a
@@ -900,7 +900,7 @@ spec:
                 print(f"webhook route {NAME}: {state}")
                 PY
                 # Routines from git (optional ConfigMap hermes-bot-routines,
-                # routines.yaml in the bot's folder; docs/hermes.md, "Routines
+                # routines.yaml in the bot's folder; docs/apps/hermes.md, "Routines
                 # from git"): scheduled jobs written into Hermes' own cron store
                 # with its cronjob API, so the gateway's scheduler runs them.
                 # Jobs this step made are tracked in
@@ -1144,7 +1144,7 @@ spec:
               # OPENPROJECT_API_TOKEN (for the openproject MCP server's
               # header), OPENPROJECT_USER, OPENPROJECT_USER_ID and
               # OPENPROJECT_PROJECT, written by the bot's task-board Job
-              # (docs/openproject.md, "Bot provisioning"). Empty or absent
+              # (docs/apps/openproject.md, "Bot provisioning"). Empty or absent
               # until then, and for a bot without TASK_BOARD_ENABLED; when
               # the Job fills it, Reloader restarts this pod.
               - secretRef:
@@ -1153,7 +1153,7 @@ spec:
               # MATRIX_RECOVERY_KEY, only while re-verifying a fresh crypto
               # store. Nothing in git creates this Secret: it is made by hand
               # from 1Password for one boot and deleted afterwards
-              # (docs/hermes.md), so the key is not in the steady-state env.
+              # (docs/apps/hermes.md), so the key is not in the steady-state env.
               - secretRef:
                   name: matrix-recovery
                   optional: true
@@ -1280,7 +1280,7 @@ spec:
             image:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
-              # Floating tag, digest re-pinned by Renovate (docs/hermes.md).
+              # Floating tag, digest re-pinned by Renovate (docs/apps/hermes.md).
               tag: v0.23.0@sha256:66fd424fb72b9841a9fddba330586bc9485b2c35dbaf6967a403eae516645243
             env:
               TZ: America/New_York
@@ -1336,7 +1336,7 @@ spec:
         ports:
           ssh:
             port: 22
-      # Opt-in OpenAI-compatible API (input API_SERVER_ENABLED; docs/hermes.md).
+      # Opt-in OpenAI-compatible API (input API_SERVER_ENABLED; docs/apps/hermes.md).
       # Everything gated on it is off unless the bot sets it to true.
       api:
         enabled: ${API_SERVER_ENABLED:=false}
@@ -1345,7 +1345,7 @@ spec:
         ports:
           http:
             port: 8642
-      # Opt-in signed webhook (input WEBHOOK_ENABLED; docs/hermes.md).
+      # Opt-in signed webhook (input WEBHOOK_ENABLED; docs/apps/hermes.md).
       hooks:
         enabled: ${WEBHOOK_ENABLED:=false}
         controller: agent
@@ -1354,7 +1354,7 @@ spec:
           webhook:
             port: 8644
       # Board wake-ups (input TASK_BOARD_WEBHOOK_ENABLED;
-      # docs/openproject.md, "Waking a bot"): the same webhook listener, for
+      # docs/apps/openproject.md, "Waking a bot"): the same webhook listener, for
       # openproject-mcp's relay only (CNP agent-board-hooks). In the cluster
       # only; no HTTPRoute.
       board-hooks:
@@ -1364,7 +1364,7 @@ spec:
         ports:
           webhook:
             port: 8644
-      # Opt-in desktop viewer / Webapp (input WEBAPP_ENABLED; docs/hermes.md).
+      # Opt-in desktop viewer / Webapp (input WEBAPP_ENABLED; docs/apps/hermes.md).
       desktop:
         enabled: ${WEBAPP_ENABLED:=false}
         controller: agent
@@ -1372,7 +1372,7 @@ spec:
         ports:
           http:
             port: 9120
-      # Opt-in A2A server (input A2A_ENABLED; docs/hermes.md). Other bots
+      # Opt-in A2A server (input A2A_ENABLED; docs/apps/hermes.md). Other bots
       # call agent-a2a.hermes-<bot>.svc.cluster.local:9900 directly; LAN
       # peers use the route below.
       a2a:
@@ -1544,7 +1544,7 @@ spec:
           - secretKey: outlook_tenant_id
             remoteRef:
               key: hermes-${BOT_NAME}/outlook_tenant_id
-      # Hindsight client settings (docs/hermes-memory.md): the bot's tenant
+      # Hindsight client settings (docs/apps/hermes-memory.md): the bot's tenant
       # key from 1Password plus fixed values. Hermes strips HINDSIGHT_API_KEY
       # and HINDSIGHT_API_URL from child processes. Indicators off: no
       # "retained"/"recalled" markers in Matrix replies.
@@ -1790,7 +1790,7 @@ spec:
       # Grok Chief Engineer as an outbound A2A peer (A2A_CHIEF_ENGINEER_ENABLED),
       # through a bridge that does not exist yet. Its URL is kept out of git
       # with its token. The agent also needs an egress rule for the bridge's
-      # host before a call can leave the pod (docs/hermes.md).
+      # host before a call can leave the pod (docs/apps/hermes.md).
       a2a-chief-engineer:
         enabled: ${A2A_CHIEF_ENGINEER_ENABLED:=false}
         forceRename: a2a-chief-engineer
@@ -1871,7 +1871,7 @@ spec:
                       - port: "8888"
                         protocol: TCP
       # The agent's route to the task board's MCP server (input
-      # TASK_BOARD_ENABLED; docs/openproject.md, "Bot access"): the
+      # TASK_BOARD_ENABLED; docs/apps/openproject.md, "Bot access"): the
       # openproject-mcp pods on 8000, nothing else. That server's own
       # policy admits only agent pods from bot-labelled namespaces, and
       # every call is made with this bot's own OpenProject token.
@@ -1952,7 +1952,7 @@ spec:
                       - port: "8642"
                         protocol: TCP
       # Lets pocket-id-exempt in network select the public route
-      # (docs/gateway-auth.md, "Opt out").
+      # (docs/platform/gateway-auth.md, "Opt out").
       api-gateway-auth:
         enabled: ${API_SERVER_ENABLED:=false}
         forceRename: agent-api-gateway-auth
@@ -2014,7 +2014,7 @@ spec:
                       - port: "8644"
                         protocol: TCP
       # Lets pocket-id-exempt in network select the public route
-      # (docs/gateway-auth.md, "Opt out").
+      # (docs/platform/gateway-auth.md, "Opt out").
       hooks-gateway-auth:
         enabled: ${WEBHOOK_ENABLED:=false}
         forceRename: agent-hooks-gateway-auth
@@ -2088,7 +2088,7 @@ spec:
                       - port: "9120"
                         protocol: TCP
       # Lets pocket-id-exempt in network select the native route
-      # (docs/gateway-auth.md, "Opt out").
+      # (docs/platform/gateway-auth.md, "Opt out").
       desktop-gateway-auth:
         enabled: ${WEBAPP_ENABLED:=false}
         forceRename: agent-desktop-gateway-auth
@@ -2163,7 +2163,7 @@ spec:
                       - port: "9900"
                         protocol: TCP
       # Lets pocket-id-exempt in network select the public route
-      # (docs/gateway-auth.md, "Opt out").
+      # (docs/platform/gateway-auth.md, "Opt out").
       a2a-gateway-auth:
         enabled: ${A2A_ENABLED:=false}
         forceRename: agent-a2a-gateway-auth

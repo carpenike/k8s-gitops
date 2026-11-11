@@ -72,7 +72,7 @@ spec:
               The health endpoint is serving but its Postgres queries are
               failing. The ingest writes through the same database, so it is
               almost certainly failing too. Check postgres17 and the
-              schoolhouse_reader grants (docs/postgres17.md).
+              schoolhouse_reader grants (docs/platform/postgres17.md).
         - alert: SchoolhouseRecordsCollapsed
           # Compares against a 14-day average, so it also fires once at the
           # end of a term. Prometheus here keeps 7 days, so the average

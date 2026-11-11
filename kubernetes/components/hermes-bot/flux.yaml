@@ -31,7 +31,7 @@ spec:
   timeout: 15m
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# The bot's OpenProject account and token (docs/openproject.md, "Bot
+# The bot's OpenProject account and token (docs/apps/openproject.md, "Bot
 # provisioning"). Every bot gets the Job; it exits at once unless the bot
 # has TASK_BOARD_ENABLED=true. Separate from provision on purpose: nothing
 # depends on it, so OpenProject being down never holds the bot's app.

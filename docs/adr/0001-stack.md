@@ -14,7 +14,7 @@ The previous repository is public and is no longer synced by a cluster.
 
 ## Decision Drivers
 
-- One tool per layer, after the v1 overlap described in `docs/lessons-from-v1.md`
+- One tool per layer, after the v1 overlap described in `docs/history/lessons-from-v1.md`
 - Community Flux and Talos conventions from onedr0p/cluster-template
 - Backups must not depend on the chassis staying up
 - The repository stays public, so site data cannot live in git

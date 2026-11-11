@@ -5,7 +5,7 @@
 #
 # A bot is a folder under kubernetes/apps/hermes/<bot>/ whose kustomization
 # sets `namespace: hermes-<bot>`, includes this component, and generates
-# ConfigMap hermes-bot-inputs (the input contract; docs/hermes.md). The
+# ConfigMap hermes-bot-inputs (the input contract; docs/apps/hermes.md). The
 # replacements below derive names from it; the Flux Kustomizations in
 # flux.yaml build ./provision, ./task-board and ./app with
 # postBuild.substituteFrom those ConfigMaps. Replacements, not substitution, fill the objects here, because

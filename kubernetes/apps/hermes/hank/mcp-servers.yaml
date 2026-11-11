@@ -1,5 +1,5 @@
 ---
-# Hank's MCP servers from git (docs/hermes.md, "MCP servers from git"). The
+# Hank's MCP servers from git (docs/apps/hermes.md, "MCP servers from git"). The
 # config init container writes each entry into config.yaml on every start.
 # Each server also needs egress: public hosts go in mcp-egress.yaml.
 servers:
@@ -12,7 +12,7 @@ servers:
     tools:
       - resolve-library-id
       - query-docs
-  # The shared task board (docs/openproject.md, "Bot access"), as OpenProject
+  # The shared task board (docs/apps/openproject.md, "Bot access"), as OpenProject
   # user hank. In-cluster, so its egress is the component's agent-task-board
   # (TASK_BOARD_ENABLED), not mcp-egress.yaml. OPENPROJECT_API_TOKEN comes
   # from Secret hermes-hank-openproject, which the provisioning Job fills.

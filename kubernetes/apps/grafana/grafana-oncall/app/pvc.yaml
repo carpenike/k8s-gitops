@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
 # /var/lib/oncall for the engine and the Celery worker: the SQLite database
 # (escalation chains, schedules, integrations and their tokens). Forge's
-# /var/lib/grafana-oncall/data, copied at the cutover (docs/grafana.md).
+# /var/lib/grafana-oncall/data, copied at the cutover (docs/platform/grafana.md).
 # Backed up by ../backup. Both containers share it, so they share a pod.
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Bulwark webmail for Stalwart (ADR 0017, docs/mail.md "Webmail"). Nothing
+# Bulwark webmail for Stalwart (ADR 0017, docs/apps/mail.md "Webmail"). Nothing
 # depends on it: mail keeps working if this is unready.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

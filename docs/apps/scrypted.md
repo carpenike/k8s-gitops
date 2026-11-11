@@ -7,7 +7,7 @@ The manifest hostname is `scrypted.${SECRET_DOMAIN}`. `mikrotik-dns`
 publishes that name. The route has no parent on `envoy-external`.
 
 The gateway Pocket ID policy applies, then Scrypted's own login. That is
-two logins, which [gateway-auth.md](gateway-auth.md) ("One login per
+two logins, which [gateway-auth.md](../platform/gateway-auth.md) ("One login per
 route") no longer allows. To do: pick the one login, the gateway's
 (Scrypted trusting it) or Scrypted's own with the route labelled `app`.
 Forge's Caddy vhost does not add a second login.
@@ -49,7 +49,7 @@ Read from `carpenike/nix-config` `main`.
 Namespace `scrypted`. Chart `app-template` 5.3.0. One replica,
 `Recreate`. `hostNetwork` is false.
 
-The pod annotation is the one in [multus.md](multus.md):
+The pod annotation is the one in [multus.md](../platform/multus.md):
 
 ```yaml
 k8s.v1.cni.cncf.io/networks: '[{"name":"vlan30","namespace":"kube-system","ips":["10.30.0.31/16"]}]'
@@ -106,7 +106,7 @@ reconcile puts the Deployment back to whatever git says.
 
 1. Trunk VLAN 30 on the sled switch ports and apply the Talos machine
    config so `ens1f0.30` exists, if that is not done yet. See
-   [multus.md](multus.md). Confirm `10.30.0.31` answers nothing else.
+   [multus.md](../platform/multus.md). Confirm `10.30.0.31` answers nothing else.
 2. Let Flux reconcile Node Feature Discovery. Confirm the label on the
    two Coral sleds, and nowhere else:
 

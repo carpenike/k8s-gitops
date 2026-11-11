@@ -2,7 +2,7 @@
 # Shared scale-set values. Each overlay sets metadata.name, githubConfigUrl,
 # and runnerScaleSetName. Runners are ephemeral: one job, then the pod is
 # removed. containerMode dind adds a privileged docker:dind sidecar.
-# See docs/actions-runners.md.
+# See docs/platform/actions-runners.md.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
