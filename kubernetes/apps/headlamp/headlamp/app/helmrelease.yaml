@@ -70,7 +70,7 @@ spec:
       enabled: true
       # pluginctl release that matches the install command in chart 0.46.0.
       version: "0.1.1"
-      baseImage: node:22.23-alpine3.24
+      baseImage: node:26.13-alpine3.24
       configContent: |
         plugins:
           - name: headlamp_flux
