@@ -149,9 +149,11 @@ Rook `useAllDevices` stays false. `devicePathFilter` matches the three
 disk is `ata5` and does not match. `wipeDevicesFromOtherClusters` stays
 true; the v1 Ceph data on those disks is wiped on install.
 
-STATE and EPHEMERAL are LUKS2 with a `nodeID` key. The chassis has no TPM
-module. sled-1's Talos dmesg on 27 Oct 2026 was `No TPM chip found` /
-`TPM device is not available`. Secure Boot stays off. See `talos/README.md`.
+STATE and EPHEMERAL are not encrypted. The planned LUKS2 `nodeID` key does
+not work on these boards. The chassis has no TPM module (sled-1's Talos
+dmesg on 27 Oct 2026 was `No TPM chip found` / `TPM device is not
+available`), and Talos refuses to derive a `nodeID` key from the boards'
+SMBIOS machine UUID. Secure Boot stays off. See `talos/README.md`.
 
 Cluster `postgres17` in `cnpg-system` is the shared PostgreSQL 17 database
 (`ghcr.io/cloudnative-pg/postgresql:17.9`, two instances, `ceph-block`).
@@ -163,8 +165,12 @@ Cloudflare R2: continuous WAL archiving plus a daily base backup
 (`postgres17-r2-daily`), 30-day recovery window. See
 [postgres17.md](postgres17.md).
 
-VolSync is installed. ReplicationSource objects are examples only.
-It waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
+VolSync copies app volumes to Cloudflare R2 with restic. The
+ReplicationSource for a volume is in that app's `backup/` folder: Grafana,
+Grafana OnCall, homelab-mcp, Tuwunel and OpenProject. Hindsight's is in
+its `app/` folder, and each Hermes bot gets one from the `hermes-bot`
+component. They share 1Password item `volsync-r2-template`, with one
+repository path per volume. VolSync waits on `snapshot-controller` in `kube-system` (chart 0.1.2, external
 snapshotter v8.7.0). That chart also carries the VolumeSnapshot CRDs.
 `ceph-block` has VolumeSnapshotClass `csi-ceph-block`.
 
