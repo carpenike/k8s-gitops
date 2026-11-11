@@ -93,7 +93,10 @@ SMTP2GO instead of the edge: an `MtaRoute/Relay` named `smtp2go` to
 `mail.smtp2go.com:465` (implicit TLS), authenticated as an SMTP2GO SMTP
 user whose password Stalwart reads from `STALWART_SMTP2GO_PASSWORD`. The
 egress policy already allows 465 to public IPv4. Local domains still go
-to route `local`. When the edge can send, the outbound strategy points
+to route `local`. The outbound strategy's `tls` expression drops its
+default retry under `invalid-tls`, which would skip certificate
+validation on the relay hop and could hand the password to an
+impostor. When the edge can send, the outbound strategy points
 at the edge's route instead and the SMTP2GO account is closed.
 
 `holthome.net` is a verified sender domain at SMTP2GO, with its

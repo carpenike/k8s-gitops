@@ -261,8 +261,19 @@ IPv4.
    }'
    ```
 
-   It applies at the next reload. Undo it by setting `else` back to
-   `'mx'`.
+   In the WebUI this is Settings › MTA › Outbound › Strategy, Routing:
+   keep the `is_local_domain(rcpt_domain)` → `'local'` condition and set
+   ELSE to `'smtp2go'`, quotes included. It applies at the next reload.
+   Undo it by setting ELSE back to `'mx'`.
+
+   On the same page, delete the TLS condition
+   `retry_num > 0 && last_error == 'tls'` → `'invalid-tls'`, leaving ELSE
+   `'default'`. That default retries a delivery that failed with a TLS
+   error under a strategy that does not validate certificates, and the
+   TLS strategy applies to relay hops too, so a forged certificate on the
+   second try would receive the SMTP2GO password. Every remote domain
+   goes through the relay, so nothing needs the fallback. Leave
+   Scheduling and Connection as they are.
 6. **DKIM.** Nothing to change. Signing happens in the DATA stage, before
    routing: the default `dkimSignDomain` signs mail from authenticated
    senders on local domains with the domain's active keys. Check that the
