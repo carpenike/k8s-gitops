@@ -40,8 +40,13 @@ needs to issue a token Stalwart accepts, and keeps nothing on disk.
 - Pocket ID gets a second public client, `bulwark`, with PKCE, gated to
   `family`, and the existing API `Stalwart Mail`
   (`https://mail.holthome.net`) is granted to it
-- Bulwark asks for `urn:stalwart:oauth:scope:full`, so Account security
-  (app passwords) works from webmail too
+- Bulwark asks for the four service scopes
+  (`urn:ietf:params:oauth:scope:mail`, `contacts`, `calendars`, `files`).
+  Stalwart refuses a token from a client other than its WebUI unless it
+  carries one of them, and ignores its own scopes on tokens from an
+  outside provider. Pocket ID grants them as permissions of the
+  `Stalwart Mail` API. Account security (app passwords) stays in the
+  WebUI
 - The browser calls Stalwart's JMAP API on `mail.holthome.net` directly,
   from another origin, so Stalwart's `usePermissiveCors` is on
 - Settings sync and Bulwark's admin dashboard stay off. Each browser keeps
@@ -61,7 +66,7 @@ needs to issue a token Stalwart accepts, and keeps nothing on disk.
 - Bad, because Bulwark is young (first release March 2026) and releases
   often. Renovate pins the digest, so updates arrive as reviewed changes
 - Bad, because the token is a bearer token in the browser, so a script
-  injected into Bulwark could use it with full account scope
+  injected into Bulwark could read and send mail as the user
 - Neutral, because Bulwark is AGPL-3.0. Running it unmodified for the
   household adds no obligation
 

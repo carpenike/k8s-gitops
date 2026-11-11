@@ -216,10 +216,14 @@ Pocket ID only, then the browser calls Stalwart's JMAP API at
 1. 1Password item `bulwark` with `session_secret`.
 2. Pocket ID: a public client `bulwark` (PKCE, no secret), callback
    `https://webmail.holthome.net/en/auth/callback`, gated to `family`.
-   Grant it the API `Stalwart Mail` (`https://mail.holthome.net`) for
-   user-delegated access, as the `stalwart` client has. Bulwark builds the
-   callback from the browser's locale, so a browser set to another
-   language needs that locale's path too.
+   Give the API `Stalwart Mail` (`https://mail.holthome.net`) four
+   permissions keyed `urn:ietf:params:oauth:scope:mail`, `…:contacts`,
+   `…:calendars` and `…:files` (`PUT /api/apis/{id}/permissions`), and
+   grant the API to `bulwark` for user-delegated access with all four.
+   Without them Stalwart answers 401 to Bulwark's token: it refuses an
+   outside client's token that carries none of these scopes. Bulwark
+   builds the callback from the browser's locale, so a browser set to
+   another language needs that locale's path too.
 3. Stalwart: turn on `usePermissiveCors` in the HTTP settings. The
    webmail runs on another origin, and without it the browser blocks
    every JMAP call. It adds `Access-Control-Allow-Origin: *` to every
