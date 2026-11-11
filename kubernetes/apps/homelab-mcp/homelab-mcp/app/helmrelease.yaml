@@ -204,9 +204,13 @@ spec:
               # all its bots. Each bot that logs in still gets its own token;
               # what they share is the tool list. Grokbot's own list: Hermes'
               # tools plus the school reads (car-ride check-in, the kitchen
-              # paper) and the Cooklang reads (cookbook shopping lists); no
-              # recipe edits. /mcp/house-sensors: Groundskeeper; its scope
-              # name keys the HA entity policy.
+              # paper), the Cooklang reads (cookbook shopping lists; no
+              # recipe edits) and every MFP tool, reads and writes including
+              # deletes (Ryan, 2026-11-11). Writes are preview then confirm,
+              # but a bot can confirm its own preview, so nobody reviews a
+              # Grokbot write before it lands.
+              # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
+              # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
               # Grocy acts as her (grocy.steffi in homelab-mcp-user-credentials;
               # refused, never the shared key, until it exists): reads plus
@@ -258,7 +262,19 @@ spec:
                  "school_get_announcements", "school_list_staff", "school_get_sync_status",
                  "school_parent_today",
                  "cooklang_list_recipes", "cooklang_get_recipe",
-                 "cooklang_search_federation", "cooklang_build_shopping_list"],
+                 "cooklang_search_federation", "cooklang_build_shopping_list",
+                 "mfp_auth_status", "mfp_get_day", "mfp_get_range", "mfp_audit",
+                 "mfp_get_food", "mfp_search_food", "mfp_list_recipes", "mfp_get_recipe",
+                 "mfp_preview_log_entry", "mfp_log_entry", "mfp_preview_delete_entry",
+                 "mfp_delete_entry", "mfp_preview_delete_meal_entries",
+                 "mfp_delete_meal_entries", "mfp_preview_replace_entry", "mfp_replace_entry",
+                 "mfp_preview_create_recipe", "mfp_create_recipe",
+                 "mfp_preview_update_recipe", "mfp_update_recipe",
+                 "mfp_preview_delete_recipe", "mfp_delete_recipe", "mfp_list_meals",
+                 "mfp_preview_log_recipe", "mfp_log_recipe", "mfp_preview_log_meal",
+                 "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
+                 "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
+                 "mfp_delete_meal"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
