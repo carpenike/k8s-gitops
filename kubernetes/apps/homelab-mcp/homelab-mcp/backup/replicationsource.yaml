@@ -66,3 +66,39 @@ spec:
     retain:
       daily: 7
       weekly: 4
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# The Obsidian vault volume. Obsidian Sync keeps 12 months of version history,
+# but the headless client is in beta and can sync a missed file as a delete
+# (upstream #19/#28), and the agents write here: this is the copy outside
+# Obsidian's service. It also holds the client's login and end-to-end key
+# (config/); restic encrypts the repository. Every 6 hours at :30, between
+# the state (:15) and Signal (:45) runs.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: homelab-mcp-vault
+spec:
+  sourcePVC: homelab-mcp-vault
+  trigger:
+    schedule: "30 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: homelab-mcp-vault-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 2Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: homelab-mcp-volsync
+    # The volume root and config/ are 0700, owned by the pod's uid.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4

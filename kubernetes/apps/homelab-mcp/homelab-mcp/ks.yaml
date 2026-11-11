@@ -62,6 +62,10 @@ spec:
       kind: ExternalSecret
       name: homelab-mcp-signal-volsync
       namespace: homelab-mcp
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: homelab-mcp-vault-volsync
+      namespace: homelab-mcp
   interval: 1h
   path: ./kubernetes/apps/homelab-mcp/homelab-mcp/backup
   prune: true

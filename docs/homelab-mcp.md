@@ -17,7 +17,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
-| `/mcp/agent/grokbot` | the `hermes` list, plus school reads and Cooklang reads | `grokbot` | Grokbot (every Grokbot agent) |
+| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, and the Obsidian vault (`vault_*`, reads and writes) | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
@@ -64,6 +64,8 @@ a `toFQDNs` name.
 | `money` | postgres17 `homelab_finance` (`money_overview` only) |
 | `school`, `school_today` | postgres17 `schoolhouse` |
 | `amazon`, `costco`, `samsclub` | postgres17 `lading` |
+| `withings` | wbsapi.withings.net (token on the state volume) |
+| `vault` | the Obsidian vault on PVC `homelab-mcp-vault`, kept in step by the `obsidian-sync` container ([below](#obsidian-sync)) |
 
 Off: `messaging` (not configured yet; signal-api now runs in this pod) and
 `nixos` (Forge's deploy trigger). Signal capture and reports run in this pod
@@ -91,7 +93,8 @@ and the jobs share one state directory with the server.
 
 | Container | What it does |
 | --- | --- |
-| `permissions` (init) | Sets `/var/lib/homelab-mcp` and the Signal volume to uid 65532, mode 0700. The finance runtime refuses anything else. The only step that runs as root (`CHOWN`, `FOWNER` only) |
+| `permissions` (init) | Sets `/var/lib/homelab-mcp` and the Signal volume to uid 65532, mode 0700. The finance runtime refuses anything else. Also lays out the vault volume (below). The only step that runs as root (`CHOWN`, `FOWNER` only) |
+| `obsidian-sync` | Obsidian's headless Sync client for the vault ([below](#obsidian-sync)) |
 | `actual` | The Actual sidecar |
 | `signal-api` | signal-cli-rest-api 0.101, JSON-RPC mode, the household bot's registration on PVC `homelab-mcp-signal`. No authentication, so no Service and no route; the network policy admits nothing to 8080 |
 | `capture` | `homelab-finances-runtime capture 8080`: the Signal note listener |
@@ -118,9 +121,11 @@ Volumes:
   (`finances-context.db`), the ingestion reservation and report state, the
   finances checkout.
 - `homelab-mcp-signal`: signal-cli's registration. Not reproducible.
+- `homelab-mcp-vault` (25 Gi): the Obsidian vault, the Sync client's login
+  and end-to-end key, and its install ([below](#obsidian-sync)).
 
-Both are backed up to R2 by VolSync every 6 hours (`../backup`, item
-`volsync-r2-template`).
+All three are backed up to R2 by VolSync every 6 hours, at :15, :45 and :30
+(`../backup`, item `volsync-r2-template`).
 
 MFP writes stay off (`HOMELAB_MCP_MFP_WRITES_ENABLED: "false"`) until the
 write tests pass. The mfp tools only read.
@@ -133,6 +138,48 @@ cluster without the gateway login. Check each host when it first fails:
 - Paperless takes `Token`.
 - Gatus needs the `/api/v1/endpoints` bypass.
 - Actual takes the sidecar's password login.
+
+### Obsidian Sync
+
+The `obsidian-sync` container runs Obsidian's headless Sync client
+(`obsidian-headless`, ADR 0016) and keeps the vault on `homelab-mcp-vault`
+in step with Ryan's devices. The app's `vault_*` tools read and write the
+same folder.
+
+- **Pinned by Renovate.** `app/obsidian-sync/package.json` and
+  `package-lock.json` pin the client and its dependencies by integrity hash.
+  `run.sh` installs them with `npm ci` into the volume (`ob/`), once per
+  lockfile. The client is not redistributable, so it is never baked into an
+  image. One step is not hash-pinned: `better-sqlite3`'s install downloads its
+  prebuilt binary from its GitHub release. The image is
+  `node:22-bookworm-slim`, digest-pinned.
+- **Volume layout** (made by the permissions init container):
+  - `workspace/notes`: the vault. `HOMELAB_MCP_VAULT_PATH`.
+  - `workspace/.tmp`: the tools' scratch dir, outside the vault on the same
+    mount, so their writes are atomic and Sync never sees a temp file.
+  - `config/` (0700): the client's login token and the derived end-to-end key.
+    Mounted only into `obsidian-sync`, never into the app.
+  - `ob/`: the install.
+- **Phases** (`/tmp/obsidian-sync/state`): `installing`, then `waiting` until
+  the one-time setup below, then `syncing`. While syncing, the client touches
+  `.obsidian/.sync.lock` every second, and the liveness probe restarts it if
+  that stops.
+
+**One-time setup** (and again after a restore, or if the device is removed in
+Obsidian's settings), in a terminal. Each command prompts; the account
+password, MFA code and end-to-end password go only to the client:
+
+```bash
+kubectl -n homelab-mcp exec -it deploy/homelab-mcp -c obsidian-sync -- ob login
+kubectl -n homelab-mcp exec -it deploy/homelab-mcp -c obsidian-sync -- ob sync-list-remote
+kubectl -n homelab-mcp exec -it deploy/homelab-mcp -c obsidian-sync -- ob sync-setup --vault "<vault name>" --path /vault/notes --device-name homelab-mcp
+kubectl -n homelab-mcp exec -it deploy/homelab-mcp -c obsidian-sync -- ob sync-config --path /vault/notes --configs "" --file-types image,audio,video,pdf
+```
+
+`--configs ""` keeps Obsidian's settings (`.obsidian/`) out of it, and the
+file types leave out "unsupported" files. Within a minute `run.sh` sees the
+setup and starts `ob sync --continuous`. Check it with
+`kubectl -n homelab-mcp logs deploy/homelab-mcp -c obsidian-sync`.
 
 ## 1Password
 
@@ -242,6 +289,9 @@ other alert here.
 | `HomelabMcpDown` | Prometheus gets no `/metrics` for 10 minutes |
 | `HomelabMcpMfpAuthExpired` | MyFitnessPal refused the cookies. The tools return an auth error until they are replaced |
 | `HomelabMcpMfpCookiesExpiringSoon` | The session cookie expires within 5 days |
+| `HomelabMcpWithingsTokenUnusable` | No Withings token, or Withings refused it and a refresh, for 1 hour |
+| `HomelabMcpObsidianSyncDown` | The `obsidian-sync` container has not been running for 15 minutes |
+| `HomelabMcpObsidianSyncRestarting` | `obsidian-sync` restarted more than twice in an hour |
 
 ## Cutover from Forge
 
