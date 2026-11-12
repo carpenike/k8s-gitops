@@ -78,7 +78,8 @@ The cluster side:
   The DATA stage `enableSpamFilter` expression and the SPF, DMARC and
   reverse-DNS verification expressions skip sessions on that listener,
   because they would judge the Connector pod's address. The edge's
-  verdict travels in its headers, and a global Sieve script files mail the
+  verdict travels in its `X-Spam-Score` header. A system Sieve script
+  cannot file into a mailbox, so each user's own script files mail the
   edge marked as spam into Junk
 
 The same route also lets tailnet devices reach the client ports (465,
