@@ -27,12 +27,11 @@ needs_ryan_status: Needs Ryan
 
 # The handoff fields (System/Agents.md, "Handoff protocol"), on every board
 # project and type. Once required, OpenProject itself refuses an item without
-# them. Not yet: openproject-mcp (the Hermes bots' server) and homelab-mcp
-# 0.62.0 must send them first, or the bots' creates would fail.
+# them. openproject-mcp 0.4.0 and homelab-mcp 0.62.0 send them.
 fields:
   - {name: Context, max_length: 255}
   - {name: Done when, max_length: 500}
-fields_required: false
+fields_required: true
 
 # The agents' role: read, create, edit, comment and be assigned. No moving or
 # copying items between projects, no deleting, no managing members or the

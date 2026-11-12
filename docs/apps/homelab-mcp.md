@@ -17,7 +17,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
-| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, and the Obsidian vault (`vault_*`, its own `fitness` and `inbox` domains only; no move or delete) | `grokbot` | Grokbot (every Grokbot agent) |
+| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, the Obsidian vault (`vault_*`: reads `fitness`, `inbox` and `agents`, writes `fitness` and `inbox`; no move or delete), and the OpenProject handoff board as user `grokbot` (`openproject_*`, Personal and Bots only) | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
@@ -180,6 +180,14 @@ kubectl -n homelab-mcp exec -it deploy/homelab-mcp -c obsidian-sync -- ob sync-c
 file types leave out "unsupported" files. Within a minute `run.sh` sees the
 setup and starts `ob sync --continuous`. Check it with
 `kubectl -n homelab-mcp logs deploy/homelab-mcp -c obsidian-sync`.
+
+**The handoff board.** `openproject_*` act as one OpenProject user per
+connector (`HOMELAB_MCP_OPENPROJECT_VIEW_BOTS`): `/mcp` and `/mcp/full` as
+`claude`, `/mcp/agent/grokbot` as `grokbot`; every other view gets no
+OpenProject. Scopes are project trees (`..._BOT_SCOPES`), and OpenProject's
+memberships ([openproject.md](openproject.md), "Board structure") bound them
+again: Grokbot never sees Work. Tokens are the provisioner's Secrets
+`homelab-mcp-openproject-<bot>`, mounted at `/run/openproject-tokens`.
 
 **Who sees what.** `app/vault-policy.yaml` (the `homelab-mcp-vault-policy`
 ConfigMap, mounted into the app only) splits the vault into domains and binds

@@ -65,7 +65,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (d158acf, 0.61.0: vault writes warn about missing frontmatter;
+              # (ab73740, 0.62.0: openproject_* pinned to a bot by connector,
+              # project-tree scopes, required Context and Done when,
+              # openproject_attention; vault reads audited.
+              # d158acf, 0.61.0: vault writes warn about missing frontmatter;
               # vault_lint; the one-off briefing archive command, run by hand.
               # 1ce6566, 0.60.0: the vault is split into domains, and each
               # connector sees only its own (app/vault-policy.yaml); moves and
@@ -114,7 +117,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-d158acf45ece8252be9816326d6b3253feb032f3@sha256:02ef542b0214fc99d03d3056235710e8ff29703062646b4fef511afbd83ae7b7
+              tag: sha-ab73740161cd84489f2db7f790dfe1d4f5967465@sha256:6ff9fb1aed2d38b3fb9645b7975bbb7ccb5776a6f39b32ef81118c1b4f3900a3
             command:
               - /bin/sh
               - -c
@@ -196,7 +199,7 @@ spec:
                 ["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders",
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
-                "amazon", "costco", "samsclub", "withings", "vault"]
+                "amazon", "costco", "samsclub", "withings", "vault", "openproject"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
@@ -233,6 +236,19 @@ spec:
               # Who sees and changes which domains (app/vault-policy.yaml).
               # 0.60.0 refuses every vault call without it.
               HOMELAB_MCP_VAULT_POLICY_PATH: /etc/homelab-mcp/vault/policy.yaml
+              # The agents' handoff board (docs/apps/openproject.md, "Bots through
+              # homelab-mcp"). Each connector acts as one OpenProject bot, by the
+              # view its token was issued for; any other view gets no OpenProject.
+              # Tokens are the provisioner's per-bot Secrets, mounted below. The
+              # scopes are project trees; OpenProject's own memberships
+              # (bot-provisioner/app/board.yaml) bound them again. Grokbot is
+              # external: never Work.
+              HOMELAB_MCP_OPENPROJECT_BASE_URL: http://openproject.openproject.svc.cluster.local:8080
+              HOMELAB_MCP_OPENPROJECT_TOKENS_DIR: /run/openproject-tokens
+              HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
+                {"/mcp": "claude", "/mcp/full": "claude", "/mcp/agent/grokbot": "grokbot"}
+              HOMELAB_MCP_OPENPROJECT_BOT_SCOPES: >-
+                {"claude": ["personal", "bots", "work"], "grokbot": ["personal", "bots"]}
               HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
               # Per-user credentials: who they are kept for, and where. No view
               # uses credentials "per_user" yet (docs/apps/homelab-mcp.md).
@@ -327,7 +343,11 @@ spec:
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
                  "vault_domains", "vault_read", "vault_list", "vault_search",
-                 "vault_links", "vault_lint", "vault_create", "vault_edit"],
+                 "vault_links", "vault_lint", "vault_create", "vault_edit",
+                 "openproject_list_tasks", "openproject_get_task",
+                 "openproject_attention", "openproject_create_task",
+                 "openproject_add_comment", "openproject_claim_next",
+                 "openproject_complete_task", "openproject_release_task"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
@@ -419,9 +439,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (d158acf). Moves with the app image above.
+              # (ab73740). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-d158acf45ece8252be9816326d6b3253feb032f3@sha256:1ffcc935411e46a09c25fd3e7e3ad2aa931947a88b54889b27055efc39f77034
+              tag: sha-ab73740161cd84489f2db7f790dfe1d4f5967465@sha256:700132fb0379cca6e1de133fb9e87600c969dea461ab50fd7228656a2ab9ed3c
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
@@ -811,6 +831,40 @@ spec:
             app:
               - path: /run/mfp
                 readOnly: true
+      # OpenProject API tokens for the bots homelab-mcp acts as, one Secret
+      # each, written by the provisioner (bot-provisioner/homelab-mcp-bots.yaml),
+      # read at call time from <dir>/<bot>/OPENPROJECT_API_TOKEN. Optional, so
+      # the pod starts before the Job has run; a call then refuses.
+      openproject-claude:
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: homelab-mcp-openproject-claude
+            optional: true
+            defaultMode: 0444
+            items:
+              - key: OPENPROJECT_API_TOKEN
+                path: OPENPROJECT_API_TOKEN
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /run/openproject-tokens/claude
+                readOnly: true
+      openproject-grokbot:
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: homelab-mcp-openproject-grokbot
+            optional: true
+            defaultMode: 0444
+            items:
+              - key: OPENPROJECT_API_TOKEN
+                path: OPENPROJECT_API_TOKEN
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /run/openproject-tokens/grokbot
+                readOnly: true
       # Per-user upstream credentials (carpenike/mcp credentials.py): one file
       # per upstream and person, `<upstream>.<alias>`, read only by views with
       # credentials "per_user". Optional, so the pod starts before the
@@ -985,6 +1039,16 @@ spec:
                 toPorts:
                   - ports:
                       - port: "443"
+                        protocol: TCP
+              # The OpenProject API (openproject_*), in the cluster.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: openproject
+                      app.kubernetes.io/name: openproject
+                      openproject/process: web
+                toPorts:
+                  - ports:
+                      - port: "8080"
                         protocol: TCP
               # schoolhouse, lading, homelab_finance, finances_context.
               - toEndpoints:
