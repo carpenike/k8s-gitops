@@ -64,7 +64,8 @@ spec:
               # Base URL in OAuth, OIDC and JMAP discovery documents.
               STALWART_PUBLIC_URL: https://mail.${SECRET_DOMAIN}
             envFrom:
-              # STALWART_DB_PASSWORD, STALWART_RECOVERY_ADMIN
+              # STALWART_DB_PASSWORD, STALWART_RECOVERY_ADMIN,
+              # STALWART_CLOUDFLARE_TOKEN, STALWART_SMTP2GO_PASSWORD
               - secretRef:
                   name: stalwart
               # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY for the blob store,
