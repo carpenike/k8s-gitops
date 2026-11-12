@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (ab73740, 0.62.0: openproject_* pinned to a bot by connector,
+              # (fa22213, 0.62.1: creates name the form's type, so OpenProject
+              # keeps the Context / Done when values.
+              # ab73740, 0.62.0: openproject_* pinned to a bot by connector,
               # project-tree scopes, required Context and Done when,
               # openproject_attention; vault reads audited.
               # d158acf, 0.61.0: vault writes warn about missing frontmatter;
@@ -117,7 +119,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-ab73740161cd84489f2db7f790dfe1d4f5967465@sha256:6ff9fb1aed2d38b3fb9645b7975bbb7ccb5776a6f39b32ef81118c1b4f3900a3
+              tag: sha-fa2221350044c27fd199e497ae8a541fde66817d@sha256:1c55b3a22056bd15beeff8ca6eb73b6def994becac37982d4c09df5991867036
             command:
               - /bin/sh
               - -c
@@ -439,9 +441,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (ab73740). Moves with the app image above.
+              # (fa22213). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-ab73740161cd84489f2db7f790dfe1d4f5967465@sha256:700132fb0379cca6e1de133fb9e87600c969dea461ab50fd7228656a2ab9ed3c
+              tag: sha-fa2221350044c27fd199e497ae8a541fde66817d@sha256:df240348bcbfdf2287df5d2ba793614eb8d82d92f9bc86371dee62e902fdfa90
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
