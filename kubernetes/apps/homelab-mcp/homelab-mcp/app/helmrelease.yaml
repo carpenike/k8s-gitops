@@ -65,7 +65,8 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (fa22213, 0.62.1: creates name the form's type, so OpenProject
+              # (88a1bab, 0.62.2: OpenProject links use the board's public URL.
+              # fa22213, 0.62.1: creates name the form's type, so OpenProject
               # keeps the Context / Done when values.
               # ab73740, 0.62.0: openproject_* pinned to a bot by connector,
               # project-tree scopes, required Context and Done when,
@@ -119,7 +120,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-fa2221350044c27fd199e497ae8a541fde66817d@sha256:1c55b3a22056bd15beeff8ca6eb73b6def994becac37982d4c09df5991867036
+              tag: sha-88a1babd6f0a2a3c1e6adedce90926a060ee756e@sha256:47bb42f42d3c9a5f9180a520881fc0141aae7ab588327af450ed64f4e70c6849
             command:
               - /bin/sh
               - -c
@@ -246,6 +247,8 @@ spec:
               # (bot-provisioner/app/board.yaml) bound them again. Grokbot is
               # external: never Work.
               HOMELAB_MCP_OPENPROJECT_BASE_URL: http://openproject.openproject.svc.cluster.local:8080
+              # Links in tool results (the briefing's) go to the board people open.
+              HOMELAB_MCP_OPENPROJECT_PUBLIC_URL: https://tasks.${SECRET_DOMAIN}
               HOMELAB_MCP_OPENPROJECT_TOKENS_DIR: /run/openproject-tokens
               HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
                 {"/mcp": "claude", "/mcp/full": "claude", "/mcp/agent/grokbot": "grokbot"}
@@ -441,9 +444,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (fa22213). Moves with the app image above.
+              # (88a1bab). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-fa2221350044c27fd199e497ae8a541fde66817d@sha256:df240348bcbfdf2287df5d2ba793614eb8d82d92f9bc86371dee62e902fdfa90
+              tag: sha-88a1babd6f0a2a3c1e6adedce90926a060ee756e@sha256:4c2d81eb9776fbcce50b086944385097429e26e7585ccbac1566e1888b7cd5c2
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
