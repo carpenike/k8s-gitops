@@ -6,6 +6,10 @@
       "_links": {
         "project": {
           "href": "/api/v3/projects/5"
+        },
+        "type": {
+          "href": "/api/v3/types/1",
+          "title": "Task"
         }
       }
     },

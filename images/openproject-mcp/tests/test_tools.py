@@ -813,3 +813,12 @@ def test_settings_from_env() -> None:
 
 def test_expand_hosts() -> None:
     assert expand_hosts(["a:*", "b", "a"]) == ["a:*", "a", "b"]
+
+
+async def test_create_names_the_type_the_form_chose(op: OpenProject, fake: FakeOpenProject) -> None:
+    # Live 17.9.6: with no type on the create, OpenProject applies the default
+    # type after reading custom fields and drops their values.
+    fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
+    await op.create_task(T, subject="x", project="homelab", **HANDOFF)
+    (body,) = fake.sent("POST", "/work_packages")
+    assert body["_links"]["type"] == {"href": "/api/v3/types/1"}

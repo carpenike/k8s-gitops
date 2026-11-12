@@ -28,8 +28,8 @@ spec:
               repository: ghcr.io/carpenike/openproject-mcp
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
               # Floating tag, digest re-pinned by Renovate. This digest is the
-              # branch build 0.4.0-efe487e (handoff fields Context / Done when).
-              tag: 0.4.0@sha256:8ed500552de6d709a312d0307a6137cf0fee2ae13392eb5a7ce2cd386d8e0e15
+              # branch build 0.4.1-f5081a9 (handoff fields; names the form's type on create).
+              tag: 0.4.1@sha256:d7ebce3f9af6b9e1116aad2d8ddae38f6731efeff6a87fa65ae1ac5e45d9ac0f
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
