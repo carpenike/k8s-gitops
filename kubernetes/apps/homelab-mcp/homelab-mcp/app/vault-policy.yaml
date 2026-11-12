@@ -9,12 +9,58 @@
 #   be scoped, and only to "personal" domains (Ryan, 2026-11-11: external
 #   providers never see work, journal, system or unassigned content).
 # - Identity is the view the token was issued for; a view not listed here gets
-#   no vault at all.
+#   no vault at all. Grok connectors are shared by every bot on the account,
+#   so all Grok bots are one client, grokbot (Ryan, 2026-11-12).
+# - owner_agent is the Grok bot that looks after a domain (Personal/Agents/
+#   Grok Bots.md). vault_domains shows it so bots route handoffs; it grants
+#   nothing. Needs homelab-mcp 0.63.0: older releases refuse the key.
 version: 1
 domains:
   fitness:
     roots: [Personal/Fitness]
     sensitivity: personal
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  property:
+    roots: [Personal/Property]
+    sensitivity: personal
+    owner_agent: groundskeeper
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  tech:
+    roots: [Personal/Tech]
+    sensitivity: personal
+    owner_agent: chief-engineer
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  family-history:
+    roots: ["Personal/Family History"]
+    sensitivity: personal
+    owner_agent: herald
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  finances:
+    roots: [Personal/Finances]
+    sensitivity: personal
+    owner_agent: steward
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  health:
+    roots: [Personal/Health]
+    sensitivity: personal
+    owner_agent: coach
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  church:
+    roots: [Personal/Church]
+    sensitivity: personal
+    owner_agent: deacon
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  education:
+    roots: [Personal/Education]
+    sensitivity: personal
+    owner_agent: dean
     protected: [Goals.md]
     append_only: [Decisions.md]
   inbox:
@@ -34,7 +80,8 @@ domains:
   agents:
     roots: [Personal/Agents]
     sensitivity: personal
-    protected: [Protocol.md]
+    # Grok Bots.md: the Grok roster, Ryan's (2026-11-12).
+    protected: [Protocol.md, Grok Bots.md]
   work:
     roots: [Work, Meetings, People, Projects, Research, Reviews, Voice, memory, HHS,
             Excalidraw, Excalibrain, Templates, TASKS.md, CLAUDE.md]
@@ -50,5 +97,9 @@ clients:
     views: [/mcp/agent/grokbot]
     access: scoped
     provider: external
-    read: [fitness, inbox, agents]
-    write: [fitness, inbox]
+    # Every personal domain, health, church and education included (Ryan,
+    # 2026-11-12); agents read-only.
+    read: [fitness, inbox, property, tech, family-history, finances, health, church,
+           education, agents]
+    write: [fitness, inbox, property, tech, family-history, finances, health, church,
+            education]

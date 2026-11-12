@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (88a1bab, 0.62.2: OpenProject links use the board's public URL.
+              # (e1473d7, 0.63.0: vault domains may name an owner_agent, shown
+              # in vault_domains.
+              # 88a1bab, 0.62.2: OpenProject links use the board's public URL.
               # fa22213, 0.62.1: creates name the form's type, so OpenProject
               # keeps the Context / Done when values.
               # ab73740, 0.62.0: openproject_* pinned to a bot by connector,
@@ -120,7 +122,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-88a1babd6f0a2a3c1e6adedce90926a060ee756e@sha256:47bb42f42d3c9a5f9180a520881fc0141aae7ab588327af450ed64f4e70c6849
+              tag: sha-e1473d76de8f8c7118fcb6a3c296cf9b158faa52@sha256:fd3ed1cf3eec5549afe9b5c51b6134e2a75776f96bbe0522a5c1f167531eab55
             command:
               - /bin/sh
               - -c
@@ -279,7 +281,7 @@ spec:
               # but a bot can confirm its own preview, so nobody reviews a
               # Grokbot write before it lands. Grokbot also reads and writes the
               # Obsidian vault (vault_*, Ryan, 2026-11-11), but only its own
-              # domains (fitness, inbox; app/vault-policy.yaml): everything else
+              # domains (every personal domain; app/vault-policy.yaml): everything else
               # does not exist for it. No move or delete, here or in the policy.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
@@ -444,9 +446,9 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (88a1bab). Moves with the app image above.
+              # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-88a1babd6f0a2a3c1e6adedce90926a060ee756e@sha256:4c2d81eb9776fbcce50b086944385097429e26e7585ccbac1566e1888b7cd5c2
+              tag: sha-e1473d76de8f8c7118fcb6a3c296cf9b158faa52@sha256:ab34e594bf587092c13e81310d6788626455b59e17c0f4875e8ac6704ef302fd
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
