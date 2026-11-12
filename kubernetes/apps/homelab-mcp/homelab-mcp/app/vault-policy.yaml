@@ -19,6 +19,7 @@ domains:
   fitness:
     roots: [Personal/Fitness]
     sensitivity: personal
+    owner_agent: coach
     protected: [Goals.md]
     append_only: [Decisions.md]
   property:
