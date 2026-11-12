@@ -283,6 +283,11 @@ spec:
               # Obsidian vault (vault_*, Ryan, 2026-11-11), but only its own
               # domains (every personal domain; app/vault-policy.yaml): everything else
               # does not exist for it. No move or delete, here or in the policy.
+              # Finances (Ryan, 2026-11-12, for Steward): transaction search
+              # and finances_categorize, which sets only category and notes
+              # (never amount, payee, account or date). No rule, payee-merge,
+              # loan or other ledger writes. Its audit line names
+              # view=/mcp/agent/grokbot from 0.63.1.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -330,7 +335,8 @@ spec:
                  "finances_recurring", "finances_debt_status", "finances_breaches",
                  "finances_buffer", "finances_room", "finances_context_add",
                  "finances_context_list", "finances_clarify_candidates",
-                 "finances_ticklers", "finances_sentinel", "homelab_list_status",
+                 "finances_ticklers", "finances_sentinel",
+                 "finances_transactions", "finances_categorize", "homelab_list_status",
                  "school_list_children", "school_list_courses", "school_get_upcoming_work",
                  "school_get_missing_work", "school_get_grades", "school_get_assignment",
                  "school_get_announcements", "school_list_staff", "school_get_sync_status",
