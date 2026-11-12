@@ -102,15 +102,33 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    forwarded headers, which is a separate HTTP setting.
 
    Add `smtp-edge`: SMTP on 2525, STARTTLS with the certificate from step
-   4, no PROXY protocol. Mail on it was already checked by the edge relay
-   and arrives from a Connector pod's address, so exclude the listener
-   from the checks that would judge that address:
-   - DATA stage `enableSpamFilter`:
+   4, no PROXY protocol. Listeners bind at startup, so restart the pod
+   afterwards (`kubectl -n mail rollout restart deployment stalwart`); a
+   settings reload validates a new listener but does not open it. Mail on
+   it was already checked by the edge relay and arrives from a Connector
+   pod's address, so:
+   - MtaStageAuth `require` defaults to `local_port != 25`, which answers
+     the edge's MAIL FROM with `503 You must authenticate first`. Set it
+     to `local_port != 25 && listener != 'smtp-edge'`, and add the same
+     `listener != 'smtp-edge'` condition to `saslMechanisms` so the
+     listener offers no AUTH
+   - MtaStageData `enableSpamFilter`:
      `is_empty(authenticated_as) && listener != 'smtp-edge'`
-   - the SPF, DMARC and reverse-DNS verification expressions: the same
-     `listener != 'smtp-edge'` condition
-   - a global Sieve script that files mail the edge marked as spam into
-     Junk
+   - nothing to change for SPF, DMARC and reverse DNS: their default
+     expressions on SenderAuth already run only when `local_port == 25`
+
+   The edge's spam verdict arrives as its `X-Spam-Score` header
+   (`spam, score=…` or `ham, score=…`). A system Sieve script cannot file
+   into a mailbox (at DATA it can only reject, discard or edit), so filing
+   that mail into Junk is a rule in each user's own Sieve script:
+
+   ```sieve
+   require ["fileinto"];
+   if header :contains "X-Spam-Score" "spam," { fileinto "Junk"; }
+   ```
+
+   Without it, mail the edge scored between its spam and reject
+   thresholds reaches the inbox, tagged.
 
    The network policy and the tailnet grant are what keep everyone but
    the edge off this listener. Do not open 2525 anywhere else.
@@ -178,8 +196,9 @@ Stalwart rotate DKIM keys; with Manual it never rotates them.
 | SMTP2GO return-path, DKIM and link-tracking CNAMEs | SMTP2GO, added once through its Cloudflare connection | Interim outbound ([Outbound](#outbound)). Names and targets come from SMTP2GO's sender-domain page. Stalwart writes only the names it publishes, and external-dns only records it owns |
 | DMARC | Stalwart | Reports to the domain's report address |
 | TLS-RPT | Stalwart | Same address |
-| CAA | Nobody, for now | `holthome.net` is the whole cluster zone. A CAA record at the apex limits which certificate authorities may issue for every name in it, including Cloudflare's proxied hostnames |
-| MTA-STS | Later | Needs `mta-sts.holthome.net` served publicly over HTTPS |
+| CAA at the apex | Nobody, for now | `holthome.net` is the whole cluster zone. A CAA record at the apex limits which certificate authorities may issue for every name in it, including Cloudflare's proxied hostnames |
+| CAA at `mx.holthome.net` | The edge's Stalwart | Let's Encrypt, bound to the edge's ACME account. It covers `mx.holthome.net` and the names under it only ([Edge relay](#edge-relay-adr-0014)) |
+| MTA-STS | Later | Needs `mta-sts.holthome.net` served publicly over HTTPS ([MTA-STS](#mta-sts)) |
 | SRV, autoconfig, autodiscover | Later | They would point at JMAP and DAV on 443, which are not exposed on the mail address |
 
 Setup, in order:
@@ -342,33 +361,103 @@ nothing but a fresh page load.
 
 Inbound mail from the internet goes to Stalwart on a Vultr VM, which
 checks it, queues it, and relays it over the tailnet to `smtp-edge` on
-`10.45.10.25:2525`. The VM is not managed from this repo.
+`10.45.10.25:2525`. The VM is NixOS host `mx-edge` in the nix-config
+repo; its Stalwart settings live in its own store, not in either repo.
 
 1. **VM.** A small Vultr instance with a static IPv4. Firewall: public
-   25 only, plus Tailscale's UDP. Use Tailscale SSH, not public SSH. Set
-   the reverse DNS of the address to the edge's MX name.
+   25 only, plus Tailscale's UDP. Set the reverse DNS of the address to
+   `mx.holthome.net`.
 2. **Tailscale.** Join with tag `tag:mx-edge` and `--accept-routes`. The
    grant lets it reach `10.45.10.25` on `tcp:2525` and nothing else.
-   Check from the VM: `nc -vz 10.45.10.25 2525`.
+   Check from the VM: `nc -vz 10.45.10.25 2525`. Turn tailnet DNS off
+   (`tailscale set --accept-dns=false`): MagicDNS sends `holthome.net` to
+   the MikroTik, which the tag may not reach, so every lookup under it
+   times out and each SMTP step waits 15 s. The edge resolves through a
+   local unbound instead, which DNS blocklists such as Spamhaus also
+   require (they refuse queries from large shared resolvers).
 3. **Stalwart, MTA only.** Same version as the cluster. Its own
-   RocksDB store on the VM's disk is enough: it holds the queue and its
-   configuration.
-   - certificate for the MX name from Stalwart's ACME client
-   - the mail domains as relay domains, with every address on the RCPT
-     recipient list, and unknown recipients rejected. Never accept the
-     whole domain, or the edge bounces mail to forged senders
-   - spam filter on, with a reject threshold
-   - an `MtaRoute/Relay` to `10.45.10.25` port 2525, STARTTLS, and a
-     routing rule that sends the mail domains there
-   - queue retention long enough to cover a rebuild (days, not hours)
+   RocksDB store on the VM's disk holds the queue and its configuration.
+   Manage it over the tailnet on 8080. `holthome.net` is not a Domain on
+   the edge: a local domain would be delivered locally, not relayed.
+   - **Certificate.** A DnsServer `Cloudflare` reading
+     `STALWART_CLOUDFLARE_TOKEN`, an AcmeProvider (Let's Encrypt,
+     challenge `Dns01`, contact `postmaster@holthome.net`), and a Domain
+     `mx.holthome.net` with certificate management Automatic, DKIM
+     Manual, and DNS management Automatic with origin `holthome.net` and
+     `publishRecords` `caa` only. The certificate covers
+     `mx.holthome.net` and `*.mx.holthome.net`. Publishing only CAA keeps
+     the edge away from the records the cluster's Stalwart owns
+   - **Recipients.** MtaStageRcpt `allowRelaying` names every address,
+     `else` `false`. Never accept the whole domain, or the edge bounces
+     mail to forged senders. People also get their sub-addresses:
+
+     ```text
+     rcpt_domain == 'holthome.net' && (rcpt == 'ryan@holthome.net' ||
+       starts_with(rcpt, 'ryan+') || … || rcpt == 'postmaster@holthome.net')
+     ```
+
+     Unknown addresses and other domains get `550 5.7.1 Relay not
+     allowed`
+   - **Route.** `MtaRoute/Relay` `cluster` to `10.45.10.25` port 2525,
+     STARTTLS (`implicitTls` false), `allowInvalidCerts` true: the edge
+     connects by address, so the name check would fail, and the hop
+     already runs inside the tailnet. MtaOutboundStrategy `route`: keep
+     `is_local_domain(rcpt_domain)` → `'local'`, add
+     `rcpt_domain == 'holthome.net'` → `'cluster'`, `else` `'mx'`
+   - **Sender checks.** SenderAuth `dmarcVerify` `strict` when
+     `local_port == 25` (the default `relaxed` records a failure but
+     accepts the mail), so `p=reject` domains, `holthome.net` included,
+     are refused with `550 5.7.1 Email rejected per DMARC policy`
+   - **Spam filter.** SpamSettings `scoreReject` 15 (the default 0
+     rejects nothing). Accepted mail carries `X-Spam-Score`
+   - **Queue.** MtaDeliverySchedule `remote` expiry 7 days (default 3),
+     to cover a cluster rebuild
+   - **Listeners.** Only `smtp` (25) and `http` (8080); delete the rest.
+     Restart Stalwart after changing listeners
+   - **Logs.** A `Stdout` tracer; the default `Log` tracer writes to
+     `/var/log/stalwart`, which the container does not have
 4. **Public DNS.** Stalwart in the cluster already publishes the MX
    (`mx.holthome.net`, see [DNS](#dns)). At cutover, add a public A
    record for `mx.holthome.net` pointing at the VM. On the LAN,
    `mx.holthome.net` stays `10.45.10.25`.
 5. Export the edge's configuration with `stalwart-cli snapshot` too.
 
+Checks, from the VM against `127.0.0.1:25` (a residential line usually
+blocks outbound 25, so a laptop at home cannot test it): an address on
+the list relays and shows up in the cluster's log as `message-ingest`;
+an unknown address and an outside domain get `550 Relay not allowed`;
+a sender in `@holthome.net` gets the DMARC rejection.
+
 Adding an address: create the account in the cluster (ADR 0015) and add
-the address to the edge's recipient list.
+the address to the edge's `allowRelaying` expression.
+
+## MTA-STS
+
+Follow-up, after the cutover to the edge has carried real mail for a
+week or two. MTA-STS tells sending servers to deliver only over TLS
+with a valid certificate for the MX, which closes STARTTLS stripping.
+It fails closed: with `enforce`, a lapsed edge certificate or an MX
+that no longer matches the policy makes compliant senders hold or bounce
+mail, and they cache the policy for `max_age`.
+
+1. **Read the TLS reports first.** TLS-RPT is already published, so
+   senders mail daily reports to `postmaster@holthome.net`. They should
+   show successful TLS sessions to the edge and no failures.
+2. **Serve the policy.** `https://mta-sts.holthome.net/.well-known/mta-sts.txt`,
+   publicly, with a valid certificate. Not from the edge: its
+   certificate does not cover that name and it has no public 443. An
+   HTTPRoute on `envoy-external` for `mta-sts.${SECRET_DOMAIN}`, path
+   `/.well-known/mta-sts.txt` only, to Service `stalwart` port 8080 if
+   Stalwart serves the policy there (check with `curl` against the pod
+   first), or else a static file.
+   Senders keep their cached copy, so the host being down during a
+   cluster outage does not stop mail.
+3. **Publish in `testing` mode.** `mx: mx.holthome.net`, `max_age` about
+   a day. Add `mtaSts` to the Domain's `publishRecords` so Stalwart
+   publishes `_mta-sts` and changes its `id` with the policy. Senders
+   report failures but still deliver.
+4. **Enforce.** After a few weeks of clean reports, switch to `enforce`
+   and raise `max_age` to about a week.
 
 ## Not in this tree yet
 
@@ -381,7 +470,6 @@ the address to the edge's recipient list.
   At the switch, point the outbound strategy at the edge's route, then
   remove the SMTP2GO CNAMEs, field `smtp2go_password` and its
   ExternalSecret entry, and close the account.
-- **Webmail.** Stalwart has no bundled webmail. Native clients work over
-  IMAP or JMAP.
+- **MTA-STS.** Planned once the edge carries real mail ([MTA-STS](#mta-sts)).
 - **More than one replica.** Needs a shared in-memory store (Redis or
   Valkey) and Stalwart's cluster settings.
