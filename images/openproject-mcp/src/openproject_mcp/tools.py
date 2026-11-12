@@ -782,6 +782,14 @@ class OpenProject:
             embedded = (form if isinstance(form, dict) else {}).get("_embedded") or {}
             schema = embedded.get("schema")
             keys = self._handoff_keys(schema if isinstance(schema, dict) else {})
+            # Name the type the form chose. Without an explicit type OpenProject
+            # applies the project's default AFTER reading custom fields, and
+            # drops their values ("Context can't be blank", seen live 2026-11-11).
+            if "type" not in links:
+                chosen = ((embedded.get("payload") or {}).get("_links") or {}).get("type") or {}
+                href = chosen.get("href") if isinstance(chosen, dict) else None
+                if isinstance(href, str) and href.startswith(f"{hal.API}/types/"):
+                    links["type"] = {"href": href}
             missing = [
                 name
                 for which, name in (

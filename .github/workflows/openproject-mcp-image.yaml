@@ -30,7 +30,7 @@ env:
   # The server's own version (images/openproject-mcp/pyproject.toml and
   # src/openproject_mcp/__init__.py). Ours, so no Renovate annotation: bump
   # all three together when the server changes.
-  OPENPROJECT_MCP_VERSION: 0.4.0
+  OPENPROJECT_MCP_VERSION: 0.4.1
 
 jobs:
   build:
