@@ -281,7 +281,8 @@ The board ConfigMap has a hash suffix, so an edit to `board.yaml` replaces the
 Job; bump the Job's `script-revision` annotation for an edit to `structure.rb`.
 
 - **Projects:** Bots, Personal (one sub-project per approved vault domain:
-  Fitness so far) and Work, all private. The seeded demo projects are archived
+  Fitness, Property, Tech, Family History, Finances, Health, Church and
+  Education) and Work, all private. The seeded demo projects are archived
   (they were public, so every bot could see them).
 - **Role Agent:** view, create, edit, comment, watch, relate and be assigned.
   No moving or copying items between projects, no deleting, no managing
