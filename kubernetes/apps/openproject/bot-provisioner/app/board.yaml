@@ -9,12 +9,22 @@
 #
 # A new personal domain is one more project under personal (with its vault
 # domain in homelab-mcp's vault-policy.yaml); members listed with personal get
-# it through its subtree.
+# it through its subtree. Every personal sub-project is open to every member
+# with personal: Grok connectors are shared by all of an account's bots, so
+# Grokbot is one user and a per-bot sub-project would restrict nothing (Ryan,
+# 2026-11-12).
 
 projects:
   - {identifier: bots, name: Bots}
   - {identifier: personal, name: Personal}
   - {identifier: fitness, name: Fitness, parent: personal}
+  - {identifier: property, name: Property, parent: personal}
+  - {identifier: tech, name: Tech, parent: personal}
+  - {identifier: family-history, name: Family History, parent: personal}
+  - {identifier: finances, name: Finances, parent: personal}
+  - {identifier: health, name: Health, parent: personal}
+  - {identifier: church, name: Church, parent: personal}
+  - {identifier: education, name: Education, parent: personal}
   - {identifier: work, name: Work}
 
 # The seeded demo projects are public, so every signed-in user (every bot)
