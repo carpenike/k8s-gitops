@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (17ae140, 0.63.1: the finances_categorize audit line names the
+              # (40b33c2, 0.64.0: vault-first rule in the server instructions;
+              # a vault path through a file is not_found, not a crash.
+              # 17ae140, 0.63.1: the finances_categorize audit line names the
               # calling view.
               # e1473d7, 0.63.0: vault domains may name an owner_agent, shown
               # in vault_domains.
@@ -124,7 +126,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-17ae1406d183dd841af8f595b85056d14e2c1aa7@sha256:8671adbf74fca4fde0765a6052dd930b9dd8746821b6b29d993f66044b181495
+              tag: sha-40b33c2abb402c2082e49f316abbb4cb4299c0e7@sha256:50be4113f63eebe3110b7d0b4db31736ed7bd0166834f9754ff92afc7506ce87
             command:
               - /bin/sh
               - -c
@@ -456,7 +458,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-17ae1406d183dd841af8f595b85056d14e2c1aa7@sha256:f13a2c7a5bf70e62343f89e2d700102e7fd9d35890780a6ba67817a71f702b31
+              tag: sha-40b33c2abb402c2082e49f316abbb4cb4299c0e7@sha256:1943968c6049a55e98269d9f55bbea98b69198a8daa36f4e5037bdc3aa008a48
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
