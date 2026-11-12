@@ -27,6 +27,14 @@ domains:
   system:
     roots: [System]
     sensitivity: work
+    # The agent roster: Ryan's, read-only to every agent.
+    protected: [Agents.md]
+  # The handoff protocol every agent follows (Grokbot included, so it lives
+  # outside System). Ryan's, read-only to every agent.
+  agents:
+    roots: [Personal/Agents]
+    sensitivity: personal
+    protected: [Protocol.md]
   work:
     roots: [Work, Meetings, People, Projects, Research, Reviews, Voice, memory, HHS,
             Excalidraw, Excalibrain, Templates, TASKS.md, CLAUDE.md]
@@ -42,5 +50,5 @@ clients:
     views: [/mcp/agent/grokbot]
     access: scoped
     provider: external
-    read: [fitness, inbox]
+    read: [fitness, inbox, agents]
     write: [fitness, inbox]
