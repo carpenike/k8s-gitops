@@ -17,7 +17,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp` | read-only tools | `home.read` | The everyday Claude connector |
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
-| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, the Obsidian vault (`vault_*`: reads `fitness`, `inbox` and `agents`, writes `fitness` and `inbox`; no move or delete), and the OpenProject handoff board as user `grokbot` (`openproject_*`, Personal and Bots only) | `grokbot` | Grokbot (every Grokbot agent) |
+| `/mcp/agent/grokbot` | the `hermes` list, plus school reads, Cooklang reads, every MFP tool, the Obsidian vault (`vault_*`: reads and writes every personal domain (fitness, inbox, property, tech, family-history, finances, health, church, education), reads `agents`; no move or delete), and the OpenProject handoff board as user `grokbot` (`openproject_*`, Personal and Bots only) | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 
@@ -192,8 +192,9 @@ again: Grokbot never sees Work. Tokens are the provisioner's Secrets
 **Who sees what.** `app/vault-policy.yaml` (the `homelab-mcp-vault-policy`
 ConfigMap, mounted into the app only) splits the vault into domains and binds
 each connector to a profile. Claude (`/mcp`, `/mcp/full`) sees everything;
-Grokbot sees only `fitness` and `inbox`, and to it every other folder does not
-exist. External providers can never be given a work-sensitivity domain: the app
+Grokbot sees only the personal domains (and `agents`, read-only), and to it
+every other folder does not exist. Grok connectors are shared by every bot on
+the account, so all Grok bots are this one profile. External providers can never be given a work-sensitivity domain: the app
 refuses to load such a policy, and with no valid policy every vault tool
 refuses every caller. Adding a domain is an edit to that file and a pod
 restart (reloader does it), never an image change. Moves and deletes are
