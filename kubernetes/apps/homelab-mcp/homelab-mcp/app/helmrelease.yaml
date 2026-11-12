@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (e1473d7, 0.63.0: vault domains may name an owner_agent, shown
+              # (17ae140, 0.63.1: the finances_categorize audit line names the
+              # calling view.
+              # e1473d7, 0.63.0: vault domains may name an owner_agent, shown
               # in vault_domains.
               # 88a1bab, 0.62.2: OpenProject links use the board's public URL.
               # fa22213, 0.62.1: creates name the form's type, so OpenProject
@@ -122,7 +124,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-e1473d76de8f8c7118fcb6a3c296cf9b158faa52@sha256:fd3ed1cf3eec5549afe9b5c51b6134e2a75776f96bbe0522a5c1f167531eab55
+              tag: sha-17ae1406d183dd841af8f595b85056d14e2c1aa7@sha256:8671adbf74fca4fde0765a6052dd930b9dd8746821b6b29d993f66044b181495
             command:
               - /bin/sh
               - -c
@@ -283,6 +285,11 @@ spec:
               # Obsidian vault (vault_*, Ryan, 2026-11-11), but only its own
               # domains (every personal domain; app/vault-policy.yaml): everything else
               # does not exist for it. No move or delete, here or in the policy.
+              # Finances (Ryan, 2026-11-12, for Steward): transaction search
+              # and finances_categorize, which sets only category and notes
+              # (never amount, payee, account or date). No rule, payee-merge,
+              # loan or other ledger writes. Its audit line names
+              # view=/mcp/agent/grokbot from 0.63.1.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -330,7 +337,8 @@ spec:
                  "finances_recurring", "finances_debt_status", "finances_breaches",
                  "finances_buffer", "finances_room", "finances_context_add",
                  "finances_context_list", "finances_clarify_candidates",
-                 "finances_ticklers", "finances_sentinel", "homelab_list_status",
+                 "finances_ticklers", "finances_sentinel",
+                 "finances_transactions", "finances_categorize", "homelab_list_status",
                  "school_list_children", "school_list_courses", "school_get_upcoming_work",
                  "school_get_missing_work", "school_get_grades", "school_get_assignment",
                  "school_get_announcements", "school_list_staff", "school_get_sync_status",
@@ -448,7 +456,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-e1473d76de8f8c7118fcb6a3c296cf9b158faa52@sha256:ab34e594bf587092c13e81310d6788626455b59e17c0f4875e8ac6704ef302fd
+              tag: sha-17ae1406d183dd841af8f595b85056d14e2c1aa7@sha256:f13a2c7a5bf70e62343f89e2d700102e7fd9d35890780a6ba67817a71f702b31
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
