@@ -2,8 +2,9 @@
 
 The server holds no OpenProject credentials: every MCP request brings the
 caller's own OpenProject API token as `Authorization: Bearer <token>`. The
-only secrets are the task-board relay's two HMAC keys (relay.py), kept out of
-the dataclass repr.
+only secrets are the task-board relay's two HMAC keys and targets (relay.py)
+and the Alertmanager relay's bearer token (alerts.py), all kept out of the
+dataclass repr.
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import os
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from urllib.parse import urlsplit, urlunsplit
 
 DEFAULT_URL = "http://openproject.openproject.svc.cluster.local:8080"
 DEFAULT_ALLOWED_HOSTS = (
@@ -25,6 +27,16 @@ DEFAULT_ALLOWED_HOSTS = (
 DEFAULT_RELAY_HERMES_URL = (
     "http://agent-board-hooks.hermes-{bot}.svc.cluster.local:8644/webhooks/task-board"
 )
+
+#: The bot's Hermes route for alerts; same Service and port as the board route.
+ALERTS_ROUTE_PATH = "/webhooks/alerts"
+DEFAULT_ALERTS_BOT = "hank"
+
+
+def alerts_url_from(relay_hermes_url: str) -> str:
+    """RELAY_HERMES_URL with its path swapped for the alerts route (same Service, same port)."""
+    parts = urlsplit(relay_hermes_url)
+    return urlunsplit((parts.scheme, parts.netloc, ALERTS_ROUTE_PATH, "", ""))
 
 
 def _csv(value: str) -> list[str]:
@@ -128,6 +140,16 @@ class Settings:
     #: Bots outside the cluster: (bot, url, bearer). Secret, so no repr.
     relay_targets: tuple[tuple[str, str, str], ...] = field(default=(), repr=False)
     relay_target_errors: tuple[str, ...] = ()
+    #: Alertmanager relay (alerts.py). Off (503) while the token is unset.
+    alertmanager_hook_token: str = field(default="", repr=False)
+    alerts_bot: str = DEFAULT_ALERTS_BOT
+    #: Empty means RELAY_HERMES_URL with the path swapped (`alerts_url`).
+    alerts_hermes_url: str = ""
+
+    @property
+    def alerts_url(self) -> str:
+        """Where the alerts bot's event goes; `{bot}` is still unformatted."""
+        return self.alerts_hermes_url or alerts_url_from(self.relay_hermes_url)
 
     @property
     def api_base(self) -> str:
@@ -170,4 +192,7 @@ class Settings:
             relay_hermes_url=env.get("RELAY_HERMES_URL", "").strip() or DEFAULT_RELAY_HERMES_URL,
             relay_targets=targets,
             relay_target_errors=target_errors,
+            alertmanager_hook_token=env.get("ALERTMANAGER_HOOK_TOKEN", "").strip(),
+            alerts_bot=env.get("ALERTS_BOT", "").strip().lower() or DEFAULT_ALERTS_BOT,
+            alerts_hermes_url=env.get("ALERTS_HERMES_URL", "").strip(),
         )

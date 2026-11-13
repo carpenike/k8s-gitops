@@ -3,8 +3,9 @@
 Request flow:
   BearerGate      /mcp* without `Authorization: Bearer <token>` -> 401, before
                   any MCP handling. /healthz passes through unauthenticated,
-                  and /hooks/openproject, which checks OpenProject's own
-                  webhook signature instead (relay.py).
+                  and so do /hooks/openproject, which checks OpenProject's own
+                  webhook signature instead (relay.py), and /hooks/alertmanager,
+                  which checks its own bearer token (alerts.py).
   MCP app         the SDK's Starlette app: Host allowlist (DNS-rebinding
                   check), then stateless streamable HTTP with JSON responses.
   tools           read the same bearer token from the request and use it for
@@ -26,6 +27,9 @@ from starlette.responses import JSONResponse, Response
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from openproject_mcp import __version__
+from openproject_mcp.alerts import HOOK_PATH as ALERTS_HOOK_PATH
+from openproject_mcp.alerts import AlertRelay
+from openproject_mcp.alerts import enabled as alerts_enabled
 from openproject_mcp.config import Settings
 from openproject_mcp.relay import HOOK_PATH, Relay
 from openproject_mcp.tools import INSTRUCTIONS, OpenProject, bearer_token, register
@@ -34,6 +38,8 @@ log = logging.getLogger(__name__)
 
 MCP_PATH = "/mcp"
 HEALTH_PATH = "/healthz"
+#: Paths that do their own auth (or need none), so BearerGate lets them through.
+UNGATED = (HEALTH_PATH, HOOK_PATH, ALERTS_HOOK_PATH)
 
 
 class BearerGate:
@@ -47,7 +53,7 @@ class BearerGate:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] == "http" and scope.get("path", "") not in (HEALTH_PATH, HOOK_PATH):
+        if scope["type"] == "http" and scope.get("path", "") not in UNGATED:
             header = next(
                 (v.decode("latin-1") for k, v in scope.get("headers", []) if k == b"authorization"),
                 None,
@@ -87,6 +93,7 @@ def build_app(
     """The ASGI app and its OpenProject client. The transports are for tests."""
     op = OpenProject(settings, transport=transport)
     relay = Relay(settings, transport=relay_transport)
+    alert_relay = AlertRelay(settings, transport=relay_transport)
     mcp = MCPServer(
         name="openproject",
         title="OpenProject task queue",
@@ -102,6 +109,10 @@ def build_app(
     @mcp.custom_route(HOOK_PATH, methods=["POST"], include_in_schema=False)
     async def openproject_hook(request: Request) -> Response:
         return await relay.handle(request)
+
+    @mcp.custom_route(ALERTS_HOOK_PATH, methods=["POST"], include_in_schema=False)
+    async def alertmanager_hook(request: Request) -> Response:
+        return await alert_relay.handle(request)
 
     app = mcp.streamable_http_app(
         streamable_http_path=MCP_PATH,
@@ -145,6 +156,14 @@ def main() -> None:
         and (settings.hermes_webhook_secret or external)
         else "off (needs OPENPROJECT_WEBHOOK_SECRET, RELAY_BOTS, and HERMES_WEBHOOK_SECRET "
         "or RELAY_TARGETS)",
+    )
+    log.info(
+        "alertmanager relay at %s: %s",
+        ALERTS_HOOK_PATH,
+        f"on, to {settings.alerts_bot}'s alerts route"
+        if alerts_enabled(settings)
+        else "off, 503 (needs ALERTMANAGER_HOOK_TOKEN, HERMES_WEBHOOK_SECRET and a valid "
+        "ALERTS_BOT)",
     )
     for problem in settings.relay_target_errors:
         log.warning("task-board relay: %s; entry ignored", problem)
