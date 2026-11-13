@@ -216,7 +216,8 @@ spec:
                 ["mfp", "cooklang", "ha", "grocy", "paperless", "arcraiders",
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
-                "amazon", "costco", "samsclub", "withings", "vault", "openproject"]
+                "amazon", "costco", "samsclub", "withings", "vault", "openproject",
+                "messaging"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
@@ -225,6 +226,9 @@ spec:
               # Gatus' read API; status. lets /api/v1/endpoints through without
               # the admin login (nix-config gatus.nix).
               HOMELAB_MCP_GATUS_BASE_URL: https://status.${SECRET_DOMAIN}
+              # signal_send (category messaging) through the signal-api container
+              # in this pod, on loopback only (Ryan, 2026-11-13).
+              HOMELAB_MCP_SIGNAL_BASE_URL: http://127.0.0.1:8080
               # The Actual sidecar is the second container in this pod.
               HOMELAB_MCP_FINANCES_SIDECAR_BASE_URL: http://127.0.0.1:9210
               HOMELAB_MCP_FINANCES_REPO_URL: https://github.com/carpenike/finances.git
@@ -336,8 +340,14 @@ spec:
               # /mcp/agent/hank: Hank (Hermes) alone, for incident notes and ops
               # messages (Ryan, 2026-11-13). Vault: read Tech, write only
               # Personal/Tech/Incidents, append only to the Tech Inbox
-              # (app/vault-policy.yaml, client hank). signal_send to ops only.
-              HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: '["/mcp/agent/hank"]'
+              # (app/vault-policy.yaml, client hank).
+              # signal_send goes to ops only, from every view (Ryan, 2026-11-13:
+              # the family channel stays off until he asks). The list names each
+              # view, so a NEW view must be added here too or it can send to
+              # family.
+              HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: >-
+                ["/mcp", "/mcp/full", "/mcp/agent/hermes", "/mcp/agent/grokbot",
+                "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors"]
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
