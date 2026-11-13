@@ -329,6 +329,11 @@ spec:
               # additions to those lists -- deliberately: a new finance tool
               # should be an explicit decision here, which is the same reason
               # scope_definitions.py refuses to derive lists by subtraction.
+              # /mcp/agent/hank: Hank (Hermes) alone, for incident notes and ops
+              # messages (Ryan, 2026-11-13). Vault: read Tech, write only
+              # Personal/Tech/Incidents, append only to the Tech Inbox
+              # (app/vault-policy.yaml, client hank). signal_send to ops only.
+              HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: '["/mcp/agent/hank"]'
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -370,6 +375,11 @@ spec:
                  "openproject_add_comment", "openproject_claim_next",
                  "openproject_complete_task", "openproject_release_task"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/agent/hank", "name": "Hank",
+                 "tools": ["vault_domains", "vault_read", "vault_list", "vault_search",
+                 "vault_links", "vault_create", "vault_edit", "signal_send",
+                 "homelab_list_status"],
+                 "read_scope": "hank", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/steffi", "name": "Steffi",
                  "tools": ["grocy_health", "grocy_find_products", "grocy_attention",
                  "grocy_convert_units", "grocy_product_card", "grocy_consumption_history",

@@ -47,6 +47,9 @@ spec:
               # app's CNP. Otherwise its event has nowhere to go (the relay
               # logs and moves on).
               RELAY_BOTS: chief,hank,chief-engineer
+              # The bot the Alertmanager relay wakes (route alerts on its board
+              # listener; docs/apps/hermes.md, "Alerts").
+              ALERTS_BOT: hank
             # OPENPROJECT_WEBHOOK_SECRET and HERMES_WEBHOOK_SECRET. Without
             # them the relay answers 404 and the MCP server works as before.
             envFrom:
@@ -56,6 +59,10 @@ spec:
               # RELAY_TARGETS, the webhook targets of bots outside the cluster.
               - secretRef:
                   name: openproject-mcp-relay-targets
+                  optional: true
+              # ALERTMANAGER_HOOK_TOKEN. Without it /hooks/alertmanager answers 503.
+              - secretRef:
+                  name: openproject-mcp-alerts
                   optional: true
             resources:
               requests:
