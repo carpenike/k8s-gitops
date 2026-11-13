@@ -67,8 +67,12 @@ a `toFQDNs` name.
 | `withings` | wbsapi.withings.net (token on the state volume) |
 | `vault` | the Obsidian vault on PVC `homelab-mcp-vault`, kept in step by the `obsidian-sync` container ([below](#obsidian-sync)) |
 
-Off: `messaging` (not configured yet; signal-api now runs in this pod) and
-`nixos` (Forge's deploy trigger). Signal capture and reports run in this pod
+`messaging` (`signal_send`) uses the signal-api container in this pod on
+loopback, and sends to **ops only** from every view: each view path is in
+`HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS` (Ryan, 2026-11-13; family stays off until
+he asks). A new view must be added to that list too.
+
+Off: `nixos` (Forge's deploy trigger). Signal capture and reports run in this pod
 (below) and write the shared context store in postgres17.
 
 The stores in postgres17 and how they got there:
