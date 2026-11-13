@@ -65,7 +65,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (f9294fe, 0.65.1: fresh-data tools point at their sync-status tool.
+              # (4015095, 0.66.0: vault clients may be narrowed with write_paths and
+              # append_paths; signal_send can be held to ops per view. Includes
+              # d7a6a33, 0.65.2: decisions append to Decisions; Status is the
+              # area owner_agent's.
+              # f9294fe, 0.65.1: fresh-data tools point at their sync-status tool.
               # c14f6e8, 0.65.0: server instructions are the cross-family rules
               # only, vault first (1 KB, was 26 KB); family guidance moved into
               # tool descriptions. vault_domains lists each domain's folders.
@@ -130,7 +134,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-f9294fe0eccc892a2ca7025916f49672d1dcf2ad@sha256:46a1e7e1cc357bc0c76ef2fe680d9a5a8b304668e2056f7b8942f00db6f61f38
+              tag: sha-4015095d635be2211e36cdcba34a648660fb9914@sha256:fcc15a13749e9859d5cf46a2eb8dec39f64fc6b7e6035d355e774f7d87558753
             command:
               - /bin/sh
               - -c
@@ -472,7 +476,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-f9294fe0eccc892a2ca7025916f49672d1dcf2ad@sha256:897b4acc85892c91a7edfdb2274677619f3e191e985efe7345cd69b3dc44da77
+              tag: sha-4015095d635be2211e36cdcba34a648660fb9914@sha256:9f508771fa78cf114ffdc00e70fb56f6a19acd2e8f879b7e916fb873c7e31648
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
