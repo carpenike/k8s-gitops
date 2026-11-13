@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Bucket copy egress: cluster DNS, the Ceph RGW pods (Service port 80, pod
+# port 8080), and public IPv4 on 443 for Cloudflare R2. default-deny in
+# ../app blocks everything else.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: stalwart-blobs-r2
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: stalwart-blobs-r2
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: rook-ceph
+            app: rook-ceph-rgw
+            rook_object_store: ceph-objectstore
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

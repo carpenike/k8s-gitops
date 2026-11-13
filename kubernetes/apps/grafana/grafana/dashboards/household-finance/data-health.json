@@ -1,0 +1,979 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Household finance projection. Glass, never plumbing; alerts and required actions remain in the sentinel. Visual treatment references Sure (github.com/we-promise/sure).",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Overview",
+      "tooltip": "Household finance overview",
+      "type": "link",
+      "url": "/d/household-finance-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Cashflow & Categories",
+      "tooltip": "Household cashflow and categories",
+      "type": "link",
+      "url": "/d/household-finance-cashflow"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Debt & Projects",
+      "tooltip": "Household debt and projects",
+      "type": "link",
+      "url": "/d/household-finance-debt"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Data Health",
+      "tooltip": "Whether the other three can be trusted",
+      "type": "link",
+      "url": "/d/household-finance-health"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Rows are nightly projections. Intraday balances may legitimately differ from the source tools.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#078C52",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT extract(epoch FROM max(finished_at)) * 1000 AS \"As of\"\nFROM household_finance.export_runs\nWHERE ok\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Nightly snapshot",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Should hug zero; a persistent offset is a register error, not noise. One line per non-market account that has ever drifted in this range. Market-valued accounts are excluded because their drift is valuation, not error — the bank reports live value while the register moves only when a transaction posts. Accounts with no bank balance to compare against contribute no point rather than a zero. Recorded nightly and NOT backfillable: the bank does not keep yesterday's reported balance, so this line begins on the first export after deploy.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH ever_drifted AS (\n  SELECT account\n  FROM household_finance.reconcile_daily\n  WHERE $__timeFilter(date::timestamp)\n    AND classification <> 'market_movement'\n  GROUP BY account\n  HAVING sum(abs(coalesce(drift, 0))) > 0\n)\nSELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  drift::double precision AS value,\n  account AS metric\nFROM household_finance.reconcile_daily\nWHERE $__timeFilter(date::timestamp)\n  AND classification <> 'market_movement'\n  AND drift IS NOT NULL\n  AND account IN (SELECT account FROM ever_drifted)\nORDER BY date, account\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Register vs bank drift",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "What Actual recorded on each account's last bank pull, one band per account. Green is a pull that succeeded; amber is transient and needs nobody (rate limit, timeout); red needs a person at SimpleFin Bridge. Grey means the account is not bank-linked. A status Actual invents that this panel does not know gets its own band rather than being folded in with the healthy ones. Informational, exactly as it is in finances_sync_status: the freshness verdict is feed AGE, not this. Recorded nightly and not backfillable.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "insertNulls": false,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#078C52",
+                  "index": 0,
+                  "text": "ok"
+                },
+                "1": {
+                  "color": "#F79009",
+                  "index": 1,
+                  "text": "rate-limited"
+                },
+                "2": {
+                  "color": "#F79009",
+                  "index": 2,
+                  "text": "timed out"
+                },
+                "3": {
+                  "color": "#F13636",
+                  "index": 3,
+                  "text": "attention required"
+                },
+                "4": {
+                  "color": "#F13636",
+                  "index": 4,
+                  "text": "reauth required"
+                },
+                "5": {
+                  "color": "#F13636",
+                  "index": 5,
+                  "text": "account missing"
+                },
+                "6": {
+                  "color": "#F13636",
+                  "index": 6,
+                  "text": "failed"
+                },
+                "7": {
+                  "color": "#737373",
+                  "index": 7,
+                  "text": "not bank-linked"
+                },
+                "8": {
+                  "color": "#2E90FA",
+                  "index": 8,
+                  "text": "unrecognised status"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#737373",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 3,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.85,
+        "showValue": "never",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  (CASE\n    WHEN bank_sync_status IS NULL THEN 7\n    WHEN bank_sync_status = 'ok' THEN 0\n    WHEN bank_sync_status = 'rate-limit-exceeded' THEN 1\n    WHEN bank_sync_status = 'timed-out' THEN 2\n    WHEN bank_sync_status = 'attention-required' THEN 3\n    WHEN bank_sync_status = 'reauth-required' THEN 4\n    WHEN bank_sync_status = 'account-missing' THEN 5\n    WHEN bank_sync_status = 'failed' THEN 6\n    ELSE 8\n  END)::double precision AS value,\n  account AS metric\nFROM household_finance.sync_health_daily\nWHERE $__timeFilter(date::timestamp)\nORDER BY date, account\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Bank feed status",
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Latest recorded feed age per account, beside the stale and dead thresholds THAT account was judged by. The lines are per-cadence and deliberately shown per row: a daily feed is stale at 26h and dead at 72h, a monthly statement export at 280h and 840h. One global line across these accounts would call a correctly-behaving mortgage feed dead every morning. Manual accounts have no feed and carry no thresholds; an account with no last_sync falls back to transaction age, which its basis column names.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Feed age"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "h"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stale at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "h"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Dead at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "h"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  account AS \"Account\",\n  cadence AS \"Cadence\",\n  feed_age_hours AS \"Feed age\",\n  feed_stale_threshold_hours AS \"Stale at\",\n  feed_dead_threshold_hours AS \"Dead at\",\n  status AS \"Status\",\n  basis AS \"Basis\"\nFROM household_finance.sync_health_daily\nWHERE date = (\n  SELECT max(date)\n  FROM household_finance.sync_health_daily\n  WHERE $__timeFilter(date::timestamp)\n)\nORDER BY feed_age_hours DESC NULLS LAST, account\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Feed age against each account's own lines",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "How many register transactions carry no category, register-wide rather than for one month: a charge from March is still someone's work. Off-budget accounts, transfer legs and opening balances are excluded — each is uncategorised by design, and counting them would leave this permanently four figures deep, which is the same as having no queue. That makes this number smaller than finances_transactions(uncategorized_only=true) reports; the gap is scope, not disagreement. Recorded nightly and not backfillable: the register does not record WHEN a transaction was categorised, so history here can only be observed, never reconstructed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Uncategorized transactions"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#2E90FA",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  uncategorized_count::double precision AS \"Uncategorized transactions\"\nFROM household_finance.hygiene_daily\nWHERE $__timeFilter(date::timestamp)\nORDER BY date\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Uncategorized backlog — transactions",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "The same queue by magnitude. Deliberately a SEPARATE panel from the count and never a second axis: they share no unit, and a dual axis invites reading a crossing as meaning something. Absolute dollars, summed without regard to direction — an unclassified wire in and an unclassified payment out are two open questions, and netting them would report a tidy zero over both.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Uncategorized dollars"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F79009",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  uncategorized_amount::double precision AS \"Uncategorized dollars\"\nFROM household_finance.hygiene_daily\nWHERE $__timeFilter(date::timestamp)\nORDER BY date\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Uncategorized backlog — dollars",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "One band per configured obligation. MATCHED posted inside its tolerance band; CHANGED posted outside it; MISSING should have posted and did not — the only one worth raising. NOT_DUE and PENDING_STATEMENT are both absences that prove nothing yet. A cell can read CHANGED because the PLAN changed rather than the payment: Starlink shows −98% against a $70 expectation because the household moved it to standby between trips (DECISIONS 2026-08-17), which is working as intended. Every month is judged against the obligation list as it stands TODAY — a recurring item declares an end month but never a start — so older months are a statement about the current plan, not a reconstruction of what the checklist said then. The table holds a rolling twelve months; widen the range to see all of it.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "insertNulls": false,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#078C52",
+                  "index": 0,
+                  "text": "matched"
+                },
+                "1": {
+                  "color": "#737373",
+                  "index": 1,
+                  "text": "not due"
+                },
+                "2": {
+                  "color": "#2E90FA",
+                  "index": 2,
+                  "text": "pending statement"
+                },
+                "3": {
+                  "color": "#737373",
+                  "index": 3,
+                  "text": "ended"
+                },
+                "4": {
+                  "color": "#F79009",
+                  "index": 4,
+                  "text": "changed"
+                },
+                "5": {
+                  "color": "#F13636",
+                  "index": 5,
+                  "text": "missing"
+                },
+                "6": {
+                  "color": "#2E90FA",
+                  "index": 6,
+                  "text": "unrecognised status"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#737373",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 7,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.85,
+        "showValue": "never",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  month::timestamp AT TIME ZONE 'America/New_York' AS time,\n  (CASE status\n    WHEN 'MATCHED' THEN 0\n    WHEN 'NOT_DUE' THEN 1\n    WHEN 'PENDING_STATEMENT' THEN 2\n    WHEN 'ENDED' THEN 3\n    WHEN 'CHANGED' THEN 4\n    WHEN 'MISSING' THEN 5\n    ELSE 6\n  END)::double precision AS value,\n  obligation AS metric\nFROM household_finance.recurring_monthly\nWHERE $__timeFilter(month::timestamp)\nORDER BY month, obligation\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Recurring obligations by month",
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Whether the nightly job that fills every other panel in this suite actually ran. A finance dashboard that quietly stops updating looks exactly like a household that stopped spending, which is why this is glass rather than an alert. `Degraded` counts sources the run could not read in full — it still wrote its other tables, and named what it lost. Note this covers the EXPORT only; the sentinel keeps no run history the exporter can reach, so nothing here speaks for it.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "id": 8,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  to_char(started_at AT TIME ZONE 'America/New_York', 'YYYY-MM-DD HH24:MI') AS \"Started\",\n  CASE WHEN ok THEN 'ok' ELSE 'FAILED' END AS \"Outcome\",\n  round(extract(epoch FROM (finished_at - started_at))::numeric, 1) AS \"Seconds\",\n  coalesce(array_length(degraded, 1), 0) AS \"Degraded\",\n  error AS \"Error\"\nFROM household_finance.export_runs\nWHERE $__timeFilter(started_at)\nORDER BY started_at DESC\nLIMIT 30\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Export runs",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "How long each nightly run took, wall clock. The run recomputes the whole register every night rather than appending a day, so this grows with the register and a sudden step is worth a look — a source that started timing out, or a window that stopped being bounded. Descriptive only.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#2E90FA",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  started_at AS time,\n  extract(epoch FROM (finished_at - started_at))::double precision AS \"Duration\"\nFROM household_finance.export_runs\nWHERE $__timeFilter(started_at)\nORDER BY started_at\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Export duration",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 41,
+  "tags": [
+    "household-finance",
+    "nightly-projection",
+    "glass-not-plumbing"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ],
+    "time_options": [
+      "6M",
+      "1y",
+      "2y",
+      "5y"
+    ]
+  },
+  "timezone": "America/New_York",
+  "title": "Household Finance · Data Health",
+  "uid": "household-finance-health",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,86 @@
+# The task board's shape (docs/apps/openproject.md, "Board structure").
+# structure.rb makes OpenProject match it on every change to this file: the
+# ConfigMap carries a hash suffix, so an edit here replaces the Job.
+#
+# The rule this file enforces (Ryan, 2026-11-11): external providers never
+# reach work content, here or in the vault. Grokbot (xAI) and the Hermes bots
+# (Azure, Anthropic and Tavily, not local) are external: never a role in Work.
+# Work items never go in Personal or Bots.
+#
+# A new personal domain is one more project under personal (with its vault
+# domain in homelab-mcp's vault-policy.yaml); members listed with personal get
+# it through its subtree. Every personal sub-project is open to every member
+# with personal: Grok connectors are shared by all of an account's bots, so
+# Grokbot is one user and a per-bot sub-project would restrict nothing (Ryan,
+# 2026-11-12).
+
+projects:
+  - {identifier: bots, name: Bots}
+  - {identifier: personal, name: Personal}
+  - {identifier: fitness, name: Fitness, parent: personal}
+  - {identifier: property, name: Property, parent: personal}
+  - {identifier: tech, name: Tech, parent: personal}
+  - {identifier: family-history, name: Family History, parent: personal}
+  - {identifier: finances, name: Finances, parent: personal}
+  - {identifier: health, name: Health, parent: personal}
+  - {identifier: church, name: Church, parent: personal}
+  - {identifier: education, name: Education, parent: personal}
+  - {identifier: wardrobe, name: Wardrobe, parent: personal}
+  - {identifier: work, name: Work}
+
+# The seeded demo projects are public, so every signed-in user (every bot)
+# would see them. Archived, not deleted.
+archive: [demo-project, your-scrum-project]
+
+# A decision only Ryan can make: assignee Ryan (user 4), this status. The
+# briefing lists every one.
+needs_ryan_status: Needs Ryan
+
+# The handoff fields (System/Agents.md, "Handoff protocol"), on every board
+# project and type. Once required, OpenProject itself refuses an item without
+# them. openproject-mcp 0.4.0 and homelab-mcp 0.62.0 send them.
+fields:
+  - {name: Context, max_length: 255}
+  - {name: Done when, max_length: 500}
+fields_required: true
+
+# The agents' role: read, create, edit, comment and be assigned. No moving or
+# copying items between projects, no deleting, no managing members or the
+# project, no wiki, news, meetings or documents.
+agent_role: Agent
+agent_permissions:
+  - view_project
+  - view_work_packages
+  - view_members
+  - view_project_activity
+  - search_project
+  - add_work_packages
+  - edit_work_packages
+  - add_work_package_comments
+  - edit_own_work_package_comments
+  - add_work_package_attachments
+  - view_work_package_watchers
+  - add_work_package_watchers
+  - manage_subtasks
+  - manage_work_package_relations
+  - work_package_assigned
+  - save_queries
+
+# Who is on which projects, each with its whole subtree, as agent_role, and
+# on nothing else. structure.rb creates a missing user (no token); tokens come
+# from the provisioner.
+members:
+  chief: [bots, personal]
+  hank: [bots, personal]
+  chief-engineer: [bots]
+  grokbot: [bots, personal]
+  claude: [bots, personal, work]
+  build: [bots, personal, work]
+
+# Display names for users structure.rb creates (default: the login).
+users:
+  - {login: build, display: Build agent}
+
+# Ryan: Project admin on every board project, and the assignee for Needs Ryan.
+ryan_user_id: 4
+ryan_role: Project admin

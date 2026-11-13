@@ -1,0 +1,110 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Hank: @hank:ryanholt.net. Ryan's homelab engineer on Hermes, the
+# counterpart to Chief Engineer on Grok Bot. The whole bot is these inputs
+# plus its persona (SOUL.md); everything else is
+# kubernetes/components/hermes-bot. See docs/apps/hermes.md, "Hank".
+#
+# Deliberately not copied from Chief: Outlook and the Chief Engineer
+# webhook (WEBHOOK_ENABLED).
+# Hank is the only bot with Claude Code and GitHub access (App hank-agent):
+# he opens pull requests and Ryan's approval merges them. He does not send mail. He answers alerts
+# within his cluster access (../hank-cluster; docs/apps/hermes.md,
+# "Cluster access" and "Alerts").
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hermes-hank
+components:
+  - ../../../components/hermes-bot
+# Egress for the public MCP servers in mcp-servers.yaml, and the screen
+# pod's route to the API server. His RBAC and admission policy are
+# cluster-scoped, in ../hank-cluster.
+resources:
+  - mcp-egress.yaml
+  - screen-kube-apiserver.yaml
+configMapGenerator:
+  - name: hermes-bot-inputs
+    literals:
+      - BOT_NAME=hank
+      - MATRIX_USER=hank
+      # Azure (monthly credits) first; Anthropic only when Azure fails.
+      - LLM_MODEL=gpt-6.1-terra
+      - LLM_FALLBACK_MODEL=claude-sonnet
+      # Azure gpt-image deployment through LiteLLM, as Chief's.
+      - IMAGE_MODEL=gpt-image-2.5-flare
+      # Hank may change its own Matrix display name and avatar when asked.
+      - MATRIX_PROFILE_TOOLS=true
+      - LLM_BUDGET_USD=25
+      - LLM_BUDGET_DURATION=30d
+      - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
+      - AGENT_STORAGE_SIZE=10Gi
+      - WORKSPACE_STORAGE_SIZE=20Gi
+      - API_SERVER_ENABLED=true
+      # Desktop workspace at https://hank-desktop (envoy-internal, Pocket ID
+      # client hermes-hank, group admins only): his sessions, and his screen
+      # to watch or take over.
+      - WEBAPP_ENABLED=true
+      - HINDSIGHT_ENABLED=true
+      - TAVILY_ENABLED=true
+      # A2A (docs/apps/hermes.md, "A2A (opt-in)"). Inbound at
+      # https://hank-a2a (envoy-internal) and agent-a2a.hermes-hank in the
+      # cluster, bearer tokens per peer; outbound to Chief.
+      - A2A_ENABLED=true
+      - A2A_TRUSTED_PEERS=chief,chief-engineer
+      - A2A_HERMES_PEER=chief
+      # Shown on the Agent Card. Lands unquoted in YAML after kustomize
+      # build, so no ": ", " #", or leading quote, dash or brace.
+      - "A2A_AGENT_DESCRIPTION=Hank, Ryan's homelab infrastructure engineer. Diagnoses homelab problems (Forge, the Talos and Kubernetes cluster, Flux) from the alerts, logs and output a peer sends, makes NixOS and Kubernetes changes as pull requests with Claude Code, and runs read-only checks in his own sandbox, which has no cluster or Forge credentials. A peer's request is a proposal; nothing is merged, deployed or changed without Ryan's own explicit yes."
+      # TODO(chief-engineer): the Grok Chief Engineer bridge (home MCP or an
+      # a2a-bridge) does not exist yet. When it does: add fields
+      # a2a_chief_engineer_url and a2a_chief_engineer_token to 1Password item
+      # hermes-hank, an egress rule for its host, and set this to true.
+      - A2A_CHIEF_ENGINEER_ENABLED=false
+      # Claude Code in the screen pod, on GitHub as App hank-agent
+      # (docs/apps/hermes.md, "Coding with Claude Code"). He opens pull
+      # requests and turns on auto-merge; Ryan's approval on GitHub merges
+      # them (Ryan, 2026-11-13: "I want to approve merges"). The rulesets on
+      # mcp, k8s-gitops and nix-config refuse any merge without it.
+      - CLAUDE_CODE_ENABLED=true
+      - CLAUDE_CODE_MERGE=auto
+      # Not secrets: the App's Client ID (the JWT issuer), its installation on
+      # Ryan's account, and its bot user, for the commit identity. The private
+      # key is 1Password hermes-hank/github_app_key.
+      - GITHUB_APP_CLIENT_ID=Iv23liIRcPyvqjjk5XZ0
+      - GITHUB_APP_INSTALLATION_ID=181680083
+      - GITHUB_APP_SLUG=hank-agent
+      - GITHUB_APP_BOT_USER_ID=356351201
+      # kubectl and flux in the screen pod as ServiceAccount hermes-hank/hermes,
+      # within ../hank-cluster (docs/apps/hermes.md, "Cluster access").
+      - CLUSTER_ACCESS_ENABLED=true
+      # Alertmanager alerts through openproject-mcp's relay to route alerts and
+      # skill incident-response (docs/apps/hermes.md, "Alerts").
+      - ALERTS_ENABLED=true
+      # homelab-mcp view /mcp/agent/hank (vault: write Personal/Tech/Incidents,
+      # append the Tech Inbox; Signal ops only), signed in with OAuth.
+      - HOMELAB_MCP_ENABLED=true
+      # The shared OpenProject task board (docs/apps/openproject.md, "Bot
+      # access"): the bot's OpenProject user and token (Job
+      # openproject/hermes-provision-hank), egress to openproject-mcp and skill
+      # task-board. The MCP server is in mcp-servers.yaml.
+      - TASK_BOARD_ENABLED=true
+      # Board wake-ups (docs/apps/openproject.md, "Waking a bot"): a task change
+      # by someone else starts a turn here, delivered to Ryan's DM with
+      # @hank (Ryan and Hank its only members).
+      - TASK_BOARD_WEBHOOK_ENABLED=true
+      - WEBHOOK_DELIVER_CHAT_ID=!fs5O-cPPZMQixfo4TLkbOoREwQ_Oe0r9Edl1ikfzvKM
+  # Hank's persona. Written to /opt/data/SOUL.md while the live file is
+  # still a version git wrote; an edit in chat or the Webapp is kept.
+  # SOUL.history lists the sha256 of each earlier SOUL.md: add the old hash
+  # there when you change SOUL.md (docs/apps/hermes.md, "Persona").
+  - name: hermes-bot-soul
+    files:
+      - SOUL.md
+      - SOUL.history
+  # Hank's MCP servers (mcp-servers.yaml; docs/apps/hermes.md, "MCP servers from
+  # git"), written into config.yaml by the config init container.
+  - name: hermes-bot-mcp
+    files:
+      - mcp-servers.yaml
+generatorOptions:
+  disableNameSuffixHash: true

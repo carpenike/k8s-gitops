@@ -1,0 +1,129 @@
+---
+# ../template/job.yaml for a bot that reaches the board through homelab-mcp
+# (Claude, Grokbot): the same script with BOT_TARGET=homelab-mcp, and the
+# token's Secret in homelab-mcp, which mounts it. structure.rb owns the bot's
+# user and memberships; this only issues the token. Idempotent. Jobs are
+# immutable, so the bot's Kustomization sets force: true. Keep the image in
+# step with ../template/job.yaml and the HelmRelease
+# (kubernetes/apps/openproject/openproject/app/helmrelease.yaml).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: homelab-provision-${BOT_NAME}
+  namespace: openproject
+  labels:
+    app.kubernetes.io/name: openproject-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+spec:
+  backoffLimit: 4
+  activeDeadlineSeconds: 1200
+  template:
+    metadata:
+      # Bump with every change to app/provision.rb. The script's ConfigMap
+      # lives in another Kustomization, so only a change here makes the
+      # task-board Kustomization replace a finished or failed Job.
+      annotations:
+        openproject-bot-provisioner/script-revision: "4"
+      labels:
+        app.kubernetes.io/name: openproject-bot-provisioner
+        app.kubernetes.io/instance: ${BOT_NAME}
+    spec:
+      serviceAccountName: homelab-provision-${BOT_NAME}
+      # Never, so each failed attempt keeps its pod and logs.
+      restartPolicy: Never
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: provision
+          image: docker.io/openproject/openproject:17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+          command:
+            - bash
+            - -c
+            # Ruby refuses a world-writable TMPDIR without the sticky bit, and
+            # the emptyDir /tmp is 0777. The seeder's prepare-tmpdir does the same.
+            - mkdir -p /tmp/ruby && chmod 1777 /tmp/ruby && cd /app && exec bundle exec rails runner /opt/provision/provision.rb
+          envFrom:
+            - secretRef:
+                name: openproject-core
+            - secretRef:
+                name: openproject-memcached
+            - secretRef:
+                name: openproject-environment
+          env:
+            - name: TMPDIR
+              value: /tmp/ruby
+            - name: OPENPROJECT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-db
+                  key: password
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-secrets
+                  key: secret-key-base
+            - name: BOT_NAME
+              value: ${BOT_NAME}
+            - name: BOT_NAMESPACE
+              value: homelab-mcp
+            - name: SECRET_NAME
+              value: homelab-mcp-openproject-${BOT_NAME}
+            - name: BOT_TARGET
+              value: homelab-mcp
+            - name: BOT_DISPLAY_NAME
+              value: ${BOT_DISPLAY_NAME}
+            # The bot's inputs in one string. kustomize build drops the
+            # quotes around a lone "${VAR}", so a substituted true or 4
+            # would land as a YAML bool or int, which an env value can't be.
+            - name: BOT_INPUTS
+              value: "task_board=true ryan_user_id=${TASK_BOARD_RYAN_USER_ID:=4}"
+            - name: BOARD_PROJECT
+              value: bots
+            - name: BOARD_PROJECT_NAME
+              value: Bots
+            # structure.rb's agent role (app/board.yaml); the membership is
+            # normally there already, and left as is.
+            - name: BOT_ROLE
+              value: Agent
+            - name: RYAN_ROLE
+              value: Project admin
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: script
+              mountPath: /opt/provision
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: app-tmp
+              mountPath: /app/tmp
+            # As the seeder has it: the app's configured attachments path.
+            - name: data
+              mountPath: /var/openproject/assets
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openproject
+        - name: script
+          configMap:
+            name: openproject-bot-provisioner
+        - name: tmp
+          emptyDir: {}
+        - name: app-tmp
+          emptyDir: {}

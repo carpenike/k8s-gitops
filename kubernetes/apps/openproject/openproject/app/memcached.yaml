@@ -1,0 +1,60 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Rails cache for OpenProject (OPENPROJECT_RAILS__CACHE__STORE=memcache).
+# The chart's bundled memcached is the frozen bitnamilegacy image, so this is
+# the official image instead. Cache only: nothing to back up, safe to lose.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: memcached
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: memcached
+  interval: 1h
+  values:
+    controllers:
+      memcached:
+        containers:
+          app:
+            image:
+              repository: docker.io/library/memcached
+              tag: 1.6.45-alpine@sha256:bfc2ee42c4edb65f436dafc6a61cbc6938c30118e11ddea2f968e1a2c90bb12a
+            args: ["-m", "128", "-c", "1024"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 192Mi
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 11211
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 11211
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 11211
+            runAsGroup: 11211
+            seccompProfile:
+              type: RuntimeDefault
+    service:
+      app:
+        controller: memcached
+        ports:
+          memcache:
+            port: 11211

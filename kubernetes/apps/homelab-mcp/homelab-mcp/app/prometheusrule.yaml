@@ -1,0 +1,379 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# homelab-mcp health and the MFP browser-cookie session. The cookies cannot
+# be refreshed by the server; carpenike/mcp docs/MFP-COOKIE-RUNBOOK.md says
+# how to replace them. Alerts route to Forge's Alertmanager like the rest.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-mcp
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: homelab-mcp
+      rules:
+        - alert: HomelabMcpDown
+          expr: |
+            up{namespace="homelab-mcp",job="homelab-mcp"} == 0
+              or absent(up{namespace="homelab-mcp",job="homelab-mcp"})
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: homelab-mcp is not being scraped
+            description: >-
+              Prometheus has had no /metrics from homelab-mcp for 10 minutes.
+              Claude's MCP connectors at mcp.<domain> are probably down too.
+        - alert: HomelabMcpMfpAuthExpired
+          # Set by the client on a 401/403 or a refused token refresh; the
+          # mfp tools then return an auth error, never empty data.
+          expr: homelab_mcp_mfp_auth_state{namespace="homelab-mcp",state="expired"} == 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: MyFitnessPal session cookies have expired
+            description: >-
+              The mfp tools are refusing calls until the cookies are replaced.
+              Export fresh cookies to the 1Password item homelab-mcp, field
+              mfp_cookies (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
+        - alert: HomelabMcpMfpCookiesUnusable
+          # The export itself is missing, empty, unparseable or was captured
+          # logged out. AuthExpired cannot see this -- no call reaches MFP to
+          # be rejected -- and ExpiringSoon is silent when the export has no
+          # expirationDate. On 2026-11-09 an empty export sat for a day with
+          # neither firing. Set at startup and on every mfp_* call (0.42.1+).
+          expr: homelab_mcp_mfp_cookies_usable{namespace="homelab-mcp"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: MyFitnessPal cookie export is missing or unusable
+            description: >-
+              The mfp tools are refusing every call. Capture a fresh session
+              into the 1Password item homelab-mcp, field mfp_cookies
+              (docs/MFP-COOKIE-RUNBOOK.md in carpenike/mcp).
+        - alert: HomelabMcpObsidianSyncDown
+          # The obsidian-sync container is not running (crash loop, or the
+          # pod is down). The vault then stops matching the owner's devices,
+          # and the vault_* tools work on a stale copy.
+          expr: kube_pod_container_status_running{namespace="homelab-mcp",container="obsidian-sync"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Obsidian Sync is not running in homelab-mcp
+            description: >-
+              The obsidian-sync container has not been running for 15 minutes.
+              Check its log (kubectl -n homelab-mcp logs deploy/homelab-mcp -c
+              obsidian-sync); docs/apps/homelab-mcp.md, "Obsidian Sync".
+        - alert: HomelabMcpObsidianSyncRestarting
+          # The liveness probe restarts the client when its lock stops being
+          # refreshed (a dead event loop); repeated restarts mean it cannot
+          # stay up: a bad login, a revoked device, or an upstream hang.
+          expr: >-
+            increase(kube_pod_container_status_restarts_total{namespace="homelab-mcp",container="obsidian-sync"}[1h]) > 2
+          labels:
+            severity: warning
+          annotations:
+            summary: Obsidian Sync keeps restarting in homelab-mcp
+            description: >-
+              obsidian-sync restarted more than twice in an hour. Its log says
+              why; if the login was revoked, run the one-time setup again
+              (docs/apps/homelab-mcp.md, "Obsidian Sync").
+        - alert: HomelabMcpWithingsTokenUnusable
+          # No Withings token on the state volume, or Withings refused it and
+          # a refresh. Set at startup and on every withings_* call. Expected
+          # until the first authorization, and after a restore (the restored
+          # refresh token has usually already rotated).
+          expr: homelab_mcp_withings_token_usable{namespace="homelab-mcp"} == 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: Withings needs re-authorizing
+            description: >-
+              The withings tools are refusing calls. Run the one-time
+              authorization in carpenike/mcp README, "Withings posture"
+              (scripts/withings_authorize.py piped into the seed command).
+        - alert: HomelabMcpMfpCookiesExpiringSoon
+          # The session cookie's own expiry, read from the cookie file.
+          expr: |
+            homelab_mcp_mfp_cookie_expiry_timestamp_seconds{namespace="homelab-mcp"} > 0
+              and (homelab_mcp_mfp_cookie_expiry_timestamp_seconds{namespace="homelab-mcp"} - time()) < 5 * 86400
+          for: 1h
+          labels:
+            severity: info
+          annotations:
+            summary: MyFitnessPal session cookies expire within 5 days
+            description: >-
+              Replace them before they lapse (docs/MFP-COOKIE-RUNBOOK.md in
+              carpenike/mcp).
+    # The finance jobs in this pod. Ported from nix-config
+    # hosts/forge/services/finance-{signal-production,ingestion,snapshots}/
+    # alerts.nix with the same expressions, severities and runbook text; the
+    # systemd unit and timer checks become checks on the pod's containers.
+    - name: homelab-mcp-finance-signal
+      rules:
+        - alert: FinanceSignalPathUnhealthy
+          expr: finance_signal_path_healthy{namespace="homelab-mcp"} == 0 or absent(finance_signal_path_healthy{namespace="homelab-mcp"})
+          for: 2m
+          labels: &signal
+            severity: high
+            service: finance-signal
+            category: finance
+          annotations:
+            summary: Canonical finance context storage is unavailable or unsafe
+            description: >-
+              Check the homelab-mcp-state volume mount, ownership (65532), the
+              0700 root set by the permissions init container, and exact 0600
+              DB/journal/lease modes. Never create a replacement DB or
+              recursively chmod state.
+        - alert: FinanceSignalListenerUnhealthy
+          expr: finance_signal_listener_healthy{namespace="homelab-mcp"} == 0 or absent(finance_signal_listener_healthy{namespace="homelab-mcp"})
+          for: 2m
+          labels: *signal
+          annotations:
+            summary: Finance Signal capture is disconnected, stale or unverifiable
+            description: >-
+              Inspect native listener status and the single receive owner (the
+              capture container) and signal-api on loopback. No noted
+              acknowledgment means the sender must resend; do not invent
+              receipt or recovery.
+        - alert: FinanceSignalAckAttention
+          expr: finance_signal_ack_attention{namespace="homelab-mcp"} == 1
+          for: 1m
+          labels: *signal
+          annotations:
+            summary: Finance capture has failed, unknown or overdue acknowledgments
+            description: >-
+              Use native read-only status to inspect durable ACK evidence. A
+              committed note is not a delivered ACK; never reset a reservation
+              or automatically retry an ambiguous POST.
+        - alert: FinanceSignalReportUnavailable
+          expr: |
+            finance_signal_report_status_available{namespace="homelab-mcp"} == 0
+              and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} > 0)
+          for: 2m
+          labels: *signal
+          annotations:
+            summary: Current finance report status cannot be verified
+            description: >-
+              The current post-cutover slot cannot be read with current
+              Family/Ops destination fingerprints. Do not infer fulfillment
+              from old receipts or job success.
+        - alert: FinanceSignalReportAttention
+          expr: |
+            finance_signal_report_attention{namespace="homelab-mcp"} == 1
+              and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} > 0)
+          for: 1m
+          labels: *signal
+          annotations:
+            summary: Current finance report has a non-retryable failure or unknown outcome
+            description: >-
+              Inspect metadata-only native report status. Retryable preparation
+              failures use the completion deadline; failed/unknown/reserved
+              sends remain immediately actionable and must never be blindly
+              retried.
+        - alert: FinanceSignalReportMissed
+          expr: |
+            (finance_signal_report_fulfilled{namespace="homelab-mcp"} == 0)
+              and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} > 0)
+              and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} < time())
+          labels: *signal
+          annotations:
+            summary: Finance report purpose missed its completion deadline
+            description: >-
+              The current eligible slot remains unfulfilled after its native
+              fifteen-minute window plus 45 seconds of stop grace. Pre-cutover
+              slots are excluded. Diagnose locally; the grace never authorizes
+              a late POST or catch-up.
+        - alert: FinanceSignalMonitorStale
+          expr: |
+            time() - finance_signal_check_timestamp_seconds{namespace="homelab-mcp"} > 300
+              or finance_signal_check_timestamp_seconds{namespace="homelab-mcp"} > time() + 60
+              or absent(finance_signal_check_timestamp_seconds{namespace="homelab-mcp"})
+          for: 2m
+          labels: *signal
+          annotations:
+            summary: Finance Signal monitoring is missing, stale or future-dated
+            description: >-
+              Check the scheduler container's collect job and the metrics
+              container, independently of the listener. This is not an
+              off-cluster dead-man.
+        - alert: FinanceSignalContainerDown
+          # Replaces finance-signal-(capture|metrics).service failed.
+          expr: |
+            kube_pod_container_status_running{namespace="homelab-mcp",container=~"capture|signal-api|metrics"} == 0
+              or increase(kube_pod_container_status_restarts_total{namespace="homelab-mcp",container=~"capture|signal-api|metrics"}[15m]) > 2
+          for: 5m
+          labels: *signal
+          annotations:
+            summary: Finance Signal capture, signal-api or metrics is not running
+            description: >-
+              Check the container's log and its fixed error codes. Preserve
+              canonical state and reservations; report jobs use their own
+              outcome and deadline alerts.
+    - name: homelab-mcp-finance-ingestion
+      rules:
+        - alert: FinanceIngestPipelineFailed
+          expr: |
+            (
+              finance_ingest_last_run_failed{namespace="homelab-mcp"} == 1
+              or finance_ingest_accounts_other_failures{namespace="homelab-mcp"} > 0
+              or (finance_ingest_accounts_expected{namespace="homelab-mcp"} > 0 and finance_ingest_accounts_verified{namespace="homelab-mcp"} == 0)
+              or finance_ingest_last_finished_timestamp_seconds{namespace="homelab-mcp"} > finance_ingest_last_reported_timestamp_seconds{namespace="homelab-mcp"}
+            )
+            and (finance_ingest_post_outcome_unknown{namespace="homelab-mcp"} == 0 or finance_ingest_in_flight{namespace="homelab-mcp"} == 1)
+            and finance_ingest_state_read_success{namespace="homelab-mcp"} == 1
+          for: 2m
+          labels: &ingest
+            severity: high
+            service: finance-ingestion
+            category: finance
+          annotations:
+            summary: Finance ingestion failed required work
+            description: >-
+              The latest report is incomplete, the run failed, no expected
+              accounts verified, or verification failed beyond bank attention.
+              Inspect the durable report; do not retry inside the reservation.
+        - alert: FinanceIngestBankAttention
+          expr: |
+            finance_ingest_accounts_needing_attention{namespace="homelab-mcp"} > 0
+            and finance_ingest_accounts_verified{namespace="homelab-mcp"} > 0
+            and finance_ingest_accounts_other_failures{namespace="homelab-mcp"} == 0
+            and finance_ingest_last_run_failed{namespace="homelab-mcp"} == 0
+            and (finance_ingest_post_outcome_unknown{namespace="homelab-mcp"} == 0 or finance_ingest_in_flight{namespace="homelab-mcp"} == 1)
+            and finance_ingest_last_reported_timestamp_seconds{namespace="homelab-mcp"} >= finance_ingest_last_finished_timestamp_seconds{namespace="homelab-mcp"}
+            and finance_ingest_state_read_success{namespace="homelab-mcp"} == 1
+          for: 5m
+          labels:
+            severity: low
+            service: finance-ingestion
+            category: finance
+          annotations:
+            summary: Finance ingestion completed partially; bank attention is required
+            description: >-
+              Other accounts verified. Inspect the private report and the bank
+              connection in SimpleFin Bridge. This is not a whole-pipeline
+              outage; no automatic retry is authorized.
+        - alert: FinanceIngestOutcomeUnknown
+          # 600 s: the 480 s run deadline plus two minutes, as on Forge.
+          expr: |
+            (finance_ingest_post_outcome_unknown{namespace="homelab-mcp"} == 1 and finance_ingest_in_flight{namespace="homelab-mcp"} == 0)
+            or (
+              finance_ingest_in_flight{namespace="homelab-mcp"} == 1
+              and time() - finance_ingest_last_attempt_timestamp_seconds{namespace="homelab-mcp"} > 600
+            )
+          for: 2m
+          labels: *ingest
+          annotations:
+            summary: Finance ingestion has an unknown outcome or a stalled run
+            description: >-
+              A normal bounded run is given its deadline plus two minutes.
+              Preserve state and inspect the sidecar and ledger before explicit
+              recovery; never clear quota state or replay an ambiguous POST.
+        - alert: FinanceIngestOverdue
+          expr: |
+            time() - finance_ingest_next_attempt_timestamp_seconds{namespace="homelab-mcp"} > 1800
+            and (finance_ingest_in_flight{namespace="homelab-mcp"} == 0 or finance_ingest_last_run_failed{namespace="homelab-mcp"} == 1)
+            and finance_ingest_state_read_success{namespace="homelab-mcp"} == 1
+          for: 2m
+          labels: *ingest
+          annotations:
+            summary: Finance ingestion is over 30 minutes past its next eligible attempt
+            description: >-
+              Inspect the scheduler container and the durable report.
+              Eligibility polls are not bank pulls, and a fresh dashboard
+              export is not evidence of ingestion.
+        - alert: FinanceSchedulerDown
+          # Replaces the ingestion and snapshot timers stopped, and their
+          # workers failed: every finance job runs from this container.
+          expr: |
+            kube_pod_container_status_running{namespace="homelab-mcp",container="scheduler"} == 0
+              or absent(kube_pod_container_status_running{namespace="homelab-mcp",container="scheduler"})
+          for: 5m
+          labels: *ingest
+          annotations:
+            summary: The finance job scheduler is not running
+            description: >-
+              No bank ingestion, export, snapshot or Signal report runs until it
+              is back. Restarting it preserves the durable reservation; do not
+              substitute another bank-sync owner.
+        - alert: FinanceIngestCollectorFailed
+          expr: |
+            max by (instance, job) (finance_ingest_state_read_success{namespace="homelab-mcp"} == bool 0) == 1
+          for: 30s
+          labels: *ingest
+          annotations:
+            summary: Finance ingestion state collection failed
+            description: >-
+              Check the scheduler container's log for the ingest-metrics job
+              and /run/finance-metrics. Valid read-failure metrics are retained
+              even on nonzero CLI exit.
+        - alert: FinanceIngestCollectorStale
+          expr: |
+            time() - finance_ingest_metrics_generated_timestamp_seconds{namespace="homelab-mcp"} > 360
+              or absent(finance_ingest_metrics_generated_timestamp_seconds{namespace="homelab-mcp"})
+          for: 2m
+          labels: *ingest
+          annotations:
+            summary: Finance ingestion monitoring is absent or stale
+            description: >-
+              The two-minute ingest-metrics job has not published for over six
+              minutes. Check the scheduler and metrics containers; MCP/OAuth
+              availability is irrelevant.
+    - name: homelab-mcp-finance-snapshots
+      rules:
+        - alert: FinanceSnapshotUnavailable
+          expr: finance_snapshot_status_available{namespace="homelab-mcp"} == 0 or absent(finance_snapshot_status_available{namespace="homelab-mcp"})
+          for: 2m
+          labels: &snapshot
+            severity: high
+            service: finance-snapshot
+            category: finance
+          annotations:
+            summary: Finance snapshot status is unavailable
+            description: >-
+              The exporter could not verify its private source/configuration or
+              PostgreSQL status, or emitted invalid evidence. Never infer
+              success from a no-op or a recent check.
+        - alert: FinanceSnapshotExportFailed
+          expr: finance_snapshot_export_failed{namespace="homelab-mcp"} == 1
+          for: 2m
+          labels: *snapshot
+          annotations:
+            summary: Finance snapshot export failure remains unresolved
+            description: >-
+              The last recorded export failed, or the wrapper could not obtain
+              valid evidence. Waiting/already-current polls do not clear this
+              incident. Do not replay a bank POST.
+        - alert: FinanceSnapshotCheckStale
+          expr: |
+            time() - finance_snapshot_check_timestamp_seconds{namespace="homelab-mcp"} > 900
+              or finance_snapshot_check_timestamp_seconds{namespace="homelab-mcp"} > time() + 60
+              or absent(finance_snapshot_check_timestamp_seconds{namespace="homelab-mcp"})
+          for: 2m
+          labels: *snapshot
+          annotations:
+            summary: Finance snapshot monitoring is absent, stale or future-dated
+            description: >-
+              No valid observer check for over 15 minutes, or its clock is
+              ahead. Check the scheduler's snapshots job and the metrics
+              container. Check time is not snapshot or bank freshness.
+        - alert: FinanceSnapshotIngestionUnpublished
+          expr: |
+            finance_ingest_last_reported_timestamp_seconds{namespace="homelab-mcp"}
+              > on (instance, job) finance_snapshot_checkpoint_ingestion_finished_timestamp_seconds{namespace="homelab-mcp"}
+            and on (instance, job) (time() - finance_ingest_last_reported_timestamp_seconds{namespace="homelab-mcp"} > 900)
+            and on (instance, job) (finance_ingest_in_flight{namespace="homelab-mcp"} == 0)
+            and on (instance, job) (finance_ingest_state_read_success{namespace="homelab-mcp"} == 1)
+          for: 2m
+          labels: *snapshot
+          annotations:
+            summary: A completed finance ingestion has no matching snapshot after 15 minutes
+            description: >-
+              Compare the durable ingestion report with the export checkpoint.
+              A fresh check or an unrelated nightly export does not satisfy
+              this watermark. Waiting during a live bank pull is normal.

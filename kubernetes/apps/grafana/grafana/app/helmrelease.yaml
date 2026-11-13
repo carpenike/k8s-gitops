@@ -1,0 +1,307 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Grafana, moved from Forge (nix-config hosts/forge/infrastructure/
+# observability/grafana.nix and modules/nixos/services/grafana). One
+# replica on SQLite (grafana.db on grafana-data, copied from Forge at the
+# cutover), so Recreate. Settings are Forge's, as GF_* variables; what
+# differs is listed in docs/platform/grafana.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: grafana
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      grafana:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # A name with a dot is looked up as written first, so Cilium files
+          # the answer under that name and the toFQDNs rules match (same
+          # note as components/hermes-bot).
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+        containers:
+          app:
+            image:
+              # Forge runs nixpkgs nixos-25.11's grafana 12.3.6+security-01
+              # (flake.lock b6018f87). The copied grafana.db needs the same
+              # or a newer Grafana; this is the newest 12.3 patch. Never go
+              # below Forge: Grafana does not migrate a database down.
+              repository: docker.io/grafana/grafana
+              tag: 13.3.0@sha256:488984b716c0862639f91a698adbe2862677a5a07bad42da5f03f3030883b205
+            env:
+              GF_SERVER_HTTP_PORT: "3000"
+              GF_SERVER_ROOT_URL: https://grafana.${SECRET_DOMAIN}
+              GF_LOG_MODE: console
+              # Forge's dataproxy settings, for slow Loki queries.
+              GF_DATAPROXY_TIMEOUT: "120"
+              GF_DATAPROXY_KEEP_ALIVE_SECONDS: "120"
+              GF_SECURITY_ADMIN_USER: admin
+              # Pocket ID only, exactly as Forge: client grafana, the same
+              # endpoints, scopes, role mapping and sign-out redirect.
+              GF_AUTH_DISABLE_LOGIN_FORM: "true"
+              GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+              GF_AUTH_GENERIC_OAUTH_NAME: Pocket ID
+              GF_AUTH_GENERIC_OAUTH_CLIENT_ID: grafana
+              GF_AUTH_GENERIC_OAUTH_SCOPES: openid profile email groups
+              GF_AUTH_GENERIC_OAUTH_AUTH_URL: https://id.${SECRET_DOMAIN}/authorize
+              GF_AUTH_GENERIC_OAUTH_TOKEN_URL: https://id.${SECRET_DOMAIN}/api/oidc/token
+              GF_AUTH_GENERIC_OAUTH_API_URL: https://id.${SECRET_DOMAIN}/api/oidc/userinfo
+              GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: contains(groups[*], 'admins') && 'Admin' || 'Viewer'
+              GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "false"
+              GF_AUTH_GENERIC_OAUTH_SIGNOUT_REDIRECT_URL: https://id.${SECRET_DOMAIN}/api/oidc/end-session?post_logout_redirect_uri=https%3A%2F%2Fgrafana.${SECRET_DOMAIN}
+              # Plugins Forge installs, pinned, downloaded from grafana.com
+              # before Grafana serves (the only reason it reaches
+              # grafana.com, see the policy below). Business Charts is the
+              # version nixpkgs pinned for Forge. OnCall's app plugin
+              # matches the engine (grafana/oncall v1.16.11).
+              GF_PLUGINS_PREINSTALL_SYNC: volkovlabs-echarts-panel@7.2.2,grafana-oncall-app@1.16.11
+              # Replaces Grafana's default background preinstall list (the
+              # unpinned Drilldown apps) with plugins already installed
+              # above, so nothing unpinned is fetched.
+              GF_PLUGINS_PREINSTALL: volkovlabs-echarts-panel@7.2.2,grafana-oncall-app@1.16.11
+              GF_PLUGINS_PREINSTALL_AUTO_UPDATE: "false"
+              # OnCall's plugin signs in to Grafana with a managed service
+              # account (Forge's grafana.nix).
+              GF_FEATURE_TOGGLES_ENABLE: externalServiceAccounts
+              GF_AUTH_MANAGED_SERVICE_ACCOUNTS_ENABLED: "true"
+              # Calls home that the egress policy would refuse anyway.
+              GF_ANALYTICS_REPORTING_ENABLED: "false"
+              GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+              GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+              GF_NEWS_NEWS_FEED_ENABLED: "false"
+              GF_SECURITY_DISABLE_GRAVATAR: "true"
+            envFrom:
+              # GF_SECURITY_ADMIN_PASSWORD, GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.
+              - secretRef:
+                  name: grafana-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: 3000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+              # The first start downloads the two plugins and migrates.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: 3000
+                  periodSeconds: 5
+                  failureThreshold: 60
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            # Forge: MemoryMax 1G, CPUQuota 50%.
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 1Gi
+    # The image's grafana user. The copied grafana.db must be owned by it
+    # (docs/platform/grafana.md, cutover).
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 472
+        runAsGroup: 472
+        fsGroup: 472
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: grafana
+        forceRename: grafana
+        ports:
+          http:
+            port: 3000
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics
+            interval: 60s
+    route:
+      # Grafana's own Pocket ID client is the login, so this route is native
+      # and the gateway login is skipped. It is on BOTH gateways: external so
+      # cloudflare-dns keeps publishing the proxied CNAME, internal so
+      # mikrotik-dns publishes an A record and in-network clients stop
+      # hairpinning out through Cloudflare. The ReferenceGrant is in
+      # httproute.yaml.
+      app:
+        kind: HTTPRoute
+        forceRename: grafana
+        labels:
+          gateway.holthome.net/auth: native
+        hostnames:
+          - grafana.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+          - name: envoy-internal
+            namespace: network
+        rules:
+          # Forge's dataproxy timeout, plus a little.
+          - timeouts:
+              request: 150s
+              backendRequest: 150s
+            backendRefs:
+              - identifier: app
+                port: 3000
+    persistence:
+      data:
+        existingClaim: grafana-data
+        globalMounts:
+          - path: /var/lib/grafana
+      datasources:
+        type: secret
+        name: grafana-datasources
+        defaultMode: 0440
+        globalMounts:
+          - path: /etc/grafana/provisioning/datasources
+            readOnly: true
+      dashboard-providers:
+        type: configMap
+        name: grafana-dashboard-providers
+        globalMounts:
+          - path: /etc/grafana/provisioning/dashboards
+            readOnly: true
+      dashboards-household-finance:
+        type: configMap
+        name: grafana-dashboards-household-finance
+        globalMounts:
+          - path: /var/lib/grafana-dashboards/household-finance
+            readOnly: true
+      dashboards-schoolhouse:
+        type: configMap
+        name: grafana-dashboards-schoolhouse
+        globalMounts:
+          - path: /var/lib/grafana-dashboards/schoolhouse
+            readOnly: true
+      dashboards-whiskey-whiskey-whiskey:
+        type: configMap
+        name: grafana-dashboards-whiskey-whiskey-whiskey
+        globalMounts:
+          - path: /var/lib/grafana-dashboards/whiskey-whiskey-whiskey
+            readOnly: true
+      # Plugin downloads unpack through the temp directory.
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    # Grafana's own CiliumNetworkPolicy. Here rather than in a file because
+    # kubeconform checks files before Flux substitutes ${SECRET_DOMAIN}, and
+    # Cilium's schema refuses "${" in a toFQDNs name (same as homelab-mcp).
+    rawResources:
+      policy:
+        forceRename: grafana
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # In: 3000 from the envoy-external and envoy-internal proxies (the
+          # route is on both), Prometheus (/metrics),
+          # the OnCall engine and worker (user and plugin sync through the
+          # Grafana API) and the plugin setup Job. Probes come from the
+          # kubelet, which Cilium allows.
+          # Out: DNS; 443 to Pocket ID (token and userinfo), Forge's
+          # Prometheus and Loki vhosts, and grafana.com plus
+          # storage.googleapis.com for the two plugin downloads; then the
+          # cluster Prometheus, postgres17 and the OnCall engine.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: grafana
+                app.kubernetes.io/controller: grafana
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: observability
+                      app.kubernetes.io/name: prometheus
+                  - matchLabels:
+                      app.kubernetes.io/name: grafana-oncall
+                      app.kubernetes.io/controller: grafana-oncall
+                  - matchLabels:
+                      app.kubernetes.io/name: grafana-oncall-plugin-setup
+                toPorts:
+                  - ports:
+                      - port: "3000"
+                        protocol: TCP
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                  - matchName: prom.${SECRET_DOMAIN}
+                  - matchName: loki.${SECRET_DOMAIN}
+                  # Plugin catalog API and the archive it redirects to.
+                  - matchName: grafana.com
+                  - matchName: storage.googleapis.com
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: observability
+                      app.kubernetes.io/name: prometheus
+                toPorts:
+                  - ports:
+                      - port: "9090"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: cnpg-system
+                      cnpg.io/cluster: postgres17
+                toPorts:
+                  - ports:
+                      - port: "5432"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: grafana-oncall
+                      app.kubernetes.io/controller: grafana-oncall
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP

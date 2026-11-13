@@ -1,0 +1,22 @@
+---
+# Values derived from hermes-bot-inputs by the component's replacements, for
+# templates whose variable names differ from the input contract. Do not
+# set these per bot.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-bot-derived
+data:
+  BOT_NAMESPACE: hermes-BOT_NAME
+  # LiteLLM key template (kubernetes/apps/litellm/key-provisioner/template).
+  KEY_ALIAS: hermes-BOT_NAME
+  TEAM_ALIAS: hermes
+  # Every model on the proxy, wildcard routes included (LiteLLM sentinel;
+  # the team sets no list). The key's budget is the limit. docs/apps/hermes.md.
+  MODELS: all-proxy-models
+  BUDGET: LLM_BUDGET_USD/LLM_BUDGET_DURATION
+  TARGET_NAMESPACE: hermes-BOT_NAME
+  SECRET_NAME: litellm
+  # A name Hermes scrubs from child-process environments (it is the
+  # openai-api provider's key variable). See docs/apps/hermes.md.
+  SECRET_KEY_NAME: OPENAI_API_KEY

@@ -1,0 +1,30 @@
+{
+  "_type": "Activity::Comment",
+  "id": 510,
+  "comment": {
+    "format": "markdown",
+    "raw": "Pruned 412 snapshots older than 30 days.",
+    "html": "<p>Pruned 412 snapshots older than 30 days.</p>"
+  },
+  "details": [],
+  "version": 6,
+  "createdAt": "2026-10-20T22:50:01.000Z",
+  "updatedAt": "2026-10-20T22:50:01.000Z",
+  "_links": {
+    "self": {
+      "href": "/api/v3/activities/510"
+    },
+    "workPackage": {
+      "href": "/api/v3/work_packages/101",
+      "title": "Rotate tunnel credentials"
+    },
+    "user": {
+      "href": "/api/v3/users/21",
+      "title": "Homelab Manager"
+    },
+    "update": {
+      "href": "/api/v3/activities/510",
+      "method": "patch"
+    }
+  }
+}

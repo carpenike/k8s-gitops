@@ -1,0 +1,267 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/cluster_v1.json
+# Shared PostgreSQL 17. Forge's LiteLLM database is PostgreSQL 17, so a
+# custom-format dump from that server restores into this image.
+# The bootstrap database is `app`. LiteLLM uses the Database below.
+# Two backups: volume snapshots (csi-ceph-block, stay on Ceph) and Barman
+# Cloud to R2 (ObjectStore postgres17-r2: continuous WAL plus a daily base
+# backup, 30 days). waitForArchive stays false so a snapshot never waits on
+# R2. docs/platform/postgres17.md.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres17
+spec:
+  instances: 2
+  # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.9
+  storage:
+    storageClass: ceph-block
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  # The plugin's sidecar archives every WAL segment to R2. Adding or
+  # removing this restarts the instances: the standby first, then the
+  # primary in place (primaryUpdateMethod restart, no switchover), so
+  # clients lose the database for a few minutes.
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: postgres17-r2
+  backup:
+    volumeSnapshot:
+      className: csi-ceph-block
+      online: true
+      onlineConfiguration:
+        waitForArchive: false
+  managed:
+    roles:
+      - name: litellm
+        ensure: present
+        login: true
+        comment: LiteLLM proxy
+        passwordSecret:
+          name: litellm-db
+      - name: hindsight
+        ensure: present
+        login: true
+        comment: Hindsight memory server (hermes-memory)
+        passwordSecret:
+          name: hindsight-db
+      - name: openproject
+        ensure: present
+        login: true
+        comment: OpenProject task board (openproject)
+        passwordSecret:
+          name: openproject-db
+      # Stores moved from Forge (docs/platform/postgres17.md, "Forge stores"). Every
+      # client runs in the cluster and keeps CloudNativePG's default pg_hba.
+      # Read access is granted by each owner (ALTER DEFAULT PRIVILEGES), not
+      # by a cluster-wide role, so a reader sees its own store only.
+      - name: schoolhouse
+        ensure: present
+        login: true
+        comment: schoolhouse ingest (writer, owner of schoolhouse)
+        passwordSecret:
+          name: schoolhouse-db
+      - name: schoolhouse_reader
+        ensure: present
+        login: true
+        comment: homelab-mcp school_* tools (read only)
+        passwordSecret:
+          name: schoolhouse-reader-db
+      - name: schoolhouse_grafana
+        ensure: present
+        login: true
+        comment: Grafana, Schoolhouse dashboards (read only)
+        passwordSecret:
+          name: schoolhouse-grafana-db
+      - name: lading
+        ensure: present
+        login: true
+        comment: lading order sync (writer, owner of lading)
+        passwordSecret:
+          name: lading-db
+      - name: lading_reader
+        ensure: present
+        login: true
+        comment: homelab-mcp amazon/costco/samsclub tools and the finances export (read only)
+        passwordSecret:
+          name: lading-reader-db
+      - name: homelab_finance
+        ensure: present
+        login: true
+        comment: homelab-mcp finances export (writer, owner of homelab_finance)
+        passwordSecret:
+          name: homelab-finance-db
+      - name: homelab_finance_money
+        ensure: present
+        login: true
+        comment: homelab-mcp money_* tools (money_overview only)
+        passwordSecret:
+          name: homelab-finance-money-db
+      - name: homelab_finance_grafana
+        ensure: present
+        login: true
+        comment: Grafana, Household Finance dashboards (read only)
+        passwordSecret:
+          name: homelab-finance-grafana-db
+      - name: homelab_finance_report
+        ensure: present
+        login: true
+        comment: homelab-mcp Signal finance reports (money_overview and export_runs, read only)
+        passwordSecret:
+          name: homelab-finance-report-db
+      - name: finances_context
+        ensure: present
+        login: true
+        comment: homelab-mcp finances_context_* tools and Signal capture (owner of finances_context)
+        passwordSecret:
+          name: finances-context-db
+      - name: stalwart
+        ensure: present
+        login: true
+        comment: Stalwart mail server (mail; data and search stores)
+        passwordSecret:
+          name: stalwart-db
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: litellm
+spec:
+  cluster:
+    name: postgres17
+  name: litellm
+  owner: litellm
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Hindsight (namespace hermes-memory, docs/apps/hermes-memory.md): one schema per
+# bot (user_<bot>), created by the server. The operator installs the
+# extensions as superuser, in public, where Hindsight looks for them
+# (hindsight_api/_pg_extensions.py at v1.2.0): vector for embeddings, pg_trgm
+# and btree_gin for entity resolution. Without the last two Hindsight falls
+# back to slower full scans; the hindsight role could not create them itself.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: hindsight
+spec:
+  cluster:
+    name: postgres17
+  name: hindsight
+  owner: hindsight
+  databaseReclaimPolicy: retain
+  extensions:
+    - name: vector
+      ensure: present
+    - name: pg_trgm
+      ensure: present
+    - name: btree_gin
+      ensure: present
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# OpenProject (namespace openproject, docs/apps/openproject.md). Its extensions go
+# in pg_catalog, not public: the image's SQL structure load clears
+# search_path and names operator classes such as gin_trgm_ops without a
+# schema, so with them in public the first schema load fails (learned on
+# Forge, nix-config docs/services/openproject.md).
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: openproject
+spec:
+  cluster:
+    name: postgres17
+  name: openproject
+  owner: openproject
+  databaseReclaimPolicy: retain
+  extensions:
+    - name: btree_gist
+      ensure: present
+      schema: pg_catalog
+    - name: pg_trgm
+      ensure: present
+      schema: pg_catalog
+    - name: unaccent
+      ensure: present
+      schema: pg_catalog
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Schoolhouse (Schoology scrape; three minors' grades). Owner: the schoolhouse ingest.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: schoolhouse
+spec:
+  cluster:
+    name: postgres17
+  name: schoolhouse
+  owner: schoolhouse
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# lading (Amazon, Costco and Sam's Club order history). Owner: the lading sync.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lading
+spec:
+  cluster:
+    name: postgres17
+  name: lading
+  owner: lading
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Household finance projection for Grafana and money_*. Owner: homelab-mcp's finances export. Its snapshot tables are the only history of bank balances; restore them, never recreate.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: homelab-finance
+spec:
+  cluster:
+    name: postgres17
+  name: homelab_finance
+  owner: homelab_finance
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# What people said about transactions (Signal replies, tool notes). Owner: finances_context; the table is created by homelab-mcp on first connect.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: finances-context
+spec:
+  cluster:
+    name: postgres17
+  name: finances_context
+  owner: finances_context
+  databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Stalwart (namespace mail, docs/apps/mail.md, ADR 0013): accounts, mailboxes,
+# message metadata, configuration and the full-text index. Message bodies
+# are in the Ceph RGW bucket, not here. Stalwart creates its own tables.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: stalwart
+spec:
+  cluster:
+    name: postgres17
+  name: stalwart
+  owner: stalwart
+  databaseReclaimPolicy: retain

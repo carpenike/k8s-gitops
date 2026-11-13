@@ -1,0 +1,38 @@
+{
+  "_type": "Form",
+  "_embedded": {
+    "payload": {
+      "subject": "",
+      "_links": {
+        "project": {
+          "href": "/api/v3/projects/5"
+        },
+        "type": {
+          "href": "/api/v3/types/1",
+          "title": "Task"
+        }
+      }
+    },
+    "schema": {
+      "_type": "Schema",
+      "subject": {
+        "type": "String",
+        "name": "Subject",
+        "required": true,
+        "writable": true
+      },
+      "_links": {
+        "self": {
+          "href": "/api/v3/work_packages/schemas/5-1"
+        }
+      }
+    },
+    "validationErrors": {}
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/projects/5/work_packages/form",
+      "method": "post"
+    }
+  }
+}

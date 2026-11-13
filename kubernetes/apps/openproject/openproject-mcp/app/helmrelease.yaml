@@ -1,0 +1,126 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Streamable-HTTP MCP server at http://openproject-mcp.openproject.svc.cluster.local:8000/mcp
+# for the bots' task board (images/openproject-mcp, docs/apps/openproject.md).
+# Stateless: a bot's Hermes sends its own OpenProject API token as the
+# bearer, and every OpenProject call is made as that bot. It also serves the
+# board webhook's relay at /hooks/openproject (docs/apps/openproject.md, "Waking a
+# bot"), whose two HMAC keys are its only secrets.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openproject-mcp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: openproject-mcp
+  interval: 1h
+  values:
+    controllers:
+      openproject-mcp:
+        annotations:
+          # Restart when Secret openproject-mcp-relay or
+          # openproject-mcp-relay-targets changes.
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/carpenike/openproject-mcp
+              # Built from images/openproject-mcp by openproject-mcp-image.yaml.
+              # Floating tag, digest re-pinned by Renovate. 0.5.0 (30d4ed5):
+              # the Alertmanager relay, /hooks/alertmanager.
+              tag: 0.5.0@sha256:58be83b29698ed00c4e0b7823e4e2e4776eed66e2a4c28a5fd37293364922e52
+            env:
+              OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
+              # Links the tools hand back, for Ryan to open.
+              OPENPROJECT_PUBLIC_URL: https://tasks.${SECRET_DOMAIN}
+              # The board project the provisioning Job creates (BOARD_PROJECT
+              # in bot-provisioner/template/job.yaml). Without a default,
+              # create_task needs a project on every call, and the skill
+              # task-board doesn't name one.
+              OPENPROJECT_DEFAULT_PROJECT: bots
+              PORT: "8000"
+              # The bots the relay may wake, by OpenProject login. A Hermes
+              # bot needs TASK_BOARD_WEBHOOK_ENABLED=true in its inputs; a bot
+              # outside the cluster needs an entry in RELAY_TARGETS (Secret
+              # openproject-mcp-relay-targets) and an egress rule in this
+              # app's CNP. Otherwise its event has nowhere to go (the relay
+              # logs and moves on).
+              RELAY_BOTS: chief,hank,chief-engineer
+              # The bot the Alertmanager relay wakes (route alerts on its board
+              # listener; docs/apps/hermes.md, "Alerts").
+              ALERTS_BOT: hank
+            # OPENPROJECT_WEBHOOK_SECRET and HERMES_WEBHOOK_SECRET. Without
+            # them the relay answers 404 and the MCP server works as before.
+            envFrom:
+              - secretRef:
+                  name: openproject-mcp-relay
+                  optional: true
+              # RELAY_TARGETS, the webhook targets of bots outside the cluster.
+              - secretRef:
+                  name: openproject-mcp-relay-targets
+                  optional: true
+              # ALERTMANAGER_HOOK_TOKEN. Without it /hooks/alertmanager answers 503.
+              - secretRef:
+                  name: openproject-mcp-alerts
+                  optional: true
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8000
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8000
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+        pod:
+          # ndots:1 so a name with a dot is looked up as written first. With
+          # the default ndots:5 the first query is api2.cursor.sh.openproject.svc.cluster.local,
+          # CoreDNS's autopath answers it with the external address, and
+          # Cilium files that address under the expanded name, so the CNP's
+          # toFQDNs rule for the Grok routine host never matches (the
+          # hermes-bot component has the same fix). The in-cluster names the
+          # relay uses are written in full.
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+    service:
+      app:
+        controller: openproject-mcp
+        # Pinned: OpenProject's webhook allowlist takes addresses, not names
+        # (OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST in
+        # openproject/app/helmrelease.yaml). The address the Service already
+        # had; change both together.
+        clusterIP: 10.43.104.160
+        ports:
+          http:
+            port: 8000
+    persistence:
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

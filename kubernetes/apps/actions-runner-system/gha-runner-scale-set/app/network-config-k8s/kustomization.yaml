@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Repo-scoped scale set for carpenike/network-config.
+# Same GitHub App installation as sam-tracker. Workflows opt in with
+# runs-on: network-config-k8s. No Docker use, so this overlay drops dind and the runner
+# pod is not privileged.
+# Validation only: shellcheck and gitleaks. It holds no router credentials,
+# and runner-egress refuses the LAN.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: network-config-k8s
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/network-config
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: network-config-k8s
+      - op: remove
+        path: /spec/values/containerMode
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/cpu
+        value: 250m
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/cpu
+        value: "1"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/memory
+        value: 2Gi

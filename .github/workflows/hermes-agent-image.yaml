@@ -1,0 +1,78 @@
+---
+# Builds images/hermes-agent and pushes it to ghcr.io/carpenike/hermes-agent.
+# Like hermes-screen-image.yaml (the other publishing workflow): the built-in GITHUB_TOKEN
+# (packages: write), no repository secrets, and deploys nothing. Manifests pin
+# the pushed digest; see AGENTS.md "Hard rules" and docs/apps/hermes.md.
+name: hermes-agent image
+
+on:
+  push:
+    paths:
+      - images/hermes-agent/**
+      - .github/workflows/hermes-agent-image.yaml
+  workflow_dispatch:
+  # Weekly rebuild for base-image and apt security fixes; Renovate then opens
+  # the digest PR for the manifests. GitHub runs schedules only from the
+  # default branch, so this is dormant until rebuild is the default branch.
+  schedule:
+    - cron: "17 6 * * 5"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: hermes-agent-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The Hermes release images/hermes-agent/Dockerfile builds on.
+  # Renovate bumps it in the same PR as the base image (packageRules in
+  # .renovaterc.json5), so the image tags follow the upstream version.
+  # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
+  HERMES_VERSION: v0.23.0
+
+jobs:
+  build:
+    name: build and push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Every build gets <HERMES_VERSION>-<sha>; rebuild and main also
+      # move the floating <HERMES_VERSION> tag, which the manifests pin by
+      # digest.
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/carpenike/hermes-agent
+          tags: |
+            type=sha,prefix=${{ env.HERMES_VERSION }}-,format=short
+            type=raw,value=${{ env.HERMES_VERSION }},enable=${{ github.ref == 'refs/heads/rebuild' || github.ref == 'refs/heads/main' }}
+          labels: |
+            org.opencontainers.image.title=hermes-agent
+            org.opencontainers.image.description=Hermes agent pod: nousresearch/hermes-agent plus ms-365-mcp-server (Outlook MCP)
+
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: images/hermes-agent
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false

@@ -1,0 +1,874 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "household-finance"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "#F79009",
+        "name": "Household finance events",
+        "target": {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  CASE\n    WHEN amount IS NULL THEN label\n    ELSE label || ' (' || to_char(amount, 'FM$999,999,999,990.00') || ')'\n  END AS text,\n  type AS tags\nFROM household_finance.events\nWHERE $__timeFilter(date::timestamp)\nORDER BY date\n",
+          "refId": "FinanceEvents"
+        }
+      }
+    ]
+  },
+  "description": "Household finance projection. Glass, never plumbing; alerts and required actions remain in the sentinel. Visual treatment references Sure (github.com/we-promise/sure).",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Overview",
+      "tooltip": "Household finance overview",
+      "type": "link",
+      "url": "/d/household-finance-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Cashflow & Categories",
+      "tooltip": "Household cashflow and categories",
+      "type": "link",
+      "url": "/d/household-finance-cashflow"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Debt & Projects",
+      "tooltip": "Household debt and projects",
+      "type": "link",
+      "url": "/d/household-finance-debt"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Data Health",
+      "tooltip": "Whether the other three can be trusted",
+      "type": "link",
+      "url": "/d/household-finance-health"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Rows are nightly projections. Intraday balances may legitimately differ from the source tools.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#078C52",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT extract(epoch FROM max(finished_at)) * 1000 AS \"As of\"\nFROM household_finance.export_runs\nWHERE ok\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Nightly snapshot",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Projection uses the latest 120-day linear principal trend and stops at zero; it is descriptive, not a payment plan.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Actual"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F13636",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Projection"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F79009",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    8,
+                    8
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 2
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH actual AS (\n  SELECT date, (-balance)::double precision AS owed\n  FROM household_finance.debt_daily\n  WHERE account = 'Spectra HELOC'\n),\nbounds AS (\n  SELECT max(date) AS max_date FROM actual\n),\nrecent AS (\n  SELECT actual.*\n  FROM actual, bounds\n  WHERE actual.date >= bounds.max_date - 120\n),\ntrend AS (\n  SELECT\n    regr_slope(owed, (date - DATE '2000-01-01')::double precision) AS slope,\n    max(date) AS max_date\n  FROM recent\n),\nanchor AS (\n  SELECT actual.date, actual.owed, trend.slope\n  FROM actual\n  JOIN trend ON actual.date = trend.max_date\n),\nprojection AS (\n  SELECT\n    projected.day::date AS date,\n    greatest(0::double precision, anchor.owed + anchor.slope * (projected.day::date - anchor.date)) AS owed\n  FROM anchor\n  CROSS JOIN LATERAL generate_series(\n    anchor.date + 1,\n    least(\n      anchor.date + 1095,\n      anchor.date + ceil(-anchor.owed / nullif(anchor.slope, 0))::integer\n    ),\n    interval '1 day'\n  ) AS projected(day)\n  WHERE anchor.slope < 0\n)\nSELECT date::timestamp AT TIME ZONE 'America/New_York' AS time, owed AS \"Actual\", NULL::double precision AS \"Projection\"\nFROM actual\nWHERE $__timeFilter(date::timestamp)\nUNION ALL\nSELECT date::timestamp AT TIME ZONE 'America/New_York' AS time, NULL::double precision AS \"Actual\", owed AS \"Projection\"\nFROM projection\nWHERE $__timeFilter(date::timestamp)\nORDER BY time\n",
+          "refId": "A"
+        }
+      ],
+      "title": "HELOC burn-down and projection",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Configured debt accounts, shown as positive amounts owed and stacked by account.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 55,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  (-balance)::double precision AS value,\n  account AS metric\nFROM household_finance.debt_daily\nWHERE $__timeFilter(date::timestamp)\nORDER BY date, account\n",
+          "refId": "A"
+        }
+      ],
+      "title": "All debt",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Newest point may use bank-available basis; historical points use the register. Events annotate breaches, bridges, strikes, and dated notes. The dashed rule is the configured BUFFER_FLOOR; it is absent from the chart whenever it is absent from config_values, and crossing it is described here but acted on nowhere.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Buffer"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#078C52",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Checking available"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#2E90FA",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Buffer floor"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F13636",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 11
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  buffer::double precision AS \"Buffer\",\n  checking_available::double precision AS \"Checking available\"\nFROM household_finance.buffer_daily\nWHERE $__timeFilter(date::timestamp)\nORDER BY date\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeFrom()::timestamptz AS time, value::double precision AS \"Buffer floor\"\nFROM household_finance.config_values\nWHERE name = 'BUFFER_FLOOR'\nUNION ALL\nSELECT $__timeTo()::timestamptz, value::double precision\nFROM household_finance.config_values\nWHERE name = 'BUFFER_FLOOR'\nORDER BY time\n",
+          "refId": "B"
+        }
+      ],
+      "title": "Buffer history",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Month-to-date categorized spend compared with linear pace and the full operational FLOOR exported for the same snapshot date.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Spend MTD"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#2E90FA",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Floor pace"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F79009",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Monthly floor"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#737373",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
+      "id": 5,
+      "options": {
+        "displayMode": "gradient",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH configured AS (\n  SELECT value::numeric AS monthly_floor, as_of\n  FROM household_finance.config_values\n  WHERE name = 'FLOOR'\n),\nspend AS (\n  SELECT coalesce(sum(monthly.amount), 0)::numeric AS spend_mtd\n  FROM household_finance.category_monthly AS monthly\n  CROSS JOIN configured\n  WHERE monthly.month = date_trunc('month', configured.as_of)::date\n)\nSELECT\n  spend.spend_mtd::double precision AS \"Spend MTD\",\n  configured.monthly_floor\n    * extract(day FROM configured.as_of)\n    / extract(day FROM (date_trunc('month', configured.as_of) + interval '1 month - 1 day')) AS \"Floor pace\",\n  configured.monthly_floor::double precision AS \"Monthly floor\"\nFROM spend CROSS JOIN configured\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Spend pace vs monthly floor",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Transaction-level project shares parsed from [proj:<tag>=<amount>] notes; txn_ref traces each row to Actual.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Amount"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 13,
+        "x": 0,
+        "y": 20
+      },
+      "id": 6,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  to_char(date, 'YYYY-MM-DD') AS \"Date\",\n  proj_tag AS \"Project\",\n  amount AS \"Amount\",\n  txn_ref AS \"Actual transaction\"\nFROM household_finance.project_spend\nWHERE $__timeFilter(date::timestamp)\nORDER BY date DESC, proj_tag\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Project spend",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Running total per proj_tag, one line per project. The running sum is taken from each project's first transaction, not from the start of the selected range, so panning the time picker never re-zeros a project mid-flight. Refunds carry mirrored negative shares by convention, so a curve stepping down is correct rather than a data fault; a project that nets to zero is a purchase and its return, both recorded. Steps are drawn square because nothing is known between transactions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 11,
+        "x": 13,
+        "y": 20
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH daily AS (\n  SELECT proj_tag, date, sum(amount) AS amount\n  FROM household_finance.project_spend\n  GROUP BY proj_tag, date\n),\ncumulative AS (\n  SELECT\n    proj_tag,\n    date,\n    sum(amount) OVER (PARTITION BY proj_tag ORDER BY date) AS running\n  FROM daily\n)\nSELECT\n  date::timestamp AT TIME ZONE 'America/New_York' AS time,\n  running::double precision AS value,\n  proj_tag AS metric\nFROM cumulative\nWHERE $__timeFilter(date::timestamp)\n-- Time first. Grafana's long-to-wide conversion rejects a frame\n-- that is not globally ascending by time, so grouping by\n-- proj_tag here would fail the panel outright.\nORDER BY date, proj_tag\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Project cumulative",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 41,
+  "tags": [
+    "household-finance",
+    "nightly-projection",
+    "glass-not-plumbing"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-2y",
+    "to": "now+2y"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ],
+    "time_options": [
+      "6M",
+      "1y",
+      "2y",
+      "5y"
+    ]
+  },
+  "timezone": "America/New_York",
+  "title": "Household Finance · Debt & Projects",
+  "uid": "household-finance-debt",
+  "version": 1,
+  "weekStart": ""
+}

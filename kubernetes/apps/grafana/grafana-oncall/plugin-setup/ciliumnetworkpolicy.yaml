@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The plugin setup Job holds the Grafana admin password. Egress: cluster
+# DNS, the Grafana API, and the OnCall engine's /health/. Nothing else.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grafana-oncall-plugin-setup
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana-oncall-plugin-setup
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+            app.kubernetes.io/controller: grafana
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana-oncall
+            app.kubernetes.io/controller: grafana-oncall
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

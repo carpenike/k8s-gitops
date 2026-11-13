@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openproject
+components:
+  - ../../components/sops
+resources:
+  - ./namespace.yaml
+  - ./openproject/ks.yaml
+  - ./openproject-mcp/ks.yaml
+  - ./bot-provisioner/ks.yaml
+  - ./bot-provisioner/external-bots.yaml
+  - ./bot-provisioner/homelab-mcp-bots.yaml

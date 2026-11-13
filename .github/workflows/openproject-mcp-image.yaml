@@ -1,0 +1,78 @@
+---
+# Builds images/openproject-mcp and pushes it to ghcr.io/carpenike/openproject-mcp.
+# Like hindsight-image.yaml (see AGENTS.md for the publishing workflows): the built-in GITHUB_TOKEN
+# (packages: write), no repository secrets, and deploys nothing. Manifests pin
+# the pushed digest; see AGENTS.md "Hard rules". The Dockerfile's test stage
+# runs the server's test suite, so a failing test fails this build.
+name: openproject-mcp image
+
+on:
+  push:
+    paths:
+      - images/openproject-mcp/**
+      - .github/workflows/openproject-mcp-image.yaml
+  workflow_dispatch:
+  # Weekly rebuild for base-image and apt security fixes; Renovate then opens
+  # the digest PR for the manifests. GitHub runs schedules only from the
+  # default branch, so this is dormant until rebuild is the default branch.
+  schedule:
+    - cron: "37 6 * * 5"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: openproject-mcp-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The server's own version (images/openproject-mcp/pyproject.toml and
+  # src/openproject_mcp/__init__.py). Ours, so no Renovate annotation: bump
+  # all three together when the server changes.
+  OPENPROJECT_MCP_VERSION: 0.5.0
+
+jobs:
+  build:
+    name: build and push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Every build gets <OPENPROJECT_MCP_VERSION>-<sha>; rebuild and main also
+      # move the floating <OPENPROJECT_MCP_VERSION> tag, which the manifests pin
+      # by digest.
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/carpenike/openproject-mcp
+          tags: |
+            type=sha,prefix=${{ env.OPENPROJECT_MCP_VERSION }}-,format=short
+            type=raw,value=${{ env.OPENPROJECT_MCP_VERSION }},enable=${{ github.ref == 'refs/heads/rebuild' || github.ref == 'refs/heads/main' }}
+          labels: |
+            org.opencontainers.image.title=openproject-mcp
+            org.opencontainers.image.description=Streamable-HTTP MCP server for the bots' OpenProject task board (openproject-mcp ${{ env.OPENPROJECT_MCP_VERSION }}); each request brings its own OpenProject API token
+
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: images/openproject-mcp
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false

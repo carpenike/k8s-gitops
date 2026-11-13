@@ -1,0 +1,24 @@
+# ms-365-mcp-server --enabled-tools-file for Hermes' "outlook" MCP server.
+# One anchored regex per line (the server joins lines with | and matches
+# case-insensitively). Tool names are from src/endpoints.json at v0.178.0.
+# Keep in sync with tools.include in ../hermes-outlook-config, which is the
+# second filter (Hermes side) and also hides the server's auth tools.
+#
+# Read: list, search ($search on list-mail-messages) and get mail; folders;
+# attachments.
+^list-mail-messages$
+^list-mail-folder-messages$
+^get-mail-message$
+^list-mail-folders$
+^list-mail-child-folders$
+^list-mail-attachments$
+^get-mail-attachment-content$
+# Write (each one asks for approval: trust untrusted).
+^create-draft-email$
+^create-reply-draft$
+^send-mail$
+^move-mail-message$
+# Not here on purpose: every delete-*, update-mail-message (the only way to
+# mark read is this general PATCH), send-draft-message, reply-*/forward-*
+# (send at once), copy, rules, mailbox settings, shared mailboxes, calendar,
+# contacts, OneDrive, Teams, SharePoint, and the download-bytes utility.

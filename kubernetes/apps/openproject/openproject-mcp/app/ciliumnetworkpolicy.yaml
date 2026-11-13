@@ -1,0 +1,97 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# In: 8000 from Hermes agent pods only, in namespaces the hermes-bot
+# component labels hermes.holthome.net/bot (screen pods carry
+# app.kubernetes.io/controller: screen and never match), and from
+# OpenProject's own pods, whose worker sends the board webhook to
+# /hooks/openproject. Out: DNS, OpenProject's web pods on 8080, and the
+# bots' agent pods on 8644 (the relay's events; the bot side is the
+# hermes-bot component's agent-board-hooks), and 443 to the webhook host of
+# bots outside the cluster (Grok Bot routines; toFQDNs, so the DNS rule is
+# L7 and the proxy sees the lookups). No other internet. Each MCP request
+# carries the calling bot's own OpenProject API token; the relay checks
+# OpenProject's webhook signature.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: openproject-mcp
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: openproject-mcp
+  ingress:
+    # Forge's Alertmanager, through envoy-internal (route
+    # openproject-mcp-alerts, /hooks/alertmanager only, bearer token).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            # Without a namespace key Cilium scopes the selector to this
+            # policy's namespace; Exists plus the label spans hermes-*.
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/instance: openproject
+            app.kubernetes.io/name: openproject
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/instance: openproject
+            app.kubernetes.io/name: openproject
+            openproject/process: web
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "8644"
+              protocol: TCP
+    # Grok Bot routine webhook triggers (RELAY_TARGETS). The host of the
+    # routine's "POST to" URL; check it there when adding a Grok bot.
+    - toFQDNs:
+        - matchName: api2.cursor.sh
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

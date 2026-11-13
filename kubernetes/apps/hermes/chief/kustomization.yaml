@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Chief: @chief:ryanholt.net. The whole bot is these inputs; everything else
+# is kubernetes/components/hermes-bot. See docs/apps/hermes.md.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hermes-chief
+components:
+  - ../../../components/hermes-bot
+configMapGenerator:
+  - name: hermes-bot-inputs
+    literals:
+      - BOT_NAME=chief
+      - MATRIX_USER=chief
+      # Azure (monthly credits) first; Anthropic only when Azure fails.
+      - LLM_MODEL=gpt-6.1-terra
+      - LLM_FALLBACK_MODEL=claude-sonnet
+      # Azure gpt-image deployment through LiteLLM; the fast, everyday tier.
+      - IMAGE_MODEL=gpt-image-2.5-flare
+      # Desktop workspace at https://chief-desktop (envoy-internal, Pocket ID
+      # sign-in), for watching or taking over the browser.
+      - WEBAPP_ENABLED=true
+      # Chief may change its own Matrix display name and avatar when asked.
+      - MATRIX_PROFILE_TOOLS=true
+      - LLM_BUDGET_USD=25
+      - LLM_BUDGET_DURATION=30d
+      - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
+      - AGENT_STORAGE_SIZE=10Gi
+      - WORKSPACE_STORAGE_SIZE=20Gi
+      - API_SERVER_ENABLED=true
+      - OUTLOOK_MCP_ENABLED=true
+      # Ryan's personal Microsoft 365 mailbox, the only account the Outlook
+      # MCP server may use.
+      - OUTLOOK_MCP_EXPECTED_USERNAME=ryan@ryanholt.net
+      - HINDSIGHT_ENABLED=true
+      - WEBHOOK_ENABLED=true
+      # Ryan's DM with @chief (Ryan and Chief its only members): where
+      # webhook turns (Chief Engineer's and the board's) are delivered and
+      # mirrored.
+      - WEBHOOK_DELIVER_CHAT_ID=!1NY-w--JkAFJpmKfLvzhpj2WWnVYBK2SWdy9HRKhY3Q
+      - TAVILY_ENABLED=true
+      # No Claude Code or GitHub token: Chief reads mail and the web, so repo
+      # access lives with Hank. Code and GitHub asks go to him (skill
+      # code-requests).
+      - CODE_PEER=hank
+      # A2A (docs/apps/hermes.md, "A2A (opt-in)"). Inbound at
+      # https://chief-a2a (envoy-internal) and agent-a2a.hermes-chief in the
+      # cluster, bearer token per peer; outbound to Hank. Inbound tasks get
+      # the component's fixed list: no MCP, so no Outlook, and no memory.
+      - A2A_ENABLED=true
+      - A2A_TRUSTED_PEERS=hank
+      - A2A_HERMES_PEER=hank
+      # Shown on the Agent Card. Lands unquoted in YAML after kustomize
+      # build, so no ": ", " #", or leading quote, dash or brace.
+      - "A2A_AGENT_DESCRIPTION=Chief, Ryan's general assistant. Answers questions, researches on the web, reads and writes files and runs commands in his own sandbox. A peer's task never reaches Ryan's mail, Matrix history or memory."
+      # The shared OpenProject task board (docs/apps/openproject.md, "Bot
+      # access"): the bot's OpenProject user and token (Job
+      # openproject/hermes-provision-chief), egress to openproject-mcp and skill
+      # task-board. The MCP server is in mcp-servers.yaml.
+      - TASK_BOARD_ENABLED=true
+      # Board wake-ups (docs/apps/openproject.md, "Waking a bot"), delivered to
+      # WEBHOOK_DELIVER_CHAT_ID above.
+      - TASK_BOARD_WEBHOOK_ENABLED=true
+      # Private details for routines.yaml: 1Password item hermes-chief-routines,
+      # one field per routine key (docs/apps/hermes.md, "Routines from git").
+      - ROUTINES_PRIVATE_ENABLED=true
+  # Chief's MCP servers (mcp-servers.yaml; docs/apps/hermes.md, "MCP servers from
+  # git"), written into config.yaml by the config init container.
+  - name: hermes-bot-mcp
+    files:
+      - mcp-servers.yaml
+  # Chief's scheduled routines (routines.yaml; docs/apps/hermes.md, "Routines from
+  # git"), written into Hermes' cron store by the config init container.
+  - name: hermes-bot-routines
+    files:
+      - routines.yaml
+generatorOptions:
+  disableNameSuffixHash: true

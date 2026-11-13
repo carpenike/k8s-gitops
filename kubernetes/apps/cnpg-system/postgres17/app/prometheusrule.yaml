@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# Off-chassis backup of postgres17 (ObjectStore postgres17-r2). Nothing else
+# in the cluster alerts on CNPG: the operator chart ships no rules.
+# barman_cloud_cloudnative_pg_io_* come from the plugin through each
+# instance's exporter (plugin docs, "Observability"); cnpg_pg_stat_archiver_*
+# and cnpg_pg_replication_in_recovery are CNPG's default queries.
+# docs/platform/postgres17.md says what to check for each.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: postgres17-backup
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: postgres17-backup
+      rules:
+        - alert: Postgres17WALArchivingFailing
+          # The newest archive_command failure is later than the newest
+          # success. WAL piles up in pg_wal on the 20Gi volume meanwhile.
+          expr: |
+            cnpg_pg_stat_archiver_last_failed_time{namespace="cnpg-system",pod=~"postgres17-[0-9]+"}
+              > cnpg_pg_stat_archiver_last_archived_time{namespace="cnpg-system",pod=~"postgres17-[0-9]+"}
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: postgres17 cannot archive WAL to R2
+            description: >-
+              {{ $labels.pod }} has failed to archive WAL for 30 minutes.
+              Check `kubectl cnpg status postgres17 -n cnpg-system` and the
+              plugin-barman-cloud container log.
+        - alert: Postgres17WALArchivingStalled
+          # archive_timeout is 5min, and LiteLLM writes all day, so a day
+          # without an archived segment on the primary means it stopped.
+          expr: |
+            cnpg_pg_stat_archiver_seconds_since_last_archival{namespace="cnpg-system",pod=~"postgres17-[0-9]+"} > 86400
+              and on (namespace, pod)
+            cnpg_pg_replication_in_recovery{namespace="cnpg-system",pod=~"postgres17-[0-9]+"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: postgres17 has archived no WAL in 24 hours
+            description: >-
+              Primary {{ $labels.pod }} last archived a WAL segment
+              {{ $value | humanizeDuration }} ago.
+        - alert: Postgres17BackupFailed
+          # The newest failed base backup is later than the newest good one,
+          # or there is a failure and no good backup at all.
+          expr: |
+            (
+              max by (namespace) (barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp{namespace="cnpg-system",pod=~"postgres17-[0-9]+"})
+                > max by (namespace) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system",pod=~"postgres17-[0-9]+"})
+            )
+            or
+            (
+              max by (namespace) (barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp{namespace="cnpg-system",pod=~"postgres17-[0-9]+"} > 0)
+                unless max by (namespace) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system",pod=~"postgres17-[0-9]+"} > 0)
+            )
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: postgres17's last base backup to R2 failed
+            description: >-
+              `kubectl -n cnpg-system get backup --sort-by=.metadata.creationTimestamp`
+              shows the failed Backup and its error.
+        - alert: Postgres17BackupStale
+          # Daily at 08:30 UTC. 30 hours allows one slow run, not a missed day.
+          # Also fires if no base backup has ever completed (timestamp 0).
+          expr: |
+            time() - max by (namespace) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{namespace="cnpg-system",pod=~"postgres17-[0-9]+"})
+              > 30 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: postgres17 has no base backup in R2 from the last 30 hours
+            description: >-
+              Last good base backup was {{ $value | humanizeDuration }} ago.
+              Check ScheduledBackup postgres17-r2-daily.
+        - alert: Postgres17MetricsAbsent
+          # Without these series every rule above is silent.
+          expr: |
+            absent(cnpg_collector_up{namespace="cnpg-system",pod=~"postgres17-[0-9]+"})
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: Prometheus is not scraping postgres17
+            description: >-
+              PodMonitor cnpg-system/postgres17 has no targets, so the backup
+              alerts cannot fire.

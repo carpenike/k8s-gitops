@@ -1,0 +1,117 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# OpenProject 17.9.6 Community Edition: the shared task board for Ryan and
+# the bots. docs/apps/openproject.md.
+#
+# Web (puma) and one GoodJob worker, which also runs the scheduled jobs. The
+# seeder Job migrates and seeds on each chart revision. Database openproject
+# on postgres17; Rails cache in memcached (memcached.yaml); attachments on a
+# ceph-filesystem RWX volume shared by web and worker, backed up by VolSync.
+#
+# Left out: the bundled Bitnami postgresql and memcached (frozen
+# bitnamilegacy images), hocuspocus (real-time co-editing), the bundled
+# RustFS S3 server, the chart's Ingress (HTTPRoute instead) and the IMAP
+# cron Deployment (incoming mail; dropped below, the chart renders it even
+# with cron.enabled false).
+#
+# Sign-in: OpenID Connect is an Enterprise add-on, so Ryan uses an internal
+# account (password + 2FA) behind the gateway's Pocket ID login; bots use
+# API tokens against the in-cluster Service, which never meets the gateway.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openproject
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: openproject
+  interval: 1h
+  timeout: 20m
+  values:
+    image:
+      tag: 17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+      imagePullPolicy: IfNotPresent
+    ingress:
+      enabled: false
+    hocuspocus:
+      enabled: false
+    cron:
+      enabled: false
+    postgresql:
+      bundled: false
+      # No options.pool: chart 13.17.1 writes it into a Secret's stringData
+      # with toString but no quote, so it lands as a YAML integer and the
+      # install fails server-side apply. OPENPROJECT_DB_POOL is set under
+      # environment instead, which the chart quotes.
+      connection:
+        host: postgres17-rw.cnpg-system.svc.cluster.local
+        port: 5432
+      auth:
+        existingSecret: openproject-db
+        secretKeys:
+          userPasswordKey: password
+        username: openproject
+        database: openproject
+    memcached:
+      bundled: false
+      connection:
+        host: memcached.openproject.svc.cluster.local
+        port: 11211
+    openproject:
+      host: tasks.${SECRET_DOMAIN}
+      https: true
+      # Off, as on Forge: Envoy terminates TLS, and with Rails HSTS on, the
+      # bots' in-cluster http:// API calls would be redirected to https.
+      hsts: false
+      realtime_collaboration:
+        enabled: false
+      secretKeyBase:
+        existingSecret: openproject-secrets
+        secretKey: secret-key-base
+      admin_user:
+        secret: openproject-secrets
+        secretKeys:
+          password: admin-password
+        password_reset: "true"
+        name: Ryan
+    environment:
+      # Bots call http://openproject.openproject.svc.cluster.local:8080/api/v3
+      # in the cluster; Rails host authorization must admit that name.
+      OPENPROJECT_ADDITIONAL__HOST__NAMES: openproject.openproject.svc.cluster.local
+      # No self sign-up: Ryan creates people and bot users.
+      OPENPROJECT_SELF__REGISTRATION: "0"
+      # Rails connection pool per process (web and worker), against
+      # postgres17's shared max_connections.
+      OPENPROJECT_DB_POOL: "10"
+      # The board webhook posts to openproject-mcp's relay
+      # (bot-provisioner/app/webhook.rb). OpenProject refuses private
+      # addresses for webhooks unless listed here, and takes addresses only,
+      # not names: this is that Service's ClusterIP, pinned in
+      # openproject-mcp/app/helmrelease.yaml. Change both together.
+      OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST: 10.43.104.160
+    persistence:
+      enabled: true
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ceph-filesystem
+      size: 10Gi
+    replicaCount: 1
+    backgroundReplicaCount: 1
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        memory: 2560Mi
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: openproject-cron
+            patch: |
+              $patch: delete
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: openproject-cron

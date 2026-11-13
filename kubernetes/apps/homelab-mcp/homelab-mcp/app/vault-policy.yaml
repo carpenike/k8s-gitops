@@ -1,0 +1,126 @@
+# The vault access policy (carpenike/mcp src/homelab_mcp/tools/_vault_policy.py,
+# docs/vault-policy.example.yaml). Mounted into the app container only; no
+# agent can edit it. A change renames nothing (no hash suffix) but reloader
+# restarts the pod, and the policy is read once at startup. A policy that
+# breaks a rule does not load, and then every vault tool refuses every caller.
+#
+# - Roots never overlap; a path in no domain is "unassigned" (full clients only).
+# - sensitivity is required. An external client (the default provider) can only
+#   be scoped, and only to "personal" domains (Ryan, 2026-11-11: external
+#   providers never see work, journal, system or unassigned content).
+# - Identity is the view the token was issued for; a view not listed here gets
+#   no vault at all. Grok connectors are shared by every bot on the account,
+#   so all Grok bots are one client, grokbot (Ryan, 2026-11-12).
+# - owner_agent is the Grok bot that looks after a domain (Personal/Agents/
+#   Grok Bots.md). vault_domains shows it so bots route handoffs; it grants
+#   nothing. Needs homelab-mcp 0.63.0: older releases refuse the key.
+version: 1
+domains:
+  fitness:
+    roots: [Personal/Fitness]
+    sensitivity: personal
+    owner_agent: coach
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  property:
+    roots: [Personal/Property]
+    sensitivity: personal
+    owner_agent: groundskeeper
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  tech:
+    roots: [Personal/Tech]
+    sensitivity: personal
+    owner_agent: chief-engineer
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  family-history:
+    roots: ["Personal/Family History"]
+    sensitivity: personal
+    owner_agent: herald
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  finances:
+    roots: [Personal/Finances]
+    sensitivity: personal
+    owner_agent: steward
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  health:
+    roots: [Personal/Health]
+    sensitivity: personal
+    owner_agent: coach
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  church:
+    roots: [Personal/Church]
+    sensitivity: personal
+    owner_agent: deacon
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  education:
+    roots: [Personal/Education]
+    sensitivity: personal
+    owner_agent: dean
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  # Reported by a peer (OpenProject task 54); Ryan review pending.
+  wardrobe:
+    roots: [Personal/Wardrobe]
+    sensitivity: personal
+    owner_agent: claude
+    protected: [Goals.md]
+    append_only: [Decisions.md]
+  inbox:
+    roots: [Inbox]
+    sensitivity: personal
+  journal:
+    roots: [Journal]
+    sensitivity: work
+    agent_write: false
+  system:
+    roots: [System]
+    sensitivity: work
+    # The agent roster: Ryan's, read-only to every agent.
+    protected: [Agents.md]
+  # The handoff protocol every agent follows (Grokbot included, so it lives
+  # outside System). Ryan's, read-only to every agent.
+  agents:
+    roots: [Personal/Agents]
+    sensitivity: personal
+    # Grok Bots.md: the Grok roster, Ryan's (2026-11-12).
+    protected: [Protocol.md, Grok Bots.md]
+  work:
+    roots: [Work, Meetings, People, Projects, Research, Reviews, Voice, memory, HHS,
+            Excalidraw, Excalibrain, Templates, TASKS.md, CLAUDE.md]
+    sensitivity: work
+clients:
+  claude:
+    views: [/mcp, /mcp/full]
+    access: full
+    provider: internal
+    delete: true
+    move: true
+  # Hank (Hermes), for incident notes (Ryan, 2026-11-13). Reads Tech and
+  # Agents (Protocol.md, Grok Bots.md, Vault conventions.md); writes only
+  # under Personal/Tech/Incidents and only appends to the Tech Inbox
+  # (write_paths/append_paths, homelab-mcp 0.66.0). Tech's Status and
+  # Decisions stay with Chief Engineer. External provider, like Grokbot.
+  hank:
+    views: [/mcp/agent/hank]
+    access: scoped
+    provider: external
+    read: [tech, agents]
+    write: [tech]
+    write_paths: [Personal/Tech/Incidents]
+    append_paths: [Personal/Tech/Inbox.md]
+  grokbot:
+    views: [/mcp/agent/grokbot]
+    access: scoped
+    provider: external
+    # Every personal domain, health, church and education included (Ryan,
+    # 2026-11-12); agents read-only.
+    read: [fitness, inbox, property, tech, family-history, finances, health, church,
+           education, wardrobe, agents]
+    write: [fitness, inbox, property, tech, family-history, finances, health, church,
+            education, wardrobe]

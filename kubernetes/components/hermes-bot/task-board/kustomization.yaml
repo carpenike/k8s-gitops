@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Built by the bot's task-board Flux Kustomization with substituteFrom
+# hermes-bot-inputs. The bot's OpenProject user, board membership and API
+# token (docs/apps/openproject.md, "Bot provisioning"). Objects name their own
+# namespaces (openproject, hermes-${BOT_NAME}); no transformer.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../apps/openproject/bot-provisioner/template

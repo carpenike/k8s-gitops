@@ -1,0 +1,153 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in lading. The allow policies below are in this
+# file rather than the HelmRelease's rawResources (as homelab-mcp does)
+# because no name here needs ${SECRET_DOMAIN}, so kubeconform can check them.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The health server. In: 9230 (/healthz) from Prometheus only. Probes come
+# from the kubelet, which Cilium allows. Out: DNS and postgres17. It never
+# talks to a retailer.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lading
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lading
+      app.kubernetes.io/controller: lading
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9230"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Ryan's sync. No ingress. Out: DNS (through the DNS proxy, so toFQDNs sees
+# the lookups), postgres17, and 443 to exactly the hosts the code calls, no
+# patterns:
+#   www.amazon.com       amazon-orders 4.9.2 (uv.lock): sign-in, MFA, claim,
+#                        order history, details and transactions are all
+#                        under constants.BASE_URL. Captcha image hosts are
+#                        left out on purpose: no solver, ever
+#                        (non-negotiable 6), so a challenge fails the run.
+#   signin.costco.com    Costco Azure B2C token endpoint (sync/costco.py).
+#   ecom-api.costco.com  Costco receipts GraphQL (sync/costco.py).
+#   titan.samsclub.com   Sam's Club Azure B2C token endpoint
+#                        (sync/samsclub.py).
+#   www.samsclub.com     Sam's Club orchestra GraphQL (sync/samsclub.py).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lading-sync-ryan
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lading
+      app.kubernetes.io/controller: sync-ryan
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: www.amazon.com
+        - matchName: signin.costco.com
+        - matchName: ecom-api.costco.com
+        - matchName: titan.samsclub.com
+        - matchName: www.samsclub.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Steffi's sync. As ryan's, without the Sam's Club hosts: Forge enables Sam's
+# Club for ryan only.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lading-sync-steffi
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lading
+      app.kubernetes.io/controller: sync-steffi
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: www.amazon.com
+        - matchName: signin.costco.com
+        - matchName: ecom-api.costco.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

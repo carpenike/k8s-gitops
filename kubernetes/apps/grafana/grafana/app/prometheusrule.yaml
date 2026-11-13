@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# Forge's grafana-service-down rule (mkSystemdServiceDownAlert: alertname
+# GrafanaServiceDown, severity high, category availability), now on the
+# pod's /metrics. Alerts route to Forge's Alertmanager like the rest.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: grafana
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: grafana
+      rules:
+        - alert: GrafanaServiceDown
+          expr: |
+            up{namespace="grafana",job="grafana"} == 0
+              or absent(up{namespace="grafana",job="grafana"})
+          for: 5m
+          labels:
+            severity: high
+            service: grafana
+            category: availability
+          annotations:
+            summary: Grafana is down
+            description: >-
+              Prometheus has had no /metrics from Grafana in namespace grafana
+              for 5 minutes. Dashboards at grafana.<domain> and the OnCall
+              plugin UI are probably down. kubectl -n grafana describe pod
+              -l app.kubernetes.io/name=grafana.

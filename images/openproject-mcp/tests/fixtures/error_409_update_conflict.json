@@ -1,0 +1,5 @@
+{
+  "_type": "Error",
+  "errorIdentifier": "urn:openproject-org:api:v3:errors:UpdateConflict",
+  "message": "Your changes could not be saved, because the work package was changed in the meantime. Please, try again."
+}

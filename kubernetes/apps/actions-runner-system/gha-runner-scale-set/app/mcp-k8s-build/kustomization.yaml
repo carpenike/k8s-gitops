@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Second repo-scoped scale set for carpenike/mcp: the jobs mcp-k8s cannot run.
+# Workflows opt in with runs-on: mcp-k8s-build. Used by the Nix job (a Nix
+# install with build sandboxing) and the image job (docker build + push).
+# Kata VM pods from ../build (ADR 0011). Ordinary mcp jobs stay on mcp-k8s
+# (runc, unprivileged).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+  - ../build
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: mcp-k8s-build
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/mcp
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: mcp-k8s-build
+      - op: replace
+        path: /spec/values/maxRunners
+        value: 2

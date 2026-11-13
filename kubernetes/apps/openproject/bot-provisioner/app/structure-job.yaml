@@ -1,0 +1,106 @@
+---
+# Runs structure.rb with OpenProject's own Rails runner, in OpenProject's
+# image and with the seeder's environment, like the bots' provisioning Job
+# (../template/job.yaml). It makes the board match board.yaml. No Kubernetes
+# API access and no secrets of its own. Jobs are immutable: the board
+# ConfigMap carries a hash suffix, so an edit to board.yaml (or a bump of the
+# annotation below for structure.rb) replaces it. Keep the image in step with
+# the HelmRelease (kubernetes/apps/openproject/openproject/app/helmrelease.yaml).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openproject-board-structure
+  labels:
+    app.kubernetes.io/name: openproject-board-structure
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      annotations:
+        # Bump with every change to structure.rb.
+        openproject-board-structure/script-revision: "1"
+      labels:
+        app.kubernetes.io/name: openproject-board-structure
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: structure
+          image: docker.io/openproject/openproject:17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+          command:
+            - bash
+            - -c
+            # Ruby refuses a world-writable TMPDIR without the sticky bit, and
+            # the emptyDir /tmp is 0777. The seeder's prepare-tmpdir does the same.
+            - mkdir -p /tmp/ruby && chmod 1777 /tmp/ruby && cd /app && exec bundle exec rails runner /opt/structure/structure.rb
+          envFrom:
+            - secretRef:
+                name: openproject-core
+            - secretRef:
+                name: openproject-memcached
+            - secretRef:
+                name: openproject-environment
+          env:
+            - name: TMPDIR
+              value: /tmp/ruby
+            - name: OPENPROJECT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-db
+                  key: password
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-secrets
+                  key: secret-key-base
+            - name: BOARD_FILE
+              value: /opt/board/board.yaml
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: script
+              mountPath: /opt/structure
+              readOnly: true
+            - name: board
+              mountPath: /opt/board
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: app-tmp
+              mountPath: /app/tmp
+            # As the seeder has it: the app's configured attachments path.
+            - name: data
+              mountPath: /var/openproject/assets
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openproject
+        - name: script
+          configMap:
+            name: openproject-board-structure-script
+        - name: board
+          configMap:
+            name: openproject-board
+        - name: tmp
+          emptyDir: {}
+        - name: app-tmp
+          emptyDir: {}

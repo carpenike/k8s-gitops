@@ -1,0 +1,10 @@
+---
+# kube-prometheus-stack's node-exporter defaults to hostNetwork and hostPID.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged

@@ -1,0 +1,278 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# ADR 0013 and docs/apps/mail.md.
+#
+# Stores:
+# - data and full-text search: database stalwart on postgres17 (config.json
+#   below). CloudNativePG keeps two instances, and Barman archives WAL to R2.
+# - blobs (message bodies, attachments): S3 on the Ceph RGW bucket
+#   stalwart-blobs (objectbucketclaim.yaml), set once in the WebUI.
+# - in-memory: Stalwart's local store, which is single-node only.
+# The pod keeps nothing on disk, so a lost sled costs a reschedule, not a
+# volume reattach. One replica, Recreate: the local in-memory store (rate
+# limits, locks) is not shared between instances.
+#
+# Stalwart 1.x keeps only the datastore on disk. Domains, accounts,
+# listeners, DKIM, spam rules and certificates are JMAP objects in the
+# database, managed from the WebUI or stalwart-cli apply. On an empty store
+# Stalwart creates the listeners smtp 25, submissions 465, imaps 993, pop3s
+# 995, sieve 4190, https 443 and http 8080
+# (crates/common/src/manager/defaults.rs at v1.1.0).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: stalwart
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: stalwart
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      stalwart:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          terminationGracePeriodSeconds: 120
+          # A name with a dot is looked up as written first, so Cilium files
+          # the answer under that name and the toFQDNs rule for Pocket ID
+          # matches (same note as components/hermes-bot). With ndots:5,
+          # id.holthome.net was first tried as id.holthome.net.mail.svc...,
+          # CoreDNS's autopath answered that name, the policy dropped the
+          # connection, and the OIDC directory failed to build at startup.
+          # Every name Stalwart resolves has a dot, so nothing relies on the
+          # search list.
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+        containers:
+          app:
+            image:
+              repository: docker.io/stalwartlabs/stalwart
+              # renovate: datasource=docker depName=docker.io/stalwartlabs/stalwart
+              tag: v1.1.0@sha256:f772aa6ef8cd8018969fa491640f1436b0270eb14e2c219b5f37f1a77020837e
+            args:
+              - --config
+              - /etc/stalwart/config.json
+            env:
+              # SMTP greeting and EHLO name. Must match the MX host and its PTR.
+              STALWART_HOSTNAME: mx.${SECRET_DOMAIN}
+              # Base URL in OAuth, OIDC and JMAP discovery documents.
+              STALWART_PUBLIC_URL: https://mail.${SECRET_DOMAIN}
+            envFrom:
+              # STALWART_DB_PASSWORD, STALWART_RECOVERY_ADMIN,
+              # STALWART_CLOUDFLARE_TOKEN, STALWART_SMTP2GO_PASSWORD
+              - secretRef:
+                  name: stalwart
+              # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY for the blob store,
+              # written by Rook for the bucket claim. The WebUI's S3 blob
+              # store reads them as EnvironmentVariable sources.
+              - secretRef:
+                  name: stalwart-blobs
+            # Exec, not HTTP, so the network policy needs no host ingress.
+            # The image ships curl for its own HEALTHCHECK.
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec: &healthcheck
+                    command:
+                      - curl
+                      - -fsS
+                      - -o
+                      - /dev/null
+                      - http://127.0.0.1:8080/healthz/live
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *healthcheck
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec: *healthcheck
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              # /usr/local/bin/stalwart carries cap_net_bind_service as a file
+              # capability with the effective bit. execve refuses such a
+              # binary ("operation not permitted") when the capability is
+              # missing from the bounding set, which drop ALL empties. Adding
+              # it back to the bounding set lets the binary start; no_new_privs
+              # still keeps the non-root process from gaining it, so ports
+              # below 1024 come from the sysctl below. Restricted allows this
+              # one added capability.
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - NET_BIND_SERVICE
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: "2"
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 2000
+        runAsGroup: 2000
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+        # The file capability on the binary is not granted under
+        # allowPrivilegeEscalation: false (no_new_privs). This safe,
+        # namespaced sysctl lets the non-root process bind 25, 465 and 993.
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "0"
+    service:
+      # Mail protocols on their own LoadBalancer address, advertised by
+      # Cilium BGP. externalTrafficPolicy Local keeps the client address,
+      # which SPF, DNSBL lookups, rate limits and the network policy need.
+      mail:
+        controller: stalwart
+        forceRename: stalwart-mail
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+        annotations:
+          lbipam.cilium.io/ips: "10.45.10.25"
+        ports:
+          smtp:
+            port: 25
+          submissions:
+            port: 465
+          submission:
+            port: 587
+          imaps:
+            port: 993
+          pop3s:
+            port: 995
+          sieve:
+            port: 4190
+          # Listener smtp-edge: mail relayed by the Vultr edge (ADR 0014)
+          # over the tailnet. Created in the WebUI, not on an empty store.
+          # Only the Connector pods may reach it (ciliumnetworkpolicy.yaml),
+          # and only tag:mx-edge may use that route to this port.
+          smtp-edge:
+            port: 2525
+      # WebUI, JMAP, CalDAV, CardDAV, WebDAV and autoconfig, behind
+      # envoy-internal (httproute.yaml).
+      http:
+        controller: stalwart
+        forceRename: stalwart
+        primary: true
+        ports:
+          http:
+            port: 8080
+    configMaps:
+      config:
+        data:
+          # The DataStore object (x:PostgreSqlStore in resources/schema at
+          # v1.1.0). The password is read from the environment, so this
+          # file holds no secret. TLS without CA verification is libpq's
+          # sslmode=require, the same as hindsight-backup: the postgres17 CA
+          # secret lives in cnpg-system, not here.
+          config.json: |-
+            {
+              "@type": "PostgreSql",
+              "host": "postgres17-rw.cnpg-system.svc.cluster.local",
+              "port": 5432,
+              "database": "stalwart",
+              "authUsername": "stalwart",
+              "useTls": true,
+              "allowInvalidCerts": true,
+              "authSecret": {
+                "@type": "EnvironmentVariable",
+                "variableName": "STALWART_DB_PASSWORD"
+              }
+            }
+    persistence:
+      # Scratch only. Nothing here survives a restart, and nothing needs to.
+      data:
+        type: emptyDir
+        globalMounts:
+          - path: /var/lib/stalwart
+      config:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /etc/stalwart/config.json
+            subPath: config.json
+            readOnly: true
+      tls:
+        type: secret
+        name: stalwart-tls
+        defaultMode: 0440
+        globalMounts:
+          - path: /etc/stalwart/tls
+            readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+      # Stalwart's default Log tracer writes daily files here, and the
+      # WebUI's log viewer reads them. The root filesystem is read-only, so
+      # without this the tracer fails with "Failed to create log file".
+      # Scratch like the rest: the files go with the pod, and the console
+      # tracer (kubectl logs) carries the same events. 1Gi caps a runaway
+      # debug level; the kubelet evicts the pod past it.
+      logs:
+        type: emptyDir
+        sizeLimit: 1Gi
+        globalMounts:
+          - path: /var/log/stalwart
+    # The Pocket ID egress lives here rather than in ciliumnetworkpolicy.yaml:
+    # kubeconform checks files before Flux substitutes ${SECRET_DOMAIN}, and
+    # Cilium's schema refuses "${" in a toFQDNs name (same as Grafana and
+    # homelab-mcp). Cilium adds its allows to policy stalwart's.
+    rawResources:
+      pocket-id-policy:
+        forceRename: stalwart-pocket-id
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # Out: 443 to Pocket ID on Forge, by name, for the OIDC directory's
+          # discovery, keys and userinfo (ADR 0015). DNS goes through
+          # Cilium's proxy here so toFQDNs can learn Forge's address.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: stalwart
+                app.kubernetes.io/controller: stalwart
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP

@@ -1,0 +1,107 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in schoolhouse. The two allow policies below are
+# in this file rather than the HelmRelease's rawResources (as homelab-mcp
+# does) because no name here needs ${SECRET_DOMAIN}, so kubeconform can check
+# them.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The health server. In: 9220 (/healthz, /metrics) from Prometheus only.
+# Probes come from the kubelet, which Cilium allows. Out: DNS and postgres17.
+# It never talks to Schoology.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: schoolhouse
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: schoolhouse
+      app.kubernetes.io/controller: schoolhouse
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9220"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The ingest CronJob. No ingress. Out: DNS (through the DNS proxy, so the
+# toFQDNs rule sees the lookups), postgres17, and 443 to Schoology only.
+#
+# app.schoology.com is SCHOOLHOUSE_SCHOOLOGY_ORIGIN: the login and every
+# scraped page (one host, no SSO hop: schoolhouse docs/RECON.md section 1).
+# It is also the host the iCal share feeds are assumed to be on: Schoology
+# issues "Share Your Schoology Calendar" links on the instance the account
+# uses. The feed URLs are secret, so that is not checked here; if a feed
+# lives on another host, the ingest logs "iCal fetch failed for child <id>
+# (ConnectTimeout)" and carries on, and that exact host goes here
+# (docs/apps/schoolhouse.md). No IMAP: Forge configures no digest mailbox.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: schoolhouse-ingest
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: schoolhouse
+      app.kubernetes.io/controller: ingest
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: app.schoology.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

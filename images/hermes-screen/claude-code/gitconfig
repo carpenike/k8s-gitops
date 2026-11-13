@@ -1,0 +1,11 @@
+# k8s-gitops: system git config for the Hermes screen pod.
+[init]
+	defaultBranch = main
+# This bot's GitHub token through the gh wrapper (/usr/local/bin/gh).
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/local/bin/gh auth git-credential
+# Commit name and email for this bot, from Secret claude-code-github. git
+# skips a missing include, so without CLAUDE_CODE_ENABLED nothing changes.
+[include]
+	path = /etc/hermes-claude-code/gitconfig

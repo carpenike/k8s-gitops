@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in mail, both directions (Cilium docs, Layer 3,
+# "Ingress/Egress Default Deny"). The policies below and in ../backup add
+# the allows.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Ingress: HTTP from the envoy-internal proxies; the mail ports from the LAN
+# through the LoadBalancer (entity world: with externalTrafficPolicy Local
+# the source is the real client); and, from the tailscale Connector pods,
+# the client ports plus 2525 for the Vultr edge relay (ADR 0014). The
+# Connector source-NATs tailnet traffic, so it arrives from those pods,
+# not from world. Which tailnet device reaches which port is decided by
+# the grants in the tailnet policy (docs/platform/tailscale.md). 2525 is open to
+# nothing else, because Stalwart trusts that listener's mail as already
+# filtered. Probes are exec, so there is no host rule.
+#
+# Egress: cluster DNS, postgres17 (data and search stores), the Ceph RGW
+# (blob store; Service port 80, pod port 8080; policy matches the pod), and
+# public IPv4 on the ports mail delivery and its lookups use. 25 is direct
+# MX delivery, 465/587/2525 a smart host (relay; 465 is the interim
+# SMTP2GO route, ADR 0014), 443 MTA-STS policies, ACME and spam-rule
+# updates. No RFC1918, CGNAT or link-local. Pocket ID
+# on Forge (RFC1918) is allowed by name in policy stalwart-pocket-id, in
+# helmrelease.yaml's rawResources.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: stalwart
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: stalwart
+      app.kubernetes.io/controller: stalwart
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "25"
+              protocol: TCP
+            - port: "465"
+              protocol: TCP
+            - port: "587"
+              protocol: TCP
+            - port: "993"
+              protocol: TCP
+            - port: "995"
+              protocol: TCP
+            - port: "4190"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: tailscale
+            app.kubernetes.io/name: tailscale-connector
+      toPorts:
+        - ports:
+            - port: "465"
+              protocol: TCP
+            - port: "587"
+              protocol: TCP
+            - port: "993"
+              protocol: TCP
+            - port: "995"
+              protocol: TCP
+            - port: "4190"
+              protocol: TCP
+            - port: "2525"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: rook-ceph
+            app: rook-ceph-rgw
+            rook_object_store: ceph-objectstore
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+      toPorts:
+        - ports:
+            - port: "25"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+            - port: "465"
+              protocol: TCP
+            - port: "587"
+              protocol: TCP
+            - port: "2525"
+              protocol: TCP

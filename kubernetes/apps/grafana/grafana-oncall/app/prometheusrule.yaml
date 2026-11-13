@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# Forge's three OnCall rules (mkServiceDownAlert: GrafanaOnCallServiceDown,
+# GrafanaOnCallCeleryServiceDown, GrafanaOnCallRedisServiceDown; severity
+# high, category availability), now on the pods. Keep these alert names:
+# Forge's Alertmanager sends alertname=~"GrafanaOnCall.*ServiceDown"
+# straight to Pushover (critical) instead of to OnCall, which is the thing
+# that is down (nix-config modules/nixos/alerting/default.nix).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: grafana-oncall
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: grafana-oncall
+      rules:
+        - alert: GrafanaOnCallServiceDown
+          expr: |
+            up{namespace="grafana",job="grafana-oncall-engine"} == 0
+              or absent(up{namespace="grafana",job="grafana-oncall-engine"})
+          for: 5m
+          labels:
+            severity: high
+            service: grafana-oncall
+            category: availability
+          annotations:
+            summary: Grafana OnCall engine is down
+            description: >-
+              Prometheus has had no /metrics/ from the OnCall engine for 5
+              minutes. Forge's Alertmanager cannot deliver to OnCall, so
+              nobody is paged through it. kubectl -n grafana logs
+              deploy/grafana-oncall -c engine.
+        - alert: GrafanaOnCallCeleryServiceDown
+          expr: |
+            kube_pod_container_status_running{namespace="grafana",container="celery"} == 0
+              or absent(kube_pod_container_status_running{namespace="grafana",container="celery"})
+              or increase(kube_pod_container_status_restarts_total{namespace="grafana",container="celery"}[15m]) > 2
+          for: 5m
+          labels:
+            severity: high
+            service: grafana-oncall-celery
+            category: availability
+          annotations:
+            summary: Grafana OnCall Celery worker is not running
+            description: >-
+              The worker sends notifications and runs escalations. Alerts reach
+              OnCall but nobody is notified. kubectl -n grafana logs
+              deploy/grafana-oncall -c celery.
+        - alert: GrafanaOnCallRedisServiceDown
+          expr: |
+            kube_pod_container_status_running{namespace="grafana",pod=~"grafana-oncall-redis-.*",container="app"} == 0
+              or absent(kube_pod_container_status_running{namespace="grafana",pod=~"grafana-oncall-redis-.*",container="app"})
+          for: 5m
+          labels:
+            severity: high
+            service: grafana-oncall-redis
+            category: availability
+          annotations:
+            summary: Grafana OnCall Redis is not running
+            description: >-
+              Redis is OnCall's task broker. Without it the engine accepts
+              alerts but Celery receives no work. kubectl -n grafana logs
+              deploy/grafana-oncall-redis.
+        - alert: GrafanaOnCallPluginSetupFailed
+          expr: kube_job_status_failed{namespace="grafana",job_name="grafana-oncall-plugin-setup"} > 0
+          for: 5m
+          labels:
+            severity: warning
+            service: grafana-oncall
+            category: availability
+          annotations:
+            summary: The OnCall plugin setup Job failed
+            description: >-
+              Grafana's OnCall plugin may not be connected to the engine. kubectl
+              -n grafana logs job/grafana-oncall-plugin-setup, then delete the Job
+              and reconcile Kustomization grafana-oncall-plugin-setup
+              (docs/platform/grafana.md).
