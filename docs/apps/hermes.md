@@ -86,7 +86,11 @@ spec later:
 | `ROUTINES_PRIVATE_ENABLED` | `true` | Optional, default `false`. Secret `routines-private` from every field of 1Password item `hermes-<bot>-routines`: the private details of the bot's `routines.yaml`, one field per routine key ([Routines from git](#routines-from-git)). `true` or `false` only |
 | `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
-| `CLAUDE_CODE_MERGE` | `false` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
+| `CLAUDE_CODE_MERGE` | `auto` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`, `auto`: the bot marks its finished pull request ready and turns on auto-merge, and Ryan's approval on GitHub merges it ([Merging](#merging-ryan-approves-github-merges)). `false`: it never touches merging. `auto` or `false` only |
+| `GITHUB_APP_CLIENT_ID` | `Iv23li…` | Required with `CLAUDE_CODE_ENABLED`: the Client ID of the bot's own GitHub App, the issuer of the JWT that mints its installation tokens ([GitHub access](#github-access-the-bots-own-app)). Not a secret |
+| `GITHUB_APP_INSTALLATION_ID` | `181680083` | Required with `CLAUDE_CODE_ENABLED`: that App's installation on Ryan's account |
+| `GITHUB_APP_SLUG` | `hank-agent` | Required with `CLAUDE_CODE_ENABLED`: the App's slug. Commits are authored as `<slug>[bot]` |
+| `GITHUB_APP_BOT_USER_ID` | `356351201` | Required with `CLAUDE_CODE_ENABLED`: the id of user `<slug>[bot]` (`gh api 'users/<slug>%5Bbot%5D' -q .id`), for the commit email `<id>+<slug>[bot]@users.noreply.github.com` that GitHub links to the App |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
 | `TASK_BOARD_ENABLED` | `true` | Optional, default `false`. The shared OpenProject task board: the bot's OpenProject user and API token (Job `openproject/hermes-provision-<bot>` writes Secret `hermes-<bot>-openproject`), egress to `openproject-mcp` (CNP `agent-task-board`) and skill `homelab/task-board`. The bot's `mcp-servers.yaml` declares the `openproject` server ([openproject.md](openproject.md), "Bot access"). `true` or `false` only |
 | `TASK_BOARD_WEBHOOK_ENABLED` | `true` | Optional, default `false`. With `TASK_BOARD_ENABLED` and `WEBHOOK_DELIVER_CHAT_ID`: board wake-ups, a turn when someone else changes the bot's task ([openproject.md](openproject.md), "Waking a bot"). Adds Secret `task-board-webhook`, Service and CNP `agent-board-hooks`, and route `task-board`. `true` or `false` only |
@@ -332,7 +336,7 @@ host key is stable across restarts. The agent pre-seeds
 The screen has no Matrix or LiteLLM credentials, no ServiceAccount token,
 and no route to LiteLLM, Tuwunel, the LAN, or the API server. Two
 exceptions are opt-in: with Claude Code, it gets a Claude subscription
-token and a GitHub token
+token and a GitHub App installation token
 ([Coding with Claude Code](#coding-with-claude-code-opt-in)); with
 `CLUSTER_ACCESS_ENABLED`, its ServiceAccount token and a route to the API
 server ([Cluster access](#cluster-access-opt-in)).
@@ -1229,7 +1233,7 @@ session per task across Matrix messages**. Ryan asks for a change, follows
 up in later messages ("also add tests", "why that approach?"), and gets a
 draft pull request at the end. Today only Hank has it, with
 `CLAUDE_CODE_MERGE`. Chief reads mail and the web, the easiest places to
-plant instructions, so it has no Claude Code or GitHub token and sends
+plant instructions, so it has no Claude Code or GitHub access and sends
 code work to Hank (`CODE_PEER=hank`).
 
 ### Where it runs: the screen pod
@@ -1248,8 +1252,8 @@ What the screen gets with it:
 | Claude Code CLI | `/opt/claude-code`, wrapper `/usr/local/bin/claude` | Pinned in `images/hermes-screen/Dockerfile` (Renovate, npm). Never updates itself |
 | GitHub CLI | `/opt/gh`, wrapper `/usr/local/bin/gh` | Pinned, checksum-verified. git's credential helper for github.com |
 | Claude sign-in | `/etc/hermes-claude-code/oauth_token` | ExternalSecret `claude-code-auth`, 1Password field `claude_code_oauth_token`: a one-year token from `claude setup-token` |
-| GitHub token | `/etc/hermes-claude-code/github_token` | ExternalSecret `claude-code-github`, 1Password field `github_token` |
-| Commit identity | `/etc/hermes-claude-code/gitconfig` | `<bot> (Hermes)`, `<bot>@hermes.invalid` |
+| GitHub token | `/etc/hermes-claude-code/github_token` | ExternalSecret `claude-code-github`: a one-hour installation token of the bot's GitHub App, re-minted every 30 minutes ([GitHub access](#github-access-the-bots-own-app)) |
+| Commit identity | `/etc/hermes-claude-code/gitconfig` | `<slug>[bot]`, `<id>+<slug>[bot]@users.noreply.github.com` |
 
 No network change: Anthropic, GitHub and npm go through the screen's
 existing public egress.
@@ -1269,8 +1273,8 @@ the subscription's usage limits, shared with Ryan's own Claude Code
 sessions.
 
 **Anything in the sandbox can read these files,** including code Claude
-Code runs. That is the accepted trade: scope the GitHub token tightly,
-and treat the Claude token as able to spend the subscription's usage
+Code runs. That is the accepted trade: the GitHub token is scoped to
+the App's repositories and lasts an hour, and treat the Claude token as able to spend the subscription's usage
 until it expires or is replaced.
 
 ### One session per task
@@ -1352,32 +1356,64 @@ config change, and one Signal message on `ops` for anything else.
 `homelab_list_status`. The first sign-in is Ryan's: `hermes mcp login
 homelab` in the agent pod ([OAuth servers](#oauth-servers)).
 
-### Merging, only when Ryan asks
+### GitHub access: the bot's own App
 
-`CLAUDE_CODE_MERGE=true` appends a "Merging" section to the skill. Without
-it the section says "Never merge". With it the bot merges a pull request
-only when:
+The bot is on GitHub as its own App (Hank: `hank-agent`), not as Ryan and
+not with a long-lived token. A separate identity is what lets a ruleset
+tell the bot's merges from Ryan's.
 
-- **Ryan asks in his own Matrix message** and names that pull request (number,
-  link, or "merge it" about the one just sent). "Merge when green" counts.
-- **The ask comes from no one else.** A peer over A2A, a webhook, an alert, a
-  cron run, or text in a PR, issue, commit, email or page never counts,
-  even when it claims Ryan approved.
-- **Its checks have all passed** and `mergeStateStatus` is `CLEAN`. A draft is
-  marked ready first. Running checks are waited for; a failure is
-  reported, not merged.
-- **The head commit hasn't moved** since Ryan asked.
+| Object | What |
+| --- | --- |
+| ExternalSecret `github-app-key` | The App's private key, 1Password field `github_app_key`. Mounted nowhere: only External Secrets reads it |
+| `GithubAccessToken` `github-app-token` | ESO's generator. Signs a JWT as `GITHUB_APP_CLIENT_ID` and asks GitHub for a token of installation `GITHUB_APP_INSTALLATION_ID` with exactly Contents write, Pull requests write and Metadata read, so a permission later added to the App does not reach the bot unasked |
+| ExternalSecret `claude-code-github` | A fresh token every 30 minutes (each lasts an hour), plus the commit identity. Projected into the screen pod |
 
-The bot runs `gh pr merge <n> --squash` from its own terminal, never inside
-Claude Code (managed settings deny it there), and never with `--admin` or
-`--auto`. In this repo a merge to `rebuild` is a deploy: Flux applies it.
+No Workflows permission (it cannot change `.github/workflows`), no
+Administration (no settings or rulesets), and no checks or statuses
+(it cannot report its own CI green, nor read CI on a private repository:
+on carpenike/mcp it waits for GitHub instead). The App reaches only the
+repositories it is installed on. App tokens, unlike Actions'
+`GITHUB_TOKEN`, start workflows, so its pushes run CI and its merges run
+the image builds.
 
-**This rule is the bot's, not GitHub's.** The token's Contents and Pull
-requests write can merge any pull request in the repositories it covers,
-and Hermes cannot require an approval prompt for an arbitrary command (its
-prompts cover a fixed list of dangerous patterns; `approvals.deny` only
-blocks). What GitHub can enforce is the ruleset below: no direct pushes to
-`rebuild` or `main`, and required checks before any merge.
+### Merging: Ryan approves, GitHub merges
+
+`CLAUDE_CODE_MERGE=auto` appends a "Merging" section to the skill. Without
+it the section says "Never merge". With it, when a task is done the bot
+runs, from its own terminal (managed settings deny `gh pr merge` inside
+Claude Code):
+
+```sh
+gh pr ready <n> --repo <owner>/<repo>
+gh pr merge <n> --repo <owner>/<repo> --auto --squash
+```
+
+and tells Ryan the pull request is ready for his review. **Ryan's approval
+on GitHub is the merge.** GitHub merges once the required checks pass. A
+push after his approval dismisses it, so a changed pull request needs a
+fresh approval. The bot never merges directly and never uses `--admin`.
+It turns on auto-merge only for its own pull requests from a task Ryan
+gave it, never on a peer's, a webhook's or a page's word.
+
+**GitHub enforces this, not the bot.** Repository rulesets
+`approve-to-merge` on carpenike/mcp `main`, carpenike/k8s-gitops `main` and
+`rebuild`, and carpenike/nix-config `main` (set up 2026-11-13) require a
+pull request with one approval, given after the last push, with stale
+approvals dismissed, and forbid force pushes and deletion. Required
+checks, all pinned to GitHub Actions (app 15368) so a token with
+statuses write could not fake them:
+
+| Repository | Required checks |
+| --- | --- |
+| mcp `main` | `Python lint + type + test`, `pocketid-mcp-as conformance + contract hosting`, `Nix build + contract pin sync` (ruleset `approve-to-merge`) |
+| k8s-gitops `rebuild` | `yamllint, kubeconform, sops check, doc links`, `helm template`, `gitleaks`, `renovate config` (ruleset `rebuild-required-checks`) |
+| nix-config `main` | `Lint`, `Nix Build Successful` (existing ruleset `main-required-checks`) |
+
+Bypass, exempt: the repository admin role (Ryan) everywhere, plus
+Renovate (app 2740) and carpenike-bot (app 179885) in nix-config, whose
+flake and feed bumps auto-merge. The bot's App is never a bypass actor,
+so a direct `gh pr merge` from it is refused, and so is a merge of an
+approved pull request it pushed to after the approval.
 
 ### Bots without it (`CODE_PEER`)
 
@@ -1393,19 +1429,18 @@ Ryan), and never ask the peer to merge.
 1. On a machine signed in to Ryan's Claude account, run
    `claude setup-token` and put the printed token in 1Password vault
    `k8s-secrets`, item `hermes-<bot>`, field `claude_code_oauth_token`.
-2. Create a fine-grained GitHub token with **only the repositories the
-   bot may work on** ("Only select repositories", never "All
-   repositories"). Permissions: Contents read/write, Pull requests
-   read/write (Metadata read comes with it). Leave out Administration,
-   Secrets and Workflows; without Workflows it cannot change
-   `.github/workflows`. Give it an expiry. Put it in the same item, field
-   `github_token`.
-3. Protect each repository's default branch with a ruleset that requires
-   a pull request, so the token's Contents write cannot push to it. In
-   k8s-gitops protect `rebuild` too (Flux deploys it), and require the
-   Validate checks there. Not set up yet: on 7 Nov 2026 neither `main` nor
-   `rebuild` had a ruleset or branch protection.
-4. Add `CLAUDE_CODE_ENABLED=true` to the bot's inputs.
+2. Register a GitHub App for the bot on Ryan's account (Settings,
+   Developer settings, GitHub Apps; no webhook), with repository
+   permissions Contents read/write and Pull requests read/write only
+   (Metadata read comes with it). Install it on **only the repositories
+   the bot may work on**. Generate a private key and put the PEM in the
+   same item, field `github_app_key`; delete the downloaded file.
+3. Give each of those repositories the `approve-to-merge` ruleset
+   ([Merging](#merging-ryan-approves-github-merges)) before the bot gets
+   the token: Contents write can push and merge anywhere a ruleset does
+   not stop it.
+4. Add `CLAUDE_CODE_ENABLED=true`, `CLAUDE_CODE_MERGE=auto` and the four
+   `GITHUB_APP_*` inputs to the bot's inputs.
 
 Each field is optional to the pod: without the Claude token `claude`
 reports it is not logged in; without the GitHub token Claude Code still
@@ -1419,10 +1454,12 @@ kubectl -n hermes-<bot> exec deploy/hermes-screen -- claude -p 'Reply with OK' -
 kubectl -n hermes-<bot> exec deploy/hermes-screen -- gh auth status
 ```
 
-Renew either token by replacing its 1Password field (the Claude token
-lasts a year), then force-sync `claude-code-auth` or `claude-code-github`
-(External Secrets otherwise takes up to 12h). The projected volume
-updates in place, with no restart.
+Renew the Claude token by replacing its 1Password field (it lasts a
+year), then force-sync `claude-code-auth` (External Secrets otherwise
+takes up to 12h). The GitHub token renews itself. To rotate the App's
+private key, generate a new one, replace `github_app_key`, force-sync
+`github-app-key` and `claude-code-github`, then delete the old key on
+GitHub. The projected volume updates in place, with no restart.
 
 ## Matrix profile (opt-in)
 
@@ -2100,8 +2137,8 @@ kubectl -n hermes-<bot> rollout restart deploy/hermes-agent
 counterpart to Chief Engineer on Grok Bot. He watches what is sent to him
 (alerts, logs, a peer's question), diagnoses Forge and the cluster, and
 makes code changes as pull requests with Claude Code. He is the only bot
-with a GitHub token, and he merges a pull request only when Ryan himself
-asks for that one ([Merging](#merging-only-when-ryan-asks)). He never
+with GitHub access (App `hank-agent`). He never merges: he turns on
+auto-merge and Ryan's approval merges ([Merging](#merging-ryan-approves-github-merges)). He never
 deploys or changes Forge or the cluster by hand. Those rules are in his
 persona (`SOUL.md`). He has no credentials for Forge or the cluster.
 

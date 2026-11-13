@@ -7,8 +7,8 @@
 #
 # Deliberately not copied from Chief: Outlook and the Chief Engineer
 # webhook (WEBHOOK_ENABLED).
-# Hank is the only bot with Claude Code and a GitHub token: he opens pull
-# requests and Ryan merges them. He does not send mail. He answers alerts
+# Hank is the only bot with Claude Code and GitHub access (App hank-agent):
+# he opens pull requests and Ryan's approval merges them. He does not send mail. He answers alerts
 # within his cluster access (../hank-cluster; docs/apps/hermes.md,
 # "Cluster access" and "Alerts").
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -60,11 +60,20 @@ configMapGenerator:
       # a2a_chief_engineer_url and a2a_chief_engineer_token to 1Password item
       # hermes-hank, an egress rule for its host, and set this to true.
       - A2A_CHIEF_ENGINEER_ENABLED=false
-      # Claude Code in the screen pod with Hank's GitHub token (docs/apps/hermes.md,
-      # "Coding with Claude Code"). He opens pull requests; Ryan merges them
-      # (Ryan, 2026-11-13: no Merging section in skill coding-sessions).
+      # Claude Code in the screen pod, on GitHub as App hank-agent
+      # (docs/apps/hermes.md, "Coding with Claude Code"). He opens pull
+      # requests and turns on auto-merge; Ryan's approval on GitHub merges
+      # them (Ryan, 2026-11-13: "I want to approve merges"). The rulesets on
+      # mcp, k8s-gitops and nix-config refuse any merge without it.
       - CLAUDE_CODE_ENABLED=true
-      - CLAUDE_CODE_MERGE=false
+      - CLAUDE_CODE_MERGE=auto
+      # Not secrets: the App's Client ID (the JWT issuer), its installation on
+      # Ryan's account, and its bot user, for the commit identity. The private
+      # key is 1Password hermes-hank/github_app_key.
+      - GITHUB_APP_CLIENT_ID=Iv23liIRcPyvqjjk5XZ0
+      - GITHUB_APP_INSTALLATION_ID=181680083
+      - GITHUB_APP_SLUG=hank-agent
+      - GITHUB_APP_BOT_USER_ID=356351201
       # kubectl and flux in the screen pod as ServiceAccount hermes-hank/hermes,
       # within ../hank-cluster (docs/apps/hermes.md, "Cluster access").
       - CLUSTER_ACCESS_ENABLED=true
