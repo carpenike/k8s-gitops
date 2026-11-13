@@ -94,6 +94,18 @@ clients:
     provider: internal
     delete: true
     move: true
+  # Hank (Hermes), for incident notes (Ryan, 2026-11-13). Reads Tech; writes
+  # only under Personal/Tech/Incidents and only appends to the Tech Inbox
+  # (write_paths/append_paths, homelab-mcp 0.66.0). Tech's Status and
+  # Decisions stay with Chief Engineer. External provider, like Grokbot.
+  hank:
+    views: [/mcp/agent/hank]
+    access: scoped
+    provider: external
+    read: [tech]
+    write: [tech]
+    write_paths: [Personal/Tech/Incidents]
+    append_paths: [Personal/Tech/Inbox.md]
   grokbot:
     views: [/mcp/agent/grokbot]
     access: scoped
