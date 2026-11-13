@@ -27,9 +27,9 @@ spec:
             image:
               repository: ghcr.io/carpenike/openproject-mcp
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
-              # Floating tag, digest re-pinned by Renovate. This digest is the
-              # branch build 0.4.1-f5081a9 (handoff fields; names the form's type on create).
-              tag: 0.4.1@sha256:d7ebce3f9af6b9e1116aad2d8ddae38f6731efeff6a87fa65ae1ac5e45d9ac0f
+              # Floating tag, digest re-pinned by Renovate. 0.5.0 (30d4ed5):
+              # the Alertmanager relay, /hooks/alertmanager.
+              tag: 0.5.0@sha256:58be83b29698ed00c4e0b7823e4e2e4776eed66e2a4c28a5fd37293364922e52
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
