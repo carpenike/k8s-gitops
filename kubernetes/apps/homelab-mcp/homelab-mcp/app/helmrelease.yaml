@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (4015095, 0.66.0: vault clients may be narrowed with write_paths and
+              # (e751b24, 0.66.1: the vault rule also leads vault_domains'
+              # description, for clients (Hermes) that drop server instructions.
+              # 4015095, 0.66.0: vault clients may be narrowed with write_paths and
               # append_paths; signal_send can be held to ops per view. Includes
               # d7a6a33, 0.65.2: decisions append to Decisions; Status is the
               # area owner_agent's.
@@ -134,7 +136,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-4015095d635be2211e36cdcba34a648660fb9914@sha256:fcc15a13749e9859d5cf46a2eb8dec39f64fc6b7e6035d355e774f7d87558753
+              tag: sha-e751b24f2f3a39640fce887e06ac9d6b7d6d1f8e@sha256:e7e9113f3228022bd3b6952e7fdc212451bcf36e2d34213b84c4aca34c49b890
             command:
               - /bin/sh
               - -c
@@ -499,7 +501,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-4015095d635be2211e36cdcba34a648660fb9914@sha256:9f508771fa78cf114ffdc00e70fb56f6a19acd2e8f879b7e916fb873c7e31648
+              tag: sha-e751b24f2f3a39640fce887e06ac9d6b7d6d1f8e@sha256:b126b2f76251236d470dc758eb6f6c98266e8ecd7ecf5d228f861af254b1152d
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
