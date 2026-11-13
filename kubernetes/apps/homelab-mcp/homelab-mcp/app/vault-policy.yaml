@@ -64,6 +64,13 @@ domains:
     owner_agent: dean
     protected: [Goals.md]
     append_only: [Decisions.md]
+  # Reported by a peer (OpenProject task 54); Ryan review pending.
+  wardrobe:
+    roots: [Personal/Wardrobe]
+    sensitivity: personal
+    owner_agent: claude
+    protected: [Goals.md]
+    append_only: [Decisions.md]
   inbox:
     roots: [Inbox]
     sensitivity: personal
@@ -114,6 +121,6 @@ clients:
     # Every personal domain, health, church and education included (Ryan,
     # 2026-11-12); agents read-only.
     read: [fitness, inbox, property, tech, family-history, finances, health, church,
-           education, agents]
+           education, wardrobe, agents]
     write: [fitness, inbox, property, tech, family-history, finances, health, church,
-            education]
+            education, wardrobe]
