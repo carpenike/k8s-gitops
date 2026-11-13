@@ -46,17 +46,19 @@ global *manage user* / *create user* permission. So:
 | `POST /mcp` | Bearer | MCP over streamable HTTP. Stateless, with JSON responses. Serves both the 2025 `initialize` protocol and 2026-07-28 |
 | `GET /healthz` | none | `{"status":"ok"}`. Does not call OpenProject |
 | `POST /hooks/openproject` | OpenProject's `X-OP-Signature` | The task-board relay ([below](#task-board-relay)). 404 while it is off |
+| `POST /hooks/alertmanager` | Bearer `ALERTMANAGER_HOOK_TOKEN` | The Alertmanager relay ([below](#alertmanager-relay)). 503 while it is off |
 
 The container listens on `0.0.0.0:$PORT` (default 8000) as UID 65532. It runs
 one uvicorn process and writes nothing outside `/tmp`, so
 `readOnlyRootFilesystem` works.
 
 Requests to `/mcp` must carry a `Host` that is in `ALLOWED_HOSTS`. This is
-the MCP SDK's DNS-rebinding check. Other hosts get HTTP 421.
+the MCP SDK's DNS-rebinding check. Other hosts get HTTP 421. The two
+`/hooks/*` endpoints are not under that check, and authenticate themselves.
 
 ## Environment
 
-None of these is a secret except the relay's keys and targets.
+None of these is a secret except the relays' keys, token and targets.
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -79,6 +81,9 @@ None of these is a secret except the relay's keys and targets.
 | `RELAY_BOTS` | *(none)* | Comma list of the bots' OpenProject logins. Only these are ever woken |
 | `RELAY_TARGETS` | *(none)* | **Secret.** JSON `{"<bot>": {"url": "https://…", "bearer": "<key>"}}`: bots outside the cluster, such as a Grok Bot routine's webhook trigger. A bad entry is logged (never its values) and ignored |
 | `RELAY_HERMES_URL` | `http://agent-board-hooks.hermes-{bot}.svc.cluster.local:8644/webhooks/task-board` | Where a bot's event goes; `{bot}` is its login |
+| `ALERTMANAGER_HOOK_TOKEN` | *(none)* | **Secret.** The bearer token Alertmanager sends. Alertmanager relay only; unset turns it off (503) |
+| `ALERTS_BOT` | `hank` | The one bot that gets alerts |
+| `ALERTS_HERMES_URL` | *(`RELAY_HERMES_URL` with the path `/webhooks/alerts`)* | Where alerts go; `{bot}` is `ALERTS_BOT` |
 
 Status, priority and type names are resolved case-insensitively through the
 API and cached. A numeric value is used as an id.
@@ -175,6 +180,58 @@ accepts only SHA-256 schemes. `POST /hooks/openproject` sits between them
 OpenProject sends an event once its journal aggregation window has passed
 (5 minutes by default), so a burst of edits is one event, and a bot hears
 about a change about 5 minutes after it.
+
+## Alertmanager relay
+
+Alertmanager's webhook receiver can send a bearer token but cannot sign its
+body, and a Hermes route takes only HMAC-SHA256. `POST /hooks/alertmanager`
+sits between them (`alerts.py`) and sends every alert to one bot,
+`ALERTS_BOT`.
+
+1. It needs `ALERTMANAGER_HOOK_TOKEN`, `HERMES_WEBHOOK_SECRET` and a valid
+   `ALERTS_BOT`; without them it answers 503. `Authorization: Bearer <token>`
+   is compared in constant time; a missing or wrong one gets 401.
+2. The body is at most 256 KB (413). Anything that is not JSON, or not an
+   Alertmanager webhook v4 payload (`version: "4"`, a `groupKey`, `status`
+   `firing` or `resolved`, a non-empty `alerts` list with labels), gets 400.
+3. It deduplicates per `groupKey`, in memory. A group is forwarded when it is
+   new, when its status changed (firing to resolved or back), or when it is
+   firing with a fingerprint not forwarded before. Anything else is a
+   `repeat_interval` re-send: 200 `{"status":"duplicate"}`, nothing sent.
+   Resolved groups are forgotten after 24 hours, and at most 1000 groups are
+   kept (least recently forwarded first).
+4. It posts `ALERTS_HERMES_URL`, by default
+   `http://agent-board-hooks.hermes-<bot>.svc.cluster.local:8644/webhooks/alerts`
+   (the board relay's Service and port), signed like the board relay: Hermes
+   generic V2 with `HERMES_WEBHOOK_SECRET`. `webhook-id` is `am-` plus the
+   sha256 of the group key, the status, and each forwarded alert's
+   fingerprint and `startsAt`, so the same notice always has the same id and
+   Hermes drops a repeat even after this server restarts, while an alert that
+   fires again (a new `startsAt`) is a new delivery.
+5. The bot accepting it (2xx) is 202 `{"status":"forwarded"}`. Anything else,
+   or no answer, is 502 and the group is not marked as forwarded, so
+   Alertmanager's retry delivers it.
+
+The event:
+
+```json
+{"event_type": "alertmanager", "bot": "hank",
+ "subject": "[FIRING] KubePodCrashLooping (warning) x3",
+ "body": "<plain text, at most 8 KB>", "priority": "warning",
+ "status": "firing", "group_key": "<groupKey>",
+ "external_url": "<Alertmanager's externalURL>"}
+```
+
+`subject` is the status, `commonLabels.alertname` (or `multiple alerts`), the
+severity and how many alerts the status is about (the firing ones, or all of
+a resolved group). `priority` is `commonLabels.severity`, else the highest
+severity among the alerts, else `unknown`. `body` has one block per alert,
+firing first: alertname and severity, the other labels (`namespace`, `pod`,
+`container`, `job`, `instance`, `service`, `node`, `cluster` first),
+`summary`, `description`, `runbook_url`, `startsAt` (and `endsAt` once
+resolved) and `generatorURL`. It is cut at 8 KB with a `…truncated` line.
+Every value is data: control, format and line-separator characters become
+spaces, so a label cannot start a new line, and each value is capped.
 
 ## Development
 
