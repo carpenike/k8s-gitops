@@ -229,6 +229,19 @@ spec:
               # signal_send (category messaging) through the signal-api container
               # in this pod, on loopback only (Ryan, 2026-11-13).
               HOMELAB_MCP_SIGNAL_BASE_URL: http://127.0.0.1:8080
+              # The bot's number and the ops group only, from Secret
+              # homelab-mcp-signal: not the family group (it stays off until
+              # Ryan asks) and not the rest of that Secret (capture's).
+              HOMELAB_MCP_SIGNAL_NUMBER:
+                valueFrom:
+                  secretKeyRef:
+                    name: homelab-mcp-signal
+                    key: HOMELAB_MCP_SIGNAL_NUMBER
+              HOMELAB_MCP_SIGNAL_OPS_GROUP_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: homelab-mcp-signal
+                    key: HOMELAB_MCP_SIGNAL_OPS_GROUP_ID
               # The Actual sidecar is the second container in this pod.
               HOMELAB_MCP_FINANCES_SIDECAR_BASE_URL: http://127.0.0.1:9210
               HOMELAB_MCP_FINANCES_REPO_URL: https://github.com/carpenike/finances.git
