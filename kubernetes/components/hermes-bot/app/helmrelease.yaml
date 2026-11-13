@@ -1469,7 +1469,9 @@ spec:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
               # Floating tag, digest re-pinned by Renovate (docs/apps/hermes.md).
-              tag: v0.23.0@sha256:66fd424fb72b9841a9fddba330586bc9485b2c35dbaf6967a403eae516645243
+              # This digest is the PR build of c7fd2aa (v0.23.0-c7fd2aa: kubectl
+              # and flux added); Renovate repins it to rebuild's build.
+              tag: v0.23.0@sha256:d5274adad10aa1c6c0f4aaa4de7dbf2718766b5988685ae70d22c029fa642350
             env:
               TZ: America/New_York
             probes:
