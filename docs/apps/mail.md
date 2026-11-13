@@ -416,10 +416,19 @@ repo; its Stalwart settings live in its own store, not in either repo.
      Restart Stalwart after changing listeners
    - **Logs.** A `Stdout` tracer; the default `Log` tracer writes to
      `/var/log/stalwart`, which the container does not have
+   - **Reports.** ReportSettings `outboundReportDomain`
+     `mx.holthome.net`. The edge mails daily DMARC aggregate reports to
+     the domains that sent it mail, from `noreply-dmarc@` that domain.
+     Unset, it is `localhost.local`, which receivers defer or junk. The
+     `v=spf1 a -all` record on `mx.holthome.net` covers the VM, so the
+     reports pass SPF and DMARC. Vultr already allows outbound 25 from
+     this VM
 4. **Public DNS.** Stalwart in the cluster already publishes the MX
-   (`mx.holthome.net`, see [DNS](#dns)). At cutover, add a public A
-   record for `mx.holthome.net` pointing at the VM. On the LAN,
-   `mx.holthome.net` stays `10.45.10.25`.
+   (`mx.holthome.net`, see [DNS](#dns)). The cutover is a public A
+   record for `mx.holthome.net` pointing at the VM, DNS only (not
+   proxied), plus reverse DNS for the VM's address set to
+   `mx.holthome.net` in Vultr. On the LAN, `mx.holthome.net` stays
+   `10.45.10.25`.
 5. Export the edge's configuration with `stalwart-cli snapshot` too.
 
 Checks, from the VM against `127.0.0.1:25` (a residential line usually
