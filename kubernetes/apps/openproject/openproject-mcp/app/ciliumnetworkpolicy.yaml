@@ -20,6 +20,16 @@ spec:
     matchLabels:
       app.kubernetes.io/name: openproject-mcp
   ingress:
+    # Forge's Alertmanager, through envoy-internal (route
+    # openproject-mcp-alerts, /hooks/alertmanager only, bearer token).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
     - fromEndpoints:
         - matchLabels:
             app.kubernetes.io/name: hermes
