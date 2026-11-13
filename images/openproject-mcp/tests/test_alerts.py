@@ -1,6 +1,6 @@
 """The Alertmanager relay: bearer in, dedup per group, Hermes' signature out.
 
-Payloads follow Alertmanager's webhook_config v4 format (docs/configuration.md):
+Payloads follow Alertmanager's webhook_config v4 format (its configuration docs):
 `version`, `groupKey`, `status`, `receiver`, `groupLabels`, `commonLabels`,
 `commonAnnotations`, `externalURL`, `truncatedAlerts`, and `alerts[]` with
 `status`, `labels`, `annotations`, `startsAt`, `endsAt`, `generatorURL`,
