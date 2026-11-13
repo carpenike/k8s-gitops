@@ -150,7 +150,7 @@ RUN set -eu; \
 COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
 # k8s-gitops: kubectl and the Flux CLI for a bot with CLUSTER_ACCESS_ENABLED
 # (docs/apps/hermes.md, "Cluster access"), pinned and checksum-verified. The
-# wrappers in kube/ point both at kube/kubeconfig, which reads the pod's own
+# wrappers in kube/ point both at kube/in-cluster.yaml (installed as /etc/hermes-kube/kubeconfig), which reads the pod's own
 # ServiceAccount token; what that token may do is the bot's RBAC, not this
 # image. Keep kubectl near the cluster's version and flux at Flux's.
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
@@ -174,7 +174,7 @@ RUN set -eu; \
     /opt/kube/kubectl version --client; /opt/kube/flux version --client
 COPY --chmod=0755 kube/kubectl kube/flux /usr/local/bin/
 RUN install -d -m 0755 /etc/hermes-kube
-COPY --chmod=0644 kube/kubeconfig /etc/hermes-kube/kubeconfig
+COPY --chmod=0644 kube/in-cluster.yaml /etc/hermes-kube/kubeconfig
 # The directory first: BuildKit gives a directory that COPY --chmod creates
 # the same mode as the file (0644, not traversable), and Claude Code then
 # runs without its managed settings (EACCES, policies not in effect).

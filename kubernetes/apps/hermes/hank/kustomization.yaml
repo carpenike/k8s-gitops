@@ -8,16 +8,20 @@
 # Deliberately not copied from Chief: Outlook and the Chief Engineer
 # webhook (WEBHOOK_ENABLED).
 # Hank is the only bot with Claude Code and a GitHub token: he opens pull
-# requests, and merges one only when Ryan asks for it. He does not send
-# mail or act on systems by hand.
+# requests and Ryan merges them. He does not send mail. He answers alerts
+# within his cluster access (../hank-cluster; docs/apps/hermes.md,
+# "Cluster access" and "Alerts").
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: hermes-hank
 components:
   - ../../../components/hermes-bot
-# Egress for the public MCP servers in mcp-servers.yaml.
+# Egress for the public MCP servers in mcp-servers.yaml, and the screen
+# pod's route to the API server. His RBAC and admission policy are
+# cluster-scoped, in ../hank-cluster.
 resources:
   - mcp-egress.yaml
+  - screen-kube-apiserver.yaml
 configMapGenerator:
   - name: hermes-bot-inputs
     literals:
@@ -57,10 +61,19 @@ configMapGenerator:
       # hermes-hank, an egress rule for its host, and set this to true.
       - A2A_CHIEF_ENGINEER_ENABLED=false
       # Claude Code in the screen pod with Hank's GitHub token (docs/apps/hermes.md,
-      # "Coding with Claude Code"). He may merge a pull request when Ryan
-      # himself asks for that one (skill coding-sessions, "Merging").
+      # "Coding with Claude Code"). He opens pull requests; Ryan merges them
+      # (Ryan, 2026-11-13: no Merging section in skill coding-sessions).
       - CLAUDE_CODE_ENABLED=true
-      - CLAUDE_CODE_MERGE=true
+      - CLAUDE_CODE_MERGE=false
+      # kubectl and flux in the screen pod as ServiceAccount hermes-hank/hermes,
+      # within ../hank-cluster (docs/apps/hermes.md, "Cluster access").
+      - CLUSTER_ACCESS_ENABLED=true
+      # Alertmanager alerts through openproject-mcp's relay to route alerts and
+      # skill incident-response (docs/apps/hermes.md, "Alerts").
+      - ALERTS_ENABLED=true
+      # homelab-mcp view /mcp/agent/hank (vault: write Personal/Tech/Incidents,
+      # append the Tech Inbox; Signal ops only), signed in with OAuth.
+      - HOMELAB_MCP_ENABLED=true
       # The shared OpenProject task board (docs/apps/openproject.md, "Bot
       # access"): the bot's OpenProject user and token (Job
       # openproject/hermes-provision-hank), egress to openproject-mcp and skill

@@ -86,7 +86,7 @@ spec later:
 | `ROUTINES_PRIVATE_ENABLED` | `true` | Optional, default `false`. Secret `routines-private` from every field of 1Password item `hermes-<bot>-routines`: the private details of the bot's `routines.yaml`, one field per routine key ([Routines from git](#routines-from-git)). `true` or `false` only |
 | `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
-| `CLAUDE_CODE_MERGE` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
+| `CLAUDE_CODE_MERGE` | `false` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: the bot may merge a pull request when Ryan himself asks for that one, once its checks pass ([Merging](#merging-only-when-ryan-asks)). `false`: it never merges. `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
 | `TASK_BOARD_ENABLED` | `true` | Optional, default `false`. The shared OpenProject task board: the bot's OpenProject user and API token (Job `openproject/hermes-provision-<bot>` writes Secret `hermes-<bot>-openproject`), egress to `openproject-mcp` (CNP `agent-task-board`) and skill `homelab/task-board`. The bot's `mcp-servers.yaml` declares the `openproject` server ([openproject.md](openproject.md), "Bot access"). `true` or `false` only |
 | `TASK_BOARD_WEBHOOK_ENABLED` | `true` | Optional, default `false`. With `TASK_BOARD_ENABLED` and `WEBHOOK_DELIVER_CHAT_ID`: board wake-ups, a turn when someone else changes the bot's task ([openproject.md](openproject.md), "Waking a bot"). Adds Secret `task-board-webhook`, Service and CNP `agent-board-hooks`, and route `task-board`. `true` or `false` only |
@@ -330,10 +330,12 @@ host key is stable across restarts. The agent pre-seeds
 `StrictHostKeyChecking=accept-new`, so a changed host key is refused.
 
 The screen has no Matrix or LiteLLM credentials, no ServiceAccount token,
-and no route to LiteLLM, Tuwunel, the LAN, or the API server. The one
-exception is opt-in: with Claude Code, it gets a Claude subscription
+and no route to LiteLLM, Tuwunel, the LAN, or the API server. Two
+exceptions are opt-in: with Claude Code, it gets a Claude subscription
 token and a GitHub token
-([Coding with Claude Code](#coding-with-claude-code-opt-in)).
+([Coding with Claude Code](#coding-with-claude-code-opt-in)); with
+`CLUSTER_ACCESS_ENABLED`, its ServiceAccount token and a route to the API
+server ([Cluster access](#cluster-access-opt-in)).
 
 Chromium runs **without its own sandbox** in the screen. Both launches
 pass `--no-sandbox`:
@@ -1065,16 +1067,22 @@ browser, `computer_use`, `cronjob`, `delegation`, connections, memory and
 `session_search` included. The init container therefore sets
 `platform_toolsets.a2a`:
 
+An inbound request becomes a board task (skill `task-board`, "A request
+over A2A"); the bot does the work later in its own Matrix or board turn,
+where Ryan sees it. So the inbound turn gets the board and nothing that
+runs anything (Ryan, 2026-11-13):
+
 | Kept | Dropped, and why |
 | --- | --- |
-| `terminal`, `file`, `code_execution` (in the screen pod, which has no credentials) | `memory`, `session_search`: a peer could read Ryan's Matrix history, which is stored decrypted, or write into the bot's memory |
-| `web`, `vision` | `browser`, `computer_use`: forms, saved logins and cards |
-| `skills`, `todo` | `cronjob`, `delegation`, `connections`, `image_gen`, `tts`, `clarify` |
+| `skills`, `todo` | `terminal`, `file`, `code_execution`: they run in the screen pod, which holds Hank's GitHub, Claude and cluster credentials |
+| `openproject` (the only MCP server: a listed server name is an allowlist in `_merge_mcp_servers`) | `memory`, `session_search`: a peer could read Ryan's Matrix history, which is stored decrypted, or write into the bot's memory |
+| | `web`, `vision`, `browser`, `computer_use`: not needed to file a task; forms, saved logins and cards |
+| | `cronjob`, `delegation`, `connections`, `image_gen`, `tts`, `clarify` |
 | | `a2a`: no chaining from an inbound task, so two bots cannot bounce one request around |
-| | `no_mcp`: no MCP server on an inbound task |
+| | every other MCP server; a bot without `TASK_BOARD_ENABLED` gets `no_mcp` |
 
-`A2A_ADVERTISED_TOOLSETS` lists the same toolsets, so the Agent Card
-advertises what a peer actually gets. Both are in
+`A2A_ADVERTISED_TOOLSETS` lists the same toolsets (`skills,todo`; the
+Agent Card names capabilities, not MCP servers). Both are in
 `kubernetes/components/hermes-bot/app/helmrelease.yaml` and change
 together.
 
@@ -1293,6 +1301,56 @@ deny `gh pr merge`, `gh repo delete`/`edit`, `gh secret` and force,
 mirror and delete pushes, and deny rules hold in every mode. They are
 pattern matches, a guard rail, not a boundary. The boundary is the Kata
 VM and the GitHub token's scope.
+
+## Cluster access (opt-in)
+
+`CLUSTER_ACCESS_ENABLED=true` (Hank only) mounts the screen pod's
+ServiceAccount token (`hermes-<bot>/hermes`), so `kubectl` and `flux` in
+the bot's terminal reach the cluster. The image carries both, pinned, and
+`/etc/hermes-kube/kubeconfig` points them at `kubernetes.default.svc` with
+the mounted token (ssh sessions don't inherit the pod's
+`KUBERNETES_SERVICE_*` environment). The agent pod never gets the token.
+
+What the token may do is in `kubernetes/apps/hermes/hank-cluster`
+(cluster-scoped, so outside the namespaced bot folder) and
+`hank/screen-kube-apiserver.yaml` (the screen's route to the API server):
+
+| | |
+| --- | --- |
+| Read | everything except Secrets: the core group by name, every other API group listed (from `kubectl api-resources`, 2026-11-13; a new group needs a line). Not `generators.external-secrets.io` |
+| Write | `patch` Deployments, StatefulSets and DaemonSets (rollout restart), their `scale`, `delete` pods and Jobs, `patch` Flux Kustomizations, HelmReleases and sources (flux reconcile). No `create` |
+| ValidatingAdmissionPolicy `hermes-hank-ops` | A workload patch may change only the template's `kubectl.kubernetes.io/restartedAt` and the replica count, never the pod spec (a patch could otherwise mount any Secret in the namespace). A Flux object's `spec` must not change (no suspend). A deleted pod must have a controller; a deleted Job must have failed (Flux re-creates it) |
+
+A refused write is the policy working: the incident skill says so. To take
+the access away, set the input to `false` (no token) and delete
+`hank-cluster` from `kubernetes/apps/hermes/kustomization.yaml`.
+
+## Alerts (opt-in)
+
+`ALERTS_ENABLED=true` (Hank only) adds webhook route `alerts` and skill
+`homelab/incident-response`. Forge's Alertmanager posts every alert group
+to openproject-mcp's `/hooks/alertmanager` (bearer token; README
+"Alertmanager relay"), which drops repeats per alert group and forwards a
+rendered group, signed like a board wake-up, to the bot's board listener.
+The route needs the board route's Secret, Service and room, so it is
+written only when `task-board` is. An alert turn has the Matrix toolsets
+and is delivered to Ryan's DM with the bot, unattended (commands that
+need approval are refused; `kubectl` and `flux` don't).
+
+The skill: one incident note per alert group in
+`Personal/Tech/Incidents/`, read-only investigation, a fix within
+[Cluster access](#cluster-access-opt-in) (two tries), a pull request for a
+config change, and one Signal message on `ops` for anything else.
+
+## homelab-mcp
+
+`HOMELAB_MCP_ENABLED=true` adds the agent's egress to envoy-internal
+(10443), where `mcp.${SECRET_DOMAIN}` resolves in the cluster. Hank's
+`mcp-servers.yaml` names his own view, `/mcp/agent/hank`: the vault
+(read Tech; write only `Personal/Tech/Incidents`; append only to
+`Personal/Tech/Inbox.md`), `signal_send` (ops only) and
+`homelab_list_status`. The first sign-in is Ryan's: `hermes mcp login
+homelab` in the agent pod ([OAuth servers](#oauth-servers)).
 
 ### Merging, only when Ryan asks
 

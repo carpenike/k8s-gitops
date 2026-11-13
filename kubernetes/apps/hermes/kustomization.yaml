@@ -6,3 +6,4 @@ kind: Kustomization
 resources:
   - ./chief
   - ./hank
+  - ./hank-cluster

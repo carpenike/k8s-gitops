@@ -1,4 +1,4 @@
 #!/bin/sh
-# k8s-gitops: kubectl with the pod's ServiceAccount (kube/kubeconfig). Without
+# k8s-gitops: kubectl with the pod's ServiceAccount (kube/in-cluster.yaml). Without
 # CLUSTER_ACCESS_ENABLED there is no token and every call fails: no access.
 exec /opt/kube/kubectl --kubeconfig "${KUBECONFIG:-/etc/hermes-kube/kubeconfig}" "$@"
