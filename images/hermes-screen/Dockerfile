@@ -11,6 +11,7 @@
 #   - pn's NOPASSWD sudo removed (the pod runs with no_new_privs anyway)
 #   - openssh-server, run as pn on port 22 (sshd_config, entrypoint.sh)
 #   - Claude Code and the GitHub CLI, pinned, with their wrappers (claude-code/)
+#   - kubectl and the Flux CLI, pinned, with a kubeconfig for the pod's ServiceAccount (kube/)
 # Upstream text from here on is unchanged except where marked.
 #
 # Terminal-backend sandbox image WITH a desktop: the default sandbox base every
@@ -147,6 +148,33 @@ RUN set -eu; \
     tar -xzf "${tarball}"; mv "gh_${ver}_linux_${arch}" /opt/gh; rm -f "${tarball}"; \
     /opt/gh/bin/gh --version
 COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
+# k8s-gitops: kubectl and the Flux CLI for a bot with CLUSTER_ACCESS_ENABLED
+# (docs/apps/hermes.md, "Cluster access"), pinned and checksum-verified. The
+# wrappers in kube/ point both at kube/in-cluster.yaml (installed as /etc/hermes-kube/kubeconfig), which reads the pod's own
+# ServiceAccount token; what that token may do is the bot's RBAC, not this
+# image. Keep kubectl near the cluster's version and flux at Flux's.
+# renovate: datasource=github-releases depName=kubernetes/kubernetes
+ARG KUBECTL_VERSION=v1.37.1
+# renovate: datasource=github-releases depName=fluxcd/flux2
+ARG FLUX_VERSION=v2.10.0
+RUN set -eu; \
+    case "${TARGETARCH:-amd64}" in \
+        amd64|arm64) arch="${TARGETARCH:-amd64}" ;; \
+        *) echo "unsupported TARGETARCH ${TARGETARCH}"; exit 1 ;; \
+    esac; \
+    install -d -m 0755 /opt/kube; cd /tmp; \
+    curl -fsSLo kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${arch}/kubectl"; \
+    echo "$(curl -fsSL "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${arch}/kubectl.sha256")  kubectl" | sha256sum -c -; \
+    install -m 0755 kubectl /opt/kube/kubectl; rm -f kubectl; \
+    ver="${FLUX_VERSION#v}"; tarball="flux_${ver}_linux_${arch}.tar.gz"; \
+    curl -fsSLO "https://github.com/fluxcd/flux2/releases/download/v${ver}/${tarball}"; \
+    curl -fsSL "https://github.com/fluxcd/flux2/releases/download/v${ver}/flux_${ver}_checksums.txt" \
+        | grep " ${tarball}\$" | sha256sum -c -; \
+    tar -xzf "${tarball}" flux; install -m 0755 flux /opt/kube/flux; rm -f flux "${tarball}"; \
+    /opt/kube/kubectl version --client; /opt/kube/flux version --client
+COPY --chmod=0755 kube/kubectl kube/flux /usr/local/bin/
+RUN install -d -m 0755 /etc/hermes-kube
+COPY --chmod=0644 kube/in-cluster.yaml /etc/hermes-kube/kubeconfig
 # The directory first: BuildKit gives a directory that COPY --chmod creates
 # the same mode as the file (0644, not traversable), and Claude Code then
 # runs without its managed settings (EACCES, policies not in effect).
