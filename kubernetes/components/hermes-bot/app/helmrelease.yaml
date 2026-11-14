@@ -55,7 +55,7 @@ spec:
               # input is on. The floating tag moves on every rebuild build;
               # Renovate re-pins the digest (docs/apps/hermes.md "Updating the
               # images").
-              tag: v0.23.0@sha256:dc9c61ba64d33c5f8027a1ff960546684a76b5874710298ca6ae334a524dd320
+              tag: v0.23.0@sha256:9dc1bd5b9703cdd145735bbe2d46b6d5f83d093b7a921ca7d90b3b2d6027f752
             # The image's entrypoint bootstraps $HERMES_HOME (seeding config
             # and bundled skills), then runs an executable first argument
             # as-is (docker/main-wrapper.sh). Only the keys git owns are set;
@@ -1469,7 +1469,7 @@ spec:
               # Floating tag, digest re-pinned by Renovate (docs/apps/hermes.md).
               # This digest is the PR build of c7fd2aa (v0.23.0-c7fd2aa: kubectl
               # and flux added); Renovate repins it to rebuild's build.
-              tag: v0.23.0@sha256:d5274adad10aa1c6c0f4aaa4de7dbf2718766b5988685ae70d22c029fa642350
+              tag: v0.23.0@sha256:886a540b282d91818bb57779401e2e6b5ab1743f77cc1f90029418c24d9c8f25
             env:
               TZ: America/New_York
             probes:
