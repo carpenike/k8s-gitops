@@ -75,7 +75,7 @@ spec:
             image:
               repository: ghcr.io/koush/scrypted
               # renovate: datasource=docker depName=ghcr.io/koush/scrypted
-              tag: v0.147.0-noble-full@sha256:e78b4fcecdd6c61acaaf22b50ccef303c738da58cc0be57afdb116521df52296
+              tag: v0.148.0-noble-full@sha256:24f34decf3a15a92e4b9d31e91c0bf220e2a81638ae3c5150cb7693de471ac8f
             env:
               TZ: America/New_York
               SCRYPTED_NVR_VOLUME: /nvr
