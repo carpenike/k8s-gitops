@@ -634,7 +634,7 @@ spec:
           obsidian-sync:
             image:
               repository: docker.io/library/node
-              tag: 22.23.4-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+              tag: 26.13.1-bookworm-slim@sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1
             command:
               - /bin/sh
               - /opt/obsidian-sync/run.sh
