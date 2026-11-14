@@ -30,7 +30,7 @@ env:
   # Renovate bumps it in the same PR as the base image (packageRules in
   # .renovaterc.json5), so the image tags follow the upstream version.
   # renovate: datasource=docker depName=docker.io/nousresearch/hermes-agent
-  HERMES_VERSION: v0.23.0
+  HERMES_VERSION: v0.23.1
 
 jobs:
   build:
