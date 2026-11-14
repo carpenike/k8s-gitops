@@ -131,7 +131,7 @@ COPY --chmod=0755 entrypoint.sh /usr/local/bin/hermes-screen-entrypoint
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_CODE_VERSION=2.1.319
 # renovate: datasource=github-releases depName=cli/cli
-ARG GH_VERSION=v2.103.3
+ARG GH_VERSION=v2.104.0
 RUN npm install -g --prefix /opt/claude-code "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
     npm cache clean --force && \
     /opt/claude-code/bin/claude --version
