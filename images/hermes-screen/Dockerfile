@@ -36,7 +36,7 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 # k8s-gitops: Renovate bumps both versions below (the annotations; the
 # trycua/cua tag format is handled in .renovaterc.json5).
 # renovate: datasource=github-releases depName=trycua/cua
-ARG CUA_DRIVER_VERSION=0.41.3
+ARG CUA_DRIVER_VERSION=0.47.8
 # k8s-gitops: exact Playwright version instead of playwright@1.
 # renovate: datasource=npm depName=playwright
 ARG PLAYWRIGHT_VERSION=1.65.0
