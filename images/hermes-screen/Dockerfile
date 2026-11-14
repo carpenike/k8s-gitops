@@ -39,7 +39,7 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 ARG CUA_DRIVER_VERSION=0.41.3
 # k8s-gitops: exact Playwright version instead of playwright@1.
 # renovate: datasource=npm depName=playwright
-ARG PLAYWRIGHT_VERSION=1.65.0
+ARG PLAYWRIGHT_VERSION=1.65.1
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive \
