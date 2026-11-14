@@ -28,7 +28,7 @@
 # The tag lives in the ARG so CI and a local build read one place; hadolint cannot
 # see through the substitution, hence the inline ignore.
 # k8s-gitops: pinned by digest.
-ARG SANDBOX_BASE=docker.io/nikolaik/python-nodejs:python3.13-nodejs26@sha256:e41de97aef65d5fff26c3f433c0a6d8335c4cbd05e7e9a36bd0b252593933064
+ARG SANDBOX_BASE=docker.io/nikolaik/python-nodejs:python3.13-nodejs26@sha256:25ffb4c2951b1980b205d798460898263233c041320fab58cd3c7192a253da45
 # hadolint ignore=DL3006
 FROM ${SANDBOX_BASE}
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
