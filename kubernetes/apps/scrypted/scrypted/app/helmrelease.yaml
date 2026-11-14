@@ -153,7 +153,7 @@ spec:
             image:
               repository: docker.io/alpine/socat
               # renovate: datasource=docker depName=docker.io/alpine/socat
-              tag: 1.8.1.3@sha256:e8a6e8868a8e6e01d9c2c321a8f8d4474d2d741d962462e5c5a124a8e66a0055
+              tag: 1.8.1.3@sha256:71131702f671a88b3808a70b7330f9679cd9b9933adcafadc191508edfe55bba
             args:
               - TCP-LISTEN:1883,bind=127.0.0.1,fork,reuseaddr
               - TCP:10.20.0.30:1883
