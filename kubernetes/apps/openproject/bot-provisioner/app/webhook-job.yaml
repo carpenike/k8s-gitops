@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: webhook
-          image: docker.io/openproject/openproject:17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+          image: docker.io/openproject/openproject:17.9.7-slim@sha256:4e978557b4009dfdcdab6f18acd1aa9348a2c41ce5cd50c3d535e4c093a5c505
           command:
             - bash
             - -c
