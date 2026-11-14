@@ -38,7 +38,7 @@ spec:
             image:
               repository: ghcr.io/bulwarkmail/webmail
               # renovate: datasource=docker depName=ghcr.io/bulwarkmail/webmail
-              tag: 1.21.1@sha256:53df0683b2c59870611073b425937999c859b3a51106ecda08ed41ee12d97a7d
+              tag: 1.21.2@sha256:037b85b1433233d2d7eebb83f928df5ecc3b4adc91dc7e4c55f0a2f69024e754
             env:
               # The JMAP server, for this pod and for users' browsers. Setting
               # it turns off the setup wizard.
