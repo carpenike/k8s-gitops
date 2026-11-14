@@ -15,7 +15,7 @@
 # its own Dockerfile. One local change: list_tenants() also returns the base
 # schema, so startup migrates it and installs the maintenance routines
 # (docs/apps/hermes-memory.md).
-ARG HINDSIGHT_IMAGE=ghcr.io/vectorize-io/hindsight-api:1.2.0@sha256:ef1a5ac515a7652fbff605277d44a39e7616e421503c61841189e63ef6db6705
+ARG HINDSIGHT_IMAGE=ghcr.io/vectorize-io/hindsight-api:1.2.1@sha256:662109ece429871a81e036427fb93fbb09ba9dc4b01d320d356f114c0e1aedd8
 FROM ${HINDSIGHT_IMAGE}
 
 COPY hindsight_ext_static_keys_tenant /app/extensions/hindsight_ext_static_keys_tenant

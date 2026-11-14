@@ -30,7 +30,7 @@ env:
   # Renovate bumps it in the same PR as the base image (packageRules in
   # .renovaterc.json5), so the image tags follow the upstream version.
   # renovate: datasource=docker depName=ghcr.io/vectorize-io/hindsight-api
-  HINDSIGHT_VERSION: 1.2.0
+  HINDSIGHT_VERSION: 1.2.1
 
 jobs:
   build:
