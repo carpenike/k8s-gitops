@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterAgentResponse": [
+      {"command": "/usr/local/bin/hermes-code hook cursor"}
+    ],
+    "stop": [
+      {"command": "/usr/local/bin/hermes-code hook cursor"}
+    ]
+  }
+}

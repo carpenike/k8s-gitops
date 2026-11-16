@@ -74,6 +74,12 @@ configMapGenerator:
       - GITHUB_APP_INSTALLATION_ID=181680083
       - GITHUB_APP_SLUG=hank-agent
       - GITHUB_APP_BOT_USER_ID=356351201
+      # The other two coding engines, on Ryan's own subscriptions
+      # (docs/apps/hermes.md, "Coding engines"): 1Password hermes-hank fields
+      # cursor_api_key and copilot_token. Skill coding-sessions falls back
+      # Claude -> Cursor -> Copilot.
+      - CURSOR_ENABLED=true
+      - COPILOT_ENABLED=true
       # kubectl and flux in the screen pod as ServiceAccount hermes-hank/hermes,
       # within ../hank-cluster (docs/apps/hermes.md, "Cluster access").
       - CLUSTER_ACCESS_ENABLED=true

@@ -11,6 +11,8 @@
 #   - pn's NOPASSWD sudo removed (the pod runs with no_new_privs anyway)
 #   - openssh-server, run as pn on port 22 (sshd_config, entrypoint.sh)
 #   - Claude Code and the GitHub CLI, pinned, with their wrappers (claude-code/)
+#   - Cursor's CLI and the Copilot CLI, pinned, with their wrappers, hooks,
+#     the shared rules file and the hermes-code runner (engines/, hooks/, rules/)
 #   - kubectl and the Flux CLI, pinned, with a kubeconfig for the pod's ServiceAccount (kube/)
 # Upstream text from here on is unchanged except where marked.
 #
@@ -148,6 +150,47 @@ RUN set -eu; \
     tar -xzf "${tarball}"; mv "gh_${ver}_linux_${arch}" /opt/gh; rm -f "${tarball}"; \
     /opt/gh/bin/gh --version
 COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
+# k8s-gitops: the other two coding engines (docs/apps/hermes.md, "Coding
+# engines"). No credential is baked in: with COPILOT_ENABLED or CURSOR_ENABLED
+# the pod mounts the key under /etc/hermes-claude-code and the wrappers in
+# engines/ read it. Copilot never updates itself (COPILOT_AUTO_UPDATE=false
+# in its wrapper).
+# renovate: datasource=npm depName=@github/copilot
+ARG COPILOT_VERSION=1.0.112
+RUN npm install -g --prefix /opt/copilot "@github/copilot@${COPILOT_VERSION}" && \
+    npm cache clean --force && \
+    /opt/copilot/bin/copilot --version
+# Cursor publishes no checksum and no Renovate source: the version and both
+# sha256 sums are ours, recorded from cursor.com/install's tarball URL
+# (2026-11-16). To bump: read the new version from https://cursor.com/install,
+# download both tarballs, and record their sha256 here. Installed read-only
+# under /opt, so its self-update cannot replace it (the wrapper runs this copy).
+ARG CURSOR_AGENT_VERSION=2026.11.13-eacade1
+ARG CURSOR_AGENT_SHA256_X64=c02e4321f20d691ee03af94d29948dc3a81c6c34e7328da7bb1afade4c75812f
+ARG CURSOR_AGENT_SHA256_ARM64=e4ba0611045a24d1cf78f021d34c19461680fc7234c19c1f981f1cc169f70cdc
+RUN set -eu; \
+    case "${TARGETARCH:-amd64}" in \
+        amd64) arch=x64; sum="${CURSOR_AGENT_SHA256_X64}" ;; \
+        arm64) arch=arm64; sum="${CURSOR_AGENT_SHA256_ARM64}" ;; \
+        *) echo "unsupported TARGETARCH ${TARGETARCH}"; exit 1 ;; \
+    esac; \
+    cd /tmp; \
+    curl -fsSLo cursor-agent.tgz "https://downloads.cursor.com/lab/${CURSOR_AGENT_VERSION}/linux/${arch}/agent-cli-package.tar.gz"; \
+    echo "${sum}  cursor-agent.tgz" | sha256sum -c -; \
+    install -d -m 0755 /opt/cursor-agent; \
+    tar --strip-components=1 -xzf cursor-agent.tgz -C /opt/cursor-agent; rm -f cursor-agent.tgz; \
+    chmod -R a+rX,go-w /opt/cursor-agent; \
+    /opt/cursor-agent/cursor-agent --version
+COPY --chmod=0755 engines/copilot engines/cursor-agent engines/hermes-code /usr/local/bin/
+# The engines' turn-finished hooks, machine-wide, each calling hermes-code
+# (Copilot's policy dir must not be group- or world-writable), and the one
+# rules file: Claude reads it as its managed CLAUDE.md, Copilot through
+# COPILOT_CUSTOM_INSTRUCTIONS_DIRS, Cursor from a copy hermes-code puts in
+# each clone.
+RUN install -d -m 0755 /etc/github-copilot /etc/github-copilot/policy.d /etc/cursor /etc/hermes-rules
+COPY --chmod=0644 hooks/copilot-hermes.json /etc/github-copilot/policy.d/hermes.json
+COPY --chmod=0644 hooks/cursor-hooks.json /etc/cursor/hooks.json
+COPY --chmod=0644 rules/AGENTS.md /etc/hermes-rules/AGENTS.md
 # k8s-gitops: kubectl and the Flux CLI for a bot with CLUSTER_ACCESS_ENABLED
 # (docs/apps/hermes.md, "Cluster access"), pinned and checksum-verified. The
 # wrappers in kube/ point both at kube/in-cluster.yaml (installed as /etc/hermes-kube/kubeconfig), which reads the pod's own
@@ -180,10 +223,13 @@ COPY --chmod=0644 kube/in-cluster.yaml /etc/hermes-kube/kubeconfig
 # runs without its managed settings (EACCES, policies not in effect).
 RUN install -d -m 0755 /etc/claude-code
 COPY --chmod=0644 claude-code/managed-settings.json /etc/claude-code/managed-settings.json
+COPY --chmod=0644 rules/AGENTS.md /etc/claude-code/CLAUDE.md
 COPY --chmod=0644 claude-code/gitconfig /etc/gitconfig
 USER pn
 # As pn: managed settings and git config must be readable by the login user.
-RUN cat /etc/claude-code/managed-settings.json /etc/gitconfig > /dev/null
+RUN cat /etc/claude-code/managed-settings.json /etc/claude-code/CLAUDE.md /etc/gitconfig \
+        /etc/github-copilot/policy.d/hermes.json /etc/cursor/hooks.json /etc/hermes-rules/AGENTS.md > /dev/null && \
+    hermes-code --help > /dev/null
 WORKDIR /home/pn
 EXPOSE 22
 CMD ["/usr/local/bin/hermes-screen-entrypoint"]
