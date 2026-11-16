@@ -154,7 +154,7 @@ COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
 # ServiceAccount token; what that token may do is the bot's RBAC, not this
 # image. Keep kubectl near the cluster's version and flux at Flux's.
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-ARG KUBECTL_VERSION=v1.37.1
+ARG KUBECTL_VERSION=v1.37.2
 # renovate: datasource=github-releases depName=fluxcd/flux2
 ARG FLUX_VERSION=v2.10.0
 RUN set -eu; \
