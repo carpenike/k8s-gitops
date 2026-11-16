@@ -71,6 +71,7 @@ None of these is a secret except the relays' keys, token and targets.
 | `OPENPROJECT_RELEASE_STATUS` | `New` | Status `release_task` resets to |
 | `OPENPROJECT_CONTEXT_FIELD` | `Context` | Name of the work package custom field `create_task` writes `context` to (matched case-insensitively) |
 | `OPENPROJECT_DONE_WHEN_FIELD` | `Done when` | Name of the custom field `create_task` writes `done_when` to |
+| `OPENPROJECT_ENGINE_FIELD` | `Engine` | Name of the optional list field `create_task` writes `engine` to and `get_task` reads it from |
 | `OPENPROJECT_CLAIM_MAX_ATTEMPTS` | `5` | PATCH attempts per claim, and the retry bound for complete/release (1–20) |
 | `OPENPROJECT_CACHE_SECONDS` | `600` | TTL for status/priority/type/project lookups (0 = off). Identity uses `min(60, this)` |
 | `PORT` | `8000` | Listen port |
@@ -139,6 +140,16 @@ both as required arguments:
 `get_task` reads them back through the work package's own schema
 (`_links.schema`, cached per token), and shows null when one is unset or the
 schema cannot be read.
+
+**Engine** (optional, 0.6.0). The board's single-choice list field `Engine`
+(`OPENPROJECT_ENGINE_FIELD`) names the coding engine Hank runs a code task on:
+`claude`, `cursor` or `copilot`; empty means Claude Code. `get_task` returns it
+as `engine` (null when unset). `create_task(engine=…)` refuses any other value
+before calling OpenProject (`openproject_bad_engine`), refuses a project whose
+form lacks the field (`openproject_fields_missing`), and writes the option the
+form's schema lists for it, as `_links.customFieldN.href`
+(`/api/v3/custom_options/<id>`); a value missing from the board's options is
+refused too.
 
 ## Task-board relay
 
@@ -259,3 +270,4 @@ the error helper (`_http.py`) and the API v3 test fixtures. This server
 differs in its identity model: there, the server held a token per bot and
 took a `bot` argument. Here, each request's own token is the identity, and
 the project scope comes from OpenProject memberships instead of a local map.
+

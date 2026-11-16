@@ -82,6 +82,10 @@ _SINGULAR = {"statuses": "status", "priorities": "priority", "types": "type"}
 AssigneeFilter = Literal["any", "unassigned", "me"]
 
 
+#: The coding engines a task may name in its Engine field (board.yaml).
+ENGINES: tuple[str, ...] = ("claude", "cursor", "copilot")
+
+
 @dataclass(frozen=True)
 class Caller:
     """The OpenProject user behind one API token."""
@@ -301,10 +305,11 @@ class OpenProject:
         return dict(self.cache.put(key, data if isinstance(data, dict) else {}))
 
     def _handoff_keys(self, schema: dict[str, Any]) -> dict[str, tuple[str, str]]:
-        """{'context'|'done_when': (customFieldN, schema type)} for the fields present."""
+        """{'context'|'done_when'|'engine': (customFieldN, schema type)} for the fields present."""
         names = {
             self.settings.context_field.casefold(): "context",
             self.settings.done_when_field.casefold(): "done_when",
+            self.settings.engine_field.casefold(): "engine",
         }
         out: dict[str, tuple[str, str]] = {}
         for key, spec in schema.items():
@@ -323,17 +328,27 @@ class OpenProject:
             value = value.get("raw")
         return value if isinstance(value, str) and value.strip() else None
 
+    @staticmethod
+    def _engine_read(wp: dict[str, Any], key: str) -> str | None:
+        """A list field's chosen option: `_links.customFieldN.title`, null when unset."""
+        link = (wp.get("_links") or {}).get(key)
+        title = link.get("title") if isinstance(link, dict) else None
+        return title if isinstance(title, str) and title.strip() else None
+
     async def _handoff_of(self, who: Caller, wp: dict[str, Any]) -> dict[str, str | None]:
-        """The task's context and done_when, read through its own schema; null when absent."""
+        """The task's context, done_when and engine, read through its own schema; null when absent."""
+        none: dict[str, str | None] = {"context": None, "done_when": None, "engine": None}
         href = ((wp.get("_links") or {}).get("schema") or {}).get("href")
         # Only ever follow a schema link on this API, never an arbitrary href.
         if not isinstance(href, str) or not href.startswith(f"{hal.API}/work_packages/schemas/"):
-            return {"context": None, "done_when": None}
+            return none
         keys = self._handoff_keys(await self._schema(who, href))
-        return {
+        out = {
             which: self._cf_read(wp, keys[which][0]) if which in keys else None
             for which in ("context", "done_when")
         }
+        out["engine"] = self._engine_read(wp, keys["engine"][0]) if "engine" in keys else None
+        return out
 
     async def _update_with_retry(
         self,
@@ -684,7 +699,7 @@ class OpenProject:
         try:
             out.update(await self._handoff_of(who, wp))
         except ToolError:
-            out.update({"context": None, "done_when": None})
+            out.update({"context": None, "done_when": None, "engine": None})
         if not comments:
             out["recent_comments"] = []
             return out
@@ -725,9 +740,17 @@ class OpenProject:
         assignee: str | None = None,
         due_date: str | None = None,
         status: str | None = None,
+        engine: str | None = None,
     ) -> dict[str, Any]:
         context, done_when = (context or "").strip(), (done_when or "").strip()
+        engine = (engine or "").strip().casefold() or None
         try:
+            if engine is not None and engine not in ENGINES:
+                raise ToolError(
+                    "openproject_bad_engine",
+                    f"engine {engine!r} is not one of {', '.join(ENGINES)}.",
+                    "Omit it for the default (Claude Code), or pass claude, cursor or copilot.",
+                )
             if not context or not done_when:
                 raise ToolError(
                     "openproject_handoff_incomplete",
@@ -807,12 +830,37 @@ class OpenProject:
             for which, value in (("context", context), ("done_when", done_when)):
                 key, kind = keys[which]
                 body[key] = {"raw": value} if kind == "Formattable" else value
+            if engine is not None:
+                if "engine" not in keys:
+                    raise ToolError(
+                        "openproject_fields_missing",
+                        f"This project has no {self.settings.engine_field!r} field.",
+                        "Omit `engine`, or ask Ryan to add the field to this project.",
+                    )
+                key = keys["engine"][0]
+                spec = (schema if isinstance(schema, dict) else {}).get(key) or {}
+                allowed = (spec.get("_links") or {}).get("allowedValues") or []
+                href = next(
+                    (
+                        v.get("href")
+                        for v in allowed
+                        if isinstance(v, dict) and str(v.get("title", "")).casefold() == engine
+                    ),
+                    None,
+                )
+                if not isinstance(href, str) or not href.startswith(f"{hal.API}/custom_options/"):
+                    raise ToolError(
+                        "openproject_bad_engine",
+                        f"The board's {self.settings.engine_field!r} field has no option {engine!r}.",
+                        "The board's options are in board.yaml; omit `engine` or ask Ryan.",
+                    )
+                links[key] = {"href": href}
             body["_links"] = links
             created = await self._api(who.auth, "POST", "/work_packages", json=body)
         except ToolError as err:
             return err.payload()
         task = self._slim(created if isinstance(created, dict) else {})
-        task.update({"context": context, "done_when": done_when})
+        task.update({"context": context, "done_when": done_when, "engine": engine})
         audit.info("create_task caller=%s task=%s project=%s", who.label, task["id"], pid)
         return {"created": True, "caller": who.label, "task": task}
 
@@ -952,8 +1000,9 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
         description=(
             "Fetch one task: status, assignee (name and id), project, priority, due date, "
             "lock_version, a plain-text description excerpt and a link, its handoff fields "
-            "`context` (vault path of the note that explains it) and `done_when` (null when "
-            "unset), plus its newest comments (newest first). Each comment has author "
+            "`context` (vault path of the note that explains it) and `done_when`, and its "
+            "`engine` (the coding engine for a code task: claude, cursor or copilot; null "
+            "when unset, which means Claude Code), plus its newest comments (newest first). Each comment has author "
             "(display name), author_id and author_login (null when OpenProject hides that "
             "user's login from you); compare them with whoami and your peers' logins to tell "
             "your own, a peer bot's and a human's comments apart. Read a task before working it."
@@ -1000,6 +1049,8 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
             "`priority` and `status` are names as shown in OpenProject (e.g. 'Task', "
             "'High'). Refused "
             "(openproject_fields_missing) if the project has no Context / Done when fields. "
+            "`engine` (optional, claude | cursor | copilot) sets the task's Engine field: "
+            "the coding engine Hank runs a code task on; set it only when Ryan named one. "
             "Each call creates a NEW task; check list_tasks first to avoid duplicates."
         ),
     )
@@ -1047,6 +1098,13 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
             str | None,
             Field(description="Status name, e.g. 'Needs Ryan'; default = OpenProject's default."),
         ] = None,
+        engine: Annotated[
+            Literal["claude", "cursor", "copilot"] | None,
+            Field(
+                description="For a code task for Hank: the coding engine to run it on. "
+                "Omit for the default (Claude Code, falling back to Cursor, then Copilot)."
+            ),
+        ] = None,
     ) -> dict[str, Any]:
         return await op.create_task(
             request_token(ctx),
@@ -1060,4 +1118,5 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
             assignee,
             due_date,
             status,
+            engine,
         )

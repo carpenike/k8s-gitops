@@ -126,6 +126,8 @@ class Settings:
     #: Names of the board's two required handoff custom fields (case-insensitive).
     context_field: str = "Context"
     done_when_field: str = "Done when"
+    #: Name of the board's optional single-choice Engine field (case-insensitive).
+    engine_field: str = "Engine"
     claim_max_attempts: int = 5
     cache_seconds: int = 600
     port: int = 8000
@@ -180,6 +182,7 @@ class Settings:
             release_status=env.get("OPENPROJECT_RELEASE_STATUS", "").strip() or "New",
             context_field=env.get("OPENPROJECT_CONTEXT_FIELD", "").strip() or "Context",
             done_when_field=env.get("OPENPROJECT_DONE_WHEN_FIELD", "").strip() or "Done when",
+            engine_field=env.get("OPENPROJECT_ENGINE_FIELD", "").strip() or "Engine",
             claim_max_attempts=_int(env, "OPENPROJECT_CLAIM_MAX_ATTEMPTS", 5, 1, 20),
             cache_seconds=_int(env, "OPENPROJECT_CACHE_SECONDS", 600, 0, 86400),
             port=_int(env, "PORT", 8000, 1, 65535),
