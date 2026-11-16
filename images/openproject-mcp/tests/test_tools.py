@@ -769,6 +769,88 @@ async def test_get_task_handoff_fields_are_null_when_unset_or_unreadable(
     assert (out["context"], out["done_when"]) == (None, None)
 
 
+# ── the Engine field (a list: claude | cursor | copilot) ─────────────
+# Shapes from the live API (OpenProject 17.9.6, 2026-11-16): the create form's
+# schema lists the options under _links.allowedValues; a task carries its choice
+# as _links.customField45 {href, title}, or {href: null, title: null} when unset.
+
+
+async def test_create_task_sets_the_engine_from_the_forms_options(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    fake.on("POST", "/projects/5/work_packages/form", fx("wp_form_with_engine_field"))
+    fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
+    out = await op.create_task(T, subject="x", project="homelab", engine="Cursor", **HANDOFF)
+    assert out["created"] is True and out["task"]["engine"] == "cursor"
+    (body,) = fake.sent("POST", "/work_packages")
+    assert body["_links"]["customField45"] == {"href": "/api/v3/custom_options/5"}
+    assert "customField45" not in body  # a list field goes in _links only
+
+
+async def test_create_task_without_engine_sends_no_engine(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    fake.on("POST", "/projects/5/work_packages/form", fx("wp_form_with_engine_field"))
+    fake.on("POST", "/work_packages", fx("wp_103_created"), status=201)
+    out = await op.create_task(T, subject="x", project="homelab", **HANDOFF)
+    assert out["task"]["engine"] is None
+    (body,) = fake.sent("POST", "/work_packages")
+    assert "customField45" not in body["_links"]
+
+
+async def test_an_unknown_engine_is_refused_before_any_call(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    out = await op.create_task(T, subject="x", project="homelab", engine="gemini", **HANDOFF)
+    assert out["error"]["code"] == "openproject_bad_engine"
+    assert fake.calls == []
+
+
+async def test_engine_on_a_project_without_the_field_creates_nothing(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    # The default form route carries Context and Done when but no Engine.
+    out = await op.create_task(T, subject="x", project="homelab", engine="claude", **HANDOFF)
+    assert out["error"]["code"] == "openproject_fields_missing"
+    assert not fake.sent("POST", "/work_packages")
+
+
+async def test_engine_missing_from_the_boards_options_creates_nothing(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    form = fx("wp_form_with_engine_field")
+    spec = form["_embedded"]["schema"]["customField45"]
+    spec["_links"]["allowedValues"] = [
+        v for v in spec["_links"]["allowedValues"] if v["title"] != "copilot"
+    ]
+    fake.on("POST", "/projects/5/work_packages/form", form)
+    out = await op.create_task(T, subject="x", project="homelab", engine="copilot", **HANDOFF)
+    assert out["error"]["code"] == "openproject_bad_engine"
+    assert not fake.sent("POST", "/work_packages")
+
+
+async def test_get_task_shows_the_engine_and_null_when_unset(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    fake.on("GET", "/work_packages/schemas/9-1", fx("wp_schema_9_1_engine"))
+    wp = fx("wp_101_new")
+    wp["_links"]["customField45"] = {"title": "cursor", "href": "/api/v3/custom_options/5"}
+    fake.on("GET", "/work_packages/101", wp)
+    assert (await op.get_task(T, 101, comments=0))["engine"] == "cursor"
+    unset = fx("wp_101_new")
+    unset["_links"]["customField45"] = {"href": None, "title": None}
+    fake.on("GET", "/work_packages/101", unset)
+    assert (await op.get_task(T, 101, comments=0))["engine"] is None
+
+
+async def test_get_task_engine_is_null_where_the_project_has_no_field(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    fake.on("GET", "/work_packages/101", fx("wp_101_new"))
+    fake.on("GET", "/work_packages/schemas/9-1", fx("wp_schema_9_1"))
+    assert (await op.get_task(T, 101, comments=0))["engine"] is None
+
+
 # ── config ────────────────────────────────────────────────────────────
 
 

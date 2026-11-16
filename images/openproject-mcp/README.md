@@ -259,3 +259,14 @@ the error helper (`_http.py`) and the API v3 test fixtures. This server
 differs in its identity model: there, the server held a token per bot and
 took a `bot` argument. Here, each request's own token is the identity, and
 the project scope comes from OpenProject memberships instead of a local map.
+
+
+**Engine** (optional, 0.6.0). The board's single-choice list field `Engine`
+(`OPENPROJECT_ENGINE_FIELD`) names the coding engine Hank runs a code task on:
+`claude`, `cursor` or `copilot`; empty means Claude Code. `get_task` returns it
+as `engine` (null when unset). `create_task(engine=…)` refuses any other value
+before calling OpenProject (`openproject_bad_engine`), refuses a project whose
+form lacks the field (`openproject_fields_missing`), and writes the option the
+form's schema lists for it, as `_links.customFieldN.href`
+(`/api/v3/custom_options/<id>`); a value missing from the board's options is
+refused too.

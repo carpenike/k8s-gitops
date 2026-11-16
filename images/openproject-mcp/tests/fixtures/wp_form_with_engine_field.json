@@ -1,0 +1,118 @@
+{
+  "_type": "Form",
+  "_embedded": {
+    "payload": {
+      "subject": "",
+      "_links": {
+        "project": {
+          "href": "/api/v3/projects/5"
+        },
+        "type": {
+          "href": "/api/v3/types/1",
+          "title": "Task"
+        }
+      }
+    },
+    "schema": {
+      "_type": "Schema",
+      "subject": {
+        "type": "String",
+        "name": "Subject",
+        "required": true,
+        "writable": true
+      },
+      "customField7": {
+        "type": "String",
+        "name": "Context",
+        "required": true,
+        "hasDefault": false,
+        "writable": true,
+        "minLength": 0,
+        "maxLength": 255,
+        "options": {}
+      },
+      "customField8": {
+        "type": "Formattable",
+        "name": "Done when",
+        "required": true,
+        "hasDefault": false,
+        "writable": true,
+        "options": {}
+      },
+      "_links": {
+        "self": {
+          "href": "/api/v3/work_packages/schemas/5-1"
+        }
+      },
+      "customField45": {
+        "type": "CustomOption",
+        "name": "Engine",
+        "required": false,
+        "hasDefault": false,
+        "writable": true,
+        "attributeGroup": "Other",
+        "location": "_links",
+        "_embedded": {
+          "allowedValues": [
+            {
+              "_type": "CustomOption",
+              "id": 4,
+              "value": "claude",
+              "_links": {
+                "self": {
+                  "href": "/api/v3/custom_options/4",
+                  "title": "claude"
+                }
+              }
+            },
+            {
+              "_type": "CustomOption",
+              "id": 5,
+              "value": "cursor",
+              "_links": {
+                "self": {
+                  "href": "/api/v3/custom_options/5",
+                  "title": "cursor"
+                }
+              }
+            },
+            {
+              "_type": "CustomOption",
+              "id": 6,
+              "value": "copilot",
+              "_links": {
+                "self": {
+                  "href": "/api/v3/custom_options/6",
+                  "title": "copilot"
+                }
+              }
+            }
+          ]
+        },
+        "_links": {
+          "allowedValues": [
+            {
+              "href": "/api/v3/custom_options/4",
+              "title": "claude"
+            },
+            {
+              "href": "/api/v3/custom_options/5",
+              "title": "cursor"
+            },
+            {
+              "href": "/api/v3/custom_options/6",
+              "title": "copilot"
+            }
+          ]
+        }
+      }
+    },
+    "validationErrors": {}
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/projects/5/work_packages/form",
+      "method": "post"
+    }
+  }
+}
