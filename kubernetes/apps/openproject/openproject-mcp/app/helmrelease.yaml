@@ -27,9 +27,9 @@ spec:
             image:
               repository: ghcr.io/carpenike/openproject-mcp
               # Built from images/openproject-mcp by openproject-mcp-image.yaml.
-              # Floating tag, digest re-pinned by Renovate. 0.5.0 (30d4ed5):
-              # the Alertmanager relay, /hooks/alertmanager.
-              tag: 0.5.0@sha256:58be83b29698ed00c4e0b7823e4e2e4776eed66e2a4c28a5fd37293364922e52
+              # Floating tag, digest re-pinned by Renovate. This digest is the
+              # PR build of e703473 (0.6.0-e703473): the board's Engine field.
+              tag: 0.6.0@sha256:d2021f7efeea7fdd7f25576efcc0fd9c449f4a2efb5ed6d535e3d33d15c9e99d
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
