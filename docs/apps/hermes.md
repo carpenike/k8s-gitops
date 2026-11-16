@@ -1415,6 +1415,11 @@ flake and feed bumps auto-merge. The bot's App is never a bypass actor,
 so a direct `gh pr merge` from it is refused, and so is a merge of an
 approved pull request it pushed to after the approval.
 
+One gap: nix-config's required `Nix Build Successful` comes from a
+path-filtered workflow, so a pull request that touches none of its paths
+never reports it and cannot merge by approval. Ryan merges those himself
+(he is exempt).
+
 ### Bots without it (`CODE_PEER`)
 
 On a bot without `CLAUDE_CODE_ENABLED`, `CODE_PEER=<bot>` writes skill
