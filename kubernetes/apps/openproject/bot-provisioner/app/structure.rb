@@ -12,7 +12,8 @@
 #   4. the agent role with exactly its permissions, and its workflows (a copy
 #      of Member's, plus every transition into and out of Needs Ryan, for the
 #      agent role, Member and Project admin);
-#   5. the handoff custom fields, on every default type and every board project;
+#   5. the task custom fields (text or list), on every default type and every
+#      board project;
 #   6. the listed users and every member's user, without tokens;
 #   7. each listed member on exactly its projects' subtrees with the agent role,
 #      and OFF every other project: a bot is never left on a project its line
@@ -152,22 +153,53 @@ def run_board # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/C
   end
   say "added #{added} workflow transitions for #{needs_name}" if added.positive?
 
-  # --- 5. The handoff fields
-  required = BOARD.fetch("fields_required") == true
+  # --- 5. The task fields: text (string) or a single-choice list
+  fail!("fields_required is gone; give each field `required: true` instead") if BOARD.key?("fields_required")
   BOARD.fetch("fields").each do |spec|
-    name, max = spec.fetch("name"), spec.fetch("max_length")
+    name, required = spec.fetch("name"), spec.fetch("required", false) == true
+    format = spec.fetch("format", "string")
+    fail!("custom field #{name}: format #{format} is not string or list") unless %w[string list].include?(format)
     field = WorkPackageCustomField.find_by(name: name)
-    if field.nil?
-      field = WorkPackageCustomField.create!(
-        name: name, field_format: "string", is_required: required, max_length: max,
-        is_for_all: false, searchable: true
-      )
-      say "created custom field #{name} (id #{field.id})"
+    if format == "string"
+      max = spec.fetch("max_length")
+      if field.nil?
+        field = WorkPackageCustomField.create!(
+          name: name, field_format: "string", is_required: required, max_length: max,
+          is_for_all: false, searchable: true
+        )
+        say "created custom field #{name} (id #{field.id})"
+      else
+        fail!("custom field #{name} exists as #{field.field_format}, not string") unless field.field_format == "string"
+        if field.is_required != required || field.max_length != max
+          field.update!(is_required: required, max_length: max)
+          say "updated custom field #{name}: required=#{required} max_length=#{max}"
+        end
+      end
     else
-      fail!("custom field #{name} exists as #{field.field_format}, not string") unless field.field_format == "string"
-      if field.is_required != required || field.max_length != max
-        field.update!(is_required: required, max_length: max)
-        say "updated custom field #{name}: required=#{required} max_length=#{max}"
+      options = spec.fetch("options").map(&:to_s)
+      fail!("custom field #{name}: a list needs options") if options.empty?
+      fail!("custom field #{name}: duplicate options") unless options.uniq.size == options.size
+      if field.nil?
+        field = WorkPackageCustomField.new(
+          name: name, field_format: "list", is_required: required, multi_value: false,
+          is_for_all: false, searchable: true
+        )
+        options.each_with_index { |value, i| field.custom_options.build(value: value, position: i + 1) }
+        field.save!
+        say "created custom field #{name} (id #{field.id}): #{options.join(', ')}"
+      else
+        fail!("custom field #{name} exists as #{field.field_format}, not list") unless field.field_format == "list"
+        fail!("custom field #{name} is multi-value; fix it by hand") if field.multi_value?
+        if field.is_required != required
+          field.update!(is_required: required)
+          say "updated custom field #{name}: required=#{required}"
+        end
+        # Add what is missing; never delete an option, since tasks may point at it.
+        have = field.custom_options.pluck(:value)
+        (options - have).each do |value|
+          field.custom_options.create!(value: value, position: (field.custom_options.maximum(:position) || 0) + 1)
+          say "custom field #{name}: added option #{value}"
+        end
       end
     end
     missing_variants = variants.reject { |v| field.type_variants.include?(v) }
