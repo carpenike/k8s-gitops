@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {"type": "command", "bash": "/usr/local/bin/hermes-code hook copilot"}
+    ]
+  }
+}

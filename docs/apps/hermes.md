@@ -91,6 +91,8 @@ spec later:
 | `GITHUB_APP_INSTALLATION_ID` | `181680083` | Required with `CLAUDE_CODE_ENABLED`: that App's installation on Ryan's account |
 | `GITHUB_APP_SLUG` | `hank-agent` | Required with `CLAUDE_CODE_ENABLED`: the App's slug. Commits are authored as `<slug>[bot]` |
 | `GITHUB_APP_BOT_USER_ID` | `356351201` | Required with `CLAUDE_CODE_ENABLED`: the id of user `<slug>[bot]` (`gh api 'users/<slug>%5Bbot%5D' -q .id`), for the commit email `<id>+<slug>[bot]@users.noreply.github.com` that GitHub links to the App |
+| `CURSOR_ENABLED` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: Cursor as a coding engine, signed in with 1Password field `cursor_api_key` ([Coding engines](#coding-engines)). `true` or `false` only |
+| `COPILOT_ENABLED` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: GitHub Copilot as a coding engine, signed in with 1Password field `copilot_token` ([Coding engines](#coding-engines)). `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
 | `TASK_BOARD_ENABLED` | `true` | Optional, default `false`. The shared OpenProject task board: the bot's OpenProject user and API token (Job `openproject/hermes-provision-<bot>` writes Secret `hermes-<bot>-openproject`), egress to `openproject-mcp` (CNP `agent-task-board`) and skill `homelab/task-board`. The bot's `mcp-servers.yaml` declares the `openproject` server ([openproject.md](openproject.md), "Bot access"). `true` or `false` only |
 | `TASK_BOARD_WEBHOOK_ENABLED` | `true` | Optional, default `false`. With `TASK_BOARD_ENABLED` and `WEBHOOK_DELIVER_CHAT_ID`: board wake-ups, a turn when someone else changes the bot's task ([openproject.md](openproject.md), "Waking a bot"). Adds Secret `task-board-webhook`, Service and CNP `agent-board-hooks`, and route `task-board`. `true` or `false` only |
@@ -1264,7 +1266,8 @@ command. The `claude` wrapper exports the token as
 `CLAUDE_CODE_OAUTH_TOKEN` and unsets `ANTHROPIC_API_KEY`,
 `ANTHROPIC_AUTH_TOKEN` and `ANTHROPIC_BASE_URL`, which would otherwise take
 precedence over it. `/etc/claude-code/managed-settings.json` turns off
-auto-update and nonessential traffic and holds the deny rules below.
+auto-update, telemetry and error reporting, turns Remote Control on at
+startup, installs the turn-finished hook, and holds the deny rules below.
 
 **Subscription, not LiteLLM.** Claude Code signs in with Ryan's Claude
 subscription, which only talks to Anthropic directly, so it bypasses
@@ -1419,6 +1422,66 @@ One gap: nix-config's required `Nix Build Successful` comes from a
 path-filtered workflow, so a pull request that touches none of its paths
 never reports it and cannot merge by approval. Ryan merges those himself
 (he is exempt).
+
+### Coding engines
+
+Three engines, all on Ryan's own subscriptions: Claude Code (the default),
+Cursor (`CURSOR_ENABLED`) and GitHub Copilot (`COPILOT_ENABLED`). The bot never
+runs one itself: `hermes-code` (images/hermes-screen/engines) runs each task
+interactively in tmux session `code-<slug>`, so it stays open for follow-ups
+and Ryan can watch it. Each engine's own stop hook calls `hermes-code hook`,
+which records the finished turn; `hermes-code wait` reads it.
+
+| Engine | Started as | Remote view | Turn finished |
+| --- | --- | --- | --- |
+| Claude Code | `claude -n hank-<slug> --session-id … "<prompt>"`, Remote Control on at startup (managed settings) | claude.ai/code and the Claude app, Ryan's account: watch, type, approve | `Stop` hook (`last_assistant_message`); `StopFailure` on an API error |
+| Copilot | `copilot -i "<prompt>" --session-id … --allow-all`, `remoteSessions` on | github.com/copilot/agents and GitHub Mobile, Ryan's account: watch and steer | `agentStop` hook (`/etc/github-copilot/policy.d`), text from the transcript |
+| Cursor | `cursor-agent --force "<prompt>"` | **None.** Cursor's CLI has no remote view for a session started on the box; its Remote Control is a desktop-app feature, and "My Machines" only runs agents started from the web | `afterAgentResponse` and `stop` hooks (`/etc/cursor/hooks.json`) |
+
+**Selection:** the engine Ryan names in his message, else the task's Engine
+field on the board ([openproject.md](openproject.md), "Board structure"), else
+`auto`.
+
+**Fallback (`auto`):** Claude Code, then Cursor, then Copilot, when an engine
+stops before finishing its first turn: a `StopFailure`, an error status, or
+the process exiting with rate-limit, outage or sign-in text on screen. A
+heuristic: none of the three documents its rate-limit exit codes.
+
+**One rules file,** images/hermes-screen/rules/AGENTS.md: Claude reads it as
+its managed `/etc/claude-code/CLAUDE.md`, Copilot through
+`COPILOT_CUSTOM_INSTRUCTIONS_DIRS=/etc/hermes-rules`, Cursor from a copy
+`hermes-code` writes into the clone as `.cursor/rules/hermes.mdc` (excluded
+from git). All three also read the repository's own `AGENTS.md`.
+
+**Credentials,** screen pod only, files under `/etc/hermes-claude-code`:
+
+| Engine | Sign-in |
+| --- | --- |
+| Claude Code | A full `claude auth login`, stored in `/workspace/.claude-code` (Remote Control refuses the setup token, which can only make model requests). The wrapper falls back to the setup token when there is no login |
+| Cursor | `cursor_api_key`: a user API key (cursor.com dashboard) |
+| Copilot | `copilot_token`: a fine-grained token on Ryan's account with only the Copilot Requests permission. It is not the GitHub App token: Copilot's built-in GitHub tools get no repository write |
+
+**Pins.** Copilot is pinned through npm (Renovate) and never updates itself
+(`COPILOT_AUTO_UPDATE=false`). Cursor publishes no checksum and no Renovate
+source: its version and both sha256 sums are recorded in the Dockerfile. It
+auto-updates by default with no documented switch; it is installed read-only
+under `/opt` and the wrapper runs that copy only.
+
+**Never-merge** holds for every engine at GitHub (the rulesets,
+[Merging](#merging-ryan-approves-github-merges)). The managed settings
+(Claude) and `--deny-tool 'shell(gh pr merge)'` (Copilot) are guard rails;
+Cursor has no machine-wide permission file.
+
+**One-time steps (Ryan),** in the screen pod as `pn`:
+
+```sh
+kubectl -n hermes-hank exec -it deploy/hermes-screen -- tmux new -s login 'claude auth login'
+```
+
+Open the URL it shows, sign in, and paste the code back. The first
+interactive session then asks once "Enable Remote Control? (y/n)": attach
+with `kubectl -n hermes-hank exec -it deploy/hermes-screen -- tmux attach -t
+code-<slug>` and answer `y`.
 
 ### Bots without it (`CODE_PEER`)
 
