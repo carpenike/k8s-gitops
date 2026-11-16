@@ -6,7 +6,7 @@ metadata:
 spec:
   kubernetes:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-    version: v1.37.1
+    version: v1.37.2
   healthChecks:
     - apiVersion: ceph.rook.io/v1
       kind: CephCluster
