@@ -182,14 +182,14 @@ RUN set -eu; \
     chmod -R a+rX,go-w /opt/cursor-agent; \
     /opt/cursor-agent/cursor-agent --version
 COPY --chmod=0755 engines/copilot engines/cursor-agent engines/hermes-code /usr/local/bin/
-# The engines' turn-finished hooks, machine-wide, each calling hermes-code
-# (Copilot's policy dir must not be group- or world-writable), and the one
+# Copilot's turn-finished hook, machine-wide, calling hermes-code (its
+# policy dir must not be group- or world-writable; Cursor's CLI reads only a
+# user-level hooks.json, which hermes-code writes), and the one
 # rules file: Claude reads it as its managed CLAUDE.md, Copilot through
 # COPILOT_CUSTOM_INSTRUCTIONS_DIRS, Cursor from a copy hermes-code puts in
 # each clone.
-RUN install -d -m 0755 /etc/github-copilot /etc/github-copilot/policy.d /etc/cursor /etc/hermes-rules
+RUN install -d -m 0755 /etc/github-copilot /etc/github-copilot/policy.d /etc/hermes-rules
 COPY --chmod=0644 hooks/copilot-hermes.json /etc/github-copilot/policy.d/hermes.json
-COPY --chmod=0644 hooks/cursor-hooks.json /etc/cursor/hooks.json
 COPY --chmod=0644 rules/AGENTS.md /etc/hermes-rules/AGENTS.md
 # k8s-gitops: kubectl and the Flux CLI for a bot with CLUSTER_ACCESS_ENABLED
 # (docs/apps/hermes.md, "Cluster access"), pinned and checksum-verified. The
@@ -228,7 +228,7 @@ COPY --chmod=0644 claude-code/gitconfig /etc/gitconfig
 USER pn
 # As pn: managed settings and git config must be readable by the login user.
 RUN cat /etc/claude-code/managed-settings.json /etc/claude-code/CLAUDE.md /etc/gitconfig \
-        /etc/github-copilot/policy.d/hermes.json /etc/cursor/hooks.json /etc/hermes-rules/AGENTS.md > /dev/null && \
+        /etc/github-copilot/policy.d/hermes.json /etc/hermes-rules/AGENTS.md > /dev/null && \
     hermes-code --help > /dev/null
 WORKDIR /home/pn
 EXPOSE 22

@@ -107,7 +107,15 @@ def prepare(engine: str, repo: Path) -> None:
         )
     elif engine == "copilot":
         chome = Path(os.environ.get("COPILOT_HOME", "/workspace/.copilot"))
-        merge_json(chome / "settings.json", lambda d: d.update({"remoteSessions": True}))
+        # Remote steering needs both: remoteSessions, and this CLI accepting
+        # incoming connections with new sessions published (what
+        # /environments > Incoming connections writes; seen live 2026-11-16).
+        def remote(d: dict) -> None:
+            d["remoteSessions"] = True
+            d.setdefault("ahpEnvironment", {}).update(
+                {"acceptRemoteConnections": True, "publishNewSessionsByDefault": True})
+
+        merge_json(chome / "settings.json", remote)
 
         def trust(d: dict) -> None:
             folders = d.setdefault("trustedFolders", [])
@@ -116,6 +124,19 @@ def prepare(engine: str, repo: Path) -> None:
 
         merge_json(chome / "config.json", trust)
     elif engine == "cursor":
+        # Its turn-finished hooks, at user level: the CLI does not read the
+        # machine-wide /etc/cursor/hooks.json (seen live 2026-11-16).
+        hooks = Path.home() / ".cursor" / "hooks.json"
+        hook = {"command": "/usr/local/bin/hermes-code hook cursor"}
+
+        def add_hooks(d: dict) -> None:
+            d.setdefault("version", 1)
+            for event in ("afterAgentResponse", "stop"):
+                entries = d.setdefault("hooks", {}).setdefault(event, [])
+                if hook not in entries:
+                    entries.append(hook)
+
+        merge_json(hooks, add_hooks)
         # Cursor reads no global rules file: give the clone a copy, kept out of git.
         if RULES.is_file():
             rule = repo / ".cursor" / "rules" / "hermes.mdc"
@@ -201,6 +222,25 @@ def wait_turn(slug: str, timeout: int) -> dict:
                 return {**base, "state": "failed", "reason": turn.get("reason"),
                         "detail": turn.get("detail")}
             return {**base, "state": "done", "message": turn.get("message")}
+        screen = pane_tail(task["tmux"], 30)
+        # Cursor asks to trust each new workspace; this is a clone Hank made.
+        # Answer once, and only while the prompt is on screen now (its text
+        # stays in the scrollback after it is answered).
+        live = tmux("capture-pane", "-p", "-t", task["tmux"], check=False).stdout
+        if (task["engine"] == "cursor" and not task.get("trusted")
+                and "Trust this workspace" in live):
+            tmux("send-keys", "-t", task["tmux"], "a", check=False)
+            task["trusted"] = True
+            (d / "task.json").write_text(json.dumps(task, indent=2))
+        # Claude's first-run screens (theme, security notes) and its
+        # Remote Control consent are Ryan's to answer, once; they persist on
+        # the workspace.
+        if task["engine"] == "claude" and any(
+                cue in live for cue in ("Enable Remote Control?", "Security notes",
+                                        "Choose the text style", "Press Enter to continue")):
+            return {"engine": "claude", "slug": slug, "state": "blocked",
+                    "reason": "Claude first-run setup: Ryan answers it once (docs, Coding engines)",
+                    "screen": live[-1500:]}
         if not alive(task["tmux"]):
             tail = pane_tail(task["tmux"])
             reason = "unavailable" if UNAVAILABLE.search(tail) else "exited"
@@ -265,6 +305,16 @@ def last_text_from_transcript(path: str | None) -> str | None:
         lines = Path(path).read_text().splitlines()
     except OSError:
         return None
+    # Copilot's events.jsonl: {"type": "assistant.message", "data": {"content": ...}}.
+    for line in reversed(lines):
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(ev, dict) and ev.get("type") == "assistant.message":
+            content = (ev.get("data") or {}).get("content")
+            if isinstance(content, str) and content.strip():
+                return content
     for line in reversed(lines):
         try:
             ev = json.loads(line)

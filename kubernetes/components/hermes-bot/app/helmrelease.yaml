@@ -1481,6 +1481,11 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
+          # The coding engines' credentials reach the screen as projected
+          # files, which update in place. A restart for them would kill every
+          # running coding session, and claude-code-github changes every 30
+          # minutes (its GitHub App token).
+          secrets.exclude.reloader.stakater.com/reload: claude-code-github,claude-code-auth,cursor-auth,copilot-auth
         containers:
           app:
             image:

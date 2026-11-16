@@ -1435,8 +1435,8 @@ which records the finished turn; `hermes-code wait` reads it.
 | Engine | Started as | Remote view | Turn finished |
 | --- | --- | --- | --- |
 | Claude Code | `claude -n hank-<slug> --session-id … "<prompt>"`, Remote Control on at startup (managed settings) | claude.ai/code and the Claude app, Ryan's account: watch, type, approve | `Stop` hook (`last_assistant_message`); `StopFailure` on an API error |
-| Copilot | `copilot -i "<prompt>" --session-id … --allow-all`, `remoteSessions` on | github.com/copilot/agents and GitHub Mobile, Ryan's account: watch and steer | `agentStop` hook (`/etc/github-copilot/policy.d`), text from the transcript |
-| Cursor | `cursor-agent --force "<prompt>"` | **None.** Cursor's CLI has no remote view for a session started on the box; its Remote Control is a desktop-app feature, and "My Machines" only runs agents started from the web | `afterAgentResponse` and `stop` hooks (`/etc/cursor/hooks.json`) |
+| Copilot | `copilot -i "<prompt>" --session-id … --allow-all`, `remoteSessions` and incoming connections on | github.com/copilot/agents and GitHub Mobile, Ryan's account: watch and steer | `agentStop` hook (`/etc/github-copilot/policy.d`), text from `events.jsonl` |
+| Cursor | `cursor-agent --force "<prompt>"`, trust answered once | **None.** Cursor's CLI has no remote view for a session started on the box; its Remote Control is a desktop-app feature, and "My Machines" only runs agents started from the web | `afterAgentResponse` and `stop` hooks (`~/.cursor/hooks.json`) |
 
 **Selection:** the engine Ryan names in his message, else the task's Engine
 field on the board ([openproject.md](openproject.md), "Board structure"), else
@@ -1479,9 +1479,19 @@ kubectl -n hermes-hank exec -it deploy/hermes-screen -- tmux new -s login 'claud
 ```
 
 Open the URL it shows, sign in, and paste the code back. The first
-interactive session then asks once "Enable Remote Control? (y/n)": attach
-with `kubectl -n hermes-hank exec -it deploy/hermes-screen -- tmux attach -t
-code-<slug>` and answer `y`.
+interactive session then shows Claude's first-run screens (theme, security
+notes) and asks once "Enable Remote Control? (y/n)". `hermes-code` reports
+that session as `blocked` instead of answering for Ryan: attach with
+`kubectl -n hermes-hank exec -it deploy/hermes-screen -- tmux attach -t
+code-<slug>`, answer them, and detach with Ctrl-b d. They persist on the
+workspace.
+
+Copilot's remote view also needs this CLI to accept incoming connections
+and publish new sessions (`ahpEnvironment` in `settings.json`, what
+`/environments` > Incoming connections writes); `hermes-code` sets both.
+Cursor's CLI reads only a user-level `~/.cursor/hooks.json`, which
+`hermes-code` writes; it asks to trust each new clone, and `hermes-code`
+answers that once.
 
 ### Bots without it (`CODE_PEER`)
 
