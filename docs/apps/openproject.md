@@ -288,9 +288,16 @@ Job; bump the Job's `script-revision` annotation for an edit to `structure.rb`.
   No moving or copying items between projects, no deleting, no managing
   members or the project. Its workflows are Member's, plus every transition
   into and out of **Needs Ryan** (also for Member and Project admin).
-- **Fields:** `Context` (a vault path) and `Done when` (one sentence) on every
-  board project and type. `fields_required` turns them required, after the
-  bots' servers send them (openproject-mcp 0.4.0, homelab-mcp 0.62.0).
+- **Fields:** on every board project and type. Each says whether it is
+  `required` (default optional); a required one is refused by OpenProject
+  itself when missing.
+  - `Context` (a vault path) and `Done when` (one sentence), required. The
+    bots' servers send them (openproject-mcp 0.4.0, homelab-mcp 0.62.0).
+  - `Engine`, optional, a single-choice list: `claude`, `cursor` or
+    `copilot`, the coding engine Hank runs a code task on. Empty means
+    Claude Code. A list, so the UI offers only those values. structure.rb
+    adds options listed in board.yaml and never deletes one, since tasks
+    may still point at it.
 - **Members:** each listed user on exactly its projects' subtrees as Agent,
   and removed from every other project. structure.rb creates a missing user
   (no token). Ryan (user 4) is Project admin of every board project and the
