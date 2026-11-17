@@ -296,12 +296,82 @@ def test_webhook_id_is_stable_across_a_restart(fake: FakeOpenProject,
     first, second = (c.headers["webhook-id"] for c in hermes.calls)
     assert first == second and first.startswith("am-") and len(first) == 3 + 64
     # Order in the payload does not matter; the group, the status and the set do.
-    n = parse(payload(alert("a1"), alert("a2")))
-    assert n is not None and delivery_id(n) == first
-    other = parse(payload(alert("a1"), alert("a2"), status="resolved"))
-    assert other is not None and delivery_id(other) != first
-    other = parse(payload(alert("a1"), alert("a2"), alert("a3")))
-    assert other is not None and delivery_id(other) != first
+    assert forwarded_id(payload(alert("a1"), alert("a2"))) == first
+    assert forwarded_id(payload(alert("a1"), alert("a2"), status="resolved")) != first
+    assert forwarded_id(payload(alert("a1"), alert("a2"), alert("a3"))) != first
+    assert forwarded_id(payload(alert("a2"), alert("a1"), group="other")) != first
+
+
+def forwarded_id(event: dict[str, Any]) -> str:
+    """The webhook-id the relay sends for `event`."""
+    n = parse(event)
+    assert n is not None
+    body = json.dumps(alerts.forward_payload(n, "hank"), separators=(",", ":")).encode()
+    return delivery_id(n, body)
+
+
+class AdmittingHermes:
+    """Hermes' admission rule: a delivery id is bound to the bytes it first carried.
+
+    A known id with the same bytes is a duplicate (200); with any other bytes it
+    is `admission_conflict` (503), on every retry, for good.
+    """
+
+    def __init__(self) -> None:
+        self.calls: list[httpx.Request] = []
+        self.admitted: dict[str, bytes] = {}
+        self.transport = httpx.MockTransport(self._handle)
+
+    def _handle(self, request: httpx.Request) -> httpx.Response:
+        self.calls.append(request)
+        key, body = request.headers["webhook-id"], request.content
+        first = self.admitted.setdefault(key, body)
+        if first != body:
+            return httpx.Response(503, json={"error": "admission_conflict"})
+        return httpx.Response(202 if first is body else 200, json={"status": "accepted"})
+
+
+def resolved_at(fp: str, *, starts: str, ends: str) -> dict[str, Any]:
+    a = alert(fp, status="resolved", starts=starts)
+    a["endsAt"] = ends
+    return a
+
+
+def test_a_flap_that_keeps_its_start_time_is_not_refused(fake: FakeOpenProject) -> None:
+    # Seen live: Alertmanager kept an alert's startsAt across resolve -> fire ->
+    # resolve, so the second resolved notice reused the first one's id with a new
+    # `ends:` line, and Hermes refused every retry of it.
+    hank = AdmittingHermes()
+    starts = "2026-11-17T08:07:20.898Z"
+    with make_client(fake, hank.transport) as c:
+        for event in (
+            payload(alert("a1", starts=starts)),
+            payload(resolved_at("a1", starts=starts, ends="2026-11-17T12:43:20.898Z"),
+                    status="resolved"),
+            payload(alert("a1", starts=starts)),
+            payload(resolved_at("a1", starts=starts, ends="2026-11-17T12:48:20.898Z"),
+                    status="resolved"),
+        ):
+            assert post(c, event).status_code == 202
+    assert "ends: 2026-11-17T12:48:20.898Z" in json.loads(hank.calls[-1].content)["body"]
+
+
+def test_one_delivery_id_never_carries_two_bodies(fake: FakeOpenProject) -> None:
+    # A firing notice renders the group's resolved alerts too, so the same firing
+    # set with and without a resolved neighbour is two bodies: two ids. Each event
+    # goes to a fresh process, as after a restart, so the relay's own dedup is out
+    # of the way.
+    hank = AdmittingHermes()
+    events = [
+        payload(alert("a1"), alert("a2", status="resolved")),
+        payload(alert("a1")),
+        payload(alert("a1", description="3 errors")),
+        payload(alert("a1", description="4 errors")),
+    ]
+    for event in events:
+        with make_client(fake, hank.transport) as c:
+            assert post(c, event).status_code == 202
+    assert len(hank.admitted) == len(events)
 
 
 def test_a_failed_forward_is_502_and_not_recorded(fake: FakeOpenProject) -> None:

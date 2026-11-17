@@ -221,10 +221,15 @@ sits between them (`alerts.py`) and sends every alert to one bot,
    `http://agent-board-hooks.hermes-<bot>.svc.cluster.local:8644/webhooks/alerts`
    (the board relay's Service and port), signed like the board relay: Hermes
    generic V2 with `HERMES_WEBHOOK_SECRET`. `webhook-id` is `am-` plus the
-   sha256 of the group key, the status, and each forwarded alert's
-   fingerprint and `startsAt`, so the same notice always has the same id and
-   Hermes drops a repeat even after this server restarts, while an alert that
-   fires again (a new `startsAt`) is a new delivery.
+   sha256 of the group key and the exact bytes of the event (0.6.2), so a
+   byte-identical re-send keeps its id and Hermes drops it even after this
+   server restarts, and any change to what the bot would read (an alert that
+   fires again, a new `ends:`, a changed annotation) is a new delivery. Hermes
+   binds an id to the bytes it first admitted and refuses that id with other
+   bytes (503 `admission_conflict`) on every retry; before 0.6.2 the id
+   covered only the status and each alert's fingerprint and `startsAt`, and a
+   resolve -> fire -> resolve flap that kept its `startsAt` made Alertmanager
+   retry the second resolved notice every few seconds.
 5. The bot accepting it (2xx) is 202 `{"status":"forwarded"}`. Anything else,
    or no answer, is 502 and the group is not marked as forwarded, so
    Alertmanager's retry delivers it.
