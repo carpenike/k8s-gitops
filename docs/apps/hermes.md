@@ -1386,10 +1386,17 @@ written only when `task-board` is. An alert turn has the Matrix toolsets
 and is delivered to Ryan's DM with the bot, unattended (commands that
 need approval are refused; `kubectl` and `flux` don't).
 
-The skill: one incident note per alert group in
-`Personal/Tech/Incidents/`, read-only investigation, a fix within
-[Cluster access](#cluster-access-opt-in) (two tries), a pull request for a
-config change, and one Signal message on `ops` for anything else.
+The skill (2.0.0): first a gate (a resolved group closes its note; a group
+with a note continues it; a storm, more than three groups in about ten
+minutes, gets notes, restarts only, and one Signal summary). Then one incident
+note per alert group in `Personal/Tech/Incidents/`; read-only triage where the
+problem lives (the cluster with `kubectl`/`flux`, Forge and rydeck over
+[Host SSH](#host-ssh-opt-in)); a fix within
+[Cluster access](#cluster-access-opt-in) or a Forge restart through
+`forge-svc` (two tries); when the evidence puts the cause in git, a draft fix
+PR from a [coding engine](#coding-engines) (k8s-gitops on `rebuild`, nix-config
+on `main`), at most one per alert group and never to loosen an alert; and one
+Signal message on `ops` for anything else and every fix PR.
 
 ## homelab-mcp
 

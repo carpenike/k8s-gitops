@@ -520,12 +520,12 @@ spec:
                   cat > /opt/data/skills/homelab/incident-response/SKILL.md <<'SKILL'
                 ---
                 name: incident-response
-                description: "An Alertmanager alert reached you: write the incident note, fix it within your cluster permissions, open a PR for config changes, and message Ryan on Signal ops for anything else."
-                version: 1.0.0
+                description: "An Alertmanager alert reached you: triage it in the cluster or on the hosts, write the incident note, fix it within your permissions, open a fix PR with a coding engine when the cause is in git, and message Ryan on Signal ops for anything else."
+                version: 2.0.0
                 author: k8s-gitops (hermes-bot component)
                 metadata:
                   hermes:
-                    tags: [alert, alertmanager, incident, outage, kubernetes, flux, oncall, homelab]
+                    tags: [alert, alertmanager, incident, outage, kubernetes, flux, forge, nixos, oncall, homelab]
                 ---
 
                 # Incident response
@@ -536,6 +536,18 @@ spec:
                 group once while it fires, again when it gains alerts, and once when it
                 resolves; a repeat never reaches you.
 
+                ## 0. Before anything: how much to do
+
+                - A **resolved** group: go to 6.
+                - A group that already has a note (step 1 finds it): continue that note.
+                  If it already names a fix PR (`fix_pr`), don't start another; add what is
+                  new to the note and the PR.
+                - **A storm**: more than three different groups firing within about ten
+                  minutes, or one group with more than five alerts. Write the notes, do at
+                  most the restarts in 3, start no coding session, and send one Signal ops
+                  message for the lot (5). A storm usually has one cause: name it if you
+                  can.
+
                 ## 1. The note
 
                 One note per alert group, in `Personal/Tech/Incidents/`. Search for
@@ -544,14 +556,27 @@ spec:
                 `Personal/Tech/Incidents/<YYYY-MM-DD> <slug>.md` with frontmatter
                 `type: incident`, `domain: tech`, `status: investigating`,
                 `severity`, `alert` (the alertname), `started` (the alert's
-                startsAt), `group_key`. Body: what fired, then a timeline you add to
-                as you go.
+                startsAt), `group_key`, and later `fix_pr`. Body: what fired, then a
+                timeline you add to as you go: every command you ran and what it showed.
 
-                ## 2. Look
+                ## 2. Look: where the problem lives
 
-                Read-only first: `kubectl get`, `describe`, `logs` (add `--previous`
-                for a crash), `get events`, `flux get all -A`, `flux logs`. Write the
-                likely cause and the impact into the note.
+                The labels say where: `namespace`, `pod`, `job`, `instance`, `unit`,
+                `mountpoint`, `pool`, the alertname. Read-only first, in the right place:
+
+                - **The cluster** (a namespace, pod, Job, node, Flux object): `kubectl
+                  get`, `describe`, `logs` (add `--previous` for a crash), `get events`,
+                  `flux get all -A`, `flux logs`.
+                - **Forge** (instance forge, a systemd unit, a disk, ZFS, or a service that
+                  runs there such as Plex, Home Assistant, Grafana or Loki): over ssh
+                  (section "On Forge and rydeck" below): `systemctl list-units --failed`,
+                  `systemctl status <unit> --no-pager`, `journalctl -u <unit> -n 200
+                  --no-pager`, `df -h`, `zpool status -x`, `free -h`.
+                - **rydeck**: the same reads; it allows nothing else.
+                - **Anything else** (a provider, the internet, DNS, the router): note what
+                  you can see and go to 5.
+
+                Write the likely cause, the evidence and the impact into the note.
 
                 ## 3. Fix, within your permissions
 
@@ -562,38 +587,63 @@ spec:
                 - `kubectl scale` between 0 and the replica count in git;
                 - delete a failed Job, then `flux reconcile ks <name> -n <ns>` so
                   Flux creates it again;
-                - `flux reconcile` a Kustomization, HelmRelease or source.
+                - `flux reconcile` a Kustomization, HelmRelease or source;
+                - on Forge, restart or reload a service through `forge-svc` (section "On
+                  Forge and rydeck").
 
-                Log each command and its result in the note. Two tries at most: if
-                the alert is still firing after the second, stop and go to 5. The
-                cluster refuses anything else (RBAC and an admission policy); a
-                refusal is an answer, not something to work around.
+                Log each command and its result in the note. After a fix, wait a few
+                minutes and check the symptom again (the relay tells you when the alert
+                resolves). Two tries at most: if it is still broken after the second, stop
+                and go to 4 or 5. The cluster and Forge refuse anything else (RBAC, an
+                admission policy, polkit); a refusal is an answer, not something to work
+                around.
 
                 Never: delete a PersistentVolume, PVC, volume, namespace or backup;
-                read a Secret; silence or disable an alert; suspend Flux; force-push.
-                Don't paste a token, key or password from a log into a note,
-                comment or message: write [redacted].
+                read a Secret; silence, disable or loosen an alert to make it go away;
+                suspend Flux; force-push. Don't paste a token, key or password from a log
+                into a note, comment or message: write [redacted].
 
-                ## 4. Config changes: a pull request
+                ## 4. The cause is in git: a fix PR with a coding engine
 
-                A fix that changes a manifest or a version (a rollback is a
-                `git revert`) is a pull request in carpenike/k8s-gitops against
-                `rebuild` (skill coding-sessions). Link it in the note. Ryan's
-                approval merges it; you never do.
+                When the evidence in the note shows the cause is configuration in a
+                repository (a manifest, an image or chart version, a resource limit, a
+                NixOS option, a bad rule in code) and the fix is small and clear, have a
+                coding engine open a pull request (skill coding-sessions). Not when:
+
+                - the alert already resolved and fired once (a blip; note it, no PR);
+                - the note already has a `fix_pr`, or a storm is on (step 0);
+                - the cause is a guess: the PR needs the evidence, not a hunch;
+                - the change is to the alerts themselves, unless Ryan asked.
+
+                How:
+
+                - Repo and base: the cluster is carpenike/k8s-gitops with `--base
+                  origin/rebuild`; Forge is carpenike/nix-config (its default branch,
+                  `main`).
+                - Slug `incident-<short-name>`, engine `auto` unless Ryan named one.
+                - The prompt says: the incident note's path, the evidence (the commands and
+                  their output from the note), the smallest change that fixes it, how to
+                  check it, and "open a draft pull request; link the incident note in its
+                  body".
+                - Put the PR link in the note (`fix_pr`) and in the Signal message. Ryan's
+                  approval merges it; you never do. In k8s-gitops Flux applies it after the
+                  merge; on Forge it applies at Forge's next scheduled upgrade.
 
                 ## 5. Everything else: Signal ops
 
-                Anything you can't fix within 3 or 4, or on a host within your ssh
-                permissions (it needs data, Secrets, the network, DNS, or two tries failed):
-                one `signal_send` with `target: "ops"`, never the family channel. One
-                line: what is wrong, what you tried, and the note's path and any PR.
+                Anything you can't fix within 3 or 4 (it needs data, Secrets, the network,
+                DNS, or two tries failed), and every fix PR: one `signal_send` with
+                `target: "ops"`, never the family channel. At most one message per alert
+                group per turn. One line: what is wrong, what you tried, and the note's
+                path and any PR.
 
                 ## 6. Resolved
 
                 A resolved alert: set the note's `status: resolved`, add the root
                 cause and any follow-ups. A follow-up that needs a change becomes a
-                board task for Ryan. Changes to Tech's Status belong to Chief
-                Engineer: append them to `Personal/Tech/Inbox.md` instead.
+                board task for Ryan, unless a fix PR already covers it. Changes to Tech's
+                Status belong to Chief Engineer: append them to `Personal/Tech/Inbox.md`
+                instead.
 
                 End the turn with a few lines for Ryan: what fired, what you did, and
                 what is left.
