@@ -65,7 +65,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (3a39b98, 0.67.1: openproject_get_task returns the full description
+              # (e8baa55, 0.68.0: OAuth refresh rotation tolerates one lost
+              # response (a replay of the newest predecessor by the same
+              # client while its successor is unused), and every replay is
+              # counted in homelab_mcp_oauth_refresh_replays_total.
+              # 3a39b98, 0.67.1: openproject_get_task returns the full description
               # and comments.
               # 13c933e, 0.67.0: openproject_get_task returns the task's engine
               # and openproject_create_task can set it.
@@ -145,7 +149,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-3a39b981279f27af5d823419bcf4957afeee8227@sha256:e0d9ddfdcfd52820ab20106eafe77b2078123c3f9e0a7fc52e36a0dd08ee09f7
+              tag: sha-e8baa55e78ad577c3fdf70d85d407c78088020ea@sha256:a1e74166c7701451af3e794db72c9d49e137539f55beb61e7662133ac250f018
             command:
               - /bin/sh
               - -c
@@ -510,7 +514,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-3a39b981279f27af5d823419bcf4957afeee8227@sha256:069d2c70afe95a981769f4f23f6633a01a22d9b4eb30047cfde16be91fc018b7
+              tag: sha-e8baa55e78ad577c3fdf70d85d407c78088020ea@sha256:5c7b6ec3a4ac39fc3e49171539116794a9b10f887d12479c86742acc9f45fb75
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
