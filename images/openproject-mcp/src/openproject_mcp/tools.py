@@ -695,7 +695,7 @@ class OpenProject:
             )
         except ToolError as err:
             return err.payload()
-        out = self._slim(wp)
+        out = hal.slim_work_package(wp, web_base=self.web_base, full=True)
         try:
             out.update(await self._handoff_of(who, wp))
         except ToolError:
@@ -708,7 +708,7 @@ class OpenProject:
             uid: await self._login_of(who, uid)
             for uid in dict.fromkeys(c["author_id"] for c in newest if c["author_id"] is not None)
         }
-        out["recent_comments"] = hal.slim_comments(activities, comments, logins)
+        out["recent_comments"] = hal.slim_comments(activities, comments, logins, full=True)
         return out
 
     async def add_comment(self, token: str | None, task_id: int, text: str) -> dict[str, Any]:
@@ -999,10 +999,12 @@ def register(mcp: MCPServer, op: OpenProject) -> None:
         annotations=_RO,
         description=(
             "Fetch one task: status, assignee (name and id), project, priority, due date, "
-            "lock_version, a plain-text description excerpt and a link, its handoff fields "
+            "lock_version, the full description (markdown; description_truncated is true only "
+            "past 20,000 characters) and a link, its handoff fields "
             "`context` (vault path of the note that explains it) and `done_when`, and its "
             "`engine` (the coding engine for a code task: claude, cursor or copilot; null "
-            "when unset, which means Claude Code), plus its newest comments (newest first). Each comment has author "
+            "when unset, which means Claude Code), plus its newest comments (newest first), each in full "
+            "(markdown; `truncated` past 10,000 characters). Each comment has author "
             "(display name), author_id and author_login (null when OpenProject hides that "
             "user's login from you); compare them with whoami and your peers' logins to tell "
             "your own, a peer bot's and a human's comments apart. Read a task before working it."

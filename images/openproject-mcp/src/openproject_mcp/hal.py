@@ -27,6 +27,10 @@ API = "/api/v3"
 
 #: Default cap for the plain-text description excerpt.
 DESCRIPTION_CHARS = 500
+#: Caps for the full text get_task returns: create_task's description limit
+#: and add_comment's text limit, so anything the tools wrote comes back whole.
+FULL_DESCRIPTION_CHARS = 20000
+FULL_COMMENT_CHARS = 10000
 
 _HREF_ID_RE = re.compile(r"/(\d+)/?$")
 _TAG_RE = re.compile(r"<[^>]+>")
@@ -88,6 +92,20 @@ def plain_text(raw: Any, limit: int = DESCRIPTION_CHARS) -> tuple[str, bool]:
     return cut + "…", True
 
 
+def full_text(raw: Any, limit: int) -> tuple[str, bool]:
+    """The raw markdown, whole, up to `limit` characters: `(text, truncated)`.
+
+    For reading one task, where a step list, a command or a code block must
+    survive as written (plain_text flattens all of it onto one line).
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return "", False
+    text = raw.strip()
+    if len(text) <= limit:
+        return text, False
+    return text[:limit].rstrip() + "…", True
+
+
 def elements(collection: Any) -> list[dict[str, Any]]:
     """`_embedded.elements` of a HAL collection; [] for anything else."""
     if not isinstance(collection, dict):
@@ -109,13 +127,23 @@ def collection_total(collection: Any, fallback: int) -> int:
 
 
 def slim_work_package(
-    wp: dict[str, Any], *, web_base: str = "", description_chars: int = DESCRIPTION_CHARS
+    wp: dict[str, Any],
+    *,
+    web_base: str = "",
+    description_chars: int = DESCRIPTION_CHARS,
+    full: bool = False,
 ) -> dict[str, Any]:
-    """Project one HAL work package to the fields a bot works with."""
+    """Project one HAL work package to the fields a bot works with.
+
+    `full`: the description as its whole raw markdown (get_task) instead of a
+    flattened excerpt (lists).
+    """
     links = wp.get("_links") or {}
     description = wp.get("description")
     raw = description.get("raw") if isinstance(description, dict) else None
-    text, truncated = plain_text(raw, description_chars)
+    text, truncated = (
+        full_text(raw, FULL_DESCRIPTION_CHARS) if full else plain_text(raw, description_chars)
+    )
     wp_id = wp.get("id")
     return {
         "id": wp_id,
@@ -138,7 +166,11 @@ def slim_work_package(
 
 
 def slim_comments(
-    activities: Any, limit: int, logins: dict[int, str | None] | None = None
+    activities: Any,
+    limit: int,
+    logins: dict[int, str | None] | None = None,
+    *,
+    full: bool = False,
 ) -> list[dict[str, Any]]:
     """The newest `limit` human comments from an activities collection, newest first.
 
@@ -153,7 +185,9 @@ def slim_comments(
         raw = comment.get("raw") if isinstance(comment, dict) else None
         if not isinstance(raw, str) or not raw.strip():
             continue
-        text, _ = plain_text(raw, DESCRIPTION_CHARS)
+        text, truncated = (
+            full_text(raw, FULL_COMMENT_CHARS) if full else plain_text(raw, DESCRIPTION_CHARS)
+        )
         links = activity.get("_links")
         author_id = href_id((links or {}).get("user") if isinstance(links, dict) else None)
         out.append(
@@ -164,6 +198,7 @@ def slim_comments(
                 "author_login": logins.get(author_id) if author_id is not None else None,
                 "created_at": activity.get("createdAt"),
                 "text": text,
+                "truncated": truncated,
             }
         )
     out.reverse()

@@ -141,6 +141,12 @@ both as required arguments:
 (`_links.schema`, cached per token), and shows null when one is unset or the
 schema cannot be read.
 
+**Full text** (0.6.1). `get_task` returns the description and each comment as
+their whole raw markdown (step lists, commands and code blocks intact), capped
+at the tools' own write limits: 20,000 characters for a description
+(`description_truncated`), 10,000 per comment (`truncated` on each). Lists
+(`list_tasks`, `claim_next`) keep the one-line 500-character excerpt.
+
 **Engine** (optional, 0.6.0). The board's single-choice list field `Engine`
 (`OPENPROJECT_ENGINE_FIELD`) names the coding engine Hank runs a code task on:
 `claude`, `cursor` or `copilot`; empty means Claude Code. `get_task` returns it
