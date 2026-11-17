@@ -1340,8 +1340,8 @@ the access away, set the input to `false` (no token) and delete
 ## Host SSH (opt-in)
 
 `HOST_SSH_ENABLED=true` (Hank only) lets the bot `ssh forge` and `ssh rydeck`
-from its terminal, as user `hank`, with its own ed25519 key: 1Password
-`hermes-<bot>/ssh_key`, mounted in the screen pod only (Secret `host-ssh`). The
+from its terminal, as user `hank`, with its own ed25519 keys: 1Password
+`hermes-<bot>/ssh_key` (shell access) and `ssh_key_svc` (restart-only), mounted in the screen pod only (Secret `host-ssh`). The
 screen's entrypoint installs it as `pn`'s 0600 key, with the ssh config and
 pinned host keys from the bot's `host-ssh/` folder (ConfigMap
 `host-ssh-config`; `StrictHostKeyChecking yes`, no forwarding). CNP
@@ -1351,6 +1351,18 @@ pinned host keys from the bot's `host-ssh/` folder (ConfigMap
 | --- | --- | --- |
 | Forge | Read the journal and status. Restart or reload any `.service` unit through polkit, except sshd, networking, WireGuard, the firewall, cloudflared, `systemd-*`, `nixos-*`, upgrade/deploy/guard, ZFS, sanoid and syncoid units, rescue and emergency. No `start`, `stop`, timers or targets, and no doas, so no `nixos-rebuild`, installs or `/etc` edits | nix-config `hosts/forge/core/hank.nix` |
 | rydeck | Log in and read, like Grok's user there. No restarts | By hand on rydeck |
+
+**Restarts without a prompt.** Hermes asks Ryan before any command its
+"stop/restart system service" rule matches (`systemctl stop|restart|disable|mask`,
+anywhere in the text, inside `ssh … '…'` too; `reload` isn't in it) and refuses
+it on unattended turns (board, alerts). So restarts use a second key,
+`ssh_key_svc`, behind the alias `forge-svc`: Forge forces that key into
+`hank-svc` (`command=`, `restrict`), which runs exactly `systemctl
+restart|reload <unit>` and refuses everything else, with no shell. That makes
+one `command_allowlist` entry safe, `ssh forge-svc systemctl restart *`, which
+the config init writes on every start (`hermes approvals test` shows it as
+allow; plain `ssh forge … restart` still asks, and a chained `&& …` is denied).
+polkit's deny-list still applies to what `hank-svc` runs.
 
 The key's `from=` pins it to the cluster nodes (pod traffic leaves with its
 node's address), so it narrows the key to "from the cluster"; the key, in the

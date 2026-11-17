@@ -18,6 +18,11 @@ hosts=/etc/hermes-host-ssh
 if [ -s "$hosts/id_ed25519" ]; then
   install -d -m 0700 "$HOME/.ssh"
   install -m 0600 "$hosts/id_ed25519" "$HOME/.ssh/id_hosts"
+  # The restart-only key (alias forge-svc): the host forces it into a
+  # restart|reload-only command, so the bot may run those without a prompt.
+  if [ -s "$hosts/id_svc" ]; then
+    install -m 0600 "$hosts/id_svc" "$HOME/.ssh/id_hosts_svc"
+  fi
   install -m 0600 "$hosts/config" "$HOME/.ssh/config"
   install -m 0644 "$hosts/known_hosts" "$HOME/.ssh/known_hosts_hosts"
 fi
