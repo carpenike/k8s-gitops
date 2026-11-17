@@ -578,13 +578,13 @@ spec:
 
                 A fix that changes a manifest or a version (a rollback is a
                 `git revert`) is a pull request in carpenike/k8s-gitops against
-                `rebuild` (skill coding-sessions). Link it in the note. Ryan merges;
-                you never do.
+                `rebuild` (skill coding-sessions). Link it in the note. Ryan's
+                approval merges it; you never do.
 
                 ## 5. Everything else: Signal ops
 
-                Anything you can't fix within 3 or 4 (it needs data, Secrets, the
-                network, DNS, or a system outside the cluster, or two tries failed):
+                Anything you can't fix within 3 or 4, or on a host within your ssh
+                permissions (it needs data, Secrets, the network, DNS, or two tries failed):
                 one `signal_send` with `target: "ops"`, never the family channel. One
                 line: what is wrong, what you tried, and the note's path and any PR.
 
@@ -598,6 +598,35 @@ spec:
                 End the turn with a few lines for Ryan: what fired, what you did, and
                 what is left.
                 SKILL
+                  # Host SSH (input HOST_SSH_ENABLED; docs/apps/hermes.md, "Host
+                  # SSH"): what the bot may do on Forge and rydeck.
+                  if [ '${HOST_SSH_ENABLED:=false}' = true ]; then
+                    cat >> /opt/data/skills/homelab/incident-response/SKILL.md <<'SKILL'
+
+                ## On Forge and rydeck (ssh)
+
+                From your terminal, `ssh forge` and `ssh rydeck` log in as user `hank`. Use
+                them when an alert is about a host outside the cluster.
+
+                You may, without asking:
+
+                - read: `systemctl status`, `systemctl list-units --failed`, `journalctl -u
+                  <unit>` (and `-b`, `--since`), `df`, `free`, `ps`, `ss -tlnp`, `zpool status`,
+                  and other read-only diagnostics;
+                - on Forge only: `systemctl restart` or `systemctl reload` a `.service` unit
+                  (no sudo, no doas: polkit allows it as you).
+
+                Forge refuses, by design: restarting sshd, networking, WireGuard, the
+                firewall, cloudflared, any `systemd-*`, `nixos-*`, upgrade, deploy, ZFS, sanoid
+                or syncoid unit; `start`, `stop`, `enable` or `disable`; any timer or target;
+                and doas. A refusal is the answer. rydeck allows reads only.
+
+                The same two tries as in 3, logged in the note. Never `nixos-rebuild`, never
+                edit a file outside your home, never install anything. A config change on
+                Forge is a pull request in carpenike/nix-config (skill coding-sessions), and
+                Forge applies `main` on its own schedule after Ryan's approval merges it.
+                SKILL
+                  fi
                 else
                   rm -rf /opt/data/skills/homelab/incident-response
                 fi
@@ -1997,6 +2026,30 @@ spec:
                 apiVersion: generators.external-secrets.io/v1alpha1
                 kind: GithubAccessToken
                 name: github-app-token
+      # The bot's SSH key for hosts outside the cluster (HOST_SSH_ENABLED;
+      # docs/apps/hermes.md, "Host SSH"). 1Password field ssh_key, an
+      # ed25519 private key. Mounted into the screen pod only (persistence
+      # host-ssh), where the entrypoint installs it as pn's 0600 key. The
+      # template adds the final newline ssh needs.
+      host-ssh:
+        enabled: ${HOST_SSH_ENABLED:=false}
+        forceRename: host-ssh
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: host-ssh
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              id_ed25519: |
+                {{ .ssh_key | trim }}
+        data:
+          - secretKey: ssh_key
+            remoteRef:
+              key: hermes-${BOT_NAME}/ssh_key
       # The other coding engines' sign-ins (docs/apps/hermes.md, "Coding
       # engines"), each behind its own input so a bot without that
       # subscription has no ExternalSecret waiting on a missing field. Mounted
@@ -2675,6 +2728,36 @@ spec:
               - path: /etc/hermes-ssh
             app:
               - path: /etc/hermes-ssh
+                readOnly: true
+      # Host SSH (HOST_SSH_ENABLED): the key (Secret host-ssh) and, from the
+      # bot's folder, ConfigMap host-ssh-config with the ssh config and the
+      # pinned host keys. Screen pod only; the entrypoint copies them into
+      # pn's ~/.ssh. Optional, so a missing field never blocks the pod.
+      host-ssh:
+        enabled: ${HOST_SSH_ENABLED:=false}
+        type: custom
+        volumeSpec:
+          projected:
+            defaultMode: 0440
+            sources:
+              - secret:
+                  name: host-ssh
+                  optional: true
+                  items:
+                    - key: id_ed25519
+                      path: id_ed25519
+              - configMap:
+                  name: host-ssh-config
+                  optional: true
+                  items:
+                    - key: config
+                      path: config
+                    - key: known_hosts
+                      path: known_hosts
+        advancedMounts:
+          screen:
+            app:
+              - path: /etc/hermes-host-ssh
                 readOnly: true
       screen-ssh:
         type: secret

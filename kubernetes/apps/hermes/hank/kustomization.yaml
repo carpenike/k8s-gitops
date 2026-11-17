@@ -22,6 +22,7 @@ components:
 resources:
   - mcp-egress.yaml
   - screen-kube-apiserver.yaml
+  - host-ssh-egress.yaml
 configMapGenerator:
   - name: hermes-bot-inputs
     literals:
@@ -87,6 +88,11 @@ configMapGenerator:
       # kubectl and flux in the screen pod as ServiceAccount hermes-hank/hermes,
       # within ../hank-cluster (docs/apps/hermes.md, "Cluster access").
       - CLUSTER_ACCESS_ENABLED=true
+      # ssh to Forge and rydeck as user hank, with his own key (1Password
+      # hermes-hank/ssh_key), from the screen pod only (docs/apps/hermes.md,
+      # "Host SSH"; nix-config hosts/forge/core/hank.nix). host-ssh/ holds the
+      # ssh config and the pinned host keys; host-ssh-egress.yaml the route.
+      - HOST_SSH_ENABLED=true
       # Alertmanager alerts through openproject-mcp's relay to route alerts and
       # skill incident-response (docs/apps/hermes.md, "Alerts").
       - ALERTS_ENABLED=true
@@ -116,5 +122,9 @@ configMapGenerator:
   - name: hermes-bot-mcp
     files:
       - mcp-servers.yaml
+  - name: host-ssh-config
+    files:
+      - config=host-ssh/config
+      - known_hosts=host-ssh/known_hosts
 generatorOptions:
   disableNameSuffixHash: true
