@@ -236,15 +236,18 @@ spec:
 
                 1. Pick a short slug, e.g. `fix-login-timeout` (lowercase, digits, dashes).
                 2. Clone once into `/workspace/code/<repo>` (`gh repo clone <owner>/<repo>
-                   /workspace/code/<repo>`), or `git fetch` an existing clone.
+                   /workspace/code/<repo>`). Never work in that clone: `hermes-code` gives each
+                   task its own worktree, `/workspace/code/worktrees/<repo>/<slug>`, on branch
+                   `hermes/<slug>`, fetched fresh. So several tasks can run at once, in the
+                   same repository too.
                 3. Write the task to `/workspace/.hermes-code/<slug>.prompt`: the repo, what
-                   done looks like, and "work on branch hermes/<slug>, never on the default
-                   branch; open a draft pull request when done".
+                   done looks like, and "open a draft pull request when done".
                 4. Run it in the background and tell Ryan it is running, on which engine, and
-                   where he can watch it:
+                   where he can watch it. `--base` is the branch to start from: `origin/rebuild`
+                   in carpenike/k8s-gitops, otherwise omit it (the default branch).
 
                        terminal(
-                         command="hermes-code run <slug> --repo /workspace/code/<repo> --engine <claude|cursor|copilot|auto> --prompt-file /workspace/.hermes-code/<slug>.prompt",
+                         command="hermes-code run <slug> --repo /workspace/code/<repo> [--base origin/rebuild] --engine <claude|cursor|copilot|auto> --prompt-file /workspace/.hermes-code/<slug>.prompt",
                          background=true, notify=true)
 
                 5. When it finishes, read its JSON:
@@ -276,7 +279,10 @@ spec:
                 - When the work is done, the engine has opened a draft pull request on branch
                   `hermes/<slug>` whose body ends with `Engine: <engine>`. Send Ryan the link
                   and name the engine. In a board task's completion summary, name it too.
-                - Then `hermes-code stop <slug>` once Ryan has nothing more for it.
+                - Then, once Ryan has nothing more for it, `hermes-code stop <slug>` and
+                  `hermes-code clean <slug>`, which removes the task's worktree. `clean` refuses
+                  while it holds uncommitted changes or commits not pushed: tell Ryan instead
+                  of forcing it.
                 - Never push to a repository's default branch, or to `rebuild` in
                   carpenike/k8s-gitops (Flux deploys it). Every change goes through a pull
                   request.
@@ -1520,13 +1526,15 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            # Inputs SCREEN_CPU_LIMIT and SCREEN_MEMORY_LIMIT size the Kata VM
+            # (a bot running several coding engines at once needs more).
             resources:
               requests:
                 cpu: 500m
                 memory: 2Gi
               limits:
-                cpu: "2"
-                memory: 6Gi
+                cpu: ${SCREEN_CPU_LIMIT:=2}
+                memory: ${SCREEN_MEMORY_LIMIT:=6Gi}
         pod:
           runtimeClassName: kata-qemu
           # The pod's ServiceAccount token, for kubectl and flux in the

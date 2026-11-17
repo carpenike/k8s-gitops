@@ -91,6 +91,8 @@ spec later:
 | `GITHUB_APP_INSTALLATION_ID` | `181680083` | Required with `CLAUDE_CODE_ENABLED`: that App's installation on Ryan's account |
 | `GITHUB_APP_SLUG` | `hank-agent` | Required with `CLAUDE_CODE_ENABLED`: the App's slug. Commits are authored as `<slug>[bot]` |
 | `GITHUB_APP_BOT_USER_ID` | `356351201` | Required with `CLAUDE_CODE_ENABLED`: the id of user `<slug>[bot]` (`gh api 'users/<slug>%5Bbot%5D' -q .id`), for the commit email `<id>+<slug>[bot]@users.noreply.github.com` that GitHub links to the App |
+| `SCREEN_CPU_LIMIT` | `16` | Optional, default `2`. CPU limit of the screen pod (its Kata VM) |
+| `SCREEN_MEMORY_LIMIT` | `32Gi` | Optional, default `6Gi`. Memory limit of the screen pod |
 | `CURSOR_ENABLED` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: Cursor as a coding engine, signed in with 1Password field `cursor_api_key` ([Coding engines](#coding-engines)). `true` or `false` only |
 | `COPILOT_ENABLED` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: GitHub Copilot as a coding engine, signed in with 1Password field `copilot_token` ([Coding engines](#coding-engines)). `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
@@ -1431,6 +1433,17 @@ runs one itself: `hermes-code` (images/hermes-screen/engines) runs each task
 interactively in tmux session `code-<slug>`, so it stays open for follow-ups
 and Ryan can watch it. Each engine's own stop hook calls `hermes-code hook`,
 which records the finished turn; `hermes-code wait` reads it.
+
+**Several tasks at once.** Each task works in its own git worktree of the
+repository's clone, `/workspace/code/worktrees/<repo>/<slug>`, on branch
+`hermes/<slug>` from `--base` (default: the remote's default branch; in
+k8s-gitops, `origin/rebuild`), fetched fresh. Tasks in the same repository
+therefore never share a working tree or a checked-out branch, and any mix of
+engines can run side by side (each its own tmux session and remote session).
+`hermes-code clean <slug>` removes a finished task's worktree and refuses while
+it holds uncommitted changes or commits not pushed. Hank's screen is sized for
+it (`SCREEN_CPU_LIMIT=16`, `SCREEN_MEMORY_LIMIT=32Gi`, a 100Gi workspace). All
+three engines share Ryan's usage limits.
 
 | Engine | Started as | Remote view | Turn finished |
 | --- | --- | --- | --- |

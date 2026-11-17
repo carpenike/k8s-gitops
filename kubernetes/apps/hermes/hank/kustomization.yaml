@@ -38,7 +38,11 @@ configMapGenerator:
       - LLM_BUDGET_DURATION=30d
       - MATRIX_ALLOWED_USERS=@ryan:ryanholt.net
       - AGENT_STORAGE_SIZE=10Gi
-      - WORKSPACE_STORAGE_SIZE=20Gi
+      # Room for several coding tasks at once, each in its own worktree with its
+      # own engine, builds and tests (docs/apps/hermes.md, "Coding engines").
+      - WORKSPACE_STORAGE_SIZE=100Gi
+      - SCREEN_CPU_LIMIT=16
+      - SCREEN_MEMORY_LIMIT=32Gi
       - API_SERVER_ENABLED=true
       # Desktop workspace at https://hank-desktop (envoy-internal, Pocket ID
       # client hermes-hank, group admins only): his sessions, and his screen
