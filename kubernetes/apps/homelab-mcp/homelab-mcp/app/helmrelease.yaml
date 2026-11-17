@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (b2b1403, 0.66.4: shopping lists scale, recipe steps are returned,
+              # (13c933e, 0.67.0: openproject_get_task returns the task's engine
+              # and openproject_create_task can set it.
+              # b2b1403, 0.66.4: shopping lists scale, recipe steps are returned,
               # and the recipe index is paged.
               # 0996e5b, 0.66.3: the vault rule names no areas; vault_domains lists
               # them. Includes aacc1f7, 0.66.2: the DCR response lists refresh_token
@@ -141,7 +143,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-b2b1403dbfdfbae339583c162000f9ef597a3230@sha256:8500e5c10a69ad11d9f40903bc71642887e7d74a3f8672b8c4b4e68a6057547c
+              tag: sha-13c933ec96563de03374c00716d2708d5c2fab46@sha256:aef9fecddacdffd0eff51918dd9d8dcf77dfc50af97e428cb87aa528a6f19b2e
             command:
               - /bin/sh
               - -c
@@ -506,7 +508,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-b2b1403dbfdfbae339583c162000f9ef597a3230@sha256:a8d6868e5ebbd25f8eb476f4fc8afde17da19cd4012f26aaa5e0a02f1dcaed4f
+              tag: sha-13c933ec96563de03374c00716d2708d5c2fab46@sha256:3cdeba703f619856e7f58753b2b562011616d966f1231b13c9511cbf5a0bb501
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
