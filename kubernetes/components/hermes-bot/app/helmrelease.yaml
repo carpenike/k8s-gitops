@@ -1498,9 +1498,9 @@ spec:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
               # Floating tag, digest re-pinned by Renovate (docs/apps/hermes.md).
-              # This digest is the PR build of d27125c (v0.23.0-d27125c: the coding
-              # engines' live fixes); Renovate repins it to rebuild's build.
-              tag: v0.23.0@sha256:62cf19724343d7f1492e61934f469255a1a5b07515453b54efedf314774c6e03
+              # This digest is the PR build of cdc36ff (v0.23.0-cdc36ff: one git
+              # worktree per coding task); Renovate repins it to rebuild's build.
+              tag: v0.23.0@sha256:f8c35e9ed0a9be79ccb7a40c10a78eb523e0565dea0535abf9cf03c88dc701ca
             env:
               TZ: America/New_York
             probes:
