@@ -97,6 +97,40 @@ spec:
               The withings tools are refusing calls. Run the one-time
               authorization in carpenike/mcp README, "Withings posture"
               (scripts/withings_authorize.py piped into the seed command).
+        - alert: HomelabMcpOauthRefreshReuseRevoked
+          # homelab-mcp 0.68.0+. Reuse detection revoked a refresh-token
+          # family: an already-rotated token was replayed outside the
+          # lost-response grace. Either the chain leaked, or a client lost its
+          # token and is locked out until an interactive login. On 2026-11-16
+          # Hank's Hermes gateway sat in the second state for 33 hours,
+          # replaying every five minutes, and nothing paged. Both outcome
+          # series are exported at 0 from boot, so increase() sees the first.
+          expr: increase(homelab_mcp_oauth_refresh_replays_total{namespace="homelab-mcp",outcome="revoked"}[15m]) > 0
+          labels:
+            severity: warning
+          annotations:
+            summary: A homelab-mcp OAuth client was locked out by refresh-token reuse detection
+            description: >-
+              The app log names the family: kubectl -n homelab-mcp logs
+              deploy/homelab-mcp -c app | grep "reuse detected". A client that
+              repeats it every few minutes has lost its token and must sign in
+              again (for a Hermes bot, hermes mcp login homelab). A single
+              replay nobody can explain may mean a refresh token leaked.
+        - alert: HomelabMcpOauthRefreshReissuedOften
+          # The lost-response grace re-issued a family more than twice in a
+          # day: some client keeps dying or losing responses between our
+          # rotation and saving the new token. Each one is recoverable; a
+          # pattern means the client needs fixing before it loses twice in a
+          # row (the grace is one-shot per rotation).
+          expr: increase(homelab_mcp_oauth_refresh_replays_total{namespace="homelab-mcp",outcome="reissued"}[1d]) > 2
+          labels:
+            severity: info
+          annotations:
+            summary: homelab-mcp keeps re-issuing refresh tokens after lost responses
+            description: >-
+              grep "lost-response re-issue" in the homelab-mcp app log names
+              the family; the client behind it is crashing or timing out
+              mid-refresh.
         - alert: HomelabMcpMfpCookiesExpiringSoon
           # The session cookie's own expiry, read from the cookie file.
           expr: |
