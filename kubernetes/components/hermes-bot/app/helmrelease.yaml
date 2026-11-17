@@ -1527,9 +1527,9 @@ spec:
               repository: ghcr.io/carpenike/hermes-screen
               # Built from images/hermes-screen by hermes-screen-image.yaml.
               # Floating tag, digest re-pinned by Renovate (docs/apps/hermes.md).
-              # This digest is the PR build of cdc36ff (v0.23.0-cdc36ff: one git
-              # worktree per coding task); Renovate repins it to rebuild's build.
-              tag: v0.23.0@sha256:f8c35e9ed0a9be79ccb7a40c10a78eb523e0565dea0535abf9cf03c88dc701ca
+              # This digest is the PR build of 77fe457 (v0.23.0-77fe457: the
+              # entrypoint installs host SSH); Renovate repins it to rebuild's build.
+              tag: v0.23.0@sha256:bcf3d13a309ddbfbd43d5fd3152eb836dabc5495430bb7108fe5e32692176058
             env:
               TZ: America/New_York
             probes:
