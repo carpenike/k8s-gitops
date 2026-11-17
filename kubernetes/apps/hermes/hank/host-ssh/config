@@ -1,0 +1,17 @@
+# Hank's ssh to hosts outside the cluster (docs/apps/hermes.md, "Host SSH").
+# Installed as ~/.ssh/config in the screen pod by its entrypoint.
+Host forge
+  HostName 10.20.0.30
+Host rydeck
+  HostName 10.30.50.250
+Host forge rydeck
+  User hank
+  IdentityFile ~/.ssh/id_hosts
+  IdentitiesOnly yes
+  UserKnownHostsFile ~/.ssh/known_hosts_hosts
+  StrictHostKeyChecking yes
+  ForwardAgent no
+  ForwardX11 no
+  ClearAllForwardings yes
+  BatchMode yes
+  ConnectTimeout 10

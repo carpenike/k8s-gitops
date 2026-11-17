@@ -93,6 +93,7 @@ spec later:
 | `GITHUB_APP_BOT_USER_ID` | `356351201` | Required with `CLAUDE_CODE_ENABLED`: the id of user `<slug>[bot]` (`gh api 'users/<slug>%5Bbot%5D' -q .id`), for the commit email `<id>+<slug>[bot]@users.noreply.github.com` that GitHub links to the App |
 | `SCREEN_CPU_LIMIT` | `16` | Optional, default `2`. CPU limit of the screen pod (its Kata VM) |
 | `SCREEN_MEMORY_LIMIT` | `32Gi` | Optional, default `6Gi`. Memory limit of the screen pod |
+| `HOST_SSH_ENABLED` | `true` | Optional, default `false`. ssh from the screen pod to hosts outside the cluster with the bot's own key, 1Password field `ssh_key`; the bot's folder supplies `host-ssh/` (config, pinned host keys) and the egress ([Host SSH](#host-ssh-opt-in)). `true` or `false` only |
 | `CURSOR_ENABLED` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: Cursor as a coding engine, signed in with 1Password field `cursor_api_key` ([Coding engines](#coding-engines)). `true` or `false` only |
 | `COPILOT_ENABLED` | `true` | Optional, default `false`. With `CLAUDE_CODE_ENABLED`: GitHub Copilot as a coding engine, signed in with 1Password field `copilot_token` ([Coding engines](#coding-engines)). `true` or `false` only |
 | `CODE_PEER` | `hank` | Optional. On a bot without `CLAUDE_CODE_ENABLED`: the bot that has it. Skill `homelab/code-requests` sends code and GitHub asks there ([Bots without it](#bots-without-it-code_peer)) |
@@ -343,7 +344,9 @@ exceptions are opt-in: with Claude Code, it gets a Claude subscription
 token and a GitHub App installation token
 ([Coding with Claude Code](#coding-with-claude-code-opt-in)); with
 `CLUSTER_ACCESS_ENABLED`, its ServiceAccount token and a route to the API
-server ([Cluster access](#cluster-access-opt-in)).
+server ([Cluster access](#cluster-access-opt-in)); with `HOST_SSH_ENABLED`,
+its own SSH key and a route to port 22 of the named hosts
+([Host SSH](#host-ssh-opt-in)).
 
 Chromium runs **without its own sandbox** in the screen. Both launches
 pass `--no-sandbox`:
@@ -1333,6 +1336,31 @@ What the token may do is in `kubernetes/apps/hermes/hank-cluster`
 A refused write is the policy working: the incident skill says so. To take
 the access away, set the input to `false` (no token) and delete
 `hank-cluster` from `kubernetes/apps/hermes/kustomization.yaml`.
+
+## Host SSH (opt-in)
+
+`HOST_SSH_ENABLED=true` (Hank only) lets the bot `ssh forge` and `ssh rydeck`
+from its terminal, as user `hank`, with its own ed25519 key: 1Password
+`hermes-<bot>/ssh_key`, mounted in the screen pod only (Secret `host-ssh`). The
+screen's entrypoint installs it as `pn`'s 0600 key, with the ssh config and
+pinned host keys from the bot's `host-ssh/` folder (ConfigMap
+`host-ssh-config`; `StrictHostKeyChecking yes`, no forwarding). CNP
+`screen-host-ssh` opens port 22 to those two addresses and nothing else.
+
+| Host | What `hank` may do | Where it is set |
+| --- | --- | --- |
+| Forge | Read the journal and status. Restart or reload any `.service` unit through polkit, except sshd, networking, WireGuard, the firewall, cloudflared, `systemd-*`, `nixos-*`, upgrade/deploy/guard, ZFS, sanoid and syncoid units, rescue and emergency. No `start`, `stop`, timers or targets, and no doas, so no `nixos-rebuild`, installs or `/etc` edits | nix-config `hosts/forge/core/hank.nix` |
+| rydeck | Log in and read, like Grok's user there. No restarts | By hand on rydeck |
+
+The key's `from=` pins it to the cluster nodes (pod traffic leaves with its
+node's address), so it narrows the key to "from the cluster"; the key, in the
+screen pod only, is the boundary, and every coding engine there can use it.
+Skill `incident-response` gains a host section; config changes on Forge are
+nix-config pull requests.
+
+To rotate the key: generate a new one into the 1Password field, replace the
+public half in nix-config (and on rydeck), deploy Forge, then restart the
+screen pod.
 
 ## Alerts (opt-in)
 
