@@ -18,9 +18,11 @@ group only when:
 Anything else is a repeat and gets 200 `{"status": "duplicate"}`. The state is
 in memory: resolved groups go after 24 hours, and at most 1000 groups are kept
 (least recently changed first). A restart forgets it, so the forwarded event's
-`webhook-id` is derived from what was forwarded (group, status, and each
-alert's fingerprint and start time): Hermes drops a delivery id it has already
-seen, which catches a repeat across a restart.
+`webhook-id` is derived from what was forwarded: the group key and the exact
+bytes of the event. Hermes drops a delivery id it has already seen with the
+same bytes, which catches a repeat across a restart. It refuses the same id
+with different bytes (503 `admission_conflict`) on every retry, for good, so
+the id must change whenever the bytes do; see `delivery_id`.
 
 A forward the bot does not accept (transport error or a non-2xx answer) is a
 502, and the group is not recorded as forwarded, so Alertmanager's own retry
@@ -183,16 +185,24 @@ def parse(event: Any) -> Notification | None:
     )
 
 
-def delivery_id(n: Notification) -> str:
-    """Stable per (group, status, forwarded alerts): the same notice always gets the same id.
+def delivery_id(n: Notification, body: bytes) -> str:
+    """`am-` + sha256 of the group key and `body`, the exact bytes forwarded.
 
-    Each alert's start time is in it too, so an alert that resolved and fired
-    again is a new delivery to Hermes, while a repeat_interval re-send is not.
+    Hermes binds a delivery id to the payload it first admitted and answers any
+    later delivery under that id with other bytes 503 `admission_conflict`, on
+    every retry. An id built from a summary of the notice (group, status, each
+    alert's fingerprint and start time) is not enough: the body also renders
+    `ends:`, annotations, and a firing group's resolved alerts, and Alertmanager
+    can keep an alert's start time across resolve -> fire -> resolve, so two
+    different resolved notices shared one id and Alertmanager retried the second
+    every few seconds. Hashing the bytes makes one id one body by construction.
+
+    A byte-identical re-send (Alertmanager's retry, a repeat_interval re-send
+    after a restart) keeps its id and Hermes drops it. One whose text changed
+    (an annotation quoting `$value`, say) is a new delivery: a second notice to
+    the bot rather than a refusal that never ends.
     """
-    key = json.dumps(
-        [n.group_key, n.status, sorted((a.fingerprint, a.starts_at) for a in n.forwarded())],
-        separators=(",", ":"),
-    )
+    key = json.dumps([n.group_key, hashlib.sha256(body).hexdigest()], separators=(",", ":"))
     return "am-" + hashlib.sha256(key.encode()).hexdigest()
 
 
@@ -254,7 +264,9 @@ def render(n: Notification, limit: int = BODY_LIMIT) -> str:
     if n.truncated_alerts:
         header += f"; {n.truncated_alerts} more not sent by Alertmanager (max_alerts)"
     blocks = [header]
-    ordered = sorted(n.alerts, key=lambda a: a.status != "firing")
+    # A fixed order, so the same alerts in another order are the same bytes (and
+    # the same delivery id).
+    ordered = sorted(n.alerts, key=lambda a: (a.status != "firing", a.fingerprint, a.starts_at))
     for a in ordered:
         blocks.append("\n".join(_render_alert(a)))
     text = "\n\n".join(blocks)
@@ -389,7 +401,7 @@ class AlertRelay:
             payload = json.dumps(forward_payload(n, self.settings.alerts_bot),
                                  separators=(",", ":")).encode()
             headers = hermes_headers(self.settings.hermes_webhook_secret, payload,
-                                     delivery_id(n))
+                                     delivery_id(n, payload))
             try:
                 resp = await self._client.post(self.url, content=payload, headers=headers)
                 code = resp.status_code
