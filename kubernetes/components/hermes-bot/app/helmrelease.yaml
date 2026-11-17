@@ -613,8 +613,16 @@ spec:
                 - read: `systemctl status`, `systemctl list-units --failed`, `journalctl -u
                   <unit>` (and `-b`, `--since`), `df`, `free`, `ps`, `ss -tlnp`, `zpool status`,
                   and other read-only diagnostics;
-                - on Forge only: `systemctl restart` or `systemctl reload` a `.service` unit
-                  (no sudo, no doas: polkit allows it as you).
+                - on Forge only, restart or reload a `.service` unit with the restart-only
+                  alias, as a command on its own (no `&&`, no quotes, nothing after it):
+
+                      ssh forge-svc systemctl restart <unit>
+                      ssh forge-svc systemctl reload <unit>
+
+                  That exact shape runs without asking Ryan, on alert and board turns too;
+                  Forge refuses any other command on that alias. Check the result with a
+                  separate `ssh forge 'systemctl status <unit> --no-pager'`. Never restart
+                  through plain `ssh forge`: that needs Ryan's OK each time.
 
                 Forge refuses, by design: restarting sshd, networking, WireGuard, the
                 firewall, cloudflared, any `systemd-*`, `nixos-*`, upgrade, deploy, ZFS, sanoid
@@ -629,6 +637,16 @@ spec:
                   fi
                 else
                   rm -rf /opt/data/skills/homelab/incident-response
+                fi
+                # Host SSH: the one command Hermes may run without asking. Its
+                # "stop/restart system service" rule would otherwise prompt
+                # Ryan for every restart and refuse it on alert and board
+                # turns. Safe as a glob only because forge forces the forge-svc
+                # key into restart|reload <unit> (nix-config
+                # hosts/forge/core/hank.nix, hank-svc). Rewritten on every
+                # start, so an "!approve always" made in chat does not persist.
+                if [ '${HOST_SSH_ENABLED:=false}' = true ]; then
+                  hermes config set command_allowlist '["ssh forge-svc systemctl restart *"]'
                 fi
                 hermes config set terminal.backend ssh
                 hermes config set terminal.ssh_host screen.hermes-${BOT_NAME}.svc.cluster.local
@@ -2046,10 +2064,17 @@ spec:
             data:
               id_ed25519: |
                 {{ .ssh_key | trim }}
+              id_svc: |
+                {{ .ssh_key_svc | trim }}
         data:
           - secretKey: ssh_key
             remoteRef:
               key: hermes-${BOT_NAME}/ssh_key
+          # The restart-only key (ssh alias forge-svc; docs/apps/hermes.md,
+          # "Host SSH"), forced on the host into restart|reload only.
+          - secretKey: ssh_key_svc
+            remoteRef:
+              key: hermes-${BOT_NAME}/ssh_key_svc
       # The other coding engines' sign-ins (docs/apps/hermes.md, "Coding
       # engines"), each behind its own input so a bot without that
       # subscription has no ExternalSecret waiting on a missing field. Mounted
@@ -2746,6 +2771,8 @@ spec:
                   items:
                     - key: id_ed25519
                       path: id_ed25519
+                    - key: id_svc
+                      path: id_svc
               - configMap:
                   name: host-ssh-config
                   optional: true
