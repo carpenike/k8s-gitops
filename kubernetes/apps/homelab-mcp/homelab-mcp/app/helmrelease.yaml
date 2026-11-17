@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (13c933e, 0.67.0: openproject_get_task returns the task's engine
+              # (3a39b98, 0.67.1: openproject_get_task returns the full description
+              # and comments.
+              # 13c933e, 0.67.0: openproject_get_task returns the task's engine
               # and openproject_create_task can set it.
               # b2b1403, 0.66.4: shopping lists scale, recipe steps are returned,
               # and the recipe index is paged.
@@ -143,7 +145,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-13c933ec96563de03374c00716d2708d5c2fab46@sha256:aef9fecddacdffd0eff51918dd9d8dcf77dfc50af97e428cb87aa528a6f19b2e
+              tag: sha-3a39b981279f27af5d823419bcf4957afeee8227@sha256:e0d9ddfdcfd52820ab20106eafe77b2078123c3f9e0a7fc52e36a0dd08ee09f7
             command:
               - /bin/sh
               - -c
@@ -508,7 +510,7 @@ spec:
               # Built by carpenike/mcp .github/workflows/image.yml from main
               # (e1473d7). Moves with the app image above.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-13c933ec96563de03374c00716d2708d5c2fab46@sha256:3cdeba703f619856e7f58753b2b562011616d966f1231b13c9511cbf5a0bb501
+              tag: sha-3a39b981279f27af5d823419bcf4957afeee8227@sha256:069d2c70afe95a981769f4f23f6633a01a22d9b4eb30047cfde16be91fc018b7
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
