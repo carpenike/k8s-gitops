@@ -74,3 +74,32 @@ def test_href_id_and_null_links() -> None:
     assert hal.href_id(None) is None
     assert hal.link("users", None) == {"href": None}
     assert hal.link("statuses", 7) == {"href": "/api/v3/statuses/7"}
+
+
+def test_full_text_keeps_markdown_and_flags_only_past_the_cap() -> None:
+    raw = "Steps:\n\n1. `ssh forge 'systemctl status x'`\n2. **then** [the doc](https://e/x)\n"
+    text, truncated = hal.full_text(raw, 1000)
+    assert text == raw.strip() and truncated is False
+    text, truncated = hal.full_text("x" * 50, 20)
+    assert truncated is True and text == "x" * 20 + "…"
+    assert hal.full_text(None, 10) == ("", False)
+
+
+def test_slim_work_package_full_returns_the_whole_raw_description() -> None:
+    wp = fx("wp_101_new")
+    long = "## Steps\n\n" + "\n".join(f"{i}. step number {i}" for i in range(1, 200))
+    wp["description"] = {"format": "markdown", "raw": long, "html": ""}
+    full = hal.slim_work_package(wp, full=True)
+    assert full["description"] == long and full["description_truncated"] is False
+    excerpt = hal.slim_work_package(wp)
+    assert excerpt["description_truncated"] is True and "\n" not in excerpt["description"]
+
+
+def test_slim_comments_full_keeps_long_comments_whole() -> None:
+    acts = fx("activities_101")
+    long = "Line one.\n\n" + "word " * 300
+    next(a for a in hal.elements(acts) if (a.get("comment") or {}).get("raw"))["comment"]["raw"] = long
+    full = hal.slim_comments(acts, 10, full=True)
+    assert any(c["text"] == long.strip() and c["truncated"] is False for c in full)
+    short = hal.slim_comments(acts, 10)
+    assert any(c["truncated"] is True for c in short)

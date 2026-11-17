@@ -769,6 +769,35 @@ async def test_get_task_handoff_fields_are_null_when_unset_or_unreadable(
     assert (out["context"], out["done_when"]) == (None, None)
 
 
+async def test_get_task_returns_the_full_description_and_comments(
+    op: OpenProject, fake: FakeOpenProject
+) -> None:
+    wp = fx("wp_101_new")
+    long = "Steps:\n\n" + "\n".join(f"{i}. `ssh forge 'step {i}'`" for i in range(1, 60))
+    wp["description"] = {"format": "markdown", "raw": long, "html": ""}
+    fake.on("GET", "/work_packages/101", wp)
+    fake.on("GET", "/work_packages/schemas/9-1", fx("wp_schema_9_1"))
+    acts = fx("activities_101")
+    comment = "Full steps:\n\n" + "x " * 400
+    next(a for a in acts["_embedded"]["elements"] if (a.get("comment") or {}).get("raw"))[
+        "comment"
+    ]["raw"] = comment
+    fake.on("GET", "/work_packages/101/activities", acts)
+    out = await op.get_task(T, 101, comments=10)
+    assert out["description"] == long and out["description_truncated"] is False
+    assert any(c["text"] == comment.strip() for c in out["recent_comments"])
+    assert all(c["truncated"] is False for c in out["recent_comments"])
+
+
+async def test_list_tasks_keeps_short_excerpts(op: OpenProject, fake: FakeOpenProject) -> None:
+    rows = fx("work_packages_ready")
+    rows["_embedded"]["elements"][0]["description"] = {"format": "markdown", "raw": "y " * 600}
+    fake.on("GET", "/work_packages", rows)
+    out = await op.list_tasks(T)
+    first = out["tasks"][0]
+    assert first["description_truncated"] is True and len(first["description"]) <= 501
+
+
 # ── the Engine field (a list: claude | cursor | copilot) ─────────────
 # Shapes from the live API (OpenProject 17.9.6, 2026-11-16): the create form's
 # schema lists the options under _links.allowedValues; a task carries its choice
