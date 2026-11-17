@@ -315,6 +315,8 @@ other alert here.
 | `HomelabMcpWithingsTokenUnusable` | No Withings token, or Withings refused it and a refresh, for 1 hour |
 | `HomelabMcpObsidianSyncDown` | The `obsidian-sync` container has not been running for 15 minutes |
 | `HomelabMcpObsidianSyncRestarting` | `obsidian-sync` restarted more than twice in an hour |
+| `HomelabMcpOauthRefreshReuseRevoked` | Refresh-token reuse detection revoked a family (homelab-mcp 0.68.0+): a client is locked out until it signs in again, or a token leaked |
+| `HomelabMcpOauthRefreshReissuedOften` | The lost-response grace re-issued refresh tokens more than twice in a day (info) |
 
 ## Cutover from Forge
 
