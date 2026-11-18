@@ -12,3 +12,9 @@ spec:
   values:
     replicaCount: 2
     manageCRDs: true
+    # The chart's ServiceMonitor scrapes /metrics over HTTPS with no bearer
+    # token, so the controller's authn/authz filter answers 401. Turning the
+    # check off lets Prometheus scrape. The metrics are controller and
+    # replication counters, reachable only inside the cluster.
+    metrics:
+      disableAuth: true
