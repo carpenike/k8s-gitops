@@ -54,7 +54,12 @@ Settings worth knowing:
   bank id `hermes`, so isolation comes from the schema, not the bank.
 - **Sizing:** idle with both models loaded, the pod uses about 1.6 GiB
   (measured on 1.2.0, amd64). Embedding and reranking run on its CPU.
-  Limit 4 GiB and 2 CPUs; request 2 GiB.
+  Limit 8 GiB and 2 CPUs; request 2 GiB. Simultaneous recalls each hold a
+  reranker batch, and four at once passed 4 GiB (OOMKilled during a Ceph
+  alert storm on 2026-11-18), so the local reranker runs at most two at a
+  time (`HINDSIGHT_API_RERANKER_LOCAL_MAX_CONCURRENT=2`, default 4) over at
+  most 150 candidates (`HINDSIGHT_API_RERANKER_MAX_CANDIDATES=150`, default
+  300).
 
 ### Base schema
 
