@@ -407,7 +407,8 @@ repo; its Stalwart settings live in its own store, not in either repo.
      already runs inside the tailnet. MtaOutboundStrategy `route`: keep
      `is_local_domain(rcpt_domain)` → `'local'`, add
      `rcpt_domain == 'holthome.net' || rcpt_domain == 'ryanholt.net' ||
-     rcpt_domain == 'stefanieholt.com'` → `'cluster'`, `else` `'mx'`
+     rcpt_domain == 'stefanieholt.com' || rcpt_domain == 'devialea.com'`
+     → `'cluster'`, `else` `'mx'`
    - **Sender checks.** SenderAuth `dmarcVerify` `strict` when
      `local_port == 25` (the default `relaxed` records a failure but
      accepts the mail), so `p=reject` domains, `holthome.net` included,
@@ -449,7 +450,9 @@ to the domain's MX instead of the cluster.
 ## More mail domains
 
 `ryanholt.net` and `stefanieholt.com` move here from Microsoft 365
-(tenant `holt.onmicrosoft.com`). Both zones are at Cloudflare.
+(tenant `holt.onmicrosoft.com`). `devialea.com` moves from Cloudflare
+Email Routing, which only forwards and has no mailbox to copy. All three
+zones are at Cloudflare.
 
 Accounts stay in `holthome.net`. The OIDC directory appends
 `usernameDomain` to the bare Pocket ID username, so a sign-in always asks
@@ -465,6 +468,7 @@ domains' addresses are aliases on the `holthome.net` account:
 | --- | --- |
 | `ryan@ryanholt.net` | `ryan@holthome.net` |
 | `stefanie@stefanieholt.com` | `stefanie@holthome.net` |
+| `design@devialea.com` | `stefanie@holthome.net` |
 
 `claimUsername` `email` would not work instead: Pocket ID's email is
 not always an address this server hosts.
@@ -472,11 +476,13 @@ not always an address this server hosts.
 A Domain in Stalwart is local from the moment it exists. Mail that this
 server's users send to it stays here, even while its MX still points at
 Microsoft 365. Microsoft 365 does the same for mail between its own
-users until the domain is removed from the tenant.
+users until the domain is removed from the tenant. An address on the
+domain that is not an alias here bounces for this server's users, so
+add every address the old host had.
 
-Done (2026-11-18): the Domains exist (DKIM Automatic, DNS management
+Done (2026-11-18): the three Domains exist (DKIM Automatic, DNS management
 Manual, report address `postmaster@holthome.net`), the aliases are set,
-and the edge accepts and routes both domains.
+and the edge accepts and routes all three.
 
 Cutover, per domain:
 
@@ -490,18 +496,20 @@ Cutover, per domain:
 3. **SMTP2GO.** Add the domain under Verified Senders › Sender domains
    and let SMTP2GO add its CNAMEs through its Cloudflare connection.
    SMTP2GO refuses mail from a sender domain it has not verified.
-4. **Mailbox.** Copy the Microsoft 365 mailbox into the account.
-   Microsoft 365 IMAP takes OAuth only, so use a mail client signed in
-   to both, or imapsync with an OAuth token.
-5. **Records.** Delete the Microsoft MX, the `selector1` and `selector2`
-   DKIM CNAMEs and the `autodiscover` CNAME. Then publish MX, SPF, DMARC
+4. **Mailbox.** Copy the Microsoft 365 mailbox into the account (not
+   for `devialea.com`). Microsoft 365 IMAP takes OAuth only, so use a
+   mail client signed in to both, or imapsync with an OAuth token.
+5. **Records.** For `devialea.com`, first turn off Email Routing for
+   the zone: it locks its MX records and deletes them with itself. Its
+   SPF include and its Cloudflare DMARC report address go too.
+   For the other two, delete the Microsoft MX, the `selector1` and
+   `selector2` DKIM CNAMEs and the `autodiscover` CNAME; their DMARC
+   records report to `ryan@ryanholt.net`. Then publish MX, SPF, DMARC
    and TLS-RPT from the Domain as well. SPF becomes Stalwart's, like
-   `holthome.net`'s. The current DMARC records for both domains report
-   to `ryan@ryanholt.net`; Stalwart's report to
-   `postmaster@holthome.net`.
+   `holthome.net`'s, and DMARC reports go to `postmaster@holthome.net`.
 6. **Check.** Mail from outside arrives through the edge, mail sent from
    the alias passes DKIM and DMARC at Gmail, and nothing new arrives in
-   Microsoft 365.
+   Microsoft 365 or through Cloudflare's forwarding.
 7. **Retire.** After a few quiet days, copy anything left, remove the
    domain from the tenant, and drop any `MS=` record.
 
