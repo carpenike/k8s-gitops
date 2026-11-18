@@ -148,6 +148,17 @@ spec:
     # hosts/forge/services/finance-{signal-production,ingestion,snapshots}/
     # alerts.nix with the same expressions, severities and runbook text; the
     # systemd unit and timer checks become checks on the pod's containers.
+    #
+    # Flap damping (FLAP below). On the cluster the Signal status read drops
+    # out in bursts of 2-32 minutes that cluster into one- to two-hour
+    # episodes. listener_healthy, report_status_available, report_attention
+    # and the weekly report_fulfilled all move together. With for: 1-2m (and
+    # none on ReportMissed) each burst fired and resolved: 14 fires a day on
+    # ReportAttention and on ReportMissed{kind="weekly"} in a 24 h replay to
+    # 2026-11-18. for: 5m drops the shortest bursts; keep_firing_for: 30m
+    # holds an alert across the gaps inside an episode, so one episode pages
+    # once. A failure that lasts is still paged 5 minutes in and stays firing;
+    # the cost is a resolve that arrives up to 30 minutes late.
     - name: homelab-mcp-finance-signal
       rules:
         - alert: FinanceSignalPathUnhealthy
@@ -166,7 +177,8 @@ spec:
               recursively chmod state.
         - alert: FinanceSignalListenerUnhealthy
           expr: finance_signal_listener_healthy{namespace="homelab-mcp"} == 0 or absent(finance_signal_listener_healthy{namespace="homelab-mcp"})
-          for: 2m
+          for: 5m  # FLAP
+          keep_firing_for: 30m
           labels: *signal
           annotations:
             summary: Finance Signal capture is disconnected, stale or unverifiable
@@ -189,7 +201,8 @@ spec:
           expr: |
             finance_signal_report_status_available{namespace="homelab-mcp"} == 0
               and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} > 0)
-          for: 2m
+          for: 5m  # FLAP
+          keep_firing_for: 30m
           labels: *signal
           annotations:
             summary: Current finance report status cannot be verified
@@ -201,7 +214,8 @@ spec:
           expr: |
             finance_signal_report_attention{namespace="homelab-mcp"} == 1
               and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} > 0)
-          for: 1m
+          for: 5m  # FLAP
+          keep_firing_for: 30m
           labels: *signal
           annotations:
             summary: Current finance report has a non-retryable failure or unknown outcome
@@ -215,6 +229,11 @@ spec:
             (finance_signal_report_fulfilled{namespace="homelab-mcp"} == 0)
               and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} > 0)
               and on (instance, job, kind) (finance_signal_report_deadline_timestamp_seconds{namespace="homelab-mcp"} < time())
+          # Once a deadline has passed, fulfilled == 0 is all this checks, and
+          # fulfilled reads 0 while the status read is down. So with no for,
+          # every status burst also fired the weekly slot as missed.
+          for: 5m  # FLAP
+          keep_firing_for: 30m
           labels: *signal
           annotations:
             summary: Finance report purpose missed its completion deadline
@@ -362,7 +381,9 @@ spec:
       rules:
         - alert: FinanceSnapshotUnavailable
           expr: finance_snapshot_status_available{namespace="homelab-mcp"} == 0 or absent(finance_snapshot_status_available{namespace="homelab-mcp"})
-          for: 2m
+          # 4-5 minute dips fired it three times in a day; see FLAP above.
+          for: 5m
+          keep_firing_for: 30m
           labels: &snapshot
             severity: high
             service: finance-snapshot
