@@ -2004,6 +2004,9 @@ spec:
               EMAIL_AUTHSERV_ID: "mx.${SECRET_DOMAIN}"
               # Only these senders. Empty: every sender is dropped.
               EMAIL_ALLOWED_USERS: "${EMAIL_ALLOWED_USERS:=}"
+              # The email home channel. Unset, Hermes mails a "no home channel
+              # is set" notice at the start of every email conversation.
+              EMAIL_HOME_ADDRESS: "${EMAIL_HOME_ADDRESS:=}"
         data:
           - secretKey: email_password
             remoteRef:
