@@ -86,6 +86,7 @@ spec later:
 | `EMAIL_ENABLED` | `true` | Optional, default `false`. Hermes' email platform on the bot's own Stalwart mailbox ([Email](#email-opt-in)). `true` or `false` only |
 | `EMAIL_ADDRESS` | `chief@holthome.net` | Required with `EMAIL_ENABLED`: the bot's mailbox, an agent mailbox in [mail.md](mail.md) |
 | `EMAIL_ALLOWED_USERS` | `ryan@holthome.net,ryan@ryanholt.net` | Required with `EMAIL_ENABLED`: the only senders whose mail starts a turn, comma-separated. Empty: every message is dropped |
+| `EMAIL_HOME_ADDRESS` | `ryan@holthome.net` | Optional with `EMAIL_ENABLED`: the email platform's home channel. Unset, every new email conversation starts with a "no home channel is set" notice |
 | `ROUTINES_PRIVATE_ENABLED` | `true` | Optional, default `false`. Secret `routines-private` from every field of 1Password item `hermes-<bot>-routines`: the private details of the bot's `routines.yaml`, one field per routine key ([Routines from git](#routines-from-git)). `true` or `false` only |
 | `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
@@ -2041,6 +2042,11 @@ does, as `chief@holthome.net`. When it is on, the component adds:
   `unauthorized_dm_behavior`, so pairing and decline replies are off.
 - Automated senders (`noreply`, `mailer-daemon`, bulk headers) and the
   bot's own address are dropped too.
+- `EMAIL_HOME_ADDRESS` is the platform's home channel. Without one, Hermes
+  sends a "No home channel is set for Email" notice when an email
+  conversation starts (`gateway/run_turn_prepare.py`). It is only a
+  delivery target for jobs and messages sent to email; Chief's routines
+  and alerts still go to Matrix.
 - The body (subject included) becomes the user message; attachments are
   saved for the bot to read. The answer goes back by SMTP as a reply in
   the same thread, to the sender only.
