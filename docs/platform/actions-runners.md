@@ -11,7 +11,7 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Controller | HelmRelease `gha-runner-scale-set-controller` | Installs the scale-set CRDs and the controller. Service account `gha-rs-controller` |
 | Scale set | HelmRelease `sam-tracker` | Repo `https://github.com/carpenike/sam-tracker`. `runs-on` name `sam-tracker-k8s`. `minRunners` 0, `maxRunners` 3 |
 | Scale set | HelmRelease `sam-tracker-app-k8s` | Repo `https://github.com/carpenike/sam-tracker-app`. `runs-on` name `sam-tracker-app-k8s`. Same limits and mode as `sam-tracker` |
-| Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Runner `1` CPU / `2Gi` up to `8` CPU / `16Gi`, no container mode (see below) |
+| Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Runner `1` CPU / `2Gi` up to `8` CPU / `16Gi`, `maxRunners` 8, no container mode (see below) |
 | Scale set | HelmRelease `atrium-k8s` | Repo `https://github.com/carpenike/atrium`. `runs-on` name `atrium-k8s`. Non-Nix jobs, shared limits |
 | Scale set | HelmRelease `mcp-k8s` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s`. Non-Nix jobs. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
 | Scale set | HelmRelease `mcp-k8s-build` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s-build`. Nix and image jobs. Kata VM pods, privileged inside the guest (ADR 0011). Runner `2` CPU / `4Gi` up to `8` CPU / `16Gi`, `maxRunners` 2 |
