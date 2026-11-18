@@ -549,8 +549,8 @@ if not string :is "${env.authenticated_as}" "" {
 
     # Stamp mail to the agent mailboxes, but only when the From header is
     # exactly the envelope sender, which mustMatchSender has already verified.
-    # Agent mailboxes: list each one here. "unset.invalid" matches nothing.
-    if allof (envelope :all :comparator "i;unicode-casemap" :is "to" ["agent@unset.invalid"],
+    # Agent mailboxes, with their plus-addresses: list each one here.
+    if allof (envelope :all :comparator "i;unicode-casemap" :matches "to" ["chief@holthome.net", "chief+*@holthome.net"],
               address :count "eq" :comparator "i;ascii-numeric" "from" "1",
               address :all :comparator "i;unicode-casemap" :is "from" "${envelope.from}",
               address :domain :matches "from" "*") {
@@ -560,8 +560,13 @@ if not string :is "${env.authenticated_as}" "" {
 }
 ```
 
-Adding an agent mailbox: create the account, put its address in the
-script's list, and add it to the edge's `allowRelaying` expression.
+| Mailbox | Bot | App password |
+| --- | --- | --- |
+| `chief@holthome.net` (and `chief+…@`) | Hermes Chief | 1Password `hermes-chief`, field `email_password` |
+
+Adding an agent mailbox: create the account (role User, no groups), give
+it one app password, put its address and its plus-address pattern in the
+script's list, and add both to the edge's `allowRelaying` expression.
 
 Tested 2026-11-18 with a temporary account, deleted afterwards: SMTP on
 465 and JMAP submission were stamped and their forged headers removed, a
