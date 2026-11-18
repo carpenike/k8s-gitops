@@ -1510,6 +1510,12 @@ spec:
               - secretRef:
                   name: tavily
                   optional: true
+              # EMAIL_* for Hermes' email platform, only for a bot with
+              # EMAIL_ENABLED=true (ExternalSecret email). The platform starts
+              # when address, password and both hosts are set. Agent pod only.
+              - secretRef:
+                  name: email
+                  optional: true
               # HERMES_DASHBOARD_OIDC_ISSUER / _CLIENT_ID for the Webapp's
               # Pocket ID sign-in, only with WEBAPP_ENABLED=true (ExternalSecret
               # webapp). Without it no sign-in provider registers and the gated
@@ -1964,6 +1970,44 @@ spec:
           - secretKey: tavily_api_key
             remoteRef:
               key: hermes-${BOT_NAME}/tavily_api_key
+      # The bot's mailbox on Stalwart (input EMAIL_ENABLED; docs/apps/hermes.md,
+      # "Email (opt-in)"). The app password is the only secret; the rest is
+      # fixed here so a bot cannot point the platform elsewhere. Missing
+      # field: this stays unready, Secret email is never created, and the
+      # platform stays off.
+      email:
+        enabled: ${EMAIL_ENABLED:=false}
+        forceRename: email
+        refreshInterval: 12h
+        secretStoreRef:
+          kind: ClusterSecretStore
+          name: onepassword
+        target:
+          name: email
+          creationPolicy: Owner
+          template:
+            engineVersion: v2
+            data:
+              EMAIL_ADDRESS: "${EMAIL_ADDRESS:=}"
+              EMAIL_PASSWORD: "{{ .email_password }}"
+              # mx resolves to Stalwart's LoadBalancer inside the cluster (a
+              # static record on the router) and to the edge relay publicly.
+              # The certificate covers only this name.
+              EMAIL_IMAP_HOST: "mx.${SECRET_DOMAIN}"
+              EMAIL_IMAP_PORT: "993"
+              EMAIL_SMTP_HOST: "mx.${SECRET_DOMAIN}"
+              EMAIL_SMTP_PORT: "465"
+              # Hermes trusts only the topmost Authentication-Results header
+              # from this server: the edge's on mail from outside, script
+              # agent-auth-results's on mail sent from inside
+              # (docs/apps/mail.md, "Agent mailboxes").
+              EMAIL_AUTHSERV_ID: "mx.${SECRET_DOMAIN}"
+              # Only these senders. Empty: every sender is dropped.
+              EMAIL_ALLOWED_USERS: "${EMAIL_ALLOWED_USERS:=}"
+        data:
+          - secretKey: email_password
+            remoteRef:
+              key: hermes-${BOT_NAME}/email_password
       # Secrets for the bot's git-declared MCP servers (MCP_SECRETS_ENABLED):
       # every field of 1Password item hermes-<bot>-mcp, its label as the env
       # var name, for $${VAR} in mcp-servers.yaml. One item lookup per
@@ -2290,6 +2334,34 @@ spec:
                 toPorts:
                   - ports:
                       - port: "443"
+                        protocol: TCP
+      # Hermes' email platform, only with EMAIL_ENABLED: Stalwart on 993
+      # (IMAP) and 465 (submission), nothing else. The agent dials the
+      # LoadBalancer address; Cilium translates it to the Stalwart pod
+      # before policy, so the rule names the pod. Stalwart's own policy
+      # admits agent pods from bot-labelled namespaces on those ports.
+      email-egress:
+        enabled: ${EMAIL_ENABLED:=false}
+        forceRename: agent-email
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: hermes
+                app.kubernetes.io/controller: agent
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: mail
+                      app.kubernetes.io/name: stalwart
+                      app.kubernetes.io/controller: stalwart
+                toPorts:
+                  - ports:
+                      - port: "993"
+                        protocol: TCP
+                      - port: "465"
                         protocol: TCP
       # The agent's route to the shared memory server: hermes-memory's
       # Hindsight pods on 8888, nothing else. Hindsight's own policy admits

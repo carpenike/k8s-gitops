@@ -28,9 +28,11 @@ docs/OPENPROJECT.md
 docs/RECON.md
 docs/services/openproject.md
 docs/deploying/kubernetes.md
+docs/mikrotik-site-slc.md
 "
 # docs/rpi/README.md             microsoft/hve-core
 # docs/pocketid.md               network-config
+# docs/mikrotik-site-slc.md      network-config
 # docs/MFP-COOKIE-RUNBOOK.md     carpenike/mcp
 # docs/OPENPROJECT.md            carpenike/mcp
 # docs/RECON.md                  carpenike/schoolhouse

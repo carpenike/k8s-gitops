@@ -20,9 +20,11 @@ spec:
 # the client ports plus 2525 for the Vultr edge relay (ADR 0014). The
 # Connector source-NATs tailnet traffic, so it arrives from those pods,
 # not from world. Which tailnet device reaches which port is decided by
-# the grants in the tailnet policy (docs/platform/tailscale.md). 2525 is open to
-# nothing else, because Stalwart trusts that listener's mail as already
-# filtered. Probes are exec, so there is no host rule.
+# the grants in the tailnet policy (docs/platform/tailscale.md). Hermes
+# agent pods in bot namespaces reach 993 and 465 for their own mailboxes
+# (docs/apps/hermes.md, "Email (opt-in)"). 2525 is open to nothing else,
+# because Stalwart trusts that listener's mail as already filtered. Probes
+# are exec, so there is no host rule.
 #
 # Egress: cluster DNS, postgres17 (data and search stores), the Ceph RGW
 # (blob store; Service port 80, pod port 8080; policy matches the pod), and
@@ -83,6 +85,27 @@ spec:
             - port: "4190"
               protocol: TCP
             - port: "2525"
+              protocol: TCP
+    # Hermes agent pods with EMAIL_ENABLED (components/hermes-bot, policy
+    # agent-email): IMAP and implicit-TLS submission for the bot's own
+    # mailbox, with its app password. Bot namespaces carry
+    # hermes.holthome.net/bot; screen pods never match.
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            # Without a namespace key Cilium scopes the selector to this
+            # policy's namespace; Exists plus the label spans hermes-*.
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "993"
+              protocol: TCP
+            - port: "465"
               protocol: TCP
   egress:
     - toEndpoints:
