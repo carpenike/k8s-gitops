@@ -123,6 +123,28 @@ Probes:
 `GET /health/liveness` is an alias of `liveliness`. `GET /health` is the
 model check. It needs a key and spends tokens. It is not a probe.
 
+### Key cache
+
+`general_settings.user_api_key_cache_ttl` is 3600. It is how long a
+verified virtual key stays in memory, along with the team, user and budget
+objects cached with it. At the default of 60 seconds every active key went
+back to Postgres each minute. When postgres17 stalled, auth failed with
+`All connection attempts failed` or `key lookup did not answer within
+10s`. The proxy answered 503, Hermes classed that as "provider overloaded"
+and moved the turn to its fallback model, `claude-sonnet`. On 2026-11-18
+that was 69 Sonnet calls from Hank between 05:09 and 05:24 UTC, while
+Azure itself returned no error in the 30 days of LiteLLM metrics.
+
+The cost is staleness. A change made straight in the database waits up to
+an hour. `/key/update`, `/key/delete` and `/key/regenerate`, which the key
+provisioner uses, clear the entry at once, because there is one replica.
+Spend counters are cached separately and keep their own short TTL.
+
+The key cache does not cover the readiness probe. `/health/readiness`
+answers 503 while the database is down, and with one replica that leaves
+the Service with no endpoint. That happened at 11-15 01:05 and 11-17 03:49
+UTC, the starts of two fallback bursts.
+
 The `prometheus` callback serves `/metrics`. It needs the master key. The ServiceMonitor is labeled
 `release: kube-prometheus-stack` and sends `LITELLM_MASTER_KEY`.
 

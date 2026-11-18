@@ -232,6 +232,15 @@ spec:
               proxy_batch_write_at: 60
               disable_error_logs: true
               database_connection_pool_limit: 10
+              # Seconds a verified key (and its team, user and budget
+              # objects) stays in memory. The default of 60 sends every
+              # active key back to Postgres each minute, so a stall of
+              # postgres17 failed auth with a 503 that Hermes read as
+              # "provider overloaded" and answered by falling back to
+              # Claude (docs/apps/litellm.md, "Key cache").
+              # /key/update, /key/delete and /key/regenerate still clear
+              # the entry at once on this single replica.
+              user_api_key_cache_ttl: 3600
     persistence:
       config-file:
         type: configMap
