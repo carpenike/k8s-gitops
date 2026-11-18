@@ -49,8 +49,10 @@ One replica. The process applies Prisma migrations when it starts. The
 official chart scales by moving migrations into a job. That job is not
 wired here.
 
-`/health/liveliness` and `/health/readiness` are the probes. Both answer
-without a key. `GET /health` calls each model and needs a key, so it is
+`/health/liveliness` is the startup, liveness and readiness probe. It
+answers without a key. `/health/readiness` is not a probe: it answers 503
+while the database is down, which with one replica would empty the Service
+(docs/apps/litellm.md, "Key cache"). `GET /health` calls each model and needs a key, so it is
 not a probe. `/metrics` needs the master key. The ServiceMonitor sends
 that key.
 
