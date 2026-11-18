@@ -57,6 +57,9 @@ have workarounds that fit a household.
 - The directory uses issuer `https://id.holthome.net`, `claimUsername`
   `preferred_username`, the mail domain as `usernameDomain`, and
   `claimGroups` `groups`
+- Accounts live in the `usernameDomain` domain, because that is where
+  sign-ins look for them. Addresses in other mail domains are aliases on
+  those accounts (`docs/apps/mail.md`, More mail domains)
 - Accounts are created in advance in the WebUI, so each address receives
   mail before its owner first signs in. The same addresses go on the edge
   relay's recipient list (ADR 0014)

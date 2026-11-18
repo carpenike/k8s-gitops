@@ -389,11 +389,14 @@ repo; its Stalwart settings live in its own store, not in either repo.
      the edge away from the records the cluster's Stalwart owns
    - **Recipients.** MtaStageRcpt `allowRelaying` names every address,
      `else` `false`. Never accept the whole domain, or the edge bounces
-     mail to forged senders. People also get their sub-addresses:
+     mail to forged senders. People also get their sub-addresses. One
+     condition per mail domain, so `starts_with` stays inside it:
 
      ```text
      rcpt_domain == 'holthome.net' && (rcpt == 'ryan@holthome.net' ||
        starts_with(rcpt, 'ryan+') || … || rcpt == 'postmaster@holthome.net')
+     rcpt_domain == 'ryanholt.net' && (rcpt == 'ryan@ryanholt.net' ||
+       starts_with(rcpt, 'ryan+'))
      ```
 
      Unknown addresses and other domains get `550 5.7.1 Relay not
@@ -403,7 +406,9 @@ repo; its Stalwart settings live in its own store, not in either repo.
      connects by address, so the name check would fail, and the hop
      already runs inside the tailnet. MtaOutboundStrategy `route`: keep
      `is_local_domain(rcpt_domain)` → `'local'`, add
-     `rcpt_domain == 'holthome.net'` → `'cluster'`, `else` `'mx'`
+     `rcpt_domain == 'holthome.net' || rcpt_domain == 'ryanholt.net' ||
+     rcpt_domain == 'stefanieholt.com' || rcpt_domain == 'devialea.com'`
+     → `'cluster'`, `else` `'mx'`
    - **Sender checks.** SenderAuth `dmarcVerify` `strict` when
      `local_port == 25` (the default `relaxed` records a failure but
      accepts the mail), so `p=reject` domains, `holthome.net` included,
@@ -438,7 +443,140 @@ an unknown address and an outside domain get `550 Relay not allowed`;
 a sender in `@holthome.net` gets the DMARC rejection.
 
 Adding an address: create the account in the cluster (ADR 0015) and add
-the address to the edge's `allowRelaying` expression.
+the address to the edge's `allowRelaying` expression. Adding a domain:
+also add it to the edge's `route` expression, or the edge sends its mail
+to the domain's MX instead of the cluster.
+
+## More mail domains
+
+`ryanholt.net` and `stefanieholt.com` move here from Microsoft 365
+(tenant `holt.onmicrosoft.com`). `devialea.com` moves from Cloudflare
+Email Routing, which only forwards and has no mailbox to copy. All three
+zones are at Cloudflare.
+
+Accounts stay in `holthome.net`. The OIDC directory appends
+`usernameDomain` to the bare Pocket ID username, so a sign-in always asks
+for `<username>@holthome.net`. An account moved to another domain no
+longer matches, and the next sign-in creates a new, empty
+`<username>@holthome.net` account. Moving the old one back then fails
+with `primaryKeyViolation` until the new one is deleted. Delete it and
+move the old one in the same JMAP request, because an open WebUI or
+Bulwark tab signs in again within seconds and recreates it. The other
+domains' addresses are aliases on the `holthome.net` account:
+
+| Address | Account |
+| --- | --- |
+| `ryan@ryanholt.net` | `ryan@holthome.net` |
+| `stefanie@stefanieholt.com` | `stefanie@holthome.net` |
+| `design@devialea.com` | `stefanie@holthome.net` |
+
+`claimUsername` `email` would not work instead: Pocket ID's email is
+not always an address this server hosts.
+
+A Domain in Stalwart is local from the moment it exists. Mail that this
+server's users send to it stays here, even while its MX still points at
+Microsoft 365. Microsoft 365 does the same for mail between its own
+users until the domain is removed from the tenant. An address on the
+domain that is not an alias here bounces for this server's users, so
+add every address the old host had.
+
+Done (2026-11-18): the three Domains exist (DKIM Automatic, DNS management
+Manual, report address `postmaster@holthome.net`), the aliases are set,
+and the edge accepts and routes all three.
+
+Cutover, per domain:
+
+1. **Cloudflare token.** Add the zone to the token in
+   `cloudflare_api_token` (Zone DNS Edit), then set the Domain's DNS
+   management to Automatic with the Cloudflare provider and publish
+   DKIM only. With Manual, Stalwart never rotates the DKIM keys.
+2. **Apex TXT.** Save it first, as for `holthome.net`
+   ([DNS](#dns)). Keep any `MS=` verification until the domain is
+   removed from the tenant.
+3. **SMTP2GO.** Add the domain under Verified Senders › Sender domains
+   and let SMTP2GO add its CNAMEs through its Cloudflare connection.
+   SMTP2GO refuses mail from a sender domain it has not verified.
+4. **Mailbox.** Copy the Microsoft 365 mailbox into the account (not
+   for `devialea.com`). Microsoft 365 IMAP takes OAuth only, so use a
+   mail client signed in to both, or imapsync with an OAuth token.
+5. **Records.** For `devialea.com`, first turn off Email Routing for
+   the zone: it locks its MX records and deletes them with itself. Its
+   SPF include and its Cloudflare DMARC report address go too.
+   For the other two, delete the Microsoft MX, the `selector1` and
+   `selector2` DKIM CNAMEs and the `autodiscover` CNAME; their DMARC
+   records report to `ryan@ryanholt.net`. Then publish MX, SPF, DMARC
+   and TLS-RPT from the Domain as well. SPF becomes Stalwart's, like
+   `holthome.net`'s, and DMARC reports go to `postmaster@holthome.net`.
+6. **Check.** Mail from outside arrives through the edge, mail sent from
+   the alias passes DKIM and DMARC at Gmail, and nothing new arrives in
+   Microsoft 365 or through Cloudflare's forwarding.
+7. **Retire.** After a few quiet days, copy anything left, remove the
+   domain from the tenant, and drop any `MS=` record.
+
+## Agent mailboxes
+
+A bot reads its own mailbox with Hermes' `email` platform (IMAP and
+SMTP). Hermes acts only on mail from an allowlisted sender whose topmost
+`Authentication-Results` header comes from the pinned server name,
+`mx.holthome.net`, and reports DMARC pass or aligned SPF or DKIM pass.
+
+Mail from outside gets that header from the edge (port 25). Mail a
+household user sends from this server (Bulwark over JMAP, a mail app on
+465 or 587) gets none: Stalwart adds `Authentication-Results` only on
+port 25, and mail from the edge arrives on 2525. So system Sieve script
+`agent-auth-results` runs at the DATA stage for every authenticated
+session (MtaStageData `script`: `!is_empty(authenticated_as)` →
+`'agent-auth-results'`). JMAP submissions pass through the same stage.
+The script:
+
+- removes any `Authentication-Results` the client wrote, from every
+  authenticated submission. Without this, a stolen app password could
+  submit a forged `mx.holthome.net; dmarc=pass` header and nothing would
+  be added above it
+- adds one to mail for the listed agent mailboxes when the `From` header
+  holds exactly the envelope sender. `mustMatchSender` has already tied
+  the envelope sender to the account, its aliases and its groups; it does
+  not look at `From`
+
+```sieve
+require ["variables", "envelope", "editheader", "relational", "comparator-i;ascii-numeric"];
+
+# Authenticated submissions only (SMTP 587/465 and JMAP). MtaStageData selects
+# this script only when authenticated_as is set; the test repeats that.
+if not string :is "${env.authenticated_as}" "" {
+    # A client never gets to supply its own Authentication-Results.
+    deleteheader "Authentication-Results";
+
+    # Stamp mail to the agent mailboxes, but only when the From header is
+    # exactly the envelope sender, which mustMatchSender has already verified.
+    # Agent mailboxes, with their plus-addresses: list each one here.
+    if allof (envelope :all :comparator "i;unicode-casemap" :matches "to" ["chief@holthome.net", "chief+*@holthome.net"],
+              address :count "eq" :comparator "i;ascii-numeric" "from" "1",
+              address :all :comparator "i;unicode-casemap" :is "from" "${envelope.from}",
+              address :domain :matches "from" "*") {
+        set :lower "from_domain" "${1}";
+        addheader "Authentication-Results" "mx.holthome.net; auth=pass smtp.auth=${env.authenticated_as}; dmarc=pass (authenticated submission) header.from=${from_domain}";
+    }
+}
+```
+
+| Mailbox | Bot | App password |
+| --- | --- | --- |
+| `chief@holthome.net` (and `chief+…@`) | Hermes Chief | 1Password `hermes-chief`, field `email_password` |
+
+Adding an agent mailbox: create the account (role User, no groups), give
+it one app password, put its address and its plus-address pattern in the
+script's list, and add both to the edge's `allowRelaying` expression.
+
+Tested 2026-11-18 with a temporary account, deleted afterwards: SMTP on
+465 and JMAP submission were stamped and their forged headers removed, a
+`From` that did not match was not stamped, `MAIL FROM` for another
+address got `501 5.5.4`, and Hermes v0.23.0's own check accepted the
+stamped messages and rejected the other one.
+
+2525 trusts its mail as already filtered, so the header on top of that
+mail is the edge's only while the tailnet policy grants 2525 to the edge
+alone.
 
 ## MTA-STS
 
