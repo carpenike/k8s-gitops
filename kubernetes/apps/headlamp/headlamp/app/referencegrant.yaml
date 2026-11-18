@@ -1,0 +1,17 @@
+---
+# Lets pocket-id-exempt in namespace network select the Headlamp route,
+# which is labelled gateway.holthome.net/auth: native. See
+# docs/platform/gateway-auth.md.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: headlamp-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: headlamp
