@@ -513,6 +513,66 @@ Cutover, per domain:
 7. **Retire.** After a few quiet days, copy anything left, remove the
    domain from the tenant, and drop any `MS=` record.
 
+## Agent mailboxes
+
+A bot reads its own mailbox with Hermes' `email` platform (IMAP and
+SMTP). Hermes acts only on mail from an allowlisted sender whose topmost
+`Authentication-Results` header comes from the pinned server name,
+`mx.holthome.net`, and reports DMARC pass or aligned SPF or DKIM pass.
+
+Mail from outside gets that header from the edge (port 25). Mail a
+household user sends from this server (Bulwark over JMAP, a mail app on
+465 or 587) gets none: Stalwart adds `Authentication-Results` only on
+port 25, and mail from the edge arrives on 2525. So system Sieve script
+`agent-auth-results` runs at the DATA stage for every authenticated
+session (MtaStageData `script`: `!is_empty(authenticated_as)` →
+`'agent-auth-results'`). JMAP submissions pass through the same stage.
+The script:
+
+- removes any `Authentication-Results` the client wrote, from every
+  authenticated submission. Without this, a stolen app password could
+  submit a forged `mx.holthome.net; dmarc=pass` header and nothing would
+  be added above it
+- adds one to mail for the listed agent mailboxes when the `From` header
+  holds exactly the envelope sender. `mustMatchSender` has already tied
+  the envelope sender to the account, its aliases and its groups; it does
+  not look at `From`
+
+```sieve
+require ["variables", "envelope", "editheader", "relational", "comparator-i;ascii-numeric"];
+
+# Authenticated submissions only (SMTP 587/465 and JMAP). MtaStageData selects
+# this script only when authenticated_as is set; the test repeats that.
+if not string :is "${env.authenticated_as}" "" {
+    # A client never gets to supply its own Authentication-Results.
+    deleteheader "Authentication-Results";
+
+    # Stamp mail to the agent mailboxes, but only when the From header is
+    # exactly the envelope sender, which mustMatchSender has already verified.
+    # Agent mailboxes: list each one here. "unset.invalid" matches nothing.
+    if allof (envelope :all :comparator "i;unicode-casemap" :is "to" ["agent@unset.invalid"],
+              address :count "eq" :comparator "i;ascii-numeric" "from" "1",
+              address :all :comparator "i;unicode-casemap" :is "from" "${envelope.from}",
+              address :domain :matches "from" "*") {
+        set :lower "from_domain" "${1}";
+        addheader "Authentication-Results" "mx.holthome.net; auth=pass smtp.auth=${env.authenticated_as}; dmarc=pass (authenticated submission) header.from=${from_domain}";
+    }
+}
+```
+
+Adding an agent mailbox: create the account, put its address in the
+script's list, and add it to the edge's `allowRelaying` expression.
+
+Tested 2026-11-18 with a temporary account, deleted afterwards: SMTP on
+465 and JMAP submission were stamped and their forged headers removed, a
+`From` that did not match was not stamped, `MAIL FROM` for another
+address got `501 5.5.4`, and Hermes v0.23.0's own check accepted the
+stamped messages and rejected the other one.
+
+2525 trusts its mail as already filtered, so the header on top of that
+mail is the edge's only while the tailnet policy grants 2525 to the edge
+alone.
+
 ## MTA-STS
 
 Follow-up, after the cutover to the edge has carried real mail for a
