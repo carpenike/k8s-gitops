@@ -332,6 +332,9 @@ spec:
               # (never amount, payee, account or date). No rule, payee-merge,
               # loan or other ledger writes. Its audit line names
               # view=/mcp/agent/grokbot from 0.63.1.
+              # Withings reads (Ryan, 2026-11-18): withings_get_measurements and
+              # withings_trend, weigh-ins and blood pressure. Read-only; there
+              # are no Withings writes.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -410,6 +413,7 @@ spec:
                  "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
+                 "withings_get_measurements", "withings_trend",
                  "vault_domains", "vault_read", "vault_list", "vault_search",
                  "vault_links", "vault_lint", "vault_create", "vault_edit",
                  "openproject_list_tasks", "openproject_get_task",
