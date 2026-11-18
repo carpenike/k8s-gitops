@@ -214,6 +214,17 @@ the four sled addresses (`10.20.10.20/32` through `10.20.10.23/32`), so
 the cluster's alerts are delivered. Pods reach Forge from those addresses
 because Cilium masquerades traffic leaving the pod CIDR.
 
+Prometheus selects every ServiceMonitor, PodMonitor, PrometheusRule,
+Probe and ScrapeConfig in every namespace. No `release` label is needed.
+Rook's ServiceMonitors set `cluster=rook-ceph` on Ceph series, which
+overrides the external label. An alert relabel rule changes Ceph alerts
+back to `cluster=k8s-holthome` before they are sent; the stored Ceph
+series keep `cluster=rook-ceph`. Rook creates the Ceph alert rules
+(`prometheus-ceph-rules` in `rook-ceph`). Monitors for Flux controllers
+and Envoy Gateway live in
+`observability/kube-prometheus-stack/app/monitors/`, so `flux-instance`
+and `envoy-gateway` do not depend on the Prometheus CRDs.
+
 ## What stays off the cluster
 
 Plex, transcode, home automation, USB radios, and Pocket ID stay on
