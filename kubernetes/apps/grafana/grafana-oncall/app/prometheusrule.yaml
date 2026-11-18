@@ -17,9 +17,13 @@ spec:
     - name: grafana-oncall
       rules:
         - alert: GrafanaOnCallServiceDown
+          # Match the Service, not the job. The ServiceMonitor takes job from
+          # app.kubernetes.io/name (job="grafana-oncall"); the Service name is
+          # pinned by forceRename in the HelmRelease. job="grafana-oncall-engine"
+          # matched nothing, so absent() was always true and paged.
           expr: |
-            up{namespace="grafana",job="grafana-oncall-engine"} == 0
-              or absent(up{namespace="grafana",job="grafana-oncall-engine"})
+            up{namespace="grafana",service="grafana-oncall-engine"} == 0
+              or absent(up{namespace="grafana",service="grafana-oncall-engine"})
           for: 5m
           labels:
             severity: high

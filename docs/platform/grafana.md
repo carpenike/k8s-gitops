@@ -136,7 +136,9 @@ this is its last release. Paging now depends on the cluster.
   [gateway-auth.md](gateway-auth.md)). The integration token in the path is
   the credential, as it was on Forge.
 - Metrics: `/metrics/` on 8080 with bearer `PROMETHEUS_EXPORTER_SECRET`,
-  ServiceMonitor `grafana-oncall-engine`.
+  ServiceMonitor `grafana-oncall` on Service `grafana-oncall-engine`. Its
+  targets carry `job="grafana-oncall"`, so rules match
+  `service="grafana-oncall-engine"`.
 - Alerts keep Forge's names: `GrafanaOnCallServiceDown`,
   `GrafanaOnCallCeleryServiceDown`, `GrafanaOnCallRedisServiceDown`
   (severity `high`). Forge's Alertmanager routes
