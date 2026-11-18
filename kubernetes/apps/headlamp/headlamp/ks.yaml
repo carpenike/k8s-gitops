@@ -10,7 +10,13 @@ spec:
       namespace: network
     - name: mikrotik-dns
       namespace: network
+    - name: external-secrets
+      namespace: external-secrets
   healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: headlamp-oidc
+      namespace: headlamp
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
       name: headlamp

@@ -30,7 +30,7 @@ detail. `AGENTS.md` at the repo root is the instruction file for agents.
 | [postgres17.md](platform/postgres17.md) | Shared Postgres: backups to Ceph and R2, alerts, and the restore drill |
 | [grafana.md](platform/grafana.md) | Grafana and Grafana OnCall: datasources, plugins, secrets |
 | [actions-runners.md](platform/actions-runners.md) | Self-hosted Actions runners for private repos, and the GitHub App |
-| [headlamp.md](platform/headlamp.md) | Read-only Kubernetes UI on the internal gateway |
+| [headlamp.md](platform/headlamp.md) | Kubernetes UI on the internal gateway, Pocket ID login to the API server |
 
 Node config and first install are next to the files they describe:
 [talos/README.md](../talos/README.md) and

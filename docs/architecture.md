@@ -56,8 +56,8 @@ reloader, echo, app-template, tuppr, kube-prometheus-stack, cloudflared)
 are the current pins from onedr0p/cluster-template or the chart repo as of
 27 Oct 2026. Renovate is expected to move them. The Actions runner
 policy, the GitHub App, and each repository's `runs-on` name are in
-[actions-runners.md](platform/actions-runners.md). Headlamp's URL, read-only
-ServiceAccount, and how to grant write later are in
+[actions-runners.md](platform/actions-runners.md). Headlamp's URL, its Pocket ID login to
+the API server, and who gets which rights are in
 [headlamp.md](platform/headlamp.md).
 
 ## Networks

@@ -117,7 +117,7 @@ that have to outlive it stay off the cluster:
 | `grafana` | Grafana and Grafana OnCall | [grafana.md](docs/platform/grafana.md) |
 | `lading`, `schoolhouse` | Scheduled syncs from private repositories that feed `homelab-mcp` | [lading.md](docs/apps/lading.md), [schoolhouse.md](docs/apps/schoolhouse.md) |
 | `web` | A static site | [website.md](docs/apps/website.md) |
-| `headlamp` | Read-only cluster UI | [headlamp.md](docs/platform/headlamp.md) |
+| `headlamp` | Cluster UI, Pocket ID login, per-user RBAC | [headlamp.md](docs/platform/headlamp.md) |
 
 ## How it works
 

@@ -40,27 +40,45 @@ spec:
     serviceAccount:
       create: true
       name: headlamp
-    # The chart names this binding <release>-admin. The role is view.
+    # Users act as themselves (OIDC below), not as this ServiceAccount, so
+    # it gets no ClusterRoleBinding.
     clusterRoleBinding:
-      create: true
-      clusterRoleName: view
+      create: false
     automountServiceAccountToken: true
     config:
       inCluster: true
-      # Pocket ID on envoy-internal is the auth proxy. This flag is how the
-      # chart makes every logged-in user use the pod ServiceAccount token,
-      # so nobody pastes a kubeconfig. Headlamp's own OIDC is left off.
-      unsafeUseServiceAccountToken: true
+      # Headlamp's own Pocket ID login. The ID token goes to the API server,
+      # which trusts issuer id.${SECRET_DOMAIN} with audience headlamp
+      # (talos/control-plane/20-authentication.yaml). RBAC is per person:
+      # see rbac.yaml. Client id, secret, issuer and scopes are Secret
+      # headlamp-oidc (externalsecret.yaml).
+      unsafeUseServiceAccountToken: false
       enableHelm: false
       watchPlugins: true
       oidc:
         secret:
           create: false
-    # No gateway.holthome.net/auth label, so the gateway Pocket ID policy
-    # applies. parentRefs is only envoy-internal: mikrotik-dns publishes
+        externalSecret:
+          enabled: true
+          name: headlamp-oidc
+          hasScopes: true
+    # The chart's externalSecret mode only reads these three from env.
+    env:
+      - name: OIDC_CALLBACK_URL
+        value: https://headlamp.${SECRET_DOMAIN}/oidc-callback
+      - name: OIDC_USE_PKCE
+        value: "true"
+      - name: OIDC_AUTO_LOGIN
+        value: "true"
+    # Label native: Headlamp has its own Pocket ID client, so the gateway
+    # login is dropped (one login per route, docs/platform/gateway-auth.md).
+    # The API server still rejects any request without a valid Pocket ID
+    # token. parentRefs is only envoy-internal: mikrotik-dns publishes
     # routes on that gateway, and cloudflare-dns publishes envoy-external.
     httpRoute:
       enabled: true
+      labels:
+        gateway.holthome.net/auth: native
       hostnames:
         - headlamp.${SECRET_DOMAIN}
       parentRefs:

@@ -1,8 +1,25 @@
 ---
-# Read on the Flux objects the Headlamp Flux plugin lists. Aggregated into
-# the built-in view role, which is what the Headlamp ServiceAccount is bound
-# to. view does not include Secrets. aggregate-to-edit is unused until the
-# binding is changed to edit. See docs/platform/headlamp.md.
+# Pocket ID group admins is cluster-admin. The API server maps the token's
+# groups claim to `oidc:<group>` (talos/control-plane/20-authentication.yaml),
+# so this is only reachable with a Pocket ID login in group admins. A Pocket
+# ID user outside admins authenticates but has no rights. See
+# docs/platform/headlamp.md.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oidc-admins-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: oidc:admins
+---
+# Read on the Flux objects the Headlamp Flux plugin lists, aggregated into
+# the built-in view and edit roles. cluster-admin already covers them; this
+# is for anyone later bound to view or edit. view does not include Secrets.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
