@@ -81,6 +81,8 @@ with the sender, Chief Engineer); ExternalSecret `webhook` reads it, and
 its inputs carry `WEBHOOK_DELIVER_CHAT_ID`, the DM's room ID, committed
 as-is. A bot with `TAVILY_ENABLED=true` needs field `tavily_api_key` (its
 Tavily API key); ExternalSecret `tavily` reads it. A bot with
+`EMAIL_ENABLED=true` needs field `email_password` (its mailbox's Stalwart
+app password); ExternalSecret `email` reads it. A bot with
 `WEBAPP_ENABLED=true` needs field `webapp_oidc_client_id`: the client ID of
 a public Pocket ID client whose callback is
 `https://<bot>-desktop.<domain>/auth/callback` and which admits only Ryan

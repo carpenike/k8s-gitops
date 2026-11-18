@@ -83,6 +83,9 @@ spec later:
 | `WEBHOOK_ENABLED` | `true` | Optional, default `false`. The signed `chief-engineer` webhook on envoy-internal ([Webhook](#webhook-opt-in)). `true` or `false` only |
 | `WEBHOOK_DELIVER_CHAT_ID` | `!1NY-w--JkAFJ…` | Required with `WEBHOOK_ENABLED` or `TASK_BOARD_WEBHOOK_ENABLED`: the Matrix room ID of Ryan's DM with the bot, where webhook turns are delivered and mirrored. Without it no route is written |
 | `TAVILY_ENABLED` | `true` | Optional, default `false`. `web_search` and `web_extract` through Tavily ([Web search](#web-search-opt-in)). `true` or `false` only |
+| `EMAIL_ENABLED` | `true` | Optional, default `false`. Hermes' email platform on the bot's own Stalwart mailbox ([Email](#email-opt-in)). `true` or `false` only |
+| `EMAIL_ADDRESS` | `chief@holthome.net` | Required with `EMAIL_ENABLED`: the bot's mailbox, an agent mailbox in [mail.md](mail.md) |
+| `EMAIL_ALLOWED_USERS` | `ryan@holthome.net,ryan@ryanholt.net` | Required with `EMAIL_ENABLED`: the only senders whose mail starts a turn, comma-separated. Empty: every message is dropped |
 | `ROUTINES_PRIVATE_ENABLED` | `true` | Optional, default `false`. Secret `routines-private` from every field of 1Password item `hermes-<bot>-routines`: the private details of the bot's `routines.yaml`, one field per routine key ([Routines from git](#routines-from-git)). `true` or `false` only |
 | `MCP_SECRETS_ENABLED` | `false` | Optional, default `false`. Secret `mcp` from every field of 1Password item `hermes-<bot>-mcp`, for `${VAR}` in the bot's `mcp-servers.yaml` ([MCP servers from git](#mcp-servers-from-git)). `true` or `false` only |
 | `CLAUDE_CODE_ENABLED` | `true` | Optional, default `false`. Multi-turn coding sessions with Claude Code in the screen pod, on Ryan's Claude subscription ([Coding with Claude Code](#coding-with-claude-code-opt-in)). `true` or `false` only |
@@ -547,7 +550,7 @@ Default deny in `hermes-<bot>` both ways. The allows:
 
 | Pod | Ingress | Egress |
 | --- | --- | --- |
-| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`); with `WEBAPP_ENABLED`, the `envoy-internal` proxies on 9120 (CNP `agent-desktop`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN); with `WEBAPP_ENABLED`, `id.${SECRET_DOMAIN}` (Pocket ID) on 443 (CNP `agent-desktop-oidc`, FQDN) |
+| agent | none; with `API_SERVER_ENABLED`, the `envoy-internal` proxies on 8642 (CNP `agent-api`); with `WEBHOOK_ENABLED`, the `envoy-internal` proxies on 8644 (CNP `agent-hooks`); with `WEBAPP_ENABLED`, the `envoy-internal` proxies on 9120 (CNP `agent-desktop`) | DNS; `litellm/litellm:4000`; `matrix/tuwunel:8008`; screen `:22`; with `OUTLOOK_MCP_ENABLED`, `login.microsoftonline.com` and `graph.microsoft.com` on 443 (CNP `agent-outlook`, FQDN); with `HINDSIGHT_ENABLED`, `hermes-memory` Hindsight pods on 8888 (CNP `agent-hindsight`); with `TAVILY_ENABLED`, `api.tavily.com` on 443 (CNP `agent-tavily`, FQDN); with `EMAIL_ENABLED`, the Stalwart pods in `mail` on 993 and 465 (CNP `agent-email`); with `WEBAPP_ENABLED`, `id.${SECRET_DOMAIN}` (Pocket ID) on 443 (CNP `agent-desktop-oidc`, FQDN) |
 | screen | agent on 22 | DNS; `0.0.0.0/0` except RFC1918, CGNAT, link-local |
 | `hermes-ssh-keygen` | none | DNS; kube-apiserver |
 | `hermes-volsync` (movers) | none | DNS; public internet (R2) |
@@ -2005,6 +2008,76 @@ kubectl -n hermes-<bot> exec deploy/hermes-agent -c app -- hermes cron run <job 
 Chief's routines came from Grok Chief's inventory: four read-and-report
 jobs that need only Outlook and the web. Grok's copies are paused once
 these have run cleanly.
+
+## Email (opt-in)
+
+The bot's own mailbox, like Grok Bot's inbox: forward a message to it, or
+write to it, and the bot takes the turn and answers by email. This is
+Hermes' bundled `email` platform (`plugins/platforms/email`, v0.23.0),
+not an MCP server. It is separate from [Outlook](#outlook-opt-in), which
+reads Ryan's Microsoft 365 mailbox.
+
+**Off by default.** A bot turns it on with `EMAIL_ENABLED=true`,
+`EMAIL_ADDRESS` and `EMAIL_ALLOWED_USERS` in its inputs; today only Chief
+does, as `chief@holthome.net`. When it is on, the component adds:
+
+| Object | What |
+| --- | --- |
+| ExternalSecret / Secret `email` | `EMAIL_PASSWORD` from 1Password item `hermes-<bot>`, field `email_password` (the mailbox's Stalwart app password), plus fixed `EMAIL_*` settings: host and authserv-id `mx.${SECRET_DOMAIN}`, IMAP 993, SMTP 465, and the two inputs |
+| Optional `envFrom: email` | The agent's `app` container only |
+| CiliumNetworkPolicy `agent-email` | Agent egress to the Stalwart pods on 993 and 465 only. Stalwart's own policy admits agent pods from bot namespaces on the same ports |
+
+**How a message becomes a turn** (from the adapter's source):
+
+- It checks the inbox over IMAP every 15 s (`EMAIL_POLL_INTERVAL`). At
+  first start, mail already there is marked seen and ignored.
+- A message is dropped unless its sender is on `EMAIL_ALLOWED_USERS`
+  and its topmost `Authentication-Results` header comes from
+  `mx.${SECRET_DOMAIN}` and reports DMARC pass, or SPF or DKIM pass
+  aligned with the `From` domain. Mail from outside gets that header from
+  the edge relay; mail sent from this server gets it from Stalwart's
+  script `agent-auth-results` ([mail.md](mail.md), "Agent mailboxes").
+  Unknown senders get no reply: nothing sets
+  `unauthorized_dm_behavior`, so pairing and decline replies are off.
+- Automated senders (`noreply`, `mailer-daemon`, bulk headers) and the
+  bot's own address are dropped too.
+- The body (subject included) becomes the user message; attachments are
+  saved for the bot to read. The answer goes back by SMTP as a reply in
+  the same thread, to the sender only.
+- The turn has the same tools as a Matrix turn: Hermes adds every MCP
+  server to every platform. A forwarded message is still someone else's
+  text inside Ryan's mail, so the persona's rule that content is not
+  instructions applies.
+- A command that needs approval sends the approval prompt by email. The
+  email platform has no buttons, so it uses the gateway's `/approve` text
+  fallback: reply `/approve` before the window closes. Not tested yet.
+
+**Mail from Ryan's phone or Bulwark works** because Stalwart stamps it.
+Mail sent through another server (Gmail, Microsoft 365) works when it
+passes DMARC there.
+
+### Turning it on for a bot
+
+1. Create the mailbox in Stalwart and its app password, and add it to the
+   stamping script and the edge's recipient list ([mail.md](mail.md),
+   "Agent mailboxes").
+2. Store the app password in 1Password item `hermes-<bot>`, field
+   `email_password`.
+3. Add the three inputs and merge. Reloader restarts the pod when Secret
+   `email` appears.
+4. Check: the agent's log shows `[Email] Adapter initialized for
+   <address>`, and mail from an allowlisted address gets a reply.
+
+`mx.${SECRET_DOMAIN}` resolves to Stalwart's LoadBalancer inside the
+cluster only because of a static record on the router
+(carpenike/network-config, `docs/mikrotik-site-slc.md`, "Split-horizon
+names for the cluster"). Without it the agent reaches the edge relay,
+which has no IMAP.
+
+### Turning it off
+
+Remove `EMAIL_ENABLED=true` from the bot's inputs (or set `false`). The
+Secret and the policy go with it, and the platform does not start.
 
 ## Outlook (opt-in)
 
