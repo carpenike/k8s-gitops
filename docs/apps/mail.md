@@ -389,11 +389,14 @@ repo; its Stalwart settings live in its own store, not in either repo.
      the edge away from the records the cluster's Stalwart owns
    - **Recipients.** MtaStageRcpt `allowRelaying` names every address,
      `else` `false`. Never accept the whole domain, or the edge bounces
-     mail to forged senders. People also get their sub-addresses:
+     mail to forged senders. People also get their sub-addresses. One
+     condition per mail domain, so `starts_with` stays inside it:
 
      ```text
      rcpt_domain == 'holthome.net' && (rcpt == 'ryan@holthome.net' ||
        starts_with(rcpt, 'ryan+') || … || rcpt == 'postmaster@holthome.net')
+     rcpt_domain == 'ryanholt.net' && (rcpt == 'ryan@ryanholt.net' ||
+       starts_with(rcpt, 'ryan+'))
      ```
 
      Unknown addresses and other domains get `550 5.7.1 Relay not
@@ -403,7 +406,8 @@ repo; its Stalwart settings live in its own store, not in either repo.
      connects by address, so the name check would fail, and the hop
      already runs inside the tailnet. MtaOutboundStrategy `route`: keep
      `is_local_domain(rcpt_domain)` → `'local'`, add
-     `rcpt_domain == 'holthome.net'` → `'cluster'`, `else` `'mx'`
+     `rcpt_domain == 'holthome.net' || rcpt_domain == 'ryanholt.net' ||
+     rcpt_domain == 'stefanieholt.com'` → `'cluster'`, `else` `'mx'`
    - **Sender checks.** SenderAuth `dmarcVerify` `strict` when
      `local_port == 25` (the default `relaxed` records a failure but
      accepts the mail), so `p=reject` domains, `holthome.net` included,
@@ -438,7 +442,68 @@ an unknown address and an outside domain get `550 Relay not allowed`;
 a sender in `@holthome.net` gets the DMARC rejection.
 
 Adding an address: create the account in the cluster (ADR 0015) and add
-the address to the edge's `allowRelaying` expression.
+the address to the edge's `allowRelaying` expression. Adding a domain:
+also add it to the edge's `route` expression, or the edge sends its mail
+to the domain's MX instead of the cluster.
+
+## More mail domains
+
+`ryanholt.net` and `stefanieholt.com` move here from Microsoft 365
+(tenant `holt.onmicrosoft.com`). Both zones are at Cloudflare.
+
+Accounts stay in `holthome.net`. The OIDC directory appends
+`usernameDomain` to the bare Pocket ID username, so a sign-in always asks
+for `<username>@holthome.net`. An account moved to another domain no
+longer matches, and the next sign-in creates a new, empty
+`<username>@holthome.net` account. Moving the old one back then fails
+with `primaryKeyViolation` until the new one is deleted. Delete it and
+move the old one in the same JMAP request, because an open WebUI or
+Bulwark tab signs in again within seconds and recreates it. The other
+domains' addresses are aliases on the `holthome.net` account:
+
+| Address | Account |
+| --- | --- |
+| `ryan@ryanholt.net` | `ryan@holthome.net` |
+| `stefanie@stefanieholt.com` | `stefanie@holthome.net` |
+
+`claimUsername` `email` would not work instead: Pocket ID's email is
+not always an address this server hosts.
+
+A Domain in Stalwart is local from the moment it exists. Mail that this
+server's users send to it stays here, even while its MX still points at
+Microsoft 365. Microsoft 365 does the same for mail between its own
+users until the domain is removed from the tenant.
+
+Done (2026-11-18): the Domains exist (DKIM Automatic, DNS management
+Manual, report address `postmaster@holthome.net`), the aliases are set,
+and the edge accepts and routes both domains.
+
+Cutover, per domain:
+
+1. **Cloudflare token.** Add the zone to the token in
+   `cloudflare_api_token` (Zone DNS Edit), then set the Domain's DNS
+   management to Automatic with the Cloudflare provider and publish
+   DKIM only. With Manual, Stalwart never rotates the DKIM keys.
+2. **Apex TXT.** Save it first, as for `holthome.net`
+   ([DNS](#dns)). Keep any `MS=` verification until the domain is
+   removed from the tenant.
+3. **SMTP2GO.** Add the domain under Verified Senders › Sender domains
+   and let SMTP2GO add its CNAMEs through its Cloudflare connection.
+   SMTP2GO refuses mail from a sender domain it has not verified.
+4. **Mailbox.** Copy the Microsoft 365 mailbox into the account.
+   Microsoft 365 IMAP takes OAuth only, so use a mail client signed in
+   to both, or imapsync with an OAuth token.
+5. **Records.** Delete the Microsoft MX, the `selector1` and `selector2`
+   DKIM CNAMEs and the `autodiscover` CNAME. Then publish MX, SPF, DMARC
+   and TLS-RPT from the Domain as well. SPF becomes Stalwart's, like
+   `holthome.net`'s. The current DMARC records for both domains report
+   to `ryan@ryanholt.net`; Stalwart's report to
+   `postmaster@holthome.net`.
+6. **Check.** Mail from outside arrives through the edge, mail sent from
+   the alias passes DKIM and DMARC at Gmail, and nothing new arrives in
+   Microsoft 365.
+7. **Retire.** After a few quiet days, copy anything left, remove the
+   domain from the tenant, and drop any `MS=` record.
 
 ## MTA-STS
 
