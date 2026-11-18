@@ -38,6 +38,9 @@ spec:
       namespace: rook-ceph
     - name: snapshot-controller
       namespace: kube-system
+    # The chart now renders a PrometheusRule.
+    - name: prometheus-operator-crds
+      namespace: observability
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease

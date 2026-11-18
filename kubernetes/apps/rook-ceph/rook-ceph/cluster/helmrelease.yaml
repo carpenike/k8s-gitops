@@ -44,6 +44,9 @@ spec:
             memory: 8Gi
     monitoring:
       enabled: true
+      # The chart default is false, which leaves Ceph with no alerts.
+      # Creates PrometheusRule prometheus-ceph-rules in rook-ceph.
+      createPrometheusRules: true
     toolbox:
       enabled: true
     cephBlockPools:

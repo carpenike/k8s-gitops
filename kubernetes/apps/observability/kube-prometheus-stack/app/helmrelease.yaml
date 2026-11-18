@@ -40,6 +40,28 @@ spec:
     # Prometheus token and insecureSkipVerify.
     prometheus:
       prometheusSpec:
+        # Select every ServiceMonitor, PodMonitor, PrometheusRule, Probe and
+        # ScrapeConfig in every namespace. The chart default only selects
+        # objects labeled release=kube-prometheus-stack, which silently
+        # dropped Rook, Cilium, Flux, cert-manager, external-secrets and the
+        # other charts that ship their own monitors.
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        scrapeConfigSelectorNilUsesHelmValues: false
+        # Rook's operator-owned ServiceMonitors relabel cluster=rook-ceph,
+        # which wins over the external label. Put Ceph alerts back on
+        # cluster=k8s-holthome before they reach Forge. The series in the
+        # TSDB keep cluster=rook-ceph. The chart writes this list verbatim
+        # into a Secret as Prometheus alert_relabel_configs, so keys are
+        # snake_case.
+        additionalAlertRelabelConfigs:
+          - source_labels: [cluster]
+            regex: rook-ceph
+            target_label: cluster
+            replacement: k8s-holthome
+            action: replace
         externalLabels:
           cluster: k8s-holthome
         retention: 7d
