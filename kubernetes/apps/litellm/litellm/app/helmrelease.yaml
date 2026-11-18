@@ -68,12 +68,17 @@ spec:
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 3
+              # Not /health/readiness: that answers 503 while Postgres is
+              # unreachable, which with one replica empties the Service even
+              # though cached keys can still be served. liveliness still
+              # answers 503 during graceful shutdown, so drains are unchanged
+              # (docs/apps/litellm.md, "Key cache").
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /health/readiness
+                    path: /health/liveliness
                     port: 4000
                   periodSeconds: 10
                   timeoutSeconds: 5

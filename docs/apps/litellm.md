@@ -117,8 +117,10 @@ Probes:
 
 | Probe | Path | Auth |
 | --- | --- | --- |
-| startup, liveness | `GET /health/liveliness` | none |
-| readiness | `GET /health/readiness` | none; 503 when the database is down |
+| startup, liveness, readiness | `GET /health/liveliness` | none; 503 only during graceful shutdown |
+
+`GET /health/readiness` answers 503 while the database is down, so it is
+not the readiness probe (see "Key cache" below).
 
 `GET /health/liveness` is an alias of `liveliness`. `GET /health` is the
 model check. It needs a key and spends tokens. It is not a probe.
@@ -140,10 +142,19 @@ an hour. `/key/update`, `/key/delete` and `/key/regenerate`, which the key
 provisioner uses, clear the entry at once, because there is one replica.
 Spend counters are cached separately and keep their own short TTL.
 
-The key cache does not cover the readiness probe. `/health/readiness`
-answers 503 while the database is down, and with one replica that leaves
-the Service with no endpoint. That happened at 11-15 01:05 and 11-17 03:49
-UTC, the starts of two fallback bursts.
+The readiness probe is `/health/liveliness` for the same reason. The
+`/health/readiness` probe answered 503 while the database was down, and
+with one replica that left the Service with no endpoint, even though cached
+keys could still be served. That happened at 11-15 01:05 and 11-17 03:49
+UTC, the starts of two fallback bursts. `/health/liveliness` still answers
+503 once graceful shutdown begins, so rollouts drain as before. Recovering
+the database connection does not depend on the probe: the Prisma engine
+watchdog, auth and the DB exception handler each call
+`attempt_db_reconnect`.
+
+What is lost is a cluster signal for "LiteLLM cannot reach its database".
+The postgres17 alerts in [postgres17.md](../platform/postgres17.md) cover the
+database itself, and the spend-tracking errors show in the proxy log.
 
 The `prometheus` callback serves `/metrics`. It needs the master key. The ServiceMonitor is labeled
 `release: kube-prometheus-stack` and sends `LITELLM_MASTER_KEY`.
