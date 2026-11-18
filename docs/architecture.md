@@ -223,7 +223,10 @@ series keep `cluster=rook-ceph`. Rook creates the Ceph alert rules
 (`prometheus-ceph-rules` in `rook-ceph`). Monitors for Flux controllers
 and Envoy Gateway live in
 `observability/kube-prometheus-stack/app/monitors/`, so `flux-instance`
-and `envoy-gateway` do not depend on the Prometheus CRDs.
+and `envoy-gateway` do not depend on the Prometheus CRDs. Node NIC alerts
+(`NodeNicErrors`, `NodeNicLinkFlapped`) are in `rules/node-network.yaml`
+next to them, because the chart's default network alerts did not fire on
+the November 2026 sled-1 frame errors.
 
 ## What stays off the cluster
 
