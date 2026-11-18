@@ -7,3 +7,4 @@ resources:
   - ./ocirepository.yaml
   - ./monitors/flux.yaml
   - ./monitors/envoy-gateway.yaml
+  - ./rules/node-network.yaml
