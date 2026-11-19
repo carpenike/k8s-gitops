@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: provision
-          image: docker.io/openproject/openproject:17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+          image: docker.io/openproject/openproject:17.9.8-slim@sha256:9555489b1ec84c53275dbf63c4c101e7002222e6f273d7fc10e8ff18f8f726c0
           command:
             - bash
             - -c
