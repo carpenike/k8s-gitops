@@ -213,7 +213,8 @@ spec:
               # grant. This one admits that endpoint and nothing else on the
               # host. It does mean Cursor-operated infrastructure receives
               # authorization codes for whatever view the user consents to --
-              # today /mcp/steffi, which carries steffi.write (grocy writes).
+              # today /mcp/steffi, which carries steffi.write (grocy writes, and
+              # MFP writes and deletes on her own MFP account).
               HOMELAB_MCP_OAUTH_REDIRECT_URI_ALLOWLIST: >-
                 ["https://claude.ai/","https://claude.com/",
                 "https://vscode.dev/redirect","https://insiders.vscode.dev/redirect",
@@ -301,8 +302,8 @@ spec:
               HOMELAB_MCP_OPENPROJECT_BOT_SCOPES: >-
                 {"claude": ["personal", "bots", "work"], "grokbot": ["personal", "bots"]}
               HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
-              # Per-user credentials: who they are kept for, and where. No view
-              # uses credentials "per_user" yet (docs/apps/homelab-mcp.md).
+              # Per-user credentials: who they are kept for, and where. Used by
+              # /mcp/steffi (docs/apps/homelab-mcp.md).
               HOMELAB_MCP_USERS: >-
                 {"ryan": {"email": "ryan@ryanholt.net"},
                 "steffi": {"email": "stefanie@stefanieholt.com"}}
@@ -343,6 +344,12 @@ spec:
               # stock, ensure and unit-conversion writes, not the one-shot
               # grocy_seed_defaults. Cooklang sends no credential, so it is the
               # same for everyone; read tools only, no recipe edits.
+              # MFP acts as her too (Ryan, 2026-11-19): every mfp_* tool, the same
+              # 33 Grokbot has, reads and writes including deletes, on HER session
+              # (mfp.steffi, captured with carpenike/mcp scripts/mfp_capture.py).
+              # A missing or expired file is mfp_no_user_credential /
+              # mfp_auth_expired, never a fall-back to Ryan's shared jar. Writes
+              # are preview then confirm.
               # /mcp/household: the SHARED-credential household data set --
               # finances, school, the purchase stores, Fidelity and Paperless.
               # Named for the DATA, not a person: one ledger and one set of
@@ -358,9 +365,9 @@ spec:
               # per-user support (today only grocy has it, plus cooklang which
               # sends no credential). Adding them there is a STARTUP failure,
               # not a runtime refusal, so it would take every connector down.
-              # The same split will be wanted for the Personal wing once mfp
-              # grows per-user credentials; until then mfp reads one cookie
-              # jar for the whole server and must not be shared out.
+              # mfp has per-user credentials (carpenike/mcp#125), which is why
+              # it can sit on /mcp/steffi. On every shared view it still reads
+              # Ryan's one cookie jar, so it must not be shared out there.
               # Its tool list is the union of PERSONAL_FINANCE_TOOLS,
               # PERSONAL_SCHOOL_TOOLS and PERSONAL_MONEY_TOOLS as of 0.41.1,
               # written out rather than `scope:`d because a view takes one
@@ -432,7 +439,19 @@ spec:
                  "grocy_stock_value", "grocy_stock_by_location",
                  "grocy_ensure", "grocy_stock_item", "grocy_set_unit_conversion",
                  "cooklang_list_recipes", "cooklang_get_recipe",
-                 "cooklang_search_federation", "cooklang_build_shopping_list"],
+                 "cooklang_search_federation", "cooklang_build_shopping_list",
+                 "mfp_auth_status", "mfp_get_day", "mfp_get_range", "mfp_audit",
+                 "mfp_get_food", "mfp_search_food", "mfp_list_recipes", "mfp_get_recipe",
+                 "mfp_preview_log_entry", "mfp_log_entry", "mfp_preview_delete_entry",
+                 "mfp_delete_entry", "mfp_preview_delete_meal_entries",
+                 "mfp_delete_meal_entries", "mfp_preview_replace_entry", "mfp_replace_entry",
+                 "mfp_preview_create_recipe", "mfp_create_recipe",
+                 "mfp_preview_update_recipe", "mfp_update_recipe",
+                 "mfp_preview_delete_recipe", "mfp_delete_recipe", "mfp_list_meals",
+                 "mfp_preview_log_recipe", "mfp_log_recipe", "mfp_preview_log_meal",
+                 "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
+                 "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
+                 "mfp_delete_meal"],
                  "read_scope": "steffi.read", "write_scope": "steffi.write",
                  "connect_scopes": "all", "credentials": "per_user",
                  "users": ["stefanie@stefanieholt.com"]},
