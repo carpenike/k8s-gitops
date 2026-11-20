@@ -521,7 +521,7 @@ spec:
                 ---
                 name: incident-response
                 description: "An Alertmanager alert reached you: triage it in the cluster or on the hosts, write the incident note, fix it within your permissions, open a fix PR with a coding engine when the cause is in git, and message Ryan on Signal ops for anything else."
-                version: 2.0.0
+                version: 2.1.0
                 author: k8s-gitops (hermes-bot component)
                 metadata:
                   hermes:
@@ -540,6 +540,8 @@ spec:
 
                 - A **resolved** group: go to 6.
                 - A group that already has a note (step 1 finds it): continue that note.
+                  That includes the same incident under a different alert group: step 1
+                  matches on what broke, not only on the group key.
                   If it already names a fix PR (`fix_pr`), don't start another; add what is
                   new to the note and the PR.
                 - **A storm**: more than three different groups firing within about ten
@@ -550,14 +552,26 @@ spec:
 
                 ## 1. The note
 
-                One note per alert group, in `Personal/Tech/Incidents/`. Search for
-                the group key first (`vault_search`); if a note has it, add to that
-                note. Otherwise `vault_create`
+                One note per incident, not per alert group, in `Personal/Tech/Incidents/`.
+                One cause often fires many alerts (a node or Ceph problem fires a dozen
+                groups); they are one incident. Before creating a note, look for one to
+                add to (`vault_search`):
+
+                - a note listing this group key in `group_keys` (or `group_key`);
+                - else a note with `status: investigating` that started in the last 6
+                  hours about the same thing: the same node, host, namespace, service, or
+                  Ceph pool, or the same storm.
+
+                If one matches, add this group to it: append the group key to
+                `group_keys` and the alert to its timeline. Otherwise `vault_create`
                 `Personal/Tech/Incidents/<YYYY-MM-DD> <slug>.md` with frontmatter
                 `type: incident`, `domain: tech`, `status: investigating`,
-                `severity`, `alert` (the alertname), `started` (the alert's
-                startsAt), `group_key`, and later `fix_pr`. Body: what fired, then a
-                timeline you add to as you go: every command you ran and what it showed.
+                `severity`, `alert` (the first alertname), `started` (the alert's
+                startsAt), `group_keys` (a list), and later `fix_pr` and `task`. Body:
+                what fired, then a timeline you add to as you go: every command you ran
+                and what it showed. Never edit a note under
+                `Personal/Tech/Incidents/Archive/`; if an archived incident comes back,
+                start a new note and link the old one.
 
                 ## 2. Look: where the problem lives
 
@@ -639,11 +653,29 @@ spec:
 
                 ## 6. Resolved
 
-                A resolved alert: set the note's `status: resolved`, add the root
-                cause and any follow-ups. A follow-up that needs a change becomes a
-                board task for Ryan, unless a fix PR already covers it. Changes to Tech's
-                Status belong to Chief Engineer: append them to `Personal/Tech/Inbox.md`
-                instead.
+                A resolved alert: when every group in the note has resolved, set the
+                note's `status: resolved` and add the root cause and any follow-ups.
+
+                Follow-ups: at most one board task per incident, and only when something
+                is left to do that no fix PR covers. If the note already has a `task`,
+                comment on it instead. A group that fired once, resolved on its own and
+                left nothing to do gets no task. Who gets it:
+
+                - **You** (assignee `me`, default status), when you can do it yourself on a
+                  later turn: a check that timed out, a trend to read again tomorrow.
+                - **Claude** (assignee `claude`, default status), when it needs access you
+                  don't have: a Secret, a private service, the network or a switch.
+                - **Ryan** (assignee `ryan`, status Needs Ryan) only for a decision that is
+                  his (which recovery to choose, whether to accept a risk) or something
+                  only his hands can do (physical hardware, a sign-in). Then also append
+                  one line to `Personal/Tech/Inbox.md` asking Chief Engineer to add it to
+                  Tech's `## Needs Ryan` section, linking the task. An investigation is
+                  never Ryan's: it goes to you or to Claude.
+
+                Put the task's link in the note (`task`). Other changes to Tech's Status
+                belong to Chief Engineer: append them to `Personal/Tech/Inbox.md`. Claude
+                moves resolved notes older than 30 days to
+                `Personal/Tech/Incidents/Archive/`.
 
                 End the turn with a few lines for Ryan: what fired, what you did, and
                 what is left.
