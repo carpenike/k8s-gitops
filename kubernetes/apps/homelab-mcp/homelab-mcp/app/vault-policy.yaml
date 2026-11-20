@@ -90,9 +90,13 @@ domains:
     sensitivity: personal
     # Grok Bots.md: the Grok roster, Ryan's (2026-11-12).
     protected: [Protocol.md, Grok Bots.md]
+  # Work notes live under Work/ (moved 2026-11-19: Meetings, People,
+  # Projects, Research, Reviews, Voice, HHS -> Work/Legacy/HHS, TASKS.md).
+  # The other roots are tooling that has to stay at the vault root: Claude's
+  # memory (CLAUDE.md + memory/), Templater's Templates/, and the Excalidraw
+  # and ExcaliBrain plugin folders.
   work:
-    roots: [Work, Meetings, People, Projects, Research, Reviews, Voice, memory, HHS,
-            Excalidraw, Excalibrain, Templates, TASKS.md, CLAUDE.md]
+    roots: [Work, memory, Excalidraw, Excalibrain, Templates, CLAUDE.md]
     sensitivity: work
 clients:
   claude:
