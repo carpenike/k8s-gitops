@@ -26,6 +26,7 @@ projects:
   - {identifier: church, name: Church, parent: personal}
   - {identifier: education, name: Education, parent: personal}
   - {identifier: wardrobe, name: Wardrobe, parent: personal}
+  - {identifier: research, name: Research, parent: personal}
   - {identifier: work, name: Work}
 
 # The seeded demo projects are public, so every signed-in user (every bot)

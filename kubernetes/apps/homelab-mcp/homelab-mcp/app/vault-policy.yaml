@@ -71,6 +71,17 @@ domains:
     owner_agent: claude
     protected: [Goals.md]
     append_only: [Decisions.md]
+  # Public-source research on work topics (Ryan, 2026-11-20, vault requirement
+  # R3): what the Grok Chief of Staff's daily VA briefing finds on SAM.gov and
+  # public VA and federal sites. Personal sensitivity so Grokbot can write it;
+  # the guardrails (public URLs only, nothing internal, work-side agents read
+  # but never write) are in Personal/Research/Plan.md.
+  research:
+    roots: [Personal/Research]
+    sensitivity: personal
+    owner_agent: chief-of-staff
+    protected: [Goals.md]
+    append_only: [Decisions.md]
   inbox:
     roots: [Inbox]
     sensitivity: personal
@@ -126,6 +137,6 @@ clients:
     # Every personal domain, health, church and education included (Ryan,
     # 2026-11-12); agents read-only.
     read: [fitness, inbox, property, tech, family-history, finances, health, church,
-           education, wardrobe, agents]
+           education, wardrobe, research, agents]
     write: [fitness, inbox, property, tech, family-history, finances, health, church,
-            education, wardrobe]
+            education, wardrobe, research]
