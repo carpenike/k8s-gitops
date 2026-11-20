@@ -92,11 +92,12 @@ domains:
     protected: [Protocol.md, Grok Bots.md]
   # Work notes live under Work/ (moved 2026-11-19: Meetings, People,
   # Projects, Research, Reviews, Voice, HHS -> Work/Legacy/HHS, TASKS.md).
-  # The other roots are tooling that has to stay at the vault root: Claude's
-  # memory (CLAUDE.md + memory/), Templater's Templates/, and the Excalidraw
-  # and ExcaliBrain plugin folders.
+  # The other two roots are Claude's memory (CLAUDE.md + memory/), which has to
+  # stay at the vault root. Templates/, Excalidraw/ and Excalibrain/ went to
+  # Archive/ on 2026-11-20 when every community plugin was removed; Archive/ is
+  # in no domain, so only full clients see it.
   work:
-    roots: [Work, memory, Excalidraw, Excalibrain, Templates, CLAUDE.md]
+    roots: [Work, memory, CLAUDE.md]
     sensitivity: work
 clients:
   claude:
