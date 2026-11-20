@@ -103,12 +103,16 @@ domains:
     protected: [Protocol.md, Grok Bots.md]
   # Work notes live under Work/ (moved 2026-11-19: Meetings, People,
   # Projects, Research, Reviews, Voice, HHS -> Work/Legacy/HHS, TASKS.md).
-  # The other two roots are Claude's memory (CLAUDE.md + memory/), which has to
-  # stay at the vault root. Templates/, Excalidraw/ and Excalibrain/ went to
-  # Archive/ on 2026-11-20 when every community plugin was removed; Archive/ is
-  # in no domain, so only full clients see it.
+  # Templates/, Excalidraw/ and Excalibrain/ went to Archive/ on 2026-11-20 when
+  # every community plugin was removed; Archive/ is in no domain, so only full
+  # clients see it. Copilot reads and writes this domain (client copilot).
   work:
-    roots: [Work, memory, CLAUDE.md]
+    roots: [Work]
+    sensitivity: work
+  # Claude's own working memory, split out of work on 2026-11-20 so Copilot
+  # (which gets work) never sees it. Both have to stay at the vault root.
+  assistant:
+    roots: [memory, CLAUDE.md]
     sensitivity: work
 clients:
   claude:
@@ -117,6 +121,17 @@ clients:
     provider: internal
     delete: true
     move: true
+  # Copilot on Ryan's Microsoft laptop, through /mcp/work (Ryan, 2026-11-20,
+  # vault requirement R7). Internal for this client only: the work notes are
+  # Microsoft's and so is Copilot (Ryan, 2026-11-19). Reads work and the
+  # public-source research; writes work only, no delete or move. Personal,
+  # journal, system and assistant stay out of reach.
+  copilot:
+    views: [/mcp/work]
+    access: scoped
+    provider: internal
+    read: [work, research]
+    write: [work]
   # Hank (Hermes), for incident notes (Ryan, 2026-11-13). Reads Tech and
   # Agents (Protocol.md, Grok Bots.md, Vault conventions.md); writes only
   # under Personal/Tech/Incidents and only appends to the Tech Inbox
