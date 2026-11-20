@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Chart CRDs install with this release. The scale set Kustomization waits
+# on this HelmRelease and does not install its own copy.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gha-runner-scale-set-controller
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set-controller
+  interval: 1h
+  values:
+    fullnameOverride: gha-rs-controller
+    flags:
+      logLevel: info
+      logFormat: text
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

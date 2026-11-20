@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# OAuth state, the Signal store, the ingestion reservation and report state. Every 6 hours: the bank-balance history itself is in postgres17 (its own backups); this is the state that keeps the jobs from re-pulling or re-sending. Crash consistent: SQLite replays its journal.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: homelab-mcp-state
+spec:
+  sourcePVC: homelab-mcp-state
+  trigger:
+    schedule: "15 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: homelab-mcp-state-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: homelab-mcp-volsync
+    # The pod's uid: the volume roots are 0700 and owned by it. fsGroup is
+    # needed too -- the mover's own cache PVC is provisioned fresh and
+    # root-owned, so without it restic cannot create /cache/CACHEDIR.TAG and
+    # the mover exits before it ever reads the source.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# signal-cli's registration (the bot's Signal identity). Not reproducible; Forge kept it on a critical dataset with offsite copies. Every 6 hours.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: homelab-mcp-signal
+spec:
+  sourcePVC: homelab-mcp-signal
+  trigger:
+    schedule: "45 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: homelab-mcp-signal-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: homelab-mcp-volsync
+    # The pod's uid: the volume roots are 0700 and owned by it. fsGroup is
+    # needed too -- the mover's own cache PVC is provisioned fresh and
+    # root-owned, so without it restic cannot create /cache/CACHEDIR.TAG and
+    # the mover exits before it ever reads the source.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# The Obsidian vault volume. Obsidian Sync keeps 12 months of version history,
+# but the headless client is in beta and can sync a missed file as a delete
+# (upstream #19/#28), and the agents write here: this is the copy outside
+# Obsidian's service. It also holds the client's login and end-to-end key
+# (config/); restic encrypts the repository. Every 6 hours at :30, between
+# the state (:15) and Signal (:45) runs.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: homelab-mcp-vault
+spec:
+  sourcePVC: homelab-mcp-vault
+  trigger:
+    schedule: "30 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: homelab-mcp-vault-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 2Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: homelab-mcp-volsync
+    # The volume root and config/ are 0700, owned by the pod's uid.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4

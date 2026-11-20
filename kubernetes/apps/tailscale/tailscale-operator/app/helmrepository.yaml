@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.toolkit.fluxcd.io/helmrepository_v1.json
+# Tailscale publishes the operator chart only to this HTTP repository. There
+# is no OCI artifact (ghcr.io/tailscale has no chart package, checked
+# 10 Nov 2026), so this is a HelmRepository like headlamp's.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: tailscale
+spec:
+  interval: 15m
+  url: https://pkgs.tailscale.com/helmcharts

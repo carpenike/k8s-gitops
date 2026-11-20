@@ -1,0 +1,7 @@
+---
+# OpenProject Community Edition: the shared task board for Ryan and the bots.
+# See docs/apps/openproject.md.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openproject

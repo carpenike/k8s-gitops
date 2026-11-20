@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Repo-scoped scale set for carpenike/va-acr-app.
+# Same GitHub App installation as sam-tracker. Workflows opt in with
+# runs-on: va-acr-app-k8s.
+# Its CI starts no service containers, so this overlay drops dind and the
+# runner pod is not privileged. pytest -n auto sees the node's 56 CPUs, not
+# the pod's limit, so PYTEST_XDIST_AUTO_NUM_WORKERS sets 24 workers: 1.5 per
+# CPU, because at one per CPU the tests left about 40% of the CPUs idle.
+# va-acr-app's CI also derives the count from cgroup cpu.max.
+# Requests are 8 CPU / 8Gi, so test pods spread across the nodes. Limits are
+# 16 CPU / 24Gi. Memory peaked at 8.6 GiB with 12 workers and grows about
+# 0.3 GiB per worker. Runners scale to 0.
+# maxRunners is 8, not the shared 3: each CI run takes two runners
+# (frontend and python-linux) and several pull requests often push at once.
+# At 3, jobs queued 5-60 min while the nodes sat near idle.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: va-acr-app-k8s
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/va-acr-app
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: va-acr-app-k8s
+      - op: remove
+        path: /spec/values/containerMode
+      - op: replace
+        path: /spec/values/maxRunners
+        value: 8
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/cpu
+        value: "8"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/memory
+        value: 8Gi
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/cpu
+        value: "16"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/memory
+        value: 24Gi
+      - op: add
+        path: /spec/values/template/spec/containers/0/env/-
+        value:
+          name: PYTEST_XDIST_AUTO_NUM_WORKERS
+          value: "24"

@@ -1,0 +1,141 @@
+---
+# Runs webhook.rb with OpenProject's own Rails runner, in OpenProject's
+# image and with the seeder's environment, like the bots' provisioning Job
+# (../template/job.yaml). One webhook for the whole board, so one Job here,
+# not one per bot. Jobs are immutable: this Kustomization sets force: true,
+# so a change to the template replaces it. Keep the image in step with the
+# HelmRelease (kubernetes/apps/openproject/openproject/app/helmrelease.yaml).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openproject-board-webhook
+  labels:
+    app.kubernetes.io/name: openproject-board-webhook
+spec:
+  # Retries while the board project does not exist yet (the first bot's
+  # provisioning Job creates it).
+  backoffLimit: 6
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      # Bump with every change to webhook.rb, and to re-apply the signing
+      # key after rotating it in 1Password: only a change here replaces a
+      # finished Job.
+      annotations:
+        openproject-board-webhook/script-revision: "1"
+      labels:
+        app.kubernetes.io/name: openproject-board-webhook
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: webhook
+          image: docker.io/openproject/openproject:17.9.6-slim@sha256:817640f6637157903846ac79808fe0333b279ae6cddf3c57fe4bea6ff98b56d1
+          command:
+            - bash
+            - -c
+            # Ruby refuses a world-writable TMPDIR without the sticky bit, and
+            # the emptyDir /tmp is 0777. The seeder's prepare-tmpdir does the same.
+            - mkdir -p /tmp/ruby && chmod 1777 /tmp/ruby && cd /app && exec bundle exec rails runner /opt/webhook/webhook.rb
+          envFrom:
+            - secretRef:
+                name: openproject-core
+            - secretRef:
+                name: openproject-memcached
+            - secretRef:
+                name: openproject-environment
+          env:
+            - name: TMPDIR
+              value: /tmp/ruby
+            - name: OPENPROJECT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-db
+                  key: password
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-secrets
+                  key: secret-key-base
+            - name: OPENPROJECT_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: openproject-board-webhook
+                  key: OPENPROJECT_WEBHOOK_SECRET
+            - name: WEBHOOK_NAME
+              value: Hermes task board
+            # The relay in openproject-mcp. OpenProject refuses private
+            # addresses unless allowlisted: the Service's pinned ClusterIP is
+            # in OPENPROJECT_SSRF__PROTECTION__IP__ALLOWLIST
+            # (openproject/app/helmrelease.yaml).
+            - name: WEBHOOK_URL
+              value: http://openproject-mcp.openproject.svc.cluster.local:8000/hooks/openproject
+            # BOARD_PROJECT in ../template/job.yaml.
+            - name: BOARD_PROJECT
+              value: bots
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: script
+              mountPath: /opt/webhook
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: app-tmp
+              mountPath: /app/tmp
+            # As the seeder has it: the app's configured attachments path.
+            - name: data
+              mountPath: /var/openproject/assets
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openproject
+        - name: script
+          configMap:
+            name: openproject-board-webhook
+        - name: tmp
+          emptyDir: {}
+        - name: app-tmp
+          emptyDir: {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/external-secrets.io/externalsecret_v1.json
+# Item openproject in vault k8s-secrets, field webhook_secret: the key the
+# board webhook signs with. openproject-mcp's relay checks with the same field.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: openproject-board-webhook
+spec:
+  refreshInterval: 12h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: openproject-board-webhook
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        OPENPROJECT_WEBHOOK_SECRET: "{{ .webhook_secret }}"
+  data:
+    - secretKey: webhook_secret
+      remoteRef:
+        key: openproject/webhook_secret

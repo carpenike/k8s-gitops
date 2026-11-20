@@ -1,0 +1,8 @@
+{
+  "name": "homelab-mcp-obsidian-sync",
+  "private": true,
+  "description": "Pins Obsidian's headless Sync client for the homelab-mcp obsidian-sync container. Installed at pod start from this lockfile (npm ci), never redistributed.",
+  "dependencies": {
+    "obsidian-headless": "0.0.14"
+  }
+}

@@ -1,0 +1,210 @@
+---
+# Hank's cluster access (input CLUSTER_ACCESS_ENABLED; docs/apps/hermes.md,
+# "Cluster access"). His terminal (the screen pod) runs as ServiceAccount
+# hermes-hank/hermes with its token mounted; the agent pod never gets it.
+#
+# Read: everything except Secrets. RBAC cannot subtract, so the core group
+# lists its resources and every other API group is named (from
+# `kubectl api-resources` on 2026-11-13; a new group needs a line here).
+# generators.external-secrets.io is left out: a generator's spec can carry
+# the inputs of a secret.
+#
+# Write, only what the incident skill allows: rollout restart (patch), scale,
+# delete a pod or a Job, and flux reconcile (patch). RBAC cannot say "only
+# this annotation", and a patch to a pod template could mount any Secret in
+# the namespace, so ValidatingAdmissionPolicy hermes-hank-ops below holds
+# every such write to exactly that: a restart annotation or a replica count,
+# a pod with a controller, a failed Job, a Flux object's annotations. No
+# create, no PVC, PV, volume, Secret, namespace or RBAC write of any kind.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hermes-hank-ops
+rules:
+  - apiGroups: [""]
+    resources:
+      - componentstatuses
+      - configmaps
+      - endpoints
+      - events
+      - limitranges
+      - namespaces
+      - nodes
+      - persistentvolumeclaims
+      - persistentvolumes
+      - pods
+      - pods/log
+      - podtemplates
+      - replicationcontrollers
+      - resourcequotas
+      - serviceaccounts
+      - services
+    verbs: [get, list, watch]
+  - apiGroups:
+      - acme.cert-manager.io
+      - actions.github.com
+      - admissionregistration.k8s.io
+      - apiextensions.k8s.io
+      - apiregistration.k8s.io
+      - apps
+      - autoscaling
+      - barmancloud.cnpg.io
+      - batch
+      - ceph.rook.io
+      - cert-manager.io
+      - certificates.k8s.io
+      - cilium.io
+      - coordination.k8s.io
+      - csi.ceph.io
+      - discovery.k8s.io
+      - events.k8s.io
+      - external-secrets.io
+      - externaldns.k8s.io
+      - flowcontrol.apiserver.k8s.io
+      - fluxcd.controlplane.io
+      - gateway.envoyproxy.io
+      - gateway.networking.k8s.io
+      - gateway.networking.x-k8s.io
+      - groupsnapshot.storage.k8s.io
+      - helm.toolkit.fluxcd.io
+      - k8s.cni.cncf.io
+      - kustomize.toolkit.fluxcd.io
+      - metrics.k8s.io
+      - monitoring.coreos.com
+      - networking.k8s.io
+      - nfd.k8s-sigs.io
+      - node.k8s.io
+      - notification.toolkit.fluxcd.io
+      - objectbucket.io
+      - policy
+      - postgresql.cnpg.io
+      - rbac.authorization.k8s.io
+      - resource.k8s.io
+      - scheduling.k8s.io
+      - snapshot.storage.k8s.io
+      - source.toolkit.fluxcd.io
+      - storage.k8s.io
+      - storagemigration.k8s.io
+      - tailscale.com
+      - talos.dev
+      - tuppr.home-operations.com
+      - volsync.backube
+    resources: ["*"]
+    verbs: [get, list, watch]
+  # rollout restart; scale through the subresource.
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets]
+    verbs: [patch]
+  - apiGroups: [apps]
+    resources: [deployments/scale, statefulsets/scale]
+    verbs: [get, patch, update]
+  # A pod a controller will replace; a failed Job Flux will re-create.
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [delete]
+  - apiGroups: [batch]
+    resources: [jobs]
+    verbs: [delete]
+  # flux reconcile sets reconcile.fluxcd.io/requestedAt on these.
+  - apiGroups: [kustomize.toolkit.fluxcd.io]
+    resources: [kustomizations]
+    verbs: [patch]
+  - apiGroups: [helm.toolkit.fluxcd.io]
+    resources: [helmreleases]
+    verbs: [patch]
+  - apiGroups: [source.toolkit.fluxcd.io]
+    resources: [gitrepositories, ocirepositories, helmrepositories, helmcharts]
+    verbs: [patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hermes-hank-ops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hermes-hank-ops
+subjects:
+  - kind: ServiceAccount
+    name: hermes
+    namespace: hermes-hank
+---
+# Every write Hank's ServiceAccount makes is checked here. A restart may
+# change only the pod template's kubectl.kubernetes.io/restartedAt annotation
+# (and the replica count); the template's spec, labels and other annotations
+# must stay as they are, so no image, command, volume or ServiceAccount
+# change gets through. A Flux object's spec must not change (no suspend, no
+# new values). A deleted pod must have a controller; a deleted Job must have
+# failed.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: hermes-hank-ops
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [apps]
+        apiVersions: ["*"]
+        operations: [UPDATE]
+        resources: [deployments, statefulsets, daemonsets]
+      - apiGroups: [kustomize.toolkit.fluxcd.io, helm.toolkit.fluxcd.io, source.toolkit.fluxcd.io]
+        apiVersions: ["*"]
+        operations: [UPDATE]
+        resources: ["*"]
+      - apiGroups: [""]
+        apiVersions: ["*"]
+        operations: [DELETE]
+        resources: [pods]
+      - apiGroups: [batch]
+        apiVersions: ["*"]
+        operations: [DELETE]
+        resources: [jobs]
+  matchConditions:
+    - name: hank-only
+      expression: request.userInfo.username == 'system:serviceaccount:hermes-hank:hermes'
+  variables:
+    - name: restartKey
+      expression: "'kubectl.kubernetes.io/restartedAt'"
+    - name: newAnn
+      expression: >-
+        has(object.spec.template) && has(object.spec.template.metadata) && has(object.spec.template.metadata.annotations)
+        ? object.spec.template.metadata.annotations : {}
+    - name: oldAnn
+      expression: >-
+        has(oldObject.spec.template) && has(oldObject.spec.template.metadata) && has(oldObject.spec.template.metadata.annotations)
+        ? oldObject.spec.template.metadata.annotations : {}
+  validations:
+    - expression: >-
+        request.resource.group != 'apps' || (
+          object.spec.template.spec == oldObject.spec.template.spec
+          && object.spec.selector == oldObject.spec.selector
+          && (has(object.spec.template.metadata.labels) ? object.spec.template.metadata.labels : {}) ==
+             (has(oldObject.spec.template.metadata.labels) ? oldObject.spec.template.metadata.labels : {})
+          && variables.newAnn.all(k, k == variables.restartKey || (k in variables.oldAnn && variables.oldAnn[k] == variables.newAnn[k]))
+          && variables.oldAnn.all(k, k == variables.restartKey || k in variables.newAnn)
+        )
+      message: "Hank may only restart (kubectl.kubernetes.io/restartedAt) or scale this workload."
+    - expression: >-
+        !request.resource.group.endsWith('fluxcd.io') || object.spec == oldObject.spec
+      message: "Hank may only annotate a Flux object (flux reconcile), never change its spec."
+    - expression: >-
+        request.resource.resource != 'pods' || (
+          has(oldObject.metadata.ownerReferences)
+          && oldObject.metadata.ownerReferences.exists(r, has(r.controller) && r.controller)
+        )
+      message: "Hank may only delete a pod that a controller will replace."
+    - expression: >-
+        request.resource.resource != 'jobs' || (
+          has(oldObject.status.conditions)
+          && oldObject.status.conditions.exists(c, c.type == 'Failed' && c.status == 'True')
+        )
+      message: "Hank may only delete a failed Job (Flux re-creates it)."
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: hermes-hank-ops
+spec:
+  policyName: hermes-hank-ops
+  validationActions: [Deny]

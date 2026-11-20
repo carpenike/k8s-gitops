@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/podmonitor_v1.json
+# Instance metrics (port metrics, 9187, plain HTTP) for the backup alerts in
+# prometheusrule.yaml. Cluster spec.monitoring.enablePodMonitor stays false:
+# CNPG deprecated it in favour of a PodMonitor you manage. Prometheus only
+# selects monitors labelled release=kube-prometheus-stack.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: postgres17
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: postgres17
+      cnpg.io/podRole: instance
+  podMetricsEndpoints:
+    - port: metrics

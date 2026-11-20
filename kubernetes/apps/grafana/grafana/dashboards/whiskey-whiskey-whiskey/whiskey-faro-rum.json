@@ -1,0 +1,757 @@
+{
+  "uid": "www-faro-rum",
+  "title": "W.W.W. \u2014 Application Telemetry",
+  "description": "Real user monitoring across the public site, crew SPA, keyed guest pages and kiosks. Faro and the lightweight guest beacon share Alloy and Loki. Public and guest pages include numeric Web Vitals; kiosks use throttled health reports. Exception text is field-safe; inspect build, view and stack coordinates. Capability URLs, OAuth codes and form values are excluded. Server RED metrics include the homepage and use bounded route patterns.",
+  "tags": ["whiskey-whiskey-whiskey", "rum", "faro"],
+  "timezone": "browser",
+  "schemaVersion": 41,
+  "version": 2,
+  "editable": true,
+  "refresh": "1m",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Exceptions",
+      "description": "Unhandled JS errors and promise rejections ingested in the selected range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "increase(faro_receiver_exceptions_total[$__range])",
+          "instant": true,
+          "legendFormat": "exceptions"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Measurements",
+      "description": "Web Vitals samples (LCP, INP, CLS, FCP, TTFB).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "increase(faro_receiver_measurements_total[$__range])",
+          "instant": true,
+          "legendFormat": "measurements"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Events",
+      "description": "Page views, route changes, session start/resume, resource timings.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "increase(faro_receiver_events_total[$__range])",
+          "instant": true,
+          "legendFormat": "events"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Collector in-flight",
+      "description": "Requests currently being served by Alloy's faro.receiver. A number that never returns to zero means the Loki push is backing up.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "sum(faro_receiver_inflight_requests)",
+          "instant": true,
+          "legendFormat": "in-flight"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Ingest rate by signal type",
+      "description": "From Alloy's own counters, so this is what the collector accepted \u2014 independent of whether Loki kept it.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "rate(faro_receiver_exceptions_total[$__rate_interval])",
+          "legendFormat": "exceptions"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "rate(faro_receiver_events_total[$__rate_interval])",
+          "legendFormat": "events"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "rate(faro_receiver_measurements_total[$__rate_interval])",
+          "legendFormat": "measurements"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          },
+          "expr": "rate(faro_receiver_logs_total[$__rate_interval])",
+          "legendFormat": "logs"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Core Web Vitals \u2014 p75",
+      "description": "The three Core Web Vitals at the 75th percentile, which is the threshold Google's own scoring uses. LCP and INP are milliseconds; CLS is unitless and plotted on the right axis. Good/needs-work boundaries: LCP 2500ms, INP 200ms, CLS 0.1.",
+      "datasource": {
+        "type": "loki",
+        "uid": "auto-loki-auto"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CLS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "auto-loki-auto"
+          },
+          "expr": "quantile_over_time(0.75, {job=\"faro\", kind=\"measurement\"} | json | type=\"web-vitals\" | unwrap value_lcp | __error__=\"\" [$__auto])",
+          "legendFormat": "LCP",
+          "queryType": "range"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "auto-loki-auto"
+          },
+          "expr": "quantile_over_time(0.75, {job=\"faro\", kind=\"measurement\"} | json | type=\"web-vitals\" | unwrap value_inp | __error__=\"\" [$__auto])",
+          "legendFormat": "INP",
+          "queryType": "range"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "loki",
+            "uid": "auto-loki-auto"
+          },
+          "expr": "quantile_over_time(0.75, {job=\"faro\", kind=\"measurement\"} | json | type=\"web-vitals\" | unwrap value_cls | __error__=\"\" [$__auto])",
+          "legendFormat": "CLS",
+          "queryType": "range"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "Top exceptions",
+      "description": "Grouped by error message. `page_url` has already had any share token stripped client-side, so a #/present or #/hub row shows the slug and <redacted> in place of the key.",
+      "datasource": {
+        "type": "loki",
+        "uid": "auto-loki-auto"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "auto-loki-auto"
+          },
+          "expr": "topk(10, sum by (view_name, type, app_version) (count_over_time({job=\"faro\", kind=\"exception\"} | json [$__range])))",
+          "instant": true,
+          "queryType": "instant"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "logs",
+      "title": "Recent exceptions",
+      "description": "Raw beacons. Expand a line for the minified stacktrace, app_version (the deployed git commit), browser_name/browser_os and session_id.",
+      "datasource": {
+        "type": "loki",
+        "uid": "auto-loki-auto"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "auto-loki-auto"
+          },
+          "expr": "{job=\"faro\", kind=\"exception\"}",
+          "queryType": "range"
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Server (Fastify)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "panels": []
+    },
+    {
+      "id": 101,
+      "type": "timeseries",
+      "title": "Request rate by route",
+      "description": "What the API is actually serving. Route labels are patterns, so /api/ops/:id is one series no matter how many operations exist.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (route) (rate(http_request_duration_seconds_count{job=\"whiskeywhiskeywhiskey\"}[$__rate_interval]))",
+          "legendFormat": "{{route}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          }
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "timeseries",
+      "title": "Errors by status",
+      "description": "5xx is the app failing; 4xx is mostly bots and expired share links, which is why they are split rather than summed into one error rate.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_request_duration_seconds_count{job=\"whiskeywhiskeywhiskey\",status_code=~\"5..\"}[$__rate_interval]))",
+          "legendFormat": "5xx",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(http_request_duration_seconds_count{job=\"whiskeywhiskeywhiskey\",status_code=~\"4..\"}[$__rate_interval]))",
+          "legendFormat": "4xx",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          }
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "type": "timeseries",
+      "title": "Latency p95 by route",
+      "description": "The server-side half of a slow page. When the browser panel above shows a bad LCP, this says whether the API was the reason.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket{job=\"whiskeywhiskeywhiskey\"}[$__rate_interval])))",
+          "legendFormat": "{{route}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          }
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "type": "timeseries",
+      "title": "Event loop lag p99 / heap",
+      "description": "Saturation. SQLite work and the Anthropic calls are synchronous enough that a blocked event loop shows here before users notice it anywhere else.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "auto-prometheus-auto"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "heap used"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nodejs_eventloop_lag_p99_seconds{job=\"whiskeywhiskeywhiskey\"}",
+          "legendFormat": "event loop p99",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "nodejs_heap_size_used_bytes{job=\"whiskeywhiskeywhiskey\"}",
+          "legendFormat": "heap used",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "auto-prometheus-auto"
+          }
+        }
+      ]
+    }
+  ]
+}

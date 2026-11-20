@@ -1,0 +1,43 @@
+---
+# Recordings stay on the media NFS export Forge already mounts.
+# Forge mounts 10.20.0.10:/mnt/tank/share at /mnt/data and points Scrypted
+# at /mnt/data/scrypted (container path /nvr). This PV is that subdirectory.
+# The kubelet is the NFS client, from a sled address on 10.20.0.0/16, which
+# is the export's client prefix. The VLAN 30 address is not the NFS client.
+# The export squashes every writer to uid 1000, gid 100. Capacity is the
+# PersistentVolume size, not an NFS quota. Reclaim is Retain so deleting
+# the claim leaves the recordings in place.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: scrypted-nvr
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-media
+  mountOptions:
+    - nfsvers=4.2
+    - soft
+    - timeo=150
+    - retrans=3
+    - rw
+    - noatime
+  nfs:
+    server: 10.20.0.10
+    path: /mnt/tank/share/scrypted
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scrypted-nvr
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-media
+  volumeName: scrypted-nvr
+  resources:
+    requests:
+      storage: 10Ti

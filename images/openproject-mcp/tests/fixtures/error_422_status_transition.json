@@ -1,0 +1,10 @@
+{
+  "_type": "Error",
+  "errorIdentifier": "urn:openproject-org:api:v3:errors:PropertyConstraintViolation",
+  "message": "Status is invalid because no valid transition exists from old to new status for the current user's roles.",
+  "_embedded": {
+    "details": {
+      "attribute": "status"
+    }
+  }
+}

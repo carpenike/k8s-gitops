@@ -1,0 +1,501 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "What the ingest could not read, worst first. `affects` names the ANSWER a row qualifies, so anything listed here means that answer may be incomplete. Evidence is kept in its own panel so the worklist stays scannable.",
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Distinct blind spots, not affected payloads.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              },
+              {
+                "color": "#F79009",
+                "value": 1
+              }
+            ]
+          },
+          "unit": ""
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::int AS \"Open\" FROM open_parser_gaps\nWHERE affects IN (${affects:sqlstring})\n  AND (child_name IS NULL OR child_name IN (${child:sqlstring}))\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Open",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Excludes anything waiting on a date that has not arrived — there is genuinely nothing to learn from those yet.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              },
+              {
+                "color": "#F79009",
+                "value": 1
+              }
+            ]
+          },
+          "unit": ""
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::int AS \"Actionable\" FROM open_parser_gaps\nWHERE actionable AND affects IN (${affects:sqlstring})\n  AND (child_name IS NULL OR child_name IN (${child:sqlstring}))\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Needs a person",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Days since the oldest listed gap was first raised.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              },
+              {
+                "color": "#F79009",
+                "value": 7
+              },
+              {
+                "color": "#F13636",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(EXTRACT(EPOCH FROM now() - min(first_seen_at)) / 86400, 0) AS \"Days\"\nFROM open_parser_gaps\nWHERE affects IN (${affects:sqlstring})\n  AND (child_name IS NULL OR child_name IN (${child:sqlstring}))\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Longest open",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Seven columns, worst first. The evidence is below.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Sev"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#F13636",
+                      "value": null
+                    },
+                    {
+                      "color": "#F79009",
+                      "value": 3
+                    },
+                    {
+                      "color": "#737373",
+                      "value": 5
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 60
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Seen"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Now"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Sev"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT severity AS \"Sev\",\n       affects AS \"Affects\",\n       COALESCE(child_name, 'all') AS \"Child\",\n       COALESCE(course_title, NULLIF(section_id, ''), '') AS \"Course\",\n       reason AS \"Reason\",\n       times_seen AS \"Seen\",\n       actionable AS \"Now\"\nFROM open_parser_gaps\nWHERE affects IN (${affects:sqlstring})\n  AND (child_name IS NULL OR child_name IN (${child:sqlstring}))\nORDER BY severity, last_seen_at DESC\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Worklist",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "What each gap actually saw. This is what a fixture is captured from, so it is the difference between a worklist and a to-do list.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saw"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 620
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(child_name, 'all') AS \"Child\",\n       kind AS \"Page\",\n       reason AS \"Reason\",\n       detail::text AS \"Saw\"\nFROM open_parser_gaps\nWHERE affects IN (${affects:sqlstring})\n  AND (child_name IS NULL OR child_name IN (${child:sqlstring}))\nORDER BY severity, last_seen_at DESC\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Evidence",
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": [
+    "schoolhouse",
+    "household"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "schoolhouse"
+        },
+        "definition": "SELECT display_name FROM children WHERE active ORDER BY display_name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Child",
+        "multi": true,
+        "name": "child",
+        "options": [],
+        "query": "SELECT display_name FROM children WHERE active ORDER BY display_name",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "schoolhouse"
+        },
+        "definition": "SELECT unnest(ARRAY['missing_work','upcoming_work','grades',\n                    'announcements','courses','staff','other']) ORDER BY 1\n",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Affects",
+        "multi": true,
+        "name": "affects",
+        "options": [],
+        "query": "SELECT unnest(ARRAY['missing_work','upcoming_work','grades',\n                    'announcements','courses','staff','other']) ORDER BY 1\n",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timezone": "America/New_York",
+  "title": "Schoolhouse — Review queue",
+  "uid": "schoolhouse-queue",
+  "weekStart": ""
+}

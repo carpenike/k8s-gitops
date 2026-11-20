@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# grafana.db and the installed plugins. Daily, as on Forge (restic daily
+# plus ZFS snapshots). Crash consistent: SQLite replays its journal, the
+# same point-in-time copy Forge's ZFS snapshot took.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: grafana-data
+spec:
+  sourcePVC: grafana-data
+  trigger:
+    schedule: "20 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: grafana-data-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: grafana-volsync
+    # Grafana's uid; the namespace enforces restricted.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 472
+      runAsGroup: 472
+      fsGroup: 472
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4

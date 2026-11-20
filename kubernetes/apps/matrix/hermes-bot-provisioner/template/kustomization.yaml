@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Per-bot template, built by the hermes-bot component's provision
+# Kustomization (kubernetes/components/hermes-bot/provision). Inputs, via
+# postBuild substitution: BOT_NAME (lowercase, digits, '-') and MATRIX_USER
+# (bare localpart, e.g. chief). The bot's namespace is always
+# hermes-${BOT_NAME}; it is not a free-form input. The Job and its
+# ServiceAccount are in matrix, next to the as_token. The Secret, Role, and
+# RoleBinding are in hermes-${BOT_NAME}. No namespace transformer: the
+# objects name their own namespaces.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./secret.yaml
+  - ./rbac.yaml
+  - ./job.yaml

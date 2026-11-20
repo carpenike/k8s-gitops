@@ -1,0 +1,51 @@
+{
+  "_type": "Project",
+  "id": 5,
+  "identifier": "homelab",
+  "name": "Homelab Manager",
+  "active": true,
+  "public": false,
+  "description": {
+    "format": "markdown",
+    "raw": "",
+    "html": ""
+  },
+  "createdAt": "2026-10-01T12:00:00.000Z",
+  "updatedAt": "2026-10-01T12:00:00.000Z",
+  "statusExplanation": {
+    "format": "markdown",
+    "raw": "",
+    "html": ""
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/projects/5",
+      "title": "Homelab Manager"
+    },
+    "parent": {
+      "href": null
+    },
+    "status": {
+      "href": null
+    },
+    "workPackages": {
+      "href": "/api/v3/projects/5/work_packages"
+    },
+    "categories": {
+      "href": "/api/v3/projects/5/categories"
+    },
+    "versions": {
+      "href": "/api/v3/projects/5/versions"
+    },
+    "memberships": {
+      "href": "/api/v3/memberships?filters=..."
+    },
+    "types": {
+      "href": "/api/v3/projects/5/types"
+    },
+    "createWorkPackage": {
+      "href": "/api/v3/projects/5/work_packages/form",
+      "method": "post"
+    }
+  }
+}

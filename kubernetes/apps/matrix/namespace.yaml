@@ -1,0 +1,11 @@
+# Tuwunel is one static binary with no user in the image. It runs as
+# 1000:1000 with every capability dropped, so restricted fits. The bot
+# provisioning Job and the VolSync movers set the same profile.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: matrix
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

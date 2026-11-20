@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# /var/lib/oncall for the engine and the Celery worker: the SQLite database
+# (escalation chains, schedules, integrations and their tokens). Forge's
+# /var/lib/grafana-oncall/data, copied at the cutover (docs/platform/grafana.md).
+# Backed up by ../backup. Both containers share it, so they share a pod.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-oncall-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 2Gi
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# Redis' append-only file, as on Forge (/var/lib/grafana-oncall/redis). It
+# holds queued Celery tasks, including escalation steps scheduled for
+# later, so it survives a reschedule. Not backed up and not copied: a
+# lost queue drains in minutes, the database is the state.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-oncall-redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 1Gi

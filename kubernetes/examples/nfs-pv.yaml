@@ -1,0 +1,30 @@
+---
+# Not reconciled. server is a placeholder hostname, not a live NAS.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-media
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-media
+  nfs:
+    server: nas-media.example.invalid
+    path: /export/media
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: example-media
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-media
+  volumeName: example-media
+  resources:
+    requests:
+      storage: 1Ti

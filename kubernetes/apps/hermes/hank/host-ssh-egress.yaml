@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The screen pod's ssh to Forge and rydeck (input HOST_SSH_ENABLED;
+# docs/apps/hermes.md, "Host SSH"): port 22 on those two addresses only.
+# What Hank may do there is each host's own config (nix-config
+# hosts/forge/core/hank.nix; rydeck by hand).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: screen-host-ssh
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+      app.kubernetes.io/controller: screen
+  egress:
+    - toCIDR:
+        - 10.20.0.30/32
+        - 10.30.50.250/32
+      toPorts:
+        - ports:
+            - port: "22"
+              protocol: TCP

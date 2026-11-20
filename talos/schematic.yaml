@@ -1,0 +1,13 @@
+# Posted to https://factory.talos.dev/schematics on 3 Nov 2026.
+# id: 546ddf49f4f92f44c15fbeff45e07c984cf7626a2d5d080fb14d0727ecf78ba4
+# Image: factory.talos.dev/metal-installer/<id>:v1.14.5
+# nut-client is the UPS client. intel-ucode is the bare-metal microcode
+# extension for these boards. kata-containers is the Kata runtime
+# (handlers kata and kata-qemu). Image Factory lists that extension for
+# Talos v1.14.5. Extension order is the order that produced this id.
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/intel-ucode
+      - siderolabs/nut-client
+      - siderolabs/kata-containers

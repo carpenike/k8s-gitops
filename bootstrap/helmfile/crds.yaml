@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+# Render CRDs only. The bootstrap script applies them with kubectl before
+# helmfile sync, then retries the sync if the first pass races the CRDs.
+helmDefaults:
+  args:
+    - --include-crds
+    - --no-hooks
+
+bases:
+  - default.yaml
+
+releases:
+  # Seed once, before Cilium's ServiceMonitors. The Flux HelmRelease
+  # prometheus-operator-crds owns later upgrades.
+  - name: prometheus-operator-crds
+    namespace: observability
+    inherit:
+      - template: default
+
+  - name: cilium
+    namespace: kube-system
+    inherit:
+      - template: default
+
+  - name: cert-manager
+    namespace: cert-manager
+    inherit:
+      - template: default
+
+  - name: envoy-gateway
+    namespace: network
+    inherit:
+      - template: default
+
+  # Volume snapshot CRDs ship in the snapshot-controller chart's crds/
+  # directory. Seed them once. The Flux HelmRelease owns later upgrades.
+  - name: snapshot-controller
+    namespace: kube-system
+    inherit:
+      - template: default

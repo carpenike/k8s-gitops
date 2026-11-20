@@ -1,0 +1,219 @@
+---
+# The address the bots use: http://hindsight.hermes-memory.svc.cluster.local:8888.
+# The chart names its own Service <release>-api; this one is the stable name.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hindsight
+spec:
+  selector:
+    app.kubernetes.io/name: hindsight
+    app.kubernetes.io/instance: hindsight
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+---
+# Nightly logical backup of database hindsight (every bot's schema), required
+# before any real memory goes in. docs/apps/hermes-memory.md has the restore steps.
+#
+# pg_dump -Fc from the same image and version as postgres17, as role
+# hindsight, onto PVC hindsight-dumps (7 kept). VolSync copies that volume to
+# R2 at 03:15 UTC, after the 02:30 UTC dump. postgres17's own volume
+# snapshots stay on Ceph; this is the copy that leaves the cluster.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hindsight-backup
+spec:
+  schedule: "30 2 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: hindsight-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 26
+            runAsGroup: 26
+            fsGroup: 26
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: pg-dump
+              # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+              image: ghcr.io/cloudnative-pg/postgresql:17.11@sha256:70664ebcfa1100361b5bdc28bbf06fdbe08db2dc4ad7bd14de33c5e05fe8ea8e
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # Leftovers from an interrupted run.
+                  rm -f /dumps/*.partial
+                  stamp=$(date -u +%Y%m%dT%H%M%SZ)
+                  out=/dumps/hindsight-$stamp.dump
+                  pg_dump -Fc -h postgres17-rw.cnpg-system.svc.cluster.local -U hindsight -d hindsight -f "$out.partial"
+                  pg_restore --list "$out.partial" > /dev/null
+                  mv "$out.partial" "$out"
+                  echo "wrote $out ($(du -h "$out" | cut -f1))"
+                  ls -1t /dumps/hindsight-*.dump | tail -n +8 | xargs -r rm -f --
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: hindsight-db
+                      key: PGPASSWORD
+                - name: PGSSLMODE
+                  value: require
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: dumps
+                  mountPath: /dumps
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: dumps
+              persistentVolumeClaim:
+                claimName: hindsight-dumps
+            - name: tmp
+              emptyDir: {}
+---
+# First creation restores the latest dumps from R2 (VolSync volume
+# populator); an empty repository gives an empty volume.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hindsight-dumps
+  annotations:
+    # Never pruned with the app: it holds the only local copies of the dumps.
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 5Gi
+  dataSourceRef:
+    apiGroup: volsync.backube
+    kind: ReplicationDestination
+    name: hindsight-dumps-restore
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/external-secrets.io/externalsecret_v1.json
+# Cloudflare R2, same item and per-app path convention as the bots: path
+# hermes-memory.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: hindsight-volsync
+spec:
+  refreshInterval: 12h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: hindsight-volsync
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        RESTIC_REPOSITORY: "{{ .REPOSITORY_TEMPLATE }}/hermes-memory"
+        RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
+        AWS_ACCESS_KEY_ID: "{{ .AWS_ACCESS_KEY_ID }}"
+        AWS_SECRET_ACCESS_KEY: "{{ .AWS_SECRET_ACCESS_KEY }}"
+  data:
+    - secretKey: REPOSITORY_TEMPLATE
+      remoteRef:
+        key: volsync-r2-template/REPOSITORY_TEMPLATE
+    - secretKey: RESTIC_PASSWORD
+      remoteRef:
+        key: volsync-r2-template/RESTIC_PASSWORD
+    - secretKey: AWS_ACCESS_KEY_ID
+      remoteRef:
+        key: volsync-r2-template/AWS_ACCESS_KEY_ID
+    - secretKey: AWS_SECRET_ACCESS_KEY
+      remoteRef:
+        key: volsync-r2-template/AWS_SECRET_ACCESS_KEY
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: hindsight-dumps
+spec:
+  sourcePVC: hindsight-dumps
+  trigger:
+    schedule: "15 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: hindsight-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: hindsight-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 26
+      runAsGroup: 26
+      fsGroup: 26
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: hindsight-dumps-restore
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    repository: hindsight-volsync
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    cacheStorageClassName: ceph-block
+    accessModes:
+      - ReadWriteOnce
+    capacity: 5Gi
+    cacheCapacity: 1Gi
+    cleanupCachePVC: true
+    cleanupTempPVC: true
+    enableFileDeletion: true
+    moverPodLabels:
+      app.kubernetes.io/name: hindsight-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 26
+      runAsGroup: 26
+      fsGroup: 26
+      seccompProfile:
+        type: RuntimeDefault

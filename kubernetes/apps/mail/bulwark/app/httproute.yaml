@@ -1,0 +1,36 @@
+---
+# Bulwark does its own sign-in with Pocket ID (ADR 0017), so the route opts
+# out of the gateway login like Stalwart's: one login per route
+# (docs/platform/gateway-auth.md). The ReferenceGrant lets pocket-id-exempt in
+# namespace network select it. envoy-internal only; mikrotik-dns publishes
+# the name.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bulwark
+  labels:
+    gateway.holthome.net/auth: native
+spec:
+  hostnames:
+    - webmail.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    - backendRefs:
+        - name: bulwark
+          port: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: bulwark-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: bulwark

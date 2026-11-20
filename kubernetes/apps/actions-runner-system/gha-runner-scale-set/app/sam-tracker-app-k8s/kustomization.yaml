@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Repo-scoped scale set for carpenike/sam-tracker-app.
+# Same GitHub App installation as sam-tracker. Workflows opt in with
+# runs-on: sam-tracker-app-k8s.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: sam-tracker-app-k8s
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/sam-tracker-app
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: sam-tracker-app-k8s

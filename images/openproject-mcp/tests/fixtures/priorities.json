@@ -1,0 +1,80 @@
+{
+  "_type": "Collection",
+  "total": 4,
+  "count": 4,
+  "pageSize": 20,
+  "offset": 1,
+  "_embedded": {
+    "elements": [
+      {
+        "_type": "Priority",
+        "id": 7,
+        "name": "Low",
+        "position": 7,
+        "color": "#C5F6FA",
+        "isDefault": false,
+        "isActive": true,
+        "_links": {
+          "self": {
+            "href": "/api/v3/priorities/7",
+            "title": "Low"
+          }
+        }
+      },
+      {
+        "_type": "Priority",
+        "id": 8,
+        "name": "Normal",
+        "position": 8,
+        "color": "#C5F6FA",
+        "isDefault": true,
+        "isActive": true,
+        "_links": {
+          "self": {
+            "href": "/api/v3/priorities/8",
+            "title": "Normal"
+          }
+        }
+      },
+      {
+        "_type": "Priority",
+        "id": 9,
+        "name": "High",
+        "position": 9,
+        "color": "#C5F6FA",
+        "isDefault": false,
+        "isActive": true,
+        "_links": {
+          "self": {
+            "href": "/api/v3/priorities/9",
+            "title": "High"
+          }
+        }
+      },
+      {
+        "_type": "Priority",
+        "id": 10,
+        "name": "Immediate",
+        "position": 10,
+        "color": "#C5F6FA",
+        "isDefault": false,
+        "isActive": true,
+        "_links": {
+          "self": {
+            "href": "/api/v3/priorities/10",
+            "title": "Immediate"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/priorities"
+    },
+    "jumpTo": {
+      "href": "/api/v3/priorities?offset=%7Boffset%7D",
+      "templated": true
+    }
+  }
+}

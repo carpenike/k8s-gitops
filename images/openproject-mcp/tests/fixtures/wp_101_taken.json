@@ -1,0 +1,149 @@
+{
+  "_type": "WorkPackage",
+  "id": 101,
+  "lockVersion": 4,
+  "subject": "Rotate tunnel credentials",
+  "description": {
+    "format": "markdown",
+    "raw": "## Goal\n\nRotate the **Cloudflare tunnel** credentials on the edge host and update [the runbook](https://wiki.example.test/runbooks/tunnel). Steps:\n\n- revoke the old token\n- issue a new one via `cloudflared tunnel token`\n- restart `cloudflared.service`\n\nCheck gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. ",
+    "html": "<p class=\"op-uc-p\">## Goal\n\nRotate the **Cloudflare tunnel** credentials on the edge host and update [the runbook](https://wiki.example.test/runbooks/tunnel). Steps:\n\n- revoke the old token\n- issue a new one via `cloudflared tunnel token`\n- restart `cloudflared.service`\n\nCheck gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. Check gatus afterwards &amp; confirm every external endpoint is green. </p>"
+  },
+  "scheduleManually": false,
+  "startDate": null,
+  "dueDate": "2026-10-22",
+  "derivedStartDate": null,
+  "derivedDueDate": null,
+  "estimatedTime": null,
+  "derivedEstimatedTime": null,
+  "duration": null,
+  "ignoreNonWorkingDays": false,
+  "percentageDone": 0,
+  "createdAt": "2026-10-18T14:02:11.000Z",
+  "updatedAt": "2026-10-20T22:41:03.000Z",
+  "_embedded": {
+    "attachments": {
+      "_type": "Collection",
+      "total": 0,
+      "count": 0,
+      "_embedded": {
+        "elements": []
+      },
+      "_links": {
+        "self": {
+          "href": "/api/v3/work_packages/101/attachments"
+        }
+      }
+    },
+    "relations": {
+      "_type": "Collection",
+      "total": 0,
+      "count": 0,
+      "_embedded": {
+        "elements": []
+      },
+      "_links": {
+        "self": {
+          "href": "/api/v3/work_packages/101/relations"
+        }
+      }
+    }
+  },
+  "_links": {
+    "attachments": {
+      "href": "/api/v3/work_packages/101/attachments"
+    },
+    "addAttachment": {
+      "href": "/api/v3/work_packages/101/attachments",
+      "method": "post"
+    },
+    "update": {
+      "href": "/api/v3/work_packages/101/form",
+      "method": "post"
+    },
+    "schema": {
+      "href": "/api/v3/work_packages/schemas/9-1"
+    },
+    "updateImmediately": {
+      "href": "/api/v3/work_packages/101",
+      "method": "patch"
+    },
+    "delete": {
+      "href": "/api/v3/work_packages/101",
+      "method": "delete"
+    },
+    "logTime": {
+      "href": "/work_packages/101/time_entries/new",
+      "type": "text/html",
+      "title": "Log time"
+    },
+    "move": {
+      "href": "/work_packages/101/move/new",
+      "type": "text/html",
+      "title": "Move"
+    },
+    "copy": {
+      "href": "/work_packages/101/copy",
+      "title": "Copy"
+    },
+    "self": {
+      "href": "/api/v3/work_packages/101",
+      "title": "Rotate tunnel credentials"
+    },
+    "activities": {
+      "href": "/api/v3/work_packages/101/activities"
+    },
+    "addComment": {
+      "href": "/api/v3/work_packages/101/activities",
+      "method": "post",
+      "title": "Add comment"
+    },
+    "watchers": {
+      "href": "/api/v3/work_packages/101/watchers"
+    },
+    "relations": {
+      "href": "/api/v3/work_packages/101/relations"
+    },
+    "revisions": {
+      "href": "/api/v3/work_packages/101/revisions"
+    },
+    "type": {
+      "href": "/api/v3/types/1",
+      "title": "Task"
+    },
+    "priority": {
+      "href": "/api/v3/priorities/9",
+      "title": "High"
+    },
+    "project": {
+      "href": "/api/v3/projects/9",
+      "title": "Bots \u2014 Shared"
+    },
+    "status": {
+      "href": "/api/v3/statuses/7",
+      "title": "In progress"
+    },
+    "author": {
+      "href": "/api/v3/users/1",
+      "title": "Ryan Holt"
+    },
+    "responsible": {
+      "href": null
+    },
+    "assignee": {
+      "href": "/api/v3/users/22",
+      "title": "Finances Bot"
+    },
+    "version": {
+      "href": null
+    },
+    "parent": {
+      "href": null
+    },
+    "category": {
+      "href": null
+    },
+    "ancestors": [],
+    "children": [],
+    "customActions": []
+  }
+}

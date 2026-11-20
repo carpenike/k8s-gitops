@@ -1,0 +1,13 @@
+---
+# Stalwart runs as 2000:2000 (the image's stalwart user) with every
+# capability dropped, so restricted fits. It binds 25/465/993/... through
+# the safe sysctl net.ipv4.ip_unprivileged_port_start, which the restricted
+# profile allows. The VolSync mover sets the same profile.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mail
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

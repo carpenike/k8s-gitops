@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Bulwark webmail for Stalwart (ADR 0017, docs/apps/mail.md "Webmail"). Nothing
+# depends on it: mail keeps working if this is unready.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: bulwark
+spec:
+  dependsOn:
+    - name: stalwart
+    - name: envoy-gateway
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: bulwark
+      namespace: mail
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: bulwark
+      namespace: mail
+  interval: 1h
+  path: ./kubernetes/apps/mail/bulwark/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: mail
+  timeout: 10m

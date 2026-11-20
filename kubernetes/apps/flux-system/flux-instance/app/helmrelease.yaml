@@ -1,0 +1,97 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flux-instance
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: flux-instance
+  interval: 1h
+  values:
+    commonAnnotations:
+      fluxcd.controlplane.io/reconcileArtifactEvery: 1h
+    instance:
+      distribution:
+        # Plan pin. Leave artifact unset so the operator resolves 2.10.0 itself.
+        version: "2.10.0"
+        registry: ghcr.io/fluxcd
+      components:
+        - source-controller
+        - kustomize-controller
+        - helm-controller
+        - notification-controller
+      cluster:
+        type: kubernetes
+        domain: cluster.local
+        networkPolicy: false
+      sync:
+        kind: GitRepository
+        url: https://github.com/carpenike/k8s-gitops.git
+        ref: refs/heads/rebuild
+        path: kubernetes/apps
+        interval: 1h
+      kustomize:
+        patches:
+          - patch: |-
+              - op: add
+                path: /spec/patches
+                value:
+                  - patch: |-
+                      apiVersion: helm.toolkit.fluxcd.io/v2
+                      kind: HelmRelease
+                      metadata:
+                        name: _
+                      spec:
+                        install:
+                          crds: CreateReplace
+                          strategy:
+                            name: RetryOnFailure
+                        rollback:
+                          cleanupOnFail: true
+                        upgrade:
+                          cleanupOnFail: true
+                          crds: CreateReplace
+                          remediation:
+                            retries: 2
+                    target:
+                      group: helm.toolkit.fluxcd.io
+                      kind: HelmRelease
+            target:
+              group: kustomize.toolkit.fluxcd.io
+              kind: Kustomization
+              name: flux-system
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --concurrent=10
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --requeue-dependency=5s
+            target:
+              kind: Deployment
+              name: (helm-controller|source-controller)
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --concurrent=20
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --requeue-dependency=5s
+              - op: replace
+                path: /spec/template/spec/volumes/0
+                value:
+                  name: temp
+                  emptyDir:
+                    medium: Memory
+            target:
+              kind: Deployment
+              name: kustomize-controller
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --sops-age-secret=sops-age
+            target:
+              kind: Deployment
+              name: kustomize-controller

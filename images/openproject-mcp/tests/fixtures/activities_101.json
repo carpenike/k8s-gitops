@@ -1,0 +1,182 @@
+{
+  "_type": "Collection",
+  "total": 5,
+  "count": 5,
+  "pageSize": 20,
+  "offset": 1,
+  "_embedded": {
+    "elements": [
+      {
+        "_type": "Activity",
+        "id": 501,
+        "comment": {
+          "format": "markdown",
+          "raw": "",
+          "html": ""
+        },
+        "details": [
+          {
+            "format": "custom",
+            "raw": "Status changed from New to In progress",
+            "html": "<strong>Status</strong> changed from <i>New</i> to <i>In progress</i>"
+          }
+        ],
+        "version": 1,
+        "createdAt": "2026-10-18T14:02:11.000Z",
+        "updatedAt": "2026-10-18T14:02:11.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/activities/501"
+          },
+          "workPackage": {
+            "href": "/api/v3/work_packages/101",
+            "title": "Rotate tunnel credentials"
+          },
+          "user": {
+            "href": "/api/v3/users/1",
+            "title": "Ryan Holt"
+          },
+          "update": {
+            "href": "/api/v3/activities/501",
+            "method": "patch"
+          }
+        }
+      },
+      {
+        "_type": "Activity::Comment",
+        "id": 502,
+        "comment": {
+          "format": "markdown",
+          "raw": "Please do this before Thursday \u2014 the old token expires.",
+          "html": "<p>Please do this before Thursday \u2014 the old token expires.</p>"
+        },
+        "details": [],
+        "version": 2,
+        "createdAt": "2026-10-18T14:05:00.000Z",
+        "updatedAt": "2026-10-18T14:05:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/activities/502"
+          },
+          "workPackage": {
+            "href": "/api/v3/work_packages/101",
+            "title": "Rotate tunnel credentials"
+          },
+          "user": {
+            "href": "/api/v3/users/1",
+            "title": "Ryan Holt"
+          },
+          "update": {
+            "href": "/api/v3/activities/502",
+            "method": "patch"
+          }
+        }
+      },
+      {
+        "_type": "Activity",
+        "id": 503,
+        "comment": {
+          "format": "markdown",
+          "raw": "",
+          "html": ""
+        },
+        "details": [
+          {
+            "format": "custom",
+            "raw": "Status changed from New to In progress",
+            "html": "<strong>Status</strong> changed from <i>New</i> to <i>In progress</i>"
+          }
+        ],
+        "version": 3,
+        "createdAt": "2026-10-19T08:00:00.000Z",
+        "updatedAt": "2026-10-19T08:00:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/activities/503"
+          },
+          "workPackage": {
+            "href": "/api/v3/work_packages/101",
+            "title": "Rotate tunnel credentials"
+          },
+          "user": {
+            "href": "/api/v3/users/22",
+            "title": "Finances Bot"
+          },
+          "update": {
+            "href": "/api/v3/activities/503",
+            "method": "patch"
+          }
+        }
+      },
+      {
+        "_type": "Activity::Comment",
+        "id": 504,
+        "comment": {
+          "format": "markdown",
+          "raw": "Looked at it; this is **Homelab's** job, not mine.",
+          "html": "<p>Looked at it; this is **Homelab's** job, not mine.</p>"
+        },
+        "details": [],
+        "version": 4,
+        "createdAt": "2026-10-19T08:01:00.000Z",
+        "updatedAt": "2026-10-19T08:01:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/activities/504"
+          },
+          "workPackage": {
+            "href": "/api/v3/work_packages/101",
+            "title": "Rotate tunnel credentials"
+          },
+          "user": {
+            "href": "/api/v3/users/22",
+            "title": "Finances Bot"
+          },
+          "update": {
+            "href": "/api/v3/activities/504",
+            "method": "patch"
+          }
+        }
+      },
+      {
+        "_type": "Activity::Comment",
+        "id": 505,
+        "comment": {
+          "format": "markdown",
+          "raw": "Agreed, leaving it for [Homelab](https://tasks.example.test/users/21).",
+          "html": "<p>Agreed, leaving it for [Homelab](https://tasks.example.test/users/21).</p>"
+        },
+        "details": [],
+        "version": 5,
+        "createdAt": "2026-10-19T09:00:00.000Z",
+        "updatedAt": "2026-10-19T09:00:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/activities/505"
+          },
+          "workPackage": {
+            "href": "/api/v3/work_packages/101",
+            "title": "Rotate tunnel credentials"
+          },
+          "user": {
+            "href": "/api/v3/users/1",
+            "title": "Ryan Holt"
+          },
+          "update": {
+            "href": "/api/v3/activities/505",
+            "method": "patch"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/work_packages/101/activities"
+    },
+    "jumpTo": {
+      "href": "/api/v3/work_packages/101/activities?offset=%7Boffset%7D",
+      "templated": true
+    }
+  }
+}

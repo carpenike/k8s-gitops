@@ -1,0 +1,10 @@
+#!/bin/sh
+# k8s-gitops: the GitHub CLI with this bot's GitHub token, when the pod has
+# one (CLAUDE_CODE_ENABLED; Secret claude-code-github). git uses it too, as
+# its credential helper for github.com (/etc/gitconfig).
+token=/etc/hermes-claude-code/github_token
+if [ -z "${GH_TOKEN:-}" ] && [ -s "$token" ]; then
+  GH_TOKEN=$(cat "$token")
+  export GH_TOKEN
+fi
+exec /opt/gh/bin/gh "$@"

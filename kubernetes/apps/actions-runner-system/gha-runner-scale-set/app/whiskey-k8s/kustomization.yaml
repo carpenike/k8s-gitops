@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Repo-scoped scale set for carpenike/whiskey-whiskey-whiskey.
+# Same GitHub App installation as sam-tracker. Workflows opt in with
+# runs-on: whiskey-k8s. No Docker use, so this overlay drops dind and the runner
+# pod is not privileged.
+# Node: vitest, vite build, then headless Chromium through Playwright.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: whiskey-k8s
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/whiskey-whiskey-whiskey
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: whiskey-k8s
+      - op: remove
+        path: /spec/values/containerMode
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/cpu
+        value: "1"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/memory
+        value: 2Gi
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/cpu
+        value: "4"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/memory
+        value: 8Gi

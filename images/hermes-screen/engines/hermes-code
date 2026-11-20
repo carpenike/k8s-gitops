@@ -1,0 +1,498 @@
+#!/usr/bin/env python3
+"""k8s-gitops: one coding task, on one of three engines, in tmux.
+
+docs/apps/hermes.md, "Coding engines". The bot's skill coding-sessions calls
+this; it never runs an engine itself. Each task is a tmux session
+`code-<slug>` running Claude Code, Cursor or Copilot interactively, so the
+session stays open for follow-ups and (Claude, Copilot) shows up in Ryan's
+remote view. The engine's own stop hook (installed by this image) calls
+`hermes-code hook <engine>`, which records each finished turn; `wait` reads
+those records.
+
+  hermes-code run   <slug> --repo CLONE [--base REF] [--engine auto|claude|cursor|copilot] --prompt-file F
+  hermes-code wait  <slug> [--timeout S]
+  hermes-code send  <slug> --prompt-file F
+  hermes-code status <slug>
+  hermes-code stop  <slug>
+  hermes-code clean <slug>          (remove the task's worktree once its work is pushed)
+  hermes-code hook  <engine>        (stdin: the engine's hook JSON)
+
+Each task works in its own git worktree of the repo's clone,
+/workspace/code/worktrees/<repo>/<slug>, on branch hermes/<slug> from --base
+(default: the remote's default branch, fetched fresh). So tasks in the same
+repository run side by side without sharing a working tree or a checked-out
+branch.
+
+`run` starts the task and waits for its first turn. With --engine auto (the
+default) it falls back Claude -> Cursor -> Copilot when an engine fails
+before finishing that turn: rate limit, outage, not signed in, or the
+process exiting. Every command prints one JSON object.
+"""
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import time
+import uuid
+from pathlib import Path
+
+STATE = Path(os.environ.get("HERMES_CODE_STATE", "/workspace/.hermes-code"))
+SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")
+ENGINES = ("claude", "cursor", "copilot")
+RULES = Path(os.environ.get("HERMES_CODE_RULES", "/etc/hermes-rules/AGENTS.md"))
+# What each engine's remote view is, for the bot's report.
+REMOTE = {
+    "claude": "claude.ai/code and the Claude app, session {name}",
+    "copilot": "github.com/copilot/agents and GitHub Mobile, session {name}",
+    "cursor": None,  # Cursor's CLI has no remote view for a session started here.
+}
+# Failure text an engine prints when it cannot work right now. Checked only
+# after the engine stopped without finishing a turn, never in normal output.
+UNAVAILABLE = re.compile(
+    r"usage limit|rate.?limit|quota|too many requests|\b429\b|overloaded|"
+    r"\b5\d\d\b|not (logged|signed) in|unauthori[sz]ed|\b401\b|credits",
+    re.I,
+)
+
+
+def out(obj: dict) -> None:
+    """Print the one JSON result and exit 0."""
+    print(json.dumps(obj, indent=1))
+    sys.exit(0)
+
+
+def task_dir(slug: str) -> Path:
+    """The task's state directory; refuses a bad slug."""
+    if not SLUG_RE.match(slug):
+        out({"error": f"slug {slug!r} must match {SLUG_RE.pattern}"})
+    return STATE / slug
+
+
+def tmux(*args: str, check: bool = True) -> subprocess.CompletedProcess:
+    """Run tmux."""
+    return subprocess.run(["tmux", *args], capture_output=True, text=True, check=check)
+
+
+def alive(session: str) -> bool:
+    """True while the session exists and its engine process has not exited."""
+    r = tmux("display-message", "-p", "-t", session, "#{pane_dead}", check=False)
+    return r.returncode == 0 and r.stdout.strip() == "0"
+
+
+def pane_tail(session: str, lines: int = 40) -> str:
+    """The last lines of the engine's screen."""
+    r = tmux("capture-pane", "-p", "-t", session, "-S", f"-{lines}", check=False)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def git(repo: Path, *args: str) -> subprocess.CompletedProcess:
+    """Run git in a repository (never raises; check returncode)."""
+    return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True,
+                          check=False)
+
+
+WORKTREES = Path(os.environ.get("HERMES_CODE_WORKTREES", "/workspace/code/worktrees"))
+
+
+def worktree(slug: str, clone: Path, base: str | None) -> Path:
+    """The task's own worktree on branch hermes/<slug>, created on first use."""
+    path = WORKTREES / clone.name / slug
+    branch = f"hermes/{slug}"
+    if (path / ".git").exists():
+        return path  # a re-run or a fallback continues in the same tree
+    # One task at a time per clone: concurrent fetches and worktree adds race
+    # on the clone's config and ref locks (seen with two tasks at once).
+    with open(clone / ".git" / "hermes-code.lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        return _add_worktree(slug, clone, base, path, branch)
+
+
+def _add_worktree(slug: str, clone: Path, base: str | None, path: Path, branch: str) -> Path:
+    """fetch, then `git worktree add` on a new or existing branch; caller holds the lock."""
+    fetched = git(clone, "fetch", "--quiet", "origin")
+    if fetched.returncode != 0:
+        out({"state": "failed", "slug": slug, "reason": "git fetch",
+             "detail": fetched.stderr.strip()[-500:]})
+    if not base:
+        head = git(clone, "symbolic-ref", "--short", "refs/remotes/origin/HEAD").stdout.strip()
+        base = head or "origin/main"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if git(clone, "rev-parse", "--verify", "--quiet", f"refs/heads/{branch}").returncode == 0:
+        added = git(clone, "worktree", "add", str(path), branch)  # the branch exists: reuse it
+    else:
+        # --no-track: the branch's upstream is set when it is first pushed.
+        added = git(clone, "worktree", "add", "--no-track", "-b", branch, str(path), base)
+    if added.returncode != 0:
+        out({"state": "failed", "slug": slug, "reason": "git worktree",
+             "detail": added.stderr.strip()[-500:]})
+    return path
+
+
+def merge_json(path: Path, update) -> None:
+    """Read a JSON file (or {}), apply update(data), write it back."""
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, ValueError):
+        data = {}
+    update(data)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2))
+
+
+def prepare(engine: str, repo: Path) -> None:
+    """Per-engine setup for this repo: trust it, turn remote on, load the rules."""
+    if engine == "claude":
+        cfg = Path(os.environ.get("CLAUDE_CONFIG_DIR", "/workspace/.claude-code")) / ".claude.json"
+        merge_json(
+            cfg,
+            lambda d: d.setdefault("projects", {})
+            .setdefault(str(repo), {})
+            .update({"hasTrustDialogAccepted": True}),
+        )
+    elif engine == "copilot":
+        chome = Path(os.environ.get("COPILOT_HOME", "/workspace/.copilot"))
+        # Remote steering needs both: remoteSessions, and this CLI accepting
+        # incoming connections with new sessions published (what
+        # /environments > Incoming connections writes; seen live 2026-11-16).
+        def remote(d: dict) -> None:
+            d["remoteSessions"] = True
+            d.setdefault("ahpEnvironment", {}).update(
+                {"acceptRemoteConnections": True, "publishNewSessionsByDefault": True})
+
+        merge_json(chome / "settings.json", remote)
+
+        def trust(d: dict) -> None:
+            folders = d.setdefault("trustedFolders", [])
+            if str(repo) not in folders:
+                folders.append(str(repo))
+
+        merge_json(chome / "config.json", trust)
+    elif engine == "cursor":
+        # Its turn-finished hooks, at user level: the CLI does not read the
+        # machine-wide /etc/cursor/hooks.json (seen live 2026-11-16).
+        hooks = Path.home() / ".cursor" / "hooks.json"
+        hook = {"command": "/usr/local/bin/hermes-code hook cursor"}
+
+        def add_hooks(d: dict) -> None:
+            d.setdefault("version", 1)
+            for event in ("afterAgentResponse", "stop"):
+                entries = d.setdefault("hooks", {}).setdefault(event, [])
+                if hook not in entries:
+                    entries.append(hook)
+
+        merge_json(hooks, add_hooks)
+        # Cursor reads no global rules file: give the clone a copy, kept out of git.
+        if RULES.is_file():
+            rule = repo / ".cursor" / "rules" / "hermes.mdc"
+            rule.parent.mkdir(parents=True, exist_ok=True)
+            rule.write_text("---\nalwaysApply: true\n---\n\n" + RULES.read_text())
+            # A worktree's .git is a file; ask git where its exclude file is.
+            git_path = git(repo, "rev-parse", "--git-path", "info/exclude").stdout.strip()
+            exclude = (repo / git_path) if git_path else repo / ".git" / "info" / "exclude"
+            exclude.parent.mkdir(parents=True, exist_ok=True)
+            if exclude.parent.is_dir():
+                text = exclude.read_text() if exclude.exists() else ""
+                if ".cursor/rules/hermes.mdc" not in text:
+                    exclude.write_text(text + "\n.cursor/rules/hermes.mdc\n")
+
+
+def command(engine: str, task: dict, prompt: str) -> list[str]:
+    """The engine's interactive command line with the first prompt."""
+    name = task["name"]
+    if engine == "claude":
+        return ["claude", "-n", name, "--session-id", task["session_id"],
+                "--permission-mode", "bypassPermissions", prompt]
+    if engine == "copilot":
+        return ["copilot", "--no-auto-update", "--session-id", task["session_id"], "-n", name,
+                "--allow-all", "--deny-tool", "shell(gh pr merge)", "-i", prompt]
+    return ["cursor-agent", "--force", prompt]
+
+
+def first_prompt(engine: str, prompt: str) -> str:
+    """The task prompt plus the engine's name, which every PR body must end with."""
+    return (
+        f"{prompt.rstrip()}\n\n(You are running as coding engine `{engine}`. End every "
+        f"pull request body you write with the line `Engine: {engine}`.)"
+    )
+
+
+def launch(slug: str, engine: str, repo: Path, prompt: str) -> dict:
+    """Start the engine in tmux session code-<slug>; returns the task record."""
+    d = task_dir(slug)
+    (d / "turns").mkdir(parents=True, exist_ok=True)
+    session = f"code-{slug}"
+    tmux("kill-session", "-t", session, check=False)
+    task = {
+        "slug": slug, "engine": engine, "repo": str(repo), "tmux": session,
+        "name": f"hank-{slug}", "session_id": str(uuid.uuid4()),
+        "started": int(time.time()), "turns_seen": len(list((d / "turns").glob("*.json"))),
+    }
+    prepare(engine, repo)
+    argv = command(engine, task, first_prompt(engine, prompt))
+    launcher = d / f"launch-{engine}.sh"
+    launcher.write_text(
+        "#!/bin/sh\n"
+        f"export HERMES_CODE_TASK={shlex.quote(slug)} HERMES_CODE_ENGINE={engine}\n"
+        f"cd {shlex.quote(str(repo))}\n"
+        f"exec {shlex.join(argv)}\n"
+    )
+    launcher.chmod(0o700)
+    started = tmux("new-session", "-d", "-s", session, "-x", "220", "-y", "50", str(launcher),
+                   check=False)
+    if started.returncode != 0:
+        out({"state": "failed", "slug": slug, "engine": engine, "reason": "tmux",
+             "detail": started.stderr.strip()[-500:]})
+    tmux("set-option", "-t", session, "remain-on-exit", "on", check=False)
+    remote = REMOTE[engine]
+    task["remote"] = remote.format(name=task["name"]) if remote else None
+    (d / "task.json").write_text(json.dumps(task, indent=2))
+    return task
+
+
+def wait_turn(slug: str, timeout: int) -> dict:
+    """Block until the engine finishes its next turn, fails, or the timeout passes."""
+    d = task_dir(slug)
+    try:
+        task = json.loads((d / "task.json").read_text())
+    except (OSError, ValueError):
+        return {"state": "unknown", "error": f"no task {slug}"}
+    seen = task.get("turns_seen", 0)
+    deadline = time.time() + timeout
+    while True:
+        turns = sorted((d / "turns").glob("*.json"))
+        if len(turns) > seen:
+            turn = json.loads(turns[seen].read_text())
+            task["turns_seen"] = seen + 1
+            (d / "task.json").write_text(json.dumps(task, indent=2))
+            base = {"engine": task["engine"], "slug": slug, "remote": task.get("remote")}
+            if turn.get("failed"):
+                return {**base, "state": "failed", "reason": turn.get("reason"),
+                        "detail": turn.get("detail")}
+            return {**base, "state": "done", "message": turn.get("message")}
+        screen = pane_tail(task["tmux"], 30)
+        # Cursor asks to trust each new workspace; this is a clone Hank made.
+        # Answer once, and only while the prompt is on screen now (its text
+        # stays in the scrollback after it is answered).
+        live = tmux("capture-pane", "-p", "-t", task["tmux"], check=False).stdout
+        if (task["engine"] == "cursor" and not task.get("trusted")
+                and "Trust this workspace" in live):
+            tmux("send-keys", "-t", task["tmux"], "a", check=False)
+            task["trusted"] = True
+            (d / "task.json").write_text(json.dumps(task, indent=2))
+        # Claude's first-run screens (theme, security notes) and its
+        # Remote Control consent are Ryan's to answer, once; they persist on
+        # the workspace.
+        if task["engine"] == "claude" and any(
+                cue in live for cue in ("Enable Remote Control?", "Security notes",
+                                        "Choose the text style", "Press Enter to continue")):
+            return {"engine": "claude", "slug": slug, "state": "blocked",
+                    "reason": "Claude first-run setup: Ryan answers it once (docs, Coding engines)",
+                    "screen": live[-1500:]}
+        if not alive(task["tmux"]):
+            tail = pane_tail(task["tmux"])
+            reason = "unavailable" if UNAVAILABLE.search(tail) else "exited"
+            return {"engine": task["engine"], "slug": slug, "state": "failed",
+                    "reason": reason, "detail": tail[-2000:]}
+        if time.time() > deadline:
+            return {"engine": task["engine"], "slug": slug, "state": "timeout",
+                    "remote": task.get("remote"), "screen": pane_tail(task["tmux"], 20)}
+        time.sleep(5)
+
+
+def cmd_run(a: argparse.Namespace) -> None:
+    clone = Path(a.repo).resolve()
+    if not (clone / ".git").exists():
+        out({"error": f"{clone} is not a git clone"})
+    task_dir(a.slug)
+    repo = worktree(a.slug, clone, a.base)
+    prompt = (
+        Path(a.prompt_file).read_text().rstrip()
+        + f"\n\n(Your working tree is {repo}, already on branch hermes/{a.slug}. "
+        "Commit and push there; do not switch branches.)"
+    )
+    order = list(ENGINES) if a.engine == "auto" else [a.engine]
+    tried = []
+    for engine in order:
+        launch(a.slug, engine, repo, prompt)
+        result = wait_turn(a.slug, a.timeout)
+        tried.append({"engine": engine, "state": result["state"], "reason": result.get("reason")})
+        if result["state"] != "failed" or a.engine != "auto":
+            out({**result, "tried": tried})
+        tmux("kill-session", "-t", f"code-{a.slug}", check=False)
+    out({"state": "failed", "slug": a.slug, "reason": "every engine failed", "tried": tried})
+
+
+def cmd_send(a: argparse.Namespace) -> None:
+    d = task_dir(a.slug)
+    task = json.loads((d / "task.json").read_text())
+    if not alive(task["tmux"]):
+        out({"error": "the session has ended; start the task again with run",
+             "slug": a.slug, "engine": task["engine"]})
+    text = Path(a.prompt_file).read_text().strip()
+    # One line: a newline would submit early. Literal keys, then Enter.
+    tmux("send-keys", "-t", task["tmux"], "-l", " ".join(text.split("\n")))
+    tmux("send-keys", "-t", task["tmux"], "Enter")
+    out({"sent": True, "slug": a.slug, "engine": task["engine"], "remote": task.get("remote")})
+
+
+def cmd_status(a: argparse.Namespace) -> None:
+    d = task_dir(a.slug)
+    try:
+        task = json.loads((d / "task.json").read_text())
+    except (OSError, ValueError):
+        out({"slug": a.slug, "state": "unknown"})
+    out({**task, "alive": alive(task["tmux"]), "screen": pane_tail(task["tmux"], 15)})
+
+
+def cmd_stop(a: argparse.Namespace) -> None:
+    task_dir(a.slug)
+    tmux("kill-session", "-t", f"code-{a.slug}", check=False)
+    out({"stopped": True, "slug": a.slug})
+
+
+def cmd_clean(a: argparse.Namespace) -> None:
+    """Remove the task's worktree, refusing while it holds work not yet pushed."""
+    d = task_dir(a.slug)
+    try:
+        repo = Path(json.loads((d / "task.json").read_text())["repo"])
+    except (OSError, ValueError, KeyError):
+        out({"error": f"no task {a.slug}"})
+    if alive(f"code-{a.slug}"):
+        out({"error": "the task's session is still running; stop it first", "slug": a.slug})
+    if not (repo / ".git").exists():
+        out({"cleaned": True, "slug": a.slug, "note": "no worktree left"})
+    dirty = git(repo, "status", "--porcelain").stdout.strip()
+    # Commits on no remote branch at all, so it holds with or without an upstream.
+    unpushed = git(repo, "log", "--oneline", "HEAD", "--not", "--remotes")
+    if dirty or unpushed.returncode != 0 or unpushed.stdout.strip():
+        out({"error": "the worktree has uncommitted changes or commits not pushed; nothing removed",
+             "slug": a.slug, "worktree": str(repo), "dirty": bool(dirty),
+             "unpushed": unpushed.stdout.strip() or unpushed.stderr.strip()[-200:]})
+    removed = git(repo, "worktree", "remove", str(repo))
+    if removed.returncode != 0:
+        out({"error": "git worktree remove failed", "detail": removed.stderr.strip()[-500:]})
+    out({"cleaned": True, "slug": a.slug, "worktree": str(repo),
+         "branch": f"hermes/{a.slug} (kept, with its pushed commits)"})
+
+
+def last_text_from_transcript(path: str | None) -> str | None:
+    """The last assistant text in a JSONL transcript, tolerant of its exact shape."""
+    if not path:
+        return None
+    try:
+        lines = Path(path).read_text().splitlines()
+    except OSError:
+        return None
+    # Copilot's events.jsonl: {"type": "assistant.message", "data": {"content": ...}}.
+    for line in reversed(lines):
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(ev, dict) and ev.get("type") == "assistant.message":
+            content = (ev.get("data") or {}).get("content")
+            if isinstance(content, str) and content.strip():
+                return content
+    for line in reversed(lines):
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        blob = json.dumps(ev)
+        if "assistant" not in blob:
+            continue
+        for key in ("content", "text", "message"):
+            val = ev.get(key) if isinstance(ev, dict) else None
+            if isinstance(val, dict):
+                val = val.get("content") or val.get("text")
+            if isinstance(val, list):
+                val = "\n".join(x.get("text", "") for x in val if isinstance(x, dict))
+            if isinstance(val, str) and val.strip():
+                return val
+    return None
+
+
+def cmd_hook(a: argparse.Namespace) -> None:
+    """Record a finished turn for the task this engine process belongs to."""
+    slug = os.environ.get("HERMES_CODE_TASK", "")
+    # Engines read each other's hook files; only the engine that runs the task records.
+    if not SLUG_RE.match(slug) or os.environ.get("HERMES_CODE_ENGINE") != a.engine:
+        sys.exit(0)
+    try:
+        ev = json.load(sys.stdin)
+    except ValueError:
+        ev = {}
+    name = (ev.get("hook_event_name") or ev.get("hookEventName") or "").lower()
+    rec: dict = {"engine": a.engine, "at": int(time.time())}
+    if a.engine == "claude":
+        if name == "stopfailure":
+            rec.update(failed=True, reason=str(ev.get("error") or ev.get("reason") or "error"),
+                       detail=str(ev)[:2000])
+        else:
+            rec["message"] = ev.get("last_assistant_message") or last_text_from_transcript(
+                ev.get("transcript_path"))
+    elif a.engine == "cursor":
+        d = task_dir(slug)
+        if "text" in ev and "status" not in ev:  # afterAgentResponse: keep the text for stop
+            (d / "last-response.txt").write_text(str(ev.get("text") or ""))
+            sys.exit(0)
+        if ev.get("status") in ("error", "aborted"):
+            rec.update(failed=ev.get("status") == "error", reason=ev.get("status"))
+        last = d / "last-response.txt"
+        rec["message"] = last.read_text() if last.exists() else last_text_from_transcript(
+            ev.get("transcript_path"))
+    else:  # copilot: agentStop has no text; read the transcript
+        rec["message"] = last_text_from_transcript(ev.get("transcriptPath") or ev.get("transcript_path"))
+    d = task_dir(slug)
+    (d / "turns").mkdir(parents=True, exist_ok=True)
+    n = len(list((d / "turns").glob("*.json")))
+    (d / "turns" / f"{n:04d}.json").write_text(json.dumps(rec, indent=1))
+    sys.exit(0)
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(prog="hermes-code")
+    sub = p.add_subparsers(dest="cmd", required=True)
+    r = sub.add_parser("run")
+    r.add_argument("slug")
+    r.add_argument("--repo", required=True, help="the repository's clone")
+    r.add_argument("--base", help="branch to start from, e.g. origin/rebuild (default: the remote's default)")
+    r.add_argument("--engine", choices=("auto", *ENGINES), default="auto")
+    r.add_argument("--prompt-file", required=True)
+    r.add_argument("--timeout", type=int, default=4 * 3600)
+    w = sub.add_parser("wait")
+    w.add_argument("slug")
+    w.add_argument("--timeout", type=int, default=4 * 3600)
+    s = sub.add_parser("send")
+    s.add_argument("slug")
+    s.add_argument("--prompt-file", required=True)
+    for name in ("status", "stop", "clean"):
+        sub.add_parser(name).add_argument("slug")
+    h = sub.add_parser("hook")
+    h.add_argument("engine", choices=ENGINES)
+    a = p.parse_args()
+    if a.cmd == "run":
+        cmd_run(a)
+    elif a.cmd == "wait":
+        out(wait_turn(a.slug, a.timeout))
+    elif a.cmd == "send":
+        cmd_send(a)
+    elif a.cmd == "status":
+        cmd_status(a)
+    elif a.cmd == "stop":
+        cmd_stop(a)
+    elif a.cmd == "clean":
+        cmd_clean(a)
+    else:
+        cmd_hook(a)
+
+
+if __name__ == "__main__":
+    main()

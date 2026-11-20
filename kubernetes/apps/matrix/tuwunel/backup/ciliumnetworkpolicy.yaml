@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Restic mover egress: cluster DNS and public IPv4, for Cloudflare R2. A LAN
+# repository (v1's volsync-restic-template MinIO, or Garage on the backup
+# NAS) would need its /32 and port here; default-deny in ../app blocks the
+# LAN otherwise.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: tuwunel-volsync
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: tuwunel-volsync
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16

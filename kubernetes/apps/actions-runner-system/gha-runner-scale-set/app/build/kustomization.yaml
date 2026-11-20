@@ -1,0 +1,107 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Image and Nix build runners, shared by every *-k8s-build overlay. Included
+# after ../scale-set; the overlay then sets the name, repository and limits.
+#
+# Every runner pod is a Kata VM (runtimeClassName kata-qemu, ADR 0009). The
+# runner container and the dind sidecar are privileged, but the kata-qemu
+# handler sets privileged_without_host_devices = true, so "privileged" means
+# privileged inside the guest: no host devices, no host kernel. That is the
+# boundary ADR 0011 records. No /dev/kvm reaches the guest, so a job that
+# needs KVM (a NixOS VM test) does not run here.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: add
+        path: /spec/values/template/spec/runtimeClassName
+        value: kata-qemu
+      # Nix's build sandbox needs mount and user namespaces, and the Nix
+      # installer runs as root. Privileged inside the Kata guest only.
+      - op: add
+        path: /spec/values/template/spec/containers/0/securityContext
+        value:
+          privileged: true
+      - op: add
+        path: /spec/values/template/spec/containers/0/volumeMounts/-
+        value:
+          name: nix-store
+          mountPath: /nix
+      - op: add
+        path: /spec/values/template/spec/volumes/-
+        value:
+          name: nix-store
+          emptyDir:
+            sizeLimit: 40Gi
+      # An emptyDir is created mode 0777, and Nix refuses a world-writable
+      # /nix ("Path /nix is world-writable or a symlink"). The runner makes it
+      # 0755 root-owned before it starts (the image has passwordless sudo),
+      # then does what the shared command does.
+      - op: replace
+        path: /spec/values/template/spec/containers/0/command
+        value:
+          - /bin/bash
+          - -c
+          - sudo chown root:root /nix && sudo chmod 0755 /nix && chmod 0755 /home/runner && exec /home/runner/run.sh
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/cpu
+        value: "2"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/requests/memory
+        value: 4Gi
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/cpu
+        value: "8"
+      - op: replace
+        path: /spec/values/template/spec/containers/0/resources/limits/memory
+        value: 16Gi
+      # The chart gives the dind sidecar an exec startup probe (docker info)
+      # and has no value to turn it off. Under Kata the probe can never run:
+      # the docker:dind entrypoint moves its processes into a child cgroup and
+      # enables controllers on the container's cgroup, and kata-agent then
+      # cannot add the exec process to it ("unable to write to a control group
+      # file cgroup.procs ... Resource busy"). The probe result stays unknown,
+      # the sidecar never counts as started, and the runner container never
+      # starts. The runner waits for docker itself
+      # (RUNNER_WAIT_FOR_DOCKER_IN_SECONDS=120, set by the chart), so the
+      # probe is dropped here. It stays in place for the runc scale sets.
+      - op: add
+        path: /spec/postRenderers
+        value:
+          - kustomize:
+              patches:
+                - target:
+                    group: actions.github.com
+                    version: v1alpha1
+                    kind: AutoscalingRunnerSet
+                  patch: |-
+                    - op: test
+                      path: /spec/template/spec/initContainers/1/name
+                      value: dind
+                    - op: remove
+                      path: /spec/template/spec/initContainers/1/startupProbe
+                    # Docker cannot use overlayfs on the container's root
+                    # filesystem under Kata: it is shared from the host over
+                    # virtio-fs, and overlayfs refuses it as an upper dir
+                    # ("failed to mount ... overlay ... invalid argument").
+                    # A memory-backed emptyDir is a tmpfs inside the guest,
+                    # where overlayfs works, for docker's and buildkit's
+                    # layers alike. It is sized for the image builds (a
+                    # Python slim base and its venv, a Node sidecar) and is
+                    # gone with the pod. Counted against the guest's memory.
+                    - op: add
+                      path: /spec/template/spec/volumes/-
+                      value:
+                        name: dind-storage
+                        emptyDir:
+                          medium: Memory
+                          sizeLimit: 8Gi
+                    - op: add
+                      path: /spec/template/spec/initContainers/1/volumeMounts/-
+                      value:
+                        name: dind-storage
+                        mountPath: /var/lib/docker

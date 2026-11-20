@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Board accounts for bots outside the cluster (docs/apps/openproject.md, "Bots
+# outside the cluster"): one Flux Kustomization per bot, built from
+# ./external with that bot's inputs. Its token lands in Secret
+# openproject/openproject-bot-<bot>; Ryan copies it to 1Password and to the
+# bot. The relay wakes the bot when its login is in RELAY_BOTS and it has a
+# target in Secret openproject-mcp-relay-targets.
+#
+# Chief Engineer: Ryan's homelab assistant on Grok Bot. Reaches the board
+# over its own VPN into the LAN.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-bot-chief-engineer
+spec:
+  dependsOn:
+    - name: openproject-bot-provisioner
+  force: true
+  interval: 1h
+  path: ./kubernetes/apps/openproject/bot-provisioner/external
+  postBuild:
+    substitute:
+      BOT_NAME: chief-engineer
+      BOT_DISPLAY_NAME: Chief Engineer
+      TASK_BOARD_RYAN_USER_ID: "4"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: openproject
+  wait: true
+  timeout: 15m

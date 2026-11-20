@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/k8s.cni.cncf.io/networkattachmentdefinition_v1.json
+# Macvlan on VLAN 30, the wireless client network 10.30.0.0/16. The master
+# is ens1f0.30, the Talos VLAN subinterface. ens1f0 itself stays the
+# untagged server LAN. Scrypted is the expected consumer: HomeKit and mDNS
+# are on VLAN 30 with the phones. Cameras are on VLAN 50 (10.50.0.0/16)
+# and are reached by routed unicast from this address. There is no VLAN 50
+# attachment and no untagged-LAN attachment.
+#
+# The gateway is 10.30.0.1. sbr keeps that route on traffic sourced from
+# the macvlan address, so Cilium stays the default route for the pod
+# address. HomeKit and camera connections have to be sourced from the
+# VLAN 30 address.
+#
+# ens1f0.30 has no host address, so there is no node address on VLAN 30
+# for the macvlan child to miss. Traffic to the node uses Cilium.
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vlan30
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "vlan30",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "capabilities": {"ips": true},
+          "master": "ens1f0.30",
+          "mode": "bridge",
+          "ipam": {
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/0", "gw": "10.30.0.1"}
+            ]
+          }
+        },
+        {
+          "type": "sbr"
+        }
+      ]
+    }

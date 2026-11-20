@@ -1,0 +1,130 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in hermes-memory, both directions. Kubelet probes
+# come from the host, which Cilium allows anyway.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The Hindsight API. In: 8888 from Hermes agent pods only, in namespaces the
+# hermes-bot component labels hermes.holthome.net/bot. Screen pods carry
+# app.kubernetes.io/controller: screen and never match. Out: DNS, LiteLLM on
+# 4000 (fact extraction), postgres17 on 5432. No internet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight
+      app.kubernetes.io/component: api
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            # Without a namespace key Cilium scopes the selector to this
+            # policy's namespace; Exists plus the label spans hermes-*.
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "8888"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+            app.kubernetes.io/name: litellm
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Nightly pg_dump (backup.yaml): DNS and postgres17 only.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight-backup
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight-backup
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# VolSync movers for the dump volume: DNS and public IPv4 (R2), no LAN.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight-volsync
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight-volsync
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16

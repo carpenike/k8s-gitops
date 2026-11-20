@@ -1,0 +1,24 @@
+# Not named "kubeconfig": the repo .gitignore keeps real kubeconfigs out of git.
+# k8s-gitops: kubectl and flux in the screen pod use the pod's own
+# ServiceAccount token, mounted only when the bot has CLUSTER_ACCESS_ENABLED
+# (docs/apps/hermes.md, "Cluster access"). ssh sessions do not inherit the
+# pod's KUBERNETES_SERVICE_* environment, so in-cluster discovery does not
+# work there; this file names the in-cluster API server and the mounted
+# token and CA instead. No credential is baked in.
+apiVersion: v1
+kind: Config
+clusters:
+  - name: in-cluster
+    cluster:
+      server: https://kubernetes.default.svc
+      certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+users:
+  - name: pod-service-account
+    user:
+      tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+contexts:
+  - name: in-cluster
+    context:
+      cluster: in-cluster
+      user: pod-service-account
+current-context: in-cluster

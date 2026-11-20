@@ -1,0 +1,71 @@
+# Chief's scheduled routines (docs/apps/hermes.md, "Routines from git"), written
+# into Hermes' cron store by the config init container at each start.
+#
+# This repo is public: names, addresses, links and lists go in 1Password item
+# hermes-chief-routines, one field per routine key, and reach the job's
+# notepad. A routine with `private: true` and no field is created paused.
+#
+# Each run is unattended: Outlook is read-only (write tools need an approval
+# no one can give), and the component appends "respond with exactly [SILENT]
+# if nothing new" and "never send, reply, buy, sign up or delete". Results go
+# to Ryan's DM with Chief (deliver: dm). Times are America/New_York.
+#
+# Moved from Grok Chief (Grok "Chief's Work Inventory", 2026-11-08). Pause the
+# Grok copy once these have run cleanly for a few days.
+routines:
+  band-mail-check:
+    name: Band booster mail check
+    schedule: "0 8 * * 1-5"
+    toolsets: [web, outlook]
+    private: true
+    prompt: |
+      Check Ryan's Outlook inbox for mail from the band boosters received since
+      the last run (the senders and list addresses are in your notepad). Find
+      new band actions, deadlines, volunteer needs and schedule changes. Before
+      calling a request unanswered, look in Sent Items for Ryan's reply. If
+      your notepad gives a calendar link, compare dates with it and point out
+      any mismatch. Report each item in one or two lines: the date, what is
+      needed, and who asked. Don't add calendar events.
+
+  gift-price-watch:
+    name: Gift price watch
+    schedule: "0 9 * * *"
+    until: 2026-12-20
+    toolsets: [web, browser]
+    private: true
+    prompt: |
+      Check each gift candidate in your notepad at its retailer-direct listing
+      (the retailer's own site, never a marketplace reseller). Report only a
+      qualifying change: a price at or below the noted target, or an item back
+      in stock. For each, give the verified current price, the link and what
+      changed. Your previous output shows what you already reported: don't
+      repeat an alert unless the price dropped further.
+
+  domain-watch:
+    name: Domain watch
+    schedule: "0 8 * * 1"
+    until: 2028-01-31
+    toolsets: [web]
+    private: true
+    prompt: |
+      Look up the domain in your notepad with public RDAP
+      (https://rdap.org/domain/<name>, which redirects to the registry).
+      Compare its status, registrar, expiry and name servers with your
+      previous output. Report only a meaningful change: the domain becoming
+      available or pending delete, a new registrant or registrar, or the
+      watch's end date coming up. A routine renewal is not meaningful. On the
+      first run, with no previous output, report the current state once as the
+      baseline.
+
+  open-loops:
+    name: Weekly open loops
+    schedule: "30 8 * * 1"
+    toolsets: [outlook]
+    prompt: |
+      Look through Ryan's Outlook mail from the last 60 days, inbox and Sent
+      Items, for up to seven unresolved items: a question someone asked Ryan
+      that he hasn't answered, or something Ryan promised and hasn't done.
+      Leave out anything answered later in the thread, newsletters and
+      automated mail, and anything you reported last week unless it is still
+      open and now overdue. For each: who, what, since when, the subject, and
+      a one-line suggested follow-up.

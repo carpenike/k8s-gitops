@@ -1,0 +1,16 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: talos
+spec:
+  talos:
+    # renovate: datasource=github-releases depName=siderolabs/talos
+    version: v1.14.5
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      expr: |-
+        status.ceph.health in ['HEALTH_OK']

@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Master and worker only. Topology updater stays off (the chart default).
+# Garbage collection stays at the chart default and is not tuned.
+# The worker discovers pci and usb, which the NodeFeatureRules match.
+# sled-1 is a control plane and has a USB Coral, so the worker tolerates
+# that taint even though the control-plane taint is removed today.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: node-feature-discovery
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: node-feature-discovery
+  interval: 1h
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  values:
+    master:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+    worker:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Equal
+          value: ""
+          effect: NoSchedule
+      config:
+        core:
+          featureSources:
+            - pci
+            - usb
+          labelSources:
+            - pci
+            - usb
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 128Mi

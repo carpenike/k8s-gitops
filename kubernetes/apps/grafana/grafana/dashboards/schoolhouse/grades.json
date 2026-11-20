@@ -1,0 +1,298 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Course grades and how they moved. `course_grades` only appends when a value changes, so the line is real history rather than a resampled snapshot. A letter-only grade carries no percentage and appears in the table but not the chart.",
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Pick one child to read it. Points, not lines, where a course has a single observation.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "max": 105,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT g.observed_at AS time,\n       g.percent::double precision AS value,\n       ch.display_name || ' · ' || c.title AS metric\nFROM course_grades g\nJOIN courses c ON c.id = g.course_id\nJOIN children ch ON ch.id = c.child_id\nWHERE g.percent IS NOT NULL\n  AND c.active\n  AND ch.display_name IN (${child:sqlstring})\n  AND c.title IN (${course:sqlstring})\n  AND $__timeFilter(g.observed_at)\nORDER BY g.observed_at\n",
+          "refId": "A"
+        }
+      ],
+      "title": "How each grade has moved",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Latest observation per course and marking period, including letter-only grades.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Percent"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#F13636",
+                      "value": null
+                    },
+                    {
+                      "color": "#F79009",
+                      "value": 70
+                    },
+                    {
+                      "color": "#078C52",
+                      "value": 85
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Letter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT ch.display_name AS \"Child\",\n       c.title AS \"Course\",\n       COALESCE(s.display_name, NULLIF(c.teacher, ''), '—') AS \"Teacher\",\n       g.percent AS \"Percent\",\n       NULLIF(g.letter, '') AS \"Letter\",\n       g.observed_at AT TIME ZONE 'America/New_York' AS \"As of\"\nFROM latest_course_grade g\nJOIN courses c ON c.id = g.course_id\nJOIN children ch ON ch.id = c.child_id\nLEFT JOIN staff s ON s.schoology_uid = c.teacher_uid\nWHERE c.active\n  AND ch.display_name IN (${child:sqlstring})\n  AND c.title IN (${course:sqlstring})\nORDER BY ch.display_name, c.title\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Where each course stands",
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": [
+    "schoolhouse",
+    "household"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "schoolhouse"
+        },
+        "definition": "SELECT display_name FROM children WHERE active ORDER BY display_name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Child",
+        "multi": true,
+        "name": "child",
+        "options": [],
+        "query": "SELECT display_name FROM children WHERE active ORDER BY display_name",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "schoolhouse"
+        },
+        "definition": "SELECT DISTINCT c.title FROM courses c JOIN children ch ON ch.id = c.child_id WHERE c.active AND ch.display_name IN (${child:sqlstring}) ORDER BY c.title",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Course",
+        "multi": true,
+        "name": "course",
+        "options": [],
+        "query": "SELECT DISTINCT c.title FROM courses c JOIN children ch ON ch.id = c.child_id WHERE c.active AND ch.display_name IN (${child:sqlstring}) ORDER BY c.title",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "timezone": "America/New_York",
+  "title": "Schoolhouse — Grades",
+  "uid": "schoolhouse-grades",
+  "weekStart": ""
+}

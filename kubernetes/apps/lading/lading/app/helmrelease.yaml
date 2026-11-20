@@ -1,0 +1,363 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# lading (carpenike/lading), replacing Forge's hosts/forge/services/lading.nix
+# and the upstream nix/module.nix units:
+#
+#   lading        Deployment. The health server: /healthz only, per account
+#                 and per source (503 once a sync is older than
+#                 stale_after_hours). Holds only the read-only DSN.
+#   sync-ryan     CronJobs, one per Amazon account, as Forge's
+#   sync-steffi   lading-sync-<account> units: lading-migrate, then
+#                 lading-sync, each with its own LADING_ACCOUNT, its own
+#                 credentials Secret and its own state volume. The cookie jar
+#                 is a live authenticated session; two accounts must never
+#                 share one.
+#
+# The Amazon credential can PLACE ORDERS and CHANGE SHIPPING ADDRESSES. Only
+# the sync pods hold it, each holds one account's, and no sync pod accepts a
+# connection (ciliumnetworkpolicy.yaml).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: lading
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: lading
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      lading:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: &image
+              # Built by carpenike/lading .github/workflows/image.yml from main
+              # (302cc78, carpenike/lading #10: the Costco B2C policy travels in
+              # the token file, so a re-seed carries it instead of needing a
+              # code change). Every container here uses this image.
+              #
+              # Renovate does NOT bump this: its self-built-images group
+              # follows a floating tag, and this pins the immutable sha- one,
+              # so it is bumped by hand on every lading release.
+              repository: ghcr.io/carpenike/lading
+              tag: sha-302cc78aec7bd7ddd288a44658d3a3428dbc4b41@sha256:71ece66a8520ac650daf88c8a206f2d5308b334b938987c22dbe4d41f31fe5e4
+            # The image's default command is the health server.
+            env:
+              # Forge's services.lading.settings (LADING_<NAME>). The module
+              # gives every unit all of them; each sync container repeats
+              # this list.
+              LADING_TIMEZONE: America/New_York
+              LADING_STALE_AFTER_HOURS: "36"
+              LADING_TRANSACTION_WINDOW_DAYS: "45"
+              LADING_MAX_DETAIL_FETCHES_PER_RUN: "40"
+              LADING_COSTCO_WINDOW_DAYS: "90"
+              LADING_BIND_ADDRESS: 0.0.0.0
+              LADING_PORT: "9230"
+              LADING_STATE_DIR: /var/lib/lading
+              # What the module derives from sync.accounts, so /healthz
+              # reports an account or source whose first sync never
+              # succeeded instead of leaving it out. Keep these in step with
+              # the sync-* controllers below (builtins.toJSON of the sorted
+              # account names).
+              LADING_KNOWN_ACCOUNTS: '["ryan","steffi"]'
+              LADING_COSTCO_ACCOUNTS: '["ryan","steffi"]'
+              LADING_SAMSCLUB_ACCOUNTS: '["ryan"]'
+            envFrom:
+              - secretRef:
+                  name: lading-health
+            probes:
+              # TCP, not /healthz: /healthz answers 503 for a stale or
+              # never-run sync and for an unreachable database. Restarting
+              # this process fixes neither.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9230
+                  periodSeconds: 30
+                  failureThreshold: 3
+              readiness:
+                enabled: false
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9230
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext: &containerSecurity
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+      sync-ryan:
+        type: cronjob
+        cronjob:
+          # Unsuspended at the cutover once Forge's state for this account
+          # was on its volume (docs/apps/lading.md). A run on an empty volume is a
+          # cold Amazon login, the path that hit a JavaScript challenge on
+          # Forge's first deploy: suspend again before replacing a volume.
+          suspend: false
+          # Forge: the module default, *-*-* 04:20:00, local time.
+          schedule: "20 4 * * *"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          # Forge's timer is Persistent=true: a missed run happens late.
+          startingDeadlineSeconds: 3600
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          # NO automatic retries. lading has no retry loop on purpose (its
+          # AGENTS.md non-negotiable 2): a failed login retried is how an
+          # Amazon account gets challenge-locked, and a locked account needs
+          # a human with a browser. Forge allowed at most a second start
+          # five minutes later; here a failed run stays failed until the
+          # next day's slot or a person (LadingSyncFailed).
+          backoffLimit: 0
+        pod: &syncPod
+          restartPolicy: Never
+        initContainers:
+          permissions: &permissions
+            # A new volume's root is root-owned, and fsGroup would add group
+            # bits to the cookie jar and token files. Forge kept each state
+            # directory 0700 owned by the service user (StateDirectoryMode,
+            # and the dataset mode), so this sets the root's owner and mode
+            # only, not recursively. The only step that runs as root; CHOWN
+            # and FOWNER only.
+            image: *image
+            command:
+              - /bin/sh
+              - -c
+              - chown 65532:65532 /var/lib/lading && chmod 0700 /var/lib/lading
+            securityContext:
+              runAsUser: 0
+              runAsGroup: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - CHOWN
+                  - FOWNER
+            resources: &initResources
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+          # The module's costcoSeed and samsclubSeed (ExecStartPre, ryan has
+          # both enabled with a seed file): install the seed ONLY when no
+          # live token file exists. The refresh tokens rotate on every
+          # redemption, so after the first run the live file is newer than
+          # the seed; copying it again would restore a spent token and the
+          # next refresh fails invalid_grant days later. Same `-e` test, same
+          # 0600, same owner (this runs as 65532). The seed Secret is mounted
+          # in this container only, never in the sync container.
+          seed:
+            image: *image
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                live=/var/lib/lading/costco-tokens.json
+                if [ ! -e "$live" ]; then
+                  install -m 0600 /seed/costco_tokens "$live"
+                  echo "seeded Costco token for ryan (first run only)"
+                fi
+                live=/var/lib/lading/samsclub-tokens.json
+                if [ ! -e "$live" ]; then
+                  install -m 0600 /seed/samsclub_tokens "$live"
+                  echo "seeded Sam's Club token for ryan (first run only)"
+                fi
+            securityContext: *containerSecurity
+            resources: *initResources
+        containers:
+          app:
+            image: *image
+            # Kubernetes has no RandomizedDelaySec, so the module's hour of
+            # jitter is a random sleep before the run: a login at exactly the
+            # same minute every day is a pattern bot detection scores. Then
+            # migrations (Forge's ExecStartPre), then the sync under Forge's
+            # 45 minute TimeoutStartSec. Exit codes: 0 clean, 1 partial
+            # (something did not map), 2 failed; Forge's
+            # SuccessExitStatus=0 1 counts a partial run as success, so this
+            # does too. Never --backfill-year or --debug here.
+            command: &syncCommand
+              - /bin/sh
+              - -c
+              - |
+                delay=$(shuf -i 0-3600 -n 1)
+                echo "jitter: starting in $delay s"
+                sleep "$delay"
+                lading-migrate || exit $?
+                timeout 45m lading-sync
+                rc=$?
+                if [ "$rc" -le 1 ]; then
+                  exit 0
+                fi
+                exit "$rc"
+            env:
+              LADING_TIMEZONE: America/New_York
+              LADING_STALE_AFTER_HOURS: "36"
+              LADING_TRANSACTION_WINDOW_DAYS: "45"
+              LADING_MAX_DETAIL_FETCHES_PER_RUN: "40"
+              LADING_COSTCO_WINDOW_DAYS: "90"
+              # Set per unit by the module from sync.accounts.ryan.
+              LADING_ACCOUNT: ryan
+              LADING_COSTCO_ENABLED: "true"
+              LADING_SAMSCLUB_ENABLED: "true"
+              # The volume root is Forge's /var/lib/lading/ryan. The library
+              # writes its cookie jar, config and scratch dir under here, and
+              # HOME points here too (as in the image).
+              LADING_STATE_DIR: /var/lib/lading
+              HOME: /var/lib/lading
+            envFrom:
+              - secretRef:
+                  name: lading-ryan
+            securityContext: *containerSecurity
+            resources: &syncResources
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+      sync-steffi:
+        type: cronjob
+        # The same settings as sync-ryan except the schedule.
+        cronjob:
+          suspend: false
+          # Forge: onCalendar *-*-* 05:40:00. A different hour from ryan's on
+          # purpose: two logins to two Amazon accounts from one IP in the
+          # same minute is a more interesting pattern than two spread across
+          # the night.
+          schedule: "40 5 * * *"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 3600
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          backoffLimit: 0
+        pod: *syncPod
+        initContainers:
+          permissions: *permissions
+          # Steffi has Costco with a seed file; Sam's Club is not enabled.
+          seed:
+            image: *image
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                live=/var/lib/lading/costco-tokens.json
+                if [ ! -e "$live" ]; then
+                  install -m 0600 /seed/costco_tokens "$live"
+                  echo "seeded Costco token for steffi (first run only)"
+                fi
+            securityContext: *containerSecurity
+            resources: *initResources
+        containers:
+          app:
+            image: *image
+            command: *syncCommand
+            env:
+              LADING_TIMEZONE: America/New_York
+              LADING_STALE_AFTER_HOURS: "36"
+              LADING_TRANSACTION_WINDOW_DAYS: "45"
+              LADING_MAX_DETAIL_FETCHES_PER_RUN: "40"
+              LADING_COSTCO_WINDOW_DAYS: "90"
+              LADING_ACCOUNT: steffi
+              LADING_COSTCO_ENABLED: "true"
+              LADING_STATE_DIR: /var/lib/lading
+              HOME: /var/lib/lading
+            envFrom:
+              - secretRef:
+                  name: lading-steffi
+            securityContext: *containerSecurity
+            resources: *syncResources
+    # No fsGroup: the permissions init container sets owner and mode instead.
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      # A name with a dot is looked up as written first, so Cilium files the
+      # answer under that name and the toFQDNs rules match (same as
+      # homelab-mcp and components/hermes-bot).
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: lading
+        ports:
+          http:
+            port: 9230
+    # No ServiceMonitor: lading serves /healthz only, no /metrics. The
+    # alerts use kube-state-metrics (prometheusrule.yaml).
+    persistence:
+      # In pvc.yaml so a later backup can name them.
+      ryan-state:
+        existingClaim: lading-ryan-state
+        advancedMounts:
+          sync-ryan:
+            permissions:
+              - path: /var/lib/lading
+            seed:
+              - path: /var/lib/lading
+            app:
+              - path: /var/lib/lading
+      steffi-state:
+        existingClaim: lading-steffi-state
+        advancedMounts:
+          sync-steffi:
+            permissions:
+              - path: /var/lib/lading
+            seed:
+              - path: /var/lib/lading
+            app:
+              - path: /var/lib/lading
+      # 0444 because the pod has no fsGroup and a Secret volume is
+      # root-owned: 0400 would be unreadable to uid 65532. Every container
+      # in these pods runs as 65532 except the permissions step, and only
+      # the seed container mounts it.
+      ryan-seeds:
+        type: secret
+        name: lading-ryan-seeds
+        defaultMode: 0444
+        advancedMounts:
+          sync-ryan:
+            seed:
+              - path: /seed
+                readOnly: true
+      steffi-seeds:
+        type: secret
+        name: lading-steffi-seeds
+        defaultMode: 0444
+        advancedMounts:
+          sync-steffi:
+            seed:
+              - path: /seed
+                readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

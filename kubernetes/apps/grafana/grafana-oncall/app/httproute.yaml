@@ -1,0 +1,62 @@
+---
+# OnCall's engine on envoy-internal (10.45.10.50, published by mikrotik-dns)
+# for Forge's Alertmanager, which posts to the Alertmanager integration URL
+# https://oncall.<domain>/integrations/v1/alertmanager/<token>/. Nothing else
+# of the engine is routed: people use OnCall through the Grafana plugin, and
+# Grafana calls the engine's Service directly. GET /health/ is here so Forge
+# can watch OnCall from outside the cluster.
+#
+# Labelled public: Alertmanager cannot complete the gateway Pocket ID login,
+# and the integration token in the path is what OnCall authenticates. A
+# clientCIDRs allowlist for Forge would not work here: envoy's Service uses
+# externalTrafficPolicy Cluster, so Envoy sees a node address, not Forge's
+# (docs/platform/gateway-auth.md).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana-oncall
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - oncall.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - name: integrations
+      matches:
+        - method: POST
+          path:
+            type: PathPrefix
+            value: /integrations/v1/
+      timeouts:
+        request: 60s
+        backendRequest: 60s
+      backendRefs:
+        - name: grafana-oncall-engine
+          port: 8080
+    - name: health
+      matches:
+        - method: GET
+          path:
+            type: Exact
+            value: /health/
+      backendRefs:
+        - name: grafana-oncall-engine
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: grafana-oncall-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: grafana-oncall

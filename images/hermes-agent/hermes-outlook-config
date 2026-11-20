@@ -1,0 +1,115 @@
+#!/opt/hermes/.venv/bin/python
+"""hermes-outlook-config enable|disable: git's part of $HERMES_HOME/config.yaml for the Outlook MCP server.
+
+Run by the hermes-bot component's config init container with the bot's OUTLOOK_MCP_ENABLED
+input (docs/apps/hermes.md, "Outlook (opt-in)"). Uses Hermes' own read_raw_config/save_config, so
+the rest of config.yaml stays Hermes-managed and no defaults are written.
+
+enable:
+  - mcp_servers.outlook: the wrapper below over stdio, trust untrusted (every tool without
+    readOnlyHint asks before it runs; tools/mcp_tool_handlers.py _trust_gate_check),
+    tools.include mirroring outlook-mcp/enabled-tools.txt (it also hides the server's auth
+    tools, which ms-365-mcp-server registers in stdio mode whatever --enabled-tools says),
+    no resources, prompts or sampling.
+  - platform_toolsets.api_server: hermes-api-server plus no_mcp, so the OpenAI-compatible API
+    never gets the mailbox. Hermes adds every enabled MCP server to every platform by default
+    (hermes_cli/tools_config.py _merge_mcp_servers), and /v1/runs callers answer their own
+    approval prompts.
+disable: removes both.
+Always: drops remembered "always" answers for outlook tools (command_allowlist entries
+mcp:outlook/<tool>), so an accidental Always on send-mail lasts until the next restart at most.
+"""
+
+import sys
+
+sys.path.insert(0, "/opt/hermes")
+
+from hermes_cli.config import read_raw_config, save_config  # noqa: E402
+
+TOOLS = [
+    # read
+    "list-mail-messages",
+    "list-mail-folder-messages",
+    "get-mail-message",
+    "list-mail-folders",
+    "list-mail-child-folders",
+    "list-mail-attachments",
+    "get-mail-attachment-content",
+    # write: each asks for approval
+    "create-draft-email",
+    "create-reply-draft",
+    "send-mail",
+    "move-mail-message",
+]
+
+SERVER = {
+    "command": "/usr/local/bin/outlook-mcp",
+    # The wrapper adds these itself; repeated here so the config says what runs. The wrapper
+    # refuses any other value.
+    "args": [
+        "--enabled-tools-file", "/opt/outlook-mcp/enabled-tools.txt",
+        "--allowed-scopes", "User.Read Mail.ReadWrite Mail.Send",
+    ],
+    # ${...} is resolved by Hermes from the gateway's environment (Secret outlook-mcp) when it
+    # loads mcp_servers (tools/mcp_tool_config.py _interpolate_env_vars). The child gets only
+    # this block plus Hermes' safe baseline (_build_safe_env), not the Matrix or LiteLLM keys.
+    "env": {
+        "MS365_MCP_CLIENT_ID": "${MS365_MCP_CLIENT_ID}",
+        "MS365_MCP_TENANT_ID": "${MS365_MCP_TENANT_ID}",
+        "MS365_MCP_EXPECTED_USERNAME": "${MS365_MCP_EXPECTED_USERNAME}",
+        "MS365_MCP_TOKEN_CACHE_PATH": "/opt/data/outlook/token-cache.json",
+        "MS365_MCP_SELECTED_ACCOUNT_PATH": "/opt/data/outlook/selected-account.json",
+        "MS365_MCP_LOG_DIR": "/var/log/outlook-mcp",
+        "MS365_MCP_REQUIRE_CONFIRM": "true",
+        "MS365_MCP_USE_KEYTAR": "false",
+    },
+    "trust": "untrusted",
+    "tools": {"include": TOOLS, "resources": False, "prompts": False},
+    "sampling": {"enabled": False},
+}
+
+API_TOOLSETS = ["hermes-api-server", "no_mcp"]
+
+
+def main() -> int:
+    if len(sys.argv) != 2 or sys.argv[1] not in ("enable", "disable"):
+        print("usage: hermes-outlook-config enable|disable", file=sys.stderr)
+        return 2
+    enable = sys.argv[1] == "enable"
+    cfg = read_raw_config()
+
+    servers = cfg.get("mcp_servers")
+    if not isinstance(servers, dict):
+        servers = {}
+    toolsets = cfg.get("platform_toolsets")
+    if not isinstance(toolsets, dict):
+        toolsets = {}
+
+    if enable:
+        servers["outlook"] = SERVER
+        toolsets["api_server"] = API_TOOLSETS
+    else:
+        servers.pop("outlook", None)
+        if toolsets.get("api_server") == API_TOOLSETS:
+            toolsets.pop("api_server")
+
+    for key, value in (("mcp_servers", servers), ("platform_toolsets", toolsets)):
+        if value:
+            cfg[key] = value
+        else:
+            cfg.pop(key, None)
+
+    allowlist = cfg.get("command_allowlist")
+    if isinstance(allowlist, list):
+        kept = [entry for entry in allowlist if not str(entry).startswith("mcp:outlook/")]
+        if len(kept) != len(allowlist):
+            print(f"hermes-outlook-config: dropped {len(allowlist) - len(kept)} remembered outlook approval(s)")
+        cfg["command_allowlist"] = kept
+
+    save_config(cfg)
+    print(f"hermes-outlook-config: outlook MCP server {'enabled' if enable else 'disabled'}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

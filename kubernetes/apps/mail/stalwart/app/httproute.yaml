@@ -1,0 +1,37 @@
+---
+# WebUI, JMAP, CalDAV/CardDAV and autoconfig. Mail and DAV clients send
+# Basic or bearer credentials and cannot complete the gateway Pocket ID
+# login, so the route is native: Stalwart does its own sign-in (and can use
+# Pocket ID itself as an OIDC directory). The ReferenceGrant lets
+# pocket-id-exempt in namespace network select this route. envoy-internal
+# only; mikrotik-dns publishes the name. See docs/platform/gateway-auth.md.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: stalwart
+  labels:
+    gateway.holthome.net/auth: native
+spec:
+  hostnames:
+    - mail.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    - backendRefs:
+        - name: stalwart
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: stalwart-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: stalwart
