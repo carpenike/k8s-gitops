@@ -54,7 +54,7 @@ spec:
           containers:
             - name: pg-dump
               # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
-              image: ghcr.io/cloudnative-pg/postgresql:17.11@sha256:70664ebcfa1100361b5bdc28bbf06fdbe08db2dc4ad7bd14de33c5e05fe8ea8e
+              image: ghcr.io/cloudnative-pg/postgresql:18.6@sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533
               command:
                 - /bin/sh
                 - -c
