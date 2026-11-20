@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: docker.io/library/memcached
-              tag: 1.6.45-alpine@sha256:bfc2ee42c4edb65f436dafc6a61cbc6938c30118e11ddea2f968e1a2c90bb12a
+              tag: 1.6.45-alpine@sha256:084fb554292d1447bc2c68b80c2331b98834514f56c866bc21a61be3c2ee376d
             args: ["-m", "128", "-c", "1024"]
             resources:
               requests:
