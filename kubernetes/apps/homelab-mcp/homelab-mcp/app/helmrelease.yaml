@@ -383,9 +383,16 @@ spec:
               # the family channel stays off until he asks). The list names each
               # view, so a NEW view must be added here too or it can send to
               # family.
+              # /mcp/work: Copilot on Ryan's Microsoft laptop (Ryan, 2026-11-20,
+              # vault requirement R7). Vault tools only: read and write Work/, read
+              # Personal/Research (app/vault-policy.yaml, client copilot). No
+              # OpenProject (not in HOMELAB_MCP_OPENPROJECT_VIEW_BOTS), no Signal
+              # tool, nothing personal. Its own view so a token left on that laptop
+              # reaches nothing else. Listed below as well, per the rule above.
               HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/hermes", "/mcp/agent/grokbot",
-                "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors"]
+                "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors",
+                "/mcp/work"]
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -487,7 +494,12 @@ spec:
                  "users": ["stefanie@stefanieholt.com"]},
                 {"path": "/mcp/house-sensors", "name": "House sensors",
                  "tools": "scope:atrium-family-house-sensors",
-                 "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]}
+                 "read_scope": "atrium-family-house-sensors", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/work", "name": "Work (Microsoft)",
+                 "tools": ["vault_domains", "vault_read", "vault_list", "vault_search",
+                 "vault_links", "vault_create", "vault_edit"],
+                 "read_scope": "work.read", "write_scope": "work.write",
+                 "connect_scopes": "all", "users": ["ryan@ryanholt.net"]}
                 ]
             envFrom:
               - secretRef:
