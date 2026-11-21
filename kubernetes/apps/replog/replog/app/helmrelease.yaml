@@ -40,7 +40,7 @@ spec:
               # Published from main, pinned by commit and digest.
               # Renovate tracks it with the other ghcr.io/carpenike images.
               repository: ghcr.io/carpenike/replog
-              tag: sha-f448ffd42afa7cd5311602e62c0e08f3e1d90430@sha256:3cadaeb061ce947a3f5c7e2f40379fe5d3724f74d02d565032ca0215d4fddc79
+              tag: sha-9e33a7f6492b7f59dad928e9d29e9b855de45dd2@sha256:1fe4ddf01ae42b83dd09197daf34d26db1aed2879129b3329d9cbe06ee59668c
             env:
               # Forge binds 127.0.0.1:5008 because Caddy is on the same host.
               # Envoy is not. The image default :8080 is the listener.
