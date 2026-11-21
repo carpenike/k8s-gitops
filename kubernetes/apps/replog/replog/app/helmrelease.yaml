@@ -154,11 +154,12 @@ spec:
         manifest:
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
-          # In: 8080 from envoy-external and envoy-internal, and from
-          # Prometheus (the scrape is /metrics on that same port). Probes
-          # come from the kubelet, which Cilium allows. Out: DNS, then 443
-          # to Pocket ID. Forge reached Pocket ID from the host; this pod
-          # has to be allowed the name.
+          # In: 8080 from envoy-external and envoy-internal, from
+          # Prometheus (the scrape is /metrics on that same port), and from
+          # the homelab-mcp pods (the coach tools). Probes come from the
+          # kubelet, which Cilium allows. Out: DNS, then 443 to Pocket ID.
+          # Forge reached Pocket ID from the host; this pod has to be
+          # allowed the name.
           spec:
             endpointSelector:
               matchLabels:
@@ -180,6 +181,16 @@ spec:
                   - matchLabels:
                       k8s:io.kubernetes.pod.namespace: observability
                       app.kubernetes.io/name: prometheus
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              # homelab-mcp namespace, the homelab-mcp pods, port 8080 only.
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: homelab-mcp
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: homelab-mcp
                 toPorts:
                   - ports:
                       - port: "8080"

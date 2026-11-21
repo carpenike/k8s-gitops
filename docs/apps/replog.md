@@ -67,14 +67,18 @@ URL saved in the admin UI needs its own allow before it can be reached.
 
 ## Agents
 
-MCP access will come through homelab-mcp later: a replog tool module that
-calls this app's REST API in-cluster, with a service token, on Service
-`replog` port 8080. A CiliumNetworkPolicy will admit only the homelab-mcp
-pods. That policy is not in this pull request. The current binary also
-mounts `/api/mcp` when the website OIDC settings are set, because it has
-no separate switch. The public route does not forward it: rule
-`deny-mcp` matches `PathPrefix` `/api/mcp` and returns 404. The website
-rule is `PathPrefix` `/`, which would otherwise include that path.
+homelab-mcp's `/mcp/replog` view calls this Service in-cluster at
+`replog.replog.svc:8080` with bearer `HOMELAB_MCP_REPLOG_TOKEN`. That
+value is 1Password item `homelab-mcp`, field `replog_token`, in vault
+`k8s-secrets`. ExternalSecret `homelab-mcp` writes it into Secret
+`homelab-mcp-env`. The replog CiliumNetworkPolicy admits the homelab-mcp
+pods on port 8080 only, and the homelab-mcp policy allows that egress.
+
+The binary still mounts `/api/mcp` when the website OIDC settings are
+set, because it has no separate switch. The public route does not
+forward it: rule `deny-mcp` matches `PathPrefix` `/api/mcp` and returns
+404. The website rule is `PathPrefix` `/`, which would otherwise include
+that path.
 
 ## Image
 
