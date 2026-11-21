@@ -86,6 +86,11 @@
       },
     },
     {
+      description: "replog publishes ghcr.io/carpenike/replog only on v* tags, and there is no release yet. The HelmRelease tag v0.0.0 is a placeholder that will not pull. Remove this rule once the first release is pinned by tag and digest.",
+      matchPackageNames: ["ghcr.io/carpenike/replog"],
+      enabled: false,
+    },
+    {
       description: "cua-driver (images/hermes-screen): trycua/cua is a monorepo, so only cua-driver-rs-v<x.y.z> releases count. Upstream marks every one a prerelease, so ignoreUnstable is off.",
       matchDatasources: ["github-releases"],
       matchPackageNames: ["trycua/cua"],

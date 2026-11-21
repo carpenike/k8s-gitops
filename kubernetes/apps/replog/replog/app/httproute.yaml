@@ -1,0 +1,42 @@
+---
+# Internal only. mikrotik-dns publishes replog.${SECRET_DOMAIN} as an A record
+# for envoy-internal. cloudflare-dns watches envoy-external, so this hostname
+# is not public. The app is a Pocket ID relying party, so the route is native
+# and the gateway does not add a second login (docs/platform/gateway-auth.md).
+# OIDC is unset for now, so the password in Secret replog-env is the only
+# login. The ReferenceGrant lets pocket-id-exempt in namespace network select
+# this route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: replog
+  labels:
+    gateway.holthome.net/auth: native
+spec:
+  hostnames:
+    - replog.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    # AI coach generation can run longer than the gateway default.
+    - timeouts:
+        request: 300s
+        backendRequest: 300s
+      backendRefs:
+        - name: replog
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: replog-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: replog

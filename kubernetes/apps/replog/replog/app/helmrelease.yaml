@@ -1,0 +1,139 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# replog: the family workout log (carpenike/replog), at
+# https://replog.${SECRET_DOMAIN} on envoy-internal only.
+#
+# One replica, Recreate. The database is SQLite in WAL mode
+# (modernc.org/sqlite) on the RWO volume below. A second replica cannot
+# take that volume. There is no Postgres.
+#
+# The image is distroless (gcr.io/distroless/static-debian12:nonroot), so
+# it has no shell. The volume is made writable with fsGroup 65532, the
+# image's nonroot uid, instead of a root init container that runs chown.
+# See docs/apps/replog.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: replog
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: replog
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      replog:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              # GoReleaser publishes ghcr.io/carpenike/replog only on v* tags
+              # (Dockerfile.goreleaser), and there is no release yet. v0.0.0
+              # will not pull. Replace it with the first release, tag and
+              # digest, before this pod can start. Renovate is disabled for
+              # this image until then (.renovaterc.json5).
+              repository: ghcr.io/carpenike/replog
+              tag: v0.0.0
+            env:
+              # The image already sets the path, the avatar dir and :8080.
+              # Repeated here so a retagged image cannot drift from the volume.
+              REPLOG_ADDR: ":8080"
+              REPLOG_DB_PATH: /data/replog.db
+              REPLOG_AVATAR_DIR: /data/avatars
+              REPLOG_BASE_URL: https://replog.${SECRET_DOMAIN}
+              REPLOG_LOG_FORMAT: json
+              REPLOG_METRICS_ENABLED: "true"
+              # Only envoy-internal reaches 8080 (CiliumNetworkPolicy). Its
+              # pods are in the cluster pod CIDR. The rate limiter accepts
+              # CIDRs, not a bare "*".
+              REPLOG_TRUSTED_PROXIES: 10.42.0.0/16
+              # Pocket ID OIDC and the MCP OAuth server stay off: both turn
+              # on only when REPLOG_OIDC_ISSUER, REPLOG_OIDC_CLIENT_ID and
+              # REPLOG_OIDC_CLIENT_SECRET are all set. Do not set them here.
+            envFrom:
+              - secretRef:
+                  name: replog-env
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  periodSeconds: 30
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              # /readyz pings the database. /healthz only checks the process.
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: 8080
+                  periodSeconds: 10
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: "1"
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: replog
+        ports:
+          http:
+            port: 8080
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics
+            interval: 60s
+    persistence:
+      # The PVC is in pvc.yaml so the VolSync backup (../backup) can name it.
+      data:
+        existingClaim: replog-data
+        advancedMounts:
+          replog:
+            app:
+              - path: /data
+      # The root filesystem is read-only. SQLite and the Go runtime use /tmp.
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

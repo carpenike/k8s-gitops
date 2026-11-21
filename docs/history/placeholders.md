@@ -197,6 +197,18 @@ and Services write scopes and tag `tag:k8s-operator`. The tailnet policy
 and split DNS are set in the admin console before the merge
 ([tailscale.md](../platform/tailscale.md)).
 
+## replog
+
+Before `kubernetes/apps/replog` reconciles, create item `replog` (new) in
+vault `k8s-secrets` with fields `secret_key`, `admin_user`, `admin_pass` and
+`admin_email`. Do not use `admin` / `admin`. [replog.md](../apps/replog.md#1password)
+says what each field is. The backup uses the existing item
+`volsync-r2-template`; no new field.
+
+The HelmRelease image is `ghcr.io/carpenike/replog:v0.0.0`, a placeholder.
+GoReleaser publishes that image only on `v*` tags, and there is no release
+yet. Replace the tag with the first release before the pod can pull.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |
