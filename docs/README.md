@@ -51,6 +51,7 @@ Node config and first install are next to the files they describe:
 | [scrypted.md](apps/scrypted.md) | Scrypted NVR on VLAN 30 |
 | [schoolhouse.md](apps/schoolhouse.md) | Schoology ingest CronJob and health server |
 | [lading.md](apps/lading.md) | Amazon, Costco and Sam's Club sync per account, and token seeds |
+| [replog.md](apps/replog.md) | Family workout log, moved from Forge, public at `replog.` |
 | [website.md](apps/website.md) | The `ryanholt.net` static site, and how it shares the apex with Matrix |
 
 ## History

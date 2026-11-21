@@ -197,6 +197,21 @@ and Services write scopes and tag `tag:k8s-operator`. The tailnet policy
 and split DNS are set in the admin console before the merge
 ([tailscale.md](../platform/tailscale.md)).
 
+## replog
+
+Before `kubernetes/apps/replog` reconciles, create item `replog` (new) in
+vault `k8s-secrets` with fields `secret_key`, `admin_user`, `admin_pass`,
+`admin_email` and `oidc_client_secret`. Names match Forge's sops keys.
+`secret_key` is a new key (the cluster database starts empty).
+`oidc_client_secret` is copied from Forge's sops key of the same name.
+Do not use `admin` / `admin`. [replog.md](../apps/replog.md#1password)
+says which. The backup uses the existing item
+`volsync-r2-template`; no new field.
+
+The HelmRelease image is pinned:
+`ghcr.io/carpenike/replog:sha-f448ffd42afa7cd5311602e62c0e08f3e1d90430@sha256:3cadaeb061ce947a3f5c7e2f40379fe5d3724f74d02d565032ca0215d4fddc79`.
+`replicas` is 1. Merging does not move the name off Forge.
+
 ## Still to confirm or generate
 
 | Placeholder | Where | Replace with |

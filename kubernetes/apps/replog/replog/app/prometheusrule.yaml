@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# The ServiceMonitor's jobLabel is app.kubernetes.io/name, which the chart
+# sets to the release name. Alerts route to Forge's Alertmanager like the rest.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: replog
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: replog
+      rules:
+        - alert: ReplogDown
+          # Quiet if someone scales the Deployment to 0 while Forge still
+          # has the name. absent() would page the whole time replicas is 0.
+          # unless drops that case. A scrape that exists and is down still fires.
+          expr: |
+            (
+              up{namespace="replog",job="replog"} == 0
+              or absent(up{namespace="replog",job="replog"})
+            )
+            unless on()
+            (
+              kube_deployment_spec_replicas{namespace="replog",deployment="replog"} == 0
+            )
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: replog is not being scraped
+            description: >-
+              Prometheus has had no /metrics from replog for 10 minutes,
+              and the Deployment is supposed to be running. The workout
+              log at replog.<domain> is probably down too. A pod that
+              fails /readyz leaves the Service, so a database that does
+              not answer looks the same from here.

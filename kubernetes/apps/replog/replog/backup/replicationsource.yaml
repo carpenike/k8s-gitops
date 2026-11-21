@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# SQLite in WAL mode. copyMethod Snapshot takes a Ceph RBD snapshot
+# (csi-ceph-block) and restic reads that, not the live files. A block
+# snapshot is crash-consistent: SQLite replays the WAL on restore. Do not
+# copy replog.db, the -wal or the -shm off the mounted volume while the
+# process is running. Every 6 hours.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: replog
+spec:
+  sourcePVC: replog-data
+  trigger:
+    schedule: "20 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: replog-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: replog-volsync
+    # The volume is owned by the pod's uid via fsGroup. fsGroup is also
+    # required for the mover's own cache PVC, which is provisioned
+    # root-owned: without it restic cannot create /cache/CACHEDIR.TAG.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4
