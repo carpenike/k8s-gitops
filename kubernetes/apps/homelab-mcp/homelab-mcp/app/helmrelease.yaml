@@ -235,7 +235,7 @@ spec:
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
                 "amazon", "costco", "samsclub", "withings", "vault", "openproject",
-                "messaging"]
+                "messaging", "replog"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
