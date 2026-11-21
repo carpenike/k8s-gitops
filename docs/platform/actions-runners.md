@@ -12,7 +12,6 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Scale set | HelmRelease `sam-tracker` | Repo `https://github.com/carpenike/sam-tracker`. `runs-on` name `sam-tracker-k8s`. `minRunners` 0, `maxRunners` 3 |
 | Scale set | HelmRelease `sam-tracker-app-k8s` | Repo `https://github.com/carpenike/sam-tracker-app`. `runs-on` name `sam-tracker-app-k8s`. Same limits and mode as `sam-tracker` |
 | Scale set | HelmRelease `va-acr-app-k8s` | Repo `https://github.com/carpenike/va-acr-app`. `runs-on` name `va-acr-app-k8s`. Runner `8` CPU / `8Gi` up to `16` CPU / `24Gi`, `maxRunners` 8, no container mode (see below) |
-| Scale set | HelmRelease `replog-k8s` | Repo `https://github.com/carpenike/replog` (public; see Policy). `runs-on` name `replog-k8s`. Shared limits, `minRunners` 0, no container mode. Same overlay shape as `va-acr-app-k8s` |
 | Scale set | HelmRelease `atrium-k8s` | Repo `https://github.com/carpenike/atrium`. `runs-on` name `atrium-k8s`. Non-Nix jobs, shared limits |
 | Scale set | HelmRelease `mcp-k8s` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s`. Non-Nix jobs. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
 | Scale set | HelmRelease `mcp-k8s-build` | Repo `https://github.com/carpenike/mcp`. `runs-on` name `mcp-k8s-build`. Nix and image jobs. Kata VM pods, privileged inside the guest (ADR 0011). Runner `2` CPU / `4Gi` up to `8` CPU / `16Gi`, `maxRunners` 2 |
@@ -51,13 +50,6 @@ public repository runs the fork's workflow, and that code would run here.
 repository gets its own scale set. It uses this GitHub App when the
 installation includes that repository.
 
-`replog` is the exception, and it is public.
-HelmRelease `replog-k8s` is registered for the cluster move. A fork pull
-request that selects `runs-on: replog-k8s` would run that fork's workflow
-on this network. Workflows in that repository must not do that.
-`minRunners` stays 0. The installation still has to include the
-repository before the scale set can register.
-
 These repositories are on the personal account `carpenike`, not an
 organization. Each scale set is repo-scoped, so one cannot serve several
 repositories. Installation `175991169` must include a repository before
@@ -93,9 +85,9 @@ the same mode. The chart adds a privileged `docker:dind` sidecar
 runner image stays `ghcr.io/actions/actions-runner:2.338.2`.
 
 `va-acr-app`, `atrium-k8s`, `mcp-k8s`, `network-config-k8s`,
-`replog-k8s`, `schoolhouse-k8s`, and `whiskey-k8s` have no container mode.
-Their overlays remove `containerMode`, so the chart adds no dind sidecar
-and the runner pod is not privileged. Their jobs start no service containers or Docker
+`schoolhouse-k8s`, and `whiskey-k8s` have no container mode. Their overlays
+remove `containerMode`, so the chart adds no dind sidecar and the runner
+pod is not privileged. Their jobs start no service containers or Docker
 builds. If one later needs Docker, set `containerMode.type: dind` in that
 overlay.
 

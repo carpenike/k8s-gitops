@@ -48,10 +48,6 @@ spec:
       namespace: actions-runner-system
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
-      name: replog-k8s
-      namespace: actions-runner-system
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
       name: schoolhouse-k8s
       namespace: actions-runner-system
     - apiVersion: helm.toolkit.fluxcd.io/v2
