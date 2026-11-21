@@ -11,6 +11,7 @@ resources:
   - ./mcp-k8s
   - ./mcp-k8s-build
   - ./network-config-k8s
+  - ./replog-k8s
   - ./sam-tracker
   - ./sam-tracker-app-k8s
   - ./schoolhouse-k8s

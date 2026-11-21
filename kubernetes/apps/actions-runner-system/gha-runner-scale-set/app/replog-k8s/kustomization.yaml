@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Repo-scoped scale set for carpenike/replog.
+# Same GitHub App installation as sam-tracker. Workflows opt in with
+# runs-on: replog-k8s.
+# Same shape as va-acr-app-k8s: the shared scale-set component, then
+# name, githubConfigUrl, runnerScaleSetName, and containerMode removed
+# so the runner pod is not privileged. Requests and limits stay the
+# component defaults (500m / 1Gi up to 2 CPU / 4Gi). minRunners stays 0.
+# The runner image stays ghcr.io/actions/actions-runner:2.338.2. This
+# overlay does not pin ghcr.io/carpenike/replog. That image is still the
+# v0.0.0 placeholder on the replog HelmRelease, at replicas 0.
+# carpenike/replog is public. A fork pull request that selects this
+# runs-on name would execute the fork's workflow on this network.
+# Workflows in that repository must not do that. See
+# docs/platform/actions-runners.md.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: replog-k8s
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/replog
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: replog-k8s
+      - op: remove
+        path: /spec/values/containerMode

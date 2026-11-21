@@ -51,9 +51,11 @@ The database starts empty. Forge's files are not copied.
 `REPLOG_LOG_FORMAT=json`. `REPLOG_METRICS_ENABLED=true` serves `GET /metrics`
 on port 8080.
 
-The HTTPRoute is one native rule on `envoy-external` and `envoy-internal`,
-with a ReferenceGrant, which is homelab-mcp's public route. It is the
-website. There is no `/api/mcp` rule.
+The HTTPRoute is native on `envoy-external` and `envoy-internal`, with a
+ReferenceGrant, which is homelab-mcp's public route. The website rule is
+a prefix match on `/`. Rule `deny-mcp` is a longer prefix, `/api/mcp`,
+and HTTPRouteFilter `replog-deny-mcp` makes Envoy answer 404. That
+request has no backend, so the pod never sees it.
 
 The image is distroless, uid 65532, and has no shell. `fsGroup: 65532`
 makes `/data` writable.
@@ -70,7 +72,9 @@ calls this app's REST API in-cluster, with a service token, on Service
 `replog` port 8080. A CiliumNetworkPolicy will admit only the homelab-mcp
 pods. That policy is not in this pull request. The current binary also
 mounts `/api/mcp` when the website OIDC settings are set, because it has
-no separate switch. This route does not call that path out.
+no separate switch. The public route does not forward it: rule
+`deny-mcp` matches `PathPrefix` `/api/mcp` and returns 404. The website
+rule is `PathPrefix` `/`, which would otherwise include that path.
 
 ## Image
 

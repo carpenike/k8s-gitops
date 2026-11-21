@@ -27,10 +27,29 @@ spec:
     - name: envoy-internal
       namespace: network
   rules:
+    # A rule with no matches is a prefix match on /, and that would
+    # forward /api/mcp to the pod. This prefix is longer, so it wins for
+    # /api/mcp and /api/mcp/*. Envoy answers it. There is no backendRef.
+    # The binary mounts this path when the website OIDC settings are set.
+    # Agent access belongs on homelab-mcp, in-cluster. See docs/apps/replog.md.
+    - name: deny-mcp
+      matches:
+        - path:
+            type: PathPrefix
+            value: /api/mcp
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: replog-deny-mcp
     # The website and its JSON API, including Pocket ID
-    # (/auth/oidc/*). 300s covers an AI coach generation. Agent access
-    # is not a path on this route. See docs/apps/replog.md.
+    # (/auth/oidc/*). 300s covers an AI coach generation.
     - name: app
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
       timeouts:
         request: 300s
         backendRequest: 300s
@@ -51,3 +70,18 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: replog
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+# Fixed 404 for HTTPRoute replog rule deny-mcp. Same namespace as the
+# route. Envoy does not forward the request. See docs/apps/replog.md.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: HTTPRouteFilter
+metadata:
+  name: replog-deny-mcp
+spec:
+  directResponse:
+    contentType: text/plain
+    statusCode: 404
+    body:
+      type: Inline
+      inline: "not found\n"
