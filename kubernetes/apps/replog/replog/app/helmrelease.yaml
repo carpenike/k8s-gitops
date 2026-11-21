@@ -109,6 +109,14 @@ spec:
                 cpu: "1"
                 memory: 512Mi
     defaultPodOptions:
+      # ndots:1 so id.holthome.net resolves as an absolute name first. With the
+      # default ndots:5 it resolves as id.holthome.net.replog.svc.cluster.local,
+      # Cilium learns 10.20.0.30 under that name, and the toFQDNs rule for
+      # id.holthome.net never matches, so OIDC discovery times out.
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
