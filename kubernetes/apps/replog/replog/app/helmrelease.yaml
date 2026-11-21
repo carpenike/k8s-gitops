@@ -51,9 +51,17 @@ spec:
               # pods are in the cluster pod CIDR. The rate limiter accepts
               # CIDRs, not a bare "*".
               REPLOG_TRUSTED_PROXIES: 10.42.0.0/16
-              # Pocket ID OIDC and the MCP OAuth server stay off: both turn
-              # on only when REPLOG_OIDC_ISSUER, REPLOG_OIDC_CLIENT_ID and
-              # REPLOG_OIDC_CLIENT_SECRET are all set. Do not set them here.
+              # MCP / OIDC — off. There is no separate MCP flag. The process
+              # serves /api/mcp and its OAuth authorization server only when
+              # REPLOG_OIDC_ISSUER, REPLOG_OIDC_CLIENT_ID and
+              # REPLOG_OIDC_CLIENT_SECRET are all set (REPLOG_BASE_URL already
+              # is). Uncomment this block, the oidc_client_secret field in
+              # externalsecret.yaml, the mcp rule in httproute.yaml, and the
+              # Pocket ID egress noted in ciliumnetworkpolicy.yaml. The
+              # secret is not a value in this file. See docs/apps/replog.md.
+              # REPLOG_OIDC_ISSUER: https://id.${SECRET_DOMAIN}
+              # REPLOG_OIDC_CLIENT_ID: replog
+              # REPLOG_OIDC_REDIRECT_URL: https://replog.${SECRET_DOMAIN}/auth/oidc/callback
             envFrom:
               - secretRef:
                   name: replog-env

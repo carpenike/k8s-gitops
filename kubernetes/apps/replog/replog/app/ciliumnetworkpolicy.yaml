@@ -18,9 +18,13 @@ spec:
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
 # In: 8080 from the envoy-internal proxies only, and from Prometheus (the
 # ServiceMonitor scrapes /metrics on that same port). Probes come from the
-# kubelet, which Cilium allows. Out: cluster DNS only. Pocket ID, and any
-# notification host configured later in the admin UI, need an egress rule
-# before they can be reached. See docs/apps/replog.md.
+# kubelet, which Cilium allows. Out: cluster DNS only. Enabling MCP/OIDC
+# also needs egress to id.${SECRET_DOMAIN}:443, and a notification host
+# saved in the admin UI needs its own allow. That name cannot live in this
+# file: kubeconform runs before Flux substitutes ${SECRET_DOMAIN}, and
+# Cilium's schema rejects it in a toFQDNs match. homelab-mcp puts that
+# allow in the HelmRelease rawResources for the same reason. Copy that
+# block when uncommenting the OIDC env. See docs/apps/replog.md.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

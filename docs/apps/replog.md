@@ -23,12 +23,45 @@ The container listens on `:8080`. `REPLOG_BASE_URL` is
 on the same port. `REPLOG_TRUSTED_PROXIES` is the pod CIDR `10.42.0.0/16`,
 because only the `envoy-internal` proxies can open 8080.
 
-Pocket ID and the MCP OAuth server stay off. Both turn on only when
+Pocket ID and the MCP server stay off. There is no separate MCP flag. The
+process serves `/api/mcp` and its OAuth authorization server only when
 `REPLOG_OIDC_ISSUER`, `REPLOG_OIDC_CLIENT_ID` and `REPLOG_OIDC_CLIENT_SECRET`
-are all set, and none of them are set. The password in the ExternalSecret is
-the only login. The route is labelled `gateway.holthome.net/auth: native` so
-the gateway does not ask for a Pocket ID login in front of that password
-([gateway-auth.md](../platform/gateway-auth.md)).
+are all set. Those three are commented out in the HelmRelease and the
+ExternalSecret. The password in the ExternalSecret is the only login. The
+route is labelled `gateway.holthome.net/auth: native`, the same label
+homelab-mcp uses, so the gateway does not ask for a Pocket ID login in
+front of the app ([gateway-auth.md](../platform/gateway-auth.md)). An MCP
+client cannot complete that gateway login either, so the label is already
+the one MCP needs.
+
+## Turning MCP on later
+
+Importing a coach program through an AI conversation uses the native MCP
+server at `/api/mcp`. homelab-mcp is one native route with a 300 second
+timeout, because streamable HTTP holds the request open, and a
+ReferenceGrant so `pocket-id-exempt` can select it. This route is that
+shape on `envoy-internal` only. The `mcp` rule in `httproute.yaml` is
+commented. It is a `PathPrefix` match on `/api/mcp`, which is more specific
+than the `app` rule, so uncommenting it attaches the path without editing
+the SPA rule. `/.well-known/oauth-*` and `/oauth/*` stay on the `app` rule.
+Do not add `envoy-external`.
+
+Uncomment, in this order:
+
+1. HelmRelease env: `REPLOG_OIDC_ISSUER` (`https://id.${SECRET_DOMAIN}`),
+   `REPLOG_OIDC_CLIENT_ID` (`replog`), and `REPLOG_OIDC_REDIRECT_URL`
+   (`https://replog.${SECRET_DOMAIN}/auth/oidc/callback`).
+2. ExternalSecret: template key `REPLOG_OIDC_CLIENT_SECRET` and remoteRef
+   `replog/oidc_client_secret`. Create that 1Password field then, not before.
+3. HTTPRoute rule `mcp`.
+4. Egress to `id.${SECRET_DOMAIN}` on 443. Put it in the HelmRelease
+   `rawResources`, as homelab-mcp does, not in `ciliumnetworkpolicy.yaml`.
+
+In Pocket ID, the confidential client needs two redirect URIs: the web
+callback above, and `https://replog.${SECRET_DOMAIN}/oauth/callback`. The
+authorization server also refuses a token until that user has MCP enabled
+in the app (`PUT /api/users/{id}/mcp`). The binary's redirect allowlist is
+Claude, VS Code, and localhost. It is not an environment variable.
 
 The image is `gcr.io/distroless/static-debian12:nonroot` (uid 65532) and has
 no shell. `fsGroup: 65532` makes `/data` writable. homelab-mcp instead runs a
@@ -68,7 +101,9 @@ Secret `replog-env`. Do not use `admin` / `admin`.
 | `admin_pass` | `REPLOG_ADMIN_PASS` | Same. A later edit of this field does not change the login |
 | `admin_email` | `REPLOG_ADMIN_EMAIL` | Same |
 
-The backup reads the existing item `volsync-r2-template`. No new field there.
+Field `oidc_client_secret` is not part of this deploy. Add it when MCP is
+turned on ([above](#turning-mcp-on-later)). The backup reads the existing
+item `volsync-r2-template`. No new field there.
 The restic repository path is `<REPOSITORY_TEMPLATE>/replog`.
 
 ## Backup

@@ -202,7 +202,9 @@ and split DNS are set in the admin console before the merge
 Before `kubernetes/apps/replog` reconciles, create item `replog` (new) in
 vault `k8s-secrets` with fields `secret_key`, `admin_user`, `admin_pass` and
 `admin_email`. Do not use `admin` / `admin`. [replog.md](../apps/replog.md#1password)
-says what each field is. The backup uses the existing item
+says what each field is. Field `oidc_client_secret` stays commented until
+MCP is enabled ([replog.md](../apps/replog.md#turning-mcp-on-later)). The
+backup uses the existing item
 `volsync-r2-template`; no new field.
 
 The HelmRelease image is `ghcr.io/carpenike/replog:v0.0.0`, a placeholder.

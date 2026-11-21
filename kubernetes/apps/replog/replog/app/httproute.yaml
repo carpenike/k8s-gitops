@@ -1,11 +1,15 @@
 ---
 # Internal only. mikrotik-dns publishes replog.${SECRET_DOMAIN} as an A record
 # for envoy-internal. cloudflare-dns watches envoy-external, so this hostname
-# is not public. The app is a Pocket ID relying party, so the route is native
-# and the gateway does not add a second login (docs/platform/gateway-auth.md).
-# OIDC is unset for now, so the password in Secret replog-env is the only
-# login. The ReferenceGrant lets pocket-id-exempt in namespace network select
-# this route.
+# is not public.
+#
+# Native, same as homelab-mcp: an MCP client cannot complete the gateway
+# Pocket ID login, and a gateway login in front of the app's own login is
+# not allowed (docs/platform/gateway-auth.md). The label already applies to
+# every rule on this route, including the mcp rule once it is uncommented.
+# The ReferenceGrant lets pocket-id-exempt in namespace network select it.
+# envoy-external is not a parent. homelab-mcp is on both gateways because
+# Claude on the internet has to reach it; this app stays on the LAN.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -19,8 +23,32 @@ spec:
     - name: envoy-internal
       namespace: network
   rules:
-    # AI coach generation can run longer than the gateway default.
-    - timeouts:
+    # MCP stays off. Uncomment when the OIDC env block is uncommented.
+    # The process mounts the streamable endpoint at /api/mcp (and /api/mcp/*),
+    # not at /mcp. A PathPrefix match is more specific than the app rule, so
+    # this takes /api/mcp without editing the rule below. 300s is homelab-mcp's
+    # timeout: streamable HTTP holds the request open while a tool runs.
+    # Discovery and the OAuth authorization server stay on the app rule
+    # (/.well-known/oauth-authorization-server,
+    # /.well-known/oauth-protected-resource, /oauth/*). They are short
+    # requests, and the app rule already forwards them.
+    # - name: mcp
+    #   matches:
+    #     - path:
+    #         type: PathPrefix
+    #         value: /api/mcp
+    #   timeouts:
+    #     request: 300s
+    #     backendRequest: 300s
+    #   backendRefs:
+    #     - name: replog
+    #       port: 8080
+    # The SPA and the JSON API. Also forwards /api/mcp until the rule above
+    # is uncommented; the process answers that path 404 while OIDC is unset.
+    # 300s covers an AI coach generation as well as a later MCP tool call
+    # that still lands here.
+    - name: app
+      timeouts:
         request: 300s
         backendRequest: 300s
       backendRefs:
