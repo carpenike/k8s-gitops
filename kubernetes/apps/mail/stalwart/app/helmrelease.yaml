@@ -54,7 +54,7 @@ spec:
             image:
               repository: docker.io/stalwartlabs/stalwart
               # renovate: datasource=docker depName=docker.io/stalwartlabs/stalwart
-              tag: v1.1.0@sha256:f772aa6ef8cd8018969fa491640f1436b0270eb14e2c219b5f37f1a77020837e
+              tag: v1.1.1@sha256:5ebdf474b237161742fe4309396af4ae8797c938e8e6eb7e2d4837332c4f9851
             args:
               - --config
               - /etc/stalwart/config.json
