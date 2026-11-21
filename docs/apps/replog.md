@@ -41,8 +41,8 @@ The client secret is copied from Forge's sops key.
 
 ## What runs here
 
-`replicas: 0` until the cutover. Then one replica, `Recreate`. SQLite in
-WAL mode (`modernc.org/sqlite`) at `/data/replog.db` on PVC `replog-data`:
+One replica, `Recreate`. SQLite in WAL mode
+(`modernc.org/sqlite`) at `/data/replog.db` on PVC `replog-data`:
 class `ceph-block` (Ceph RBD), `ReadWriteOnce`, 5Gi. Avatars are
 `/data/avatars` on the same volume. There is no Postgres and no CephFS.
 The database starts empty. Forge's files are not copied.
@@ -78,15 +78,11 @@ rule is `PathPrefix` `/`, which would otherwise include that path.
 
 ## Image
 
-Forge runs the Nix package. The cluster needs a container. The intended
-publish is the homelab-mcp one: a workflow on `main` pushes
-`ghcr.io/carpenike/replog:sha-<commit>`, and this file pins that tag and
-digest by hand. Replog does not have that workflow. GoReleaser pushes the
-same image only on `v*` tags, and there is no release. The HelmRelease tag
-is `v0.0.0`, which will not pull. `replicas: 0` means the cluster does not
-try. Replace the tag before setting replicas to 1. Renovate is disabled
-for this image until then (`.renovaterc.json5`). This repo has no Flux
-ImagePolicy.
+The HelmRelease pins
+`ghcr.io/carpenike/replog:sha-f448ffd42afa7cd5311602e62c0e08f3e1d90430@sha256:3cadaeb061ce947a3f5c7e2f40379fe5d3724f74d02d565032ca0215d4fddc79`.
+Renovate tracks that image with the other `ghcr.io/carpenike` images.
+This repo has no Flux ImagePolicy. Merging does not move
+`replog.holthome.net` off Forge.
 
 ## 1Password
 
@@ -117,7 +113,8 @@ DNS. Deleting Forge's record does.
    any of the current workouts are worth keeping. The cluster database
    starts empty. There is no copy of `/var/lib/replog`.
 2. On Forge: `systemctl stop replog` and `systemctl mask replog`.
-3. Pin a real image tag in the HelmRelease, set `replicas: 1`, and merge.
+3. Merge. The image is already pinned and `replicas` is already 1.
+   Merging does not move `replog.holthome.net` off Forge.
 4. Verify `https://replog.holthome.net/healthz` only after step 5. Until
    then the name still belongs to Forge, and Forge is stopped, so the
    name will not answer. Check the pod with a port-forward first.

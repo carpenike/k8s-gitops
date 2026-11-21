@@ -208,9 +208,9 @@ Do not use `admin` / `admin`. [replog.md](../apps/replog.md#1password)
 says which. The backup uses the existing item
 `volsync-r2-template`; no new field.
 
-The HelmRelease image is `ghcr.io/carpenike/replog:v0.0.0`, a placeholder.
-GoReleaser publishes that image only on `v*` tags, and there is no release
-yet. Replace the tag with the first release before the pod can pull.
+The HelmRelease image is pinned:
+`ghcr.io/carpenike/replog:sha-f448ffd42afa7cd5311602e62c0e08f3e1d90430@sha256:3cadaeb061ce947a3f5c7e2f40379fe5d3724f74d02d565032ca0215d4fddc79`.
+`replicas` is 1. Merging does not move the name off Forge.
 
 ## Still to confirm or generate
 

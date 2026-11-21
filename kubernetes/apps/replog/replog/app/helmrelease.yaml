@@ -2,7 +2,8 @@
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # replog: the family workout log (carpenike/replog), already public at
 # https://replog.${SECRET_DOMAIN} on Forge. This is the move onto the
-# cluster. replicas stays 0 until the cutover in docs/apps/replog.md.
+# cluster. Merging does not move the name off Forge.
+# See docs/apps/replog.md.
 # The HTTPRoute is on envoy-external and envoy-internal, native, the
 # same shape as homelab-mcp after it left Forge.
 #
@@ -27,26 +28,19 @@ spec:
   values:
     controllers:
       replog:
-        # Cutover scale. 0 until Forge's unit is stopped and this image
-        # exists. A Deployment at 0 desired replicas does not pull.
-        replicas: 0
+        # One replica. The public name stays on Forge until that record
+        # is deleted. See docs/apps/replog.md.
+        replicas: 1
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              # Forge does not run a container. It runs the Nix package from
-              # the flake input inputs.replog (github:carpenike/replog).
-              # The cluster image is the homelab-mcp shape: GHCR, built
-              # from main, pinned as sha-<commit>@sha256:<digest>. Replog
-              # does not publish that yet. GoReleaser pushes
-              # ghcr.io/carpenike/replog only on v* tags, and there is no
-              # release. v0.0.0 will not pull. replicas is 0, so nothing
-              # pulls it until the tag is real. Renovate is disabled for
-              # this image until then (.renovaterc.json5).
+              # Published from main, pinned by commit and digest.
+              # Renovate tracks it with the other ghcr.io/carpenike images.
               repository: ghcr.io/carpenike/replog
-              tag: v0.0.0
+              tag: sha-f448ffd42afa7cd5311602e62c0e08f3e1d90430@sha256:3cadaeb061ce947a3f5c7e2f40379fe5d3724f74d02d565032ca0215d4fddc79
             env:
               # Forge binds 127.0.0.1:5008 because Caddy is on the same host.
               # Envoy is not. The image default :8080 is the listener.

@@ -13,9 +13,9 @@ spec:
     - name: replog
       rules:
         - alert: ReplogDown
-          # Quiet while the Deployment is scaled to 0 for the Forge cutover.
-          # absent() would page the whole time replicas is 0. unless drops
-          # that case. A scrape that exists and is down still fires.
+          # Quiet if someone scales the Deployment to 0 while Forge still
+          # has the name. absent() would page the whole time replicas is 0.
+          # unless drops that case. A scrape that exists and is down still fires.
           expr: |
             (
               up{namespace="replog",job="replog"} == 0
