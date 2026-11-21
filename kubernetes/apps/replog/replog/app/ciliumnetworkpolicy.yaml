@@ -1,9 +1,8 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Default deny for every pod in replog. The pod's own allow policy is below.
-# No toFQDNs while OIDC is off, so this file can name the peers directly
-# (homelab-mcp puts its allow in the HelmRelease only because kubeconform
-# rejects ${SECRET_DOMAIN} in a toFQDNs name).
+# Default deny for every pod in replog. The pod's own allow is in the
+# HelmRelease (rawResources), because its toFQDNs name uses ${SECRET_DOMAIN}.
+# homelab-mcp does the same. See docs/apps/replog.md.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -14,52 +13,3 @@ spec:
     - {}
   egress:
     - {}
----
-# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# In: 8080 from the envoy-internal proxies only, and from Prometheus (the
-# ServiceMonitor scrapes /metrics on that same port). Probes come from the
-# kubelet, which Cilium allows. Out: cluster DNS only. Enabling MCP/OIDC
-# also needs egress to id.${SECRET_DOMAIN}:443, and a notification host
-# saved in the admin UI needs its own allow. That name cannot live in this
-# file: kubeconform runs before Flux substitutes ${SECRET_DOMAIN}, and
-# Cilium's schema rejects it in a toFQDNs match. homelab-mcp puts that
-# allow in the HelmRelease rawResources for the same reason. Copy that
-# block when uncommenting the OIDC env. See docs/apps/replog.md.
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: replog
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: replog
-      app.kubernetes.io/controller: replog
-  ingress:
-    - fromEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: network
-            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-    - fromEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: observability
-            app.kubernetes.io/name: prometheus
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-  egress:
-    - toEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: kube-system
-            k8s:k8s-app: kube-dns
-      toPorts:
-        - ports:
-            - port: "53"
-              protocol: ANY
-          rules:
-            dns:
-              - matchPattern: "*"

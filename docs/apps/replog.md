@@ -1,133 +1,157 @@
 # replog
 
-The family workout log from [carpenike/replog](https://github.com/carpenike/replog),
-at `https://replog.${SECRET_DOMAIN}` (`replog.holthome.net`). The HTTPRoute
-parents `envoy-internal` only. `mikrotik-dns` publishes the name.
-`cloudflare-dns` watches `envoy-external`, so the hostname is not public.
+The family workout log from [carpenike/replog](https://github.com/carpenike/replog).
+It already runs on Forge, public at `https://replog.holthome.net`
+(`replog.${SECRET_DOMAIN}`). This is that instance moving onto the cluster.
+Nothing here changes Forge, DNS, or Cloudflare. The cutover does, and it
+is written out below.
 
 Manifests: `kubernetes/apps/replog/`. The layout follows
-[homelab-mcp.md](homelab-mcp.md): one namespace, an app-template HelmRelease,
-an ExternalSecret from ClusterSecretStore `onepassword`, a native HTTPRoute,
-a ServiceMonitor, and a VolSync restic source on its own Kustomization.
+[homelab-mcp.md](homelab-mcp.md), including the public route from the
+Forge move ([k8s-gitops #5765](https://github.com/carpenike/k8s-gitops/pull/5765)).
 
-## What runs
+## What Forge runs today
 
-One replica, `Recreate`. The database is SQLite in WAL mode
-(`modernc.org/sqlite`). The file is `/data/replog.db` on PVC `replog-data`:
-storage class `ceph-block` (Ceph RBD), `ReadWriteOnce`, 5Gi. Avatars are
+`hosts/forge/services/replog.nix` in carpenike/nix-config.
+
+| | |
+| --- | --- |
+| Hostname | `replog.${config.networking.domain}`, which is `replog.holthome.net` |
+| Exposure | Cloudflare tunnel `forge`, then Caddy, then the binary. The Caddy vhost is a pass-through: `cloudflare.enable`, `tunnel = "forge"`, no caddySecurity. DNS registration is the module default, a CNAME to that tunnel's `cfargotunnel.com` name |
+| Listen | `127.0.0.1:5008` |
+| Data | `/var/lib/replog/replog.db` and `/var/lib/replog/avatars/` on ZFS dataset `tank/services/replog` |
+| Package | `inputs.replog.packages.<system>.default`, the Nix build of the flake. Not a container |
+| Backups | Sanoid on that dataset, and a restic job of `/var/lib/replog` from a ZFS snapshot |
+| OIDC | `REPLOG_OIDC_ISSUER=https://id.<domain>`, `REPLOG_OIDC_CLIENT_ID=replog`. The secret is sops key `replog/oidc_client_secret` |
+| Sops keys | `replog/admin_user`, `replog/admin_pass`, `replog/admin_email`, `replog/secret_key`, `replog/oidc_client_secret`, assembled into EnvironmentFile `replog-env` |
+
+The binary binds loopback because Caddy is on the same machine, and
+`REPLOG_TRUSTED_PROXIES` is `127.0.0.1/32,::1/128` for that reason. Neither
+belongs in the cluster: Envoy is another pod. The listen here is `:8080`
+and the trusted proxies are the pod CIDR `10.42.0.0/16`.
+
+Nothing else in the Forge module or the Go config names a Forge address.
+The Nix comment about `REPLOG_WEBAUTHN_*` is stale. ADR 019 removed
+passkeys, and `nix/lib/derive-baseurl.nix` now sets only `REPLOG_BASE_URL`.
+The healthcheck dials `127.0.0.1` inside the process, which is the
+container, not Forge.
+
+Website login is Pocket ID, the same issuer and client id Forge sets.
+The client secret is copied from Forge's sops key.
+
+## What runs here
+
+`replicas: 0` until the cutover. Then one replica, `Recreate`. SQLite in
+WAL mode (`modernc.org/sqlite`) at `/data/replog.db` on PVC `replog-data`:
+class `ceph-block` (Ceph RBD), `ReadWriteOnce`, 5Gi. Avatars are
 `/data/avatars` on the same volume. There is no Postgres and no CephFS.
+The database starts empty. Forge's files are not copied.
 
-The container listens on `:8080`. `REPLOG_BASE_URL` is
-`https://replog.${SECRET_DOMAIN}`, so session cookies are `Secure`.
+`REPLOG_BASE_URL` is `https://replog.${SECRET_DOMAIN}`.
 `REPLOG_LOG_FORMAT=json`. `REPLOG_METRICS_ENABLED=true` serves `GET /metrics`
-on the same port. `REPLOG_TRUSTED_PROXIES` is the pod CIDR `10.42.0.0/16`,
-because only the `envoy-internal` proxies can open 8080.
+on port 8080.
 
-Pocket ID and the MCP server stay off. There is no separate MCP flag. The
-process serves `/api/mcp` and its OAuth authorization server only when
-`REPLOG_OIDC_ISSUER`, `REPLOG_OIDC_CLIENT_ID` and `REPLOG_OIDC_CLIENT_SECRET`
-are all set. Those three are commented out in the HelmRelease and the
-ExternalSecret. The password in the ExternalSecret is the only login. The
-route is labelled `gateway.holthome.net/auth: native`, the same label
-homelab-mcp uses, so the gateway does not ask for a Pocket ID login in
-front of the app ([gateway-auth.md](../platform/gateway-auth.md)). An MCP
-client cannot complete that gateway login either, so the label is already
-the one MCP needs.
+The HTTPRoute is one native rule on `envoy-external` and `envoy-internal`,
+with a ReferenceGrant, which is homelab-mcp's public route. It is the
+website. There is no `/api/mcp` rule.
 
-## Turning MCP on later
+The image is distroless, uid 65532, and has no shell. `fsGroup: 65532`
+makes `/data` writable.
 
-Importing a coach program through an AI conversation uses the native MCP
-server at `/api/mcp`. homelab-mcp is one native route with a 300 second
-timeout, because streamable HTTP holds the request open, and a
-ReferenceGrant so `pocket-id-exempt` can select it. This route is that
-shape on `envoy-internal` only. The `mcp` rule in `httproute.yaml` is
-commented. It is a `PathPrefix` match on `/api/mcp`, which is more specific
-than the `app` rule, so uncommenting it attaches the path without editing
-the SPA rule. `/.well-known/oauth-*` and `/oauth/*` stay on the `app` rule.
-Do not add `envoy-external`.
+Egress is cluster DNS and `id.${SECRET_DOMAIN}:443` for the website's
+Pocket ID login. That name is in the HelmRelease `rawResources`, because
+kubeconform rejects `${SECRET_DOMAIN}` in a `toFQDNs` match. A notification
+URL saved in the admin UI needs its own allow before it can be reached.
 
-Uncomment, in this order:
+## Agents
 
-1. HelmRelease env: `REPLOG_OIDC_ISSUER` (`https://id.${SECRET_DOMAIN}`),
-   `REPLOG_OIDC_CLIENT_ID` (`replog`), and `REPLOG_OIDC_REDIRECT_URL`
-   (`https://replog.${SECRET_DOMAIN}/auth/oidc/callback`).
-2. ExternalSecret: template key `REPLOG_OIDC_CLIENT_SECRET` and remoteRef
-   `replog/oidc_client_secret`. Create that 1Password field then, not before.
-3. HTTPRoute rule `mcp`.
-4. Egress to `id.${SECRET_DOMAIN}` on 443. Put it in the HelmRelease
-   `rawResources`, as homelab-mcp does, not in `ciliumnetworkpolicy.yaml`.
-
-In Pocket ID, the confidential client needs two redirect URIs: the web
-callback above, and `https://replog.${SECRET_DOMAIN}/oauth/callback`. The
-authorization server also refuses a token until that user has MCP enabled
-in the app (`PUT /api/users/{id}/mcp`). The binary's redirect allowlist is
-Claude, VS Code, and localhost. It is not an environment variable.
-
-The image is `gcr.io/distroless/static-debian12:nonroot` (uid 65532) and has
-no shell. `fsGroup: 65532` makes `/data` writable. homelab-mcp instead runs a
-root init container that `chown`s its volume, because that process refuses a
-group-writable directory and its image has a shell. replog does neither.
-
-Probes: startup and liveness are `GET /healthz`. Readiness is `GET /readyz`,
-which pings the database. The image's Docker `HEALTHCHECK` is
-`/replog healthcheck`, which calls the same `/healthz`.
-
-Egress is cluster DNS only. Turning OIDC on later means an allow to
-`id.${SECRET_DOMAIN}:443`, and that rule has to move into the HelmRelease
-(`rawResources`) because kubeconform rejects `${SECRET_DOMAIN}` in a
-`toFQDNs` name. Notification URLs saved in the admin UI also need an egress
-rule for the host they call. Nothing in the pod can open those today.
+MCP access will come through homelab-mcp later: a replog tool module that
+calls this app's REST API in-cluster, with a service token, on Service
+`replog` port 8080. A CiliumNetworkPolicy will admit only the homelab-mcp
+pods. That policy is not in this pull request. The current binary also
+mounts `/api/mcp` when the website OIDC settings are set, because it has
+no separate switch. This route does not call that path out.
 
 ## Image
 
-GoReleaser publishes `ghcr.io/carpenike/replog` only on `v*` tags, and there
-is no release yet. The HelmRelease tag is `v0.0.0`, which will not pull.
-Replace it with the first release, tag and digest, before the pod can start.
-Renovate's helm-values manager sees the image, and `.renovaterc.json5`
-disables it until that pin exists. This repo does not use a Flux
-ImagePolicy. homelab-mcp's image is a `sha-` tag pinned by hand for the
-same reason: the self-built-images group follows a floating tag.
+Forge runs the Nix package. The cluster needs a container. The intended
+publish is the homelab-mcp one: a workflow on `main` pushes
+`ghcr.io/carpenike/replog:sha-<commit>`, and this file pins that tag and
+digest by hand. Replog does not have that workflow. GoReleaser pushes the
+same image only on `v*` tags, and there is no release. The HelmRelease tag
+is `v0.0.0`, which will not pull. `replicas: 0` means the cluster does not
+try. Replace the tag before setting replicas to 1. Renovate is disabled
+for this image until then (`.renovaterc.json5`). This repo has no Flux
+ImagePolicy.
 
 ## 1Password
 
 Create item `replog` in vault `k8s-secrets` before the Kustomization
-reconciles. ClusterSecretStore `onepassword`. ExternalSecret `replog` writes
-Secret `replog-env`. Do not use `admin` / `admin`.
+reconciles. ClusterSecretStore `onepassword`. ExternalSecret `replog`
+writes Secret `replog-env`. Field names are Forge's sops keys. Do not use
+`admin` / `admin`.
 
-| Field | Secret key | Notes |
+| Field | Secret key | What to put |
 | --- | --- | --- |
-| `secret_key` | `REPLOG_SECRET_KEY` | `openssl rand -base64 32`. Read on every start and written into the database. Changing it later makes settings encrypted with the old key unreadable |
-| `admin_user` | `REPLOG_ADMIN_USER` | Created only when the users table is empty |
-| `admin_pass` | `REPLOG_ADMIN_PASS` | Same. A later edit of this field does not change the login |
-| `admin_email` | `REPLOG_ADMIN_EMAIL` | Same |
+| `secret_key` | `REPLOG_SECRET_KEY` | A new key, `openssl rand -base64 32`. Do not copy Forge's `replog/secret_key`. The cluster database is empty, so the old key has nothing to decrypt |
+| `admin_user` | `REPLOG_ADMIN_USER` | A new bootstrap username. Read only while the users table is empty |
+| `admin_pass` | `REPLOG_ADMIN_PASS` | A new bootstrap password. Same |
+| `admin_email` | `REPLOG_ADMIN_EMAIL` | A new bootstrap email. Same |
+| `oidc_client_secret` | `REPLOG_OIDC_CLIENT_SECRET` | Copy Forge's sops value `replog/oidc_client_secret`. That is the existing Pocket ID client `replog` for the website. A new secret would not match the client |
 
-Field `oidc_client_secret` is not part of this deploy. Add it when MCP is
-turned on ([above](#turning-mcp-on-later)). The backup reads the existing
-item `volsync-r2-template`. No new field there.
+The backup reads the existing item `volsync-r2-template`. No new field.
 The restic repository path is `<REPOSITORY_TEMPLATE>/replog`.
+
+## Cutover
+
+Do this in order. Do not merge this while Forge should keep the name,
+unless the route is understood: external-dns will not take a record it
+does not own (TXT prefix `k8s.`), so the HTTPRoute alone does not move
+DNS. Deleting Forge's record does.
+
+1. Optional. On Forge, while it is still up, export JSON from the app if
+   any of the current workouts are worth keeping. The cluster database
+   starts empty. There is no copy of `/var/lib/replog`.
+2. On Forge: `systemctl stop replog` and `systemctl mask replog`.
+3. Pin a real image tag in the HelmRelease, set `replicas: 1`, and merge.
+4. Verify `https://replog.holthome.net/healthz` only after step 5. Until
+   then the name still belongs to Forge, and Forge is stopped, so the
+   name will not answer. Check the pod with a port-forward first.
+5. nix-config pull request: remove `services.replog`, the Caddy vhost
+   `replog`, and that hostname from tunnel `forge`. Then delete the
+   Cloudflare record for `replog.holthome.net`. It is the CNAME the Caddy
+   module registered at the tunnel's `cfargotunnel.com` target
+   (`cloudflare.dns.register` defaults to true, record type falls back to
+   the tunnel default, which is a CNAME). external-dns then publishes the
+   name to the cluster tunnel, proxied, because the route parents
+   `envoy-external`.
+
+Rollback, before the DNS record is deleted: set `replicas: 0`, unmask and
+start `replog` on Forge. The CNAME still points at tunnel `forge`.
+
+Rollback, after the record is deleted: set `replicas: 0`, restore the
+nix-config (vhost and tunnel ingress), and let that module recreate the
+CNAME. Do not hand-edit Cloudflare from this repo.
 
 ## Backup
 
-VolSync `ReplicationSource` `replog`, `copyMethod: Snapshot`, volume snapshot
-class `csi-ceph-block`, every 6 hours at minute 20. Restic reads the Ceph RBD
-snapshot, not the live files. A block snapshot is crash-consistent, and
-SQLite replays the WAL on restore. Do not copy `replog.db`, `replog.db-wal`
-or `replog.db-shm` off the mounted volume while the process is running.
+VolSync `ReplicationSource` `replog`, `copyMethod: Snapshot`, volume
+snapshot class `csi-ceph-block`, every 6 hours at minute 20. Restic reads
+the Ceph RBD snapshot, not the live files. A block snapshot is
+crash-consistent, and SQLite replays the WAL on restore.
 
-Keep 7 daily and 4 weekly. The mover runs as uid 65532, the same as the pod.
+Keep 7 daily and 4 weekly. The mover runs as uid 65532.
 
-To restore: scale the Deployment to 0, restore the snapshot onto
-`replog-data`, delete any leftover `replog.db-wal` and `replog.db-shm` from
-the broken copy, and scale back to 1. The log should say the secret key was
-loaded and should not say it bootstrapped a new admin. If
-`REPLOG_SECRET_KEY` is set, the restored database needs the same value.
+To restore a cluster backup: scale the Deployment to 0, restore the
+snapshot onto `replog-data`, delete any leftover `-wal` and `-shm` from
+the broken copy, and scale back to 1. The new `REPLOG_SECRET_KEY` has to
+be the one this database was created with.
 
 ## Monitoring
 
-ServiceMonitor `replog` scrapes `GET /metrics` on port 8080 every 60 seconds.
-`/metrics` is also reachable on the internal hostname, because the process
-has one listener. It is not on `envoy-external`.
+ServiceMonitor `replog` scrapes `GET /metrics` on port 8080 every 60
+seconds. That path is on the public route too, because the process has
+one listener. Forge did not expose a separate metrics port either.
 
-`ReplogDown` fires when that scrape is missing for 10 minutes, including a
-pod that failed `/readyz` and left the Service. It will fire while the image
-tag is still the placeholder.
+`ReplogDown` stays quiet while `replicas` is 0. It fires when a running
+Deployment has had no scrape for 10 minutes.

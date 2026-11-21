@@ -1,7 +1,10 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# replog: the family workout log (carpenike/replog), at
-# https://replog.${SECRET_DOMAIN} on envoy-internal only.
+# replog: the family workout log (carpenike/replog), already public at
+# https://replog.${SECRET_DOMAIN} on Forge. This is the move onto the
+# cluster. replicas stays 0 until the cutover in docs/apps/replog.md.
+# The HTTPRoute is on envoy-external and envoy-internal, native, the
+# same shape as homelab-mcp after it left Forge.
 #
 # One replica, Recreate. The database is SQLite in WAL mode
 # (modernc.org/sqlite) on the RWO volume below. A second replica cannot
@@ -24,44 +27,46 @@ spec:
   values:
     controllers:
       replog:
-        replicas: 1
+        # Cutover scale. 0 until Forge's unit is stopped and this image
+        # exists. A Deployment at 0 desired replicas does not pull.
+        replicas: 0
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              # GoReleaser publishes ghcr.io/carpenike/replog only on v* tags
-              # (Dockerfile.goreleaser), and there is no release yet. v0.0.0
-              # will not pull. Replace it with the first release, tag and
-              # digest, before this pod can start. Renovate is disabled for
+              # Forge does not run a container. It runs the Nix package from
+              # the flake input inputs.replog (github:carpenike/replog).
+              # The cluster image is the homelab-mcp shape: GHCR, built
+              # from main, pinned as sha-<commit>@sha256:<digest>. Replog
+              # does not publish that yet. GoReleaser pushes
+              # ghcr.io/carpenike/replog only on v* tags, and there is no
+              # release. v0.0.0 will not pull. replicas is 0, so nothing
+              # pulls it until the tag is real. Renovate is disabled for
               # this image until then (.renovaterc.json5).
               repository: ghcr.io/carpenike/replog
               tag: v0.0.0
             env:
-              # The image already sets the path, the avatar dir and :8080.
-              # Repeated here so a retagged image cannot drift from the volume.
+              # Forge binds 127.0.0.1:5008 because Caddy is on the same host.
+              # Envoy is not. The image default :8080 is the listener.
               REPLOG_ADDR: ":8080"
               REPLOG_DB_PATH: /data/replog.db
               REPLOG_AVATAR_DIR: /data/avatars
               REPLOG_BASE_URL: https://replog.${SECRET_DOMAIN}
               REPLOG_LOG_FORMAT: json
               REPLOG_METRICS_ENABLED: "true"
-              # Only envoy-internal reaches 8080 (CiliumNetworkPolicy). Its
-              # pods are in the cluster pod CIDR. The rate limiter accepts
-              # CIDRs, not a bare "*".
+              # Forge trusts 127.0.0.1/32,::1/128 (Caddy on loopback). The
+              # rate limiter only accepts CIDRs. Envoy's pods are in the
+              # cluster pod CIDR, and the network policy admits only those
+              # proxies plus Prometheus.
               REPLOG_TRUSTED_PROXIES: 10.42.0.0/16
-              # MCP / OIDC — off. There is no separate MCP flag. The process
-              # serves /api/mcp and its OAuth authorization server only when
-              # REPLOG_OIDC_ISSUER, REPLOG_OIDC_CLIENT_ID and
-              # REPLOG_OIDC_CLIENT_SECRET are all set (REPLOG_BASE_URL already
-              # is). Uncomment this block, the oidc_client_secret field in
-              # externalsecret.yaml, the mcp rule in httproute.yaml, and the
-              # Pocket ID egress noted in ciliumnetworkpolicy.yaml. The
-              # secret is not a value in this file. See docs/apps/replog.md.
-              # REPLOG_OIDC_ISSUER: https://id.${SECRET_DOMAIN}
-              # REPLOG_OIDC_CLIENT_ID: replog
-              # REPLOG_OIDC_REDIRECT_URL: https://replog.${SECRET_DOMAIN}/auth/oidc/callback
+              # Website Pocket ID login, the same non-secret settings Forge
+              # sets in hosts/forge/services/replog.nix. The client secret
+              # is REPLOG_OIDC_CLIENT_SECRET from Secret replog-env. The
+              # redirect defaults to ${REPLOG_BASE_URL}/auth/oidc/callback.
+              REPLOG_OIDC_ISSUER: https://id.${SECRET_DOMAIN}
+              REPLOG_OIDC_CLIENT_ID: replog
             envFrom:
               - secretRef:
                   name: replog-env
@@ -145,3 +150,61 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+    # The pod's allow policy. It is here rather than in
+    # ciliumnetworkpolicy.yaml because kubeconform checks files before Flux
+    # substitutes ${SECRET_DOMAIN}, and Cilium's schema refuses "${" in a
+    # toFQDNs name. homelab-mcp does the same. Default deny stays in the file.
+    rawResources:
+      policy:
+        forceRename: replog
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # In: 8080 from envoy-external and envoy-internal, and from
+          # Prometheus (the scrape is /metrics on that same port). Probes
+          # come from the kubelet, which Cilium allows. Out: DNS, then 443
+          # to Pocket ID. Forge reached Pocket ID from the host; this pod
+          # has to be allowed the name.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: replog
+                app.kubernetes.io/controller: replog
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: observability
+                      app.kubernetes.io/name: prometheus
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
