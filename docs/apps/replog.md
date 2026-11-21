@@ -67,14 +67,18 @@ URL saved in the admin UI needs its own allow before it can be reached.
 
 ## Agents
 
-MCP access will come through homelab-mcp later: a replog tool module that
-calls this app's REST API in-cluster, with a service token, on Service
-`replog` port 8080. A CiliumNetworkPolicy will admit only the homelab-mcp
-pods. That policy is not in this pull request. The current binary also
-mounts `/api/mcp` when the website OIDC settings are set, because it has
-no separate switch. The public route does not forward it: rule
-`deny-mcp` matches `PathPrefix` `/api/mcp` and returns 404. The website
-rule is `PathPrefix` `/`, which would otherwise include that path.
+homelab-mcp's `/mcp/replog` view calls this Service in-cluster at
+`replog.replog.svc:8080` with bearer `HOMELAB_MCP_REPLOG_TOKEN`. That
+value is 1Password item `homelab-mcp`, field `replog_token`, in vault
+`k8s-secrets`. ExternalSecret `homelab-mcp` writes it into Secret
+`homelab-mcp-env`. The replog CiliumNetworkPolicy admits the homelab-mcp
+pods on port 8080 only, and the homelab-mcp policy allows that egress.
+
+The binary still mounts `/api/mcp` when the website OIDC settings are
+set, because it has no separate switch. The public route does not
+forward it: rule `deny-mcp` matches `PathPrefix` `/api/mcp` and returns
+404. The website rule is `PathPrefix` `/`, which would otherwise include
+that path.
 
 ## Image
 
@@ -98,6 +102,7 @@ writes Secret `replog-env`. Field names are Forge's sops keys. Do not use
 | `admin_pass` | `REPLOG_ADMIN_PASS` | A new bootstrap password. Same |
 | `admin_email` | `REPLOG_ADMIN_EMAIL` | A new bootstrap email. Same |
 | `oidc_client_secret` | `REPLOG_OIDC_CLIENT_SECRET` | Copy Forge's sops value `replog/oidc_client_secret`. That is the existing Pocket ID client `replog` for the website. A new secret would not match the client |
+| `service_token` | `REPLOG_SERVICE_TOKEN` | Coach service token. It must start with `rlcst_`, and the characters after that prefix must be at least 16 printable ASCII characters with no spaces. Not a Forge key. The value stays in 1Password. The bootstrap admin is a coach, so `REPLOG_SERVICE_USER` is not set |
 
 The backup reads the existing item `volsync-r2-template`. No new field.
 The restic repository path is `<REPOSITORY_TEMPLATE>/replog`.

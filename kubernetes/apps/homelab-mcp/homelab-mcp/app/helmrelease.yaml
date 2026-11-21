@@ -65,7 +65,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (e8baa55, 0.68.0: OAuth refresh rotation tolerates one lost
+              # (450891b: RepLog coach view and the three workout-set tools,
+              # carpenike/mcp#169). Digest confirmed from GHCR for that tag.
+              # e8baa55, 0.68.0: OAuth refresh rotation tolerates one lost
               # response (a replay of the newest predecessor by the same
               # client while its successor is unused), and every replay is
               # counted in homelab_mcp_oauth_refresh_replays_total.
@@ -149,7 +151,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-e8baa55e78ad577c3fdf70d85d407c78088020ea@sha256:a1e74166c7701451af3e794db72c9d49e137539f55beb61e7662133ac250f018
+              tag: sha-450891b528616d81ed3bd83d4539ff8d8ca8e92b@sha256:fbac6988872f7177a4cfaa694af19e64682a90d8a8eaefcf1b8480f91567f4da
             command:
               - /bin/sh
               - -c
@@ -389,10 +391,17 @@ spec:
               # OpenProject (not in HOMELAB_MCP_OPENPROJECT_VIEW_BOTS), no Signal
               # tool, nothing personal. Its own view so a token left on that laptop
               # reaches nothing else. Listed below as well, per the rule above.
+              # /mcp/replog: Ryan's coach view (carpenike/mcp#169). The JSON is
+              # that pull request's view, unchanged: tools is
+              # scope:atrium-personal-replog (not "read" or "all"), read scope
+              # atrium-personal-replog, write scope atrium-personal-replog.write,
+              # and the only user is ryan@ryanholt.net. The scope's tools are
+              # replog_get_coach_view, replog_preview_workout_set, and
+              # replog_log_workout_set.
               HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/hermes", "/mcp/agent/grokbot",
                 "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors",
-                "/mcp/work"]
+                "/mcp/work", "/mcp/replog"]
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -499,7 +508,12 @@ spec:
                  "tools": ["vault_domains", "vault_read", "vault_list", "vault_search",
                  "vault_links", "vault_create", "vault_edit"],
                  "read_scope": "work.read", "write_scope": "work.write",
-                 "connect_scopes": "all", "users": ["ryan@ryanholt.net"]}
+                 "connect_scopes": "all", "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/replog", "name": "RepLog",
+                 "tools": "scope:atrium-personal-replog",
+                 "read_scope": "atrium-personal-replog",
+                 "write_scope": "atrium-personal-replog.write",
+                 "users": ["ryan@ryanholt.net"]}
                 ]
             envFrom:
               - secretRef:
@@ -1056,7 +1070,8 @@ spec:
           # envoy-internal proxies only -- still proxies in namespace network,
           # which is why HOMELAB_MCP_TRUSTED_PROXY_IPS may be "*"; 9201
           # (/metrics) from Prometheus only. Probes come from the kubelet,
-          # which Cilium allows. Out: DNS, then 443 to the named hosts only.
+          # which Cilium allows. Out: DNS, then 443 to the named hosts only,
+          # plus replog.replog.svc port 8080 (the coach tools).
           # toFQDNs needs the DNS proxy to see the lookups, hence the L7 DNS
           # rule, and the pod's ndots 1.
           spec:
@@ -1154,6 +1169,17 @@ spec:
                       k8s:io.kubernetes.pod.namespace: openproject
                       app.kubernetes.io/name: openproject
                       openproject/process: web
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              # RepLog coach tools. Service replog.replog.svc, port 8080 only.
+              # The replog policy admits these pods on that port.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: replog
+                      app.kubernetes.io/name: replog
+                      app.kubernetes.io/controller: replog
                 toPorts:
                   - ports:
                       - port: "8080"
