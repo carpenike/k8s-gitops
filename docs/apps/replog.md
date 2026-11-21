@@ -102,6 +102,7 @@ writes Secret `replog-env`. Field names are Forge's sops keys. Do not use
 | `admin_pass` | `REPLOG_ADMIN_PASS` | A new bootstrap password. Same |
 | `admin_email` | `REPLOG_ADMIN_EMAIL` | A new bootstrap email. Same |
 | `oidc_client_secret` | `REPLOG_OIDC_CLIENT_SECRET` | Copy Forge's sops value `replog/oidc_client_secret`. That is the existing Pocket ID client `replog` for the website. A new secret would not match the client |
+| `service_token` | `REPLOG_SERVICE_TOKEN` | Coach service token. It must start with `rlcst_`, and the characters after that prefix must be at least 16 printable ASCII characters with no spaces. Not a Forge key. The value stays in 1Password. The bootstrap admin is a coach, so `REPLOG_SERVICE_USER` is not set |
 
 The backup reads the existing item `volsync-r2-template`. No new field.
 The restic repository path is `<REPOSITORY_TEMPLATE>/replog`.
