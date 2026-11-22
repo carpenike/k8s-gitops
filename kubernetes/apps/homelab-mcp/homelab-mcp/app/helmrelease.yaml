@@ -151,7 +151,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-6e21d1d5f0f965482f34a6785fbcb6ee8eb2632c@sha256:9b7cdd86d883a1db23ac59778a92cd9e607b33f27ee04e22a3fa29805849a33c
+              tag: sha-ef5f97434e985c673a2475880b99c7bb39d2e8d9@sha256:9d67cf18887bde2e1bb3f4e7e4b5120389eef51a34d10b89320aa32c7a136051
             command:
               - /bin/sh
               - -c
