@@ -402,6 +402,10 @@ spec:
               # homelab-mcp-user-credentials, field replog.ryan). There is no
               # fallback to HOMELAB_MCP_REPLOG_TOKEN. That shared mapping
               # (homelab-mcp/replog_token) stays for shared-mode calls.
+              # connect_scopes "all": request the write scope on connect, as
+              # /mcp/full and /mcp/steffi do. Claude asked only for the read
+              # scope and its step-up did not add write, so the write tools
+              # failed with insufficient_scope (2026-11-22).
               HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/hermes", "/mcp/agent/grokbot",
                 "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors",
@@ -517,7 +521,7 @@ spec:
                  "tools": "scope:atrium-personal-replog",
                  "read_scope": "atrium-personal-replog",
                  "write_scope": "atrium-personal-replog.write",
-                 "credentials": "per_user",
+                 "connect_scopes": "all", "credentials": "per_user",
                  "users": ["ryan@ryanholt.net"]}
                 ]
             envFrom:
