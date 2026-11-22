@@ -209,7 +209,7 @@ says which. The backup uses the existing item
 `volsync-r2-template`; no new field.
 
 The HelmRelease image is pinned:
-`ghcr.io/carpenike/replog:sha-6383fe312169bbe12808fac4ff0dc3ae2f0063fa@sha256:d024a195e4711b685de7a63925c07b79931f618fc9c2414a2944fdfb9a64857d`.
+`ghcr.io/carpenike/replog:sha-ad9436c71cf2d4d3c6d667a03fb75b2f9b6b9a7c@sha256:c2a7c2cfb6df020d12706303f61a22d38fb3962392cafa2c9950b29db8abb977`.
 `replicas` is 1. Merging does not move the name off Forge.
 
 ## Still to confirm or generate

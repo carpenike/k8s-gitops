@@ -86,7 +86,7 @@ that path.
 ## Image
 
 The HelmRelease pins
-`ghcr.io/carpenike/replog:sha-6383fe312169bbe12808fac4ff0dc3ae2f0063fa@sha256:d024a195e4711b685de7a63925c07b79931f618fc9c2414a2944fdfb9a64857d`.
+`ghcr.io/carpenike/replog:sha-ad9436c71cf2d4d3c6d667a03fb75b2f9b6b9a7c@sha256:c2a7c2cfb6df020d12706303f61a22d38fb3962392cafa2c9950b29db8abb977`.
 Renovate tracks that image with the other `ghcr.io/carpenike` images.
 This repo has no Flux ImagePolicy. Merging does not move
 `replog.holthome.net` off Forge.
@@ -106,6 +106,7 @@ writes Secret `replog-env`. Field names are Forge's sops keys. Do not use
 | `admin_email` | `REPLOG_ADMIN_EMAIL` | A new bootstrap email. Same |
 | `oidc_client_secret` | `REPLOG_OIDC_CLIENT_SECRET` | Copy Forge's sops value `replog/oidc_client_secret`. That is the existing Pocket ID client `replog` for the website. A new secret would not match the client |
 | `service_token` | `REPLOG_SERVICE_TOKEN` | Coach service token. It must start with `rlcst_`, and the characters after that prefix must be at least 16 printable ASCII characters with no spaces. Not a Forge key. The value stays in 1Password. The bootstrap admin is a coach, so `REPLOG_SERVICE_USER` is not set |
+| `on_behalf_credential` | `REPLOG_ON_BEHALF_CREDENTIAL` | On-behalf secret (ADR 025). Must not start with `rlcst_`; empty disables the path. homelab-mcp sends it with `X-RepLog-On-Behalf-Of: <verified email>`. Same value as item `homelab-mcp`, field `replog_on_behalf_credential` |
 
 The backup reads the existing item `volsync-r2-template`. No new field.
 The restic repository path is `<REPOSITORY_TEMPLATE>/replog`.
