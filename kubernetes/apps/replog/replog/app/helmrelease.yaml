@@ -61,10 +61,10 @@ spec:
               # redirect defaults to ${REPLOG_BASE_URL}/auth/oidc/callback.
               REPLOG_OIDC_ISSUER: https://id.${SECRET_DOMAIN}
               REPLOG_OIDC_CLIENT_ID: replog
-              # On-behalf proof (ADR 025 amendment). both = homelab-mcp's
-              # signed short-lived token or the shared credential, for the
-              # switch-over release. Next: signed, then drop the shared one.
-              REPLOG_ON_BEHALF_MODE: both
+              # On-behalf proof (ADR 025 amendment). signed = only
+              # homelab-mcp's signed short-lived token. The shared on-behalf
+              # credential is removed (Ryan, 2026-11-22).
+              REPLOG_ON_BEHALF_MODE: signed
             envFrom:
               - secretRef:
                   name: replog-env
