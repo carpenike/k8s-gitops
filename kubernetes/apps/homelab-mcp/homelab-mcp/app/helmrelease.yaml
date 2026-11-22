@@ -200,6 +200,10 @@ spec:
               # Only envoy-external reaches port 9200 (CiliumNetworkPolicy),
               # so its X-Forwarded-For is the one to trust.
               HOMELAB_MCP_TRUSTED_PROXY_IPS: "*"
+              # RepLog on-behalf calls send a 60-second Ed25519 JWT signed per
+              # call (carpenike/mcp#176) instead of the shared credential.
+              # A missing key is a tool error, never a shared-secret fallback.
+              HOMELAB_MCP_REPLOG_ON_BEHALF_PROOF: signed_jwt
               # Same Pocket ID client as Forge: its callback is this host.
               HOMELAB_MCP_POCKETID_ISSUER: https://id.${SECRET_DOMAIN}
               HOMELAB_MCP_POCKETID_CLIENT_ID: mcp

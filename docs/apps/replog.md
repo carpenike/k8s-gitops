@@ -107,6 +107,7 @@ writes Secret `replog-env`. Field names are Forge's sops keys. Do not use
 | `oidc_client_secret` | `REPLOG_OIDC_CLIENT_SECRET` | Copy Forge's sops value `replog/oidc_client_secret`. That is the existing Pocket ID client `replog` for the website. A new secret would not match the client |
 | `service_token` | `REPLOG_SERVICE_TOKEN` | Coach service token. It must start with `rlcst_`, and the characters after that prefix must be at least 16 printable ASCII characters with no spaces. Not a Forge key. The value stays in 1Password. The bootstrap admin is a coach, so `REPLOG_SERVICE_USER` is not set |
 | `on_behalf_credential` | `REPLOG_ON_BEHALF_CREDENTIAL` | On-behalf secret (ADR 025). Must not start with `rlcst_`; empty disables the path. homelab-mcp sends it with `X-RepLog-On-Behalf-Of: <verified email>`. Same value as item `homelab-mcp`, field `replog_on_behalf_credential` |
+| `on_behalf_public_key` | `REPLOG_ON_BEHALF_JWT_PUBLIC_KEY` | Ed25519 public key (PEM) that verifies homelab-mcp's signed 60-second on-behalf tokens (ADR 025 amendment). Public. The private half is item `homelab-mcp`, field `replog_signing_private_key`. `REPLOG_ON_BEHALF_MODE` is `both` in the HelmRelease for the switch-over release |
 
 The backup reads the existing item `volsync-r2-template`. No new field.
 The restic repository path is `<REPOSITORY_TEMPLATE>/replog`.
