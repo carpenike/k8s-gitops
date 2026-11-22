@@ -65,6 +65,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # c8b091d, 0.69.0 (carpenike/mcp#174): HA control tools behind
+              # one policy (service table, entity allowlist, built-in
+              # denylist), ha_activate_scene, ha_set_climate, and the
+              # atrium-personal-house-control scope. Digest confirmed from GHCR.
               # (450891b: RepLog coach view and the three workout-set tools,
               # carpenike/mcp#169). Digest confirmed from GHCR for that tag.
               # e8baa55, 0.68.0: OAuth refresh rotation tolerates one lost
@@ -151,7 +155,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-ef5f97434e985c673a2475880b99c7bb39d2e8d9@sha256:9d67cf18887bde2e1bb3f4e7e4b5120389eef51a34d10b89320aa32c7a136051
+              tag: sha-c8b091dd6d1fad1ea425a6c879aca3ff730807a9@sha256:458d2d98dd66ce3cac2472ac247266790a610ba34f6a735dc25b0ce279f4bc0d
             command:
               - /bin/sh
               - -c
@@ -240,6 +244,88 @@ spec:
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
               HOMELAB_MCP_HA_BASE_URL: https://ha.${SECRET_DOMAIN}
+              # What the HA control tools may actuate (carpenike/mcp#174; Ryan,
+              # 2026-11-22). Applies to every view that has ha_call_service:
+              # /mcp/full and /mcp/house-control. Explicit ids from a read-only
+              # inventory: real lights (not Z-Wave "basic" or status-LED
+              # entities), switches that are light relays or TV plugs, the
+              # ecobee (climate.study; the two fireplace thermostats are not
+              # listed), and media players. homelab-mcp's built-in denylist
+              # (locks, covers, alarms, scripts, automations, freezers,
+              # heaters, fireplaces, pumps, chargers, ...) wins over this list.
+              # Setpoints 60-76 F, volume <= 0.6, hvac off refused (defaults).
+              HOMELAB_MCP_HA_CONTROL_ENTITY_ALLOWLIST: >-
+                [
+                "light.bar_back_ceiling_1", "light.bar_ceiling_lights",
+                "light.bar_ceiling_lights_switch", "light.bar_front_ceiling_1",
+                "light.bar_front_ceiling_2", "light.basement_bath_hall_ceiling",
+                "light.basement_bathroom_shower_light",
+                "light.basement_bathroom_sink_light_left",
+                "light.basement_bathroom_sink_light_right",
+                "light.basement_bathroom_sink_lights",
+                "light.basement_gym_wall_lights_switch", "light.basement_hutch_light",
+                "light.basement_main_ceiling_back_center",
+                "light.basement_main_ceiling_back_left",
+                "light.basement_main_ceiling_back_right",
+                "light.basement_main_ceiling_front_left",
+                "light.basement_main_ceiling_front_right",
+                "light.basement_main_ceiling_light_switch",
+                "light.basement_main_ceiling_lights",
+                "light.basement_main_ceiling_mid_left",
+                "light.basement_main_ceiling_mid_right",
+                "light.basement_pantry_ceiling_light",
+                "light.basement_seating_ceiling_back_left",
+                "light.basement_seating_ceiling_back_right",
+                "light.basement_seating_ceiling_front_left",
+                "light.basement_seating_ceiling_front_right",
+                "light.basement_seating_ceiling_lights",
+                "light.basement_seating_ceiling_lights_switch",
+                "light.kitchen_bar_lights_switch", "light.living_room_all_lights",
+                "light.living_room_hutch_1", "light.living_room_hutch_2",
+                "light.living_room_hutch_lights", "light.master_bath_ceiling_light",
+                "light.master_bathroom_ceiling_shower",
+                "light.master_bathroom_counter_light",
+                "light.master_closet_all_lights",
+                "light.master_closet_hanging_rod_lights",
+                "light.master_closet_lights_ryan_s_side",
+                "light.master_closet_lights_shared_wall",
+                "light.master_closet_lights_steffi_s_side",
+                "light.pavilion_left_eave_light", "light.pavilion_right_eave_light",
+                "light.sunroom_corner_lamp", "light.sunroom_hutch_light",
+                "light.sunroom_window_lights", "light.upstairs_hallway_ceiling_lights",
+                "light.upstairs_hallway_end", "light.upstairs_hallway_end_switch",
+                "light.upstairs_hallway_middle", "light.upstairs_hallway_stairs",
+                "light.upstairs_laundry_room_ceiling_door",
+                "light.upstairs_laundry_room_ceiling_lights",
+                "light.upstairs_laundry_room_ceiling_switch",
+                "light.upstairs_laundry_room_ceiling_window",
+                "light.upstairs_master_closet_ceiling_door",
+                "light.upstairs_master_closet_ceiling_end",
+                "light.upstairs_master_closet_ceiling_lights",
+                "light.upstairs_master_closet_switch",
+                "light.upstairs_stairwell_chandelier_light_1",
+                "light.upstairs_stairwell_chandelier_light_2",
+                "light.upstairs_stairwell_chandelier_light_3",
+                "light.upstairs_stairwell_chandelier_light_4",
+                "light.upstairs_stairwell_chandelier_light_5",
+                "light.upstairs_stairwell_chandelier_lights",
+                "switch.bar_under_lights", "switch.basement_bath_switch_light",
+                "switch.garage_front_lights", "switch.garage_side_lights",
+                "switch.main_hall_bathroom_sink_light", "switch.outdoor_lights",
+                "switch.patio_lights", "switch.porch_ceiling_lights",
+                "switch.sunroom_hutch_lights_relay",
+                "switch.upstairs_caydan_switch_lights_ceiling",
+                "switch.upstairs_caydan_switch_lights_wall",
+                "switch.upstairs_jayme_switch_lights_ceiling",
+                "switch.upstairs_jayme_switch_lights_wall",
+                "switch.upstairs_taylor_switch_lights_ceiling",
+                "switch.upstairs_taylor_switch_lights_wall",
+                "switch.basement_tv_switch_relay", "switch.livingroom_tv_switch_relay",
+                "climate.study", "media_player"
+                ]
+              # Belt and braces for entities whose ids slip past the globs.
+              HOMELAB_MCP_HA_CONTROL_ENTITY_DENYLIST: >-
+                ["climate.basement", "climate.living_room", "switch.study_aux_heat_only"]
               HOMELAB_MCP_PAPERLESS_BASE_URL: https://paperless.${SECRET_DOMAIN}
               # Gatus' read API; status. lets /api/v1/endpoints through without
               # the admin login (nix-config gatus.nix).
@@ -406,10 +492,17 @@ spec:
               # /mcp/full and /mcp/steffi do. Claude asked only for the read
               # scope and its step-up did not add write, so the write tools
               # failed with insufficient_scope (2026-11-22).
+              # /mcp/house-control: household control for Ryan's assistants
+              # (carpenike/mcp#174; Ryan, 2026-11-22). The HA reads (presence,
+              # locks, alarms and cameras hidden) plus ha_call_service,
+              # ha_activate_scene and ha_set_climate, bounded by
+              # HOMELAB_MCP_HA_CONTROL_ENTITY_ALLOWLIST and the built-in
+              # denylist. Its own view so /mcp/house-sensors (Groundskeeper,
+              # unattended) stays read-only. Write requested on connect.
               HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/hermes", "/mcp/agent/grokbot",
                 "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors",
-                "/mcp/work", "/mcp/replog"]
+                "/mcp/work", "/mcp/replog", "/mcp/house-control"]
               HOMELAB_MCP_VIEWS: >-
                 [
                 {"path": "/mcp", "name": "Home (read)", "tools": "read",
@@ -522,7 +615,12 @@ spec:
                  "read_scope": "atrium-personal-replog",
                  "write_scope": "atrium-personal-replog.write",
                  "connect_scopes": "all", "credentials": "per_user",
-                 "users": ["ryan@ryanholt.net"]}
+                 "users": ["ryan@ryanholt.net"]},
+                {"path": "/mcp/house-control", "name": "House control",
+                 "tools": "scope:atrium-personal-house-control",
+                 "read_scope": "atrium-personal-house-control",
+                 "write_scope": "atrium-personal-house-control.write",
+                 "connect_scopes": "all", "users": ["ryan@ryanholt.net"]}
                 ]
             envFrom:
               - secretRef:
