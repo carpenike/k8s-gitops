@@ -218,7 +218,7 @@ Item `homelab-mcp` in vault `k8s-secrets`:
 | `grocy_api_key` | Grocy API key |
 | `paperless_token` | Paperless API token |
 | `replog_token` | Shared-mode RepLog coach service token. ExternalSecret `homelab-mcp` writes it as `HOMELAB_MCP_REPLOG_TOKEN`. This field stays. `/mcp/replog` does not use it |
-| `replog_on_behalf_credential` | RepLog on-behalf credential (carpenike/replog ADR 025). ExternalSecret `homelab-mcp` writes it as `HOMELAB_MCP_REPLOG_ON_BEHALF_CREDENTIAL`. `/mcp/replog` sends it with the caller's verified email (`HOMELAB_MCP_REPLOG_AUTH` defaults to `on_behalf`). Same value as item `replog`, field `on_behalf_credential` |
+| `replog_signing_private_key` | Ed25519 private key (PEM) that signs a 60-second RepLog on-behalf JWT per call (carpenike/mcp#176, replog ADR 025). ExternalSecret `homelab-mcp` writes it as `HOMELAB_MCP_REPLOG_SIGNING_PRIVATE_KEY`; `HOMELAB_MCP_REPLOG_ON_BEHALF_PROOF` is `signed_jwt`. The public half is item `replog`, field `on_behalf_public_key`. There is no shared on-behalf credential |
 | `mfp_cookies` | The MyFitnessPal cookie export (carpenike/mcp `docs/MFP-COOKIE-RUNBOOK.md`) |
 | `sidecar_token` | Shared token between the tools, and the sidecar (Forge's `homelab-mcp/actual-env` `SIDECAR_TOKEN`, or a new `openssl rand -hex 32`) |
 | `actual_password` | Actual server password (Forge's `homelab-mcp/actual-env` `ACTUAL_PASSWORD`) |
