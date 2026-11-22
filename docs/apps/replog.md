@@ -68,10 +68,13 @@ URL saved in the admin UI needs its own allow before it can be reached.
 ## Agents
 
 homelab-mcp's `/mcp/replog` view calls this Service in-cluster at
-`replog.replog.svc:8080` with bearer `HOMELAB_MCP_REPLOG_TOKEN`. That
-value is 1Password item `homelab-mcp`, field `replog_token`, in vault
-`k8s-secrets`. ExternalSecret `homelab-mcp` writes it into Secret
-`homelab-mcp-env`. The replog CiliumNetworkPolicy admits the homelab-mcp
+`replog.replog.svc:8080`. That view is `credentials: "per_user"`, so the
+bearer is the file `replog.ryan` from item `homelab-mcp-user-credentials`
+in vault `k8s-secrets` (Ryan's alias in `HOMELAB_MCP_USERS`). It does not
+fall back to the shared token. Item `homelab-mcp`, field `replog_token`,
+stays: ExternalSecret `homelab-mcp` still writes it into Secret
+`homelab-mcp-env` as `HOMELAB_MCP_REPLOG_TOKEN` for shared-mode calls.
+The replog CiliumNetworkPolicy admits the homelab-mcp
 pods on port 8080 only, and the homelab-mcp policy allows that egress.
 
 The binary still mounts `/api/mcp` when the website OIDC settings are
@@ -83,7 +86,7 @@ that path.
 ## Image
 
 The HelmRelease pins
-`ghcr.io/carpenike/replog:sha-beb93c1c224cc7a51aad0f9ceed5d4491e636c8f@sha256:c329e8e1272d47f6cb61b69ce81bd77e9a22a41fc8a6796e3806ee7a877b9d16`.
+`ghcr.io/carpenike/replog:sha-147ec5a56dd2690ae2e995b4e802bec884ebf942@sha256:6d75d2d1413ee917e340e54df4503b5a74ad4f6522f9d384a55d267e91eb7b20`.
 Renovate tracks that image with the other `ghcr.io/carpenike` images.
 This repo has no Flux ImagePolicy. Merging does not move
 `replog.holthome.net` off Forge.
