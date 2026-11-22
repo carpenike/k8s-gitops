@@ -50,7 +50,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI, accounts from Pocket ID, inbound from the internet through a Stalwart edge relay on Vultr over the tailnet, Bulwark webmail (see [mail.md](apps/mail.md), ADR 0013, 0014, 0015, 0017) | v1.1.0, Bulwark 1.21.1 |
 | Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see [hermes.md](apps/hermes.md)) | v0.23.0 |
 | Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see [website.md](apps/website.md)) | 1.31.7 |
-| Workout log | replog, moving off Forge, SQLite on Ceph RBD, public gateway, one replica. Merging does not move the name off Forge (see [replog.md](apps/replog.md)) | `sha-beb93c1c224cc7a51aad0f9ceed5d4491e636c8f` |
+| Workout log | replog, moving off Forge, SQLite on Ceph RBD, public gateway, one replica. Merging does not move the name off Forge (see [replog.md](apps/replog.md)) | `sha-147ec5a56dd2690ae2e995b4e802bec884ebf942` |
 
 Chart tags that the plan did not name (spegel, CoreDNS, metrics-server,
 reloader, echo, app-template, tuppr, kube-prometheus-stack, cloudflared)

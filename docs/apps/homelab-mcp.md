@@ -20,7 +20,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp/agent/grokbot` | the `hermes` list, plus `finances_transactions` and `finances_categorize` (category and notes only; no rules, payee merges or loan writes), school reads, Cooklang reads, every MFP tool, the Obsidian vault (`vault_*`: reads and writes every personal domain (fitness, inbox, property, tech, family-history, finances, health, church, education, wardrobe), reads `agents`; no move or delete), and the OpenProject handoff board as user `grokbot` (`openproject_*`, Personal and Bots only) | `grokbot` | Grokbot (every Grokbot agent) |
 | `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
-| `/mcp/replog` | `scope:atrium-personal-replog`: `replog_get_coach_view`, `replog_preview_workout_set`, `replog_log_workout_set`. Not `"read"` or `"all"` | `atrium-personal-replog` and `atrium-personal-replog.write` | Ryan only (`ryan@ryanholt.net`). The JSON is the view from carpenike/mcp#169 |
+| `/mcp/replog` | `scope:atrium-personal-replog`. Not `"read"` or `"all"` | `atrium-personal-replog` and `atrium-personal-replog.write` | Ryan only (`ryan@ryanholt.net`). `credentials: "per_user"`: the bearer is `replog.ryan`, never `HOMELAB_MCP_REPLOG_TOKEN` |
 
 View paths follow one rule. The household owner's views sit at the root
 and are named by access: `/mcp` (read) and `/mcp/full` (read and write);
@@ -217,7 +217,7 @@ Item `homelab-mcp` in vault `k8s-secrets`:
 | `ha_read_token` | Home Assistant token for reads |
 | `grocy_api_key` | Grocy API key |
 | `paperless_token` | Paperless API token |
-| `replog_token` | RepLog coach service token. ExternalSecret `homelab-mcp` writes it as `HOMELAB_MCP_REPLOG_TOKEN`. Add this field on the existing item before merge. The value stays in 1Password |
+| `replog_token` | Shared-mode RepLog coach service token. ExternalSecret `homelab-mcp` writes it as `HOMELAB_MCP_REPLOG_TOKEN`. This field stays. `/mcp/replog` does not use it |
 | `mfp_cookies` | The MyFitnessPal cookie export (carpenike/mcp `docs/MFP-COOKIE-RUNBOOK.md`) |
 | `sidecar_token` | Shared token between the tools, and the sidecar (Forge's `homelab-mcp/actual-env` `SIDECAR_TOKEN`, or a new `openssl rand -hex 32`) |
 | `actual_password` | Actual server password (Forge's `homelab-mcp/actual-env` `ACTUAL_PASSWORD`) |
@@ -236,6 +236,7 @@ upstream keys, one field per upstream and person, named
 | --- | --- |
 | `grocy.ryan` | Ryan's own Grocy API key, used only by views with `credentials: "per_user"` |
 | `grocy.steffi` | Steffi's own Grocy API key (from her Grocy user), same use |
+| `replog.ryan` | Ryan's own RepLog coach service token. `/mcp/replog` reads this file and does not fall back to `homelab-mcp/replog_token`. There is no `replog.steffi` |
 
 To give someone a per-user key:
 1. Add them to `HOMELAB_MCP_USERS` in the HelmRelease.
@@ -247,7 +248,7 @@ To give someone a per-user key:
 The volume is optional, so the pod starts before the item exists. A
 per-user call then fails with `<upstream>_no_user_credential` and is
 counted in `homelab_mcp_user_credential_missing_total`; it never falls back
-to the shared key. No view uses `per_user` yet.
+to the shared key. `/mcp/steffi` and `/mcp/replog` set `credentials: "per_user"`.
 
 The database passwords come from the postgres17 items (`schoolhouse`,
 `lading`, `homelab-finance`, `finances-context`;

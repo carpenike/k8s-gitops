@@ -305,7 +305,8 @@ spec:
                 {"claude": ["personal", "bots", "work"], "grokbot": ["personal", "bots"]}
               HOMELAB_MCP_WITHINGS_TOKEN_PATH: /var/lib/homelab-mcp/state/withings-token.json
               # Per-user credentials: who they are kept for, and where. Used by
-              # /mcp/steffi (docs/apps/homelab-mcp.md).
+              # /mcp/steffi and /mcp/replog (docs/apps/homelab-mcp.md). Ryan's
+              # RepLog file is replog.ryan. There is no replog.steffi.
               HOMELAB_MCP_USERS: >-
                 {"ryan": {"email": "ryan@ryanholt.net"},
                 "steffi": {"email": "stefanie@stefanieholt.com"}}
@@ -391,13 +392,16 @@ spec:
               # OpenProject (not in HOMELAB_MCP_OPENPROJECT_VIEW_BOTS), no Signal
               # tool, nothing personal. Its own view so a token left on that laptop
               # reaches nothing else. Listed below as well, per the rule above.
-              # /mcp/replog: Ryan's coach view (carpenike/mcp#169). The JSON is
-              # that pull request's view, unchanged: tools is
-              # scope:atrium-personal-replog (not "read" or "all"), read scope
-              # atrium-personal-replog, write scope atrium-personal-replog.write,
-              # and the only user is ryan@ryanholt.net. The scope's tools are
-              # replog_get_coach_view, replog_preview_workout_set, and
-              # replog_log_workout_set.
+              # /mcp/replog: Ryan's coach view (carpenike/mcp#169, per-user in
+              # carpenike/mcp#170). tools stays scope:atrium-personal-replog
+              # (not "read" or "all"). read scope atrium-personal-replog, write
+              # scope atrium-personal-replog.write, and the only user is
+              # ryan@ryanholt.net. credentials is per_user, so a call reads
+              # replog.<alias> from HOMELAB_MCP_USER_CREDENTIALS_DIR. Ryan's
+              # alias is ryan, so the file is replog.ryan (item
+              # homelab-mcp-user-credentials, field replog.ryan). There is no
+              # fallback to HOMELAB_MCP_REPLOG_TOKEN. That shared mapping
+              # (homelab-mcp/replog_token) stays for shared-mode calls.
               HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/hermes", "/mcp/agent/grokbot",
                 "/mcp/agent/hank", "/mcp/steffi", "/mcp/household", "/mcp/house-sensors",
@@ -513,6 +517,7 @@ spec:
                  "tools": "scope:atrium-personal-replog",
                  "read_scope": "atrium-personal-replog",
                  "write_scope": "atrium-personal-replog.write",
+                 "credentials": "per_user",
                  "users": ["ryan@ryanholt.net"]}
                 ]
             envFrom:
