@@ -86,17 +86,19 @@ spec:
           # No Withings token on the state volume, or Withings refused it and
           # a refresh. Set at startup and on every withings_* call. Expected
           # until the first authorization, and after a restore (the restored
-          # refresh token has usually already rotated).
+          # refresh token has usually already rotated). One series per
+          # person (`alias`, homelab-mcp 0.70.0).
           expr: homelab_mcp_withings_token_usable{namespace="homelab-mcp"} == 0
           for: 1h
           labels:
             severity: warning
           annotations:
-            summary: Withings needs re-authorizing
+            summary: "Withings needs re-authorizing for {{ $labels.alias }}"
             description: >-
-              The withings tools are refusing calls. Run the one-time
-              authorization in carpenike/mcp README, "Withings posture"
-              (scripts/withings_authorize.py piped into the seed command).
+              The withings tools are refusing calls for {{ $labels.alias }}.
+              Run the one-time authorization for that person
+              (docs/apps/homelab-mcp.md, "Withings": withings_authorize.py
+              piped into `seed --alias <alias>`).
         - alert: HomelabMcpOauthRefreshReuseRevoked
           # homelab-mcp 0.68.0+. Reuse detection revoked a refresh-token
           # family: an already-rotated token was replayed outside the
