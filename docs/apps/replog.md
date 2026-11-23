@@ -108,7 +108,7 @@ that path.
 ## Image
 
 The HelmRelease pins
-`ghcr.io/carpenike/replog:sha-fca4ebb6b9850642b94cabe5c116a39950bac05e@sha256:a6f26c2ae60741a208df138ba549651ed20fc8c2ccfb3c70604f3243845f8cab`.
+`ghcr.io/carpenike/replog:sha-2e2fc2b9717c1b7aa2414fadb0ebede4260fbab3@sha256:3899fc3e5ffc413f7c4efe28ab138a15de28ee0cbddd408c6a9fd5e2c10ca4c8`.
 Renovate tracks that image with the other `ghcr.io/carpenike` images.
 This repo has no Flux ImagePolicy. Merging does not move
 `replog.holthome.net` off Forge.
