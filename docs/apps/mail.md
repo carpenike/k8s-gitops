@@ -145,6 +145,15 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    Without it, mail the edge scored between its spam and reject
    thresholds reaches the inbox, tagged.
 
+   Installed 2026-11-23 for `ryan` and `stefanie` as their active script
+   `filters`, filing into `Junk Mail` (Stalwart's name for the junk
+   folder) with `stop`, under a `# rule:[…]` comment. Bulwark reads a
+   script in that form as an external rule, shows it on its Filters page
+   and keeps it when its own filters are saved. The rule runs on the
+   server, so it applies whatever mail app is used. Only one script is
+   active per account: an app that manages Sieve over ManageSieve would
+   replace it with its own. Chief needs none; its allowlist drops spam.
+
    The network policy and the tailnet grant are what keep everyone but
    the edge off this listener. Do not open 2525 anywhere else.
 6. **Domain**: add `holthome.net`, with DKIM management Automatic (DKIM1
