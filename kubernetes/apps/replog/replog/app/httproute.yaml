@@ -43,6 +43,24 @@ spec:
             group: gateway.envoyproxy.io
             kind: HTTPRouteFilter
             name: replog-deny-mcp
+    # Form-check clip uploads (carpenike/replog#62). Envoy streams request
+    # bodies and sets no size cap of its own, so the only limits are the
+    # app's REPLOG_VIDEO_MAX_MB and Cloudflare's on the public path. This
+    # rule only gives a slow gym uplink longer than the 300s below. Envoy
+    # Gateway sorts regex matches ahead of prefix matches. Before #62 the
+    # path does not exist and the pod answers 404 as it does today.
+    - name: video-upload
+      matches:
+        - method: POST
+          path:
+            type: RegularExpression
+            value: ^/api/athletes/[^/]+/workouts/[^/]+/sets/[^/]+/video$
+      timeouts:
+        request: 900s
+        backendRequest: 900s
+      backendRefs:
+        - name: replog
+          port: 8080
     # The website and its JSON API, including Pocket ID
     # (/auth/oidc/*). 300s covers an AI coach generation.
     - name: app
