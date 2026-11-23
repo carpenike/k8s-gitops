@@ -403,6 +403,14 @@ Check: `curl -s -u prometheus:<password>
 https://mail.holthome.net/metrics/prometheus | head` returns
 `stalwart_` series, and without the password it returns 401.
 
+If the ServiceMonitor reaches the cluster before Secret
+`stalwart-metrics` exists (the 1Password field was missing, or the
+ExternalSecret was slower), the Prometheus operator rejects it with
+`unable to get secret "stalwart-metrics"` and does not try again when the
+Secret appears; an annotation does not wake it either. Restart the
+operator (`kubectl -n observability rollout restart deploy
+kube-prometheus-stack-operator`) and the target comes up on the next sync.
+
 ## Restore
 
 1. Restore `postgres17` (or just database `stalwart`) to the chosen time,
