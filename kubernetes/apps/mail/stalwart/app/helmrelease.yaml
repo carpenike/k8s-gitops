@@ -73,6 +73,11 @@ spec:
               # store reads them as EnvironmentVariable sources.
               - secretRef:
                   name: stalwart-blobs
+              # STALWART_METRICS_USERNAME, STALWART_METRICS_PASSWORD for the
+              # Prometheus endpoint's Basic auth (externalsecret.yaml).
+              - secretRef:
+                  name: stalwart-metrics
+                  optional: true
             # Exec, not HTTP, so the network policy needs no host ingress.
             # The image ships curl for its own HEALTHCHECK.
             probes:
@@ -183,6 +188,25 @@ spec:
         ports:
           http:
             port: 8080
+    # Stalwart's own metrics (Metrics › Prometheus, Basic auth), on the
+    # HTTP listener. Prometheus picks up every ServiceMonitor.
+    serviceMonitor:
+      app:
+        service:
+          identifier: http
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics/prometheus
+            interval: 60s
+            basicAuth:
+              username:
+                name: stalwart-metrics
+                key: STALWART_METRICS_USERNAME
+              password:
+                name: stalwart-metrics
+                key: STALWART_METRICS_PASSWORD
     configMaps:
       config:
         data:
