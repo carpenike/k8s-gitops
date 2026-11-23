@@ -55,8 +55,11 @@ have workarounds that fit a household.
   resource is the public URL, granted to the client, because the WebUI
   sends that URL as the `resource` parameter
 - The directory uses issuer `https://id.holthome.net`, `claimUsername`
-  `preferred_username`, the mail domain as `usernameDomain`, and
-  `claimGroups` `groups`
+  `preferred_username` and the mail domain as `usernameDomain`. No
+  `claimGroups`: Stalwart turned every Pocket ID group (`family`,
+  `admins`, `media`, …) into a group account with a mailbox and an
+  address its members could send as, and nothing here uses them. Removed
+  2026-11-23. Roles are set on each account in Stalwart
 - Accounts live in the `usernameDomain` domain, because that is where
   sign-ins look for them. Addresses in other mail domains are aliases on
   those accounts (`docs/apps/mail.md`, More mail domains)

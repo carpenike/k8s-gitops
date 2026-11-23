@@ -94,12 +94,27 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
 4. **Certificate**: add one with File sources `/etc/stalwart/tls/tls.crt`
    and `/etc/stalwart/tls/tls.key`, and use it on the TLS listeners.
 5. **Listeners**: Stalwart creates 25, 465, 993, 995, 4190, 443 and 8080 on
-   an empty store. Add `submission` on 587 (STARTTLS) if clients need it.
-   Leave Settings › Network › Proxy › Trusted Networks empty. Every
+   an empty store. Add `submission` on 587 (STARTTLS): the Service and
+   the network policy already carry 587, and many mail apps default to
+   it. Leave Settings › Network › Proxy › Trusted Networks empty. Every
    connection from a network listed there must start with a PROXY
    header or Stalwart drops it, and nothing here sends one: not Envoy,
-   not the edge relay. Client addresses in HTTP logs come from Envoy's
-   forwarded headers, which is a separate HTTP setting.
+   not the edge relay.
+
+   **Client addresses and bans.** Stalwart bans an address after 100
+   failed logins, 35 abuse events or 30 scan hits a day, and applies the
+   HTTP rate limits per address. Two paths share one address unless this
+   is set:
+   - HTTP arrives from envoy-internal. Set Http `clientIpSource`
+     `xForwardedFor` with `forwardedHops` 1, so the address is the one
+     Envoy appends. Only envoy-internal reaches 8080 (network policy), so
+     nobody can supply the header directly. With `peer`, the default,
+     every web, Bulwark and JMAP user was one address
+   - tailnet clients and the edge relay's 2525 arrive from a Connector
+     pod. Add Allowed IP `10.42.0.0/16` (the pod network: Envoy, the
+     Connector, Hermes agents), which is never banned or rate limited.
+     Otherwise one phone retrying a stale app password could ban the
+     Connector, and with it inbound mail from the edge
 
    Add `smtp-edge`: SMTP on 2525, STARTTLS with the certificate from step
    4, no PROXY protocol. Listeners bind at startup, so restart the pod
@@ -135,7 +150,9 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
 6. **Domain**: add `holthome.net`, with DKIM management Automatic (DKIM1
    Ed25519 and RSA), TLS Manual (cert-manager owns the certificate), and
    report address `mailto:postmaster@holthome.net`. Then set up its DNS as
-   in [DNS](#dns).
+   in [DNS](#dns). Set ReportSettings `outboundReportDomain`
+   `holthome.net`: unset, bounces and reports come from
+   `MAILER-DAEMON@localhost.local`, unsigned.
 7. **Outbound**: through SMTP2GO for now ([Outbound](#outbound)), and
    through the edge relay (ADR 0014) once Vultr opens its outbound 25.
 8. **Directory** (ADR 0015), before creating any account, because
@@ -151,8 +168,8 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
      invalid"
    - in Stalwart, add an OIDC directory: issuer `https://id.holthome.net`
      (exactly as Pocket ID reports it), `claimUsername`
-     `preferred_username`, `usernameDomain` the mail domain, `claimGroups`
-     `groups`, and the client id under `acceptedAudiences`. Set it as
+     `preferred_username`, `usernameDomain` the mail domain, no
+     `claimGroups`, and the client id under `acceptedAudiences`. Set it as
      the directory, and the client id as the WebUI Application's
      `oauthClientId`
    - restart the pod after saving the Application
