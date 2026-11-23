@@ -39,7 +39,7 @@ the bucket and the mail in it.
 | --- | --- | --- |
 | `mail.holthome.net` | `envoy-internal`, published by `mikrotik-dns` | WebUI (`/admin`), JMAP, CalDAV, CardDAV, autoconfig |
 | `webmail.holthome.net` | `envoy-internal`, published by `mikrotik-dns` | Bulwark webmail |
-| `mx.holthome.net` | `10.45.10.25`, Service `stalwart-mail` | SMTP 25, 465, 587; IMAP 993; POP3 995; ManageSieve 4190; `smtp-edge` 2525 from the edge relay only |
+| `mx.holthome.net` | `10.45.10.25`, Service `stalwart-mail` | SMTP 25, 465, 587; IMAP 993; ManageSieve 4190; `smtp-edge` 2525 from the edge relay only |
 | MX of each mail domain (public DNS) | The Vultr edge relay | Inbound SMTP from the internet (ADR 0014) |
 
 `mikrotik-dns` only reads HTTPRoutes, so the `mx` A record has to be
@@ -95,9 +95,12 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
 4. **Certificate**: add one with File sources `/etc/stalwart/tls/tls.crt`
    and `/etc/stalwart/tls/tls.key`, and use it on the TLS listeners.
 5. **Listeners**: Stalwart creates 25, 465, 993, 995, 4190, 443 and 8080 on
-   an empty store. Add `submission` on 587 (STARTTLS): the Service and
-   the network policy already carry 587, and many mail apps default to
-   it. Leave Settings › Network › Proxy › Trusted Networks empty. Every
+   an empty store. Delete `pop3s` (995): nothing here uses POP3, and the
+   Service and network policy do not carry it. Delete `https` (443): HTTPS
+   terminates at envoy-internal, which reaches Stalwart on 8080, so 443
+   was never reachable. Add `submission` on 587 (STARTTLS): the Service
+   and the network policy already carry 587, and many mail apps default
+   to it. Leave Settings › Network › Proxy › Trusted Networks empty. Every
    connection from a network listed there must start with a PROXY
    header or Stalwart drops it, and nothing here sends one: not Envoy,
    not the edge relay.

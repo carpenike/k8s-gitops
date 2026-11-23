@@ -73,8 +73,6 @@ spec:
               protocol: TCP
             - port: "993"
               protocol: TCP
-            - port: "995"
-              protocol: TCP
             - port: "4190"
               protocol: TCP
     - fromEndpoints:
@@ -88,8 +86,6 @@ spec:
             - port: "587"
               protocol: TCP
             - port: "993"
-              protocol: TCP
-            - port: "995"
               protocol: TCP
             - port: "4190"
               protocol: TCP
