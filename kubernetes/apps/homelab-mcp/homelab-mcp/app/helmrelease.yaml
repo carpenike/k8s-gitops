@@ -405,13 +405,14 @@ spec:
               # else only through READ_GRANTS, which is empty: each person reads
               # only their own, and no bot reads Steffi's. Ryan's token stays at
               # WITHINGS_TOKEN_PATH; Steffi's is withings-token.steffi.json beside
-              # it. USERIDS pins Steffi's token to her Withings userid. The 0 is a
-              # placeholder until it is known: her first seed is refused and the
-              # refusal names her userid, which goes here (it is not secret).
-              # Seeding now needs --alias (docs/apps/homelab-mcp.md, Withings).
+              # it. USERIDS pins Steffi's token to her Withings userid (her own
+              # Withings account, read from her first seed's refusal on
+              # 2026-11-23; a userid is not secret). A token for any other
+              # Withings user is refused. Seeding needs --alias
+              # (docs/apps/homelab-mcp.md, Withings).
               HOMELAB_MCP_WITHINGS_OWNER_ALIAS: ryan
               HOMELAB_MCP_WITHINGS_USERIDS: >-
-                {"steffi": 0}
+                {"steffi": 31471867}
               HOMELAB_MCP_WITHINGS_READ_GRANTS: "{}"
               # Per-user credentials: who they are kept for, and where. Used by
               # /mcp/steffi and /mcp/replog (docs/apps/homelab-mcp.md). Ryan's
