@@ -59,6 +59,14 @@ Cloudflare, which refuses bodies over 100 MB on this plan, and a 100 MiB
 clip plus multipart overhead is over that. HTTPRoute rule `video-upload`
 matches `POST /api/athletes/*/workouts/*/sets/*/video` and gives it 900
 seconds instead of 300, for a slow uplink.
+
+Web Push rest alerts (also #62) send from the pod to the browser push
+services in replog's `DefaultAllowedHosts`. The pod's network policy
+allows 443 to `fcm.googleapis.com`, `android.googleapis.com`,
+`*.push.apple.com`, `*.push.services.mozilla.com` and
+`*.notify.windows.com`. VAPID keys are generated on first start and kept
+in the database, so no new 1Password field. Video share links (`/s/*`,
+`/api/share/*`) are public by design and go through rule `app`.
 The database starts empty. Forge's files are not copied.
 
 `REPLOG_BASE_URL` is `https://replog.${SECRET_DOMAIN}`.

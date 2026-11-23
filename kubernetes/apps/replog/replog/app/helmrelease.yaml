@@ -40,7 +40,7 @@ spec:
               # Published from main, pinned by commit and digest.
               # Renovate tracks it with the other ghcr.io/carpenike images.
               repository: ghcr.io/carpenike/replog
-              tag: sha-fca4ebb6b9850642b94cabe5c116a39950bac05e@sha256:a6f26c2ae60741a208df138ba549651ed20fc8c2ccfb3c70604f3243845f8cab
+              tag: sha-5d2b3c6655fc947dac87f60dfeec8b2abf2333d1@sha256:5f773df4a3e974aa195be37a7ed58e6d290cb50d5510ac950498b836c3a6d0d6
             env:
               # Forge binds 127.0.0.1:5008 because Caddy is on the same host.
               # Envoy is not. The image default :8080 is the listener.
@@ -184,7 +184,8 @@ spec:
           # In: 8080 from envoy-external and envoy-internal, from
           # Prometheus (the scrape is /metrics on that same port), and from
           # the homelab-mcp pods (the coach tools). Probes come from the
-          # kubelet, which Cilium allows. Out: DNS, then 443 to Pocket ID.
+          # kubelet, which Cilium allows. Out: DNS, then 443 to Pocket ID
+          # and to the Web Push services.
           # Forge reached Pocket ID from the host; this pod has to be
           # allowed the name.
           spec:
@@ -236,6 +237,21 @@ spec:
                         - matchPattern: "*"
               - toFQDNs:
                   - matchName: id.${SECRET_DOMAIN}
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
+              # Web Push rest alerts (carpenike/replog#62). The browser
+              # push services in replog's DefaultAllowedHosts
+              # (internal/push/push.go), 443 only. Endpoints are one label
+              # under these names (web.push.apple.com,
+              # updates.push.services.mozilla.com, wns2-*.notify.windows.com).
+              - toFQDNs:
+                  - matchName: fcm.googleapis.com
+                  - matchName: android.googleapis.com
+                  - matchPattern: "*.push.apple.com"
+                  - matchPattern: "*.push.services.mozilla.com"
+                  - matchPattern: "*.notify.windows.com"
                 toPorts:
                   - ports:
                       - port: "443"
