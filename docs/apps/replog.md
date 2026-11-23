@@ -44,7 +44,21 @@ The client secret is copied from Forge's sops key.
 One replica, `Recreate`. SQLite in WAL mode
 (`modernc.org/sqlite`) at `/data/replog.db` on PVC `replog-data`:
 class `ceph-block` (Ceph RBD), `ReadWriteOnce`, 5Gi. Avatars are
-`/data/avatars` on the same volume. There is no Postgres and no CephFS.
+`/data/avatars` on the same volume. There is no Postgres.
+
+Form-check clips (carpenike/replog#62) are on their own PVC,
+`replog-videos`: class `ceph-filesystem` (CephFS), `ReadWriteMany`, 20Gi,
+mounted at `/videos`, with `REPLOG_VIDEO_DIR=/videos`. The image's default
+is `/data/videos`, which would put clips on the database volume. An image
+built before #62 ignores the variable, and the volume stays empty, so the
+deploy change is safe in either order.
+
+`REPLOG_VIDEO_MAX_MB` is 95, not the app's default 100. Envoy streams
+request bodies and sets no size cap, but the public name is behind
+Cloudflare, which refuses bodies over 100 MB on this plan, and a 100 MiB
+clip plus multipart overhead is over that. HTTPRoute rule `video-upload`
+matches `POST /api/athletes/*/workouts/*/sets/*/video` and gives it 900
+seconds instead of 300, for a slow uplink.
 The database starts empty. Forge's files are not copied.
 
 `REPLOG_BASE_URL` is `https://replog.${SECRET_DOMAIN}`.
@@ -151,6 +165,13 @@ the Ceph RBD snapshot, not the live files. A block snapshot is
 crash-consistent, and SQLite replays the WAL on restore.
 
 Keep 7 daily and 4 weekly. The mover runs as uid 65532.
+
+Clips: `ReplicationSource` `replog-videos`, `copyMethod: Snapshot`, volume
+snapshot class `csi-ceph-filesystem`, nightly at 03:50 UTC, to restic path
+`<REPOSITORY_TEMPLATE>/replog-videos` (ExternalSecret
+`replog-videos-volsync`, same 1Password item). Keep 7 daily and 4 weekly.
+The rows that name the clips are in `replog-data`, which runs more often,
+so a restore can have a row whose clip is newer than the last nightly run.
 
 To restore a cluster backup: scale the Deployment to 0, restore the
 snapshot onto `replog-data`, delete any leftover `-wal` and `-shm` from

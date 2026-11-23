@@ -47,6 +47,14 @@ spec:
               REPLOG_ADDR: ":8080"
               REPLOG_DB_PATH: /data/replog.db
               REPLOG_AVATAR_DIR: /data/avatars
+              # Form-check clips (carpenike/replog#62) on CephFS PVC
+              # replog-videos, not the image default /data/videos on the
+              # RBD volume. An image without video support ignores both.
+              REPLOG_VIDEO_DIR: /videos
+              # 95 MiB, not the default 100: the public name is behind
+              # Cloudflare, which refuses request bodies over 100 MB on
+              # this plan. 100 MiB plus multipart overhead is over that.
+              REPLOG_VIDEO_MAX_MB: "95"
               REPLOG_BASE_URL: https://replog.${SECRET_DOMAIN}
               REPLOG_LOG_FORMAT: json
               REPLOG_METRICS_ENABLED: "true"
@@ -151,6 +159,13 @@ spec:
           replog:
             app:
               - path: /data
+      # CephFS, backed up by ../backup (ReplicationSource replog-videos).
+      videos:
+        existingClaim: replog-videos
+        advancedMounts:
+          replog:
+            app:
+              - path: /videos
       # The root filesystem is read-only. SQLite and the Go runtime use /tmp.
       tmp:
         type: emptyDir

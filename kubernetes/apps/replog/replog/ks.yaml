@@ -56,6 +56,10 @@ spec:
       kind: ExternalSecret
       name: replog-volsync
       namespace: replog
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: replog-videos-volsync
+      namespace: replog
   interval: 1h
   path: ./kubernetes/apps/replog/replog/backup
   prune: true

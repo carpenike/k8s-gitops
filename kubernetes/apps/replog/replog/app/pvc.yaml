@@ -14,3 +14,23 @@ spec:
   resources:
     requests:
       storage: 5Gi
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# Form-check video clips (REPLOG_VIDEO_DIR, carpenike/replog#62). CephFS
+# (class ceph-filesystem), the same shape as openproject's attachments
+# volume. Kept off replog-data so large clips never fill the SQLite volume
+# and are backed up on their own schedule (../backup). The image's default
+# REPLOG_VIDEO_DIR is /data/videos; the HelmRelease points it here instead.
+# An image without video support ignores the variable and the volume stays
+# empty. See docs/apps/replog.md.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: replog-videos
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ceph-filesystem
+  resources:
+    requests:
+      storage: 20Gi
