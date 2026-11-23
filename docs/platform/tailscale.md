@@ -65,8 +65,8 @@ the `tailscale0` MTU problem.
        // Grok Bot, once its device is tagged (see below).
        { "src": ["tag:grokbot"], "dst": ["10.45.10.50/32"], "ip": ["tcp:443"] },
        { "src": ["tag:grokbot"], "dst": ["10.20.0.1/32"],   "ip": ["udp:53", "tcp:53"] },
-       // Mail clients on your own devices: submission, IMAP, POP3, Sieve.
-       { "src": ["autogroup:member"], "dst": ["10.45.10.25/32"], "ip": ["tcp:465", "tcp:587", "tcp:993", "tcp:995", "tcp:4190"] },
+       // Mail clients on your own devices: submission, IMAP, Sieve.
+       { "src": ["autogroup:member"], "dst": ["10.45.10.25/32"], "ip": ["tcp:465", "tcp:587", "tcp:993", "tcp:4190"] },
        // The Vultr edge relay (ADR 0014): its delivery port only.
        { "src": ["tag:mx-edge"], "dst": ["10.45.10.25/32"], "ip": ["tcp:2525"] },
      ],

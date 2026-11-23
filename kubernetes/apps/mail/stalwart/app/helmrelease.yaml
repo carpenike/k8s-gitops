@@ -17,7 +17,9 @@
 # database, managed from the WebUI or stalwart-cli apply. On an empty store
 # Stalwart creates the listeners smtp 25, submissions 465, imaps 993, pop3s
 # 995, sieve 4190, https 443 and http 8080
-# (crates/common/src/manager/defaults.rs at v1.1.0).
+# (crates/common/src/manager/defaults.rs at v1.1.0). Here pop3s and https
+# are deleted (nothing used POP3; HTTPS terminates at envoy-internal), and
+# submission 587 and smtp-edge 2525 are added (docs/apps/mail.md).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -169,8 +171,6 @@ spec:
             port: 587
           imaps:
             port: 993
-          pop3s:
-            port: 995
           sieve:
             port: 4190
           # Listener smtp-edge: mail relayed by the Vultr edge (ADR 0014)
