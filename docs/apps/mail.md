@@ -60,9 +60,10 @@ Vault `k8s-secrets`:
 | --- | --- | --- |
 | `stalwart` | `database_password` | Role `stalwart` on `postgres17`. Read by `cnpg-system` and `mail` |
 | `stalwart` | `admin_password` | `STALWART_RECOVERY_ADMIN=admin:<password>`. Always accepted as an administrator while set |
-| `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zone `holthome.net` only, for automatic DNS ([DNS](#dns)) |
+| `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zones `holthome.net`, `ryanholt.net`, `stefanieholt.com` and `devialea.com`, for automatic DNS ([DNS](#dns), [More mail domains](#more-mail-domains)) |
 | `stalwart` | `smtp2go_password` | `STALWART_SMTP2GO_PASSWORD`. Password of the SMTP2GO SMTP user, for the interim outbound route ([Outbound](#outbound)) |
 | `stalwart` | `smtp2go_username` | That SMTP user's name. Not read by the cluster: it is typed into the route |
+| `stalwart` | `metrics_password` | `STALWART_METRICS_PASSWORD`. Basic auth for `/metrics/prometheus`, shared with the ServiceMonitor ([Metrics](#metrics)) |
 | `bulwark` | `session_secret` | `SESSION_SECRET` for Bulwark, at least 32 characters (`openssl rand -base64 32`) |
 | `stalwart-r2` | `access_key_id`, `secret_access_key`, `endpoint_url`, `bucket` | The blob copy. Same values as `postgres17-r2`: the same R2 token and bucket, with blobs under `stalwart/blobs/` beside Barman's `cnpg/postgres17/`. Rotating the `postgres17-r2` token means updating both items |
 
@@ -380,6 +381,27 @@ Pocket ID only, then the browser calls Stalwart's JMAP API at
 Each browser keeps its own Bulwark settings. Settings sync and Bulwark's
 admin dashboard are off, and the pod keeps nothing, so a restart costs
 nothing but a fresh page load.
+
+## Metrics
+
+Stalwart serves Prometheus metrics (`stalwart_*`) at `/metrics/prometheus`
+on its HTTP listener, 8080. The HTTPRoute sends every path on
+`mail.holthome.net` there, so the endpoint takes Basic auth:
+
+- 1Password item `stalwart`, field `metrics_password` (any strong
+  random value). ExternalSecret `stalwart-metrics` turns it into
+  `STALWART_METRICS_USERNAME` (`prometheus`) and
+  `STALWART_METRICS_PASSWORD`; the pod gets both through `envFrom`
+- In the WebUI, Settings › Telemetry › Metrics › Prometheus: `Enabled`,
+  user `prometheus`, secret EnvironmentVariable
+  `STALWART_METRICS_PASSWORD`. Set it only after the pod has the
+  variable, or the endpoint stays off
+- The app-template ServiceMonitor scrapes every 60 s with the same
+  Secret, and the network policy admits the Prometheus pods on 8080
+
+Check: `curl -s -u prometheus:<password>
+https://mail.holthome.net/metrics/prometheus | head` returns
+`stalwart_` series, and without the password it returns 401.
 
 ## Restore
 
