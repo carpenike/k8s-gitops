@@ -108,10 +108,20 @@ that path.
 ## Image
 
 The HelmRelease pins
-`ghcr.io/carpenike/replog:sha-2e2fc2b9717c1b7aa2414fadb0ebede4260fbab3@sha256:3899fc3e5ffc413f7c4efe28ab138a15de28ee0cbddd408c6a9fd5e2c10ca4c8`.
+`ghcr.io/carpenike/replog:sha-7f52207d2a05d806981852e34752b68fa43986b3@sha256:f3ea0d31a0023060aa50d65c9e669533b15d2b6cef5b10b8c4921c352c93979a`.
 Renovate tracks that image with the other `ghcr.io/carpenike` images.
 This repo has no Flux ImagePolicy. Merging does not move
 `replog.holthome.net` off Forge.
+
+The app runs its goose migrations on start, so a new image migrates the
+SQLite database on the RBD volume before it serves. Image `7f52207`
+(replog#65, ADR 028) adds migration 0028: nullable
+`workouts.program_week`/`program_day`. RepLog stores the program day each
+session really was, from backfill `program_week`/`program_day` or a live
+session start, and plan-vs-done compares against that template day. Rows
+from before 0028 keep the day counted from earlier sessions. Check the
+version with `kubectl -n replog logs deploy/replog | grep goose` (expect
+`version: 28`).
 
 ## 1Password
 
