@@ -18,7 +18,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
 | `/mcp/agent/grokbot` | the `hermes` list, plus `finances_transactions` and `finances_categorize` (category and notes only; no rules, payee merges or loan writes), school reads, Cooklang reads, every MFP tool, the Obsidian vault (`vault_*`: reads and writes every personal domain (fitness, inbox, property, tech, family-history, finances, health, church, education, wardrobe), reads `agents`; no move or delete), and the OpenProject handoff board as user `grokbot` (`openproject_*`, Personal and Bots only) | `grokbot` | Grokbot (every Grokbot agent) |
-| `/mcp/steffi` | Grocy (reads and stock writes, as her) and Cooklang reads | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
+| `/mcp/steffi` | Grocy (reads and stock writes, as her), Cooklang reads, and her own Withings readings | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 | `/mcp/replog` | `scope:atrium-personal-replog`. Not `"read"` or `"all"` | `atrium-personal-replog` and `atrium-personal-replog.write` | Ryan only (`ryan@ryanholt.net`). `credentials: "per_user"`: the bearer is `replog.ryan`, never `HOMELAB_MCP_REPLOG_TOKEN` |
 
@@ -205,6 +205,36 @@ refuses to load such a policy, and with no valid policy every vault tool
 refuses every caller. Adding a domain is an edit to that file and a pod
 restart (reloader does it), never an image change. Moves and deletes are
 preview then confirm.
+
+### Withings
+
+Ryan and Steffi share one Withings Body Scan, each under their own Withings
+user, so each has their own OAuth token on the state volume (carpenike/mcp
+0.70.0). A call reads the caller's own token, chosen from the verified email
+through `HOMELAB_MCP_USERS`. `HOMELAB_MCP_WITHINGS_READ_GRANTS` is empty, so
+neither reads the other's and no bot reads Steffi's (Ryan, 2026-11-23).
+Ryan's token is `withings-token.json`; Steffi's is
+`withings-token.steffi.json` beside it. `HOMELAB_MCP_WITHINGS_USERIDS` pins
+her token to her Withings userid, and a token for any other user is refused.
+
+To authorize Steffi (once, and again after a restore), she runs this herself,
+in a private browser window so Withings does not reuse Ryan's sign-in, and
+picks her own user if the consent page asks:
+
+```sh
+WITHINGS_CLIENT_ID=op://k8s-secrets/homelab-mcp-withings/client_id \
+WITHINGS_CLIENT_SECRET=op://k8s-secrets/homelab-mcp-withings/client_secret \
+op run -- python3 scripts/withings_authorize.py \
+  | kubectl -n homelab-mcp exec -i deploy/homelab-mcp -c app -- \
+      python -m homelab_mcp.tools._withings seed --alias steffi
+```
+
+`scripts/withings_authorize.py` is in carpenike/mcp. While her pin is the
+placeholder `0`, that seed is refused with "the token is for Withings user
+N, not the pinned 0". Put N in `HOMELAB_MCP_WITHINGS_USERIDS`, let Flux roll
+the pod, and run it again. Re-authorizing Ryan is the same command with
+`--alias ryan`. Until her token exists, `HomelabMcpWithingsTokenUnusable`
+fires for `alias="steffi"`.
 
 ## 1Password
 
