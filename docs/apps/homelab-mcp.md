@@ -229,10 +229,11 @@ op run -- python3 scripts/withings_authorize.py \
       python -m homelab_mcp.tools._withings seed --alias steffi
 ```
 
-`scripts/withings_authorize.py` is in carpenike/mcp. While her pin is the
-placeholder `0`, that seed is refused with "the token is for Withings user
-N, not the pinned 0". Put N in `HOMELAB_MCP_WITHINGS_USERIDS`, let Flux roll
-the pod, and run it again. Re-authorizing Ryan is the same command with
+`scripts/withings_authorize.py` is in carpenike/mcp. Steffi has her own
+Withings account (the scale is shared with it), so sign in with her login.
+Her pin is userid `31471867`; a seed of any other user's token is refused
+with "the token is for Withings user N, not the pinned …". For a new
+person, pin a placeholder `0` first: the refusal names their userid. Re-authorizing Ryan is the same command with
 `--alias ryan`. Until her token exists, `HomelabMcpWithingsTokenUnusable`
 fires for `alias="steffi"`.
 
