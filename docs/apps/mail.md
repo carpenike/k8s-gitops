@@ -153,6 +153,14 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    in [DNS](#dns). Set ReportSettings `outboundReportDomain`
    `holthome.net`: unset, bounces and reports come from
    `MAILER-DAEMON@localhost.local`, unsigned.
+   Then, in Settings › Network › General, set `defaultHostname`
+   `mx.holthome.net` and the default domain `holthome.net`. A new store
+   leaves the hostname blank and the default domain pointing at nothing,
+   and Stalwart falls back to `STALWART_HOSTNAME`. The hostname goes into
+   `Received` and `Message-ID` headers, bounces and reports, and the MX
+   it publishes, and has to match the edge's reverse DNS and the
+   certificate. The form will not save the hostname without a valid
+   default domain.
 7. **Outbound**: through SMTP2GO for now ([Outbound](#outbound)), and
    through the edge relay (ADR 0014) once Vultr opens its outbound 25.
 8. **Directory** (ADR 0015), before creating any account, because
@@ -425,7 +433,11 @@ repo; its Stalwart settings live in its own store, not in either repo.
      `is_local_domain(rcpt_domain)` → `'local'`, add
      `rcpt_domain == 'holthome.net' || rcpt_domain == 'ryanholt.net' ||
      rcpt_domain == 'stefanieholt.com' || rcpt_domain == 'devialea.com'`
-     → `'cluster'`, `else` `'mx'`
+     → `'cluster'`, `else` `'mx'`. Set `tls` to just `'default'`: the
+     default rule `retry_num > 0 && last_error == 'tls'` → `'invalid-tls'`
+     retries a failed TLS delivery without checking the certificate
+   - **Hostname.** `defaultHostname` `mx.holthome.net`, default domain
+     `mx.holthome.net`, for the same reasons as the cluster's
    - **Sender checks.** SenderAuth `dmarcVerify` `strict` when
      `local_port == 25` (the default `relaxed` records a failure but
      accepts the mail), so `p=reject` domains, `holthome.net` included,
