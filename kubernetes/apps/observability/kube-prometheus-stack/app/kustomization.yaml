@@ -7,4 +7,5 @@ resources:
   - ./ocirepository.yaml
   - ./monitors/flux.yaml
   - ./monitors/envoy-gateway.yaml
+  - ./monitors/mx-edge.yaml
   - ./rules/node-network.yaml

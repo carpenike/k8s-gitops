@@ -518,6 +518,33 @@ the address to the edge's `allowRelaying` expression. Adding a domain:
 also add it to the edge's `route` expression, or the edge sends its mail
 to the domain's MX instead of the cluster.
 
+## Monitoring the edge
+
+The cluster's Prometheus scrapes the Vultr edge over the tailnet:
+
+| Piece | Where |
+| --- | --- |
+| node-exporter on 9100, systemd collector, open on `tailscale0` only | nix-config `hosts/mx-edge/monitoring.nix` |
+| Stalwart's `/metrics/prometheus` on 8080 (already tailnet only), Basic auth `prometheus` | the edge's Metrics › Prometheus, secret `Value` set over its admin API |
+| Egress Service `observability/mx-edge` (`tailscale.com/tailnet-ip`), ExternalSecret `mx-edge-metrics`, ScrapeConfigs `mx-edge-node` and `mx-edge-stalwart` | `kubernetes/apps/observability/kube-prometheus-stack/app/monitors/mx-edge.yaml` |
+| Alerts for both servers | `kubernetes/apps/mail/stalwart/app/prometheusrule.yaml` |
+
+- **Tailnet grant:** `tag:k8s` to `tag:mx-edge` on `tcp:8080` and
+  `tcp:9100` ([tailscale.md](../platform/tailscale.md)). The operator
+  runs the egress proxy as `tag:k8s`.
+- **Password:** 1Password item `mx-edge`, field `metrics_password`. Store
+  it before the ScrapeConfig reaches the cluster: like the
+  ServiceMonitor in [Metrics](#metrics), the operator rejects a scrape
+  whose Basic-auth Secret is missing and does not retry until restarted.
+- **Tailnet address:** the egress Service names the edge by its tailnet
+  IP, which changes if the VM re-joins the tailnet. Update the
+  annotation after a rebuild.
+- **Alerts:** the edge unreachable, its Stalwart down or its container
+  unit inactive, a failed nightly upgrade, its disk over 85%, a queue
+  over 20 messages for 30 minutes on either server, the cluster's
+  Stalwart down, and over 30 failed logins in 15 minutes. Nothing
+  exports the edge's certificate expiry, so it has no alert.
+
 ## More mail domains
 
 `ryanholt.net` and `stefanieholt.com` move here from Microsoft 365
