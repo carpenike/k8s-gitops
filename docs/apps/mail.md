@@ -595,8 +595,7 @@ Cutover, per domain:
    and let SMTP2GO add its CNAMEs through its Cloudflare connection.
    SMTP2GO refuses mail from a sender domain it has not verified.
 4. **Mailbox.** Copy the Microsoft 365 mailbox into the account (not
-   for `devialea.com`). Microsoft 365 IMAP takes OAuth only, so use a
-   mail client signed in to both, or imapsync with an OAuth token.
+   for `devialea.com`), as in [Copying a mailbox](#copying-a-mailbox).
 5. **Records.** For `devialea.com`, first turn off Email Routing for
    the zone: it locks its MX records and deletes them with itself. Its
    SPF include and its Cloudflare DMARC report address go too.
@@ -608,8 +607,67 @@ Cutover, per domain:
 6. **Check.** Mail from outside arrives through the edge, mail sent from
    the alias passes DKIM and DMARC at Gmail, and nothing new arrives in
    Microsoft 365 or through Cloudflare's forwarding.
-7. **Retire.** After a few quiet days, copy anything left, remove the
-   domain from the tenant, and drop any `MS=` record.
+7. **Retire.** After a few quiet days, run the copy once more, remove
+   the domain from the tenant, and drop any `MS=` record.
+
+### Copying a mailbox
+
+[Vandelay](https://stalw.art/docs/migration/), Stalwart's migration
+tool, copies a mailbox in two steps that meet at a local SQLite
+archive. `vandelay import exchange-graph` reads the Microsoft 365
+mailbox over Microsoft Graph, and `vandelay export` writes the archive
+to the Stalwart account over JMAP.
+
+It runs in Deployment `stalwart-migration` (`stalwart/migration/`, a
+separate Flux Kustomization), because an archive is about the size of
+the mailbox. The archives sit on its 60 GiB `ceph-block` volume, which
+can be grown. The pod fetches the pinned Vandelay release and checks
+its SHA-256 at start, then idles. Each step is a `kubectl exec`. The
+toolbox is temporary: remove the directory and its Kustomization once
+the domains have moved, which deletes the volume and the archives.
+
+Graph sign-in uses Entra app `Vandelay mail migration` in the tenant: a
+public client with no secret, single tenant, with admin consent for
+`User.Read Mail.Read MailboxSettings.Read Calendars.Read Contacts.Read
+Files.Read offline_access`. Those are delegated permissions, so the app
+reads only the mailbox of whoever signs in. Its client ID is on the
+app's Overview page in Entra. Delete the app after the last copy.
+
+Per mailbox, here Ryan's:
+
+```sh
+kubectl -n mail exec -it deploy/stalwart-migration -- \
+  vandelay import exchange-graph --objects mail \
+    --client-id <client id> --tenant holt.onmicrosoft.com \
+    ryan-m365.sqlite
+```
+
+It prints a code for <https://login.microsoft.com/device>. The mailbox's
+owner signs in there. Then compare, and write:
+
+```sh
+kubectl -n mail exec -it deploy/stalwart-migration -- sh -c \
+  'vandelay export --dry-run --url "$STALWART_URL" --auth-basic admin \
+     --account-name ryan@holthome.net --objects mailbox,email \
+     ryan-m365.sqlite'
+```
+
+Run it again without `--dry-run` to write. The export signs in as the
+recovery administrator (`VANDELAY_PASSWORD`, from field
+`admin_password` of item `stalwart`) and writes to the named account.
+
+- `--objects mailbox,email` matters. Without it the export also sets
+  the account's active Sieve script to the archive's, and a Microsoft
+  365 archive has none, so it would switch off the account's `filters`
+  script and its Junk rule.
+- The export matches each message with the account by its Message-ID
+  header, in any folder, and creates only what matches nothing. Running
+  it again, or after mail has already arrived here, creates no
+  duplicates. A message that already exists keeps its folder and flags.
+- Running the import again reads only messages new since the last run.
+  Read state and folder moves made in Outlook after the first import
+  are not copied. The final pass after the MX switch is the same two
+  commands.
 
 ## Agent mailboxes
 

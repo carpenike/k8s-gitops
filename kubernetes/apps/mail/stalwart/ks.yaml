@@ -70,3 +70,35 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: mail
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Temporary toolbox for copying Microsoft 365 mailboxes into Stalwart with
+# Vandelay (migration/; docs/apps/mail.md, "Copying a mailbox"). Remove it,
+# and its volume with it, once the domains have moved.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: stalwart-migration
+spec:
+  dependsOn:
+    - name: stalwart
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: stalwart-migration
+      namespace: mail
+  interval: 1h
+  path: ./kubernetes/apps/mail/stalwart/migration
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: mail
+  timeout: 10m
