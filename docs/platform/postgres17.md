@@ -79,7 +79,7 @@ chart ships no rules, so nothing else covers this.
 | `Postgres17BackupStale` | No good base backup in 30 h (or none ever), for 1 h | `kubectl -n cnpg-system get scheduledbackup postgres17-r2-daily` |
 | `Postgres17MetricsAbsent` | Prometheus has no postgres17 series for 30 min, so the alerts above cannot fire | `kubectl -n cnpg-system get podmonitor postgres17` |
 
-While WAL cannot be archived it stays in `pg_wal` on the 20 GiB volume, so
+While WAL cannot be archived it stays in `pg_wal` on the 60 GiB volume, so
 a failing archive eventually fills the disk. Treat the first alert as
 urgent.
 
