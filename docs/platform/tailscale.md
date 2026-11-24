@@ -69,6 +69,9 @@ the `tailscale0` MTU problem.
        { "src": ["autogroup:member"], "dst": ["10.45.10.25/32"], "ip": ["tcp:465", "tcp:587", "tcp:993", "tcp:4190"] },
        // The Vultr edge relay (ADR 0014): its delivery port only.
        { "src": ["tag:mx-edge"], "dst": ["10.45.10.25/32"], "ip": ["tcp:2525"] },
+       // Prometheus scraping the edge through the operator's egress proxy
+       // (docs/apps/mail.md, "Monitoring the edge").
+       { "src": ["tag:k8s"], "dst": ["tag:mx-edge"], "ip": ["tcp:8080", "tcp:9100"] },
      ],
    }
    ```
