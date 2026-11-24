@@ -24,9 +24,13 @@ spec:
   failoverDelay: 120
   # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
   imageName: ghcr.io/cloudnative-pg/postgresql:17.9
+  # 60Gi from 20Gi (24 Nov 2026) before copying Microsoft 365 mail into
+  # Stalwart, whose metadata and full-text index live here (database
+  # stalwart). ceph-block expands in place (resizeInUseVolumes defaults to
+  # true); a volume cannot shrink.
   storage:
     storageClass: ceph-block
-    size: 20Gi
+    size: 60Gi
   resources:
     requests:
       cpu: 100m
