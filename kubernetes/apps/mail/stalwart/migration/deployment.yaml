@@ -42,11 +42,14 @@ spec:
           command:
             - /bin/sh
             - -ec
+            # $${...} is Flux's escape: postBuild substitution (strict, in
+            # ../ks.yaml) turns it into ${...} for the shell instead of
+            # failing on a variable that cluster-secrets does not define.
             - |
               cd /tmp
               curl -fsSLo vandelay.tar.gz \
-                "https://github.com/stalwartlabs/vandelay/releases/download/v${VANDELAY_VERSION}/vandelay-x86_64-unknown-linux-musl.tar.gz"
-              echo "${VANDELAY_SHA256}  vandelay.tar.gz" | sha256sum -c -
+                "https://github.com/stalwartlabs/vandelay/releases/download/v$${VANDELAY_VERSION}/vandelay-x86_64-unknown-linux-musl.tar.gz"
+              echo "$${VANDELAY_SHA256}  vandelay.tar.gz" | sha256sum -c -
               tar -xzf vandelay.tar.gz
               cp vandelay-x86_64-unknown-linux-musl/vandelay /opt/vandelay/vandelay
               chmod 0755 /opt/vandelay/vandelay
