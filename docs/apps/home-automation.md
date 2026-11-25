@@ -192,11 +192,12 @@ disables Forge's `zwave-js-ui` (dataset kept) and runs
    `systemctl daemon-reload`. Tar `/var/lib/zwave-js-ui` to `/var/backup`.
 2. Copy `/var/lib/zwave-js-ui` into `zwave-js-ui-store` the same way as
    zigbee2mqtt (a busybox pod on the volume, `ssh forge 'sudo tar …' |
-   kubectl exec -i … tar -x`). The pod runs as root, so no uid is needed.
-   In the copied `settings.json`, set `mqtt.host` to
-   `emqx.home-automation.svc.cluster.local`; the user and password are
-   Forge's and the broker has them. The serial port needs no edit:
-   `ZWAVEJS_SERIAL_PORT=/dev/zwave` overrides it.
+   kubectl exec -i … tar -x`), leaving out `logs/`. The pod runs as
+   root, so no uid is needed. `settings.json` needs no edit: MQTT is
+   disabled there (Home Assistant uses the WebSocket server), and
+   `ZWAVEJS_SERIAL_PORT=/dev/zwave` overrides the serial port. If MQTT is
+   turned on later, its host is `emqx.home-automation.svc.cluster.local`,
+   user `zwave-js-ui`.
 3. Merge this repo's pull request, then the nix-config one, and apply that
    on Forge. Home Assistant keeps its URL: Forge's loopback `:3002` now
    relays to `10.45.10.31:3002`, which accepts only Forge.
