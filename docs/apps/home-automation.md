@@ -75,7 +75,10 @@ Vault `k8s-secrets`. Values come from Forge's sops file
 | --- | --- | --- |
 | `emqx` | `dashboard_password`, `home_assistant_password`, `zigbee2mqtt_password`, `zwave_js_ui_password`, `frigate_password`, `teslamate_password`, `scrypted_password` | Broker bootstrap users; each client's own password. Forge keys `emqx/dashboard_password`, `home-assistant/mqtt-password`, `zigbee2mqtt/mqtt_password`, `zwave-js-ui/mqtt_password`, and the Frigate, TeslaMate and Scrypted ones |
 | `zwave-js-ui` | `session_secret`, `s0_legacy_key`, `s2_unauthenticated_key`, `s2_authenticated_key`, `s2_access_control_key`, `s2_long_range_key`, `s2_long_range_access_control_key` | Forge keys `zwave-js-ui/*`. Must be Forge's values, or secure nodes stop answering |
+<<<<<<< HEAD
 | `zigbee2mqtt` | `network_key`, `pan_id`, `ext_pan_id` | Forge keys `zigbee2mqtt/*`, exactly as stored there (the PAN ids are what Forge puts in `ZIGBEE2MQTT_CONFIG_ADVANCED_*`). The PAN ids go into the environment; `network_key` is a record, since the copied `secret.yaml` already holds it |
+=======
+>>>>>>> 8021f52aad51026723b8eb762253890511a53d49
 | `home-assistant-env` | One field per variable in Forge's `home-assistant/env`, named as the variable | `extract` into the container environment |
 | `home-assistant-recorder` | `db_password` | Role `hass_recorder` in postgres17. New value |
 | `home-assistant-gitops` | `deploy_key`, `webhook_id` | git-sync. The deploy key's public half goes on hass-config with write access off. The webhook id is a random string |
@@ -90,7 +93,11 @@ dashboard's authorization metrics show no misses for a week.
 
 ## Before the cutovers
 
+<<<<<<< HEAD
 - [ ] 1Password items above exist (six); every ExternalSecret in the namespace
+=======
+- [ ] 1Password items above exist; every ExternalSecret in the namespace
+>>>>>>> 8021f52aad51026723b8eb762253890511a53d49
       is `SecretSynced`
 - [ ] hass-config prep PR merged (real `configuration.yaml`, portable
       script calls, CI, `packages/gitops.yaml`), branch protection on
