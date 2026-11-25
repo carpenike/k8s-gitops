@@ -49,6 +49,7 @@ Node config and first install are next to the files they describe:
 | [matrix.md](apps/matrix.md) | Tuwunel homeserver, first admin, and Hermes bot provisioning |
 | [mail.md](apps/mail.md) | Stalwart mail server: postgres17 and RGW storage, backups, names, and first-run setup |
 | [scrypted.md](apps/scrypted.md) | Scrypted NVR on VLAN 30 |
+| [home-automation.md](apps/home-automation.md) | EMQX, zigbee2mqtt, Z-Wave JS UI and Home Assistant moved from Forge; hass-config deployed by git-sync; the four cutovers |
 | [schoolhouse.md](apps/schoolhouse.md) | Schoology ingest CronJob and health server |
 | [lading.md](apps/lading.md) | Amazon, Costco and Sam's Club sync per account, and token seeds |
 | [replog.md](apps/replog.md) | Family workout log, moved from Forge, public at `replog.` |
@@ -89,3 +90,4 @@ Records use the [MADR](https://adr.github.io/madr/) headings.
 | [0014](adr/0014-mail-edge-relay.md) | Inbound mail through a Stalwart edge relay on Vultr, over the tailnet | proposed |
 | [0015](adr/0015-mail-pocket-id.md) | Stalwart accounts from Pocket ID | proposed |
 | [0016](adr/0016-obsidian-headless-sync.md) | Obsidian vault for the agents, via Obsidian's headless Sync client | proposed |
+| [0018](adr/0018-home-automation.md) | Home automation on the Talos cluster | proposed |

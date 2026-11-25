@@ -1,0 +1,61 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# eth0 only: the VLAN 30 interface (net1, macvlan) is outside Cilium, so
+# HomeKit, Sonos callbacks and WeatherFlow UDP there are not filtered here.
+#
+# In: 8123 from envoy-internal only. That is what makes trusted_proxies
+# 10.42.0.0/16 in configuration.yaml safe: no other pod can reach 8123 to
+# send a forged X-Forwarded-For.
+# Out: DNS; the broker; the Z-Wave WebSocket; postgres17; GitHub SSH for
+# git-sync; and `world`, i.e. the LAN devices, Forge and cloud integrations
+# (Home Assistant talks to dozens of them). No other pod in the cluster.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: home-assistant
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: emqx
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: zwave-js-ui
+      toPorts:
+        - ports:
+            - port: "3002"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEntities:
+        - world

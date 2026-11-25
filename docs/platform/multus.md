@@ -85,7 +85,8 @@ interface.
 ## Annotation
 
 The attachment lives in `kube-system`. An app in another namespace names
-that namespace. Scrypted uses `10.30.0.31/16`. The VLAN 30 DHCP pool
+that namespace. Scrypted uses `10.30.0.31/16`. Home Assistant uses `10.30.0.32/16`
+(ADR 0018). The VLAN 30 DHCP pool
 `wireless_pool` is `10.30.100.1`–`10.30.100.254`, so `10.30.0.31` is
 outside it and needs no reservation. That address has to stay outside
 `10.30.100.0/24`. `10.30.0.30` and `10.30.0.116` are already static on

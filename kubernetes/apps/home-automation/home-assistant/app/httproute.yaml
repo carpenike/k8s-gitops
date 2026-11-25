@@ -1,0 +1,40 @@
+---
+# Home Assistant has its own login, and the mobile app and the API clients
+# (homelab-mcp, Hermes) cannot complete the gateway Pocket ID login, so the
+# route opts out (label app, envoy-internal only). Phones away from home use
+# the house VPN; there is no envoy-external route and no tunnel rule.
+# Forge's Caddy made the same exception. docs/platform/gateway-auth.md.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: home-assistant
+  labels:
+    gateway.holthome.net/auth: app
+spec:
+  hostnames:
+    - ha.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    # The websocket API and long-polling stay open.
+    - timeouts:
+        request: 0s
+        backendRequest: 0s
+      backendRefs:
+        - name: home-assistant
+          port: 8123
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: home-assistant-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: home-assistant

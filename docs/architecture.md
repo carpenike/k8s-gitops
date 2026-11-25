@@ -48,6 +48,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Dashboard | Headlamp, read-only, internal gateway | chart 0.46.0 |
 | Matrix | Tuwunel, `ryanholt.net`, external gateway (see [matrix.md](apps/matrix.md)) | v1.9.4 |
 | Mail | Stalwart: data on `postgres17`, blobs in Ceph RGW bucket `stalwart-blobs`, LoadBalancer `10.45.10.25` for SMTP and IMAP, internal gateway for the WebUI, accounts from Pocket ID, inbound from the internet through a Stalwart edge relay on Vultr over the tailnet, Bulwark webmail (see [mail.md](apps/mail.md), ADR 0013, 0014, 0015, 0017) | v1.1.0, Bulwark 1.21.1 |
+| Home automation | EMQX (one node), zigbee2mqtt, Z-Wave JS UI (USB stick on one sled) and Home Assistant (`vlan30` `10.30.0.32`, recorder on `postgres17`, config from hass-config by git-sync); shipped at replicas 0, moving from Forge (see [home-automation.md](apps/home-automation.md), ADR 0018) | EMQX 6.3.3, zigbee2mqtt 2.14.2, Z-Wave JS UI 11.27.0, Home Assistant 2026.10.1 |
 | Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see [hermes.md](apps/hermes.md)) | v0.23.0 |
 | Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see [website.md](apps/website.md)) | 1.31.7 |
 | Workout log | replog, moving off Forge, SQLite on Ceph RBD, public gateway, one replica. Merging does not move the name off Forge (see [replog.md](apps/replog.md)) | `sha-7f52207d2a05d806981852e34752b68fa43986b3` |
@@ -88,6 +89,7 @@ VLAN themselves. The phones are on VLAN 30. Cameras are on VLAN 50
 is `10.30.0.1`. Scrypted's address is `10.30.0.31/16`, which has to stay
 outside the wireless DHCP pool `10.30.100.0/24`. The app is
 `kubernetes/apps/scrypted`. ADR 0008 and [scrypted.md](apps/scrypted.md).
+Home Assistant's address is `10.30.0.32/16` (ADR 0018).
 Cilium `cni.exclusive` is false
 and `devices` stays `ens1f0`. See [multus.md](platform/multus.md) and ADR 0007.
 
@@ -231,8 +233,10 @@ the November 2026 sled-1 frame errors.
 
 ## What stays off the cluster
 
-Plex, transcode, home automation, USB radios, and Pocket ID stay on
-Forge. Scrypted runs here and reaches the cameras on VLAN 50 from its
+Plex, transcode, and Pocket ID stay on Forge. Home automation (Home
+Assistant, zigbee2mqtt, Z-Wave JS UI with its USB stick, and EMQX) is
+moving here, ADR 0018 and [home-automation.md](apps/home-automation.md).
+Scrypted runs here and reaches the cameras on VLAN 50 from its
 VLAN 30 address. ADR 0008. The NAS boxes serve files and backups. They
 are not Kubernetes nodes. Garage on the backup NAS is a NixOS change,
 not a manifest in this repo.

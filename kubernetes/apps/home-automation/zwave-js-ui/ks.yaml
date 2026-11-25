@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: zwave-js-ui
+spec:
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: ceph-csi-drivers
+      namespace: rook-ceph
+    - name: external-secrets
+      namespace: external-secrets
+    - name: envoy-gateway
+      namespace: network
+    - name: emqx
+    - name: node-feature-discovery-rules
+      namespace: kube-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: zwave-js-ui
+      namespace: home-automation
+  interval: 1h
+  path: ./kubernetes/apps/home-automation/zwave-js-ui/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: home-automation
+  timeout: 10m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# The VolSync backup. Nothing depends on it, so a missing 1Password item
+# keeps only this Kustomization unready.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: zwave-js-ui-backup
+spec:
+  dependsOn:
+    - name: zwave-js-ui
+    - name: volsync
+      namespace: volsync-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: zwave-js-ui-volsync
+      namespace: home-automation
+  interval: 1h
+  path: ./kubernetes/apps/home-automation/zwave-js-ui/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: home-automation
+  timeout: 5m

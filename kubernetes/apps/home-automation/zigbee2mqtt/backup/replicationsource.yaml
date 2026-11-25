@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# zigbee2mqtt's data directory: database.db, the coordinator backup, devices.yaml and groups.yaml. Hourly, toward Forge's 15-minute RPO for this dataset.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: zigbee2mqtt
+spec:
+  sourcePVC: zigbee2mqtt-data
+  trigger:
+    schedule: "5 * * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: zigbee2mqtt-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: zigbee2mqtt-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      hourly: 24
+      daily: 7
+      weekly: 4
