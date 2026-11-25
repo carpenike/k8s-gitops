@@ -7,30 +7,34 @@
 #
 # Idempotent. A real file or directory found where a link belongs (the copy
 # from Forge at cutover) is moved to /config/.pre-gitops/ once, not deleted.
+#
+# Flux postBuild substitution runs over this file (it is in a generated
+# ConfigMap) and replaces every braced variable, so variables here are
+# written $VAR, without braces.
 set -eu
 
 CHECKOUT=/git/hass-config
 PATHS="configuration.yaml packages dashboards scripts blueprints custom_sentences www/streamline-card"
 
-[ -d "${CHECKOUT}" ] || { echo "no checkout at ${CHECKOUT}" >&2; exit 1; }
-[ -f "${CHECKOUT}/configuration.yaml" ] || { echo "checkout has no configuration.yaml" >&2; exit 1; }
+[ -d "$CHECKOUT" ] || { echo "no checkout at $CHECKOUT" >&2; exit 1; }
+[ -f "$CHECKOUT/configuration.yaml" ] || { echo "checkout has no configuration.yaml" >&2; exit 1; }
 
-for p in ${PATHS}; do
-  dest="/config/${p}"
-  src="${CHECKOUT}/${p}"
-  if [ ! -e "${src}" ]; then
+for p in $PATHS; do
+  dest="/config/$p"
+  src="$CHECKOUT/$p"
+  if [ ! -e "$src" ]; then
     # Not in git (yet): leave whatever the volume has.
     continue
   fi
-  mkdir -p "$(dirname "${dest}")"
-  if [ -L "${dest}" ]; then
-    [ "$(readlink "${dest}")" = "${src}" ] && continue
-    rm "${dest}"
-  elif [ -e "${dest}" ]; then
-    mkdir -p "/config/.pre-gitops/$(dirname "${p}")"
-    mv "${dest}" "/config/.pre-gitops/${p}"
-    echo "moved ${dest} to /config/.pre-gitops/${p}"
+  mkdir -p "$(dirname "$dest")"
+  if [ -L "$dest" ]; then
+    [ "$(readlink "$dest")" = "$src" ] && continue
+  elif [ -e "$dest" ]; then
+    mkdir -p "/config/.pre-gitops/$(dirname "$p")"
+    mv "$dest" "/config/.pre-gitops/$p"
+    echo "moved $dest to /config/.pre-gitops/$p"
   fi
-  ln -s "${src}" "${dest}"
-  echo "linked ${dest} -> ${src}"
+  # -n replaces an existing link instead of following it into a directory.
+  ln -sfn "$src" "$dest"
+  echo "linked $dest -> $src"
 done
