@@ -333,9 +333,9 @@ mail is not in that mailbox and stays out of these tools.
 | Setting | Value | Why |
 | --- | --- | --- |
 | `HOMELAB_MCP_EMAIL_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Every other view is refused before any request |
-| `HOMELAB_MCP_EMAIL_SEND_VIEWS` | `/mcp/full` | The only connector that can preview and send, after Ryan approves the exact preview |
-| `HOMELAB_MCP_EMAIL_RECIPIENT_DENYLIST` | `@va.gov`, `@microsoft.com` | Personal mail does not go to work domains |
-| Grokbot tool list | read, draft, reply and forward drafts, moves, keywords | No send tools: it reads untrusted mail unattended, so it leaves drafts |
+| `HOMELAB_MCP_EMAIL_SEND_VIEWS` | `/mcp/full`, `/mcp/agent/grokbot` | The connectors that can preview and send (Ryan, 2026-11-25). On Grokbot the gate is the model's own check, so the budget and recipient lists bound it |
+| `HOMELAB_MCP_EMAIL_RECIPIENT_DENYLIST` | `@va.gov` | Personal mail stays away from VA. `@microsoft.com` is allowed: the agents send calendar invites to Ryan's work address |
+| Grokbot tool list | read, draft, reply and forward drafts, moves, keywords, preview and send | |
 
 Credentials are three Stalwart app passwords, created by Ryan in the
 self-service portal, each with `allowedIps` `10.42.0.0/16` (Stalwart sees

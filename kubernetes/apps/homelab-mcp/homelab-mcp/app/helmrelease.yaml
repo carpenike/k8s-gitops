@@ -402,17 +402,20 @@ spec:
               # the token's view before any request, so a later "all" or "read"
               # view for someone else cannot reach it. Home (read tools only),
               # Home (full) and Grokbot. EMAIL_SEND_VIEWS: who may preview and
-              # send, after Ryan approves the exact preview: Home (full) only.
-              # Grokbot drafts; Ryan sends. Nothing sends at all until the
-              # optional secret homelab-mcp-email-send exists. The denylist
-              # keeps personal mail from going to work domains.
+              # send: Home (full) and Grokbot (Ryan, 2026-11-25). On Grokbot,
+              # which reads mail unattended, the preview -> confirm gate is
+              # the model's own check, so the send budget and recipient lists
+              # are what bound it. Nothing sends at all until the optional
+              # secret homelab-mcp-email-send exists. The denylist keeps
+              # personal mail away from VA. Not @microsoft.com: Ryan's agents
+              # send calendar invites to his work address.
               HOMELAB_MCP_EMAIL_JMAP_URL: https://mail.${SECRET_DOMAIN}
               HOMELAB_MCP_EMAIL_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/grokbot"]
               HOMELAB_MCP_EMAIL_SEND_VIEWS: >-
-                ["/mcp/full"]
+                ["/mcp/full", "/mcp/agent/grokbot"]
               HOMELAB_MCP_EMAIL_RECIPIENT_DENYLIST: >-
-                ["@va.gov", "@microsoft.com"]
+                ["@va.gov"]
               HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
@@ -473,13 +476,12 @@ spec:
               # Withings reads (Ryan, 2026-11-18): withings_get_measurements and
               # withings_trend, weigh-ins and blood pressure. Read-only; there
               # are no Withings writes.
-              # Email (Ryan, 2026-11-25, carpenike/mcp 0.71.0): read, draft and
-              # organise his personal mailbox (search, read, attachments, drafts,
-              # reply and forward drafts, moves including trash and junk,
-              # keywords). Never email_preview_send_draft or email_send_draft,
-              # and /mcp/agent/grokbot is not in HOMELAB_MCP_EMAIL_SEND_VIEWS:
-              # it reads untrusted mail unattended, so it leaves drafts for Ryan
-              # to send. No email_create_folder / email_update_folder.
+              # Email (Ryan, 2026-11-25, carpenike/mcp 0.71.0): read, draft,
+              # organise and send from his personal mailbox (search, read,
+              # attachments, drafts, reply and forward drafts, moves including
+              # trash and junk, keywords, preview then send). Sending needs the
+              # view in HOMELAB_MCP_EMAIL_SEND_VIEWS too, and the send secret.
+              # No email_create_folder / email_update_folder.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -606,7 +608,8 @@ spec:
                  "email_get_thread", "email_list_drafts", "email_get_attachment",
                  "email_create_draft", "email_update_draft", "email_delete_draft",
                  "email_create_reply_draft", "email_create_forward_draft",
-                 "email_move_messages", "email_set_keywords"],
+                 "email_move_messages", "email_set_keywords",
+                 "email_preview_send_draft", "email_send_draft"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent/hank", "name": "Hank",
                  "tools": ["vault_domains", "vault_read", "vault_list", "vault_search",
