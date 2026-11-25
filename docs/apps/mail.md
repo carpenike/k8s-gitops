@@ -61,7 +61,7 @@ Vault `k8s-secrets`:
 | `stalwart` | `database_password` | Role `stalwart` on `postgres17`. Read by `cnpg-system` and `mail` |
 | `stalwart` | `admin_password` | `STALWART_RECOVERY_ADMIN=admin:<password>`. Always accepted as an administrator while set |
 | `stalwart` | `cloudflare_api_token` | `STALWART_CLOUDFLARE_TOKEN`. Cloudflare token with `Zone / Zone / Read` and `Zone / DNS / Edit` on zones `holthome.net`, `ryanholt.net`, `stefanieholt.com` and `devialea.com`, for automatic DNS ([DNS](#dns), [More mail domains](#more-mail-domains)) |
-| `stalwart` | `smtp2go_password` | `STALWART_SMTP2GO_PASSWORD`. Password of the SMTP2GO SMTP user, for the interim outbound route ([Outbound](#outbound)) |
+| `stalwart` | `smtp2go_password` | `STALWART_SMTP2GO_PASSWORD`. Password of the SMTP2GO SMTP user, for the outbound route ([Outbound](#outbound)) |
 | `stalwart` | `smtp2go_username` | That SMTP user's name. Not read by the cluster: it is typed into the route |
 | `stalwart` | `metrics_password` | `STALWART_METRICS_PASSWORD`. Basic auth for `/metrics/prometheus`, shared with the ServiceMonitor ([Metrics](#metrics)) |
 | `bulwark` | `session_secret` | `SESSION_SECRET` for Bulwark, at least 32 characters (`openssl rand -base64 32`) |
@@ -174,8 +174,8 @@ The RGW credentials are not in 1Password. Rook writes them to Secret
    it publishes, and has to match the edge's reverse DNS and the
    certificate. The form will not save the hostname without a valid
    default domain.
-7. **Outbound**: through SMTP2GO for now ([Outbound](#outbound)), and
-   through the edge relay (ADR 0014) once Vultr opens its outbound 25.
+7. **Outbound**: through SMTP2GO ([Outbound](#outbound)). The edge relay
+   is the fallback (ADR 0014).
 8. **Directory** (ADR 0015), before creating any account, because
    Stalwart does not move accounts between directories:
    - in Pocket ID, create a public OIDC client for the WebUI (PKCE, no
@@ -230,8 +230,8 @@ Stalwart rotate DKIM keys; with Manual it never rotates them.
 | --- | --- | --- |
 | DKIM | Stalwart | Rotation every 90 days, old key retired after 7 |
 | MX | Stalwart | Points at `mx.holthome.net`. Publicly that name is the edge VM (an A record added by hand at cutover); on the LAN the MikroTik answers `10.45.10.25` |
-| SPF | Stalwart | Authorizes the MX host, which is right because the edge also sends outbound (ADR 0014). SMTP2GO needs no change to it: it sends with its own return-path subdomain |
-| SMTP2GO return-path, DKIM and link-tracking CNAMEs | SMTP2GO, added once through its Cloudflare connection | Interim outbound ([Outbound](#outbound)). Names and targets come from SMTP2GO's sender-domain page. Stalwart writes only the names it publishes, and external-dns only records it owns |
+| SPF | Stalwart | Authorizes the MX host, the edge, which sends its own DMARC reports and is the fallback outbound route (ADR 0014). SMTP2GO needs no change to it: it sends with its own return-path subdomain |
+| SMTP2GO return-path, DKIM and link-tracking CNAMEs | SMTP2GO, added once through its Cloudflare connection | Outbound ([Outbound](#outbound)). Names and targets come from SMTP2GO's sender-domain page. Stalwart writes only the names it publishes, and external-dns only records it owns |
 | DMARC | Stalwart | Reports to the domain's report address |
 | TLS-RPT | Stalwart | Same address |
 | CAA at the apex | Nobody, for now | `holthome.net` is the whole cluster zone. A CAA record at the apex limits which certificate authorities may issue for every name in it, including Cloudflare's proxied hostnames |
@@ -269,10 +269,11 @@ Setup, in order:
 
 ## Outbound
 
-Interim, until the edge relay can send (ADR 0014, "Interim outbound
-through SMTP2GO"). Stalwart relays every remote domain to SMTP2GO on
-465 with implicit TLS. The egress policy already allows 465 to public
-IPv4.
+Through SMTP2GO, the standing route since 2026-11-25 (ADR 0014,
+"Outbound through SMTP2GO"). The edge takes over only if SMTP2GO's terms
+stop allowing this use or the household outgrows its free plan (1,000 a
+month, 200 a day). Stalwart relays every remote domain to SMTP2GO on 465
+with implicit TLS. The egress policy already allows 465 to public IPv4.
 
 1. **SMTP2GO account** (free plan). Leave Maintain Return-Path off, and
    send bounce notifications to the sender.
@@ -853,15 +854,18 @@ mail, and they cache the policy for `max_age`.
 
 ## Not in this tree yet
 
-- **Outbound through the edge.** A residential address will be rejected
-  or spam-foldered, so outbound goes through the edge VM, whose address
-  has a matching PTR (ADR 0014). That needs Vultr to open its outbound
-  25, a way from the cluster to the tailnet (such as an operator egress
-  Service), and a policy rule; the current egress rule excludes
-  100.64.0.0/10. Until then it goes through SMTP2GO ([Outbound](#outbound)).
-  At the switch, point the outbound strategy at the edge's route, then
-  remove the SMTP2GO CNAMEs, field `smtp2go_password` and its
-  ExternalSecret entry, and close the account.
+- **Outbound through the edge.** Not planned: outbound stays on SMTP2GO
+  ([Outbound](#outbound)) unless its terms change or the household
+  outgrows its free plan (ADR 0014). A residential address would be
+  rejected or spam-foldered, so the fallback is the edge VM, whose
+  address has a matching PTR. It needs a way from the cluster to the
+  tailnet (such as an operator egress Service) and a policy rule; the
+  current egress rule excludes 100.64.0.0/10. Vultr already allows
+  outbound 25. Sending straight to recipients' MX also wants a resolver
+  that validates DNSSEC, so that DANE is on. At the switch, point the
+  outbound strategy at the edge's route, then remove the SMTP2GO CNAMEs,
+  field `smtp2go_password` and its ExternalSecret entry, and close the
+  account.
 - **MTA-STS.** Planned once the edge carries real mail ([MTA-STS](#mta-sts)).
 - **More than one replica.** Needs a shared in-memory store (Redis or
   Valkey) and Stalwart's cluster settings.

@@ -57,13 +57,14 @@ points the MX of each mail domain at the VM. The edge:
 - relays everything it accepts through an `MtaRoute/Relay` to
   `10.45.10.25:2525`, and queues while that is unreachable
 - gets its own certificate for the MX name with Stalwart's ACME client
-- also carries outbound mail: the cluster's Stalwart relays remote
+- can carry outbound mail: the cluster's Stalwart would relay remote
   domains through it, so mail leaves from the VM's static address with
   its own PTR. Vultr allows outbound 25 from the VM (seen 2026-11-13,
   when the edge delivered a DMARC report). This is what lets the
   cluster's Stalwart publish SPF itself (`docs/apps/mail.md`, "DNS"): its SPF
   authorizes the MX host, which is the VM. The cluster-to-tailnet path
-  for this is not built yet
+  for this is not built. Amended 2026-11-25: outbound stays on SMTP2GO,
+  and the edge is the fallback ("Outbound through SMTP2GO", below)
 
 The MX target is `mx.holthome.net`, published by the cluster's Stalwart.
 Publicly that name is an A record for the VM; on the LAN the MikroTik
@@ -87,19 +88,33 @@ The same route also lets tailnet devices reach the client ports (465,
 587, 993, 995, 4190) through the Connector. Grants give those to
 `autogroup:member` only.
 
-### Interim outbound through SMTP2GO
+### Outbound through SMTP2GO
 
-Amended 2026-11-11. Until the cluster can reach the tailnet, the
-cluster's Stalwart sends remote domains through SMTP2GO instead of the
-edge: an `MtaRoute/Relay` named `smtp2go` to `mail.smtp2go.com:465`
+Amended 2026-11-11, and again 2026-11-25. The cluster's Stalwart sends
+remote domains through SMTP2GO instead of the edge: an `MtaRoute/Relay`
+named `smtp2go` to `mail.smtp2go.com:465`
 (implicit TLS), authenticated as an SMTP2GO SMTP user whose password
 Stalwart reads from `STALWART_SMTP2GO_PASSWORD`. The egress policy
 already allows 465 to public IPv4. Local domains still go to route
 `local`. The outbound strategy's `tls` expression drops its default
 retry under `invalid-tls`, which would skip certificate validation on
-the relay hop and could hand the password to an impostor. When the edge
-can send, the outbound strategy points at the edge's route instead and
-the SMTP2GO account is closed.
+the relay hop and could hand the password to an impostor.
+
+This began as a stopgap until the cluster could reach the tailnet. On
+2026-11-25 it became the standing route: outbound through the edge is
+not planned. SMTP2GO sends from addresses with an established
+reputation, and a test to a Microsoft 365 mailbox passed SPF, DKIM and
+DMARC with spam confidence level 1. The edge is one VPS address with no
+sending history, and Microsoft in particular junks or defers mail from
+small new senders. Owning that reputation is not worth it for a
+household's mail. Two things would reopen the question: SMTP2GO's terms
+change so that this use is no longer allowed, or the household's mail
+outgrows the free plan and paying is the alternative. Then the outbound
+strategy points at the edge's route and the SMTP2GO account is closed
+(`docs/apps/mail.md`, "Not in this tree yet"). On 2026-11-25 the edge's
+address had matching forward and reverse DNS and was on none of Spamhaus
+ZEN, Barracuda, SpamCop, UCEPROTECT levels 1 to 3, Mailspike, PSBL, s5h
+or 0spam.
 
 `holthome.net` is a verified sender domain at SMTP2GO, with its
 return-path, DKIM and link-tracking CNAMEs in Cloudflare (added by
@@ -148,8 +163,8 @@ with.
   as its queue retention allows, instead of relying on senders' retries
 - Good, because sender checks and rejections happen at the real address,
   during the SMTP session
-- Good, because outbound leaves from a static address with its own PTR,
-  so no third-party relay is needed
+- Good, because the edge can send from a static address with its own
+  PTR if SMTP2GO stops being usable
 - Bad, because there are two Stalwart servers to configure and patch. The
   edge's configuration lives in its own store, like the cluster's
   (`stalwart-cli snapshot`), not in this repo
@@ -161,9 +176,13 @@ with.
   other senders off it
 - Bad, because mail sits on the VM's disk while queued, outside the
   cluster and its backups
-- Bad, because outbound through the edge waits on a cluster-to-tailnet
-  path. Until it exists, outbound goes through SMTP2GO, a third party
-  that sees every message and holds its bounces
+- Bad, because outbound goes through SMTP2GO, a third party that sees
+  every message and holds its bounces, and that refuses envelope senders
+  outside its verified domains, so a redirect that keeps the original
+  sender fails
+- Neutral, because DANE does not apply to outbound mail: Stalwart's
+  resolver cannot validate DNSSEC, so Stalwart turns DANE off, and every
+  remote domain goes to the relay rather than to its own MX anyway
 - Neutral, because the VM costs a few dollars a month
 
 ## Pros and Cons of the Options
