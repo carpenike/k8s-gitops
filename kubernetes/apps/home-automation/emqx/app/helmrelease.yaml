@@ -11,7 +11,8 @@
 # (ExternalSecret emqx); ACLs from the file source (acl.conf). Anonymous
 # clients are refused because an authenticator is configured.
 #
-# replicas 0 until the EMQX cutover (docs/apps/home-automation.md).
+# Running since the EMQX cutover step 2 (docs/apps/home-automation.md). It has
+# no clients until Forge's are repointed in nix-config.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -25,7 +26,7 @@ spec:
   values:
     controllers:
       emqx:
-        replicas: 0
+        replicas: 1
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
