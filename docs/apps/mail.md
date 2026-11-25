@@ -582,6 +582,9 @@ Done (2026-11-18): the three Domains exist (DKIM Automatic, DNS management
 Manual, report address `postmaster@holthome.net`), the aliases are set,
 and the edge accepts and routes all three.
 
+`ryanholt.net` cut over on 2026-11-24 (steps 1 to 6). Step 7 is still
+open. `stefanieholt.com` and `devialea.com` have not moved yet.
+
 Cutover, per domain:
 
 1. **Cloudflare token.** Add the zone to the token in
@@ -593,20 +596,44 @@ Cutover, per domain:
    removed from the tenant.
 3. **SMTP2GO.** Add the domain under Verified Senders › Sender domains
    and let SMTP2GO add its CNAMEs through its Cloudflare connection.
-   SMTP2GO refuses mail from a sender domain it has not verified.
+   SMTP2GO refuses mail from a sender domain it has not verified. The
+   account lives on `app-us.smtp2go.com`; a page opened on
+   `app.smtp2go.com` lands on the login screen even when signed in.
+   Set up automatically hands off to Cloudflare, which asks for a
+   Cloudflare sign-in and then adds three DNS-only CNAMEs: `em<id>`
+   (return path), `s<id>._domainkey` (DKIM) and `link` (tracking).
+   Press Verify on the domain's page afterwards.
 4. **Mailbox.** Copy the Microsoft 365 mailbox into the account (not
    for `devialea.com`), as in [Copying a mailbox](#copying-a-mailbox).
 5. **Records.** For `devialea.com`, first turn off Email Routing for
    the zone: it locks its MX records and deletes them with itself. Its
    SPF include and its Cloudflare DMARC report address go too.
-   For the other two, delete the Microsoft MX, the `selector1` and
-   `selector2` DKIM CNAMEs and the `autodiscover` CNAME; their DMARC
-   records report to `ryan@ryanholt.net`. Then publish MX, SPF, DMARC
-   and TLS-RPT from the Domain as well. SPF becomes Stalwart's, like
-   `holthome.net`'s, and DMARC reports go to `postmaster@holthome.net`.
+   For the other two, add `mx`, `spf`, `dmarc` and `tlsRpt` to the
+   Domain's `dnsManagement.publishRecords`, next to `dkim`. Saving that
+   publishes nothing by itself. Queue the publish as a task:
+
+   ```json
+   ["x:Task/set", {"create": {"t": {"@type": "DnsManagement",
+     "domainId": "<domain id>", "onSuccessRenewCertificate": false,
+     "updateRecords": {"mx": true, "spf": true, "dmarc": true,
+                       "tlsRpt": true}}}}, "0"]
+   ```
+
+   Stalwart then replaces the record sets it owns at each name: the
+   Microsoft MX goes, the old SPF is swapped for Stalwart's while other
+   apex TXT values such as `MS=` stay, and DMARC (now `p=reject`) and
+   TLS-RPT report to `postmaster@holthome.net` instead of
+   `ryan@ryanholt.net`. Delete what is left by hand: the `selector1`
+   and `selector2` DKIM CNAMEs and the `autodiscover` CNAME. The Teams
+   and Intune records (`sip`, `lyncdiscover`, the SIP SRV records,
+   `enterpriseenrollment`, `enterpriseregistration`) are not mail; they
+   go when the domain leaves the tenant.
 6. **Check.** Mail from outside arrives through the edge, mail sent from
    the alias passes DKIM and DMARC at Gmail, and nothing new arrives in
-   Microsoft 365 or through Cloudflare's forwarding.
+   Microsoft 365 or through Cloudflare's forwarding. Send the test from
+   an address on another domain: a Gmail "Send mail as" alias for the
+   domain relays through whatever SMTP server it was set up with, and
+   with `p=reject` that fails DMARC unless the server is Stalwart.
 7. **Retire.** After a few quiet days, run the copy once more, remove
    the domain from the tenant, and drop any `MS=` record.
 
@@ -668,6 +695,68 @@ recovery administrator (`VANDELAY_PASSWORD`, from field
   Read state and folder moves made in Outlook after the first import
   are not copied. The final pass after the MX switch is the same two
   commands.
+- Size. Ryan's mailbox (2026-11-24) was a 22 GB archive of 327,327
+  messages. The import took nearly 6 hours, mostly Graph throttling
+  (HTTP 429, retried). 23 messages failed with HTTP 500 from Graph on
+  every retry. The export of 290,346 messages took about 1.5 hours and
+  added about 5 GB to database `stalwart` on postgres17, whose volume
+  was raised to 60Gi first ([postgres17](../platform/postgres17.md)).
+  Message bodies go to the Ceph bucket.
+
+#### Leaving folders out
+
+Vandelay has no folder filter. To skip folders, copy the archive and
+delete them from the copy, then export the copy. The original stays
+whole, so a later import still knows which messages it has fetched;
+trim again after each import. The pod has no `sqlite3`; Alpine's
+`sqlite`, `sqlite-libs`, `readline`, `libncursesw` and `zlib` packages
+unpacked into `/tmp` run with `LD_LIBRARY_PATH` pointing at their
+`usr/lib`. The archive keeps each message's folders in
+`emails.mailbox_ids` (a JSON array of `mailboxes.id`) and the Graph IDs
+in `sync_id_exchange_graph`:
+
+```sql
+-- in sqlite3: .backup ryan-export.sqlite  (from ryan-m365.sqlite, -readonly)
+-- then on ryan-export.sqlite, with <ids> the folders to drop:
+CREATE TEMP TABLE drop_emails AS SELECT e.id FROM emails e
+  WHERE NOT EXISTS (SELECT 1 FROM json_each(e.mailbox_ids) j
+                    WHERE j.value NOT IN (<ids>));
+DELETE FROM sync_id_exchange_graph
+  WHERE type_name = 'email' AND local_id IN (SELECT id FROM drop_emails);
+DELETE FROM emails WHERE id IN (SELECT id FROM drop_emails);
+DELETE FROM blobs WHERE id NOT IN (SELECT blob_id FROM emails);
+DELETE FROM sync_id_exchange_graph
+  WHERE type_name = 'mailbox' AND local_id IN (<ids>);
+DELETE FROM mailboxes WHERE id IN (<ids>);  -- children before parents
+```
+
+`vandelay inspect <archive> mailbox` lists the folders with their
+message counts; the IDs come from `SELECT id, name, parent_id FROM
+mailboxes`. Ryan's copy left out `RSS Feeds` and `Sync Issues` and kept
+`Clutter`.
+
+#### Messages over 50 MB
+
+The export skips a message larger than Stalwart's JMAP upload limit
+(`maxUploadSize`, 50 MB) and says a re-run will not help. To copy one,
+raise four settings over JMAP as the recovery administrator, run
+`x:Action/set` `ReloadSettings`, export again, then put them back and
+reload:
+
+| Setting | Default | For a 177 MB message |
+| --- | --- | --- |
+| `Jmap.maxUploadSize` | 50000000 | 200000000 |
+| `Jmap.uploadQuota` (per account, per `uploadTtl`) | 50000000 | 500000000 |
+| `Email.maxMessageSize` | 75000000 | 200000000 |
+| `SystemSettings.maxBufferedMemory` | unset (512 MiB) | 1610612736 |
+
+The last one matters even after the upload limits are raised.
+`Email/import` reserves twice a message's size from the memory budget,
+a read may take at most three quarters of the budget, and Vandelay puts
+several messages in one call even with `-j 1`; otherwise the import
+answers `serverUnavailable` and the log shows `limit.memory-budget`.
+The pod's memory limit is 2Gi. The JMAP session's `maxSizeUpload` shows
+whether a reload took effect.
 
 ## Agent mailboxes
 
