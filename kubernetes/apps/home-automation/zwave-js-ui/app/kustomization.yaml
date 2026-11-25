@@ -7,3 +7,4 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./ciliumnetworkpolicy.yaml
+  - ./service-forge.yaml

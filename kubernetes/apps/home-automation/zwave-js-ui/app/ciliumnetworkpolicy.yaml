@@ -1,7 +1,9 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
 # In: the UI 8091 from envoy-internal; the unauthenticated WebSocket server
-# 3002 from Home Assistant only. Out: DNS and the broker. Device-database
+# 3002 from Home Assistant only: the cluster pod, or Forge through the
+# zwave-js-ui-forge LoadBalancer (seen as world, or as a node when the
+# LoadBalancer path SNATs) until Home Assistant moves. Out: DNS and the broker. Device-database
 # and firmware update lookups are not allowed; open them here for an update.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -23,6 +25,19 @@ spec:
     - fromEndpoints:
         - matchLabels:
             app.kubernetes.io/name: home-assistant
+      toPorts:
+        - ports:
+            - port: "3002"
+              protocol: TCP
+    - fromCIDRSet:
+        - cidr: 10.20.0.30/32
+      toPorts:
+        - ports:
+            - port: "3002"
+              protocol: TCP
+    - fromEntities:
+        - remote-node
+        - host
       toPorts:
         - ports:
             - port: "3002"

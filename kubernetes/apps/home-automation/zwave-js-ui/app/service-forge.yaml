@@ -1,0 +1,26 @@
+---
+# The Z-Wave JS WebSocket server for Home Assistant while it still runs on
+# Forge. The server has no authentication, so only Forge's address may
+# connect (loadBalancerSourceRanges, enforced by Cilium, and the
+# CiliumNetworkPolicy next to this file); Forge relays its own loopback
+# :3002 here and listens on nothing else. Delete this Service when Home
+# Assistant moves to the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: zwave-js-ui-forge
+  annotations:
+    lbipam.cilium.io/ips: "10.45.10.31"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  loadBalancerSourceRanges:
+    - 10.20.0.30/32
+  selector:
+    app.kubernetes.io/name: zwave-js-ui
+    app.kubernetes.io/controller: zwave-js-ui
+  ports:
+    - name: websocket
+      port: 3002
+      targetPort: 3002
+      protocol: TCP

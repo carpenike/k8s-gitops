@@ -12,10 +12,12 @@
 # The container is privileged so it can open the hostPath tty: a device
 # mounted by hostPath is outside the container's device cgroup otherwise.
 # The store (settings.json, node cache) is copied from Forge's
-# /var/lib/zwave-js-ui at cutover; the serial port and broker are then set to
-# /dev/zwave and emqx.home-automation.svc in the UI (docs/apps/home-automation.md).
+# /var/lib/zwave-js-ui at cutover, with Forge's unit stopped first
+# (docs/apps/home-automation.md, "3. Z-Wave JS UI"). ZWAVEJS_SERIAL_PORT
+# overrides the Forge device path in settings.json, as Forge's own unit did.
 #
-# replicas 0 until the Z-Wave cutover.
+# Until Home Assistant moves, it reaches 3002 from Forge through the
+# zwave-js-ui-forge LoadBalancer (service-forge.yaml).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -29,7 +31,7 @@ spec:
   values:
     controllers:
       zwave-js-ui:
-        replicas: 0
+        replicas: 1
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -46,6 +48,7 @@ spec:
               ZWAVEJS_EXTERNAL_CONFIG: /usr/src/app/store/.config-db
               # Behind Envoy, so the rate limiter reads X-Forwarded-For.
               TRUST_PROXY: "true"
+              ZWAVEJS_SERIAL_PORT: /dev/zwave
             envFrom:
               - secretRef:
                   name: zwave-js-ui

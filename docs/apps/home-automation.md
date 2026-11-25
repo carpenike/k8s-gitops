@@ -30,7 +30,11 @@ CloudNativePG's backups.
   `eth0`, routed, as Forge did.
 - **Z-Wave JS UI** runs on the sled with the stick (NFD label
   `feature.node.kubernetes.io/zwave-stick`). The WebSocket server on 3002
-  has no authentication; only the Home Assistant pod may connect.
+  has no authentication; only Home Assistant may connect. Until Home
+  Assistant moves, that is Forge, through LoadBalancer `zwave-js-ui-forge`
+  at `10.45.10.31`, which accepts only `10.20.0.30`; Forge's
+  `zwave-forward-cluster` relays its loopback `:3002` there. Delete both
+  with the Home Assistant cutover.
 - **Home Assistant** has `net1` on `kube-system/vlan30` at `10.30.0.32/16`
   ([multus.md](../platform/multus.md)). HomeKit (21063-21068), mDNS, the
   Sonos callback (1400) and WeatherFlow UDP (50222) use it. Its policy
@@ -174,13 +178,31 @@ to step 3, about ten minutes; devices keep their state and rejoin nothing.
 
 ### 3. Z-Wave JS UI
 
-1. Stop and mask `zwave-js-ui` on Forge. Move the stick to the labelled
-   sled.
-2. Copy `/var/lib/zwave-js-ui` into `zwave-js-ui-store`.
-3. Set `replicas: 1`. In the UI: serial port `/dev/zwave`, MQTT host
-   `emqx.home-automation.svc.cluster.local`, user `zwave-js-ui`. Check
-   every node is alive.
-4. Z-Wave in Home Assistant on Forge is down until step 4.
+Moving the stick to the labelled sled takes Z-Wave down; it is back when
+the cluster pod runs. As for zigbee2mqtt, two pull requests: nix-config
+disables Forge's `zwave-js-ui` (dataset kept) and runs
+`zwave-forward-cluster`, and this repo sets `replicas: 1` and adds
+`zwave-js-ui-forge`.
+
+1. On Forge, stop `zwave-js-ui` and keep it stopped until the nix-config
+   change applies. `systemctl mask --runtime` does not hold on NixOS (the
+   unit file is in `/etc/systemd/system`); use a runtime drop-in instead,
+   `/run/systemd/system/zwave-js-ui.service.d/99-cutover-block.conf` with
+   `[Unit]` and `ConditionPathExists=/nonexistent`, then
+   `systemctl daemon-reload`. Tar `/var/lib/zwave-js-ui` to `/var/backup`.
+2. Copy `/var/lib/zwave-js-ui` into `zwave-js-ui-store` the same way as
+   zigbee2mqtt (a busybox pod on the volume, `ssh forge 'sudo tar …' |
+   kubectl exec -i … tar -x`), leaving out `logs/`. The pod runs as
+   root, so no uid is needed. `settings.json` needs no edit: MQTT is
+   disabled there (Home Assistant uses the WebSocket server), and
+   `ZWAVEJS_SERIAL_PORT=/dev/zwave` overrides the serial port. If MQTT is
+   turned on later, its host is `emqx.home-automation.svc.cluster.local`,
+   user `zwave-js-ui`.
+3. Merge this repo's pull request, then the nix-config one, and apply that
+   on Forge. Home Assistant keeps its URL: Forge's loopback `:3002` now
+   relays to `10.45.10.31:3002`, which accepts only Forge.
+4. Check every node is alive in the UI and Z-Wave entities update in Home
+   Assistant.
 
 ### 4. Home Assistant
 
