@@ -20,11 +20,12 @@ CloudNativePG's backups.
 ## Network
 
 - **EMQX** is `ClusterIP` (`emqx.home-automation.svc:1883`). LoadBalancer
-  `emqx-forge` at `10.45.10.30` accepts only Forge (`10.20.0.30`) for
-  Frigate and TeslaMate. Delete it when they move. Scrypted in the
-  cluster forwards to Forge's broker today (its `mqtt-forward` sidecar);
-  point that sidecar at `emqx.home-automation.svc:1883` at the EMQX
-  cutover.
+  `emqx-forge` at `10.45.10.30` accepts only Forge (`10.20.0.30`). After
+  the EMQX cutover, Forge's `mqtt-forward-cluster` relays every client
+  still on Forge through it, including the cluster Scrypted's
+  `mqtt-forward` sidecar, which dials Forge. Point that sidecar at
+  `emqx.home-automation.svc:1883` later, and delete `emqx-forge` when the
+  last Forge client moves.
 - **zigbee2mqtt** reaches the coordinator at `10.30.100.183:6638` from
   `eth0`, routed, as Forge did.
 - **Z-Wave JS UI** runs on the sled with the stick (NFD label
@@ -108,15 +109,25 @@ copies data needs Ryan's go.
 
 ### 1. EMQX
 
-1. Stop and mask `podman-emqx` on Forge.
-2. Set `replicas: 1` for `emqx`. Check the six users exist in the
-   dashboard and that `emqx-forge` answers from Forge.
-3. Repoint Forge's clients (Home Assistant, zigbee2mqtt, Z-Wave JS UI,
-   Frigate, TeslaMate) to `10.45.10.30:1883` in nix-config, and Scrypted's
-   `mqtt-forward` sidecar to the cluster service. Forge's sops file has no
-   `frigate/mqtt_password`, so `emqx/frigate_password` is a new value: add
-   it to Forge's sops as `frigate/mqtt_password` in the same nix-config
-   change.
+1. Set `replicas: 1` for `emqx`. Check the six users exist in the
+   dashboard and that `emqx-forge` answers from Forge. No client uses it
+   yet.
+2. Merge the nix-config change that disables Forge's EMQX and runs
+   `mqtt-forward-cluster` instead: socat on Forge's `:1883` to
+   `10.45.10.30:1883`. Every Forge client, and the cluster Scrypted's
+   `mqtt-forward` sidecar (which dials `10.20.0.30:1883`), keeps its
+   settings and reaches the cluster broker through it. Apply it on Forge.
+3. Check that each client reconnects (the dashboard's client list) and that
+   Zigbee, Scrypted and TeslaMate entities update in Home Assistant.
+   Retained messages on Forge's broker are not copied; zigbee2mqtt and the
+   others republish discovery and state when they reconnect.
+
+Forge's sops file has no `frigate/mqtt_password`, so `emqx/frigate_password`
+is a new value. Frigate authenticates only after that value is added to
+Forge's sops as `frigate/mqtt_password`.
+
+Each client moves off the forwarder when it moves to the cluster. Delete the
+forwarder and `emqx-forge` when the last Forge client is gone.
 
 ### 2. zigbee2mqtt
 
