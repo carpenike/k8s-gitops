@@ -392,6 +392,30 @@ spec:
               # Links in tool results (the briefing's) go to the board people open.
               HOMELAB_MCP_OPENPROJECT_PUBLIC_URL: https://tasks.${SECRET_DOMAIN}
               HOMELAB_MCP_OPENPROJECT_TOKENS_DIR: /run/openproject-tokens
+              # Email: Ryan's personal Stalwart mailbox over JMAP (carpenike/mcp
+              # docs/EMAIL.md, 0.71.0). Personal mail only; Microsoft/VA work
+              # mail is not in this mailbox and stays out. The URL must be the
+              # origin Stalwart reports (its STALWART_PUBLIC_URL), reached
+              # through envoy-internal like the other upstreams; the session's
+              # apiUrl and downloadUrl are refused if they point anywhere else.
+              # EMAIL_VIEWS: who may touch the mailbox at all, checked against
+              # the token's view before any request, so a later "all" or "read"
+              # view for someone else cannot reach it. Home (read tools only),
+              # Home (full) and Grokbot. EMAIL_SEND_VIEWS: who may preview and
+              # send, after Ryan approves the exact preview: Home (full) only.
+              # Grokbot drafts; Ryan sends. Nothing sends at all until the
+              # optional secret homelab-mcp-email-send exists. The denylist
+              # keeps personal mail from going to work domains.
+              HOMELAB_MCP_EMAIL_JMAP_URL: https://mail.${SECRET_DOMAIN}
+              HOMELAB_MCP_EMAIL_VIEWS: >-
+                ["/mcp", "/mcp/full", "/mcp/agent/grokbot"]
+              HOMELAB_MCP_EMAIL_SEND_VIEWS: >-
+                ["/mcp/full"]
+              HOMELAB_MCP_EMAIL_RECIPIENT_DENYLIST: >-
+                ["@va.gov", "@microsoft.com"]
+              HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
+              HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
+              HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
               HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
                 {"/mcp": "claude", "/mcp/full": "claude", "/mcp/agent/grokbot": "grokbot"}
               HOMELAB_MCP_OPENPROJECT_BOT_SCOPES: >-
@@ -449,6 +473,13 @@ spec:
               # Withings reads (Ryan, 2026-11-18): withings_get_measurements and
               # withings_trend, weigh-ins and blood pressure. Read-only; there
               # are no Withings writes.
+              # Email (Ryan, 2026-11-25, carpenike/mcp 0.71.0): read, draft and
+              # organise his personal mailbox (search, read, attachments, drafts,
+              # reply and forward drafts, moves including trash and junk,
+              # keywords). Never email_preview_send_draft or email_send_draft,
+              # and /mcp/agent/grokbot is not in HOMELAB_MCP_EMAIL_SEND_VIEWS:
+              # it reads untrusted mail unattended, so it leaves drafts for Ryan
+              # to send. No email_create_folder / email_update_folder.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -570,7 +601,12 @@ spec:
                  "openproject_list_tasks", "openproject_get_task",
                  "openproject_attention", "openproject_create_task",
                  "openproject_add_comment", "openproject_claim_next",
-                 "openproject_complete_task", "openproject_release_task"],
+                 "openproject_complete_task", "openproject_release_task",
+                 "email_list_folders", "email_search", "email_get_message",
+                 "email_get_thread", "email_list_drafts", "email_get_attachment",
+                 "email_create_draft", "email_update_draft", "email_delete_draft",
+                 "email_create_reply_draft", "email_create_forward_draft",
+                 "email_move_messages", "email_set_keywords"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent/hank", "name": "Hank",
                  "tools": ["vault_domains", "vault_read", "vault_list", "vault_search",
@@ -653,6 +689,18 @@ spec:
             envFrom:
               - secretRef:
                   name: homelab-mcp-env
+              # HOMELAB_MCP_EMAIL_USERNAME, _READ_PASSWORD, _WRITE_PASSWORD
+              # (ExternalSecret homelab-mcp-email). Optional: until the item
+              # exists the email_* tools answer email_not_configured.
+              - secretRef:
+                  name: homelab-mcp-email
+                  optional: true
+              # HOMELAB_MCP_EMAIL_SEND_PASSWORD only (homelab-mcp-email-send).
+              # Its own Secret so sending is a separate, deliberate opt-in:
+              # without it every connector is drafts-only.
+              - secretRef:
+                  name: homelab-mcp-email-send
+                  optional: true
             probes:
               liveness: &probe
                 enabled: true
@@ -1256,6 +1304,9 @@ spec:
                   - matchName: grocy.${SECRET_DOMAIN}
                   - matchName: ha.${SECRET_DOMAIN}
                   - matchName: paperless.${SECRET_DOMAIN}
+                  # email_*: Stalwart's JMAP through envoy-internal. Stalwart's
+                  # own policy already admits envoy-internal on 8080.
+                  - matchName: mail.${SECRET_DOMAIN}
                   # mfp: cookies go to www only; the v2 API takes the bearer token.
                   - matchName: www.myfitnesspal.com
                   - matchName: api.myfitnesspal.com
