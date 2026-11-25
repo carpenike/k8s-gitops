@@ -88,12 +88,16 @@ spec:
                 capabilities:
                   drop:
                     - ALL
+              # --fast-list holds both buckets' full listings in memory,
+              # about 1 KiB per object per side. Copying the Microsoft 365
+              # mailbox in (24 Nov 2026) took the bucket to ~330k objects,
+              # and every run after it was OOMKilled at 512Mi.
               resources:
                 requests:
                   cpu: 50m
-                  memory: 128Mi
+                  memory: 768Mi
                 limits:
-                  memory: 512Mi
+                  memory: 2Gi
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp
