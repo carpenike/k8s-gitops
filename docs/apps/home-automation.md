@@ -131,12 +131,46 @@ forwarder and `emqx-forge` when the last Forge client is gone.
 
 ### 2. zigbee2mqtt
 
-1. Stop and mask `zigbee2mqtt` on Forge. Only one client may hold the
-   coordinator.
-2. Copy `/var/lib/zigbee2mqtt` into `zigbee2mqtt-data`, owned by
-   `1000:1000`.
-3. Set `replicas: 1`. Check the coordinator connects and Zigbee entities
-   update in Home Assistant on Forge.
+Two pull requests: nix-config disables Forge's zigbee2mqtt (its dataset
+stays snapshotted and backed up for the rollback week), and this repo sets
+`replicas: 1`. Do the three steps in one sitting. Zigbee is down from step 1
+to step 3, about ten minutes; devices keep their state and rejoin nothing.
+
+1. Merge the nix-config pull request and apply it on Forge. That stops
+   `zigbee2mqtt` there. Do not merge it and walk away: Forge applies `main`
+   nightly, and Zigbee would stay down until the next two steps. Check
+   `systemctl is-active zigbee2mqtt` on Forge says `inactive`. Only one
+   process may hold the coordinator.
+2. Copy `/var/lib/zigbee2mqtt` into the `zigbee2mqtt-data` volume, which
+   exists already at `replicas: 0`. From a workstation with `kubectl` and
+   SSH to Forge:
+
+   ```sh
+   kubectl -n home-automation run z2m-copy --image=busybox:1.38 \
+     --restart=Never --overrides='{"spec":{
+       "securityContext":{"runAsUser":1000,"runAsGroup":1000,"fsGroup":1000},
+       "containers":[{"name":"z2m-copy","image":"busybox:1.38",
+         "command":["sleep","3600"],
+         "volumeMounts":[{"name":"data","mountPath":"/data"}]}],
+       "volumes":[{"name":"data",
+         "persistentVolumeClaim":{"claimName":"zigbee2mqtt-data"}}]}}'
+   kubectl -n home-automation wait --for=condition=Ready pod/z2m-copy
+   ssh forge 'sudo tar -C /var/lib/zigbee2mqtt --exclude=./log -cf - .' \
+     | kubectl -n home-automation exec -i z2m-copy -- tar -C /data -xf -
+   kubectl -n home-automation exec z2m-copy -- ls -la /data
+   kubectl -n home-automation delete pod z2m-copy
+   ```
+
+   The listing shows `configuration.yaml`, `secret.yaml`, `database.db`,
+   `coordinator_backup.json`, `devices.yaml` and `groups.yaml`, owned by
+   `1000`. The environment overrides the broker, the frontend address and
+   port, and the PAN ids; everything else (channel 25, transmit power,
+   availability, the network key in `secret.yaml`) comes from the copied
+   files.
+3. Merge the pull request that sets `replicas: 1`. Check the log says the
+   coordinator started and MQTT connected, `zigbee.${SECRET_DOMAIN}` opens
+   behind the Pocket ID login, and Zigbee entities update in Home Assistant
+   on Forge.
 
 ### 3. Z-Wave JS UI
 

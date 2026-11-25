@@ -11,8 +11,9 @@
 # /var/lib/zigbee2mqtt at cutover. The environment overrides only the
 # settings that change in the cluster: the broker and the frontend.
 #
-# Only one process may hold the coordinator: Forge's unit is stopped and
-# masked before this goes to 1. replicas 0 until that cutover.
+# Only one process may hold the coordinator: Forge's unit is stopped (nix-config
+# disables it) and the data copied before this goes to 1
+# (docs/apps/home-automation.md, "2. zigbee2mqtt").
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -26,7 +27,7 @@ spec:
   values:
     controllers:
       zigbee2mqtt:
-        replicas: 0
+        replicas: 1
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -46,6 +47,10 @@ spec:
               ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: zstack
               ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED: "true"
               ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: "8080"
+              # The copied configuration.yaml binds the frontend to 127.0.0.1
+              # (Forge put Caddy in front); the probes and the route need it
+              # on the pod address.
+              ZIGBEE2MQTT_CONFIG_FRONTEND_HOST: "0.0.0.0"
               ZIGBEE2MQTT_CONFIG_HOMEASSISTANT_ENABLED: "true"
               ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"
             envFrom:
