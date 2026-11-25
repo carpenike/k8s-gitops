@@ -13,8 +13,9 @@
 # mounted by hostPath is outside the container's device cgroup otherwise.
 # The store (settings.json, node cache) is copied from Forge's
 # /var/lib/zwave-js-ui at cutover, with Forge's unit stopped first
-# (docs/apps/home-automation.md, "3. Z-Wave JS UI"). ZWAVEJS_SERIAL_PORT
-# overrides the Forge device path in settings.json, as Forge's own unit did.
+# (docs/apps/home-automation.md, "3. Z-Wave JS UI"). settings.json on the
+# volume names the port (/dev/zwave) and wins over ZWAVEJS_SERIAL_PORT, which
+# only covers an empty store.
 #
 # Until Home Assistant moves, it reaches 3002 from Forge through the
 # zwave-js-ui-forge LoadBalancer (service-forge.yaml).
