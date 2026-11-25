@@ -114,6 +114,7 @@ that have to outlive it stay off the cluster:
 | `matrix` | Tuwunel homeserver | [matrix.md](docs/apps/matrix.md) |
 | `mail` | Stalwart mail server, with an edge relay outside the house | [mail.md](docs/apps/mail.md) |
 | `scrypted` | Camera NVR | [scrypted.md](docs/apps/scrypted.md) |
+| `home-automation` | Home Assistant, zigbee2mqtt, Z-Wave JS UI and the EMQX broker, moving from Forge | [home-automation.md](docs/apps/home-automation.md) |
 | `grafana` | Grafana and Grafana OnCall | [grafana.md](docs/platform/grafana.md) |
 | `lading`, `schoolhouse` | Scheduled syncs from private repositories that feed `homelab-mcp` | [lading.md](docs/apps/lading.md), [schoolhouse.md](docs/apps/schoolhouse.md) |
 | `web` | A static site | [website.md](docs/apps/website.md) |

@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Home automation moved from Forge (ADR 0018, docs/apps/home-automation.md):
+# the MQTT broker, the Zigbee and Z-Wave bridges, and Home Assistant. Every
+# controller ships at replicas 0; each cutover sets one to 1 in its own PR.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: home-automation
+components:
+  - ../../components/sops
+resources:
+  - ./namespace.yaml
+  - ./ciliumnetworkpolicy.yaml
+  - ./emqx/ks.yaml
+  - ./zigbee2mqtt/ks.yaml
+  - ./zwave-js-ui/ks.yaml
+  - ./home-assistant/ks.yaml

@@ -147,6 +147,12 @@ spec:
         comment: Stalwart mail server (mail; data and search stores)
         passwordSecret:
           name: stalwart-db
+      - name: hass_recorder
+        ensure: present
+        login: true
+        comment: Home Assistant recorder (home-automation; owner of home_assistant)
+        passwordSecret:
+          name: home-assistant-recorder-db
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 apiVersion: postgresql.cnpg.io/v1
@@ -278,3 +284,22 @@ spec:
   name: stalwart
   owner: stalwart
   databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# Home Assistant's recorder (namespace home-automation, docs/apps/home-automation.md,
+# ADR 0018): states, events, long-term statistics and energy history,
+# restored from Forge's home_assistant database at cutover. Same database,
+# role and extension names as Forge.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: home-assistant
+spec:
+  cluster:
+    name: postgres17
+  name: home_assistant
+  owner: hass_recorder
+  databaseReclaimPolicy: retain
+  extensions:
+    - name: pg_trgm
+      ensure: present

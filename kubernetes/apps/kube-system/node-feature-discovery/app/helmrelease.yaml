@@ -40,6 +40,17 @@ spec:
           labelSources:
             - pci
             - usb
+        sources:
+          usb:
+            # NFD's default list is 0e, ef, fe, ff. The Z-Wave stick
+            # (0658:0200, rule zwave-stick) is a CDC ACM modem, class 02,
+            # so 02 is added; the Coral (ff) still matches. ADR 0018.
+            deviceClassWhitelist:
+              - "02"
+              - "0e"
+              - "ef"
+              - "fe"
+              - "ff"
       resources:
         requests:
           cpu: 10m

@@ -1,0 +1,24 @@
+---
+# MQTT for the clients still on Forge (Frigate, TeslaMate) until they move.
+# Only Forge's address may connect (loadBalancerSourceRanges, enforced by
+# Cilium, and the CiliumNetworkPolicy next to this file). Nothing on the LAN
+# uses MQTT. Delete this Service when the last Forge client has moved.
+apiVersion: v1
+kind: Service
+metadata:
+  name: emqx-forge
+  annotations:
+    lbipam.cilium.io/ips: "10.45.10.30"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  loadBalancerSourceRanges:
+    - 10.20.0.30/32
+  selector:
+    app.kubernetes.io/name: emqx
+    app.kubernetes.io/controller: emqx
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
+      protocol: TCP

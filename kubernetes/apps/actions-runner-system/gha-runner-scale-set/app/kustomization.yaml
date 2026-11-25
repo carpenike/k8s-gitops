@@ -6,6 +6,7 @@ resources:
   - ./externalsecret.yaml
   - ./ocirepository.yaml
   - ./atrium-k8s
+  - ./hass-config-k8s
   - ./lading-k8s
   - ./lading-k8s-build
   - ./mcp-k8s

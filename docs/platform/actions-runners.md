@@ -18,6 +18,7 @@ and `gha-runner-scale-set`, both tag `0.15.1`.
 | Scale set | HelmRelease `schoolhouse-k8s-build` | Repo `https://github.com/carpenike/schoolhouse`. `runs-on` name `schoolhouse-k8s-build`. The image build. Same Kata VM pods and limits as `mcp-k8s-build` |
 | Scale set | HelmRelease `lading-k8s` | Repo `https://github.com/carpenike/lading`. `runs-on` name `lading-k8s`. Lint and tests. Shared limits, no Docker |
 | Scale set | HelmRelease `lading-k8s-build` | Repo `https://github.com/carpenike/lading`. `runs-on` name `lading-k8s-build`. The image build. Same Kata VM pods and limits as `mcp-k8s-build` |
+| Scale set | HelmRelease `hass-config-k8s` | Repo `https://github.com/carpenike/hass-config`. `runs-on` name `hass-config-k8s`. `check_config` only, no container mode. Runner `500m` / `1Gi` up to `2` CPU / `4Gi` |
 | Scale set | HelmRelease `network-config-k8s` | Repo `https://github.com/carpenike/network-config`. `runs-on` name `network-config-k8s`. Runner `250m` / `512Mi` up to `1` CPU / `2Gi` |
 | Scale set | HelmRelease `schoolhouse-k8s` | Repo `https://github.com/carpenike/schoolhouse`. `runs-on` name `schoolhouse-k8s`. Shared limits |
 | Scale set | HelmRelease `whiskey-k8s` | Repo `https://github.com/carpenike/whiskey-whiskey-whiskey`. `runs-on` name `whiskey-k8s`. Runner `1` CPU / `2Gi` up to `4` CPU / `8Gi` |
@@ -84,7 +85,7 @@ the same mode. The chart adds a privileged `docker:dind` sidecar
 `restartPolicy: Always`) and sets `DOCKER_HOST` on the runner. The
 runner image stays `ghcr.io/actions/actions-runner:2.338.2`.
 
-`va-acr-app`, `atrium-k8s`, `mcp-k8s`, `network-config-k8s`,
+`va-acr-app`, `atrium-k8s`, `hass-config-k8s`, `mcp-k8s`, `network-config-k8s`,
 `schoolhouse-k8s`, and `whiskey-k8s` have no container mode. Their overlays
 remove `containerMode`, so the chart adds no dind sidecar and the runner
 pod is not privileged. Their jobs start no service containers or Docker
