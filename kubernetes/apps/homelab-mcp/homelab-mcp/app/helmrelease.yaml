@@ -439,12 +439,12 @@ spec:
               # A feed on another host shows its host in icloud_list_calendars
               # (feed_allowed false); add it here and in egress. A subscribed
               # calendar not named in CALENDAR_VIEWS is seen by
-              # SUBSCRIBED_VIEWS only: Home and Home (full), never Grokbot,
-              # so the work calendar (Microsoft/VA content) stays with Claude.
+              # SUBSCRIBED_VIEWS only. Ryan chose (2026-11-26) that Grokbot
+              # sees subscribed calendars too, the work calendar included.
               HOMELAB_MCP_ICLOUD_FEED_HOSTS: >-
                 ["outlook.office365.com"]
               HOMELAB_MCP_ICLOUD_SUBSCRIBED_VIEWS: >-
-                ["/mcp", "/mcp/full"]
+                ["/mcp", "/mcp/full", "/mcp/agent/grokbot"]
               HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS: >-
                 {}
               HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
