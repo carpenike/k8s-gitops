@@ -90,7 +90,12 @@ spec:
               GITSYNC_SSH_KNOWN_HOSTS: "true"
               GITSYNC_SSH_KNOWN_HOSTS_FILE: /etc/gitops/known_hosts
               GITSYNC_ONE_TIME: "true"
+            # OpenSSH refuses a uid with no passwd entry, and the git-sync
+            # image only knows its own user, 65533. Group 568 reads the deploy
+            # key (0440, group fsGroup) and lets Home Assistant read /git.
             securityContext: &gitsyncsec
+              runAsUser: 65533
+              runAsGroup: 568
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
