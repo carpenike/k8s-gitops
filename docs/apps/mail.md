@@ -415,6 +415,37 @@ Secret appears; an annotation does not wake it either. Restart the
 operator (`kubectl -n observability rollout restart deploy
 kube-prometheus-stack-operator`) and the target comes up on the next sync.
 
+## Upgrading Stalwart
+
+Renovate opens the image bump. Read the release notes before merging: a
+minor release can need steps the image does not do itself. A newer
+release may write data an older one cannot read, so the way back is the
+restore below, not the old tag. Check that the latest `postgres17`
+backup and the hourly blob copy (`stalwart-blobs-r2`) succeeded first.
+
+The Recreate strategy means mail stops for the restart, about a minute.
+Senders retry, so nothing is lost.
+
+After the new pod is ready, do the release's manual steps as the
+recovery admin, over JMAP or in the WebUI. For 1.2 there were two:
+
+- New permissions on the default roles. Roles created by an older
+  release do not get them. `x:Authentication` `singleton` names the
+  default roles: User `b`, Group `c`, System Administrator `e`. Add each
+  name with an `x:Role/set` patch such as
+  `"enabledPermissions/sysMailRuleGet": true`, so the existing set is
+  kept. For 1.2 that was the `sysMailRule*`, `sysBlockedSender*`,
+  `sysSafeSender*` and `sysCalendarSettings*` permissions on all three
+  roles, and `sysExchangeGet` and `sysExchangeUpdate` on the
+  administrator role. Restarting once with
+  `STALWART_UPDATE_ROLE_PERMISSIONS=true` does the same, but needs a
+  second change and restart to take the variable out again.
+- A newer WebUI. Stalwart downloads the WebUI bundle from GitHub
+  (`x:Application`, release `v2`) and keeps it for 90 days, so a server
+  upgrade does not refresh it. Run `x:Action/set` with
+  `{"@type": "UpdateApps"}` (Management › Actions in the WebUI) to fetch
+  it now.
+
 ## Restore
 
 1. Restore `postgres17` (or just database `stalwart`) to the chosen time,
