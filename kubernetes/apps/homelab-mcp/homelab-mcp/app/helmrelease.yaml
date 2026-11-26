@@ -433,6 +433,20 @@ spec:
               HOMELAB_MCP_ICLOUD_WRITE_VIEWS: >-
                 ["/mcp/full", "/mcp/agent/grokbot"]
               HOMELAB_MCP_ICLOUD_TIMEZONE: America/New_York
+              # Subscribed calendars (ICS feeds; carpenike/mcp 0.73.0). iCloud
+              # keeps only the feed URL, so the server fetches it, read-only,
+              # from these hosts only (the egress list below must match).
+              # A feed on another host shows its host in icloud_list_calendars
+              # (feed_allowed false); add it here and in egress. A subscribed
+              # calendar not named in CALENDAR_VIEWS is seen by
+              # SUBSCRIBED_VIEWS only: Home and Home (full), never Grokbot,
+              # so the work calendar (Microsoft/VA content) stays with Claude.
+              HOMELAB_MCP_ICLOUD_FEED_HOSTS: >-
+                ["outlook.office365.com"]
+              HOMELAB_MCP_ICLOUD_SUBSCRIBED_VIEWS: >-
+                ["/mcp", "/mcp/full"]
+              HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS: >-
+                {}
               HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
                 {"/mcp": "claude", "/mcp/full": "claude", "/mcp/agent/grokbot": "grokbot"}
               HOMELAB_MCP_OPENPROJECT_BOT_SCOPES: >-
@@ -1364,6 +1378,8 @@ spec:
                   - matchName: contacts.icloud.com
                   - matchPattern: "p*-caldav.icloud.com"
                   - matchPattern: "p*-contacts.icloud.com"
+                  # icloud_* subscribed-calendar feeds (HOMELAB_MCP_ICLOUD_FEED_HOSTS).
+                  - matchName: outlook.office365.com
                   # mfp: cookies go to www only; the v2 API takes the bearer token.
                   - matchName: www.myfitnesspal.com
                   - matchName: api.myfitnesspal.com
