@@ -316,10 +316,46 @@ Also:
 | --- | --- | --- |
 | `homelab-mcp-signal` | `number`, `group_id`, `ops_group_id`, `bot_uuid`, `capture_senders` | `HOMELAB_MCP_SIGNAL_*` in sops `homelab-mcp/finance-signal-env` |
 | `homelab-finance` | `report_password` (new field) | none; generate |
+| `homelab-mcp-email` | `username`, `read_password`, `write_password` | none; Stalwart app passwords ([Email](#email)) |
+| `homelab-mcp-email-send` | `send_password` | none; only when sending is wanted ([Email](#email)) |
 
 `homelab-mcp-jobs` reuses `homelab-mcp` (`sidecar_token`,
 `finances_repo_token`, `finances_*` amounts), `homelab-finance/export_db_password`,
 `lading/reader_password` and `homelab-finance/report_password`.
+
+## Email
+
+The `email_*` tools (carpenike/mcp 0.71.0, `docs/EMAIL.md` there) read and
+draft in Ryan's personal Stalwart mailbox over JMAP at
+`https://mail.${SECRET_DOMAIN}`, through envoy-internal. Microsoft/VA work
+mail is not in that mailbox and stays out of these tools.
+
+| Setting | Value | Why |
+| --- | --- | --- |
+| `HOMELAB_MCP_EMAIL_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Every other view is refused before any request |
+| `HOMELAB_MCP_EMAIL_SEND_VIEWS` | `/mcp/full`, `/mcp/agent/grokbot` | The connectors that can preview and send (Ryan, 2026-11-25). On Grokbot the gate is the model's own check, so the budget and recipient lists bound it |
+| `HOMELAB_MCP_EMAIL_RECIPIENT_DENYLIST` | `@va.gov` | Personal mail stays away from VA. `@microsoft.com` is allowed: the agents send calendar invites to Ryan's work address |
+| Grokbot tool list | read, draft, reply and forward drafts, moves, keywords, preview and send | |
+
+Credentials are three Stalwart app passwords, created by Ryan in the
+self-service portal, each with `allowedIps` `10.42.0.0/16` (Stalwart sees
+the pod address in Envoy's `X-Forwarded-For`) and an expiry:
+
+1. `read_password`: permissions `Disable` with `emailSend` and the JMAP
+   set methods. Used by the read tools.
+2. `write_password`: `Disable` with `emailSend`. Drafts, moves, keywords.
+3. `send_password`: `Inherit`. Only `email_send_draft` uses it. It lives in
+   its own item, `homelab-mcp-email-send`, so sending is a separate opt-in:
+   without that item every connector is drafts-only.
+
+Put the login and the first two in item `homelab-mcp-email`. Both Secrets
+are optional in the HelmRelease, so the pod starts without them and the
+tools answer `email_not_configured` or `email_send_disabled`. Reloader
+restarts the pod when they appear. Revoking an app password in Stalwart
+cuts that capability at once.
+
+The pod's egress allows `mail.${SECRET_DOMAIN}` on 443. Stalwart's policy
+already admits envoy-internal on 8080, so it needs no change.
 
 ## Images
 
