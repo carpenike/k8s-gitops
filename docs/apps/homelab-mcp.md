@@ -395,6 +395,15 @@ hosts. Revoke the password at appleid.apple.com to cut it at once.
 | `HOMELAB_MCP_ICLOUD_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Every other view is refused before any request |
 | `HOMELAB_MCP_ICLOUD_WRITE_VIEWS` | `/mcp/full`, `/mcp/agent/grokbot` | One gated calendar path for both agents (Ryan, 2026-11-25) |
 | Grokbot tool list | all 11 `icloud_*` tools | Writes still need Ryan's confirmation through the preview |
+| `HOMELAB_MCP_ICLOUD_FEED_HOSTS` | `outlook.office365.com` | Hosts subscribed-calendar feeds are fetched from (0.73.0); the egress list must match |
+| `HOMELAB_MCP_ICLOUD_SUBSCRIBED_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Subscribed calendars not named below, the work feed included (Ryan, 2026-11-26) |
+| `HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS` | `{}` | Calendar name or id -> views; name a calendar here to narrow who sees it |
+
+A subscribed calendar (an ICS feed added to the iCloud account) holds only
+its feed URL, which is a secret link and never shown. When
+`icloud_list_calendars` reports `feed_allowed: false`, add the host it
+names to `HOMELAB_MCP_ICLOUD_FEED_HOSTS` and to the egress `toFQDNs` list
+in the same pull request.
 
 A per-user connector uses `icloud.<alias>` (JSON `username`, `password`)
 from the user-credentials Secret, never Ryan's Apple ID.
