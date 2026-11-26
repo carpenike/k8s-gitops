@@ -441,8 +441,13 @@ spec:
               # calendar not named in CALENDAR_VIEWS is seen by
               # SUBSCRIBED_VIEWS only. Ryan chose (2026-11-26) that Grokbot
               # sees subscribed calendars too, the work calendar included.
+              # Hosts seen in Ryan's subscriptions (2026-11-26): Outlook (work),
+              # GameChanger and TeamSnap (kids' teams), Google Calendar (band),
+              # Planning Center (church group), FCPS (school calendar).
               HOMELAB_MCP_ICLOUD_FEED_HOSTS: >-
-                ["outlook.office365.com"]
+                ["outlook.office365.com", "api.team-manager.gc.com",
+                "ical-cdn.teamsnap.com", "calendar.google.com",
+                "groups.planningcenteronline.com", "www.fcps.org"]
               HOMELAB_MCP_ICLOUD_SUBSCRIBED_VIEWS: >-
                 ["/mcp", "/mcp/full", "/mcp/agent/grokbot"]
               HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS: >-
@@ -1380,6 +1385,11 @@ spec:
                   - matchPattern: "p*-contacts.icloud.com"
                   # icloud_* subscribed-calendar feeds (HOMELAB_MCP_ICLOUD_FEED_HOSTS).
                   - matchName: outlook.office365.com
+                  - matchName: api.team-manager.gc.com
+                  - matchName: ical-cdn.teamsnap.com
+                  - matchName: calendar.google.com
+                  - matchName: groups.planningcenteronline.com
+                  - matchName: www.fcps.org
                   # mfp: cookies go to www only; the v2 API takes the bearer token.
                   - matchName: www.myfitnesspal.com
                   - matchName: api.myfitnesspal.com
