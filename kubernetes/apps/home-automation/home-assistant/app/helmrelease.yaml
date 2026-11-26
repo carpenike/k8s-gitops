@@ -22,7 +22,9 @@
 # command_line and shell_command paths in hass-config resolve unchanged, and
 # at /media, which LLM Vision hardcodes (Forge used a symlink).
 #
-# replicas 0 until the Home Assistant cutover.
+# Running since the Home Assistant cutover (2026-11-25): /config is a copy of
+# Forge's /var/lib/home-assistant and the recorder a restore of Forge's
+# database, both taken with Forge's unit stopped.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -36,7 +38,7 @@ spec:
   values:
     controllers:
       home-assistant:
-        replicas: 0
+        replicas: 1
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
