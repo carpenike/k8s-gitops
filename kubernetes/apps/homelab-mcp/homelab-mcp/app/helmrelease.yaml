@@ -1406,6 +1406,19 @@ spec:
                   - ports:
                       - port: "443"
                         protocol: TCP
+              # Hosts behind envoy-internal (mail and ha today). Cilium's socket
+              # LB turns the gateway's LoadBalancer address into the envoy pod
+              # on 10443 before policy runs, so the toFQDNs rule above (443 to
+              # the resolved address) never matches that traffic. Same rule as
+              # mail/bulwark.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "10443"
+                        protocol: TCP
               # The OpenProject API (openproject_*), in the cluster.
               - toEndpoints:
                   - matchLabels:
