@@ -1181,6 +1181,8 @@ spec:
             port: 9300
     serviceMonitor:
       app:
+        service:
+          identifier: app
         labels:
           release: kube-prometheus-stack
         endpoints:
