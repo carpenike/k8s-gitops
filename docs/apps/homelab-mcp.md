@@ -395,7 +395,7 @@ hosts. Revoke the password at appleid.apple.com to cut it at once.
 | `HOMELAB_MCP_ICLOUD_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Every other view is refused before any request |
 | `HOMELAB_MCP_ICLOUD_WRITE_VIEWS` | `/mcp/full`, `/mcp/agent/grokbot` | One gated calendar path for both agents (Ryan, 2026-11-25) |
 | Grokbot tool list | all 11 `icloud_*` tools | Writes still need Ryan's confirmation through the preview |
-| `HOMELAB_MCP_ICLOUD_FEED_HOSTS` | `outlook.office365.com` | Hosts subscribed-calendar feeds are fetched from (0.73.0); the egress list must match |
+| `HOMELAB_MCP_ICLOUD_FEED_HOSTS` | `outlook.office365.com`, `api.team-manager.gc.com`, `ical-cdn.teamsnap.com`, `calendar.google.com`, `groups.planningcenteronline.com`, `www.fcps.org` | Hosts subscribed-calendar feeds are fetched from (0.73.0); the egress list must match |
 | `HOMELAB_MCP_ICLOUD_SUBSCRIBED_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Subscribed calendars not named below, the work feed included (Ryan, 2026-11-26) |
 | `HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS` | `{}` | Calendar name or id -> views; name a calendar here to narrow who sees it |
 
