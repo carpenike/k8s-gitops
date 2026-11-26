@@ -318,6 +318,7 @@ Also:
 | `homelab-finance` | `report_password` (new field) | none; generate |
 | `homelab-mcp-email` | `username`, `read_password`, `write_password` | none; Stalwart app passwords ([Email](#email)) |
 | `homelab-mcp-email-send` | `send_password` | none; only when sending is wanted ([Email](#email)) |
+| `homelab-mcp-icloud` | `username`, `password` | none; Apple app-specific password ([iCloud](#icloud)) |
 
 `homelab-mcp-jobs` reuses `homelab-mcp` (`sidecar_token`,
 `finances_repo_token`, `finances_*` amounts), `homelab-finance/export_db_password`,
@@ -356,6 +357,47 @@ cuts that capability at once.
 
 The pod's egress allows `mail.${SECRET_DOMAIN}` on 443. Stalwart's policy
 already admits envoy-internal on 8080, so it needs no change.
+
+From 0.72.0 the same tools also schedule sends, cancel them, report
+delivery status, manage the vacation auto-reply and Sieve filters, draft
+unsubscribe requests, list top senders and unanswered threads, and snooze.
+Grokbot gets all of these except `email_set_vacation` and the filter
+writes, which change how the whole mailbox answers and routes mail. The
+scheduler runs `homelab-email-snooze-wake` every 5 minutes with the write
+password (it can move mail, never send). Check the Stalwart details
+carpenike/mcp `docs/EMAIL.md` lists (spam header, FUTURERELEASE, Sieve and
+vacation permissions) before relying on them.
+
+A per-user connector (Steffi's, later) reads its own mailbox from
+`email.<alias>` in the user-credentials Secret, JSON with `username`,
+`read_password`, `write_password` and optional `send_password`, and never
+Ryan's. Add her view to `EMAIL_VIEWS` (and `EMAIL_SEND_VIEWS` to send) when
+that file exists. The snooze job wakes only Ryan's mailbox until the
+scheduler also mounts the user-credentials Secret.
+
+## iCloud
+
+The `icloud_*` tools (carpenike/mcp 0.72.0, `docs/ICLOUD.md` there) read
+and change Ryan's Apple calendars over CalDAV and read his contacts over
+CardDAV. Calendars and contacts live in iCloud, not Stalwart.
+
+The credential is the main risk: an Apple app-specific password cannot be
+scoped, so the one in item `homelab-mcp-icloud` also opens iCloud Mail and
+Contacts. The server keeps every request on Apple's CalDAV/CardDAV hosts
+and the account's own collections, keeps contacts read-only, and requires
+preview then confirm for any event with attendees (iCloud emails them as
+Ryan) and for every update or delete. The pod's egress allows only
+`caldav.icloud.com`, `contacts.icloud.com` and their `pNN-` partition
+hosts. Revoke the password at appleid.apple.com to cut it at once.
+
+| Setting | Value | Why |
+| --- | --- | --- |
+| `HOMELAB_MCP_ICLOUD_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Every other view is refused before any request |
+| `HOMELAB_MCP_ICLOUD_WRITE_VIEWS` | `/mcp/full`, `/mcp/agent/grokbot` | One gated calendar path for both agents (Ryan, 2026-11-25) |
+| Grokbot tool list | all 11 `icloud_*` tools | Writes still need Ryan's confirmation through the preview |
+
+A per-user connector uses `icloud.<alias>` (JSON `username`, `password`)
+from the user-credentials Secret, never Ryan's Apple ID.
 
 ## Images
 
