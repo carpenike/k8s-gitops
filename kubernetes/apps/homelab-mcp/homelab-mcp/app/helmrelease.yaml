@@ -158,7 +158,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-771f00faced38f2ef46bfc01362a35867f675f4d@sha256:b2400c6b6eb4425dc9acd213486fc1ef884a6ecebeb548154fa748d06aa9a169
+              tag: sha-4daa58379f4da5c7303d7703621e2381b1479934@sha256:421cf3b36a463d8f5ff3d073b5a5745170f910940b34561cd4aeda1107a5fc28
             command:
               - /bin/sh
               - -c
@@ -246,7 +246,7 @@ spec:
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
                 "amazon", "costco", "samsclub", "withings", "vault", "openproject",
-                "messaging", "replog", "email"]
+                "messaging", "replog", "email", "icloud"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
@@ -419,6 +419,20 @@ spec:
               HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
+              # iCloud calendar and contacts over CalDAV/CardDAV (carpenike/mcp
+              # docs/ICLOUD.md, 0.72.0). Ryan's calendars and contacts are in
+              # iCloud, not Stalwart. The Apple app-specific password cannot
+              # be scoped (it also opens iCloud Mail), so the server limits it:
+              # Apple's DAV hosts only (and the egress below), contacts
+              # read-only, and every event write that emails attendees, plus
+              # every update or delete, is preview then confirm. Read: Home,
+              # Home (full), Grokbot. Write: Home (full) and Grokbot (Ryan,
+              # 2026-11-25: one gated calendar path for both agents).
+              HOMELAB_MCP_ICLOUD_VIEWS: >-
+                ["/mcp", "/mcp/full", "/mcp/agent/grokbot"]
+              HOMELAB_MCP_ICLOUD_WRITE_VIEWS: >-
+                ["/mcp/full", "/mcp/agent/grokbot"]
+              HOMELAB_MCP_ICLOUD_TIMEZONE: America/New_York
               HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
                 {"/mcp": "claude", "/mcp/full": "claude", "/mcp/agent/grokbot": "grokbot"}
               HOMELAB_MCP_OPENPROJECT_BOT_SCOPES: >-
@@ -482,6 +496,13 @@ spec:
               # trash and junk, keywords, preview then send). Sending needs the
               # view in HOMELAB_MCP_EMAIL_SEND_VIEWS too, and the send secret.
               # No email_create_folder / email_update_folder.
+              # Email extras (0.72.0): scheduled sends (send_at, list, cancel),
+              # delivery status, unsubscribe drafts, top senders, awaiting
+              # reply, snooze, and reading filters and the auto-reply. Not
+              # email_set_vacation or the filter writes: they change how the
+              # whole mailbox answers and routes mail, so Home (full) only.
+              # iCloud (Ryan, 2026-11-25): calendar reads and gated writes,
+              # contacts read-only.
               # /mcp/house-sensors: Groundskeeper; its scope name keys the HA
               # entity policy.
               # /mcp/steffi: Steffi's own connector, credentials "per_user".
@@ -609,7 +630,18 @@ spec:
                  "email_create_draft", "email_update_draft", "email_delete_draft",
                  "email_create_reply_draft", "email_create_forward_draft",
                  "email_move_messages", "email_set_keywords",
-                 "email_preview_send_draft", "email_send_draft"],
+                 "email_preview_send_draft", "email_send_draft",
+                 "email_list_scheduled", "email_cancel_scheduled",
+                 "email_get_delivery_status", "email_get_vacation",
+                 "email_get_unsubscribe", "email_create_unsubscribe_draft",
+                 "email_top_senders", "email_list_awaiting_reply",
+                 "email_snooze", "email_unsnooze", "email_list_snoozed",
+                 "email_list_filters",
+                 "icloud_list_calendars", "icloud_list_events", "icloud_get_event",
+                 "icloud_search_contacts", "icloud_get_contact",
+                 "icloud_preview_create_event", "icloud_create_event",
+                 "icloud_preview_update_event", "icloud_update_event",
+                 "icloud_preview_delete_event", "icloud_delete_event"],
                  "read_scope": "grokbot", "users": ["ryan@ryanholt.net"]},
                 {"path": "/mcp/agent/hank", "name": "Hank",
                  "tools": ["vault_domains", "vault_read", "vault_list", "vault_search",
@@ -703,6 +735,12 @@ spec:
               # without it every connector is drafts-only.
               - secretRef:
                   name: homelab-mcp-email-send
+                  optional: true
+              # HOMELAB_MCP_ICLOUD_USERNAME / _PASSWORD (homelab-mcp-icloud):
+              # an Apple app-specific password. Optional: until the item
+              # exists icloud_* answers icloud_not_configured.
+              - secretRef:
+                  name: homelab-mcp-icloud
                   optional: true
             probes:
               liveness: &probe
@@ -982,11 +1020,17 @@ spec:
               HOMELAB_MCP_FINANCES_INGEST_ANCHOR_UTC: "19:30"
               HOMELAB_MCP_FINANCES_INGEST_ANCHOR_TOLERANCE_SECONDS: "1800"
               HOMELAB_MCP_LOG_LEVEL: info
+              # homelab-email-snooze-wake: Ryan's mailbox, write password only
+              # (moves and keywords; it cannot send).
+              HOMELAB_MCP_EMAIL_JMAP_URL: https://mail.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: homelab-mcp-jobs
               - secretRef:
                   name: homelab-mcp-signal
+              - secretRef:
+                  name: homelab-mcp-email
+                  optional: true
             securityContext: *jobSecurity
             resources:
               requests:
@@ -1045,6 +1089,9 @@ spec:
             0,5,10 8 * * * homelab-finances-runtime due daily "$FINANCE_REPORTS_NOT_BEFORE" && homelab-finances-runtime project && homelab-finances-runtime report daily 8080 "$FINANCE_REPORTS_NOT_BEFORE"
             0,5,10 16 * * 5 homelab-finances-runtime due weekly "$FINANCE_REPORTS_NOT_BEFORE" && homelab-finances-runtime project && homelab-finances-runtime report weekly 8080 "$FINANCE_REPORTS_NOT_BEFORE"
             */2 * * * * homelab-finances-runtime collect 8080 "$FINANCE_REPORTS_NOT_BEFORE" /run/finance-metrics/finance_signal.prom
+            # Snoozed email back to the inbox when due (email_snooze). Prints
+            # counts only; does nothing until the email secret exists.
+            */5 * * * * homelab-email-snooze-wake
     service:
       app:
         controller: homelab-mcp
@@ -1310,6 +1357,13 @@ spec:
                   # email_*: Stalwart's JMAP through envoy-internal. Stalwart's
                   # own policy already admits envoy-internal on 8080.
                   - matchName: mail.${SECRET_DOMAIN}
+                  # icloud_*: Apple's CalDAV/CardDAV discovery hosts and the
+                  # per-account partition hosts they hand out (pNN-...). The
+                  # server refuses any other host before sending the password.
+                  - matchName: caldav.icloud.com
+                  - matchName: contacts.icloud.com
+                  - matchPattern: "p*-caldav.icloud.com"
+                  - matchPattern: "p*-contacts.icloud.com"
                   # mfp: cookies go to www only; the v2 API takes the bearer token.
                   - matchName: www.myfitnesspal.com
                   - matchName: api.myfitnesspal.com
