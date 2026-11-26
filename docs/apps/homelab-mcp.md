@@ -394,16 +394,28 @@ hosts. Revoke the password at appleid.apple.com to cut it at once.
 | --- | --- | --- |
 | `HOMELAB_MCP_ICLOUD_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Every other view is refused before any request |
 | `HOMELAB_MCP_ICLOUD_WRITE_VIEWS` | `/mcp/full`, `/mcp/agent/grokbot` | One gated calendar path for both agents (Ryan, 2026-11-25) |
-| Grokbot tool list | all 11 `icloud_*` tools | Writes still need Ryan's confirmation through the preview |
-| `HOMELAB_MCP_ICLOUD_FEED_HOSTS` | `outlook.office365.com`, `api.team-manager.gc.com`, `ical-cdn.teamsnap.com`, `calendar.google.com`, `groups.planningcenteronline.com`, `www.fcps.org` | Hosts subscribed-calendar feeds are fetched from (0.73.0); the egress list must match |
+| Grokbot tool list | the 11 calendar and contact `icloud_*` tools, not the four feed-host tools | Writes still need Ryan's confirmation through the preview |
+| `HOMELAB_MCP_ICLOUD_FEED_HOSTS` | `outlook.office365.com`, `api.team-manager.gc.com`, `ical-cdn.teamsnap.com`, `calendar.google.com`, `groups.planningcenteronline.com`, `www.fcps.org` | Hosts subscribed-calendar feeds are fetched from (0.73.0); fetched through feed-proxy |
+| `HOMELAB_MCP_ICLOUD_FEED_PROXY_URL` | `http://homelab-mcp-feed-proxy.homelab-mcp.svc.cluster.local:9300` | The feed-proxy pod (0.74.0); this pod's egress lists no feed hosts |
+| `HOMELAB_MCP_ICLOUD_FEED_ADMIN_VIEWS` | `/mcp/full` | The only connector that may approve a new feed host (Ryan, 2026-11-26) |
 | `HOMELAB_MCP_ICLOUD_SUBSCRIBED_VIEWS` | `/mcp`, `/mcp/full`, `/mcp/agent/grokbot` | Subscribed calendars not named below, the work feed included (Ryan, 2026-11-26) |
 | `HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS` | `{}` | Calendar name or id -> views; name a calendar here to narrow who sees it |
 
 A subscribed calendar (an ICS feed added to the iCloud account) holds only
 its feed URL, which is a secret link and never shown. When
-`icloud_list_calendars` reports `feed_allowed: false`, add the host it
-names to `HOMELAB_MCP_ICLOUD_FEED_HOSTS` and to the egress `toFQDNs` list
-in the same pull request.
+`icloud_list_calendars` reports `feed_allowed: false`, Ryan approves the
+host it names in chat from Home (full): `icloud_preview_allow_feed_host`,
+then `icloud_allow_feed_host` with the token. No pull request is needed.
+Approvals are kept in `icloud-feed-hosts.db` on the state volume.
+
+The `feed-proxy` controller is a second pod from the same image
+(`homelab-feed-proxy`). It holds no secrets and no service-account token,
+and its policy admits only the homelab-mcp pod on 9300. Its egress is 443
+to public IPv4 only, with every private and reserved range excepted. The
+proxy also refuses any name that resolves to a non-public address. Code
+running in the main pod could send data out in a URL through it. That
+takes control of the server, not a prompt, and is the accepted cost of
+approving hosts from chat (carpenike/mcp `docs/ICLOUD.md`).
 
 A per-user connector uses `icloud.<alias>` (JSON `username`, `password`)
 from the user-credentials Secret, never Ryan's Apple ID.
