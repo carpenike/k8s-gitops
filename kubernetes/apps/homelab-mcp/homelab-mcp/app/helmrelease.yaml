@@ -158,7 +158,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-e49a290683515a19eaab004ad95a0a46e1e84998@sha256:a09948ded59c1d29087cd298dbcbb5554fb9f543445c66bc11527dbf8385d646
+              tag: sha-4cfc9e40b7f35f32b9f774a5a562124647cc3e98@sha256:13c8c666e78ac2b97d820e66368b8446f76e223702dd2349c10f28a5135d7ac1
             command:
               - /bin/sh
               - -c
@@ -435,9 +435,9 @@ spec:
               HOMELAB_MCP_ICLOUD_TIMEZONE: America/New_York
               # Subscribed calendars (ICS feeds; carpenike/mcp 0.73.0). iCloud
               # keeps only the feed URL, so the server fetches it, read-only,
-              # from these hosts only (the egress list below must match).
+              # from these hosts and the ones approved in chat (below).
               # A feed on another host shows its host in icloud_list_calendars
-              # (feed_allowed false); add it here and in egress. A subscribed
+              # (feed_allowed false) until it is approved. A subscribed
               # calendar not named in CALENDAR_VIEWS is seen by
               # SUBSCRIBED_VIEWS only. Ryan chose (2026-11-26) that Grokbot
               # sees subscribed calendars too, the work calendar included.
@@ -452,6 +452,15 @@ spec:
                 ["/mcp", "/mcp/full", "/mcp/agent/grokbot"]
               HOMELAB_MCP_ICLOUD_CALENDAR_VIEWS: >-
                 {}
+              # Feeds are fetched by the feed-proxy pod below (carpenike/mcp
+              # 0.74.0), so this pod's egress lists no feed hosts. A host not
+              # in FEED_HOSTS is approved in chat from Home (full) with
+              # icloud_preview_allow_feed_host, then icloud_allow_feed_host
+              # (Ryan, 2026-11-26); approvals are kept in the state volume.
+              HOMELAB_MCP_ICLOUD_FEED_PROXY_URL: http://homelab-mcp-feed-proxy.homelab-mcp.svc.cluster.local:9300
+              HOMELAB_MCP_ICLOUD_FEED_ADMIN_VIEWS: >-
+                ["/mcp/full"]
+              HOMELAB_MCP_ICLOUD_FEED_HOSTS_DB_PATH: /var/lib/homelab-mcp/state/icloud-feed-hosts.db
               HOMELAB_MCP_OPENPROJECT_VIEW_BOTS: >-
                 {"/mcp": "claude", "/mcp/full": "claude", "/mcp/agent/grokbot": "grokbot"}
               HOMELAB_MCP_OPENPROJECT_BOT_SCOPES: >-
@@ -1081,6 +1090,49 @@ spec:
                 memory: 48Mi
               limits:
                 memory: 128Mi
+      # homelab-feed-proxy (carpenike/mcp 0.74.0, src/homelab_mcp/feed_proxy.py)
+      # fetches subscribed-calendar feeds for icloud_*. Its own pod, so open
+      # https egress never sits next to the credentials: no secrets, no
+      # service-account token, no volume but /tmp, and its policy (below)
+      # admits only the homelab-mcp pod. One GET per request, no redirects
+      # followed (the server checks each hop against its allowlist), public
+      # addresses only, 5 MB cap; it logs hosts, never feed URLs.
+      feed-proxy:
+        replicas: 1
+        strategy: RollingUpdate
+        pod:
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+        containers:
+          app:
+            image: *mcpImage
+            command:
+              - homelab-feed-proxy
+            env:
+              FEED_PROXY_PORT: "9300"
+            probes:
+              liveness: &feedProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 9300
+                  periodSeconds: 30
+                  timeoutSeconds: 3
+              readiness: *feedProbe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 5m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
     # No fsGroup: the init container sets owner and mode instead (see there).
     defaultPodOptions:
       securityContext:
@@ -1121,8 +1173,16 @@ spec:
             port: 9201
           finance-metrics:
             port: 9202
+      feed-proxy:
+        controller: feed-proxy
+        forceRename: homelab-mcp-feed-proxy
+        ports:
+          http:
+            port: 9300
     serviceMonitor:
       app:
+        service:
+          identifier: app
         labels:
           release: kube-prometheus-stack
         endpoints:
@@ -1383,13 +1443,8 @@ spec:
                   - matchName: contacts.icloud.com
                   - matchPattern: "p*-caldav.icloud.com"
                   - matchPattern: "p*-contacts.icloud.com"
-                  # icloud_* subscribed-calendar feeds (HOMELAB_MCP_ICLOUD_FEED_HOSTS).
-                  - matchName: outlook.office365.com
-                  - matchName: api.team-manager.gc.com
-                  - matchName: ical-cdn.teamsnap.com
-                  - matchName: calendar.google.com
-                  - matchName: groups.planningcenteronline.com
-                  - matchName: www.fcps.org
+                  # icloud_* subscribed-calendar feeds go through feed-proxy
+                  # (the toEndpoints rule below), not from this pod.
                   # mfp: cookies go to www only; the v2 API takes the bearer token.
                   - matchName: www.myfitnesspal.com
                   - matchName: api.myfitnesspal.com
@@ -1445,6 +1500,15 @@ spec:
                   - ports:
                       - port: "10443"
                         protocol: TCP
+              # icloud_* subscribed-calendar feeds, through feed-proxy.
+              - toEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: feed-proxy
+                toPorts:
+                  - ports:
+                      - port: "9300"
+                        protocol: TCP
               # The OpenProject API (openproject_*), in the cluster.
               - toEndpoints:
                   - matchLabels:
@@ -1474,4 +1538,59 @@ spec:
                 toPorts:
                   - ports:
                       - port: "5432"
+                        protocol: TCP
+      # feed-proxy: in from the homelab-mcp pod only, on 9300. Out: DNS, and
+      # 443 to public IPv4 only. The except list is every private, shared,
+      # loopback, link-local and reserved range, which covers the node LAN,
+      # the LoadBalancer range and cloud metadata; cluster pods have
+      # identities, so a CIDR rule never matches them. The proxy also refuses
+      # a name with any non-public address before connecting.
+      feed-proxy-policy:
+        forceRename: homelab-mcp-feed-proxy
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: homelab-mcp
+                app.kubernetes.io/controller: feed-proxy
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: homelab-mcp
+                toPorts:
+                  - ports:
+                      - port: "9300"
+                        protocol: TCP
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+              - toCIDRSet:
+                  - cidr: 0.0.0.0/0
+                    except:
+                      - 0.0.0.0/8
+                      - 10.0.0.0/8
+                      - 100.64.0.0/10
+                      - 127.0.0.0/8
+                      - 169.254.0.0/16
+                      - 172.16.0.0/12
+                      - 192.0.0.0/24
+                      - 192.0.2.0/24
+                      - 192.168.0.0/16
+                      - 198.18.0.0/15
+                      - 198.51.100.0/24
+                      - 203.0.113.0/24
+                      - 224.0.0.0/4
+                      - 240.0.0.0/4
+                toPorts:
+                  - ports:
+                      - port: "443"
                         protocol: TCP
