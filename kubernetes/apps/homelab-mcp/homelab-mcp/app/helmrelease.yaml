@@ -1164,7 +1164,11 @@ spec:
             # counts only; does nothing until the email secret exists.
             */5 * * * * homelab-email-snooze-wake
     service:
+      # Two services now (feed-proxy below), so app-template would name this
+      # one homelab-mcp-app; the HTTPRoute and probes expect homelab-mcp.
       app:
+        forceRename: homelab-mcp
+        primary: true
         controller: homelab-mcp
         ports:
           http:
