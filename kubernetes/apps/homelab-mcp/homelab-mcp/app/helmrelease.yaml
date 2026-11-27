@@ -538,8 +538,13 @@ spec:
               # does not exist for it. No move or delete, here or in the policy.
               # Grocy (Ryan, 2026-11-27, for Sam's Club orders): the shopping
               # list, the order manifest (store item numbers, pack counts, a
-              # price ceiling) and grocy_mark_ordered. No stock writes. Shared
-              # Grocy key, as this view is not per_user.
+              # price ceiling) and grocy_mark_ordered. Later the same day (Ryan,
+              # 2026-11-27) also grocy_add_to_shopping_list, grocy_check_off and
+              # the gated receipt import (grocy_preview_receipt_import, then
+              # grocy_import_receipt with its confirm token; idempotent per
+              # receipt line), so Sam's orders land in stock. No other stock
+              # writes: counts, consume, transfer and undo stay with Steffi's
+              # connector. Shared Grocy key, as this view is not per_user.
               # Costco and Sam's Club receipt reads too (Ryan, 2026-11-27), the
               # same read-only lading tools /mcp/household has.
               # Finances (Ryan, 2026-11-12, for Steward): transaction search
@@ -671,6 +676,8 @@ spec:
                  "cooklang_list_recipes", "cooklang_get_recipe",
                  "cooklang_search_federation", "cooklang_build_shopping_list",
                  "grocy_shopping_list", "grocy_order_manifest", "grocy_mark_ordered",
+                 "grocy_add_to_shopping_list", "grocy_check_off",
+                 "grocy_preview_receipt_import", "grocy_import_receipt",
                  "costco_get_receipt", "costco_get_sync_status", "costco_list_receipts",
                  "costco_match_charges", "costco_price_history", "costco_search_items",
                  "samsclub_get_receipt", "samsclub_get_sync_status",
