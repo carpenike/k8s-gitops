@@ -157,9 +157,11 @@ with.
 
 ### Fallback path through the edge
 
-Proposed 2026-11-27. The cluster's Stalwart gets a second relay route,
+Built 2026-11-27. The cluster's Stalwart has a second relay route,
 `edge`, to the edge VM over the tailnet, and the outbound strategy sends
-one destination through it: `mail.grokbot.com`. Every other remote
+one destination through it: `mail.grokbot.com`. The first message, from
+`ryan@ryanholt.net`, went cluster to edge to Amazon SES (the domain's MX)
+in under ten seconds, and the edge verified its DKIM on the way. Every other remote
 domain stays on SMTP2GO, and the two triggers above for a full move are
 unchanged.
 
@@ -197,10 +199,12 @@ Tailnet: the grant that gives `tag:k8s` `tcp:8080` and `tcp:9100` on
 
 Edge:
 
-- A listener `relay` on 587 (SMTP, STARTTLS), opened on `tailscale0`
-  only in the NixOS firewall (nix-config `hosts/mx-edge`)
-- An account for the cluster under `mx.holthome.net`, which is already
-  a Domain there. MtaStageAuth `require` is true on 587
+- A listener `relay` on 587 (SMTP, STARTTLS). Public 587 is dropped by
+  the NixOS firewall; on the tailnet, Tailscale's own chain accepts
+  `tailscale0` before NixOS's, so the grant decides who reaches it
+- An account `relay@mx.holthome.net` for the cluster (`mx.holthome.net`
+  is already a Domain there). MtaStageAuth already requires a login off
+  port 25
 - MtaStageAuth `mustMatchSender` false for that account only, because a
   redirect carries someone else's envelope sender
 - MtaStageRcpt `allowRelaying` gains `authenticated_as` equal to that
