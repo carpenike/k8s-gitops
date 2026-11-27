@@ -422,6 +422,15 @@ spec:
               HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
+              # Calendar intake (carpenike/mcp docs/EMAIL.md, 0.74.0): mail and
+              # flier photos sent to Ryan's +calendar address, filed into the
+              # "Calendar Intake" folder by a filter. email_list_intake marks a
+              # message trusted only from the mailbox's own identities or these
+              # exact addresses, with DMARC pass. Steffi added by Ryan
+              # 2026-11-27. Trust is about the sender only; events still go
+              # through icloud_preview_create_event and Ryan's confirmation.
+              HOMELAB_MCP_CALENDAR_INTAKE_SENDERS: >-
+                ["stefanie@stefanieholt.com"]
               # iCloud calendar and contacts over CalDAV/CardDAV (carpenike/mcp
               # docs/ICLOUD.md, 0.72.0). Ryan's calendars and contacts are in
               # iCloud, not Stalwart. The Apple app-specific password cannot
@@ -667,7 +676,7 @@ spec:
                  "email_get_unsubscribe", "email_create_unsubscribe_draft",
                  "email_top_senders", "email_list_awaiting_reply",
                  "email_snooze", "email_unsnooze", "email_list_snoozed",
-                 "email_list_filters",
+                 "email_list_filters", "email_list_intake",
                  "icloud_list_calendars", "icloud_list_events", "icloud_get_event",
                  "icloud_search_contacts", "icloud_get_contact",
                  "icloud_preview_create_event", "icloud_create_event",
