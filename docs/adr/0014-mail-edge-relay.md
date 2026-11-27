@@ -155,6 +155,77 @@ SMTP2GO's free plan (1,000 a month, 200 a day) covers a household, and
 its terms allow mail to people the sender has a personal relationship
 with.
 
+### Fallback path through the edge
+
+Proposed 2026-11-27. The cluster's Stalwart gets a second relay route,
+`edge`, to the edge VM over the tailnet, and the outbound strategy sends
+one destination through it: `mail.grokbot.com`. Every other remote
+domain stays on SMTP2GO, and the two triggers above for a full move are
+unchanged.
+
+The occasion is a mail rule that forwards Planning Center's Safety Team
+notices to `ryanholt+pco@mail.grokbot.com` and keeps a copy. Stalwart
+v1.2.1 compiles a rule's Forward action to a Sieve `redirect`, which
+keeps Planning Center as the sender, and its mail rules have no
+forward-as-attachment action. SMTP2GO refuses that message (550, sender
+domain not verified, first seen 2026-11-27). The edge sends it
+unchanged: Planning Center's DKIM signature survives, and DMARC passes
+on it. The same work builds the path that the rest of this ADR only
+describes, so a forced move off SMTP2GO would start from a route that
+has carried mail, not from nothing.
+
+Cluster:
+
+- An operator egress Service `mail/mx-edge-relay` for the edge's tailnet
+  address, port 587, like `observability/mx-edge` for metrics
+- Stalwart's network policy allows that Service's proxy pods (namespace
+  `tailscale`, labels `tailscale.com/parent-resource: mx-edge-relay` and
+  `tailscale.com/parent-resource-ns: mail`) on 587. The CIDR rule keeps
+  excluding 100.64.0.0/10
+- An `MtaRoute/Relay` `edge` to `mx-edge-relay.mail.svc.cluster.local`
+  port 587, STARTTLS, `allowInvalidCerts` true: it connects by Service
+  name, and the hop runs inside the tailnet, as the edge's own `cluster`
+  route does. It logs in as the edge account below, with the password
+  from `STALWART_EDGE_RELAY_PASSWORD` (1Password item `stalwart`, field
+  `edge_relay_password`)
+- MtaOutboundStrategy `route`: `is_local_domain(rcpt_domain)` →
+  `'local'`, `rcpt_domain == 'mail.grokbot.com'` → `'edge'`, else
+  `'smtp2go'`
+
+Tailnet: the grant that gives `tag:k8s` `tcp:8080` and `tcp:9100` on
+`tag:mx-edge` gains `tcp:587`.
+
+Edge:
+
+- A listener `relay` on 587 (SMTP, STARTTLS), opened on `tailscale0`
+  only in the NixOS firewall (nix-config `hosts/mx-edge`)
+- An account for the cluster under `mx.holthome.net`, which is already
+  a Domain there. MtaStageAuth `require` is true on 587
+- MtaStageAuth `mustMatchSender` false for that account only, because a
+  redirect carries someone else's envelope sender
+- MtaStageRcpt `allowRelaying` gains `authenticated_as` equal to that
+  account `&& rcpt_domain == 'mail.grokbot.com'`. A leaked password then
+  relays to that one domain and nowhere else
+- Its outbound strategy already sends any other domain to its MX
+
+What this proves: the path from the cluster through the tailnet to the
+edge, relay authentication, and direct delivery from the edge's
+address, on mail nobody depends on (the rule keeps a copy in the
+mailbox). What it does not prove: whether Gmail or Microsoft accept the
+household's own mail from that address. That needs a separate, later
+step (a few of the household's own messages to mailboxes it owns at
+Gmail and Outlook, headers checked), and is not part of this change.
+
+Open: Stalwart has no SRS, so the redirected message keeps Planning
+Center's Mailgun envelope sender and fails SPF at the receiver. Delivery
+then depends on the receiver accepting DMARC passed by DKIM alone. If
+`mail.grokbot.com` refuses on SPF, this route does not help that rule.
+Mail from the household's own domains would pass SPF there, because
+their SPF is `v=spf1 mx -all` and the MX is the edge.
+
+To undo it, remove the `mail.grokbot.com` condition. The route, listener
+and account can stay idle.
+
 ### Consequences
 
 - Good, because nothing new listens on the home connection; the only
@@ -179,7 +250,8 @@ with.
 - Bad, because outbound goes through SMTP2GO, a third party that sees
   every message and holds its bounces, and that refuses envelope senders
   outside its verified domains, so a redirect that keeps the original
-  sender fails
+  sender fails unless its destination goes through the edge ("Fallback
+  path through the edge")
 - Neutral, because DANE does not apply to outbound mail: Stalwart's
   resolver cannot validate DNSSEC, so Stalwart turns DANE off, and every
   remote domain goes to the relay rather than to its own MX anyway
