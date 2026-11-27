@@ -52,6 +52,7 @@ Node config and first install are next to the files they describe:
 | [home-automation.md](apps/home-automation.md) | EMQX, zigbee2mqtt, Z-Wave JS UI and Home Assistant moved from Forge; hass-config deployed by git-sync; the four cutovers |
 | [schoolhouse.md](apps/schoolhouse.md) | Schoology ingest CronJob and health server |
 | [lading.md](apps/lading.md) | Amazon, Costco and Sam's Club sync per account, and token seeds |
+| [grocy.md](apps/grocy.md) | Grocy food inventory, moved from Forge: per-person Pocket ID login, the copy, and the homelab-mcp tools |
 | [replog.md](apps/replog.md) | Family workout log, moved from Forge, public at `replog.` |
 | [website.md](apps/website.md) | The `ryanholt.net` static site, and how it shares the apex with Matrix |
 

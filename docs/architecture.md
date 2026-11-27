@@ -51,6 +51,7 @@ Flux syncs `kubernetes/apps` from this GitHub repository. The branch in
 | Home automation | EMQX (one node), zigbee2mqtt, Z-Wave JS UI (USB stick on one sled) and Home Assistant (`vlan30` `10.30.0.32`, recorder on `postgres17`, config from hass-config by git-sync); shipped at replicas 0, moving from Forge (see [home-automation.md](apps/home-automation.md), ADR 0018) | EMQX 6.3.3, zigbee2mqtt 2.14.2, Z-Wave JS UI 11.27.0, Home Assistant 2026.10.1 |
 | Agents | Hermes Agent, one `hermes-<bot>` namespace per bot: agent pod (runc) plus screen pod (`kata-qemu`), Matrix `@chief` (see [hermes.md](apps/hermes.md)) | v0.23.0 |
 | Website | `ryanholt.net` static site, nginx-unprivileged, external gateway (see [website.md](apps/website.md)) | 1.31.7 |
+| Food inventory | Grocy, moving off Forge, SQLite on Ceph RBD, internal gateway with a per-person Pocket ID identity header, one replica. Waits for the Forge copy before it starts (see [grocy.md](apps/grocy.md)) | LinuxServer.io `v4.7.1-ls352` |
 | Workout log | replog, moving off Forge, SQLite on Ceph RBD, public gateway, one replica. Merging does not move the name off Forge (see [replog.md](apps/replog.md)) | `sha-7f52207d2a05d806981852e34752b68fa43986b3` |
 
 Chart tags that the plan did not name (spegel, CoreDNS, metrics-server,

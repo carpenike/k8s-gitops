@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# The whole /config volume: grocy.db and storage/ (pictures and files) under
+# data/, plus the image's nginx and PHP settings. copyMethod Snapshot takes a
+# Ceph RBD snapshot (csi-ceph-block) and restic reads that, not the live
+# files. A block snapshot is crash-consistent; SQLite recovers its journal on
+# open. Every 6 hours, toward Forge's sanoid snapshots of tank/services/grocy.
+# The mover runs as the app user (PUID/PGID 1000), which owns every file
+# after the image's start-up chown.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: grocy
+spec:
+  sourcePVC: grocy-config
+  trigger:
+    schedule: "35 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: grocy-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: grocy-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4

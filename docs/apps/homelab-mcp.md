@@ -50,14 +50,15 @@ The first time a user connects a client to a view, they get a consent page.
 ## What runs here
 
 The pod only reaches hosts named in its CiliumNetworkPolicy, on 443, plus
-postgres17 on 5432 and `replog.replog.svc` on 8080. That policy is in the HelmRelease (`rawResources`), not
+postgres17 on 5432, `replog.replog.svc` on 8080 and `grocy.grocy.svc` on 80. That policy is in the HelmRelease (`rawResources`), not
 `ciliumnetworkpolicy.yaml`, because kubeconform rejects `${SECRET_DOMAIN}` in
 a `toFQDNs` name.
 
 | Category | Upstream |
 | --- | --- |
 | `mfp` | www/api.myfitnesspal.com |
-| `cooklang`, `ha`, `grocy`, `paperless` | their hosts on `${SECRET_DOMAIN}` |
+| `cooklang`, `ha`, `paperless` | their hosts on `${SECRET_DOMAIN}` |
+| `grocy` | `grocy.grocy.svc:80` in the cluster ([grocy.md](grocy.md)). `GROCY-API-KEY` per call: the shared `grocy_api_key`, or the caller's `grocy.<alias>` in a per-user view |
 | `arcraiders` | public game-data sites |
 | `gatus` | `status.${SECRET_DOMAIN}` `/api/v1/endpoints`, let through Forge's admin login (nix-config) |
 | `fidelity` | api.snaptrade.com |
@@ -140,7 +141,7 @@ The upstreams on `${SECRET_DOMAIN}` must answer API calls from the
 cluster without the gateway login. Check each host when it first fails:
 
 - Home Assistant takes its own bearer token.
-- Grocy takes `GROCY-API-KEY`.
+- Grocy takes `GROCY-API-KEY`. It is in the cluster now and called on its Service, not its host name ([grocy.md](grocy.md)).
 - Paperless takes `Token`.
 - Gatus needs the `/api/v1/endpoints` bypass.
 - Actual takes the sidecar's password login.
