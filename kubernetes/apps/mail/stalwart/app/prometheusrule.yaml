@@ -93,18 +93,42 @@ spec:
               No metrics from Stalwart in namespace mail for 10 minutes. Mail
               delivery to mailboxes, IMAP, JMAP and webmail are probably down;
               the edge relay queues inbound mail meanwhile.
-        - alert: MailQueueBacklog
-          # Either server. A healthy queue here drains in seconds.
-          expr: stalwart_queue_messages{job=~"stalwart|mx-edge-stalwart"} > 20
+        # Stalwart sets its queue-size gauge (queue.count, exported as
+        # stalwart_queue_messages) only in the Enterprise edition
+        # (crates/services/src/task_manager/scheduler.rs at v1.2.1), so
+        # these two alerts use counters instead.
+        - alert: MailEdgeNotDelivering
+          # The edge hands every inbound message to the cluster's
+          # smtp-edge (2525). Mail accepted for an hour with nothing
+          # delivered means that hand-off is failing.
+          expr: >-
+            sum(increase(stalwart_queue_message_queued_total{job="mx-edge-stalwart"}[1h])) > 0
+            and sum(increase(stalwart_delivery_delivered_total{job="mx-edge-stalwart"}[1h])) < 1
+          labels:
+            severity: warning
+          annotations:
+            summary: The edge relay accepted mail but delivered none in an hour
+            description: >-
+              Inbound mail is queued on the edge. Check that the cluster's
+              Stalwart is up and that the edge reaches 10.45.10.25:2525 over
+              the tailnet (nc -vz from the VM).
+        - alert: MailDeliveryRetrying
+          # Retries per hour. The edge's baseline is up to about 13, from
+          # DMARC report collectors with broken certificates; the cluster
+          # relays everything through SMTP2GO and normally has none.
+          expr: >-
+            sum by (job) (increase(stalwart_queue_rescheduled_total{job="mx-edge-stalwart"}[1h])) > 25
+            or sum by (job) (increase(stalwart_queue_rescheduled_total{job="stalwart"}[1h])) > 5
           for: 30m
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.job }}: mail queue has held over 20 messages for 30 minutes"
+            summary: "{{ $labels.job }}: mail deliveries are being retried"
             description: >-
-              Messages are waiting to be delivered. On the edge that usually
-              means the cluster's smtp-edge (2525) is unreachable; on the
-              cluster, SMTP2GO or a recipient's server is refusing them.
+              Messages are waiting in the queue for another attempt. On the
+              edge that usually means the cluster's smtp-edge (2525) is
+              unreachable; on the cluster, SMTP2GO is deferring them. Each
+              server's WebUI lists its queue.
         - alert: StalwartAuthFailureBurst
           # Stalwart bans an address after 100 failures a day; this is the
           # early sign, for example a phone with a stale app password.

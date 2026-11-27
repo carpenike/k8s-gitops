@@ -78,9 +78,16 @@ homelab-mcp pods only. Egress is cluster DNS only.
 
 The callback is `https://grocy.${SECRET_DOMAIN}/oauth2/callback`, already
 covered by the `envoy-gateway` client's `https://*.holthome.net/oauth2/callback`
-([gateway-auth.md](../platform/gateway-auth.md)). Unlike Forge's `home`
-policy, there is no group check: any Pocket ID login gets in, as with the
-other routes. A group rule can be added to the same SecurityPolicy later.
+([gateway-auth.md](../platform/gateway-auth.md)). Like Forge's `home` policy, the SecurityPolicy's `authorization` block
+allows only a token whose `groups` claim holds `home`; any other Pocket ID
+account is refused at the gateway.
+
+Grocy gives a user it creates on first sight `DEFAULT_PERMISSIONS`, which
+defaults to `ADMIN` (enough to create API keys). The HelmRelease sets
+`GROCY_DEFAULT_PERMISSIONS: USERS_EDIT_SELF`, so a new household login
+starts with only its own profile and an admin grants the rest in Grocy
+(Manage users). From the environment the setting is a single permission
+name. Users copied from Forge keep their permissions.
 
 There is no `/api` bypass on the route. Forge's existed for the MCP tools,
 which now call the Service directly. A phone app that uses an API key

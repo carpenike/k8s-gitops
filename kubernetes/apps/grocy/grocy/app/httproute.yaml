@@ -37,6 +37,8 @@ spec:
 #      and issuer, and writes its email claim into X-Grocy-User. jwt_authn
 #      removes any client-sent X-Grocy-User before it does, and a request
 #      without a valid token is refused, so a browser cannot name a user.
+#   3. authorization: only a token whose `groups` claim holds `home` gets
+#      through, as Forge's `home` policy required.
 #
 # Grocy reads X-Grocy-User (GROCY_REVERSE_PROXY_AUTH_HEADER in the
 # HelmRelease). The pod accepts connections only from envoy-internal and
@@ -86,3 +88,19 @@ spec:
         claimToHeaders:
           - header: X-Grocy-User
             claim: email
+  # Only the household. Forge's caddy-security policy `home` required the
+  # Pocket ID group `home`; without this rule any Pocket ID account (friends
+  # on other views) would get in, and Grocy creates a user on first sight.
+  # Claims come from the ID token the jwt provider above verified.
+  authorization:
+    defaultAction: Deny
+    rules:
+      - name: home-group
+        action: Allow
+        principal:
+          jwt:
+            provider: pocket-id
+            claims:
+              - name: groups
+                valueType: StringArray
+                values: ["home"]

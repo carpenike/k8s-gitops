@@ -572,9 +572,11 @@ The cluster's Prometheus scrapes the Vultr edge over the tailnet:
   IP, which changes if the VM re-joins the tailnet. Update the
   annotation after a rebuild.
 - **Alerts:** the edge unreachable, its Stalwart down or its container
-  unit inactive, a failed nightly upgrade, its disk over 85%, a queue
-  over 20 messages for 30 minutes on either server, the cluster's
-  Stalwart down, and over 30 failed logins in 15 minutes. Nothing
+  unit inactive, a failed nightly upgrade, its disk over 85%, the edge
+  accepting mail but delivering none for an hour, deliveries being
+  retried on either server, the cluster's Stalwart down, and over 30
+  failed logins in 15 minutes. Queue size itself is not alerted on:
+  Stalwart exports that gauge only in the Enterprise edition. Nothing
   exports the edge's certificate expiry, so it has no alert.
 
 ## More mail domains
