@@ -156,7 +156,7 @@ COPY --chmod=0755 claude-code/claude claude-code/gh /usr/local/bin/
 # engines/ read it. Copilot never updates itself (COPILOT_AUTO_UPDATE=false
 # in its wrapper).
 # renovate: datasource=npm depName=@github/copilot
-ARG COPILOT_VERSION=1.0.112
+ARG COPILOT_VERSION=1.0.117
 RUN npm install -g --prefix /opt/copilot "@github/copilot@${COPILOT_VERSION}" && \
     npm cache clean --force && \
     /opt/copilot/bin/copilot --version
