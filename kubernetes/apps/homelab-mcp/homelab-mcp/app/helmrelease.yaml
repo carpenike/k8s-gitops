@@ -163,7 +163,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-a5bbcad9d00e19d47afe6721aaa417771d24683d@sha256:20152808821e993d755a8e86977e14b4dba54bc3fad0728607b23e609101abaf
+              tag: sha-4c22ea07c664fc5b759fdc92413146efe7c61d13@sha256:9cb2a1d0b31b3f108ccfdf1b2a032cc6050e9732d3eba9d21e583ad2f5499e9d
             command:
               - /bin/sh
               - -c
@@ -527,6 +527,12 @@ spec:
               # Obsidian vault (vault_*, Ryan, 2026-11-11), but only its own
               # domains (every personal domain; app/vault-policy.yaml): everything else
               # does not exist for it. No move or delete, here or in the policy.
+              # Grocy (Ryan, 2026-11-27, for Sam's Club orders): the shopping
+              # list, the order manifest (store item numbers, pack counts, a
+              # price ceiling) and grocy_mark_ordered. No stock writes. Shared
+              # Grocy key, as this view is not per_user.
+              # Costco and Sam's Club receipt reads too (Ryan, 2026-11-27), the
+              # same read-only lading tools /mcp/household has.
               # Finances (Ryan, 2026-11-12, for Steward): transaction search
               # and finances_categorize, which sets only category and notes
               # (never amount, payee, account or date). No rule, payee-merge,
@@ -655,6 +661,12 @@ spec:
                  "school_parent_today",
                  "cooklang_list_recipes", "cooklang_get_recipe",
                  "cooklang_search_federation", "cooklang_build_shopping_list",
+                 "grocy_shopping_list", "grocy_order_manifest", "grocy_mark_ordered",
+                 "costco_get_receipt", "costco_get_sync_status", "costco_list_receipts",
+                 "costco_match_charges", "costco_price_history", "costco_search_items",
+                 "samsclub_get_receipt", "samsclub_get_sync_status",
+                 "samsclub_list_receipts", "samsclub_match_charges",
+                 "samsclub_search_items",
                  "mfp_auth_status", "mfp_get_day", "mfp_get_range", "mfp_audit",
                  "mfp_get_food", "mfp_search_food", "mfp_list_recipes", "mfp_get_recipe",
                  "mfp_preview_log_entry", "mfp_log_entry", "mfp_preview_delete_entry",
@@ -704,6 +716,8 @@ spec:
                  "grocy_ensure", "grocy_stock_item", "grocy_set_unit_conversion",
                  "grocy_update_product", "grocy_transfer", "grocy_preview_undo",
                  "grocy_undo", "grocy_preview_receipt_import", "grocy_import_receipt",
+                 "grocy_shopping_list", "grocy_add_to_shopping_list", "grocy_check_off",
+                 "grocy_staples_due", "grocy_mark_ordered", "grocy_order_manifest",
                  "cooklang_list_recipes", "cooklang_get_recipe",
                  "cooklang_search_federation", "cooklang_build_shopping_list",
                  "mfp_auth_status", "mfp_get_day", "mfp_get_range", "mfp_audit",
