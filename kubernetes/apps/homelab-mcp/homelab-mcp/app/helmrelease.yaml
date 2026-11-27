@@ -422,7 +422,7 @@ spec:
               HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
-              # Calendar intake (carpenike/mcp docs/EMAIL.md, 0.74.0): mail and
+              # Calendar intake (carpenike/mcp docs/EMAIL.md, 0.75.0): mail and
               # flier photos sent to Ryan's +calendar address, filed into the
               # "Calendar Intake" folder by a filter. email_list_intake marks a
               # message trusted only from the mailbox's own identities or these
