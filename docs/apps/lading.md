@@ -19,6 +19,8 @@ Namespace `lading`, chart `app-template` 5.3.0, image
 | `lading` | Deployment, 1 replica | always on, `/healthz` on 9230 | `lading-health`: reader DSN only | none |
 | `sync-ryan` | CronJob | `20 4 * * *` (module default 04:20) | `lading-ryan`, seeds `lading-ryan-seeds` | `lading-ryan-state` |
 | `sync-steffi` | CronJob | `40 5 * * *` (Forge `05:40`) | `lading-steffi`, seed `lading-steffi-seeds` | `lading-steffi-state` |
+| `receipts-ryan` | CronJob | `0 18 * * *`, Costco and Sam's Club only | `lading-receipts` (owner DSN only) | `lading-ryan-state` |
+| `receipts-steffi` | CronJob | `30 18 * * *`, Costco only | `lading-receipts` (owner DSN only) | `lading-steffi-state` |
 
 - Each CronJob runs `lading-migrate`, then `lading-sync`, with
   `LADING_ACCOUNT` set to its account. Ryan has Costco and Sam's Club on
@@ -27,6 +29,15 @@ Namespace `lading`, chart `app-template` 5.3.0, image
   `LADING_KNOWN_ACCOUNTS=["ryan","steffi"]`,
   `LADING_COSTCO_ACCOUNTS=["ryan","steffi"]`,
   `LADING_SAMSCLUB_ACCOUNTS=["ryan"]`.
+- The `receipts-*` CronJobs (Ryan, 2026-11-27) run `lading-sync --source
+  costco` (and `--source samsclub` for ryan) in the evening, after up to 30
+  minutes of jitter, so same-day warehouse trips and deliveries arrive before
+  the next morning. Those sources use each store's own rotating token from
+  the account's state volume and perform no amazon.com login, so these pods
+  hold no Amazon credential (Secret `lading-receipts` is the owner DSN only)
+  and their network policies leave `www.amazon.com` out. `lading-sync`
+  applies migrations itself. They share the state volume with the morning
+  run and never overlap it in time.
 - Settings ported from Forge, on every container: `TIMEZONE=America/New_York`,
   `STALE_AFTER_HOURS=36`, `TRANSACTION_WINDOW_DAYS=45`,
   `MAX_DETAIL_FETCHES_PER_RUN=40`, `COSTCO_WINDOW_DAYS=90`.

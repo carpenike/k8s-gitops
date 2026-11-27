@@ -151,3 +151,84 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Ryan's evening receipts-only run. As lading-sync-ryan WITHOUT
+# www.amazon.com: the pod holds no Amazon credential and must not reach it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lading-receipts-ryan
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lading
+      app.kubernetes.io/controller: receipts-ryan
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: signin.costco.com
+        - matchName: ecom-api.costco.com
+        - matchName: titan.samsclub.com
+        - matchName: www.samsclub.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Steffi's evening receipts-only run: Costco only, no www.amazon.com.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lading-receipts-steffi
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lading
+      app.kubernetes.io/controller: receipts-steffi
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            cnpg.io/cluster: postgres17
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: signin.costco.com
+        - matchName: ecom-api.costco.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
