@@ -167,7 +167,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-ce7ee1d568b656c46095a4b04057c13484f16a18@sha256:558efb8dbda9b985e755f5a43a0d44feee6eac4c127910976681fcc2ad82af9a
+              tag: sha-4769b41ec3e680b9c2c08baee157c12d613e98e9@sha256:4b986a5abc235bf6d1f3c84188a661bca9db360017e661926e0a7b8f35e2756f
             command:
               - /bin/sh
               - -c
@@ -552,6 +552,11 @@ spec:
               # staples_due, consumption_history, convert_units and health.
               # Read-only; 0.78.0 nets items already on order out of the card,
               # the list and staples_due so a second pass doesn't reorder them.
+              # Product setup (Ryan, 2026-11-27, so unmapped receipt lines can be
+              # mapped): grocy_create_product (0.79.0; makes a product with its
+              # store item number and books no stock) and grocy_update_product
+              # (attach an item number, shelf life, minimum, staple interval).
+              # Master data only; still no stock counts, consume, transfer or undo.
               # Finances (Ryan, 2026-11-12, for Steward): transaction search
               # and finances_categorize, which sets only category and notes
               # (never amount, payee, account or date). No rule, payee-merge,
@@ -686,6 +691,7 @@ spec:
                  "grocy_find_products", "grocy_product_card", "grocy_stock_by_location",
                  "grocy_attention", "grocy_staples_due", "grocy_consumption_history",
                  "grocy_convert_units", "grocy_health",
+                 "grocy_create_product", "grocy_update_product",
                  "costco_get_receipt", "costco_get_sync_status", "costco_list_receipts",
                  "costco_match_charges", "costco_price_history", "costco_search_items",
                  "samsclub_get_receipt", "samsclub_get_sync_status",
@@ -738,7 +744,8 @@ spec:
                  "grocy_convert_units", "grocy_product_card", "grocy_consumption_history",
                  "grocy_stock_value", "grocy_stock_by_location",
                  "grocy_ensure", "grocy_stock_item", "grocy_set_unit_conversion",
-                 "grocy_update_product", "grocy_transfer", "grocy_preview_undo",
+                 "grocy_update_product", "grocy_create_product", "grocy_transfer",
+                 "grocy_preview_undo",
                  "grocy_undo", "grocy_preview_receipt_import", "grocy_import_receipt",
                  "grocy_shopping_list", "grocy_add_to_shopping_list", "grocy_check_off",
                  "grocy_staples_due", "grocy_mark_ordered", "grocy_order_manifest",
