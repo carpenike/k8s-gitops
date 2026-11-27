@@ -20,7 +20,7 @@
 # taken yet: docs/apps/hermes-memory.md) and hindsight-client by
 # hindsight/requirements.txt (hashes).
 
-ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
+ARG HERMES_AGENT_IMAGE=docker.io/nousresearch/hermes-agent:v0.23.4@sha256:ef0650d523ee1b5ab32c779acabc446d9936869a9932591553688a62bcf0c42f
 
 # Pure-Python wheels for Hermes' venv, built against the same Python (3.14.9).
 FROM docker.io/library/python:3.14.9-slim@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8 AS hindsight-client

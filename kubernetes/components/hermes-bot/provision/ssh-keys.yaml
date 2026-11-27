@@ -108,7 +108,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: keygen
-          image: docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
+          image: docker.io/nousresearch/hermes-agent:v0.23.4@sha256:ef0650d523ee1b5ab32c779acabc446d9936869a9932591553688a62bcf0c42f
           command:
             - /usr/local/bin/python3
             - -c
