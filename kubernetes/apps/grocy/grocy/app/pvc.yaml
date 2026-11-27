@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# The image's /config: Grocy's data directory is /config/data (grocy.db,
+# storage/ with uploaded pictures and files, config.php, plugins/,
+# viewcache/), next to the image's nginx and PHP settings. Ceph RBD,
+# ReadWriteOnce, so one replica. Forge's dataset is about the size of the
+# SQLite file plus pictures. Backed up by ../backup. See docs/apps/grocy.md.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grocy-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 5Gi

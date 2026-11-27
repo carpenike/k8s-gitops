@@ -249,7 +249,10 @@ spec:
                 "messaging", "replog", "email", "icloud"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
-              HOMELAB_MCP_GROCY_BASE_URL: https://grocy.${SECRET_DOMAIN}/api
+              # Grocy in the cluster (docs/apps/grocy.md), straight to the
+              # Service: no gateway login, the tools send GROCY-API-KEY. The
+              # grocy policy admits these pods on port 80.
+              HOMELAB_MCP_GROCY_BASE_URL: http://grocy.grocy.svc.cluster.local/api
               HOMELAB_MCP_HA_BASE_URL: https://ha.${SECRET_DOMAIN}
               # What the HA control tools may actuate (carpenike/mcp#174; Ryan,
               # 2026-11-22). Applies to every view that has ha_call_service:
@@ -1387,7 +1390,8 @@ spec:
           # which is why HOMELAB_MCP_TRUSTED_PROXY_IPS may be "*"; 9201
           # (/metrics) from Prometheus only. Probes come from the kubelet,
           # which Cilium allows. Out: DNS, then 443 to the named hosts only,
-          # plus replog.replog.svc port 8080 (the coach tools).
+          # plus replog.replog.svc port 8080 (the coach tools) and
+          # grocy.grocy.svc port 80 (the grocy_* tools).
           # toFQDNs needs the DNS proxy to see the lookups, hence the L7 DNS
           # rule, and the pod's ndots 1.
           spec:
@@ -1434,7 +1438,6 @@ spec:
                   - matchName: id.${SECRET_DOMAIN}
                   - matchName: cook.${SECRET_DOMAIN}
                   - matchName: fedcook.${SECRET_DOMAIN}
-                  - matchName: grocy.${SECRET_DOMAIN}
                   - matchName: ha.${SECRET_DOMAIN}
                   - matchName: paperless.${SECRET_DOMAIN}
                   # email_*: Stalwart's JMAP through envoy-internal. Stalwart's
@@ -1522,6 +1525,17 @@ spec:
                 toPorts:
                   - ports:
                       - port: "8080"
+                        protocol: TCP
+              # Grocy tools. Service grocy.grocy.svc, port 80 only. The grocy
+              # policy admits these pods on that port.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: grocy
+                      app.kubernetes.io/name: grocy
+                      app.kubernetes.io/controller: grocy
+                toPorts:
+                  - ports:
+                      - port: "80"
                         protocol: TCP
               # RepLog coach tools. Service replog.replog.svc, port 8080 only.
               # The replog policy admits these pods on that port.
