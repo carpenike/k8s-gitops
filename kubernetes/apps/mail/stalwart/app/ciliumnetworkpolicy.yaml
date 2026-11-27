@@ -28,8 +28,9 @@ spec:
 # are exec, so there is no host rule.
 #
 # Egress: cluster DNS, postgres17 (data and search stores), the Ceph RGW
-# (blob store; Service port 80, pod port 8080; policy matches the pod), and
-# public IPv4 on the ports mail delivery and its lookups use. 25 is direct
+# (blob store; Service port 80, pod port 8080; policy matches the pod), the
+# Tailscale egress proxy for the edge relay's 587 (route "edge", ADR 0014),
+# and public IPv4 on the ports mail delivery and its lookups use. 25 is direct
 # MX delivery, 465/587/2525 a smart host (relay; 465 is the
 # SMTP2GO route, ADR 0014), 443 MTA-STS policies, ACME and spam-rule
 # updates. No RFC1918, CGNAT or link-local. Pocket ID
@@ -137,6 +138,17 @@ spec:
       toPorts:
         - ports:
             - port: "8080"
+              protocol: TCP
+    # The edge relay's 587, through the Tailscale operator's egress proxy
+    # for Service mx-edge-relay (mx-edge-relay.yaml).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: tailscale
+            tailscale.com/parent-resource: mx-edge-relay
+            tailscale.com/parent-resource-ns: mail
+      toPorts:
+        - ports:
+            - port: "587"
               protocol: TCP
     - toCIDRSet:
         - cidr: 0.0.0.0/0

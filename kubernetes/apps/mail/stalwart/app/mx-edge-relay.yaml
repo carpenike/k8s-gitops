@@ -1,0 +1,26 @@
+---
+# The edge relay's authenticated listener (587) for the one destination the
+# cluster's Stalwart sends through the edge: MtaRoute/Relay "edge" (ADR
+# 0014, "Fallback path through the edge"; docs/apps/mail.md, "Through the
+# edge"). The Tailscale operator sees the annotation, runs a tag:k8s proxy
+# in namespace tailscale, and points this Service at it; the tailnet policy
+# grants tag:k8s tcp:587 on tag:mx-edge. The edge requires a login there
+# and relays it to mail.grokbot.com only.
+#
+# 100.82.25.116 is mx-edge's tailnet address, the same one
+# observability/mx-edge (metrics) uses. It changes if the VM re-joins the
+# tailnet; update both then.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mx-edge-relay
+  annotations:
+    tailscale.com/tailnet-ip: 100.82.25.116
+spec:
+  type: ExternalName
+  # Rewritten by the operator to its proxy's Service.
+  externalName: placeholder
+  ports:
+    - name: submission
+      port: 587
+      protocol: TCP
