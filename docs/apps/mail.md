@@ -342,6 +342,56 @@ SMTP2GO accepts only senders on its verified domains. Mail with another
 domain in the envelope sender, such as a Sieve redirect that keeps the
 original sender, is refused and stays in Stalwart's queue.
 
+### Through the edge
+
+One destination, `mail.grokbot.com`, goes through the edge relay instead
+(ADR 0014, "Fallback path through the edge"): a mail rule forwards
+Planning Center notices there, and SMTP2GO refuses a redirect that keeps
+Planning Center as the sender. The edge delivers it unchanged.
+
+1. **Password.** Field `edge_relay_password` in item `stalwart`, 40
+   random characters. The ExternalSecret reads it as
+   `STALWART_EDGE_RELAY_PASSWORD`; Reloader restarts the pod.
+2. **Tailnet grant.** `tag:k8s` to `tag:mx-edge` includes `tcp:587`
+   ([tailscale.md](../platform/tailscale.md)).
+3. **Edge firewall.** Public 587 stays closed: NixOS opens only 25 to
+   the internet. Tailscale's own `ts-input` chain runs before NixOS's and
+   accepts everything on `tailscale0`, so on the tailnet the grant is the
+   gate. nix-config `hosts/mx-edge/stalwart.nix` also lists 587 on
+   `tailscale0`, which matters only if Tailscale stops managing the
+   firewall.
+4. **Edge Stalwart**, over its admin API on 8080:
+   - Account `relay` (User, domain `mx.holthome.net`) with that password
+   - NetworkListener `relay`: SMTP on `[::]:587`, STARTTLS. Restart
+     Stalwart afterwards
+   - MtaStageAuth `require` stays `local_port != 25`, and SASL is offered
+     only over TLS off port 25, as before. `mustMatchSender`: false for
+     the relay account, else true, because a redirect carries the
+     original envelope sender
+   - MtaStageRcpt `allowRelaying` gains, before `else`: `local_port ==
+     587 && authenticated_as == 'relay@mx.holthome.net' && rcpt_domain ==
+     'mail.grokbot.com'` → true. A leaked password relays to that domain
+     only. `authenticated_as` is the full login, as `auth.success` logs it
+   - Its outbound strategy already sends that domain to its MX
+5. **Egress.** Service `mx-edge-relay` (annotation
+   `tailscale.com/tailnet-ip`, port 587) and the network policy rule for
+   its proxy pods.
+6. **Route.** `MtaRoute/Relay` `edge` to
+   `mx-edge-relay.mail.svc.cluster.local` port 587, `implicitTls` false,
+   `allowInvalidCerts` true (it connects by Service name, inside the
+   tailnet), user `relay@mx.holthome.net`, secret
+   EnvironmentVariable `STALWART_EDGE_RELAY_PASSWORD`. Then
+   MtaOutboundStrategy `route` gains `rcpt_domain == 'mail.grokbot.com'`
+   → `'edge'` between `'local'` and the SMTP2GO `else`.
+
+Check before step 6: from outside the tailnet, 587 on the edge's public
+address is closed; through the tailnet, an unauthenticated session is
+refused relay, and the relay login to another domain gets `550 Relay
+not allowed`. After step 6, a message from `ryan@ryanholt.net` to the
+Grok address leaves on route `edge` and passes SPF (the domain's SPF is
+`mx`, and the MX is the edge), DKIM and DMARC. Undo by removing the
+route condition.
+
 Test, with an outside mailbox (inbound is not live yet, so use a check
 that does not reply by mail):
 

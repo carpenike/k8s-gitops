@@ -65,6 +65,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # a5bbcad, 0.75.0: calendar intake (carpenike/mcp#187:
+              # email_list_intake, pictures as image blocks, parsed invites)
+              # and the grocy writes of carpenike/mcp#188. #187's own image
+              # build was cancelled by #188's push, so this tag carries both.
+              # Digest confirmed from GHCR.
               # 771f00f, 0.70.0 (carpenike/mcp#180): Withings per person. Each
               # call reads the caller's own token; `person` only with a grant;
               # tokens pinned to a Withings userid. Digest confirmed from GHCR.
@@ -158,7 +163,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-4b8e2d49a23358a24a79ea838fb47f5c749cb6f6@sha256:8f016978b4cef56a3feac029fe567a1de49fbffbb430aacd6da1994759ff16bd
+              tag: sha-a5bbcad9d00e19d47afe6721aaa417771d24683d@sha256:20152808821e993d755a8e86977e14b4dba54bc3fad0728607b23e609101abaf
             command:
               - /bin/sh
               - -c
@@ -422,6 +427,15 @@ spec:
               HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
+              # Calendar intake (carpenike/mcp docs/EMAIL.md, 0.75.0): mail and
+              # flier photos sent to Ryan's +calendar address, filed into the
+              # "Calendar Intake" folder by a filter. email_list_intake marks a
+              # message trusted only from the mailbox's own identities or these
+              # exact addresses, with DMARC pass. Steffi added by Ryan
+              # 2026-11-27. Trust is about the sender only; events still go
+              # through icloud_preview_create_event and Ryan's confirmation.
+              HOMELAB_MCP_CALENDAR_INTAKE_SENDERS: >-
+                ["stefanie@stefanieholt.com"]
               # iCloud calendar and contacts over CalDAV/CardDAV (carpenike/mcp
               # docs/ICLOUD.md, 0.72.0). Ryan's calendars and contacts are in
               # iCloud, not Stalwart. The Apple app-specific password cannot
@@ -540,7 +554,11 @@ spec:
               # Grocy acts as her (grocy.steffi in homelab-mcp-user-credentials;
               # refused, never the shared key, until it exists): reads plus
               # stock, ensure and unit-conversion writes, not the one-shot
-              # grocy_seed_defaults. Cooklang sends no credential, so it is the
+              # grocy_seed_defaults. 0.75.0 adds product updates, transfers,
+              # gated undo and gated receipt import. The import reads the
+              # Costco / Sam's receipt from lading on the shared read-only DSN
+              # (the same receipts /mcp/household already shows her) and books
+              # with her own Grocy key. Cooklang sends no credential, so it is the
               # same for everyone; read tools only, no recipe edits.
               # MFP acts as her too (Ryan, 2026-11-19): every mfp_* tool, the same
               # 33 Grokbot has, reads and writes including deletes, on HER session
@@ -667,7 +685,7 @@ spec:
                  "email_get_unsubscribe", "email_create_unsubscribe_draft",
                  "email_top_senders", "email_list_awaiting_reply",
                  "email_snooze", "email_unsnooze", "email_list_snoozed",
-                 "email_list_filters",
+                 "email_list_filters", "email_list_intake",
                  "icloud_list_calendars", "icloud_list_events", "icloud_get_event",
                  "icloud_search_contacts", "icloud_get_contact",
                  "icloud_preview_create_event", "icloud_create_event",
@@ -684,6 +702,8 @@ spec:
                  "grocy_convert_units", "grocy_product_card", "grocy_consumption_history",
                  "grocy_stock_value", "grocy_stock_by_location",
                  "grocy_ensure", "grocy_stock_item", "grocy_set_unit_conversion",
+                 "grocy_update_product", "grocy_transfer", "grocy_preview_undo",
+                 "grocy_undo", "grocy_preview_receipt_import", "grocy_import_receipt",
                  "cooklang_list_recipes", "cooklang_get_recipe",
                  "cooklang_search_federation", "cooklang_build_shopping_list",
                  "mfp_auth_status", "mfp_get_day", "mfp_get_range", "mfp_audit",
