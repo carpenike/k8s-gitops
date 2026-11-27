@@ -91,6 +91,13 @@ spec:
               # 'Grocy\Middleware\ReverseProxyAuthMiddleware' no longer loads.
               GROCY_AUTH_CLASS: 'Grocy\Middleware\Auth\ReverseProxyAuthMiddleware'
               GROCY_REVERSE_PROXY_AUTH_HEADER: X-Grocy-User
+              # Grocy grants DEFAULT_PERMISSIONS to a user it creates on first
+              # sight, and its default is ADMIN (config-dist.php), which can
+              # mint API keys. A new household login starts with nothing but
+              # its own profile; an admin grants the rest in Grocy. From the
+              # environment the value is one permission name, not a list.
+              # Existing users and the API keys' users keep what they have.
+              GROCY_DEFAULT_PERMISSIONS: USERS_EDIT_SELF
             probes:
               # Grocy answers no unauthenticated page with a 200 (the auth
               # middleware throws when the identity header is missing), so
