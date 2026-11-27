@@ -289,6 +289,103 @@ spec:
                   name: lading-steffi
             securityContext: *containerSecurity
             resources: *syncResources
+      # Evening receipts-only runs (Ryan, 2026-11-27): Costco and Sam's Club
+      # again at about 18:00, so a warehouse trip or a same-day delivery is in
+      # lading (and grocy_preview_receipt_import) that evening instead of
+      # the next morning. `lading-sync --source costco|samsclub` uses only
+      # the store's own rotating token and performs NO amazon.com login, so
+      # these pods get no Amazon credential at all: Secret lading-receipts
+      # holds the owner DSN only, and their network policies leave
+      # www.amazon.com out. Same state volume as the morning run (the token
+      # files rotate in place; the two never overlap in time). No seed step:
+      # the morning run installs the seeds. The LadingSync* alerts cover
+      # these CronJobs as they do the others.
+      receipts-ryan:
+        type: cronjob
+        cronjob:
+          suspend: false
+          schedule: "0 18 * * *"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 3600
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          backoffLimit: 0
+        pod: *syncPod
+        initContainers:
+          permissions: *permissions
+        containers:
+          app:
+            image: *image
+            command: &receiptsCommand
+              - /bin/sh
+              - -c
+              - |
+                delay=$(shuf -i 0-1800 -n 1)
+                echo "jitter: starting in $delay s"
+                sleep "$delay"
+                worst=0
+                for source in $RECEIPT_SOURCES; do
+                  timeout 15m lading-sync --source "$source"
+                  rc=$?
+                  echo "$source: exit $rc"
+                  if [ "$rc" -gt "$worst" ]; then
+                    worst=$rc
+                  fi
+                done
+                if [ "$worst" -le 1 ]; then
+                  exit 0
+                fi
+                exit "$worst"
+            env:
+              LADING_TIMEZONE: America/New_York
+              LADING_STALE_AFTER_HOURS: "36"
+              LADING_COSTCO_WINDOW_DAYS: "90"
+              LADING_ACCOUNT: ryan
+              LADING_COSTCO_ENABLED: "true"
+              LADING_SAMSCLUB_ENABLED: "true"
+              RECEIPT_SOURCES: costco samsclub
+              LADING_STATE_DIR: /var/lib/lading
+              HOME: /var/lib/lading
+            envFrom:
+              - secretRef:
+                  name: lading-receipts
+            securityContext: *containerSecurity
+            resources: *syncResources
+      receipts-steffi:
+        type: cronjob
+        # As receipts-ryan, Costco only (Sam's Club is ryan's alone), 30
+        # minutes later so the two accounts are not fetched together.
+        cronjob:
+          suspend: false
+          schedule: "30 18 * * *"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 3600
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+          backoffLimit: 0
+        pod: *syncPod
+        initContainers:
+          permissions: *permissions
+        containers:
+          app:
+            image: *image
+            command: *receiptsCommand
+            env:
+              LADING_TIMEZONE: America/New_York
+              LADING_STALE_AFTER_HOURS: "36"
+              LADING_COSTCO_WINDOW_DAYS: "90"
+              LADING_ACCOUNT: steffi
+              LADING_COSTCO_ENABLED: "true"
+              RECEIPT_SOURCES: costco
+              LADING_STATE_DIR: /var/lib/lading
+              HOME: /var/lib/lading
+            envFrom:
+              - secretRef:
+                  name: lading-receipts
+            securityContext: *containerSecurity
+            resources: *syncResources
     # No fsGroup: the permissions init container sets owner and mode instead.
     defaultPodOptions:
       automountServiceAccountToken: false
@@ -325,6 +422,11 @@ spec:
               - path: /var/lib/lading
             app:
               - path: /var/lib/lading
+          receipts-ryan:
+            permissions:
+              - path: /var/lib/lading
+            app:
+              - path: /var/lib/lading
       steffi-state:
         existingClaim: lading-steffi-state
         advancedMounts:
@@ -332,6 +434,11 @@ spec:
             permissions:
               - path: /var/lib/lading
             seed:
+              - path: /var/lib/lading
+            app:
+              - path: /var/lib/lading
+          receipts-steffi:
+            permissions:
               - path: /var/lib/lading
             app:
               - path: /var/lib/lading
