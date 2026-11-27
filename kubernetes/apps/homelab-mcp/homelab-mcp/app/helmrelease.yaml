@@ -1347,11 +1347,16 @@ spec:
               - path: /run/mfp
                 readOnly: true
       # The NYT Cooking session (carpenike/mcp docs/NYT-COOKIE-RUNBOOK.md),
-      # same shape and mode as mfp above. Only the app container mounts it.
+      # same mode as mfp above. Optional, so the pod starts before the
+      # 1Password field exists; until then nyt_* answers nyt_auth_required.
+      # Only the app container mounts it.
       nyt:
-        type: secret
-        name: homelab-mcp-nyt
-        defaultMode: 0444
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: homelab-mcp-nyt
+            optional: true
+            defaultMode: 0444
         advancedMounts:
           homelab-mcp:
             app:
