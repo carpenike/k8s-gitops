@@ -65,6 +65,11 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # a5bbcad, 0.75.0: calendar intake (carpenike/mcp#187:
+              # email_list_intake, pictures as image blocks, parsed invites)
+              # and the grocy writes of carpenike/mcp#188. #187's own image
+              # build was cancelled by #188's push, so this tag carries both.
+              # Digest confirmed from GHCR.
               # 771f00f, 0.70.0 (carpenike/mcp#180): Withings per person. Each
               # call reads the caller's own token; `person` only with a grant;
               # tokens pinned to a Withings userid. Digest confirmed from GHCR.
@@ -158,7 +163,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-4b8e2d49a23358a24a79ea838fb47f5c749cb6f6@sha256:8f016978b4cef56a3feac029fe567a1de49fbffbb430aacd6da1994759ff16bd
+              tag: sha-a5bbcad9d00e19d47afe6721aaa417771d24683d@sha256:20152808821e993d755a8e86977e14b4dba54bc3fad0728607b23e609101abaf
             command:
               - /bin/sh
               - -c
