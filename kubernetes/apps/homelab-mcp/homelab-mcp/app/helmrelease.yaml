@@ -167,7 +167,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-bc058eb8aba6b9cf4b585d29245dfe3ddd36a9d6@sha256:025bfe5c721716fc53170bd054be85a1f1d953e59f83a2bac1e9311186de1fb1
+              tag: sha-ce7ee1d568b656c46095a4b04057c13484f16a18@sha256:558efb8dbda9b985e755f5a43a0d44feee6eac4c127910976681fcc2ad82af9a
             command:
               - /bin/sh
               - -c
@@ -547,6 +547,11 @@ spec:
               # connector. Shared Grocy key, as this view is not per_user.
               # Costco and Sam's Club receipt reads too (Ryan, 2026-11-27), the
               # same read-only lading tools /mcp/household has.
+              # Grocy stock reads (Ryan, 2026-11-27, for meal-prep deltas):
+              # find_products, product_card, stock_by_location, attention,
+              # staples_due, consumption_history, convert_units and health.
+              # Read-only; 0.78.0 nets items already on order out of the card,
+              # the list and staples_due so a second pass doesn't reorder them.
               # Finances (Ryan, 2026-11-12, for Steward): transaction search
               # and finances_categorize, which sets only category and notes
               # (never amount, payee, account or date). No rule, payee-merge,
@@ -678,6 +683,9 @@ spec:
                  "grocy_shopping_list", "grocy_order_manifest", "grocy_mark_ordered",
                  "grocy_add_to_shopping_list", "grocy_check_off",
                  "grocy_preview_receipt_import", "grocy_import_receipt",
+                 "grocy_find_products", "grocy_product_card", "grocy_stock_by_location",
+                 "grocy_attention", "grocy_staples_due", "grocy_consumption_history",
+                 "grocy_convert_units", "grocy_health",
                  "costco_get_receipt", "costco_get_sync_status", "costco_list_receipts",
                  "costco_match_charges", "costco_price_history", "costco_search_items",
                  "samsclub_get_receipt", "samsclub_get_sync_status",
