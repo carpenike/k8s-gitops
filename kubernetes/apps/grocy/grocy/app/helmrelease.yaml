@@ -51,14 +51,20 @@ spec:
                   echo "waiting for /config/data/grocy.db (docs/apps/grocy.md, Cutover)"
                   sleep 10
                 done
-            # Root with no capabilities: it only tests for the file, and the
-            # cutover copy runs here (tar -o, so no chown is needed).
+            # Root, so the cutover copy can run here on a fresh root-owned
+            # volume (tar -o, so no chown is needed). DAC_OVERRIDE is the one
+            # capability it keeps: after the first start the image chowns
+            # /config/data to 1000 with mode 0700, and root without it cannot
+            # even stat grocy.db, so the wait never ended on the first
+            # restart (2026-11-27). DAC_OVERRIDE is in the baseline set.
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
+                add:
+                  - DAC_OVERRIDE
             resources:
               requests:
                 cpu: 5m
