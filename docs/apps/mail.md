@@ -354,8 +354,12 @@ Planning Center as the sender. The edge delivers it unchanged.
    `STALWART_EDGE_RELAY_PASSWORD`; Reloader restarts the pod.
 2. **Tailnet grant.** `tag:k8s` to `tag:mx-edge` includes `tcp:587`
    ([tailscale.md](../platform/tailscale.md)).
-3. **Edge firewall.** nix-config `hosts/mx-edge/stalwart.nix` admits 587
-   on `tailscale0` only.
+3. **Edge firewall.** Public 587 stays closed: NixOS opens only 25 to
+   the internet. Tailscale's own `ts-input` chain runs before NixOS's and
+   accepts everything on `tailscale0`, so on the tailnet the grant is the
+   gate. nix-config `hosts/mx-edge/stalwart.nix` also lists 587 on
+   `tailscale0`, which matters only if Tailscale stops managing the
+   firewall.
 4. **Edge Stalwart**, over its admin API on 8080:
    - Account `relay` (User, domain `mx.holthome.net`) with that password
    - NetworkListener `relay`: SMTP on `[::]:587`, STARTTLS. Restart
@@ -364,9 +368,10 @@ Planning Center as the sender. The edge delivers it unchanged.
      only over TLS off port 25, as before. `mustMatchSender`: false for
      the relay account, else true, because a redirect carries the
      original envelope sender
-   - MtaStageRcpt `allowRelaying` gains, before `else`: the relay account
-     `&& rcpt_domain == 'mail.grokbot.com'` → true. A leaked password
-     relays to that domain only
+   - MtaStageRcpt `allowRelaying` gains, before `else`: `local_port ==
+     587 && authenticated_as == 'relay@mx.holthome.net' && rcpt_domain ==
+     'mail.grokbot.com'` → true. A leaked password relays to that domain
+     only. `authenticated_as` is the full login, as `auth.success` logs it
    - Its outbound strategy already sends that domain to its MX
 5. **Egress.** Service `mx-edge-relay` (annotation
    `tailscale.com/tailnet-ip`, port 587) and the network policy rule for
