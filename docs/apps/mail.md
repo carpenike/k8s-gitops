@@ -937,9 +937,12 @@ mail, and they cache the policy for `max_age`.
 
 ## Not in this tree yet
 
-- **Outbound through the edge.** Not planned: outbound stays on SMTP2GO
+- **Outbound through the edge.** One destination goes through it:
+  `mail.grokbot.com`, for a forwarding rule SMTP2GO refuses ([Through
+  the edge](#through-the-edge); ADR 0014, "Fallback path through the
+  edge"). Everything else stays on SMTP2GO
   ([Outbound](#outbound)) unless its terms change or the household
-  outgrows its free plan (ADR 0014). A residential address would be
+  outgrows its free plan. A residential address would be
   rejected or spam-foldered, so the fallback is the edge VM, whose
   address has a matching PTR. It needs a way from the cluster to the
   tailnet (such as an operator egress Service) and a policy rule; the
