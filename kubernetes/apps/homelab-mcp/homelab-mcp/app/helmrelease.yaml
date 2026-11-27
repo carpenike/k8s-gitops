@@ -65,6 +65,10 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # 7fa82b2, 0.76.1 (carpenike/mcp#190): new filter rules go after
+              # a Bulwark /* */ comment block and its requires, and the spam
+              # guard header is a setting (see HOMELAB_MCP_EMAIL_SPAM_HEADER).
+              # Digest confirmed from GHCR.
               # a5bbcad, 0.75.0: calendar intake (carpenike/mcp#187:
               # email_list_intake, pictures as image blocks, parsed invites)
               # and the grocy writes of carpenike/mcp#188. #187's own image
@@ -163,7 +167,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-4c22ea07c664fc5b759fdc92413146efe7c61d13@sha256:9cb2a1d0b31b3f108ccfdf1b2a032cc6050e9732d3eba9d21e583ad2f5499e9d
+              tag: sha-7fa82b2b1f97ae339f1b3bf9ed2c8ee34d635234@sha256:64489b56403b192cd41e975b20a237a5b4ead9d238e94b4379d5cf377d7417eb
             command:
               - /bin/sh
               - -c
@@ -427,6 +431,11 @@ spec:
               HOMELAB_MCP_EMAIL_SEND_MAX_RECIPIENTS: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_HOUR: "10"
               HOMELAB_MCP_EMAIL_SEND_MAX_PER_DAY: "30"
+              # Every filter rule skips mail the edge relay marked as spam, so
+              # spam to a +address still reaches the Junk rule. The relay
+              # writes "X-Spam-Score: spam, score=..." (not X-Spam-Status).
+              HOMELAB_MCP_EMAIL_SPAM_HEADER: X-Spam-Score
+              HOMELAB_MCP_EMAIL_SPAM_MARKER: "spam,"
               # Calendar intake (carpenike/mcp docs/EMAIL.md, 0.75.0): mail and
               # flier photos sent to Ryan's +calendar address, filed into the
               # "Calendar Intake" folder by a filter. email_list_intake marks a
