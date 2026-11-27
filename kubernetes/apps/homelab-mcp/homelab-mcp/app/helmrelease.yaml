@@ -255,7 +255,7 @@ spec:
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
                 "amazon", "costco", "samsclub", "withings", "vault", "openproject",
-                "messaging", "replog", "email", "icloud"]
+                "messaging", "replog", "email", "icloud", "nyt"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               # Grocy in the cluster (docs/apps/grocy.md), straight to the
@@ -376,6 +376,15 @@ spec:
               HOMELAB_MCP_MONEY_PG_SCHEMA: household_finance
               HOMELAB_MCP_MFP_ENABLED: "true"
               HOMELAB_MCP_MFP_COOKIES_FILE: /run/mfp/cookies.json
+              # NYT Cooking (carpenike/mcp#196, 0.81.0): read-only search, recipes
+              # and the recipe box, as Ryan's own subscriber session (NYT-S from
+              # the homelab-mcp-nyt secret, re-read when it changes; no login
+              # tool). No view lists nyt_* by name: they reach /mcp ("read") and
+              # /mcp/full ("all") only, which are Ryan's alone. Do not add them to
+              # an agent or per_user view without Ryan (it is his account). The
+              # user id (regi_id) is read from the export's regi_cookie.
+              HOMELAB_MCP_NYT_ENABLED: "true"
+              HOMELAB_MCP_NYT_COOKIES_FILE: /run/nyt/cookies.json
               # Withings (read-only weigh-ins). The app credentials come from
               # the homelab-mcp-withings item; the OAuth token is written by
               # `python -m homelab_mcp.tools._withings seed` and rotates on
@@ -1337,6 +1346,17 @@ spec:
             app:
               - path: /run/mfp
                 readOnly: true
+      # The NYT Cooking session (carpenike/mcp docs/NYT-COOKIE-RUNBOOK.md),
+      # same shape and mode as mfp above. Only the app container mounts it.
+      nyt:
+        type: secret
+        name: homelab-mcp-nyt
+        defaultMode: 0444
+        advancedMounts:
+          homelab-mcp:
+            app:
+              - path: /run/nyt
+                readOnly: true
       # OpenProject API tokens for the bots homelab-mcp acts as, one Secret
       # each, written by the provisioner (bot-provisioner/homelab-mcp-bots.yaml),
       # read at call time from <dir>/<bot>/OPENPROJECT_API_TOKEN. Optional, so
@@ -1520,6 +1540,8 @@ spec:
                   # mfp: cookies go to www only; the v2 API takes the bearer token.
                   - matchName: www.myfitnesspal.com
                   - matchName: api.myfitnesspal.com
+                  # nyt: the NYT-S cookie goes to this host only.
+                  - matchName: cooking.nytimes.com
                   # arcraiders data sources.
                   - matchName: metaforge.app
                   - matchName: ardb.app
