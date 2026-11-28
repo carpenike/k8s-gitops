@@ -1,0 +1,32 @@
+{
+  "_type": "Schema",
+  "subject": {
+    "type": "String",
+    "name": "Subject",
+    "required": true,
+    "writable": true
+  },
+  "customField7": {
+    "type": "String",
+    "name": "Context",
+    "required": true,
+    "hasDefault": false,
+    "writable": true,
+    "minLength": 0,
+    "maxLength": 255,
+    "options": {}
+  },
+  "customField8": {
+    "type": "Formattable",
+    "name": "Done when",
+    "required": true,
+    "hasDefault": false,
+    "writable": true,
+    "options": {}
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/work_packages/schemas/5-1"
+    }
+  }
+}

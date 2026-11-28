@@ -1,0 +1,295 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Home Assistant, moved from Forge (hosts/forge/services/home-assistant.nix).
+# ADR 0018, docs/apps/home-automation.md.
+#
+# Image 2026.10.1 is the version Forge runs, so .storage needs no migration
+# at cutover; Renovate moves it afterwards. One replica, Recreate: one
+# VLAN 30 address, one HomeKit identity, one recorder writer.
+#
+# Network: eth0 (Cilium) for the cluster, the gateway and the internet;
+# net1 (Multus vlan30, 10.30.0.32) for HomeKit, mDNS, Sonos callbacks and
+# WeatherFlow UDP, which are all on VLAN 30. hostNetwork stays off.
+#
+# Config from git: git-sync clones carpenike/hass-config main (read-only
+# deploy key) into /git. link-config.sh points the git-owned paths in /config
+# at that checkout. The git-sync sidecar pulls every 60 s; after a new commit
+# it POSTs the gitops webhook, and the automation in hass-config
+# packages/gitops.yaml checks the config and reloads. Restart-only changes
+# (a new integration in configuration.yaml) need a pod restart.
+#
+# /config is also mounted at /var/lib/home-assistant (Forge's data dir), so
+# command_line and shell_command paths in hass-config resolve unchanged, and
+# at /media, which LLM Vision hardcodes (Forge used a symlink).
+#
+# Running since the Home Assistant cutover (2026-11-25): /config is a copy of
+# Forge's /var/lib/home-assistant and the recorder a restore of Forge's
+# database, both taken with Forge's unit stopped.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: home-assistant
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: home-assistant
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      home-assistant:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          vlan30-route:
+            # Same as scrypted: sbr moves the connected route into its own
+            # table, so put 10.30.0.0/16 back on net1 in main. Without it,
+            # replies to Sonos and HomeKit clients would leave via eth0 and
+            # be masqueraded to the sled address on VLAN 20.
+            image:
+              repository: docker.io/library/busybox
+              # renovate: datasource=docker depName=docker.io/library/busybox
+              tag: "1.38"
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                ip -o addr show dev net1 | grep -q '10.30.0.32/'
+                ip route replace 10.30.0.0/16 dev net1 src 10.30.0.32
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - NET_ADMIN
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+          git-clone:
+            image: &gitsync
+              repository: registry.k8s.io/git-sync/git-sync
+              # renovate: datasource=docker depName=registry.k8s.io/git-sync/git-sync
+              tag: v4.8.1
+            env:
+              GITSYNC_REPO: git@github.com:carpenike/hass-config.git
+              GITSYNC_REF: main
+              GITSYNC_ROOT: /git
+              # v4.8.0 stopped setting safe.directory=*. The /git emptyDir
+              # is root-owned while git-sync runs as uid 65533, so git
+              # 2.35+ would reject the repo as dubious ownership.
+              GITSYNC_GIT_CONFIG: "safe.directory:/git"
+              GITSYNC_LINK: hass-config
+              GITSYNC_DEPTH: "1"
+              GITSYNC_SSH_KEY_FILE: /etc/git-secret/ssh
+              GITSYNC_SSH_KNOWN_HOSTS: "true"
+              GITSYNC_SSH_KNOWN_HOSTS_FILE: /etc/gitops/known_hosts
+              GITSYNC_ONE_TIME: "true"
+            # OpenSSH refuses a uid with no passwd entry, and the git-sync
+            # image only knows its own user, 65533. Group 568 reads the deploy
+            # key (0440, group fsGroup) and lets Home Assistant read /git.
+            securityContext: &gitsyncsec
+              runAsUser: 65533
+              runAsGroup: 568
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources: &gitsyncres
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 256Mi
+          link-config:
+            image:
+              repository: docker.io/library/busybox
+              # renovate: datasource=docker depName=docker.io/library/busybox
+              tag: "1.38"
+            command:
+              - /bin/sh
+              - /etc/gitops/link-config.sh
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+        containers:
+          app:
+            image:
+              repository: ghcr.io/home-operations/home-assistant
+              # renovate: datasource=docker depName=ghcr.io/home-operations/home-assistant
+              tag: 2026.10.1@sha256:627056a9e95d904822e14887ce84b9e411c55bd913f4a593d7596103848c15ec
+            env:
+              TZ: America/New_York
+              VENV_FOLDER: /venv
+            envFrom:
+              - secretRef:
+                  name: home-assistant-env
+              - secretRef:
+                  name: home-assistant
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 200m
+                memory: 2Gi
+              limits:
+                memory: 4Gi
+          git-sync:
+            image: *gitsync
+            env:
+              GITSYNC_REPO: git@github.com:carpenike/hass-config.git
+              GITSYNC_REF: main
+              GITSYNC_ROOT: /git
+              GITSYNC_GIT_CONFIG: "safe.directory:/git"
+              GITSYNC_LINK: hass-config
+              GITSYNC_DEPTH: "1"
+              GITSYNC_SSH_KEY_FILE: /etc/git-secret/ssh
+              GITSYNC_SSH_KNOWN_HOSTS: "true"
+              GITSYNC_SSH_KNOWN_HOSTS_FILE: /etc/gitops/known_hosts
+              GITSYNC_PERIOD: 60s
+              GITSYNC_WEBHOOK_METHOD: POST
+              GITSYNC_WEBHOOK_SUCCESS_STATUS: "200"
+            envFrom:
+              # GITSYNC_WEBHOOK_URL only (the local webhook with its secret id).
+              - secretRef:
+                  name: home-assistant-gitsync
+            securityContext: *gitsyncsec
+            resources: *gitsyncres
+    defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[{"name":"vlan30","namespace":"kube-system","ips":["10.30.0.32/16"]}]'
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: home-assistant
+        ports:
+          http:
+            port: 8123
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        retain: true
+        forceRename: home-assistant-config
+        advancedMounts:
+          home-assistant:
+            link-config:
+              - path: /config
+            app:
+              - path: /config
+              - path: /var/lib/home-assistant
+              - path: /media
+                subPath: media
+      venv:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        storageClass: ceph-block
+        forceRename: home-assistant-venv
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /venv
+      media-library:
+        type: persistentVolumeClaim
+        existingClaim: home-assistant-media
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /mnt/data/media
+                readOnly: true
+      git:
+        type: emptyDir
+        advancedMounts:
+          home-assistant:
+            git-clone:
+              - path: /git
+            git-sync:
+              - path: /git
+            link-config:
+              - path: /git
+                readOnly: true
+            app:
+              - path: /git
+                readOnly: true
+      gitops:
+        type: configMap
+        name: home-assistant-gitops
+        advancedMounts:
+          home-assistant:
+            git-clone:
+              - path: /etc/gitops
+                readOnly: true
+            git-sync:
+              - path: /etc/gitops
+                readOnly: true
+            link-config:
+              - path: /etc/gitops
+                readOnly: true
+      deploy-key:
+        type: secret
+        name: home-assistant-deploy-key
+        defaultMode: 0440
+        advancedMounts:
+          home-assistant:
+            git-clone:
+              - path: /etc/git-secret
+                readOnly: true
+            git-sync:
+              - path: /etc/git-secret
+                readOnly: true
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /tmp
+                subPath: app
+            git-clone:
+              - path: /tmp
+                subPath: git-clone
+            git-sync:
+              - path: /tmp
+                subPath: git-sync

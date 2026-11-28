@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# Grocy has no /metrics. This is kube-state-metrics: the Deployment is meant
+# to run and no pod is ready. It also fires while the pod waits for the
+# cutover copy (docs/apps/grocy.md), which is the point: a database that was
+# never copied in should not go unnoticed. Forge's equivalent was
+# grocy-service-down on phpfpm-grocy.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: grocy
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: grocy
+      rules:
+        - alert: GrocyDown
+          expr: |
+            kube_deployment_status_replicas_available{namespace="grocy",deployment="grocy"} == 0
+            unless on()
+            (
+              kube_deployment_spec_replicas{namespace="grocy",deployment="grocy"} == 0
+            )
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Grocy has no ready pod
+            description: >-
+              The grocy Deployment is supposed to run and has had no ready
+              pod for 15 minutes. Stock lookups at grocy.<domain> and the
+              homelab-mcp grocy_* tools fail until it is back. If the pod is
+              in Init, the wait-for-data container is still waiting for the
+              Forge copy (docs/apps/grocy.md).

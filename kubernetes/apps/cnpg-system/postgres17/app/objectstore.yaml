@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/barmancloud.cnpg.io/objectstore_v1.json
+# Off-chassis copy of postgres17: Barman Cloud plugin to Cloudflare R2.
+# Objects land under s3://<bucket>/cnpg/postgres17/ (base/ and wals/); the
+# serverName defaults to the Cluster name. Endpoint and bucket come from
+# Secret postgres17-r2-vars (Kustomization postgres17-r2), credentials from
+# Secret postgres17-r2. docs/platform/postgres17.md has the checks and the restore drill.
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: postgres17-r2
+spec:
+  # Recovery window: base backups and WAL older than the oldest base backup
+  # still needed for any point in the last 30 days are deleted.
+  retentionPolicy: 30d
+  configuration:
+    destinationPath: s3://${CNPG_R2_BUCKET}/cnpg
+    endpointURL: ${CNPG_R2_ENDPOINT}
+    s3Credentials:
+      accessKeyId:
+        name: postgres17-r2
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: postgres17-r2
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+      maxParallel: 2
+    data:
+      compression: gzip
+      jobs: 2
+  instanceSidecarConfiguration:
+    # boto3 1.36+ sends default integrity checksums that some S3-compatible
+    # stores reject (plugin docs, "S3-Compatible Storage Providers", issue
+    # 393). Only send them when an operation requires one.
+    env:
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required

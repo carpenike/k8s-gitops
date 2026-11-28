@@ -1,0 +1,128 @@
+---
+# Toolbox for copying mailboxes into Stalwart with Vandelay
+# (docs/apps/mail.md, "Copying a mailbox"). It runs nothing by itself:
+# each import and export is started with kubectl exec, and a Graph import
+# prints its device code to that terminal. Remove this directory once the
+# moves from Microsoft 365 are done.
+#
+# Stalwart does not publish a Vandelay image, so the init container fetches
+# the release build and refuses it unless it matches the SHA-256 below,
+# taken from the release's vandelay-x86_64-unknown-linux-musl.tar.gz.sha256.
+# The nodes are amd64.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stalwart-migration
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stalwart-migration
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: stalwart-migration
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 2000
+        runAsGroup: 2000
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: fetch
+          # renovate: datasource=docker depName=docker.io/curlimages/curl
+          image: docker.io/curlimages/curl:8.23.0@sha256:3fb7e13e5d179a845c97d78204f3f1064d1907037f26a3ebf91710571151fd93
+          command:
+            - /bin/sh
+            - -ec
+            # $${...} is Flux's escape: postBuild substitution (strict, in
+            # ../ks.yaml) turns it into ${...} for the shell instead of
+            # failing on a variable that cluster-secrets does not define.
+            - |
+              cd /tmp
+              curl -fsSLo vandelay.tar.gz \
+                "https://github.com/stalwartlabs/vandelay/releases/download/v$${VANDELAY_VERSION}/vandelay-x86_64-unknown-linux-musl.tar.gz"
+              echo "$${VANDELAY_SHA256}  vandelay.tar.gz" | sha256sum -c -
+              tar -xzf vandelay.tar.gz
+              cp vandelay-x86_64-unknown-linux-musl/vandelay /opt/vandelay/vandelay
+              chmod 0755 /opt/vandelay/vandelay
+              /opt/vandelay/vandelay --version
+          env:
+            # No Renovate comment: a version bump needs the new checksum in
+            # the same change, and this toolbox is temporary.
+            - name: VANDELAY_VERSION
+              value: "1.1.0"
+            - name: VANDELAY_SHA256
+              value: 68ab9511001d9ab911abf56d28f1860a520e3acd939bb27d5c964613701dea6e
+          securityContext: &securityContext
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: bin
+              mountPath: /opt/vandelay
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: vandelay
+          # renovate: datasource=docker depName=docker.io/curlimages/curl
+          image: docker.io/curlimages/curl:8.23.0@sha256:3fb7e13e5d179a845c97d78204f3f1064d1907037f26a3ebf91710571151fd93
+          command:
+            - /bin/sh
+            - -c
+            - exec sleep infinity
+          workingDir: /data
+          env:
+            - name: PATH
+              value: /opt/vandelay:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+            - name: HOME
+              value: /tmp
+            - name: NO_COLOR
+              value: "1"
+            # Stalwart's public URL (STALWART_PUBLIC_URL in ../app). Its
+            # JMAP session names this URL, and Vandelay sends requests
+            # where the session says.
+            - name: STALWART_URL
+              value: https://mail.${SECRET_DOMAIN}
+          envFrom:
+            # VANDELAY_PASSWORD
+            - secretRef:
+                name: stalwart-migration
+          securityContext: *securityContext
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: bin
+              mountPath: /opt/vandelay
+              readOnly: true
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: bin
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          persistentVolumeClaim:
+            claimName: stalwart-migration

@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The mail namespace is default deny (../../stalwart/app). Ingress: 3000
+# from the envoy-internal proxies only. Probes are exec.
+#
+# Egress: 10443 on the envoy-internal proxies. Bulwark's
+# server side reads Stalwart's JMAP session and exchanges sign-in codes at
+# JMAP_SERVER_URL, which is the public name on envoy-internal's address;
+# Cilium sends in-cluster traffic for that address to the proxy pods. It
+# goes through the gateway rather than to the stalwart Service because the
+# session document names the public URL. Cluster DNS and Pocket ID on
+# Forge (by name) are in policy bulwark-pocket-id, in helmrelease.yaml's
+# rawResources.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: bulwark
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: bulwark
+      app.kubernetes.io/controller: bulwark
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "10443"
+              protocol: TCP

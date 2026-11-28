@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# Z-Wave JS UI's store: settings, node cache and names. The network itself (node inclusion) lives on the stick. Hourly. The pod runs as root, so the mover does too.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: zwave-js-ui
+spec:
+  sourcePVC: zwave-js-ui-store
+  trigger:
+    schedule: "10 * * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: zwave-js-ui-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: zwave-js-ui-volsync
+    moverSecurityContext:
+      runAsNonRoot: false
+      runAsUser: 0
+      runAsGroup: 0
+      fsGroup: 0
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      hourly: 24
+      daily: 7
+      weekly: 4

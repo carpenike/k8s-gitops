@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Dashboards Forge provisioned from nix-config, rendered to JSON:
+#   household-finance  hosts/forge/services/household-finance-dashboards.nix
+#                      (folder "Household Finance", homelab-mcp.nix)
+#   schoolhouse        hosts/forge/services/schoolhouse-dashboards.nix
+#                      (folder "Schoolhouse", schoolhouse.nix)
+#   whiskey-whiskey-whiskey
+#                      hosts/forge/infrastructure/observability/dashboards
+#                      (folder "Applications", alloy.nix)
+# The dashboard UIDs are Forge's, so links and the copied grafana.db keep
+# pointing at the same boards. No hash suffix: the HelmRelease mounts these
+# by name, and reloader restarts Grafana when one changes (Grafana also
+# rescans every 60 seconds).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+configMapGenerator:
+  - name: grafana-dashboard-providers
+    files:
+      - ./providers.yaml
+  - name: grafana-dashboards-household-finance
+    files:
+      - ./household-finance/overview.json
+      - ./household-finance/cashflow-categories.json
+      - ./household-finance/debt-projects.json
+      - ./household-finance/data-health.json
+  - name: grafana-dashboards-schoolhouse
+    files:
+      - ./schoolhouse/sync-health.json
+      - ./schoolhouse/review-queue.json
+      - ./schoolhouse/grades.json
+      - ./schoolhouse/work.json
+  - name: grafana-dashboards-whiskey-whiskey-whiskey
+    files:
+      - ./whiskey-whiskey-whiskey/whiskey-audience.json
+      - ./whiskey-whiskey-whiskey/whiskey-faro-rum.json
+generatorOptions:
+  disableNameSuffixHash: true

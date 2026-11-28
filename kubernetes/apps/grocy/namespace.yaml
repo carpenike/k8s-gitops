@@ -1,0 +1,14 @@
+---
+# grocy: household food inventory (https://github.com/grocy/grocy), moved from
+# Forge (hosts/forge/services/grocy.nix in carpenike/nix-config). One process,
+# SQLite on a Ceph RBD volume. Baseline, not restricted: the LinuxServer.io
+# image starts as root under s6 and drops to its app user. See
+# docs/apps/grocy.md.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grocy
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline

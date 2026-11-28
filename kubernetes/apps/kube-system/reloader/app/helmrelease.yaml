@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: reloader
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: reloader
+  interval: 1h
+  values:
+    fullnameOverride: reloader
+    reloader:
+      readOnlyRootFileSystem: true
+      # Also restart a workload when a Secret or ConfigMap it uses is
+      # created, not only when one changes. An optional envFrom Secret from
+      # an ExternalSecret often appears seconds after the pod it feeds has
+      # started (hermes-bot's task-board-webhook did, so Chief came up
+      # without his board route). syncAfterRestart stays false: Reloader's
+      # own restart does not replay every existing Secret as new.
+      reloadOnCreate: true
+      syncAfterRestart: false
+      podMonitor:
+        enabled: true

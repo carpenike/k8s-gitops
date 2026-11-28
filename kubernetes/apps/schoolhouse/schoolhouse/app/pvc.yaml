@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.0-standalone-strict/persistentvolumeclaim-v1.json
+# The ingest's state directory (SCHOOLHOUSE_STATE_DIR): the Schoology session
+# cookie jar, schoology.cookies.json (0600). It is a live parent login, so
+# treat the volume as a credential. Only the ingest CronJob mounts it; the
+# health server never sees it. The raw archive and every record are in
+# postgres17, not here. Copied from Forge's /var/lib/schoolhouse at the
+# cutover (docs/apps/schoolhouse.md).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: schoolhouse-state
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 1Gi

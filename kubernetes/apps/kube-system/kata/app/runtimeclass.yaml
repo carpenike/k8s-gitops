@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/node.k8s.io/runtimeclass_v1.json
+# siderolabs/kata-containers for Talos v1.14.5 registers both handlers
+# in containerd. Overhead matches the extension README at that tag.
+# https://github.com/siderolabs/extensions/blob/v1.14.5/container-runtime/kata-containers/README.md
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: kata
+handler: kata
+overhead:
+  podFixed:
+    memory: "130Mi"
+    cpu: "250m"
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/node.k8s.io/runtimeclass_v1.json
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: kata-qemu
+handler: kata-qemu
+overhead:
+  podFixed:
+    memory: "160Mi"
+    cpu: "250m"

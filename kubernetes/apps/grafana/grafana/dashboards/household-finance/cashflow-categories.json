@@ -1,0 +1,951 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Household finance projection. Glass, never plumbing; alerts and required actions remain in the sentinel. Visual treatment references Sure (github.com/we-promise/sure).",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Overview",
+      "tooltip": "Household finance overview",
+      "type": "link",
+      "url": "/d/household-finance-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Cashflow & Categories",
+      "tooltip": "Household cashflow and categories",
+      "type": "link",
+      "url": "/d/household-finance-cashflow"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Debt & Projects",
+      "tooltip": "Household debt and projects",
+      "type": "link",
+      "url": "/d/household-finance-debt"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Data Health",
+      "tooltip": "Whether the other three can be trusted",
+      "type": "link",
+      "url": "/d/household-finance-health"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Rows are nightly projections. Intraday balances may legitimately differ from the source tools.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#078C52",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT extract(epoch FROM max(finished_at)) * 1000 AS \"As of\"\nFROM household_finance.export_runs\nWHERE ok\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Nightly snapshot",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Categorized on-budget income compared with positive household spend; account setup, transfers, and card-payment plumbing are excluded upstream.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Income"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#078C52",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expense"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F13636",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 2
+      },
+      "id": 2,
+      "options": {
+        "barRadius": 0.05,
+        "barWidth": 0.85,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "text": {},
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xField": "Month",
+        "xTickLabelRotation": -35,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH expenses AS (\n  SELECT month, sum(amount) AS expense\n  FROM household_finance.category_monthly\n  GROUP BY month\n),\nmonthly AS (\n  SELECT\n    coalesce(income.month, expenses.month) AS month,\n    coalesce(income.income, 0) AS income,\n    coalesce(expenses.expense, 0) AS expense\n  FROM household_finance.income_monthly AS income\n  FULL JOIN expenses USING (month)\n)\nSELECT\n  to_char(month, 'Mon YY') AS \"Month\",\n  income::double precision AS \"Income\",\n  expense::double precision AS \"Expense\"\nFROM monthly\nWHERE $__timeFilter(month::timestamp)\nORDER BY month\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Monthly income vs expense",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "The eight largest categories in the selected range; spend is positive money out.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH top_categories AS (\n  SELECT category\n  FROM household_finance.category_monthly\n  WHERE $__timeFilter(month::timestamp)\n  GROUP BY category\n  ORDER BY sum(amount) DESC\n  LIMIT 8\n)\nSELECT\n  month::timestamp AT TIME ZONE 'America/New_York' AS time,\n  amount::double precision AS value,\n  category AS metric\nFROM household_finance.category_monthly\nWHERE $__timeFilter(month::timestamp)\n  AND category IN (SELECT category FROM top_categories)\nORDER BY month, category\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Category trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "A truthful outflow-to-category Sankey. It does not label the source as income until income_monthly is free of opening-balance activity.",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 16,
+        "x": 0,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "editorMode": "code",
+        "followTheme": true,
+        "getOption": "const frame = context.panel.data.series[0];\nif (!frame) {\n  return { title: { text: 'No categorized spend in this range', left: 'center', top: 'middle' } };\n}\n\nconst field = (name) => frame.fields.find((item) => item.name.toLowerCase() === name);\nconst sourceField = field('source');\nconst targetField = field('target');\nconst valueField = field('value');\nif (!sourceField || !targetField || !valueField) {\n  return { title: { text: 'Expected source / target / value fields', left: 'center', top: 'middle' } };\n}\n\nconst sources = Array.from(sourceField.values);\nconst targets = Array.from(targetField.values);\nconst values = Array.from(valueField.values);\nconst links = sources.map((source, index) => ({\n  source,\n  target: targets[index],\n  value: Number(values[index]),\n})).filter((link) => link.value > 0);\nconst names = [...new Set(links.flatMap((link) => [link.source, link.target]))];\nconst palette = ['#078C52', '#2E90FA', '#F79009', '#F13636', '#12B76A', '#175CD3', '#DC6803', '#737373'];\nconst money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });\n\nreturn {\n  tooltip: {\n    trigger: 'item',\n    formatter: (item) => item.name + ': ' + money.format(Number(item.value || 0)),\n  },\n  series: [{\n    type: 'sankey',\n    data: names.map((name, index) => ({\n      name,\n      itemStyle: { color: name === 'Categorized spend' ? '#078C52' : palette[(index + 1) % palette.length] },\n    })),\n    links,\n    emphasis: { focus: 'adjacency' },\n    lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.45 },\n    nodeAlign: 'justify',\n    nodeGap: 12,\n    nodeWidth: 18,\n    label: { fontFamily: 'Geist, sans-serif', fontSize: 12 },\n  }],\n};\n",
+        "map": "none",
+        "renderer": "canvas"
+      },
+      "pluginVersion": "7.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  'Categorized spend' AS source,\n  category AS target,\n  sum(amount)::double precision AS value\nFROM household_finance.category_monthly\nWHERE $__timeFilter(month::timestamp)\nGROUP BY category\nORDER BY value DESC\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Categorized spend flow",
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Exact lading attribution remains separate from (unattributed); no charge is spread or dropped. The dashed rule is the configured AMAZON_BASELINE, a reference level rather than a limit; it is absent from the chart whenever it is absent from config_values.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 75,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ryan"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#078C52",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "steffi"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#2E90FA",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "(unattributed)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F79009",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Baseline"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#737373",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 10
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  month::timestamp AT TIME ZONE 'America/New_York' AS time,\n  amazon_amount::double precision AS value,\n  person AS metric\nFROM household_finance.person_monthly\nWHERE $__timeFilter(month::timestamp)\nORDER BY month, person\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeFrom()::timestamptz AS time, value::double precision AS \"Baseline\"\nFROM household_finance.config_values\nWHERE name = 'AMAZON_BASELINE'\nUNION ALL\nSELECT $__timeTo()::timestamptz, value::double precision\nFROM household_finance.config_values\nWHERE name = 'AMAZON_BASELINE'\nORDER BY time\n",
+          "refId": "B"
+        }
+      ],
+      "title": "Amazon spend by person",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Payee-level spend from the same filtered population as category_monthly; credit-card payment plumbing is excluded upstream.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Spend"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 6,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  payee AS \"Merchant\",\n  sum(amount) AS \"Spend\",\n  sum(txn_count) AS \"Transactions\",\n  count(DISTINCT month) AS \"Months\"\nFROM household_finance.merchant_monthly\nWHERE $__timeFilter(month::timestamp)\nGROUP BY payee\nORDER BY \"Spend\" DESC\nLIMIT 20\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Top merchants",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Needs two complete months in range: with fewer, this panel is deliberately empty rather than wrong. Month-over-month change for every category, largest absolute move first, comparing the two most recent complete months; the in-progress month is excluded, and a missing prior month is never treated as zero — that would render an ordinary month as entirely new spending. Unranked and uncoloured on purpose: it reports what moved, it does not judge which moves matter.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prior"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Delta"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 28
+      },
+      "id": 7,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH complete_months AS (\n  SELECT DISTINCT month\n  FROM household_finance.category_monthly\n  WHERE $__timeFilter(month::timestamp)\n    AND month < date_trunc('month', current_date)::date\n),\nranked AS (\n  SELECT month, row_number() OVER (ORDER BY month DESC) AS rn\n  FROM complete_months\n),\ncomparison AS (\n  SELECT cur_month, pri_month\n  FROM (\n    SELECT\n      (SELECT month FROM ranked WHERE rn = 1) AS cur_month,\n      (SELECT month FROM ranked WHERE rn = 2) AS pri_month\n  ) AS pair\n  WHERE cur_month IS NOT NULL AND pri_month IS NOT NULL\n),\ncur AS (\n  SELECT source.category, source.amount\n  FROM household_finance.category_monthly AS source\n  JOIN comparison ON source.month = comparison.cur_month\n),\npri AS (\n  SELECT source.category, source.amount\n  FROM household_finance.category_monthly AS source\n  JOIN comparison ON source.month = comparison.pri_month\n)\nSELECT\n  category AS \"Category\",\n  coalesce(pri.amount, 0)::double precision AS \"Prior\",\n  coalesce(cur.amount, 0)::double precision AS \"Current\",\n  (coalesce(cur.amount, 0) - coalesce(pri.amount, 0))::double precision AS \"Delta\"\nFROM cur\nFULL JOIN pri USING (category)\nORDER BY abs(coalesce(cur.amount, 0) - coalesce(pri.amount, 0)) DESC\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Top movers · categories",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Needs two complete months in range, same as the category panel, and is empty otherwise. The same comparison at payee level, capped at the 25 largest absolute moves. A payee that merely got renamed upstream appears twice, once falling to zero and once rising from it; that pairing is left visible rather than smoothed away.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Prior"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Delta"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 28
+      },
+      "id": 8,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH complete_months AS (\n  SELECT DISTINCT month\n  FROM household_finance.merchant_monthly\n  WHERE $__timeFilter(month::timestamp)\n    AND month < date_trunc('month', current_date)::date\n),\nranked AS (\n  SELECT month, row_number() OVER (ORDER BY month DESC) AS rn\n  FROM complete_months\n),\ncomparison AS (\n  SELECT cur_month, pri_month\n  FROM (\n    SELECT\n      (SELECT month FROM ranked WHERE rn = 1) AS cur_month,\n      (SELECT month FROM ranked WHERE rn = 2) AS pri_month\n  ) AS pair\n  WHERE cur_month IS NOT NULL AND pri_month IS NOT NULL\n),\ncur AS (\n  SELECT source.payee, source.amount\n  FROM household_finance.merchant_monthly AS source\n  JOIN comparison ON source.month = comparison.cur_month\n),\npri AS (\n  SELECT source.payee, source.amount\n  FROM household_finance.merchant_monthly AS source\n  JOIN comparison ON source.month = comparison.pri_month\n)\nSELECT\n  payee AS \"Merchant\",\n  coalesce(pri.amount, 0)::double precision AS \"Prior\",\n  coalesce(cur.amount, 0)::double precision AS \"Current\",\n  (coalesce(cur.amount, 0) - coalesce(pri.amount, 0))::double precision AS \"Delta\"\nFROM cur\nFULL JOIN pri USING (payee)\nORDER BY abs(coalesce(cur.amount, 0) - coalesce(pri.amount, 0)) DESC\nLIMIT 25\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Top movers · merchants",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "household-finance"
+      },
+      "description": "Needs one complete month in range, and is empty otherwise. Payees whose first appearance anywhere in merchant_monthly is the same complete month the movers panels compare, with more than $100 of spend. First-seen is computed over all history, not the selected range, so widening or narrowing the time picker cannot manufacture a new merchant.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Spend"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 28
+      },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "household-finance"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "WITH complete_months AS (\n  SELECT DISTINCT month\n  FROM household_finance.merchant_monthly\n  WHERE $__timeFilter(month::timestamp)\n    AND month < date_trunc('month', current_date)::date\n),\ncurrent_month AS (\n  SELECT max(month) AS month FROM complete_months\n),\nfirst_seen AS (\n  SELECT payee, min(month) AS first_month\n  FROM household_finance.merchant_monthly\n  GROUP BY payee\n)\nSELECT\n  merchant.payee AS \"Merchant\",\n  merchant.amount::double precision AS \"Spend\",\n  merchant.txn_count AS \"Transactions\"\nFROM household_finance.merchant_monthly AS merchant\nJOIN current_month ON merchant.month = current_month.month\nJOIN first_seen\n  ON first_seen.payee = merchant.payee\n  AND first_seen.first_month = current_month.month\nWHERE merchant.amount > 100\nORDER BY merchant.amount DESC\n",
+          "refId": "A"
+        }
+      ],
+      "title": "New merchants",
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 41,
+  "tags": [
+    "household-finance",
+    "nightly-projection",
+    "glass-not-plumbing"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-2y",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ],
+    "time_options": [
+      "6M",
+      "1y",
+      "2y",
+      "5y"
+    ]
+  },
+  "timezone": "America/New_York",
+  "title": "Household Finance · Cashflow & Categories",
+  "uid": "household-finance-cashflow",
+  "version": 1,
+  "weekStart": ""
+}

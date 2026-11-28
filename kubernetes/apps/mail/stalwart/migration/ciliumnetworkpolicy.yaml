@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The mail namespace is default deny (../app). No ingress: everything is
+# started with kubectl exec.
+#
+# Egress: cluster DNS; 10443 on the envoy-internal proxies, because the
+# export writes to Stalwart's public name on envoy-internal's address (the
+# URL its JMAP session names; same reasoning as policy bulwark); and public
+# IPv4 on 443 for the Vandelay download from GitHub and for Microsoft's
+# sign-in and Graph hosts during an import.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: stalwart-migration
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: stalwart-migration
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "10443"
+              protocol: TCP
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

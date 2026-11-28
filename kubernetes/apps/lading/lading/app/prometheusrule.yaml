@@ -1,0 +1,84 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# nix-config has no lading Prometheus rule to port: Forge alerted through
+# Gatus on /healthz (503 once a sync is older than stale_after_hours = 36)
+# and a systemd service-down rule. lading has no /metrics, so these use
+# kube-state-metrics: one series per CronJob (cronjob="lading-sync-<account>"
+# or whatever name the chart gives it), so each account alerts on its own.
+# They see the Job's exit status only: a run that exits 1 (partial) counts
+# as a success, as it did on Forge, and per-source freshness inside a run
+# (Amazon vs Costco vs Sam's Club) is only on /healthz.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lading
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: lading
+      rules:
+        - alert: LadingDown
+          # Forge: lading-service-down (mkSystemdServiceDownAlert).
+          expr: |
+            kube_deployment_status_replicas_available{namespace="lading"} < 1
+          for: 10m
+          labels:
+            severity: high
+            service: lading
+            category: availability
+          annotations:
+            summary: lading health server has no available replica
+            description: >-
+              The lading Deployment in namespace lading has had no available
+              pod for 10 minutes. Nothing reports per-source sync freshness
+              while it is down.
+        - alert: LadingSyncFailed
+          # The newest scheduled run is over and did not succeed. No retry
+          # follows (backoffLimit 0, on purpose), so this stays until the
+          # next day's run succeeds or a person reruns it.
+          expr: |
+            (
+              kube_cronjob_status_last_successful_time{namespace="lading"}
+                < kube_cronjob_status_last_schedule_time{namespace="lading"}
+              or
+              kube_cronjob_status_last_schedule_time{namespace="lading"}
+                unless on(namespace, cronjob) kube_cronjob_status_last_successful_time{namespace="lading"}
+            )
+            and on(namespace, cronjob) kube_cronjob_status_active{namespace="lading"} == 0
+          for: 15m
+          labels:
+            severity: high
+            service: lading
+            category: availability
+          annotations:
+            summary: "lading sync {{ $labels.cronjob }} failed"
+            description: >-
+              The last run of {{ $labels.cronjob }} exited 2 or was killed
+              (45 minute timeout). Read its Job's log before rerunning. An
+              AmazonOrdersAuthError or a JavaScript challenge means do NOT
+              retry in a loop: that is how the account gets challenge-locked.
+              See docs/apps/lading.md, "When a sync fails".
+        - alert: LadingSyncStale
+          # The /healthz verdict, from the Job side: no successful run for
+          # longer than stale_after_hours (36h, one missed daily run is
+          # tolerated). Also fires for a CronJob older than that which has
+          # never succeeded, or one left suspended after the cutover.
+          expr: |
+            (time() - kube_cronjob_status_last_successful_time{namespace="lading"}) > 36 * 3600
+            or
+            (
+              (time() - kube_cronjob_created{namespace="lading"}) > 36 * 3600
+                unless on(namespace, cronjob) kube_cronjob_status_last_successful_time{namespace="lading"}
+            )
+          for: 30m
+          labels:
+            severity: high
+            service: lading
+            category: availability
+          annotations:
+            summary: "lading sync {{ $labels.cronjob }} has not succeeded in 36 hours"
+            description: >-
+              The finance advisor will start reporting "no order behind that
+              charge" for purchases this account has not synced. Check that
+              the CronJob is not suspended and read the last Job's log.

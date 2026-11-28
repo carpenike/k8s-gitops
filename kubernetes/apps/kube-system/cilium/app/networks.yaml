@@ -1,0 +1,72 @@
+---
+# LoadBalancer pool is the v1 CiliumLoadBalancerIPPool: 10.45.0.0/16.
+# It does not overlap the node LAN 10.20.0.0/16. Advertise LoadBalancer
+# IPs only, not pod CIDRs.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: pool
+spec:
+  allowFirstLastIPs: "No"
+  blocks:
+    - cidr: 10.45.0.0/16
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: l2-policy
+spec:
+  loadBalancerIPs: true
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPAdvertisement
+metadata:
+  name: bgp-advertisement-config
+  labels:
+    advertise: bgp
+spec:
+  advertisements:
+    - advertisementType: Service
+      service:
+        addresses:
+          - LoadBalancerIP
+      selector:
+        matchExpressions:
+          - key: somekey
+            operator: NotIn
+            values: ["never-used-value"]
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeerConfig
+metadata:
+  name: bgp-peer-config-v4
+spec:
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: bgp
+---
+# iBGP. ASN 64512 both sides. RouterOS at 10.20.0.1 already peers
+# 10.20.10.20 through 10.20.10.23.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPClusterConfig
+metadata:
+  name: bgp-cluster-config
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+  bgpInstances:
+    - name: instance-64512
+      localASN: 64512
+      peers:
+        - name: peer-64512-v4
+          peerASN: 64512
+          peerAddress: 10.20.0.1
+          peerConfigRef:
+            name: bgp-peer-config-v4

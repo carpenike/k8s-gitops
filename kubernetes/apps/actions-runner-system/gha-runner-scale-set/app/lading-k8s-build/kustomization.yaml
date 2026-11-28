@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Image runners for carpenike/lading: the container image build that the k8s
+# deployment pulls. Workflows opt in with runs-on: lading-k8s-build.
+# Kata VM pods from ../build (ADR 0011). The GitHub App installation must
+# include carpenike/lading before this scale set can register.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../scale-set
+  - ../build
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: scale-set
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: lading-k8s-build
+      - op: replace
+        path: /spec/values/githubConfigUrl
+        value: https://github.com/carpenike/lading
+      - op: replace
+        path: /spec/values/runnerScaleSetName
+        value: lading-k8s-build
+      - op: replace
+        path: /spec/values/maxRunners
+        value: 2

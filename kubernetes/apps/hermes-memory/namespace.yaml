@@ -1,0 +1,14 @@
+---
+# No hermes.holthome.net/bot label on purpose: that label is what admits a
+# namespace's agent pods to Tuwunel and to Hindsight itself.
+# Pruning is off: the backup volume lives here.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hermes-memory
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

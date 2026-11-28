@@ -1,0 +1,19 @@
+{
+  "_type": "Collection",
+  "total": 0,
+  "count": 0,
+  "pageSize": 20,
+  "offset": 1,
+  "_embedded": {
+    "elements": []
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/work_packages"
+    },
+    "jumpTo": {
+      "href": "/api/v3/work_packages?offset=%7Boffset%7D",
+      "templated": true
+    }
+  }
+}

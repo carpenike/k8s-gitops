@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# Physical NIC faults on the nodes. In November 2026 sled-1's ens1f0 dropped
+# about 4.9% of received frames as CRC/alignment errors (4-5 million a day
+# from 12 Nov) and lost link twice in a day. Ceph RBD writes across the
+# cluster stalled for 4-44 s, and Redis, OnCall and the finance jobs
+# restarted or flapped. Neither chart default caught it:
+# NodeNetworkReceiveErrs needs a 2m ratio > 1% for a whole hour, and the 2m
+# ratio dipped below 1% often enough to restart its timer; the default
+# NodeNetworkInterfaceFlapping needs more than 2 changes in 2 minutes.
+#
+# Devices: physical ports only (en*/eth* with no VLAN suffix). The VLAN
+# sub-interface would page twice for the same link, and Cilium/veth
+# devices are not hardware.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: node-network
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: node-network
+      rules:
+        - alert: NodeNicErrors
+          # One-hour window, so the ratio is smooth instead of a 2m rate. A
+          # healthy port here sees tens of errors a day at most; 0.1% is
+          # 30-50 times below what sled-1 showed. The > 1000 floor keeps a
+          # nearly idle port from alerting on a handful of errors.
+          expr: |
+            (
+              (
+                increase(node_network_receive_errs_total{job="node-exporter",device=~"(en|eth)[^.]*"}[1h])
+                + increase(node_network_transmit_errs_total{job="node-exporter",device=~"(en|eth)[^.]*"}[1h])
+              )
+              / (
+                increase(node_network_receive_packets_total{job="node-exporter",device=~"(en|eth)[^.]*"}[1h])
+                + increase(node_network_transmit_packets_total{job="node-exporter",device=~"(en|eth)[^.]*"}[1h])
+              ) > 0.001
+              and (
+                increase(node_network_receive_errs_total{job="node-exporter",device=~"(en|eth)[^.]*"}[1h])
+                + increase(node_network_transmit_errs_total{job="node-exporter",device=~"(en|eth)[^.]*"}[1h])
+              ) > 1000
+            )
+            * on (instance) group_left (nodename) max by (instance, nodename) (node_uname_info{job="node-exporter"})
+          for: 15m
+          keep_firing_for: 1h
+          labels:
+            severity: high
+            category: hardware
+          annotations:
+            summary: "{{ $labels.nodename }} {{ $labels.device }} is corrupting packets"
+            description: >-
+              {{ $value | humanizePercentage }} of packets on
+              {{ $labels.nodename }} {{ $labels.device }} failed in the last
+              hour (RX + TX errors). This is the cable, the SFP+/DAC, the
+              switch port or the NIC. Ceph traffic to that node retransmits,
+              so RBD writes stall across the cluster. Compare
+              node_network_receive_frame_total (frames corrupted coming in)
+              with the transmit side, then reseat or swap the cable and
+              optic and check the switch port's counters.
+        - alert: NodeNicLinkFlapped
+          # Any carrier change on a physical port in the last 30 minutes. The
+          # kernel counter resets on reboot, which increase() would count as
+          # a change, so nodes up for less than 45 minutes are skipped.
+          expr: |
+            (
+              increase(node_network_carrier_changes_total{job="node-exporter",device=~"(en|eth)[^.]*"}[30m]) > 0
+              and on (instance) (time() - node_boot_time_seconds{job="node-exporter"}) > 2700
+            )
+            * on (instance) group_left (nodename) max by (instance, nodename) (node_uname_info{job="node-exporter"})
+          labels:
+            severity: warning
+            category: hardware
+          annotations:
+            summary: "{{ $labels.nodename }} {{ $labels.device }} lost link"
+            description: >-
+              The link on {{ $labels.nodename }} {{ $labels.device }} went
+              down and came back in the last 30 minutes. If nobody touched the
+              cable or the switch, look for NodeNicErrors on the same port and
+              check `talosctl -n <node> dmesg | grep "NIC Link"`.

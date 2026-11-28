@@ -1,0 +1,8 @@
+---
+# Keep kubelet node IPs on the LAN. Applies to the worker as well as
+# the control planes. The control-plane taint delete is a separate document.
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+nodeIP:
+  validSubnets:
+    - 10.20.0.0/16

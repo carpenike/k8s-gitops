@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in namespace grafana. Each workload's allow
+# policy sits next to it: Grafana's is in its HelmRelease (rawResources,
+# because its toFQDNs names use the SECRET_DOMAIN substitution); OnCall's, the plugin
+# setup Job's and the VolSync movers' are plain files in their directories.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}

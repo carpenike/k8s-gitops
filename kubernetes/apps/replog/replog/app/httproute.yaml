@@ -1,0 +1,105 @@
+---
+# Public, the same hostname Forge already serves. homelab-mcp's route after
+# it left Forge (k8s-gitops #5765): native, both gateways, ReferenceGrant.
+#
+# envoy-external is what cloudflare-dns publishes. It will not take a
+# record it does not own (TXT prefix k8s.), so this route does not move
+# replog.${SECRET_DOMAIN} off Forge's tunnel by itself. The cutover deletes
+# that record after the Forge vhost is gone. See docs/apps/replog.md.
+#
+# envoy-internal is so mikrotik-dns publishes an A record and LAN clients
+# do not hairpin out through Cloudflare. pocket-id-exempt selects this
+# route by its label in every namespace, so native follows onto both
+# gateways. Forge's Caddy vhost is a pass-through with no caddySecurity,
+# which is this label: the website does its own Pocket ID login.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: replog
+  labels:
+    gateway.holthome.net/auth: native
+spec:
+  hostnames:
+    - replog.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+    - name: envoy-internal
+      namespace: network
+  rules:
+    # A rule with no matches is a prefix match on /, and that would
+    # forward /api/mcp to the pod. This prefix is longer, so it wins for
+    # /api/mcp and /api/mcp/*. Envoy answers it. There is no backendRef.
+    # The binary mounts this path when the website OIDC settings are set.
+    # Agent access belongs on homelab-mcp, in-cluster. See docs/apps/replog.md.
+    - name: deny-mcp
+      matches:
+        - path:
+            type: PathPrefix
+            value: /api/mcp
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: replog-deny-mcp
+    # Form-check clip uploads (carpenike/replog#62). Envoy streams request
+    # bodies and sets no size cap of its own, so the only limits are the
+    # app's REPLOG_VIDEO_MAX_MB and Cloudflare's on the public path. This
+    # rule only gives a slow gym uplink longer than the 300s below. Envoy
+    # Gateway sorts regex matches ahead of prefix matches. Before #62 the
+    # path does not exist and the pod answers 404 as it does today.
+    - name: video-upload
+      matches:
+        - method: POST
+          path:
+            type: RegularExpression
+            value: ^/api/athletes/[^/]+/workouts/[^/]+/sets/[^/]+/video$
+      timeouts:
+        request: 900s
+        backendRequest: 900s
+      backendRefs:
+        - name: replog
+          port: 8080
+    # The website and its JSON API, including Pocket ID
+    # (/auth/oidc/*). 300s covers an AI coach generation.
+    - name: app
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+      timeouts:
+        request: 300s
+        backendRequest: 300s
+      backendRefs:
+        - name: replog
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: replog-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: replog
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+# Fixed 404 for HTTPRoute replog rule deny-mcp. Same namespace as the
+# route. Envoy does not forward the request. See docs/apps/replog.md.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: HTTPRouteFilter
+metadata:
+  name: replog-deny-mcp
+spec:
+  directResponse:
+    contentType: text/plain
+    statusCode: 404
+    body:
+      type: Inline
+      inline: "not found\n"

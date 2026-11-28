@@ -1,0 +1,160 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Grocy, moved from Forge (hosts/forge/services/grocy.nix in
+# carpenike/nix-config), where it was nixpkgs' services.grocy behind Caddy.
+# See docs/apps/grocy.md.
+#
+# Image: LinuxServer.io's, the only maintained Grocy image. grocy/grocy-docker
+# was archived in February 2026 and points here. It starts as root under s6,
+# sets up nginx and PHP-FPM, chowns /config to PUID:PGID and runs both as that
+# user. That is why the namespace is baseline and the root filesystem is
+# writable. Forge chose the native module to avoid exactly this image family;
+# the cluster has no native option.
+#
+# One replica, Recreate: SQLite on the RWO volume.
+#
+# The wait-for-data init container keeps Grocy from starting on an empty
+# volume. An empty start creates a fresh grocy.db with user admin/admin and
+# would hide the fact that the Forge copy never happened. The cutover copies
+# Forge's data into /config/incoming and renames it to /config/data; the
+# rename is atomic, so the wait ends only after the whole copy is in place.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grocy
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: grocy
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      grocy:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          wait-for-data:
+            image:
+              repository: docker.io/library/busybox
+              # renovate: datasource=docker depName=docker.io/library/busybox
+              tag: "1.38"
+            command:
+              - sh
+              - -c
+              - |
+                # /config/.allow-empty starts Grocy with no data: only for a
+                # deliberate fresh install. A VolSync restore brings data/ back.
+                until [ -f /config/data/grocy.db ] || [ -f /config/.allow-empty ]; do
+                  echo "waiting for /config/data/grocy.db (docs/apps/grocy.md, Cutover)"
+                  sleep 10
+                done
+            # Root, so the cutover copy can run here on a fresh root-owned
+            # volume (tar -o, so no chown is needed). DAC_OVERRIDE is the one
+            # capability it keeps: after the first start the image chowns
+            # /config/data to 1000 with mode 0700, and root without it cannot
+            # even stat grocy.db, so the wait never ended on the first
+            # restart (2026-11-27). DAC_OVERRIDE is in the baseline set.
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - DAC_OVERRIDE
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+        containers:
+          app:
+            image:
+              repository: ghcr.io/linuxserver/grocy
+              # The Grocy release Forge's nixpkgs pins (4.7.1). Forge still
+              # runs 4.6.0 until its next deploy; Grocy migrates the copied
+              # database forward on first start (4.7.0 needs no manual step
+              # beyond the AUTH_CLASS rename below).
+              tag: v4.7.1-ls352@sha256:ef5ea5094aa2ed32df74528c4bdd94713679038c97add02045d881550c2a59a8
+            env:
+              TZ: America/New_York
+              PUID: "1000"
+              PGID: "1000"
+              # Grocy reads GROCY_<SETTING> from the environment when the
+              # setting is not in data/settingoverrides/ (config-dist.php,
+              # Setting()). These are Forge's settings.
+              GROCY_CURRENCY: USD
+              GROCY_CULTURE: en_GB
+              # Per-user login: the gateway signs the person in with Pocket ID
+              # and sets X-Grocy-User to their email (httproute.yaml), the
+              # same identity Caddy put in X-Token-User-Email on Forge, so the
+              # copied users match. Grocy creates a user on first sight.
+              # 4.7.0 moved the class to the Auth\ namespace; Forge's
+              # 'Grocy\Middleware\ReverseProxyAuthMiddleware' no longer loads.
+              GROCY_AUTH_CLASS: 'Grocy\Middleware\Auth\ReverseProxyAuthMiddleware'
+              GROCY_REVERSE_PROXY_AUTH_HEADER: X-Grocy-User
+              # Grocy grants DEFAULT_PERMISSIONS to a user it creates on first
+              # sight, and its default is ADMIN (config-dist.php), which can
+              # mint API keys. A new household login starts with nothing but
+              # its own profile; an admin grants the rest in Grocy. From the
+              # environment the value is one permission name, not a list.
+              # Existing users and the API keys' users keep what they have.
+              GROCY_DEFAULT_PERMISSIONS: USERS_EDIT_SELF
+            probes:
+              # Grocy answers no unauthenticated page with a 200 (the auth
+              # middleware throws when the identity header is missing), so
+              # the probes are TCP on nginx.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 80
+                  periodSeconds: 30
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 80
+                  periodSeconds: 10
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 80
+                  periodSeconds: 5
+                  failureThreshold: 60
+            securityContext:
+              allowPrivilegeEscalation: false
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                cpu: "1"
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: grocy
+        ports:
+          http:
+            port: 80
+    persistence:
+      config:
+        existingClaim: grocy-config
+        globalMounts:
+          - path: /config

@@ -1,0 +1,262 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# replog: the family workout log (carpenike/replog), already public at
+# https://replog.${SECRET_DOMAIN} on Forge. This is the move onto the
+# cluster. Merging does not move the name off Forge.
+# See docs/apps/replog.md.
+# The HTTPRoute is on envoy-external and envoy-internal, native, the
+# same shape as homelab-mcp after it left Forge.
+#
+# One replica, Recreate. The database is SQLite in WAL mode
+# (modernc.org/sqlite) on the RWO volume below. A second replica cannot
+# take that volume. There is no Postgres.
+#
+# The image is distroless (gcr.io/distroless/static-debian12:nonroot), so
+# it has no shell. The volume is made writable with fsGroup 65532, the
+# image's nonroot uid, instead of a root init container that runs chown.
+# See docs/apps/replog.md.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: replog
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: replog
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      replog:
+        # One replica. The public name stays on Forge until that record
+        # is deleted. See docs/apps/replog.md.
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              # Published from main, pinned by commit and digest.
+              # Renovate tracks it with the other ghcr.io/carpenike images.
+              repository: ghcr.io/carpenike/replog
+              tag: sha-70523381dcbdbde83a721b809b90bea0ac5012ec@sha256:4b063823714f8ab7c390f1ba108defbe1a56f345ea7114e2c1435c79569a230e
+            env:
+              # Forge binds 127.0.0.1:5008 because Caddy is on the same host.
+              # Envoy is not. The image default :8080 is the listener.
+              REPLOG_ADDR: ":8080"
+              REPLOG_DB_PATH: /data/replog.db
+              REPLOG_AVATAR_DIR: /data/avatars
+              # Form-check clips (carpenike/replog#62) on CephFS PVC
+              # replog-videos, not the image default /data/videos on the
+              # RBD volume. An image without video support ignores both.
+              REPLOG_VIDEO_DIR: /videos
+              # 95 MiB, not the default 100: the public name is behind
+              # Cloudflare, which refuses request bodies over 100 MB on
+              # this plan. 100 MiB plus multipart overhead is over that.
+              REPLOG_VIDEO_MAX_MB: "95"
+              REPLOG_BASE_URL: https://replog.${SECRET_DOMAIN}
+              REPLOG_LOG_FORMAT: json
+              REPLOG_METRICS_ENABLED: "true"
+              # Forge trusts 127.0.0.1/32,::1/128 (Caddy on loopback). The
+              # rate limiter only accepts CIDRs. Envoy's pods are in the
+              # cluster pod CIDR, and the network policy admits only those
+              # proxies plus Prometheus.
+              REPLOG_TRUSTED_PROXIES: 10.42.0.0/16
+              # Website Pocket ID login, the same non-secret settings Forge
+              # sets in hosts/forge/services/replog.nix. The client secret
+              # is REPLOG_OIDC_CLIENT_SECRET from Secret replog-env. The
+              # redirect defaults to ${REPLOG_BASE_URL}/auth/oidc/callback.
+              REPLOG_OIDC_ISSUER: https://id.${SECRET_DOMAIN}
+              REPLOG_OIDC_CLIENT_ID: replog
+              # On-behalf proof (ADR 025 amendment). signed = only
+              # homelab-mcp's signed short-lived token. The shared on-behalf
+              # credential is removed (Ryan, 2026-11-22).
+              REPLOG_ON_BEHALF_MODE: signed
+            envFrom:
+              - secretRef:
+                  name: replog-env
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  periodSeconds: 30
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              # /readyz pings the database. /healthz only checks the process.
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: 8080
+                  periodSeconds: 10
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  periodSeconds: 5
+                  failureThreshold: 24
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: "1"
+                memory: 512Mi
+    defaultPodOptions:
+      # ndots:1 so id.holthome.net resolves as an absolute name first. With the
+      # default ndots:5 it resolves as id.holthome.net.replog.svc.cluster.local,
+      # Cilium learns 10.20.0.30 under that name, and the toFQDNs rule for
+      # id.holthome.net never matches, so OIDC discovery times out.
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: replog
+        ports:
+          http:
+            port: 8080
+    serviceMonitor:
+      app:
+        labels:
+          release: kube-prometheus-stack
+        endpoints:
+          - port: http
+            path: /metrics
+            interval: 60s
+    persistence:
+      # The PVC is in pvc.yaml so the VolSync backup (../backup) can name it.
+      data:
+        existingClaim: replog-data
+        advancedMounts:
+          replog:
+            app:
+              - path: /data
+      # CephFS, backed up by ../backup (ReplicationSource replog-videos).
+      videos:
+        existingClaim: replog-videos
+        advancedMounts:
+          replog:
+            app:
+              - path: /videos
+      # The root filesystem is read-only. SQLite and the Go runtime use /tmp.
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    # The pod's allow policy. It is here rather than in
+    # ciliumnetworkpolicy.yaml because kubeconform checks files before Flux
+    # substitutes ${SECRET_DOMAIN}, and Cilium's schema refuses "${" in a
+    # toFQDNs name. homelab-mcp does the same. Default deny stays in the file.
+    rawResources:
+      policy:
+        forceRename: replog
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          # In: 8080 from envoy-external and envoy-internal, from
+          # Prometheus (the scrape is /metrics on that same port), and from
+          # the homelab-mcp pods (the coach tools). Probes come from the
+          # kubelet, which Cilium allows. Out: DNS, then 443 to Pocket ID
+          # and to the Web Push services.
+          # Forge reached Pocket ID from the host; this pod has to be
+          # allowed the name.
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: replog
+                app.kubernetes.io/controller: replog
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: observability
+                      app.kubernetes.io/name: prometheus
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              # homelab-mcp namespace, the homelab-mcp pods, port 8080 only.
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: homelab-mcp
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: homelab-mcp
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: homelab-mcp
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: web
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
+              # Web Push rest alerts (carpenike/replog#62). The browser
+              # push services in replog's DefaultAllowedHosts
+              # (internal/push/push.go), 443 only. Endpoints are one label
+              # under these names (web.push.apple.com,
+              # updates.push.services.mozilla.com, wns2-*.notify.windows.com).
+              - toFQDNs:
+                  - matchName: fcm.googleapis.com
+                  - matchName: android.googleapis.com
+                  - matchPattern: "*.push.apple.com"
+                  - matchPattern: "*.push.services.mozilla.com"
+                  - matchPattern: "*.notify.windows.com"
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP

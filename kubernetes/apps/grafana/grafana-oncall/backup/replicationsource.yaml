@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# OnCall's SQLite database: escalation chains, schedules, integrations.
+# Forge classed it standard with a one-day RPO; this is every 6 hours.
+# Crash consistent: SQLite replays its journal.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: grafana-oncall-data
+spec:
+  sourcePVC: grafana-oncall-data
+  trigger:
+    schedule: "40 */6 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: grafana-oncall-data-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: grafana-oncall-volsync
+    # OnCall's uid and gid; the namespace enforces restricted.
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 957
+      runAsGroup: 952
+      fsGroup: 952
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4

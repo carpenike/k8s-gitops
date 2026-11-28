@@ -1,0 +1,143 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# EMQX, the MQTT broker that ran on Forge as podman-emqx (same image and
+# digest Forge pins in modules/nixos/services/emqx/default.nix). One node:
+# from 5.9 on, EMQX is under the Business Source License and a multi-node
+# cluster needs a commercial license (emqx.com/en/content/license-faq), so
+# availability comes from Kubernetes rescheduling the pod onto another sled.
+#
+# The node name is fixed so the built-in database on the volume belongs to
+# the same node after every restart. Users come from the bootstrap file
+# (ExternalSecret emqx); ACLs from the file source (acl.conf). Anonymous
+# clients are refused because an authenticator is configured.
+#
+# Running since the EMQX cutover step 2 (docs/apps/home-automation.md). It has
+# no clients until Forge's are repointed in nix-config.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: emqx
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: emqx
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      emqx:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/emqx/emqx
+              # renovate: datasource=docker depName=docker.io/emqx/emqx
+              tag: 6.3.3@sha256:54778dba62a5cbcb03ca381c9bceb3d8a87cab9e3da155ed3607d994454df900
+            env:
+              TZ: America/New_York
+              EMQX_NODE__NAME: emqx@127.0.0.1
+              EMQX_DASHBOARD__DEFAULT_USERNAME: admin
+              EMQX_AUTHENTICATION__1__ENABLE: "true"
+              EMQX_AUTHENTICATION__1__MECHANISM: password_based
+              EMQX_AUTHENTICATION__1__BACKEND: built_in_database
+              EMQX_AUTHENTICATION__1__USER_ID_TYPE: username
+              EMQX_AUTHENTICATION__1__BOOTSTRAP_TYPE: plain
+              EMQX_AUTHENTICATION__1__BOOTSTRAP_FILE: /opt/emqx/etc/bootstrap/users.csv
+              EMQX_AUTHORIZATION__NO_MATCH: allow
+              EMQX_AUTHORIZATION__SOURCES__1__TYPE: file
+              EMQX_AUTHORIZATION__SOURCES__1__ENABLE: "true"
+              EMQX_AUTHORIZATION__SOURCES__1__PATH: /opt/emqx/etc/acl/acl.conf
+              # MQTT over TCP only. No WebSocket or TLS listener has a client.
+              EMQX_LISTENERS__WS__DEFAULT__ENABLE: "false"
+              EMQX_LISTENERS__WSS__DEFAULT__ENABLE: "false"
+              EMQX_LISTENERS__SSL__DEFAULT__ENABLE: "false"
+            envFrom:
+              - secretRef:
+                  name: emqx
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: &dashboard 18083
+                  periodSeconds: 5
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: *dashboard
+                  periodSeconds: 30
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &mqtt 1883
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: emqx
+        ports:
+          mqtt:
+            port: *mqtt
+          dashboard:
+            port: *dashboard
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        storageClass: ceph-block
+        retain: true
+        forceRename: emqx-data
+        globalMounts:
+          - path: /opt/emqx/data
+      log:
+        type: emptyDir
+        globalMounts:
+          - path: /opt/emqx/log
+      bootstrap:
+        type: secret
+        name: emqx
+        items:
+          - key: users.csv
+            path: users.csv
+        globalMounts:
+          - path: /opt/emqx/etc/bootstrap
+            readOnly: true
+      acl:
+        type: configMap
+        name: emqx-acl
+        globalMounts:
+          - path: /opt/emqx/etc/acl
+            readOnly: true

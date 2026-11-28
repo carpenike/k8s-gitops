@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in grocy (an empty rule selects no peer).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# In: 80 from envoy-internal (browsers, after the Pocket ID login and the
+# identity header, httproute.yaml) and from the homelab-mcp pods (the grocy_*
+# tools, which send GROCY-API-KEY). Nothing else may reach the pod: Grocy
+# trusts X-Grocy-User from whoever connects, which is why the Forge nginx
+# was bound to loopback. Probes come from the kubelet, which Cilium allows.
+# Out: cluster DNS only. Grocy calls nothing; a barcode lookup plugin would
+# need its own allow here.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grocy
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grocy
+      app.kubernetes.io/controller: grocy
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: homelab-mcp
+            app.kubernetes.io/name: homelab-mcp
+            app.kubernetes.io/controller: homelab-mcp
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: homelab-mcp
+            app.kubernetes.io/name: homelab-mcp
+            app.kubernetes.io/controller: web
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY

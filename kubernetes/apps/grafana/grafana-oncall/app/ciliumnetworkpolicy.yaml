@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# The engine and Celery pod. In: 8080 from envoy-internal (Forge's
+# Alertmanager), Grafana (the OnCall plugin's backend), Prometheus
+# (/metrics/, bearer token) and the plugin setup Job. Probes come from the
+# kubelet, which Cilium allows.
+# Out: DNS, Redis, the Grafana API (user and plugin sync), and HTTPS to the
+# public internet. That last rule is wider than Grafana's on purpose: where
+# OnCall sends notifications (Telegram, Slack, outgoing webhooks, Grafana
+# Cloud for push, SMS and calls) is configured in its database, not in this
+# repo, so there is no fixed host list to write. Private ranges stay closed.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grafana-oncall
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana-oncall
+      app.kubernetes.io/controller: grafana-oncall
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+            app.kubernetes.io/controller: grafana
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: prometheus
+        - matchLabels:
+            app.kubernetes.io/name: grafana-oncall-plugin-setup
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana-oncall
+            app.kubernetes.io/controller: redis
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+            app.kubernetes.io/controller: grafana
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Redis: 6379 from the engine and Celery pod only. No egress.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grafana-oncall-redis
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana-oncall
+      app.kubernetes.io/controller: redis
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana-oncall
+            app.kubernetes.io/controller: grafana-oncall
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP

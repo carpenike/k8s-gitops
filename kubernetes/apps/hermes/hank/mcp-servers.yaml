@@ -1,0 +1,60 @@
+---
+# Hank's MCP servers from git (docs/apps/hermes.md, "MCP servers from git"). The
+# config init container writes each entry into config.yaml on every start.
+# Each server also needs egress: public hosts go in mcp-egress.yaml.
+servers:
+  # Up-to-date library and CLI docs for Claude Code work. Public, no key
+  # (rate-limited without one). Read-only, so no approval prompt.
+  context7:
+    url: https://mcp.context7.com/mcp
+    trust: full
+    timeout: 60
+    tools:
+      - resolve-library-id
+      - query-docs
+  # The shared task board (docs/apps/openproject.md, "Bot access"), as OpenProject
+  # user hank. In-cluster, so its egress is the component's agent-task-board
+  # (TASK_BOARD_ENABLED), not mcp-egress.yaml. OPENPROJECT_API_TOKEN comes
+  # from Secret hermes-hank-openproject, which the provisioning Job fills.
+  # trust full: the writes stay on the board, under Hank's own name, and the
+  # skill task-board says what a task does and doesn't authorize.
+  openproject:
+    url: http://openproject-mcp.openproject.svc.cluster.local:8000/mcp
+    headers:
+      Authorization: "Bearer ${OPENPROJECT_API_TOKEN}"
+    trust: full
+    timeout: 60
+    tools:
+      - whoami
+      - list_tasks
+      - get_task
+      - create_task
+      - add_comment
+      - claim_next
+      - complete_task
+      - release_task
+  # homelab-mcp, view /mcp/agent/hank (input HOMELAB_MCP_ENABLED for the
+  # egress; docs/apps/hermes.md, "homelab-mcp"). Its own OAuth sign-in: run
+  # `hermes mcp login homelab` once in the agent pod. trust full because every
+  # write is bounded by the server, not by Hermes: the vault policy lets this
+  # view write only Personal/Tech/Incidents and append to the Tech Inbox, and
+  # signal_send refuses any target but ops (HOMELAB_MCP_SIGNAL_OPS_ONLY_VIEWS).
+  # Alert turns are unattended, so an untrusted server's writes would fail.
+  homelab:
+    url: https://mcp.${SECRET_DOMAIN}/mcp/agent/hank
+    auth: oauth
+    oauth:
+      scope: hank
+      redirect_port: 8765
+    trust: full
+    timeout: 60
+    tools:
+      - vault_domains
+      - vault_read
+      - vault_list
+      - vault_search
+      - vault_links
+      - vault_create
+      - vault_edit
+      - signal_send
+      - homelab_list_status

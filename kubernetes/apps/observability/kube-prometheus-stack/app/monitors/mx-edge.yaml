@@ -1,0 +1,97 @@
+---
+# The Vultr mail edge relay (mx-edge, ADR 0014; docs/apps/mail.md,
+# "Monitoring the edge"). Prometheus scrapes it through a Tailscale egress
+# proxy: the operator sees the annotation, runs a tag:k8s proxy in
+# namespace tailscale, and points this Service at it. The tailnet policy
+# grants tag:k8s tcp:8080 and tcp:9100 on tag:mx-edge.
+#
+# 100.82.25.116 is mx-edge's tailnet address, reachable only inside the
+# tailnet. It changes if the VM re-joins the tailnet (a rebuild); update it
+# here then (`tailscale status` on any tailnet device).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mx-edge
+  annotations:
+    tailscale.com/tailnet-ip: 100.82.25.116
+spec:
+  type: ExternalName
+  # Rewritten by the operator to its proxy's Service.
+  externalName: placeholder
+  ports:
+    - name: node
+      port: 9100
+      protocol: TCP
+    - name: stalwart
+      port: 8080
+      protocol: TCP
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/external-secrets.io/externalsecret_v1.json
+# Basic auth for the edge's /metrics/prometheus. Item mx-edge, field
+# metrics_password; the edge's Stalwart holds the same value (Metrics ›
+# Prometheus, set over its admin API). Missing field: unready, and the
+# stalwart scrape gets 401.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mx-edge-metrics
+spec:
+  refreshInterval: 12h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mx-edge-metrics
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        username: prometheus
+        password: "{{ .metrics_password }}"
+  data:
+    - secretKey: metrics_password
+      remoteRef:
+        key: mx-edge/metrics_password
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+# node-exporter on the edge (nix-config hosts/mx-edge/monitoring.nix), with
+# the systemd collector for the upgrade and Stalwart container units.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: mx-edge-node
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobName: mx-edge-node
+  scrapeInterval: 60s
+  staticConfigs:
+    - targets:
+        - mx-edge.observability.svc.cluster.local:9100
+      labels:
+        instance: mx-edge
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+# The edge's Stalwart (stalwart_* metrics), on its tailnet-only 8080.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: mx-edge-stalwart
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobName: mx-edge-stalwart
+  scrapeInterval: 60s
+  metricsPath: /metrics/prometheus
+  basicAuth:
+    username:
+      name: mx-edge-metrics
+      key: username
+    password:
+      name: mx-edge-metrics
+      key: password
+  staticConfigs:
+    - targets:
+        - mx-edge.observability.svc.cluster.local:8080
+      labels:
+        instance: mx-edge

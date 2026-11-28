@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Built by the bot's `provision` Flux Kustomization with substituteFrom
+# hermes-bot-inputs and hermes-bot-derived. Objects name their own
+# namespaces (matrix, litellm, hermes-${BOT_NAME}); no transformer.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ciliumnetworkpolicy.yaml
+  - ../../../apps/matrix/hermes-bot-provisioner/template
+  - ../../../apps/litellm/key-provisioner/template
+  - ./ssh-keys.yaml

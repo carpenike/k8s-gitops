@@ -1,0 +1,106 @@
+---
+# Internal only, as on Forge (Caddy vhost, no Cloudflare tunnel). The name
+# grocy.${SECRET_DOMAIN} is still Forge's router record when this merges, so
+# the route does not take traffic by itself; the cutover points the name here
+# (docs/apps/grocy.md).
+#
+# No gateway.holthome.net/auth label: SecurityPolicy grocy below targets this
+# route and replaces the gateway's pocket-id policy (mergeType unset), so a
+# person still signs in once.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grocy
+spec:
+  hostnames:
+    - grocy.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    - name: app
+      backendRefs:
+        - name: grocy
+          port: 80
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Grocy needs to know WHO is signed in (chores, stock changes and API keys are
+# per person), and its only SSO is a trusted header
+# (ReverseProxyAuthMiddleware). On Forge, Caddy put the PocketID email in
+# X-Token-User-Email. Here:
+#
+#   1. oidc: the same Pocket ID login and client as the gateway policy
+#      (network/pocket-id), and the ID token is forwarded upstream in
+#      X-Grocy-Id-Token. Envoy owns that header.
+#   2. jwt: Envoy's jwt_authn runs after the OAuth2 filter (Envoy Gateway
+#      1.9.3 filter order), verifies that ID token against Pocket ID's JWKS
+#      and issuer, and writes its email claim into X-Grocy-User. jwt_authn
+#      removes any client-sent X-Grocy-User before it does, and a request
+#      without a valid token is refused, so a browser cannot name a user.
+#   3. authorization: only a token whose `groups` claim holds `home` gets
+#      through, as Forge's `home` policy required.
+#
+# Grocy reads X-Grocy-User (GROCY_REVERSE_PROXY_AUTH_HEADER in the
+# HelmRelease). The pod accepts connections only from envoy-internal and
+# homelab-mcp (ciliumnetworkpolicy.yaml).
+#
+# Cookies have their own names so they never collide with the gateway
+# policy's EG_HOST_* cookies. The callback is https://grocy.<domain>/oauth2/callback,
+# which the envoy-gateway Pocket ID client already allows
+# (docs/platform/gateway-auth.md).
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: grocy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: grocy
+  oidc:
+    provider:
+      issuer: https://id.${SECRET_DOMAIN}
+    clientIDRef:
+      name: grocy-oidc
+    clientSecret:
+      name: grocy-oidc
+    scopes:
+      - openid
+      - profile
+      - email
+      - groups
+    cookieNames:
+      accessToken: EG_GROCY_ACCESS_TOKEN
+      idToken: EG_GROCY_ID_TOKEN
+    cookieConfig:
+      sameSite: Lax
+    forwardIDToken:
+      header: X-Grocy-Id-Token
+  jwt:
+    providers:
+      - name: pocket-id
+        issuer: https://id.${SECRET_DOMAIN}
+        remoteJWKS:
+          uri: https://id.${SECRET_DOMAIN}/.well-known/jwks.json
+        extractFrom:
+          headers:
+            - name: X-Grocy-Id-Token
+        claimToHeaders:
+          - header: X-Grocy-User
+            claim: email
+  # Only the household. Forge's caddy-security policy `home` required the
+  # Pocket ID group `home`; without this rule any Pocket ID account (friends
+  # on other views) would get in, and Grocy creates a user on first sight.
+  # Claims come from the ID token the jwt provider above verified.
+  authorization:
+    defaultAction: Deny
+    rules:
+      - name: home-group
+        action: Allow
+        principal:
+          jwt:
+            provider: pocket-id
+            claims:
+              - name: groups
+                valueType: StringArray
+                values: ["home"]

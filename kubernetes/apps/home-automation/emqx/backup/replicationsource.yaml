@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# The broker's built-in database (users, retained messages, sessions). Daily: users are re-imported from the bootstrap file anyway.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: emqx
+spec:
+  sourcePVC: emqx-data
+  trigger:
+    schedule: "20 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: emqx-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: emqx-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      hourly: 24
+      daily: 7
+      weekly: 4

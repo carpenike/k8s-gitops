@@ -1,0 +1,9 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# One folder per bot (kubernetes/components/hermes-bot; docs/apps/hermes.md).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./chief
+  - ./hank
+  - ./hank-cluster

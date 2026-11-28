@@ -1,0 +1,34 @@
+# kube-apiserver trusts ID tokens from Pocket ID (Forge). Headlamp logs
+# users in with its own Pocket ID client, client id `headlamp`, and sends
+# the ID token to the API server, so RBAC sees the person, not a shared
+# ServiceAccount. Username is `oidc:<preferred_username>`, groups are
+# `oidc:<group>`. The `oidc:` prefix keeps a Pocket ID name from ever
+# matching a `system:` user or group. ClusterRoleBinding
+# `oidc-admins-cluster-admin` (kubernetes/apps/headlamp) grants
+# cluster-admin to Pocket ID group `admins`.
+#
+# This document is the whole authentication config, not a merge: the
+# anonymous block is Talos's default, kept so the health probes still
+# answer without a token. Add another audience to the list for a kubectl
+# (kubelogin) client later. See docs/platform/headlamp.md.
+apiVersion: v1alpha1
+kind: KubeAuthenticationConfig
+configuration:
+  anonymous:
+    enabled: true
+    conditions:
+      - path: /livez
+      - path: /readyz
+      - path: /healthz
+  jwt:
+    - issuer:
+        url: https://id.holthome.net
+        audiences:
+          - headlamp
+      claimMappings:
+        username:
+          claim: preferred_username
+          prefix: "oidc:"
+        groups:
+          claim: groups
+          prefix: "oidc:"

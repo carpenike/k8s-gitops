@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ocirepository.yaml
+  - ./pvc.yaml
+  - ./helmrelease.yaml
+  - ./externalsecret.yaml
+  - ./httproute.yaml
+  - ./ciliumnetworkpolicy.yaml
+  - ./prometheusrule.yaml
+configMapGenerator:
+  # obsidian-sync's script and pinned client (Renovate's npm manager keeps
+  # package.json and package-lock.json current). No hash suffix: the
+  # HelmRelease names this ConfigMap, and reloader restarts the pod on change.
+  - name: homelab-mcp-obsidian-sync
+    files:
+      - ./obsidian-sync/run.sh
+      - ./obsidian-sync/package.json
+      - ./obsidian-sync/package-lock.json
+  # The vault access policy (domains and client profiles), app container only.
+  - name: homelab-mcp-vault-policy
+    files:
+      - policy.yaml=./vault-policy.yaml
+generatorOptions:
+  disableNameSuffixHash: true

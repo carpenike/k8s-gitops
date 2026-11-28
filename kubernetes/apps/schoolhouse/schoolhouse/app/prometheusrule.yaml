@@ -1,0 +1,94 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# Ported from nix-config hosts/forge/services/schoolhouse.nix
+# (modules.alerting.rules) with the same expressions, `for`, severities and
+# labels, scoped to this namespace. The systemd service-down rule becomes a
+# scrape check. Alerts route to Forge's Alertmanager like the rest.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: schoolhouse
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: schoolhouse
+      rules:
+        - alert: SchoolhouseDown
+          # Forge: schoolhouse-service-down (mkSystemdServiceDownAlert). The
+          # ServiceMonitor is the only scrape target in this namespace.
+          expr: |
+            up{namespace="schoolhouse"} == 0
+              or absent(up{namespace="schoolhouse"})
+          for: 10m
+          labels:
+            severity: high
+            service: schoolhouse
+            category: availability
+          annotations:
+            summary: Schoolhouse health server is not being scraped
+            description: >-
+              Prometheus has had no /metrics from the schoolhouse Deployment
+              for 10 minutes, so the ingest freshness alerts below cannot
+              fire either.
+        - alert: SchoolhouseIngestStale
+          # The ingest runs weekdays only, so Friday evening to Monday
+          # morning is about 59 hours of normal silence. The window is
+          # stated instead: weekdays, from 14:00 UTC (10:00 EDT / 09:00 EST,
+          # after the 07:00 run and its jitter in both halves of the year).
+          # hour() and day_of_week() are UTC. 12h separates a healthy ~3h
+          # from a missed morning run at ~13-14h.
+          expr: |
+            (time() - schoolhouse_last_successful_ingest_timestamp_seconds{namespace="schoolhouse"}) > 12 * 3600
+              and on() (day_of_week() > 0 < 6)
+              and on() (hour() >= 14)
+          for: 30m
+          labels:
+            severity: high
+            service: schoolhouse
+            category: availability
+          annotations:
+            summary: Schoolhouse ingest has not succeeded in over 12 hours
+            description: >-
+              The last ingest run finished more than 12 hours ago on a school
+              day. Grades, assignments and missing work are all frozen at
+              that point, and nothing about the UI will say so. Check the
+              last schoolhouse-ingest Job's log (kubectl -n schoolhouse logs
+              job/<name>) for a LoginFailedError, which means the captured
+              form shape drifted, and check that the CronJob is not
+              suspended.
+        - alert: SchoolhouseDatabaseUnreachable
+          # Distinguishable from the process being gone, which
+          # SchoolhouseDown covers. /metrics answers 200 either way.
+          expr: schoolhouse_database_up{namespace="schoolhouse"} == 0
+          for: 10m
+          labels:
+            severity: medium
+            service: schoolhouse
+            category: availability
+          annotations:
+            summary: Schoolhouse cannot reach its database
+            description: >-
+              The health endpoint is serving but its Postgres queries are
+              failing. The ingest writes through the same database, so it is
+              almost certainly failing too. Check postgres17 and the
+              schoolhouse_reader grants (docs/platform/postgres17.md).
+        - alert: SchoolhouseRecordsCollapsed
+          # Compares against a 14-day average, so it also fires once at the
+          # end of a term. Prometheus here keeps 7 days, so the average
+          # covers what is retained until long-term storage exists.
+          expr: |
+            schoolhouse_last_run_records_seen{namespace="schoolhouse"}
+              < 0.5 * avg_over_time(schoolhouse_last_run_records_seen{namespace="schoolhouse"}[14d])
+          for: 6h
+          labels:
+            severity: low
+            service: schoolhouse
+            category: correctness
+          annotations:
+            summary: Schoolhouse is seeing half the records it used to
+            description: >-
+              The most recent ingest parsed far fewer records than the
+              fortnight average while still reporting success. That is what a
+              parser going blind looks like from the outside. Check the
+              review queue (parser_gaps) for newly opened gaps.

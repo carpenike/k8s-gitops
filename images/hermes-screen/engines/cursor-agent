@@ -1,0 +1,13 @@
+#!/bin/sh
+# k8s-gitops: Cursor's CLI in the Hermes screen pod (docs/apps/hermes.md,
+# "Coding engines"). Signs in with Ryan's Cursor user API key (Secret
+# cursor-auth, mounted only with CURSOR_ENABLED). Installed read-only under
+# /opt/cursor-agent: its self-update cannot replace this binary, and this
+# wrapper never runs a copy it downloads to ~/.local.
+key=/etc/hermes-claude-code/cursor_api_key
+unset CURSOR_API_KEY
+if [ -s "$key" ]; then
+  CURSOR_API_KEY=$(cat "$key")
+  export CURSOR_API_KEY
+fi
+exec /opt/cursor-agent/cursor-agent "$@"

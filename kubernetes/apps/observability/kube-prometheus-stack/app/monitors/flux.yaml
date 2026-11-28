@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/podmonitor_v1.json
+# Flux controllers serve /metrics on http-prom (8080). The flux-operator
+# chart's ServiceMonitor only covers the operator. This lives here, not in
+# flux-instance, so the bootstrap path does not wait on Prometheus CRDs.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flux-controllers
+spec:
+  namespaceSelector:
+    matchNames:
+      - flux-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: flux
+  podMetricsEndpoints:
+    - port: http-prom
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_phase]
+          regex: Running
+          action: keep

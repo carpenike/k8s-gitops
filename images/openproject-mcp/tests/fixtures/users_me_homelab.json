@@ -1,0 +1,30 @@
+{
+  "_type": "User",
+  "id": 21,
+  "name": "Homelab Manager",
+  "createdAt": "2026-10-01T12:00:00.000Z",
+  "updatedAt": "2026-10-15T12:00:00.000Z",
+  "login": "bot-homelab",
+  "admin": false,
+  "firstName": "Homelab",
+  "lastName": "Manager",
+  "email": null,
+  "avatar": "",
+  "status": "active",
+  "identityUrl": null,
+  "language": "en",
+  "_links": {
+    "self": {
+      "href": "/api/v3/users/21",
+      "title": "Homelab Manager"
+    },
+    "memberships": {
+      "href": "/api/v3/memberships?filters=%5B%7B%22principal%22%3A%7B%22operator%22%3A%22%3D%22%2C%22values%22%3A%5B%2221%22%5D%7D%7D%5D",
+      "title": "Memberships"
+    },
+    "showUser": {
+      "href": "/users/21",
+      "type": "text/html"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ocirepository.yaml
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ./service-forge.yaml
+  - ./httproute.yaml
+  - ./ciliumnetworkpolicy.yaml
+configMapGenerator:
+  - name: emqx-acl
+    files:
+      - acl.conf=./acl.conf
+generatorOptions:
+  disableNameSuffixHash: true

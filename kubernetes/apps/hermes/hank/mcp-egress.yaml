@@ -1,0 +1,30 @@
+---
+# Agent egress to the public hosts of Hank's MCP servers (mcp-servers.yaml).
+# FQDN rules need the L7 DNS rule so Cilium's DNS proxy sees the lookups.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: agent-mcp-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+      app.kubernetes.io/controller: agent
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: mcp.context7.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

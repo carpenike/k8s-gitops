@@ -1,0 +1,26 @@
+{
+  "_type": "User",
+  "id": 23,
+  "name": "Hank",
+  "createdAt": "2026-10-01T12:00:00.000Z",
+  "updatedAt": "2026-10-15T12:00:00.000Z",
+  "avatar": "",
+  "_links": {
+    "self": {
+      "href": "/api/v3/users/23",
+      "title": "Hank"
+    },
+    "memberships": {
+      "href": "/api/v3/memberships?filters=%5B%7B%22principal%22%3A%7B%22operator%22%3A%22%3D%22%2C%22values%22%3A%5B%2223%22%5D%7D%7D%5D",
+      "title": "Memberships"
+    },
+    "showUser": {
+      "href": "/users/23",
+      "type": "text/html"
+    }
+  },
+  "login": "hank",
+  "firstName": "Hank",
+  "lastName": "",
+  "status": "active"
+}

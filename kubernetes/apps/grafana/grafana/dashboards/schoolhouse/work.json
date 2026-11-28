@@ -1,0 +1,531 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "What is outstanding and what is coming. Lateness is computed from the due date, never read from Schoology's own wording — that page labels work due in five days '4 days overdue'. Late and Unknown are two different questions and are counted separately: Late is what Schoology reports outstanding, Unknown is what it has never said anything about. Reading Late alone understates the picture, which is exactly what this board used to do.",
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Schoology itself reports these outstanding, and the due date has passed. This is the half we actually know about — read it next to Unknown, never on its own.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              },
+              {
+                "color": "#F79009",
+                "value": 1
+              },
+              {
+                "color": "#F13636",
+                "value": 5
+              }
+            ]
+          },
+          "unit": ""
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::int AS \"Late\"\nFROM assignments a\nJOIN courses c ON c.id = a.course_id\nJOIN children ch ON ch.id = c.child_id\nJOIN latest_assignment_state s ON s.assignment_id = a.id\nWHERE s.status = 'assigned' AND c.active AND a.due_at < now()\n  AND ch.display_name IN (${child:sqlstring})\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Late",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Past due, and no submission state has ever been observed. NOT a count of missed work — it is a count of questions the store cannot answer, and each one needs a human to look.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              },
+              {
+                "color": "#F79009",
+                "value": 1
+              }
+            ]
+          },
+          "unit": ""
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::int AS \"Unknown\"\nFROM assignments a\nJOIN courses c ON c.id = a.course_id\nJOIN children ch ON ch.id = c.child_id\nLEFT JOIN latest_assignment_state s ON s.assignment_id = a.id\nWHERE s.assignment_id IS NULL AND c.active AND a.due_at < now()\n  AND ch.display_name IN (${child:sqlstring})\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Unknown",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Everything dated in the coming week, whatever its state.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2E90FA",
+                "value": null
+              }
+            ]
+          },
+          "unit": ""
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::int AS \"Due\"\nFROM assignments a\nJOIN courses c ON c.id = a.course_id\nJOIN children ch ON ch.id = c.child_id\nWHERE c.active AND a.due_at BETWEEN now() AND now() + interval '7 days'\n  AND ch.display_name IN (${child:sqlstring})\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Due in 7 days",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "Work the store knows about but cannot place in time, so it can never appear in a 'what is due this week' answer. Materials carries no due date; the gradebook and the To Do page do.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#078C52",
+                "value": null
+              },
+              {
+                "color": "#F79009",
+                "value": 1
+              }
+            ]
+          },
+          "unit": ""
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::int AS \"Undated\"\nFROM assignments a\nJOIN courses c ON c.id = a.course_id\nJOIN children ch ON ch.id = c.child_id\nWHERE c.active AND a.due_at IS NULL\n  AND ch.display_name IN (${child:sqlstring})\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Undated",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "`State` is computed here from the due date, never read from Schoology's wording. `Basis` says how much to trust the row: *observed* means Schoology reports it not turned in; *inferred* means the due date passed and no submission state was ever seen, which often just means nobody has graded it yet. Same vocabulary as school_get_missing_work, deliberately — the two must agree.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "State"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "ahead": {
+                        "color": "#078C52",
+                        "index": 1,
+                        "text": "ahead"
+                      },
+                      "late": {
+                        "color": "#F13636",
+                        "index": 0,
+                        "text": "late"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Basis"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "inferred": {
+                        "color": "#F79009",
+                        "index": 1,
+                        "text": "inferred"
+                      },
+                      "observed": {
+                        "color": "#F13636",
+                        "index": 0,
+                        "text": "observed"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT ch.display_name AS \"Child\",\n       c.title AS \"Course\",\n       a.title AS \"Work\",\n       a.due_at AT TIME ZONE 'America/New_York' AS \"Due\",\n       CASE WHEN a.due_at < now() THEN 'late' ELSE 'ahead' END AS \"State\",\n       CASE WHEN s.assignment_id IS NULL THEN 'inferred'\n            ELSE 'observed' END AS \"Basis\"\nFROM assignments a\nJOIN courses c ON c.id = a.course_id\nJOIN children ch ON ch.id = c.child_id\nLEFT JOIN latest_assignment_state s\n  ON s.assignment_id = a.id AND s.status = 'assigned'\nWHERE a.due_at IS NOT NULL AND c.active\n  AND (\n    -- Schoology says it is outstanding, whenever it is due.\n    s.assignment_id IS NOT NULL\n    -- Or it is past due and the store has never seen any state\n    -- for it at all. Future-dated work with no state yet is\n    -- simply not started, and belongs in \"Due in 7 days\".\n    OR (a.due_at < now()\n        AND NOT EXISTS (SELECT 1 FROM latest_assignment_state x\n                        WHERE x.assignment_id = a.id))\n  )\n  AND ch.display_name IN (${child:sqlstring})\nORDER BY a.due_at\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Outstanding, soonest first",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "schoolhouse"
+      },
+      "description": "`Dated` is what decides whether 'what is due Thursday' can be answered at all. Points arrive only once something is graded.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "schoolhouse"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT ch.display_name AS \"Child\",\n       count(*) AS \"Known\",\n       count(*) FILTER (WHERE a.due_at IS NOT NULL) AS \"Dated\",\n       count(*) FILTER (WHERE a.points_possible IS NOT NULL) AS \"Pointed\",\n       count(*) FILTER (WHERE a.due_at > now()) AS \"Still ahead\"\nFROM assignments a\nJOIN courses c ON c.id = a.course_id\nJOIN children ch ON ch.id = c.child_id\nWHERE c.active AND ch.display_name IN (${child:sqlstring})\nGROUP BY ch.display_name\nORDER BY ch.display_name\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Coverage",
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": [
+    "schoolhouse",
+    "household"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "schoolhouse"
+        },
+        "definition": "SELECT display_name FROM children WHERE active ORDER BY display_name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Child",
+        "multi": true,
+        "name": "child",
+        "options": [],
+        "query": "SELECT display_name FROM children WHERE active ORDER BY display_name",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timezone": "America/New_York",
+  "title": "Schoolhouse — Work",
+  "uid": "schoolhouse-work",
+  "weekStart": ""
+}

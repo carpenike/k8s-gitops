@@ -1,0 +1,10 @@
+# Public static sites. nginx-unprivileged runs as uid 101 with no
+# capabilities, so restricted fits.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

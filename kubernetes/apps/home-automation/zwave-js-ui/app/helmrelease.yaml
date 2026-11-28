@@ -1,0 +1,117 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Z-Wave JS UI, moved from Forge (hosts/forge/services/zwave-js-ui.nix). The
+# USB stick moves from Forge to one sled; NFD rule zwave-stick labels that
+# sled and the pod is pinned to it. If that sled fails, Z-Wave is down until
+# the stick is moved to another sled (the label follows the stick).
+#
+# The WebSocket server (3002) has no authentication and can drive every
+# Z-Wave device, so it is a ClusterIP port that only Home Assistant may reach
+# (CiliumNetworkPolicy). It is never on a gateway or on VLAN 30.
+#
+# The container is privileged so it can open the hostPath tty: a device
+# mounted by hostPath is outside the container's device cgroup otherwise.
+# The store (settings.json, node cache) is copied from Forge's
+# /var/lib/zwave-js-ui at cutover, with Forge's unit stopped first
+# (docs/apps/home-automation.md, "3. Z-Wave JS UI"). settings.json on the
+# volume names the port (/dev/zwave) and wins over ZWAVEJS_SERIAL_PORT, which
+# only covers an empty store.
+#
+# Until Home Assistant moves, it reaches 3002 from Forge through the
+# zwave-js-ui-forge LoadBalancer (service-forge.yaml).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: zwave-js-ui
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: zwave-js-ui
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      zwave-js-ui:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/zwave-js/zwave-js-ui
+              # renovate: datasource=docker depName=ghcr.io/zwave-js/zwave-js-ui
+              tag: 11.27.0@sha256:0f3ad23ccf5ff2256ad8cc060ab0fc987b8f52a8427eac337f93b058fa628f35
+            env:
+              TZ: America/New_York
+              PORT: "8091"
+              STORE_DIR: /usr/src/app/store
+              ZWAVEJS_EXTERNAL_CONFIG: /usr/src/app/store/.config-db
+              # Behind Envoy, so the rate limiter reads X-Forwarded-For.
+              TRUST_PROXY: "true"
+              ZWAVEJS_SERIAL_PORT: /dev/zwave
+            envFrom:
+              - secretRef:
+                  name: zwave-js-ui
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      nodeSelector:
+        feature.node.kubernetes.io/zwave-stick: "true"
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: zwave-js-ui
+        ports:
+          http:
+            port: &ui 8091
+          websocket:
+            port: 3002
+    route:
+      app:
+        kind: HTTPRoute
+        # Keeps the gateway Pocket ID login; the UI's own auth stays off, as on
+        # Forge behind Caddy. The route serves the UI port only, not 3002.
+        hostnames:
+          - zwave.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *ui
+    persistence:
+      store:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        retain: true
+        forceRename: zwave-js-ui-store
+        globalMounts:
+          - path: /usr/src/app/store
+      zwave:
+        type: hostPath
+        hostPath: /dev/serial/by-id/usb-0658_0200-if00
+        hostPathType: CharDevice
+        globalMounts:
+          - path: /dev/zwave

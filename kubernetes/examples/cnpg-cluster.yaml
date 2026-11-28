@@ -1,0 +1,43 @@
+---
+# Not reconciled. Copy into an app directory after the credentials ExternalSecret exists.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: example-apps
+  namespace: cnpg-system
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+  storage:
+    storageClass: ceph-block
+    size: 20Gi
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+      secret:
+        name: example-apps-credentials
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: example-apps-backup
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: example-apps-backup
+  namespace: cnpg-system
+spec:
+  configuration:
+    destinationPath: s3://PLACEHOLDER_BUCKET_cnpg/
+    endpointURL: https://s3.example.invalid
+    s3Credentials:
+      accessKeyId:
+        name: example-apps-backup
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: example-apps-backup
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip

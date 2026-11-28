@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Per-bot template, built by the hermes-bot component's task-board
+# Kustomization. Inputs, via postBuild substitution: BOT_NAME and
+# TASK_BOARD_ENABLED (with TASK_BOARD_RYAN_USER_ID). The Job and its
+# ServiceAccount are in openproject, next to OpenProject's database
+# credentials; the Secret, Role and RoleBinding are in hermes-${BOT_NAME}.
+# No namespace transformer: the objects name their own namespaces. Same
+# shape as kubernetes/apps/matrix/hermes-bot-provisioner/template.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./secret.yaml
+  - ./rbac.yaml
+  - ./job.yaml

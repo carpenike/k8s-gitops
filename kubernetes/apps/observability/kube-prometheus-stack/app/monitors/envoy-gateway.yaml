@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/servicemonitor_v1.json
+# Envoy Gateway controller: /metrics on the envoy-gateway Service's metrics
+# port (19001). This lives here, not in envoy-gateway, so the ingress path
+# does not wait on Prometheus CRDs.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: envoy-gateway
+spec:
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: envoy-gateway
+      app.kubernetes.io/name: gateway-helm
+      control-plane: envoy-gateway
+  endpoints:
+    - port: metrics
+      path: /metrics
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/podmonitor_v1.json
+# Envoy proxies for envoy-external and envoy-internal: /stats/prometheus on
+# the proxy container's metrics port (19001).
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: envoy-proxy
+spec:
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: proxy
+      app.kubernetes.io/managed-by: envoy-gateway
+      app.kubernetes.io/name: envoy
+  podMetricsEndpoints:
+    - port: metrics
+      path: /stats/prometheus

@@ -1,0 +1,9 @@
+---
+# Static NFS volumes are created per share. This class does not provision.
+# An example PV lives in kubernetes/examples and is not reconciled by Flux.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-media
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer

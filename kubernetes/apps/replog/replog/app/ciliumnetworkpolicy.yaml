@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in replog. The pod's own allow is in the
+# HelmRelease (rawResources), because its toFQDNs name uses ${SECRET_DOMAIN}.
+# homelab-mcp does the same. See docs/apps/replog.md.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}

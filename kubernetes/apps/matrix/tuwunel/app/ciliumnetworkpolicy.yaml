@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Default deny for every pod in matrix, both directions. An empty rule puts
+# the selected endpoints into default deny without allowing any peer
+# (Cilium docs, Layer 3, "Ingress/Egress Default Deny"). The policies below
+# and in ../../hermes-bot-provisioner/app add the allows.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Ingress only from the envoy-external proxies (deploy type GatewayNamespace,
+# so they run in network) and from the bot provisioning Job. Probes are
+# exec, not HTTP. Egress is cluster DNS and public IPv4 on any port, since
+# federation peers can delegate to any port. No RFC1918, CGNAT, or
+# link-local: nothing on the LAN is needed while OIDC is off. Tuwunel's own
+# ip_range_denylist blocks the same ranges for outbound federation.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: tuwunel
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: tuwunel
+      app.kubernetes.io/controller: tuwunel
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-external
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: matrix
+            app.kubernetes.io/name: hermes-bot-provisioner
+        # Each Hermes bot's agent pod, in its own hermes-<bot> namespace
+        # (labelled hermes.holthome.net/bot by kubernetes/components/hermes-bot).
+        - matchLabels:
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: agent
+          matchExpressions:
+            # Without a namespace key Cilium scopes the selector to this
+            # policy's namespace; Exists plus the label spans hermes-*.
+            - key: k8s:io.kubernetes.pod.namespace
+              operator: Exists
+            - key: k8s:io.cilium.k8s.namespace.labels.hermes.holthome.net/bot
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "8008"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+            - 172.16.0.0/12
+            - 192.168.0.0/16

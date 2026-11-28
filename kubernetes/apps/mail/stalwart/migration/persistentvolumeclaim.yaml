@@ -1,0 +1,15 @@
+---
+# Vandelay archives, one SQLite file per mailbox. An archive holds every
+# message in full, so it is about the size of the mailbox it copies.
+# ceph-block allows expansion: raise the request if an import runs short.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stalwart-migration
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 60Gi

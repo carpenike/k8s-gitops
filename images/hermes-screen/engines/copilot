@@ -1,0 +1,20 @@
+#!/bin/sh
+# k8s-gitops: GitHub Copilot CLI in the Hermes screen pod (docs/apps/hermes.md,
+# "Coding engines"). Signs in with Ryan's Copilot through a fine-grained token
+# that has only the Copilot Requests permission (Secret copilot-auth, mounted
+# only with COPILOT_ENABLED). The bot's GitHub App token stays with git and gh:
+# Copilot's built-in GitHub tools get no repository write. State and remote
+# sessions live on the shared workspace.
+export COPILOT_HOME="${COPILOT_HOME:-/workspace/.copilot}"
+mkdir -p "$COPILOT_HOME"
+token=/etc/hermes-claude-code/copilot_token
+unset GH_TOKEN GITHUB_TOKEN COPILOT_GITHUB_TOKEN
+if [ -s "$token" ]; then
+  COPILOT_GITHUB_TOKEN=$(cat "$token")
+  export COPILOT_GITHUB_TOKEN
+fi
+# Never update itself: its version moves with the image.
+export COPILOT_AUTO_UPDATE=false
+# The one rules file every engine reads (images/hermes-screen/rules/AGENTS.md).
+export COPILOT_CUSTOM_INSTRUCTIONS_DIRS=/etc/hermes-rules
+exec /opt/copilot/bin/copilot "$@"

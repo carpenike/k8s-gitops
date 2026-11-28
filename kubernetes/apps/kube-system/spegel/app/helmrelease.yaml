@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: spegel
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: spegel
+  interval: 1h
+  values:
+    spegel:
+      containerdRegistryConfigPath: /etc/cri/conf.d/hosts
+    serviceMonitor:
+      enabled: true

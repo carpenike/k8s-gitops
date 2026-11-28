@@ -1,0 +1,128 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: headlamp
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: headlamp
+      version: 0.46.0
+      sourceRef:
+        kind: HelmRepository
+        name: headlamp
+      interval: 15m
+  # The plugin manager container is node:alpine (musl). Pods inherit search
+  # holthome.net and ndots:5, so registry.npmjs.org is first tried as
+  # registry.npmjs.org.holthome.net. The router answers that with NOERROR and
+  # no address, which musl treats as the final answer (ENOTFOUND), so npm
+  # never reaches the registry and the pod crash-loops. ndots:1 makes names
+  # with a dot resolve as absolute first. Service short names still search.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: headlamp
+            patch: |-
+              - op: add
+                path: /spec/template/spec/dnsConfig
+                value:
+                  options:
+                    - name: ndots
+                      value: "1"
+  values:
+    replicaCount: 1
+    # Image tag follows the chart appVersion when empty. Chart 0.46.0
+    # ships appVersion 0.46.0.
+    serviceAccount:
+      create: true
+      name: headlamp
+    # Users act as themselves (OIDC below), not as this ServiceAccount, so
+    # it gets no ClusterRoleBinding.
+    clusterRoleBinding:
+      create: false
+    automountServiceAccountToken: true
+    config:
+      inCluster: true
+      # Headlamp's own Pocket ID login. The ID token goes to the API server,
+      # which trusts issuer id.${SECRET_DOMAIN} with audience headlamp
+      # (talos/control-plane/20-authentication.yaml). RBAC is per person:
+      # see rbac.yaml. Client id, secret, issuer and scopes are Secret
+      # headlamp-oidc (externalsecret.yaml).
+      unsafeUseServiceAccountToken: false
+      enableHelm: false
+      watchPlugins: true
+      oidc:
+        secret:
+          create: false
+        externalSecret:
+          enabled: true
+          name: headlamp-oidc
+          hasScopes: true
+    # The chart's externalSecret mode only reads these three from env.
+    env:
+      - name: OIDC_CALLBACK_URL
+        value: https://headlamp.${SECRET_DOMAIN}/oidc-callback
+      - name: OIDC_USE_PKCE
+        value: "true"
+      - name: OIDC_AUTO_LOGIN
+        value: "true"
+    # Label native: Headlamp has its own Pocket ID client, so the gateway
+    # login is dropped (one login per route, docs/platform/gateway-auth.md).
+    # The API server still rejects any request without a valid Pocket ID
+    # token. parentRefs is only envoy-internal: mikrotik-dns publishes
+    # routes on that gateway, and cloudflare-dns publishes envoy-external.
+    httpRoute:
+      enabled: true
+      labels:
+        gateway.holthome.net/auth: native
+      hostnames:
+        - headlamp.${SECRET_DOMAIN}
+      parentRefs:
+        - name: envoy-internal
+          namespace: network
+    pluginsManager:
+      enabled: true
+      # pluginctl release that matches the install command in chart 0.46.0.
+      version: "0.1.1"
+      baseImage: node:22.23-alpine3.24
+      configContent: |
+        plugins:
+          - name: headlamp_flux
+            source: https://artifacthub.io/packages/headlamp/headlamp-plugins/headlamp_flux
+            version: 0.7.0
+        installOptions:
+          parallel: false
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+    securityContext:
+      privileged: false
+      runAsNonRoot: true
+      runAsUser: 100
+      runAsGroup: 101
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

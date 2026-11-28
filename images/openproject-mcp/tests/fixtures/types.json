@@ -1,0 +1,71 @@
+{
+  "_type": "Collection",
+  "total": 3,
+  "count": 3,
+  "pageSize": 20,
+  "offset": 1,
+  "_embedded": {
+    "elements": [
+      {
+        "_type": "Type",
+        "id": 1,
+        "name": "Task",
+        "color": "#1A67A3",
+        "position": 1,
+        "isDefault": true,
+        "isMilestone": false,
+        "createdAt": "2026-10-01T12:00:00.000Z",
+        "updatedAt": "2026-10-01T12:00:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/types/1",
+            "title": "Task"
+          }
+        }
+      },
+      {
+        "_type": "Type",
+        "id": 2,
+        "name": "Milestone",
+        "color": "#1A67A3",
+        "position": 2,
+        "isDefault": false,
+        "isMilestone": false,
+        "createdAt": "2026-10-01T12:00:00.000Z",
+        "updatedAt": "2026-10-01T12:00:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/types/2",
+            "title": "Milestone"
+          }
+        }
+      },
+      {
+        "_type": "Type",
+        "id": 7,
+        "name": "Bug",
+        "color": "#1A67A3",
+        "position": 7,
+        "isDefault": false,
+        "isMilestone": false,
+        "createdAt": "2026-10-01T12:00:00.000Z",
+        "updatedAt": "2026-10-01T12:00:00.000Z",
+        "_links": {
+          "self": {
+            "href": "/api/v3/types/7",
+            "title": "Bug"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v3/types"
+    },
+    "jumpTo": {
+      "href": "/api/v3/types?offset=%7Boffset%7D",
+      "templated": true
+    }
+  }
+}

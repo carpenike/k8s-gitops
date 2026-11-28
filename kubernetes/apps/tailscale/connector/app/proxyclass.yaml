@@ -1,0 +1,28 @@
+---
+# Pod settings for the Connector's StatefulSet. The label is ours, so the
+# spread constraint does not depend on labels the operator sets.
+# Proxy metrics are left off: the ProxyClass API calls them unstable and
+# for debugging only.
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: connector
+spec:
+  statefulSet:
+    pod:
+      labels:
+        app.kubernetes.io/name: tailscale-connector
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: tailscale-connector
+      tailscaleContainer:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 256Mi

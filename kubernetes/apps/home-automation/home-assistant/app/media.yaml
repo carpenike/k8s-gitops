@@ -1,0 +1,40 @@
+---
+# The NAS media library Home Assistant browses (media_dirs.media). Forge
+# mounts 10.20.0.10:/mnt/tank/share at /mnt/data, so the library is
+# /mnt/tank/share/media, mounted at the same path in the pod so hass-config
+# needs no change. Read-only: HA-generated media lives on the config volume.
+# Same pattern as scrypted's nvr.yaml.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: home-assistant-media
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-media
+  mountOptions:
+    - nfsvers=4.2
+    - soft
+    - timeo=150
+    - retrans=3
+    - ro
+    - noatime
+  nfs:
+    server: 10.20.0.10
+    path: /mnt/tank/share/media
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assistant-media
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-media
+  volumeName: home-assistant-media
+  resources:
+    requests:
+      storage: 10Ti

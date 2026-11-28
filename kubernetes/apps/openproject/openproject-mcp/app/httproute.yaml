@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.networking.k8s.io/httproute_v1.json
+# The Alertmanager relay's one public path (images/openproject-mcp README,
+# "Alertmanager relay"): Forge's Alertmanager posts alert groups here, and
+# the relay wakes Hank (docs/apps/hermes.md, "Alerts"). envoy-internal only
+# (LAN; Forge is on it), exactly /hooks/alertmanager, nothing else on 8000.
+# Labelled public: the sender carries its own bearer token
+# (ALERTMANAGER_HOOK_TOKEN) and cannot do the gateway login.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: openproject-mcp-alerts
+  labels:
+    gateway.holthome.net/auth: public
+spec:
+  hostnames:
+    - alerts-relay.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /hooks/alertmanager
+      timeouts:
+        request: 30s
+        backendRequest: 30s
+      backendRefs:
+        - name: openproject-mcp
+          port: 8000
+---
+# Lets pocket-id-exempt select the route (docs/platform/gateway-auth.md, "Opt out").
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: openproject-mcp-alerts-gateway-auth
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: network
+  to:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: openproject-mcp-alerts

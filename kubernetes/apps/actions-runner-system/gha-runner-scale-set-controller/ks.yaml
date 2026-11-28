@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gha-runner-scale-set-controller
+spec:
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: gha-runner-scale-set-controller
+      namespace: actions-runner-system
+  interval: 1h
+  path: ./kubernetes/apps/actions-runner-system/gha-runner-scale-set-controller/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: actions-runner-system

@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# Home Assistant's /config: .storage (auth, integrations, HomeKit pairing), UI-owned YAML, custom components, generated media. The recorder is in postgres17, backed up by CloudNativePG. Hourly, toward Forge's 15-minute RPO.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: home-assistant
+spec:
+  sourcePVC: home-assistant-config
+  trigger:
+    schedule: "15 * * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: home-assistant-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 1Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: home-assistant-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      hourly: 24
+      daily: 7
+      weekly: 4

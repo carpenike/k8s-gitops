@@ -1,0 +1,9 @@
+# tuppr 0.5.10 creates a talos.dev/v1alpha1 ServiceAccount named
+# tuppr-talosconfig in system-upgrade with spec.roles os:admin.
+# That kind does not exist until this access config is on the control planes.
+apiVersion: v1alpha1
+kind: KubeTalosAPIAccessConfig
+allowedRoles:
+  - os:admin
+allowedKubernetesNamespaces:
+  - system-upgrade

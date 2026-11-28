@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/nfd.k8s-sigs.io/nodefeaturerule_v1alpha1.json
+# The Z-Wave USB stick that moves from Forge (usb-0658_0200-if00, Sigma
+# Designs vendor 0658, product 0200). Z-Wave JS UI schedules on the sled that
+# carries it. One stick, so at most one sled matches. ADR 0018.
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: zwave-stick
+spec:
+  rules:
+    - name: zwave-stick
+      labels:
+        feature.node.kubernetes.io/zwave-stick: "true"
+      matchFeatures:
+        - feature: usb.device
+          matchExpressions:
+            vendor:
+              op: In
+              value: ["0658"]
+            device:
+              op: In
+              value: ["0200"]

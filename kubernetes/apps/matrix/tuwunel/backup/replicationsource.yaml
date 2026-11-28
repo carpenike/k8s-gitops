@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/volsync.backube/replicationsource_v1alpha1.json
+# The shape of kubernetes/examples/volsync-source.yaml, on the class name
+# from docs/architecture.md (csi-ceph-block). The snapshot is crash
+# consistent; RocksDB replays its WAL on restore, the same as after a power
+# loss. The mover runs in matrix, so it carries the restricted profile and
+# the label the egress policy in this directory selects.
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: tuwunel
+spec:
+  sourcePVC: tuwunel-data
+  trigger:
+    schedule: "30 3 * * *"
+  restic:
+    copyMethod: Snapshot
+    repository: tuwunel-volsync
+    pruneIntervalDays: 7
+    cacheCapacity: 2Gi
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    moverPodLabels:
+      app.kubernetes.io/name: tuwunel-volsync
+    moverSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    retain:
+      daily: 7
+      weekly: 4

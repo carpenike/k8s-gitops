@@ -1,0 +1,93 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana-oncall
+spec:
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: envoy-gateway
+      namespace: network
+    - name: external-secrets
+      namespace: external-secrets
+    - name: prometheus-operator-crds
+      namespace: observability
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: grafana-oncall
+      namespace: grafana
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: grafana-oncall
+      namespace: grafana
+  interval: 1h
+  path: ./kubernetes/apps/grafana/grafana-oncall/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: grafana
+  timeout: 10m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Forge's one-shot grafana-oncall-plugin-setup unit, as a Job. Jobs are
+# immutable, so force replaces it when the manifest or script changes. To
+# run it again with no change (after the cutover copies grafana.db), delete
+# the Job and reconcile this Kustomization (docs/platform/grafana.md). No postBuild:
+# nothing here needs the domain.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana-oncall-plugin-setup
+spec:
+  dependsOn:
+    - name: grafana
+    - name: grafana-oncall
+  force: true
+  interval: 1h
+  path: ./kubernetes/apps/grafana/grafana-oncall/plugin-setup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: grafana
+  timeout: 15m
+  wait: true
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Nothing depends on this. If 1Password item volsync-r2-template cannot be
+# read, this Kustomization stays unready and OnCall does not wait on it.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana-oncall-backup
+spec:
+  dependsOn:
+    - name: grafana-oncall
+    - name: volsync
+      namespace: volsync-system
+    - name: external-secrets
+      namespace: external-secrets
+  healthChecks:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      name: grafana-oncall-data-volsync
+      namespace: grafana
+  interval: 1h
+  path: ./kubernetes/apps/grafana/grafana-oncall/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: grafana
+  timeout: 5m

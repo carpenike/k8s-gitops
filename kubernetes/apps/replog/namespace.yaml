@@ -1,0 +1,8 @@
+---
+# replog: the family workout log (carpenike/replog). One process, SQLite on
+# a Ceph RBD volume. Baseline Pod Security: the pod runs as the image's
+# unprivileged user with no capabilities. See docs/apps/replog.md.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: replog

@@ -1,0 +1,123 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# zigbee2mqtt, moved from Forge (hosts/forge/services/zigbee2mqtt.nix). The
+# coordinator is a network adapter (Z-Stack over TCP, 10.30.100.183:6638), so
+# the pod needs no device and can run on any sled; it reaches VLAN 30 by
+# routed unicast from eth0, as Forge did from VLAN 20. Version 2.14.2 is what
+# Forge runs today (bridge version reported to Home Assistant).
+#
+# The data directory (configuration.yaml with the network key, database.db,
+# coordinator_backup.json, devices.yaml, groups.yaml) is copied from Forge's
+# /var/lib/zigbee2mqtt at cutover. The environment overrides only the
+# settings that change in the cluster: the broker and the frontend.
+#
+# Only one process may hold the coordinator: Forge's unit is stopped (nix-config
+# disables it) and the data copied before this goes to 1
+# (docs/apps/home-automation.md, "2. zigbee2mqtt").
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: zigbee2mqtt
+  interval: 1h
+  timeout: 10m
+  values:
+    controllers:
+      zigbee2mqtt:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/koenkk/zigbee2mqtt
+              # renovate: datasource=docker depName=ghcr.io/koenkk/zigbee2mqtt
+              tag: 2.14.3@sha256:fb4a6b0f6868ad1cd6a9996479802b2420e599c3463b62bbff8c8cd9a908f43a
+            env:
+              TZ: America/New_York
+              ZIGBEE2MQTT_DATA: /data
+              ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://emqx.home-automation.svc.cluster.local:1883
+              ZIGBEE2MQTT_CONFIG_MQTT_USER: zigbee2mqtt
+              ZIGBEE2MQTT_CONFIG_MQTT_BASE_TOPIC: zigbee2mqtt
+              ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://10.30.100.183:6638
+              ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: zstack
+              ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED: "true"
+              ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: "8080"
+              # The copied configuration.yaml binds the frontend to 127.0.0.1
+              # (Forge put Caddy in front); the probes and the route need it
+              # on the pod address.
+              ZIGBEE2MQTT_CONFIG_FRONTEND_HOST: "0.0.0.0"
+              ZIGBEE2MQTT_CONFIG_HOMEASSISTANT_ENABLED: "true"
+              ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"
+            envFrom:
+              - secretRef:
+                  name: zigbee2mqtt
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: zigbee2mqtt
+        ports:
+          http:
+            port: 8080
+    route:
+      app:
+        kind: HTTPRoute
+        # Keeps the gateway Pocket ID login; the frontend has no login of its
+        # own (no auth_token), as on Forge behind Caddy.
+        hostnames:
+          - zigbee.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 8080
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        retain: true
+        forceRename: zigbee2mqtt-data
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

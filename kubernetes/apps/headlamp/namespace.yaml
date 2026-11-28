@@ -1,0 +1,6 @@
+# Baseline is the cluster default. Headlamp does not need a privileged
+# Pod Security label.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: headlamp

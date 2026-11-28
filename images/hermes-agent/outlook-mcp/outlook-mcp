@@ -1,0 +1,80 @@
+#!/bin/sh
+# Starts Softeria ms-365-mcp-server for Hermes' "outlook" MCP server (stdio,
+# spawned by the gateway), or for a one-off --login / --verify-login /
+# --list-permissions run from `kubectl exec`. Both get the same environment
+# and the same tool filter, so a login asks for exactly the scopes the server
+# uses. See docs/apps/hermes.md, "Outlook (opt-in)".
+#
+# Fails closed instead of starting with a broader identity:
+#   - no client id, or Softeria's shared default app id (src/cloud-config.ts)
+#   - no tenant id, or a multi-tenant authority (common/organizations/consumers)
+#   - no expected username, or the placeholder still in the bot's inputs
+#   - any flag that would widen the server (org/work/app mode, HTTP, discovery,
+#     presets, extra scopes, a different tool filter or scope list)
+set -eu
+
+server=/opt/outlook-mcp/node_modules/@softeria/ms-365-mcp-server/dist/index.js
+tools_file=/opt/outlook-mcp/enabled-tools.txt
+scopes='User.Read Mail.ReadWrite Mail.Send'
+softeria_client_id=084a3e9f-a9f4-43f7-89f9-d229cf97853e
+
+fail() {
+  echo "outlook-mcp: $*" >&2
+  exit 78
+}
+
+# Static settings. Hermes' config.yaml sets the same values in the server's
+# env block; these defaults make `kubectl exec ... outlook-mcp --login` match.
+: "${MS365_MCP_TOKEN_CACHE_PATH:=/opt/data/outlook/token-cache.json}"
+: "${MS365_MCP_SELECTED_ACCOUNT_PATH:=/opt/data/outlook/selected-account.json}"
+: "${MS365_MCP_LOG_DIR:=/var/log/outlook-mcp}"
+: "${MS365_MCP_REQUIRE_CONFIRM:=true}"
+# No system keychain in the pod: keep the token cache in the file above.
+MS365_MCP_USE_KEYTAR=false
+export MS365_MCP_TOKEN_CACHE_PATH MS365_MCP_SELECTED_ACCOUNT_PATH \
+  MS365_MCP_LOG_DIR MS365_MCP_REQUIRE_CONFIRM MS365_MCP_USE_KEYTAR
+
+# Delegated auth for one user only: no secrets, certificates, managed or
+# federated identity, and no org (Teams/SharePoint) scopes.
+unset MS365_MCP_CLIENT_SECRET MS365_MCP_CLIENT_CERTIFICATE_PATH \
+  MS365_MCP_MANAGED_IDENTITY MS365_MCP_FEDERATED_TOKEN_FILE \
+  MS365_MCP_KEYVAULT_URL MS365_MCP_OAUTH_TOKEN MS365_MCP_ORG_MODE \
+  MS365_MCP_FORCE_WORK_SCOPES MS365_MCP_EXTRA_SCOPES ENABLED_TOOLS_FILE
+
+case "${MS365_MCP_CLIENT_ID:-}" in
+  "" | "$softeria_client_id") fail "MS365_MCP_CLIENT_ID is unset or Softeria's default app; set the bot's own Entra app id" ;;
+esac
+case "${MS365_MCP_TENANT_ID:-}" in
+  "" | common | organizations | consumers) fail "MS365_MCP_TENANT_ID must be the single tenant's id" ;;
+esac
+case "${MS365_MCP_EXPECTED_USERNAME:-}" in
+  "" | REPLACE_*) fail "MS365_MCP_EXPECTED_USERNAME is unset or still the placeholder" ;;
+esac
+
+# Hermes' config args repeat the two filter flags; allow them only unchanged.
+expect=""
+for arg in "$@"; do
+  if [ -n "$expect" ]; then
+    [ "$arg" = "$expect" ] || fail "refusing a different value after the filter flag: $arg"
+    expect=""
+    continue
+  fi
+  case "$arg" in
+    --enabled-tools-file) expect=$tools_file ;;
+    --allowed-scopes) expect=$scopes ;;
+    --org-mode | --work-mode | --force-work-scopes | --app-mode | --http* | \
+      --discovery | --preset* | --enabled-tools* | --allowed-scopes=* | \
+      --extra-scopes* | --enable-auth-tools | --enable-dynamic-registration | \
+      --auth-browser | --cloud*)
+      fail "refusing flag $arg" ;;
+  esac
+done
+[ -z "$expect" ] || fail "missing value for a filter flag"
+
+# Create only when missing: the log dir is an emptyDir mount point, which
+# this uid cannot chmod.
+for dir in "$(dirname "$MS365_MCP_TOKEN_CACHE_PATH")" "$MS365_MCP_LOG_DIR"; do
+  [ -d "$dir" ] || install -d -m 0700 "$dir"
+done
+
+exec node "$server" --enabled-tools-file "$tools_file" --allowed-scopes "$scopes" "$@"

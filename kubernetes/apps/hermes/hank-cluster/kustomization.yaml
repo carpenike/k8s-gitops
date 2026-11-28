@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Hank's cluster-scoped access objects (ClusterRole, binding, admission
+# policy). Separate from ./hank because that folder sets namespace:
+# hermes-hank, and kustomize would stamp it onto the admission policy.
+# See ../hank/kustomization.yaml (CLUSTER_ACCESS_ENABLED) and
+# docs/apps/hermes.md, "Cluster access".
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cluster-access.yaml

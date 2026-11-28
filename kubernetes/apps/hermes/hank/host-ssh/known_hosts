@@ -1,0 +1,4 @@
+# Pinned host keys, ed25519, read 2026-11-16 (forge: its key file and a scan agree;
+# rydeck: scans from two networks agree). A changed key is refused.
+10.20.0.30 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBJqmpFbj46iQWSq+hWXITn9vy5YNUHtt9kUkmi4VZor
+10.30.50.250 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBczbuM+s+C+syT3Qut4XO2Df/kqjPHybC+6JORyOUev

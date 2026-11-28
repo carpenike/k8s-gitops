@@ -1,0 +1,32 @@
+# Hank's ssh to hosts outside the cluster (docs/apps/hermes.md, "Host SSH").
+# Installed as ~/.ssh/config in the screen pod by its entrypoint.
+#
+# forge-svc: the restart-only key. Forge forces it into
+# `systemctl restart|reload <unit>` (nix-config hank-svc), so Hermes runs
+# `ssh forge-svc systemctl restart <unit>` without asking. Its own block:
+# IdentityFile adds up across matching blocks, and this key must be the only one.
+Host forge-svc
+  HostName 10.20.0.30
+  User hank
+  IdentityFile ~/.ssh/id_hosts_svc
+  IdentitiesOnly yes
+  UserKnownHostsFile ~/.ssh/known_hosts_hosts
+  StrictHostKeyChecking yes
+  ClearAllForwardings yes
+  BatchMode yes
+  ConnectTimeout 10
+Host forge
+  HostName 10.20.0.30
+Host rydeck
+  HostName 10.30.50.250
+Host forge rydeck
+  User hank
+  IdentityFile ~/.ssh/id_hosts
+  IdentitiesOnly yes
+  UserKnownHostsFile ~/.ssh/known_hosts_hosts
+  StrictHostKeyChecking yes
+  ForwardAgent no
+  ForwardX11 no
+  ClearAllForwardings yes
+  BatchMode yes
+  ConnectTimeout 10

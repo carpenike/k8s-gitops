@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# LiteLLM key hermes-memory for Hindsight's fact extraction: claude-haiku only,
+# USD 10 per 30 days, team hermes. Written to Secret litellm as
+# HINDSIGHT_API_LLM_API_KEY (docs/apps/litellm.md, "Virtual keys for cluster apps").
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: hindsight-litellm
+spec:
+  dependsOn:
+    - name: litellm-key-provisioner
+      namespace: litellm
+  force: true
+  interval: 1h
+  path: ./kubernetes/apps/litellm/key-provisioner/template
+  postBuild:
+    substitute:
+      KEY_ALIAS: hermes-memory
+      TEAM_ALIAS: hermes
+      MODELS: claude-haiku
+      BUDGET: 10/30d
+      TARGET_NAMESPACE: hermes-memory
+      SECRET_NAME: litellm
+      SECRET_KEY_NAME: HINDSIGHT_API_LLM_API_KEY
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: hindsight
+spec:
+  dependsOn:
+    - name: hindsight-litellm
+    - name: postgres17
+      namespace: cnpg-system
+    - name: external-secrets
+      namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: ceph-csi-drivers
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
+  # The CNPG Database is checked here, not on postgres17: a missing
+  # 1Password item for hindsight must not make LiteLLM's chain unhealthy.
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: hindsight
+      namespace: hermes-memory
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      name: hindsight
+      namespace: cnpg-system
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      current: has(status.applied) && status.applied
+  interval: 1h
+  path: ./kubernetes/apps/hermes-memory/hindsight/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: hermes-memory
+  timeout: 15m

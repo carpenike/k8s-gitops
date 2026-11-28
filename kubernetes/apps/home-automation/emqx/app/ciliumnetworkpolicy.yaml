@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# In: MQTT 1883 from this namespace's apps and from Scrypted; from Forge
+# through the emqx-forge LoadBalancer (seen as world, or as a node when the
+# LoadBalancer path SNATs); the dashboard 18083 from envoy-internal only.
+# Out: DNS only. The broker opens no connections of its own.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: emqx
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: emqx
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: home-automation
+            app.kubernetes.io/name: home-assistant
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: home-automation
+            app.kubernetes.io/name: zigbee2mqtt
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: home-automation
+            app.kubernetes.io/name: zwave-js-ui
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: scrypted
+            app.kubernetes.io/name: scrypted
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - fromCIDRSet:
+        - cidr: 10.20.0.30/32
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - fromEntities:
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "18083"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY

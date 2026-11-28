@@ -1,0 +1,14 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: KubernetesUpgrade
+metadata:
+  name: kubernetes
+spec:
+  kubernetes:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+    version: v1.37.1
+  healthChecks:
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      expr: |-
+        status.ceph.health in ['HEALTH_OK']

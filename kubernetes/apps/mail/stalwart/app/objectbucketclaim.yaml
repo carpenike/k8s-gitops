@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/objectbucket.io/objectbucketclaim_v1alpha1.json
+# Message bodies, attachments and Sieve scripts, on CephObjectStore
+# ceph-objectstore (rook-ceph-cluster chart default: metadata 3x replicated,
+# data erasure coded 2+1, host failure domain). Rook creates Secret and
+# ConfigMap stalwart-blobs here with the bucket's credentials and endpoint.
+#
+# StorageClass ceph-bucket has reclaimPolicy Delete: deleting this claim
+# deletes the bucket and every message in it. Flux never prunes it; remove
+# it by hand only after the mail is gone or copied.
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: stalwart-blobs
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  bucketName: stalwart-blobs
+  storageClassName: ceph-bucket

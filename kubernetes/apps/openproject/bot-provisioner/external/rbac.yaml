@@ -1,0 +1,48 @@
+---
+# The Job's identity. automountServiceAccountToken stays on: the script
+# patches the bot's Secret with it.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-provision-${BOT_NAME}
+  namespace: openproject
+  labels:
+    app.kubernetes.io/name: openproject-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+---
+# One Secret by name, get and patch only.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: external-provision-${BOT_NAME}
+  namespace: openproject
+  labels:
+    app.kubernetes.io/name: openproject-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames:
+      - openproject-bot-${BOT_NAME}
+    verbs:
+      - get
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: external-provision-${BOT_NAME}
+  namespace: openproject
+  labels:
+    app.kubernetes.io/name: openproject-bot-provisioner
+    app.kubernetes.io/instance: ${BOT_NAME}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: external-provision-${BOT_NAME}
+subjects:
+  - kind: ServiceAccount
+    name: external-provision-${BOT_NAME}
+    namespace: openproject

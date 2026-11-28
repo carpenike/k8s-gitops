@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# No hash suffix: the per-key Jobs live in other Flux Kustomizations and
+# refer to the ConfigMap by name.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ciliumnetworkpolicy.yaml
+configMapGenerator:
+  - name: litellm-key-provisioner
+    files:
+      - ./provision-key.py
+generatorOptions:
+  disableNameSuffixHash: true
