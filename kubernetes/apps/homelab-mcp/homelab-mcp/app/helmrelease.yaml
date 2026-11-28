@@ -1434,8 +1434,15 @@ spec:
         ports:
           http:
             port: 9300
+    # The job label is the Service name (app.kubernetes.io/service). The
+    # chart's default, app.kubernetes.io/name, is homelab-mcp on both
+    # Services, which would put the worker's series under job="homelab-mcp"
+    # and leave HomelabMcpWorkerDown's absent() firing forever.
+    # forceRename keeps the existing ServiceMonitor's name.
     serviceMonitor:
       app:
+        forceRename: homelab-mcp
+        jobLabel: app.kubernetes.io/service
         service:
           identifier: app
         labels:
@@ -1445,6 +1452,8 @@ spec:
             path: /metrics
             interval: 60s
       worker:
+        forceRename: homelab-mcp-worker
+        jobLabel: app.kubernetes.io/service
         service:
           identifier: worker
         labels:
