@@ -65,6 +65,8 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # be65355, 0.82.0 (carpenike/mcp#198): NYT search filters, nutrition,
+              # tags, and nyt_save_recipe_image (egress to static01.nyt.com below).
               # 5d79c14, 0.81.1 (carpenike/mcp#197): the NYT user id also comes
               # from the nyt-jkidd cookie when regi_cookie is absent.
               # c03abf3, 0.81.0 (carpenike/mcp#196): read-only nyt_* NYT Cooking
@@ -171,7 +173,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-5d79c14f62f1f099036f878773e09bbcf11e0cd0@sha256:85a311862bb2fd9e1b38ddd032e965878023959899a57086060f2ac330496819
+              tag: sha-be653554c980fd14a50e426066abd8ee8bc7f1da@sha256:e8abe49678077fef2a7d775f7f8f441e6f77d8c04c0a8ed0847e5b438189292b
             command:
               - /bin/sh
               - -c
@@ -1551,6 +1553,9 @@ spec:
                   - matchName: api.myfitnesspal.com
                   # nyt: the NYT-S cookie goes to this host only.
                   - matchName: cooking.nytimes.com
+                  # nyt_save_recipe_image: NYT's photo CDN, fetched with no
+                  # cookies (carpenike/mcp#198).
+                  - matchName: static01.nyt.com
                   # arcraiders data sources.
                   - matchName: metaforge.app
                   - matchName: ardb.app
