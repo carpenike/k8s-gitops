@@ -12,7 +12,7 @@
 #
 # Tags live in the ARGs; hadolint cannot see through the substitution, hence
 # the inline ignores.
-ARG PYTHON_IMAGE=docker.io/library/python:3.13.18-slim@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90
+ARG PYTHON_IMAGE=docker.io/library/python:3.13.18-slim@sha256:168d3a5d10f2152f8e8d77b6843ac82c22a846cfefeef7afdf9aa630404e82a7
 ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.13.10@sha256:a3ea1357342c1a4bf9a0c53a3deb1b55379aefa037338d8113d5771efa01774f
 
 # hadolint ignore=DL3006
