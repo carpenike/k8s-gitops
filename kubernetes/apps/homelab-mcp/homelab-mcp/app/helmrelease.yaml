@@ -71,6 +71,16 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # 1442817, 0.88.1 (carpenike/mcp#211): House Sensors also allows
+              # entities with an HA label (default agent-readable, live
+              # registry lookup, 30s cache).
+              # Also carries, unpinned since 0.85.1:
+              # c1796c7 0.88.0 (#214) web pods can replay disk-bound tool calls
+              # to a worker (off until HOMELAB_MCP_WORKER_URL and
+              # HOMELAB_MCP_WORKER_TOOLS are set); 78c082c 0.87.0 (#213) small
+              # tool stores on Postgres (off until HOMELAB_MCP_TOOL_STATE_DSN
+              # is set); a64c165 0.86.0 (#212) stateless HTTP so any replica
+              # can answer any request. Digest confirmed from GHCR.
               # 1513fc2, 0.85.1 (carpenike/mcp#210): meals confirms await gate.verify.
               # Also carries, unbuilt on their own (each build cancelled by the next push):
               # 7ce6d04 0.85.0 (#209) gate consumed tokens on Postgres, off until
@@ -194,7 +204,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-1513fc299868a9a28d37160a310d7501aa760749@sha256:c77eaca101c5ac72101b007fff8dc3c9ed502b98dc0d8aa119a34453ac23e1e7
+              tag: sha-14428170591ce7bba207211320bf4a6f3531a445@sha256:9c0df6548ff979b0b3af0ec09753d10ff580bdc8e97fb1f25740b8dd149d1f5d
             command:
               - /bin/sh
               - -c
@@ -959,10 +969,10 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (1513fc2, 0.85.1). Moves with the app image above. Digest
+              # (1442817, 0.88.1). Moves with the app image above. Digest
               # confirmed from GHCR.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-1513fc299868a9a28d37160a310d7501aa760749@sha256:e44511931effe814a1df0014496777f0907aa30a5c961d67f4eea5ed9b0e1385
+              tag: sha-14428170591ce7bba207211320bf4a6f3531a445@sha256:4465763d58e2ce7829eed606d9f655acd8ee93e7e64e18adb112bbe6af0a96f6
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
