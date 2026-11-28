@@ -65,6 +65,8 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # 5d79c14, 0.81.1 (carpenike/mcp#197): the NYT user id also comes
+              # from the nyt-jkidd cookie when regi_cookie is absent.
               # c03abf3, 0.81.0 (carpenike/mcp#196): read-only nyt_* NYT Cooking
               # tools (env, secret and egress below). Digest confirmed from GHCR.
               # 7fa82b2, 0.76.1 (carpenike/mcp#190): new filter rules go after
@@ -169,7 +171,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-c03abf3efa621e743d85279cf398a66498667516@sha256:512be817e50d4032c19b9896d27ad359f5290804d25e608e6fc30ab74fd17a34
+              tag: sha-5d79c14f62f1f099036f878773e09bbcf11e0cd0@sha256:85a311862bb2fd9e1b38ddd032e965878023959899a57086060f2ac330496819
             command:
               - /bin/sh
               - -c
