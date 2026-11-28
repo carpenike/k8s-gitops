@@ -173,7 +173,7 @@ spec:
           app:
             image:
               repository: docker.io/library/redis
-              tag: 8.10-alpine@sha256:0bf6577d7774e592b29d093e3ac9390eb91e13d72c21e506afce736de5e0eeb0
+              tag: 8.12-alpine@sha256:5af80107c1eeecb484a2269b80a26d12bfa6521787da4663bd9f19f60a163483
             # Forge's command line.
             command:
               - redis-server
