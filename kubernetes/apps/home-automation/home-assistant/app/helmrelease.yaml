@@ -79,7 +79,7 @@ spec:
             image: &gitsync
               repository: registry.k8s.io/git-sync/git-sync
               # renovate: datasource=docker depName=registry.k8s.io/git-sync/git-sync
-              tag: v4.7.1
+              tag: v4.8.1
             env:
               GITSYNC_REPO: git@github.com:carpenike/hass-config.git
               GITSYNC_REF: main
