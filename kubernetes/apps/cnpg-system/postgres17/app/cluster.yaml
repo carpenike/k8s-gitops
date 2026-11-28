@@ -141,6 +141,12 @@ spec:
         comment: homelab-mcp finances_context_* tools and Signal capture (owner of finances_context)
         passwordSecret:
           name: finances-context-db
+      - name: meals
+        ensure: present
+        login: true
+        comment: homelab-mcp meals_* dinner planner and its nightly refresh (owner of meals)
+        passwordSecret:
+          name: meals-db
       - name: stalwart
         ensure: present
         login: true
@@ -269,6 +275,26 @@ spec:
   name: finances_context
   owner: finances_context
   databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# The dinner planner's household store (carpenike/mcp docs/MEALS.md): recipe
+# pool, plan, cook log, preferences, ingredient matches. Owner: meals. The
+# schema is declared here so the role never needs CREATE on the database;
+# homelab-mcp creates its tables in it on first connect.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: meals
+spec:
+  cluster:
+    name: postgres17
+  name: meals
+  owner: meals
+  databaseReclaimPolicy: retain
+  schemas:
+    - name: meals
+      owner: meals
+      ensure: present
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 # Stalwart (namespace mail, docs/apps/mail.md, ADR 0013): accounts, mailboxes,

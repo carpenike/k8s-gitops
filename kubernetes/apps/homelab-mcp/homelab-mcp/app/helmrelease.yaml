@@ -272,7 +272,7 @@ spec:
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
                 "amazon", "costco", "samsclub", "withings", "vault", "openproject",
-                "messaging", "replog", "email", "icloud", "nyt"]
+                "messaging", "replog", "email", "icloud", "nyt", "meals"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               # Grocy in the cluster (docs/apps/grocy.md), straight to the
@@ -406,6 +406,25 @@ spec:
               # regi_cookie.
               HOMELAB_MCP_NYT_ENABLED: "true"
               HOMELAB_MCP_NYT_COOKIES_FILE: /run/nyt/cookies.json
+              # Dinner planner (meals_*, carpenike/mcp#206, docs/MEALS.md):
+              # composes nyt_*, cooklang_*, mfp_* and grocy_* and keeps its
+              # household store in postgres17 (database and schema meals,
+              # DSN in homelab-mcp-env). On /mcp and /mcp/full through their
+              # "read"/"all" tiers, and listed on /mcp/steffi. Not on any
+              # /mcp/agent/* view. On Steffi's per_user view it never reaches
+              # NYT: it reads the shared pool the nightly refresh tops up.
+              # Slots: Ryan's dinner from Personal/Fitness/Plan.md "Daily
+              # budget" (600-700 kcal, 40-45 g protein; ~850 kcal when the
+              # snack is skipped). Day targets: target_kcal and
+              # target_protein_g in Personal/Fitness/Status.md frontmatter.
+              # Keep the schema in step with the scheduler's copy below.
+              HOMELAB_MCP_MEALS_ENABLED: "true"
+              HOMELAB_MCP_MEALS_PG_SCHEMA: meals
+              HOMELAB_MCP_MEALS_SLOTS: >-
+                {"ryan": {"dinner": {"kcal": [600, 700], "protein_g": [40, 45],
+                "max_kcal_if_no_snack": 850}}}
+              HOMELAB_MCP_MEALS_VAULT_TARGETS: >-
+                {"ryan": "Personal/Fitness/Status.md"}
               # Withings (read-only weigh-ins). The app credentials come from
               # the homelab-mcp-withings item; the OAuth token is written by
               # `python -m homelab_mcp.tools._withings seed` and rotates on
@@ -630,6 +649,12 @@ spec:
               # Withings reads (Ryan, 2026-11-23): her own weigh-ins and blood
               # pressure only, from her own token (withings-token.steffi.json);
               # refused, never Ryan's, until it exists.
+              # Dinner planner (Ryan, 2026-11-28): every meals_* tool. NYT is
+              # dropped for her (shared recipe pool only, meals_not_in_pool
+              # otherwise), the diary is her own MFP, Grocy lines go on with
+              # her own key. No nyt_* here, ever. The planner store (plan,
+              # cook log, preferences) is household data shared with /mcp
+              # and /mcp/full by design.
               # /mcp/household: the SHARED-credential household data set --
               # finances, school, the purchase stores, Fidelity and Paperless.
               # Named for the DATA, not a person: one ledger and one set of
@@ -796,7 +821,14 @@ spec:
                  "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
-                 "withings_get_measurements", "withings_trend"],
+                 "withings_get_measurements", "withings_trend",
+                 "meals_fit", "meals_candidates", "meals_surprise", "meals_pantry_ideas",
+                 "meals_pool_status", "meals_get_plan", "meals_plan_dinner",
+                 "meals_log_cooked", "meals_cook_history", "meals_get_preferences",
+                 "meals_set_preference", "meals_set_tweak", "meals_set_ingredient_match",
+                 "meals_list_ingredient_matches", "meals_preview_remove", "meals_remove",
+                 "meals_preview_shopping_list", "meals_add_to_shopping_list",
+                 "meals_compare_mfp_recipe", "meals_mfp_recipe_draft"],
                  "read_scope": "steffi.read", "write_scope": "steffi.write",
                  "connect_scopes": "all", "credentials": "per_user",
                  "users": ["stefanie@stefanieholt.com"]},
@@ -1155,6 +1187,14 @@ spec:
               # homelab-email-snooze-wake: Ryan's mailbox, write password only
               # (moves and keywords; it cannot send).
               HOMELAB_MCP_EMAIL_JMAP_URL: https://mail.${SECRET_DOMAIN}
+              # homelab-meals-refresh: the nyt module with Ryan's session (the
+              # same cookie file as the app, mounted read-only below) and the
+              # meals store (DSN in homelab-mcp-jobs). Prints counts and error
+              # codes only. Same schema as the app container.
+              HOMELAB_MCP_MEALS_ENABLED: "true"
+              HOMELAB_MCP_MEALS_PG_SCHEMA: meals
+              HOMELAB_MCP_NYT_ENABLED: "true"
+              HOMELAB_MCP_NYT_COOKIES_FILE: /run/nyt/cookies.json
             envFrom:
               - secretRef:
                   name: homelab-mcp-jobs
@@ -1276,6 +1316,10 @@ spec:
             # Snoozed email back to the inbox when due (email_snooze). Prints
             # counts only; does nothing until the email secret exists.
             */5 * * * * homelab-email-snooze-wake
+            # Top up the shared recipe pool from NYT Cooking (meals_*), once a
+            # night. Fixed queries only, inside the planner's daily NYT budget;
+            # exit 1 when NYT refuses (session expired or rate limited).
+            15 3 * * * homelab-meals-refresh
     service:
       # Two services now (feed-proxy below), so app-template would name this
       # one homelab-mcp-app; the HTTPRoute and probes expect homelab-mcp.
@@ -1385,7 +1429,7 @@ spec:
       # The NYT Cooking session (carpenike/mcp docs/NYT-COOKIE-RUNBOOK.md),
       # same mode as mfp above. Optional, so the pod starts before the
       # 1Password field exists; until then nyt_* answers nyt_auth_required.
-      # Only the app container mounts it.
+      # The app container and the scheduler (homelab-meals-refresh) mount it.
       nyt:
         type: custom
         volumeSpec:
@@ -1396,6 +1440,9 @@ spec:
         advancedMounts:
           homelab-mcp:
             app:
+              - path: /run/nyt
+                readOnly: true
+            scheduler:
               - path: /run/nyt
                 readOnly: true
       # OpenProject API tokens for the bots homelab-mcp acts as, one Secret
