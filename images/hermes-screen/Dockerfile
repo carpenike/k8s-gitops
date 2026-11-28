@@ -199,7 +199,7 @@ COPY --chmod=0644 rules/AGENTS.md /etc/hermes-rules/AGENTS.md
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
 ARG KUBECTL_VERSION=v1.37.1
 # renovate: datasource=github-releases depName=fluxcd/flux2
-ARG FLUX_VERSION=v2.10.0
+ARG FLUX_VERSION=v2.10.1
 RUN set -eu; \
     case "${TARGETARCH:-amd64}" in \
         amd64|arm64) arch="${TARGETARCH:-amd64}" ;; \
