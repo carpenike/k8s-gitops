@@ -43,6 +43,10 @@ spec:
             k8s:io.kubernetes.pod.namespace: homelab-mcp
             app.kubernetes.io/name: homelab-mcp
             app.kubernetes.io/controller: homelab-mcp
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: homelab-mcp
+            app.kubernetes.io/name: homelab-mcp
+            app.kubernetes.io/controller: web
       toPorts:
         - ports:
             - port: "80"
