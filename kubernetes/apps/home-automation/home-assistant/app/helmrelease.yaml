@@ -84,6 +84,10 @@ spec:
               GITSYNC_REPO: git@github.com:carpenike/hass-config.git
               GITSYNC_REF: main
               GITSYNC_ROOT: /git
+              # v4.8.0 stopped setting safe.directory=*. The /git emptyDir
+              # is root-owned while git-sync runs as uid 65533, so git
+              # 2.35+ would reject the repo as dubious ownership.
+              GITSYNC_GIT_CONFIG: "safe.directory:/git"
               GITSYNC_LINK: hass-config
               GITSYNC_DEPTH: "1"
               GITSYNC_SSH_KEY_FILE: /etc/git-secret/ssh
@@ -169,6 +173,7 @@ spec:
               GITSYNC_REPO: git@github.com:carpenike/hass-config.git
               GITSYNC_REF: main
               GITSYNC_ROOT: /git
+              GITSYNC_GIT_CONFIG: "safe.directory:/git"
               GITSYNC_LINK: hass-config
               GITSYNC_DEPTH: "1"
               GITSYNC_SSH_KEY_FILE: /etc/git-secret/ssh
