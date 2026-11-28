@@ -15,7 +15,7 @@ dependencies = [
   "httpx==0.28.1",
   "pydantic==2.14.4",
   "starlette==1.10.0",
-  "uvicorn==0.54.0",
+  "uvicorn==0.55.0",
 ]
 
 [dependency-groups]
