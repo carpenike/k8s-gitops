@@ -65,6 +65,7 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # e7f00cf, 0.82.2 (carpenike/mcp#200): NYT nutrition units, more tag filtering.
               # 1507bdb, 0.82.1 (carpenike/mcp#199): NYT parsing fixes.
               # be65355, 0.82.0 (carpenike/mcp#198): NYT search filters, nutrition,
               # tags, and nyt_save_recipe_image (egress to static01.nyt.com below).
@@ -174,7 +175,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-1507bdb5f01fcc6ad4d05d43f28cd24626191b1f@sha256:529b467320350979a118aae6fd1d9f9188c945089dc35b480bb50ab22767f7c7
+              tag: sha-e7f00cf2ff68ff1321515578a0380fe34e40c52e@sha256:c1c6781030012d1f67ee881ef40b906d2dc9b2f5b8833535c7054936ac6bc944
             command:
               - /bin/sh
               - -c
