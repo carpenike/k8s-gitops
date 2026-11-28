@@ -31,7 +31,7 @@ spec:
       containers:
         - name: setup
           # The pinned Python image the other provisioning Jobs use.
-          image: docker.io/library/python:3.15.2-slim-trixie@sha256:e97b88e416c3c01eb427b21fd8cd3ebf006e6ee38afcfcc3cae1c54ee2ab0a75
+          image: docker.io/library/python:3.15.2-slim-trixie@sha256:08a4c22c92b79ec821a7ad49768480039ee5b7accac3955228e75366e30abc8e
           command:
             - python3
             - /opt/setup/setup-plugin.py
