@@ -54,7 +54,7 @@ spec:
         repository: ghcr.io/carpenike/hindsight
         # Built from images/hindsight by hindsight-image.yaml. Floating tag,
         # digest re-pinned by Renovate (docs/apps/hermes-memory.md).
-        tag: 1.2.0@sha256:31e3707cc4afd722a8b1985a8d0f1d3f9f789cbec57bf55c20d7ba883a26f182
+        tag: 1.3.0@sha256:cc0d93240d7bf5da20d0501d7ed997cda212adbb1b0e08d3542305f3bfd3a124
       resources:
         requests:
           cpu: 250m

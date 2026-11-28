@@ -30,7 +30,7 @@ spec:
               # Floating tag, digest re-pinned by Renovate. This digest is the
               # PR build of 8251aa1 (0.6.2-8251aa1): the alert relay's webhook-id
               # covers the exact bytes it forwards.
-              tag: 0.6.2@sha256:7669ca6a8ba31bd4756fac04185a5081e4156d160e797b74f4c17a8714225f0a
+              tag: 0.6.2@sha256:c2b5ea950731ad629f0f381b5b018627d9db899ea1ab3dcf825eafed3d2763c8
             env:
               OPENPROJECT_URL: http://openproject.openproject.svc.cluster.local:8080
               # Links the tools hand back, for Ryan to open.
