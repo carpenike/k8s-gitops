@@ -401,6 +401,31 @@ and `/mcp/full` through the `"read"` and `"all"` tiers and are listed on
   `target_protein_g` frontmatter are the day's targets. Steffi has neither
   yet, so she gets nutrition only and no diary comparison.
 
+## Shared state
+
+The server's own state is in postgres17 database `homelab_mcp`, so a second
+replica sees the same logins, previews and tool state
+(carpenike/mcp #208, #209, #213):
+
+| Schema (login) | Holds | DSN in `homelab-mcp-env` |
+| --- | --- | --- |
+| `mcp_oauth` (`homelab_mcp_oauth`) | OAuth clients, refresh token digests and tombstones, consents, authorization codes, pending logins | `HOMELAB_MCP_OAUTH_STATE_DSN` |
+| `mcp_gate` (`homelab_mcp_gate`) | consumed preview token digests | `HOMELAB_MCP_GATE_CONSUMED_DSN` |
+| `mcp_tools` (`homelab_mcp_tools`) | ARC Raiders state, the calendar feed host allowlist, the finances classification memo, Withings tokens | `HOMELAB_MCP_TOOL_STATE_DSN` |
+
+Passwords are item `homelab-mcp-state`, fields `oauth_password`,
+`gate_password` and `tools_password`
+([postgres17.md](../platform/postgres17.md#1password)). Field
+`gate_token_key` is `HOMELAB_MCP_GATE_TOKEN_KEY`, the HMAC key every replica
+signs previews with; the gate refuses the shared DSN without it.
+
+The first start with each DSN copies that store's files from the state
+volume (`state.db`, `arcraiders.db`, `icloud-feed-hosts.db`,
+`finances-state.json`, `withings-token*.json`) into empty tables, once, and
+never writes the files. Rolling back means removing the DSNs: the files are
+as they were at the cutover, so a connector that logged in since logs in
+once more, and a rotated Withings token needs `python -m homelab_mcp.tools._withings seed` again ([Withings](#withings)).
+
 ## iCloud
 
 The `icloud_*` tools (carpenike/mcp 0.72.0, `docs/ICLOUD.md` there) read

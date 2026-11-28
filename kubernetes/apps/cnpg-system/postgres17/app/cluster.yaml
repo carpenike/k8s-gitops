@@ -141,6 +141,31 @@ spec:
         comment: homelab-mcp finances_context_* tools and Signal capture (owner of finances_context)
         passwordSecret:
           name: finances-context-db
+      # homelab-mcp's own state (carpenike/mcp #208, #209, #213): one
+      # database, one schema and one login per store, and no login can read
+      # another store's schema. homelab_mcp only owns the database.
+      - name: homelab_mcp
+        ensure: present
+        login: false
+        comment: owner of database homelab_mcp (no login; each store's schema has its own owner)
+      - name: homelab_mcp_oauth
+        ensure: present
+        login: true
+        comment: homelab-mcp OAuth state (owner of schema mcp_oauth in homelab_mcp)
+        passwordSecret:
+          name: homelab-mcp-oauth-db
+      - name: homelab_mcp_gate
+        ensure: present
+        login: true
+        comment: homelab-mcp consumed preview tokens (owner of schema mcp_gate in homelab_mcp)
+        passwordSecret:
+          name: homelab-mcp-gate-db
+      - name: homelab_mcp_tools
+        ensure: present
+        login: true
+        comment: homelab-mcp small tool stores (owner of schema mcp_tools in homelab_mcp)
+        passwordSecret:
+          name: homelab-mcp-tools-db
       - name: meals
         ensure: present
         login: true
@@ -275,6 +300,32 @@ spec:
   name: finances_context
   owner: finances_context
   databaseReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
+# homelab-mcp's shared state, so more than one replica can serve it
+# (carpenike/mcp #208 OAuth, #209 preview tokens, #213 tool stores). Each
+# schema is owned by its store's login; the code sets search_path to it and
+# never creates a schema, so no login needs CREATE on the database.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: homelab-mcp
+spec:
+  cluster:
+    name: postgres17
+  name: homelab_mcp
+  owner: homelab_mcp
+  databaseReclaimPolicy: retain
+  schemas:
+    - name: mcp_oauth
+      owner: homelab_mcp_oauth
+      ensure: present
+    - name: mcp_gate
+      owner: homelab_mcp_gate
+      ensure: present
+    - name: mcp_tools
+      owner: homelab_mcp_tools
+      ensure: present
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/database_v1.json
 # The dinner planner's household store (carpenike/mcp docs/MEALS.md): recipe

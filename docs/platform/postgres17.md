@@ -278,7 +278,10 @@ A fourth, `finances_context`, is new. It holds the shared transaction-context
 table that the `finances_context_*` tools and the Signal capture worker both
 write to (carpenike/mcp #120). A fifth, `meals`, is new too: the homelab-mcp
 dinner planner's household store (carpenike/mcp #206), in schema `meals`,
-which the Database object declares.
+which the Database object declares. A sixth, `homelab_mcp`, holds
+homelab-mcp's own state so more than one replica can serve it: OAuth state,
+consumed preview tokens and the small tool stores (carpenike/mcp #208, #209,
+#213), one schema and one login each. Its owner `homelab_mcp` has no login.
 
 Every client runs in the cluster and connects to `postgres17-rw` with
 CloudNativePG's default `pg_hba`. Nothing outside the cluster connects, so
@@ -291,6 +294,7 @@ there is no LoadBalancer and no CA to copy anywhere.
 | `homelab_finance` | `homelab_finance` (the finances export) | `homelab_finance_money` (`money_overview` only), `homelab_finance_report` (`money_overview` and `export_runs`), `homelab_finance_grafana` | homelab-mcp pod; Grafana |
 | `finances_context` | `finances_context` | none; the same role reads and writes | homelab-mcp pod |
 | `meals` | `meals` | none; the same role reads and writes | homelab-mcp pod (server and the nightly refresh) |
+| `homelab_mcp` | `homelab_mcp` (no login); schemas `mcp_oauth`, `mcp_gate`, `mcp_tools` owned by `homelab_mcp_oauth`, `homelab_mcp_gate`, `homelab_mcp_tools` | none; each login reads and writes only its own schema | homelab-mcp pod (server) |
 
 Readers get no cluster-wide role. Each owner grants its own readers, once, at
 restore time (below), and default privileges cover the tables its later
@@ -316,6 +320,9 @@ connects here.
 | `homelab-finance` | `grafana_db_password` | `homelab_finance_grafana` | `homelab-mcp/grafana_db_password` |
 | `finances-context` | `db_password` | `finances_context` | none (new) |
 | `meals` | `db_password` | `meals` | none (new) |
+| `homelab-mcp-state` | `oauth_password` | `homelab_mcp_oauth` | none (new) |
+| `homelab-mcp-state` | `gate_password` | `homelab_mcp_gate` | none (new) |
+| `homelab-mcp-state` | `tools_password` | `homelab_mcp_tools` | none (new) |
 
 Until an item exists, its ExternalSecret is not ready and CloudNativePG
 leaves that role (and the Database it owns) unapplied. Nothing else in
