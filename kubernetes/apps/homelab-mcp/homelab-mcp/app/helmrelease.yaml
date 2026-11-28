@@ -1537,11 +1537,11 @@ spec:
             app:
               - path: /run/nyt
                 readOnly: true
-          web:
-            app:
+            scheduler:
               - path: /run/nyt
                 readOnly: true
-            scheduler:
+          web:
+            app:
               - path: /run/nyt
                 readOnly: true
       # OpenProject API tokens for the bots homelab-mcp acts as, one Secret
