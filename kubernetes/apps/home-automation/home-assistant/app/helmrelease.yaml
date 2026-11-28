@@ -132,7 +132,7 @@ spec:
             image:
               repository: ghcr.io/home-operations/home-assistant
               # renovate: datasource=docker depName=ghcr.io/home-operations/home-assistant
-              tag: 2026.10.1@sha256:627056a9e95d904822e14887ce84b9e411c55bd913f4a593d7596103848c15ec
+              tag: 2026.11.3@sha256:96c244d8aa3586026bb8d4fdc0dcf9b34f348874a1ea5060942356cf181177bc
             env:
               TZ: America/New_York
               VENV_FOLDER: /venv
