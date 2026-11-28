@@ -71,6 +71,12 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # c1796c7, 0.88.0 (carpenike/mcp#214): worker tool proxy, off until
+              # HOMELAB_MCP_WORKER_URL is set. Also carries 78c082c 0.87.0 (#213)
+              # tool stores on Postgres, on via HOMELAB_MCP_TOOL_STATE_DSN, and
+              # a64c165 0.86.0 (#212) stateless MCP HTTP (both also built on their
+              # own). 7ce6d04 (#209) gate and 8bd7d9c (#208) OAuth state on
+              # Postgres are now on via their DSNs. Digest confirmed from GHCR.
               # 1513fc2, 0.85.1 (carpenike/mcp#210): meals confirms await gate.verify.
               # Also carries, unbuilt on their own (each build cancelled by the next push):
               # 7ce6d04 0.85.0 (#209) gate consumed tokens on Postgres, off until
@@ -194,7 +200,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-1513fc299868a9a28d37160a310d7501aa760749@sha256:c77eaca101c5ac72101b007fff8dc3c9ed502b98dc0d8aa119a34453ac23e1e7
+              tag: sha-c1796c7bcacd8e2b6f9b71afa3b8bac0edc0a59d@sha256:62b6736a9c6eb6938b918af4f48024bf778aba87935e695983fa0140ba0fb00f
             command:
               - /bin/sh
               - -c
@@ -959,10 +965,10 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (1513fc2, 0.85.1). Moves with the app image above. Digest
+              # (c1796c7, 0.88.0). Moves with the app image above. Digest
               # confirmed from GHCR.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-1513fc299868a9a28d37160a310d7501aa760749@sha256:e44511931effe814a1df0014496777f0907aa30a5c961d67f4eea5ed9b0e1385
+              tag: sha-c1796c7bcacd8e2b6f9b71afa3b8bac0edc0a59d@sha256:6b211604fc1088261f49fb3753e1e208eec9a4a85326111c60fda40a292b68d3
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
