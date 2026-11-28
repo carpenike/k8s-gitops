@@ -21,10 +21,25 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: homelab-mcp is not being scraped
+            summary: a homelab-mcp web pod is not being scraped
             description: >-
-              Prometheus has had no /metrics from homelab-mcp for 10 minutes.
-              Claude's MCP connectors at mcp.<domain> are probably down too.
+              Prometheus has had no /metrics from a homelab-mcp web pod for 10
+              minutes. With both down, Claude's MCP connectors at mcp.<domain>
+              are down too.
+        - alert: HomelabMcpWorkerDown
+          expr: |
+            up{namespace="homelab-mcp",job="homelab-mcp-worker"} == 0
+              or absent(up{namespace="homelab-mcp",job="homelab-mcp-worker"})
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: the homelab-mcp worker is not being scraped
+            description: >-
+              Prometheus has had no /metrics from the homelab-mcp worker for
+              10 minutes. vault_*, finances_*, meals_*, signal_send and email
+              sends answer worker_unavailable, and the finance jobs and
+              Signal capture may be stopped.
         - alert: HomelabMcpMfpAuthExpired
           # Set by the client on a 401/403 or a refused token refresh; the
           # mfp tools then return an auth error, never empty data.

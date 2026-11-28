@@ -455,16 +455,14 @@ process's memory. While the worker restarts (about 20 seconds) those tools
 answer `worker_unavailable` with a hint to retry; everything else keeps
 working.
 
-Rollout, in two pull requests:
+Service `homelab-mcp` (the route, and the web pods' /metrics) selects the
+web pods. Service `homelab-mcp-worker` carries the worker's 9200 and both of
+its metrics ports; alert `HomelabMcpWorkerDown` watches it.
 
-1. Add the web Deployment, Service `homelab-mcp-worker`, the policies and
-   the signing key variable. Service `homelab-mcp` still selects the worker,
-   so nothing changes for clients. Check both web pods are Ready and their
-   logs are clean.
-2. Point Service `homelab-mcp` at the web pods, move the finance metrics to
-   the worker's Service, and close the worker's port 9200 to envoy.
-
-Rolling back step 2 is pointing the Service back at the worker.
+Rolled out on 28 Nov 2026 in two pull requests: the web pods first, beside
+the worker and with no traffic, then the Service switch. Rolling back the
+switch means pointing Service `homelab-mcp` at controller `homelab-mcp`
+again and admitting envoy on the worker's 9200.
 
 Still per pod, so two replicas allow twice as much: the dynamic client
 registration rate limit (`HOMELAB_MCP_OAUTH_REGISTER_RATE_LIMIT_MAX`).
