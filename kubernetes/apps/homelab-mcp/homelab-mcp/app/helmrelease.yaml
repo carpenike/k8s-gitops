@@ -71,6 +71,9 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # f712946, 0.88.2 (carpenike/mcp#215): meals tools register on
+              # FastMCP; jobs run without the OAuth env. Also carries 1442817
+              # 0.88.1 (#211) House Sensors see HA-labelled entities.
               # c1796c7, 0.88.0 (carpenike/mcp#214): worker tool proxy, off until
               # HOMELAB_MCP_WORKER_URL is set. Also carries 78c082c 0.87.0 (#213)
               # tool stores on Postgres, on via HOMELAB_MCP_TOOL_STATE_DSN, and
@@ -200,7 +203,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-c1796c7bcacd8e2b6f9b71afa3b8bac0edc0a59d@sha256:62b6736a9c6eb6938b918af4f48024bf778aba87935e695983fa0140ba0fb00f
+              tag: sha-f712946f26ff207b10aa64c060a17ef718fe5c89@sha256:8fe148d706b62c753b653e5405e186edc6402b76e8a2da3f02c6fcbb0e37c182
             command:
               - /bin/sh
               - -c
@@ -965,10 +968,10 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (c1796c7, 0.88.0). Moves with the app image above. Digest
+              # (f712946, 0.88.2). Moves with the app image above. Digest
               # confirmed from GHCR.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-c1796c7bcacd8e2b6f9b71afa3b8bac0edc0a59d@sha256:6b211604fc1088261f49fb3753e1e208eec9a4a85326111c60fda40a292b68d3
+              tag: sha-f712946f26ff207b10aa64c060a17ef718fe5c89@sha256:113a76c1c2f3da933f1d26fe6411532ed95508c73bd60791f44126b2bc481e71
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
