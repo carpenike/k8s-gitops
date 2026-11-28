@@ -307,10 +307,14 @@ kubectl -n homelab-mcp annotate externalsecret homelab-mcp-mfp \
   force-sync="$(date +%s)" --overwrite
 ```
 
-The OAuth signing key and the state database are created on first start,
-in `/var/lib/homelab-mcp/state` on the PVC. They are not in 1Password.
-Losing the PVC means every client connects again. Nothing else is lost; the
-finances checkout re-clones.
+The OAuth signing key is item `homelab-mcp-state`, field
+`oauth_signing_key` (`HOMELAB_MCP_OAUTH_SIGNING_KEY`), copied on 28 Nov 2026
+from `/var/lib/homelab-mcp/state/signing-key.pem` with the same SHA-256, so
+tokens issued before the copy stay valid. Every pod signs and verifies with
+it. Rotating it logs every client out once. The logins themselves are in
+postgres17 ([Shared state](#shared-state)); the old `state.db` on the PVC is
+only the import source. Losing the PVC loses the Signal identity, the vault
+copy (Obsidian Sync restores it) and the finances checkout (it re-clones).
 
 Also:
 
@@ -425,6 +429,45 @@ volume (`state.db`, `arcraiders.db`, `icloud-feed-hosts.db`,
 never writes the files. Rolling back means removing the DSNs: the files are
 as they were at the cutover, so a connector that logged in since logs in
 once more, and a rotated Withings token needs `python -m homelab_mcp.tools._withings seed` again ([Withings](#withings)).
+
+## Web and worker
+
+Two Deployments run the same server image, so a release no longer takes the
+public route down for the length of a pod restart:
+
+- **web** (2 replicas, RollingUpdate, a PodDisruptionBudget of one) mounts
+  no PVC. It holds logins and tokens, runs the tools whose state is in
+  postgres17 or upstream, and is the only pod envoy may reach.
+- **homelab-mcp**, the worker (1 replica, Recreate), keeps every volume and
+  sidecar: the vault and Obsidian Sync, signal-api and capture, the Actual
+  sidecar, the scheduler and the finances checkout. Service
+  `homelab-mcp-worker` reaches its app container on 9200, and its policy
+  admits only the web pods there.
+
+The web pods forward a `tools/call` for any tool in
+`HOMELAB_MCP_WORKER_TOOLS` to the worker with the caller's own bearer token
+(carpenike/mcp #214). The worker checks that token itself, against the same
+signing key, and applies the same view and vault policy, so a web pod
+asserts nothing on the caller's behalf. Forwarded today: `vault_*`,
+`finances_*`, `meals_*`, `signal_send`, and `email_preview_send_draft` /
+`email_send_draft`, whose hourly and daily send budget lives in one
+process's memory. While the worker restarts (about 20 seconds) those tools
+answer `worker_unavailable` with a hint to retry; everything else keeps
+working.
+
+Rollout, in two pull requests:
+
+1. Add the web Deployment, Service `homelab-mcp-worker`, the policies and
+   the signing key variable. Service `homelab-mcp` still selects the worker,
+   so nothing changes for clients. Check both web pods are Ready and their
+   logs are clean.
+2. Point Service `homelab-mcp` at the web pods, move the finance metrics to
+   the worker's Service, and close the worker's port 9200 to envoy.
+
+Rolling back step 2 is pointing the Service back at the worker.
+
+Still per pod, so two replicas allow twice as much: the dynamic client
+registration rate limit (`HOMELAB_MCP_OAUTH_REGISTER_RATE_LIMIT_MAX`).
 
 ## iCloud
 

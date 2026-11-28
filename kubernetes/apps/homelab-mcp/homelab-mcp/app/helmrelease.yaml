@@ -1,8 +1,15 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # homelab-mcp: the Claude tools server (carpenike/mcp), at mcp.${SECRET_DOMAIN}.
-# One replica: OAuth state is a SQLite file and the write-confirmation gate
-# keeps consumed tokens in memory. Recreate, because the volume is RWO.
+# Two shapes of the same server:
+#   homelab-mcp  the worker: one replica, Recreate (its volumes are RWO), with
+#                every sidecar below. It answers the tools that need those
+#                volumes, forwarded to it by the web pods.
+#   web          stateless, two replicas, RollingUpdate. Its state is in
+#                postgres17 (database homelab_mcp).
+# The split is being rolled out in two steps (docs/apps/homelab-mcp.md,
+# "Web and worker"): until the second, Service homelab-mcp still selects the
+# worker, so the web pods run but take no traffic.
 #
 # Views (HOMELAB_MCP_VIEWS) make several MCP URLs on this one host, each a
 # protected resource of its own (carpenike/mcp src/homelab_mcp/views.py).
@@ -236,9 +243,13 @@ spec:
               limits:
                 memory: 64Mi
         containers:
-          app:
+          # The worker's copy of the server. The web pods (controller web
+          # below) run this same container with two more variables; they
+          # route every tool that needs this pod's volumes, loopback services
+          # or single-process state here (HOMELAB_MCP_WORKER_TOOLS).
+          app: &mcpApp
             image: *mcpImage
-            env:
+            env: &mcpEnv
               HOMELAB_MCP_PUBLIC_BASE_URL: https://mcp.${SECRET_DOMAIN}
               HOMELAB_MCP_BIND_ADDRESS: 0.0.0.0
               HOMELAB_MCP_PORT: "9200"
@@ -1257,6 +1268,64 @@ spec:
                 memory: 48Mi
               limits:
                 memory: 128Mi
+      # The public server: the same image and settings as the worker's app
+      # container, but stateless (no volumes but /tmp and the read-only
+      # secrets), so it runs two replicas and rolls one at a time. Logins,
+      # refresh tokens, preview tokens and the small tool stores are in
+      # postgres17 (database homelab_mcp), and both pods sign and verify
+      # tokens with the same key (HOMELAB_MCP_OAUTH_SIGNING_KEY).
+      #
+      # A tools/call for a tool in HOMELAB_MCP_WORKER_TOOLS is replayed to
+      # the worker with the caller's own token (carpenike/mcp#214,
+      # src/homelab_mcp/worker_proxy.py), after this pod has checked the
+      # token and the view's tool scope. The worker checks the token again
+      # itself. Those tools are the ones that need the worker:
+      #   vault_*      the Obsidian vault volume (Obsidian Sync owns it)
+      #   finances_*   the Actual sidecar on loopback, the finances checkout,
+      #                and the context store shared with capture
+      #   meals_*      reads the vault and writes the week's menu file there
+      #   signal_send  signal-api on loopback
+      #   email_preview_send_draft, email_send_draft
+      #                the hourly and daily send budget is kept in memory, so
+      #                one process must own it or each replica would get its
+      #                own budget
+      # While the worker restarts (about 20s on a release) those calls
+      # answer worker_unavailable with a hint to retry; everything else
+      # keeps working.
+      web:
+        replicas: 2
+        strategy: RollingUpdate
+        # One new pod before an old one stops (maxUnavailable stays at the
+        # Deployment default, which is 0 for two replicas).
+        rollingUpdate:
+          surge: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # Long enough for a forwarded call (vault, finances) to finish
+          # once the pod has left the Service.
+          terminationGracePeriodSeconds: 30
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: homelab-mcp
+                  app.kubernetes.io/controller: web
+        containers:
+          app:
+            <<: *mcpApp
+            env:
+              <<: *mcpEnv
+              HOMELAB_MCP_WORKER_URL: http://homelab-mcp-worker.homelab-mcp.svc.cluster.local:9200
+              HOMELAB_MCP_WORKER_TOOLS: >-
+                ["vault_*", "finances_*", "meals_*", "signal_send",
+                "email_preview_send_draft", "email_send_draft"]
       # homelab-feed-proxy (carpenike/mcp 0.74.0, src/homelab_mcp/feed_proxy.py)
       # fetches subscribed-calendar feeds for icloud_*. Its own pod, so open
       # https egress never sits next to the credentials: no secrets, no
@@ -1348,6 +1417,14 @@ spec:
             port: 9201
           finance-metrics:
             port: 9202
+      # The worker, for the web pods' forwarded calls (its policy admits
+      # only them on 9200).
+      worker:
+        controller: homelab-mcp
+        forceRename: homelab-mcp-worker
+        ports:
+          http:
+            port: 9200
       feed-proxy:
         controller: feed-proxy
         forceRename: homelab-mcp-feed-proxy
@@ -1440,6 +1517,10 @@ spec:
             app:
               - path: /run/mfp
                 readOnly: true
+          web:
+            app:
+              - path: /run/mfp
+                readOnly: true
       # The NYT Cooking session (carpenike/mcp docs/NYT-COOKIE-RUNBOOK.md),
       # same mode as mfp above. Optional, so the pod starts before the
       # 1Password field exists; until then nyt_* answers nyt_auth_required.
@@ -1453,6 +1534,10 @@ spec:
             defaultMode: 0444
         advancedMounts:
           homelab-mcp:
+            app:
+              - path: /run/nyt
+                readOnly: true
+          web:
             app:
               - path: /run/nyt
                 readOnly: true
@@ -1478,6 +1563,10 @@ spec:
             app:
               - path: /run/openproject-tokens/claude
                 readOnly: true
+          web:
+            app:
+              - path: /run/openproject-tokens/claude
+                readOnly: true
       openproject-grokbot:
         type: custom
         volumeSpec:
@@ -1490,6 +1579,10 @@ spec:
                 path: OPENPROJECT_API_TOKEN
         advancedMounts:
           homelab-mcp:
+            app:
+              - path: /run/openproject-tokens/grokbot
+                readOnly: true
+          web:
             app:
               - path: /run/openproject-tokens/grokbot
                 readOnly: true
@@ -1507,6 +1600,10 @@ spec:
             defaultMode: 0444
         advancedMounts:
           homelab-mcp:
+            app:
+              - path: /run/user-credentials
+                readOnly: true
+          web:
             app:
               - path: /run/user-credentials
                 readOnly: true
@@ -1548,6 +1645,10 @@ spec:
         name: homelab-mcp-vault-policy
         advancedMounts:
           homelab-mcp:
+            app:
+              - path: /etc/homelab-mcp/vault
+                readOnly: true
+          web:
             app:
               - path: /etc/homelab-mcp/vault
                 readOnly: true
@@ -1607,6 +1708,16 @@ spec:
                       - port: "9201"
                         protocol: TCP
                       - port: "9202"
+                        protocol: TCP
+              # The web pods replay worker tools here (Service
+              # homelab-mcp-worker). Nothing else in the cluster may call it.
+              - fromEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: web
+                toPorts:
+                  - ports:
+                      - port: "9200"
                         protocol: TCP
             egress:
               - toEndpoints:
@@ -1749,7 +1860,159 @@ spec:
                   - ports:
                       - port: "5432"
                         protocol: TCP
-      # feed-proxy: in from the homelab-mcp pod only, on 9300. Out: DNS, and
+      # The web pods' policy. In: 9200 from the two envoy proxies, 9201 from
+      # Prometheus. Out: the worker on 9200, and only the upstreams of the
+      # tools that run here. The worker-only hosts (Actual, the finances
+      # repo, Obsidian Sync, npm, Signal) are left out on purpose: those
+      # tools are forwarded (HOMELAB_MCP_WORKER_TOOLS), so a web pod never
+      # needs them.
+      web-policy:
+        forceRename: homelab-mcp-web
+        manifest:
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: homelab-mcp
+                app.kubernetes.io/controller: web
+            ingress:
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-external
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "9200"
+                        protocol: TCP
+              - fromEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: observability
+                      app.kubernetes.io/name: prometheus
+                toPorts:
+                  - ports:
+                      - port: "9201"
+                        protocol: TCP
+            egress:
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: kube-system
+                      k8s:k8s-app: kube-dns
+                toPorts:
+                  - ports:
+                      - port: "53"
+                        protocol: ANY
+                    rules:
+                      dns:
+                        - matchPattern: "*"
+              # The same hosts as the worker's policy above, less the
+              # worker-only ones; see the notes there for each.
+              - toFQDNs:
+                  - matchName: id.${SECRET_DOMAIN}
+                  - matchName: cook.${SECRET_DOMAIN}
+                  - matchName: fedcook.${SECRET_DOMAIN}
+                  - matchName: ha.${SECRET_DOMAIN}
+                  - matchName: paperless.${SECRET_DOMAIN}
+                  - matchName: mail.${SECRET_DOMAIN}
+                  - matchName: caldav.icloud.com
+                  - matchName: contacts.icloud.com
+                  - matchPattern: "p*-caldav.icloud.com"
+                  - matchPattern: "p*-contacts.icloud.com"
+                  - matchName: www.myfitnesspal.com
+                  - matchName: api.myfitnesspal.com
+                  - matchName: cooking.nytimes.com
+                  - matchName: static01.nyt.com
+                  - matchName: metaforge.app
+                  - matchName: ardb.app
+                  - matchName: arcraiders.wiki
+                  - matchName: raw.githubusercontent.com
+                  - matchName: api.github.com
+                  - matchName: status.${SECRET_DOMAIN}
+                  # fidelity_* (SnapTrade).
+                  - matchName: api.snaptrade.com
+                  - matchName: wbsapi.withings.net
+                toPorts:
+                  - ports:
+                      - port: "443"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: network
+                      gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+                toPorts:
+                  - ports:
+                      - port: "10443"
+                        protocol: TCP
+              # Worker tools, replayed to the worker.
+              - toEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: homelab-mcp
+                toPorts:
+                  - ports:
+                      - port: "9200"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: feed-proxy
+                toPorts:
+                  - ports:
+                      - port: "9300"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: openproject
+                      app.kubernetes.io/name: openproject
+                      openproject/process: web
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: grocy
+                      app.kubernetes.io/name: grocy
+                      app.kubernetes.io/controller: grocy
+                toPorts:
+                  - ports:
+                      - port: "80"
+                        protocol: TCP
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: replog
+                      app.kubernetes.io/name: replog
+                      app.kubernetes.io/controller: replog
+                toPorts:
+                  - ports:
+                      - port: "8080"
+                        protocol: TCP
+              # homelab_mcp (logins, preview tokens, tool stores), meals,
+              # schoolhouse, lading, homelab_finance.
+              - toEndpoints:
+                  - matchLabels:
+                      k8s:io.kubernetes.pod.namespace: cnpg-system
+                      cnpg.io/cluster: postgres17
+                toPorts:
+                  - ports:
+                      - port: "5432"
+                        protocol: TCP
+      # At least one web pod through a node drain.
+      web-pdb:
+        forceRename: homelab-mcp-web
+        manifest:
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          spec:
+            minAvailable: 1
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: homelab-mcp
+                app.kubernetes.io/controller: web
+      # feed-proxy: in from the homelab-mcp pods (worker and web) only, on 9300. Out: DNS, and
       # 443 to public IPv4 only. The except list is every private, shared,
       # loopback, link-local and reserved range, which covers the node LAN,
       # the LoadBalancer range and cloud metadata; cluster pods have
@@ -1770,6 +2033,9 @@ spec:
                   - matchLabels:
                       app.kubernetes.io/name: homelab-mcp
                       app.kubernetes.io/controller: homelab-mcp
+                  - matchLabels:
+                      app.kubernetes.io/name: homelab-mcp
+                      app.kubernetes.io/controller: web
                 toPorts:
                   - ports:
                       - port: "9300"
