@@ -39,6 +39,12 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
+          # Recreate keeps the route dark from SIGTERM until the new pod is
+          # Ready, so every second of shutdown is a second of 503s. Every
+          # container exits on SIGTERM within a few seconds (metrics needed
+          # the wrapper below), so 10s is enough; 30s only held the old pod
+          # while the kubelet waited out a process that ignored the signal.
+          terminationGracePeriodSeconds: 10
           # A name with a dot is looked up as written first, so Cilium files
           # the answer under that name and the toFQDNs rules match (see the
           # same note in components/hermes-bot).
@@ -877,6 +883,9 @@ spec:
                   timeoutSeconds: 3
                   failureThreshold: 3
               readiness: *probe
+              # Checked every 2s so the pod goes Ready (and the route comes
+              # back) soon after the server listens; 60 x 2s keeps the
+              # 120s startup budget.
               startup:
                 enabled: true
                 custom: true
@@ -884,8 +893,8 @@ spec:
                   httpGet:
                     path: /healthz
                     port: 9200
-                  periodSeconds: 5
-                  failureThreshold: 24
+                  periodSeconds: 2
+                  failureThreshold: 60
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -1163,11 +1172,20 @@ spec:
                 memory: 768Mi
           metrics:
             image: *mcpImage
+            # serve-metrics (carpenike/mcp src/homelab_mcp/finance_runtime/
+            # serve.py) installs no SIGTERM handler, and as PID 1 the kernel
+            # drops a signal with no handler, so it ran until the kubelet's
+            # SIGKILL and held every restart for the full grace period. Run
+            # it as a child of sh, where the default action ends it, and pass
+            # the signal on. Remove once serve-metrics handles SIGTERM.
             command:
-              - homelab-finances-runtime
-              - serve-metrics
-              - /run/finance-metrics
-              - 0.0.0.0:9202
+              - /bin/sh
+              - -c
+              - |
+                homelab-finances-runtime serve-metrics /run/finance-metrics 0.0.0.0:9202 &
+                child=$!
+                trap 'kill -TERM "$child"; wait "$child"' TERM INT
+                wait "$child"
             probes:
               liveness:
                 enabled: true
