@@ -388,10 +388,13 @@ spec:
               # NYT Cooking (carpenike/mcp#196, 0.81.0): read-only search, recipes
               # and the recipe box, as Ryan's own subscriber session (NYT-S from
               # the homelab-mcp-nyt secret, re-read when it changes; no login
-              # tool). No view lists nyt_* by name: they reach /mcp ("read") and
-              # /mcp/full ("all") only, which are Ryan's alone. Do not add them to
-              # an agent or per_user view without Ryan (it is his account). The
-              # user id (regi_id) is read from the export's regi_cookie.
+              # tool). They reach /mcp ("read") and /mcp/full ("all"), which are
+              # Ryan's alone. The read tools plus nyt_save_recipe_image are also
+              # listed on /mcp/agent/grokbot (Ryan, 2026-11-28); Grokbot has no
+              # cooklang_create_recipe, so it can attach a photo only to a recipe
+              # already in nyt/. No per_user view may ever list nyt_* (it is
+              # Ryan's account). The user id (regi_id) is read from the export's
+              # regi_cookie.
               HOMELAB_MCP_NYT_ENABLED: "true"
               HOMELAB_MCP_NYT_COOKIES_FILE: /run/nyt/cookies.json
               # Withings (read-only weigh-ins). The app credentials come from
@@ -727,6 +730,8 @@ spec:
                  "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
+                 "nyt_auth_status", "nyt_search_recipes", "nyt_get_recipe",
+                 "nyt_list_saved_recipes", "nyt_save_recipe_image",
                  "withings_get_measurements", "withings_trend",
                  "vault_domains", "vault_read", "vault_list", "vault_search",
                  "vault_links", "vault_lint", "vault_create", "vault_edit",
