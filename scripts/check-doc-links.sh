@@ -28,6 +28,7 @@ docs/NYT-COOKIE-RUNBOOK.md
 docs/OPENPROJECT.md
 docs/EMAIL.md
 docs/ICLOUD.md
+docs/MEALS.md
 docs/RECON.md
 docs/services/openproject.md
 docs/deploying/kubernetes.md
@@ -39,6 +40,7 @@ docs/mikrotik-site-slc.md
 # docs/EMAIL.md                 carpenike/mcp
 # docs/NYT-COOKIE-RUNBOOK.md    carpenike/mcp (added in carpenike/mcp#196)
 # docs/ICLOUD.md                carpenike/mcp
+# docs/MEALS.md                 carpenike/mcp (added in carpenike/mcp#206)
 # docs/MFP-COOKIE-RUNBOOK.md     carpenike/mcp
 # docs/OPENPROJECT.md            carpenike/mcp
 # docs/RECON.md                  carpenike/schoolhouse

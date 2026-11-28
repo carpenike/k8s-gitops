@@ -41,8 +41,8 @@ spec:
         pod:
           # Recreate keeps the route dark from SIGTERM until the new pod is
           # Ready, so every second of shutdown is a second of 503s. Every
-          # container exits on SIGTERM within a few seconds (metrics needed
-          # the wrapper below), so 10s is enough; 30s only held the old pod
+          # container exits on SIGTERM within a few seconds (metrics on its
+          # own from carpenike/mcp#205), so 10s is enough; 30s only held the old pod
           # while the kubelet waited out a process that ignored the signal.
           terminationGracePeriodSeconds: 10
           # A name with a dot is looked up as written first, so Cilium files
@@ -71,6 +71,15 @@ spec:
           permissions:
             image: &mcpImage
               # Built by carpenike/mcp .github/workflows/image.yml from main
+              # 1513fc2, 0.85.1 (carpenike/mcp#210): meals confirms await gate.verify.
+              # Also carries, unbuilt on their own (each build cancelled by the next push):
+              # 7ce6d04 0.85.0 (#209) gate consumed tokens on Postgres, off until
+              # HOMELAB_MCP_GATE_CONSUMED_DSN is set (never pin 0.85.0: its meals
+              # confirms skip the token check); 6c294aa/cc3495c finances config;
+              # 5398bd2 0.84.0 (#206) meals_* dinner planner; 8bd7d9c (#208) OAuth
+              # state on Postgres, off until HOMELAB_MCP_OAUTH_STATE_DSN is set;
+              # 051a6b7 0.83.3 (#207) consent page restyle; f482006 0.83.2 (#205)
+              # serve-metrics handles SIGTERM. Digest confirmed from GHCR.
               # 559c826, 0.83.1 (carpenike/mcp#204): NYT keeps bone-in, skin-on descriptors in the ingredient item.
               # 274553a, 0.83.0 (carpenike/mcp#203): NYT structured ingredient parts, byline/time casing, last_success ISO.
               # 457daf0, 0.82.4 (carpenike/mcp#202): NYT drinks filter, tag cleanup.
@@ -185,7 +194,7 @@ spec:
               # follows a floating tag and this pins the immutable sha- one,
               # so it is bumped by hand on every release.
               repository: ghcr.io/carpenike/homelab-mcp
-              tag: sha-559c826b8383cc3a7588112d5248d2f8eeddca98@sha256:a19281a5d5438e0ed268dda1af32a2440abe4c33d49f96670c32930ba9633220
+              tag: sha-1513fc299868a9a28d37160a310d7501aa760749@sha256:c77eaca101c5ac72101b007fff8dc3c9ed502b98dc0d8aa119a34453ac23e1e7
             command:
               - /bin/sh
               - -c
@@ -273,7 +282,7 @@ spec:
                 "gatus", "fidelity", "finances", "finances_docs", "finances_loans",
                 "finances_sentinel", "money", "school", "school_today",
                 "amazon", "costco", "samsclub", "withings", "vault", "openproject",
-                "messaging", "replog", "email", "icloud", "nyt"]
+                "messaging", "replog", "email", "icloud", "nyt", "meals"]
               HOMELAB_MCP_COOKLANG_BASE_URL: https://cook.${SECRET_DOMAIN}
               HOMELAB_MCP_FEDERATION_BASE_URL: https://fedcook.${SECRET_DOMAIN}
               # Grocy in the cluster (docs/apps/grocy.md), straight to the
@@ -407,6 +416,25 @@ spec:
               # regi_cookie.
               HOMELAB_MCP_NYT_ENABLED: "true"
               HOMELAB_MCP_NYT_COOKIES_FILE: /run/nyt/cookies.json
+              # Dinner planner (meals_*, carpenike/mcp#206, docs/MEALS.md):
+              # composes nyt_*, cooklang_*, mfp_* and grocy_* and keeps its
+              # household store in postgres17 (database and schema meals,
+              # DSN in homelab-mcp-env). On /mcp and /mcp/full through their
+              # "read"/"all" tiers, and listed on /mcp/steffi. Not on any
+              # /mcp/agent/* view. On Steffi's per_user view it never reaches
+              # NYT: it reads the shared pool the nightly refresh tops up.
+              # Slots: Ryan's dinner from Personal/Fitness/Plan.md "Daily
+              # budget" (600-700 kcal, 40-45 g protein; ~850 kcal when the
+              # snack is skipped). Day targets: target_kcal and
+              # target_protein_g in Personal/Fitness/Status.md frontmatter.
+              # Keep the schema in step with the scheduler's copy below.
+              HOMELAB_MCP_MEALS_ENABLED: "true"
+              HOMELAB_MCP_MEALS_PG_SCHEMA: meals
+              HOMELAB_MCP_MEALS_SLOTS: >-
+                {"ryan": {"dinner": {"kcal": [600, 700], "protein_g": [40, 45],
+                "max_kcal_if_no_snack": 850}}}
+              HOMELAB_MCP_MEALS_VAULT_TARGETS: >-
+                {"ryan": "Personal/Fitness/Status.md"}
               # Withings (read-only weigh-ins). The app credentials come from
               # the homelab-mcp-withings item; the OAuth token is written by
               # `python -m homelab_mcp.tools._withings seed` and rotates on
@@ -631,6 +659,12 @@ spec:
               # Withings reads (Ryan, 2026-11-23): her own weigh-ins and blood
               # pressure only, from her own token (withings-token.steffi.json);
               # refused, never Ryan's, until it exists.
+              # Dinner planner (Ryan, 2026-11-28): every meals_* tool. NYT is
+              # dropped for her (shared recipe pool only, meals_not_in_pool
+              # otherwise), the diary is her own MFP, Grocy lines go on with
+              # her own key. No nyt_* here, ever. The planner store (plan,
+              # cook log, preferences) is household data shared with /mcp
+              # and /mcp/full by design.
               # /mcp/household: the SHARED-credential household data set --
               # finances, school, the purchase stores, Fidelity and Paperless.
               # Named for the DATA, not a person: one ledger and one set of
@@ -797,7 +831,14 @@ spec:
                  "mfp_log_meal", "mfp_preview_copy_entries", "mfp_copy_entries",
                  "mfp_preview_create_meal", "mfp_create_meal", "mfp_preview_delete_meal",
                  "mfp_delete_meal",
-                 "withings_get_measurements", "withings_trend"],
+                 "withings_get_measurements", "withings_trend",
+                 "meals_fit", "meals_candidates", "meals_surprise", "meals_pantry_ideas",
+                 "meals_pool_status", "meals_get_plan", "meals_plan_dinner",
+                 "meals_log_cooked", "meals_cook_history", "meals_get_preferences",
+                 "meals_set_preference", "meals_set_tweak", "meals_set_ingredient_match",
+                 "meals_list_ingredient_matches", "meals_preview_remove", "meals_remove",
+                 "meals_preview_shopping_list", "meals_add_to_shopping_list",
+                 "meals_compare_mfp_recipe", "meals_mfp_recipe_draft"],
                  "read_scope": "steffi.read", "write_scope": "steffi.write",
                  "connect_scopes": "all", "credentials": "per_user",
                  "users": ["stefanie@stefanieholt.com"]},
@@ -918,9 +959,10 @@ spec:
           actual:
             image:
               # Built by carpenike/mcp .github/workflows/image.yml from main
-              # (e1473d7). Moves with the app image above.
+              # (1513fc2, 0.85.1). Moves with the app image above. Digest
+              # confirmed from GHCR.
               repository: ghcr.io/carpenike/homelab-mcp-actual-sidecar
-              tag: sha-e8baa55e78ad577c3fdf70d85d407c78088020ea@sha256:5c7b6ec3a4ac39fc3e49171539116794a9b10f887d12479c86742acc9f45fb75
+              tag: sha-1513fc299868a9a28d37160a310d7501aa760749@sha256:e44511931effe814a1df0014496777f0907aa30a5c961d67f4eea5ed9b0e1385
             env:
               SIDECAR_HOST: 127.0.0.1
               SIDECAR_PORT: "9210"
@@ -1156,6 +1198,14 @@ spec:
               # homelab-email-snooze-wake: Ryan's mailbox, write password only
               # (moves and keywords; it cannot send).
               HOMELAB_MCP_EMAIL_JMAP_URL: https://mail.${SECRET_DOMAIN}
+              # homelab-meals-refresh: the nyt module with Ryan's session (the
+              # same cookie file as the app, mounted read-only below) and the
+              # meals store (DSN in homelab-mcp-jobs). Prints counts and error
+              # codes only. Same schema as the app container.
+              HOMELAB_MCP_MEALS_ENABLED: "true"
+              HOMELAB_MCP_MEALS_PG_SCHEMA: meals
+              HOMELAB_MCP_NYT_ENABLED: "true"
+              HOMELAB_MCP_NYT_COOKIES_FILE: /run/nyt/cookies.json
             envFrom:
               - secretRef:
                   name: homelab-mcp-jobs
@@ -1173,20 +1223,14 @@ spec:
                 memory: 768Mi
           metrics:
             image: *mcpImage
-            # serve-metrics (carpenike/mcp src/homelab_mcp/finance_runtime/
-            # serve.py) installs no SIGTERM handler, and as PID 1 the kernel
-            # drops a signal with no handler, so it ran until the kubelet's
-            # SIGKILL and held every restart for the full grace period. Run
-            # it as a child of sh, where the default action ends it, and pass
-            # the signal on. Remove once serve-metrics handles SIGTERM.
+            # serve-metrics stops on SIGTERM itself as PID 1 from 0.83.2
+            # (carpenike/mcp#205), so it runs directly; the sh wrapper from
+            # #6044 that stood in for that handler is gone.
             command:
-              - /bin/sh
-              - -c
-              - |
-                homelab-finances-runtime serve-metrics /run/finance-metrics 0.0.0.0:9202 &
-                child=$!
-                trap 'kill -TERM "$child"; wait "$child"' TERM INT
-                wait "$child"
+              - homelab-finances-runtime
+              - serve-metrics
+              - /run/finance-metrics
+              - 0.0.0.0:9202
             probes:
               liveness:
                 enabled: true
@@ -1277,6 +1321,10 @@ spec:
             # Snoozed email back to the inbox when due (email_snooze). Prints
             # counts only; does nothing until the email secret exists.
             */5 * * * * homelab-email-snooze-wake
+            # Top up the shared recipe pool from NYT Cooking (meals_*), once a
+            # night. Fixed queries only, inside the planner's daily NYT budget;
+            # exit 1 when NYT refuses (session expired or rate limited).
+            15 3 * * * homelab-meals-refresh
     service:
       # Two services now (feed-proxy below), so app-template would name this
       # one homelab-mcp-app; the HTTPRoute and probes expect homelab-mcp.
@@ -1386,7 +1434,7 @@ spec:
       # The NYT Cooking session (carpenike/mcp docs/NYT-COOKIE-RUNBOOK.md),
       # same mode as mfp above. Optional, so the pod starts before the
       # 1Password field exists; until then nyt_* answers nyt_auth_required.
-      # Only the app container mounts it.
+      # The app container and the scheduler (homelab-meals-refresh) mount it.
       nyt:
         type: custom
         volumeSpec:
@@ -1397,6 +1445,9 @@ spec:
         advancedMounts:
           homelab-mcp:
             app:
+              - path: /run/nyt
+                readOnly: true
+            scheduler:
               - path: /run/nyt
                 readOnly: true
       # OpenProject API tokens for the bots homelab-mcp acts as, one Secret

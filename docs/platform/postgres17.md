@@ -276,7 +276,9 @@ everything that writes to them:
 
 A fourth, `finances_context`, is new. It holds the shared transaction-context
 table that the `finances_context_*` tools and the Signal capture worker both
-write to (carpenike/mcp #120).
+write to (carpenike/mcp #120). A fifth, `meals`, is new too: the homelab-mcp
+dinner planner's household store (carpenike/mcp #206), in schema `meals`,
+which the Database object declares.
 
 Every client runs in the cluster and connects to `postgres17-rw` with
 CloudNativePG's default `pg_hba`. Nothing outside the cluster connects, so
@@ -288,6 +290,7 @@ there is no LoadBalancer and no CA to copy anywhere.
 | `lading` | `lading` | `lading_reader` (homelab-mcp, finances export) | lading app; homelab-mcp |
 | `homelab_finance` | `homelab_finance` (the finances export) | `homelab_finance_money` (`money_overview` only), `homelab_finance_report` (`money_overview` and `export_runs`), `homelab_finance_grafana` | homelab-mcp pod; Grafana |
 | `finances_context` | `finances_context` | none; the same role reads and writes | homelab-mcp pod |
+| `meals` | `meals` | none; the same role reads and writes | homelab-mcp pod (server and the nightly refresh) |
 
 Readers get no cluster-wide role. Each owner grants its own readers, once, at
 restore time (below), and default privileges cover the tables its later
@@ -312,6 +315,7 @@ connects here.
 | `homelab-finance` | `report_password` | `homelab_finance_report` | none (Forge used peer auth) |
 | `homelab-finance` | `grafana_db_password` | `homelab_finance_grafana` | `homelab-mcp/grafana_db_password` |
 | `finances-context` | `db_password` | `finances_context` | none (new) |
+| `meals` | `db_password` | `meals` | none (new) |
 
 Until an item exists, its ExternalSecret is not ready and CloudNativePG
 leaves that role (and the Database it owns) unapplied. Nothing else in

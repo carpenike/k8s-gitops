@@ -18,7 +18,7 @@ the others. Configure them in `HOMELAB_MCP_VIEWS` in the HelmRelease.
 | `/mcp/full` | every enabled tool | `home.read` and `home.write`, both requested on connect | Claude, when writes are wanted |
 | `/mcp/agent/hermes` | the `hermes` list | `hermes` | Hermes (every Hermes bot) |
 | `/mcp/agent/grokbot` | the `hermes` list, plus `finances_transactions` and `finances_categorize` (category and notes only; no rules, payee merges or loan writes), school reads, Cooklang reads, every MFP tool, the Obsidian vault (`vault_*`: reads and writes every personal domain (fitness, inbox, property, tech, family-history, finances, health, church, education, wardrobe), reads `agents`; no move or delete), and the OpenProject handoff board as user `grokbot` (`openproject_*`, Personal and Bots only) | `grokbot` | Grokbot (every Grokbot agent) |
-| `/mcp/steffi` | Grocy (reads and stock writes, as her), Cooklang reads, and her own Withings readings | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
+| `/mcp/steffi` | Grocy (reads and stock writes, as her), Cooklang reads, every MFP tool (her own diary), her own Withings readings, and the dinner planner (`meals_*`, shared recipe pool only, never NYT) | `steffi.read` and `steffi.write`, both requested on connect | Steffi; `credentials: "per_user"` |
 | `/mcp/house-sensors` | the `atrium-family-house-sensors` list | the same | Groundskeeper |
 | `/mcp/replog` | `scope:atrium-personal-replog`. Not `"read"` or `"all"` | `atrium-personal-replog` and `atrium-personal-replog.write` | Ryan only (`ryan@ryanholt.net`). `credentials: "per_user"`: the bearer is `replog.ryan`, never `HOMELAB_MCP_REPLOG_TOKEN` |
 
@@ -69,6 +69,7 @@ a `toFQDNs` name.
 | `withings` | wbsapi.withings.net (token on the state volume) |
 | `vault` | the Obsidian vault on PVC `homelab-mcp-vault`, kept in step by the `obsidian-sync` container ([below](#obsidian-sync)) |
 | `replog` | `replog.replog.svc:8080`. Bearer `HOMELAB_MCP_REPLOG_TOKEN` |
+| `meals` | postgres17 `meals` (its own store), plus the `nyt`, `cooklang`, `mfp` and `grocy` tools it composes ([Dinner planner](#dinner-planner)) |
 
 `messaging` (`signal_send`) uses the signal-api container in this pod on
 loopback, and sends to **ops only** from every view: each view path is in
@@ -375,6 +376,30 @@ A per-user connector (Steffi's, later) reads its own mailbox from
 Ryan's. Add her view to `EMAIL_VIEWS` (and `EMAIL_SEND_VIEWS` to send) when
 that file exists. The snooze job wakes only Ryan's mailbox until the
 scheduler also mounts the user-credentials Secret.
+
+## Dinner planner
+
+The `meals_*` tools (carpenike/mcp `docs/MEALS.md`) plan household dinners
+over NYT Cooking, the cookbook, MyFitnessPal and Grocy. They are on `/mcp`
+and `/mcp/full` through the `"read"` and `"all"` tiers and are listed on
+`/mcp/steffi`. No `/mcp/agent/*` view carries them.
+
+- Store: postgres17 database `meals`, schema `meals`, role `meals`
+  (`HOMELAB_MCP_MEALS_PG_DSN` in `homelab-mcp-env` and `homelab-mcp-jobs`,
+  password from item `meals`, field `db_password`;
+  [postgres17.md](../platform/postgres17.md#1password)). The plan, cook log
+  and preferences are shared by everyone on a meals view, by design.
+- NYT stays Ryan's: a `per_user` caller never reaches it and reads the
+  shared recipe pool instead. The scheduler runs `homelab-meals-refresh` at
+  03:15 to top the pool up, with the NYT cookie file mounted read-only and
+  inside the planner's daily NYT budget. Exit 1 means NYT refused (expired
+  session or rate limit); renew the cookie as carpenike/mcp
+  `docs/NYT-COOKIE-RUNBOOK.md` describes.
+- Budgets: `HOMELAB_MCP_MEALS_SLOTS` holds Ryan's dinner slot from
+  `Personal/Fitness/Plan.md` ("Daily budget"). `HOMELAB_MCP_MEALS_VAULT_TARGETS`
+  points at `Personal/Fitness/Status.md`, whose `target_kcal` and
+  `target_protein_g` frontmatter are the day's targets. Steffi has neither
+  yet, so she gets nutrition only and no diary comparison.
 
 ## iCloud
 
