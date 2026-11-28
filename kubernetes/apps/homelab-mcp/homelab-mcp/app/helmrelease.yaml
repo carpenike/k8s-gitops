@@ -391,9 +391,10 @@ spec:
               # the homelab-mcp-nyt secret, re-read when it changes; no login
               # tool). They reach /mcp ("read") and /mcp/full ("all"), which are
               # Ryan's alone. The read tools plus nyt_save_recipe_image are also
-              # listed on /mcp/agent/grokbot (Ryan, 2026-11-28); Grokbot has no
-              # cooklang_create_recipe, so it can attach a photo only to a recipe
-              # already in nyt/. No per_user view may ever list nyt_* (it is
+              # listed on /mcp/agent/grokbot (Ryan, 2026-11-28). Grokbot also has
+              # cooklang_create_recipe (Ryan, 2026-11-28) so it can import NYT
+              # recipes into nyt/; it has no cooklang_update_recipe or
+              # cooklang_delete_recipe. No per_user view may ever list nyt_* (it is
               # Ryan's account). The user id (regi_id) is read from the export's
               # regi_cookie.
               HOMELAB_MCP_NYT_ENABLED: "true"
@@ -550,8 +551,9 @@ spec:
               # all its bots. Each bot that logs in still gets its own token;
               # what they share is the tool list. Grokbot's own list: Hermes'
               # tools plus the school reads (car-ride check-in, the kitchen
-              # paper), the Cooklang reads (cookbook shopping lists; no
-              # recipe edits) and every MFP tool, reads and writes including
+              # paper), the Cooklang reads (cookbook shopping lists) plus
+              # cooklang_create_recipe for NYT imports (Ryan, 2026-11-28; no
+              # update or delete) and every MFP tool, reads and writes including
               # deletes (Ryan, 2026-11-11). Writes are preview then confirm,
               # but a bot can confirm its own preview, so nobody reviews a
               # Grokbot write before it lands. Grokbot also reads and writes the
@@ -705,7 +707,7 @@ spec:
                  "school_get_missing_work", "school_get_grades", "school_get_assignment",
                  "school_get_announcements", "school_list_staff", "school_get_sync_status",
                  "school_parent_today",
-                 "cooklang_list_recipes", "cooklang_get_recipe",
+                 "cooklang_list_recipes", "cooklang_get_recipe", "cooklang_create_recipe",
                  "cooklang_search_federation", "cooklang_build_shopping_list",
                  "grocy_shopping_list", "grocy_order_manifest", "grocy_mark_ordered",
                  "grocy_add_to_shopping_list", "grocy_check_off",
